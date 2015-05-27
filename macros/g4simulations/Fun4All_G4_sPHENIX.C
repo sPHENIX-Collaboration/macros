@@ -190,9 +190,9 @@ int Fun4All_G4_sPHENIX(
 
   if (do_cemc_eval) CEMC_Eval("g4cemc_eval.root");
 
-  if (do_hcalin_cell) HCALInner_Eval("g4hcalin_eval.root");
+  if (do_hcalin_eval) HCALInner_Eval("g4hcalin_eval.root");
 
-  if (do_hcalout_cell) HCALOuter_Eval("g4hcalout_eval.root");
+  if (do_hcalout_eval) HCALOuter_Eval("g4hcalout_eval.root");
 
   //-------------- 
   // IO management
