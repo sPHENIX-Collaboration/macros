@@ -105,7 +105,7 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // CEMC
   
-  if (do_cemc) radius = CEmc(g4Reco, radius, 8, 0);
+  if (do_cemc) radius = CEmc(g4Reco, radius, 8, absorberactive);
   
   //----------------------------------------
   // HCALIN
