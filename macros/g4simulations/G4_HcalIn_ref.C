@@ -33,7 +33,7 @@ double HCalInner(PHG4Reco* g4Reco,
   PHG4HcalSubsystem *hcal;
   hcal = new PHG4HcalSubsystem("HCALIN", ilayer);
   hcal->SetRadius(innerradius);
-  hcal->SetMaterial("SS304"); // SS304 stainless steel
+  hcal->SetMaterial("SS310"); // SS310 stainless steel
   hcal->SetThickness(hcal_inner_thickness);
   hcal->SetScintWidth(scintw);
   hcal->SetNumScint(nscint);
