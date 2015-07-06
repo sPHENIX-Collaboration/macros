@@ -79,6 +79,11 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
             ana->AddNode("ABSORBER_HCALOUT");
         }
 
+
+      ana->AddNode("BH_1");
+      ana->AddNode("BH_FORWARD_PLUS");
+      ana->AddNode("BH_FORWARD_NEG");
+
     }
 
   ana->set_tower_zero_sup(1e-6);

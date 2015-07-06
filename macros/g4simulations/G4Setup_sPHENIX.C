@@ -136,6 +136,33 @@ int G4Setup(const int absorberactive = 0,
   blackhole->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(blackhole);
 
+  //----------------------------------------
+  // FORWARD BLACKHOLEs
+  // +Z
+  blackhole = new PHG4CylinderSubsystem("BH_FORWARD_PLUS", 1);
+  blackhole->SuperDetector("BH_FORWARD_PLUS");
+  blackhole->SetRadius(0); // add 10 cm
+  blackhole->SetLengthViaRapidityCoverage(false);
+  blackhole->SetLength(0.1); // make it cover the world in length
+  blackhole->SetPosition(0,0, g4Reco->GetWorldSizeZ()/2. - 0.1  - no_overlapp);
+  blackhole->BlackHole();
+  blackhole->SetThickness(radius - no_overlapp); // it needs some thickness
+  blackhole->SetActive(); // always see what leaks out
+  blackhole->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(blackhole);
+
+  blackhole = new PHG4CylinderSubsystem("BH_FORWARD_NEG", 1);
+  blackhole->SuperDetector("BH_FORWARD_NEG");
+  blackhole->SetRadius(0); // add 10 cm
+  blackhole->SetLengthViaRapidityCoverage(false);
+  blackhole->SetLength(0.1); // make it cover the world in length
+  blackhole->SetPosition(0,0, - g4Reco->GetWorldSizeZ()/2. +0.1  + no_overlapp);
+  blackhole->BlackHole();
+  blackhole->SetThickness(radius - no_overlapp); // it needs some thickness
+  blackhole->SetActive(); // always see what leaks out
+  blackhole->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(blackhole);
+
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
   se->registerSubsystem( g4Reco );
