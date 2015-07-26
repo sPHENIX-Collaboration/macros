@@ -11,7 +11,7 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_sPHENIX(
-		       int nEvents = 100,
+		       const int nEvents = 100,
 		       const char * inputFile = "/phenix/sim02/phnxreco/sPHENIX/hijing_sims/output/G4sPHENIX-4fm-050-0199.root",
 		       const char * outputFile = "G4sPHENIXCells.root"
 		       )
@@ -256,6 +256,10 @@ int Fun4All_G4_sPHENIX(
   //-----------------
   // Event processing
   //-----------------
+  if (nEvents <= 0)
+    {
+      return;
+    }
   se->run(nEvents);
 
   //-----
