@@ -18,7 +18,6 @@ double HCalInner(PHG4Reco* g4Reco,
   gSystem->Load("libg4detectors.so");
   gSystem->Load("libg4testbench.so");
 
-  double tilt_angle = 32.;  
   int ilayer = Min_hcal_in_layer;
   PHG4InnerHcalSubsystem *hcal;
   hcal = new PHG4InnerHcalSubsystem("HCALIN");
@@ -27,7 +26,7 @@ double HCalInner(PHG4Reco* g4Reco,
   // hcal->SetGapWidth(0.85);
   // hcal->SetScintiThickness(0.7);
   // hcal->SetNumScintiPlates(5*64);
-  hcal->SetTiltAngle(tilt_angle); 
+  hcal->SetTiltViaNcross(4); 
   hcal->SetActive();
   hcal->SuperDetector("HCALIN");
   if (absorberactive)  hcal->SetAbsorberActive();
@@ -51,7 +50,7 @@ double HCalInner(PHG4Reco* g4Reco,
     cout << " HCALIN Material Description:" << endl;
     cout << "  inner radius = " << hcal->GetInnerRadius() << " cm" << endl;
     cout << "  outer radius = " << hcal->GetOuterRadius() << " cm" << endl;
-    cout << "  tilt angle = " <<  tilt_angle << endl;
+    cout << "  tilt angle = " <<  hcal->GetTiltAngle() << endl;
     cout << "===========================================================================" << endl;
   }
 
