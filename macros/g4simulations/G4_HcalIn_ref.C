@@ -4,8 +4,8 @@ Min_hcal_in_layer = 1;
 Max_hcal_in_layer = 1;
 
 void HCalInnerInit() {
-  Min_hcal_in_layer = 0;
-  Max_hcal_in_layer = 0;
+  Min_hcal_in_layer = 1;
+  Max_hcal_in_layer = 1;
 }
 
 double HCalInner(PHG4Reco* g4Reco,
@@ -13,44 +13,51 @@ double HCalInner(PHG4Reco* g4Reco,
 		 const int crossings,
 		 const int absorberactive = 0,
 		 int verbosity = 0) {
-  // all sizes are in cm!  
-
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4testbench.so");
-
-  int ilayer = Min_hcal_in_layer;
-  PHG4InnerHcalSubsystem *hcal;
-  hcal = new PHG4InnerHcalSubsystem("HCALIN");
-  hcal->SetMaterial("SS310"); // SS310 stainless steel
-  // these are all the defaults
-  // hcal->SetGapWidth(0.85);
-  // hcal->SetScintiThickness(0.7);
-  // hcal->SetNumScintiPlates(5*64);
-  hcal->SetTiltViaNcross(4); 
-  hcal->SetActive();
-  hcal->SuperDetector("HCALIN");
-  if (absorberactive)  hcal->SetAbsorberActive();
-  hcal->OverlapCheck(overlapcheck);
-  //hcal->SetLightCorrection(116.0,0.85,135.0,1.0); 
-  double innerradius = hcal->GetInnerRadius();
+  
+  double innerradius = 116.;
+  double outerradius = 135.;
+  double scintw = 0.7;
+  int    nscint = 64*5;
+  
   if (radius > innerradius) {
     cout << "inconsistency: radius: " << radius 
 	 << " larger than HCALIN inner radius: " << innerradius << endl;
     gSystem->Exit(-1);
   }
 
+  gSystem->Load("libg4detectors.so");
+  gSystem->Load("libg4testbench.so");
+  
+  double hcal_inner_thickness = outerradius - innerradius;
+  int ilayer = Min_hcal_in_layer;
+  PHG4HcalSubsystem *hcal;
+  hcal = new PHG4HcalSubsystem("HCALIN", ilayer);
+  hcal->SetRadius(innerradius);
+  hcal->SetMaterial("SS310"); // SS310 stainless steel
+  hcal->SetThickness(hcal_inner_thickness);
+  hcal->SetScintWidth(scintw);
+  hcal->SetNumScint(nscint);
+  hcal->SetTiltViaNcross(+crossings); // Jin: correct for the sign for inner HCal tilting per request from Chris
+  hcal->SetActive();
+  hcal->SuperDetector("HCALIN");
+  if (absorberactive)  hcal->SetAbsorberActive();
+  hcal->OverlapCheck(overlapcheck);
+  //hcal->SetLightCorrection(116.0,0.85,135.0,1.0); 
   g4Reco->registerSubsystem( hcal );
 
-  radius = hcal->GetOuterRadius();
+  radius = outerradius;
 
   HCalInner_SupportRing(g4Reco,absorberactive);
   
   if (verbosity >= 0) {
     cout << "==================== G4_HcalIn_ref.C::HCalInner() =========================" << endl;
+    cout << " CVS Version: $Id: G4_HcalIn_ref.C,v 1.2 2015/04/21 21:21:14 pinkenbu Exp $" << endl;
     cout << " HCALIN Material Description:" << endl;
-    cout << "  inner radius = " << hcal->GetInnerRadius() << " cm" << endl;
-    cout << "  outer radius = " << hcal->GetOuterRadius() << " cm" << endl;
-    cout << "  tilt angle = " <<  hcal->GetTiltAngle() << endl;
+    cout << "  inner radius = " << innerradius << " cm" << endl;
+    cout << "  outer radius = " << outerradius << " cm" << endl;
+    cout << "  number of scintilators = " << nscint << endl;
+    cout << "  width of scintilators = " << scintw << " cm" << endl;
+    cout << "  number of crossings = " << crossings << endl;
     cout << "===========================================================================" << endl;
   }
 
