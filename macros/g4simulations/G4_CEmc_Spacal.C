@@ -45,6 +45,7 @@ CEmc(PHG4Reco* g4Reco, double radius, const int crossings, const int absorberact
 
   // 1.5cm thick teflon as an approximation for EMCAl light collection + electronics (10% X0 total estimated)
   PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("CEMC_ELECTRONICS", 0);
+  cyl->SuperDetector("CEMC_ELECTRONICS");
   cyl->SetRadius(radius);
   cyl->SetMaterial("G4_TEFLON"); // plastic
   cyl->SetThickness(1.5);
@@ -81,6 +82,7 @@ CEmc(PHG4Reco* g4Reco, double radius, const int crossings, const int absorberact
 
   // 0.5cm thick Stainless Steel as an approximation for EMCAl support system
   cyl = new PHG4CylinderSubsystem("CEMC_SPT", 0);
+  cyl->SuperDetector("CEMC_SPT");
   cyl->SetRadius(radius);
   cyl->SetMaterial("SS310"); // SS310 Stainless Steel
   cyl->SetThickness(0.5);
