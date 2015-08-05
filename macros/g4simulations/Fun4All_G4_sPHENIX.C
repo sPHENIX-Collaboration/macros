@@ -11,7 +11,7 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_sPHENIX(
-		       int nEvents = 100,
+		       const int nEvents = 100,
 		       const char * inputFile = "/phenix/sim02/phnxreco/sPHENIX/hijing_sims/output/G4sPHENIX-4fm-050-0199.root",
 		       const char * outputFile = "G4sPHENIXCells.root"
 		       )
@@ -46,13 +46,13 @@ int Fun4All_G4_sPHENIX(
   bool do_cemc_cell = true;
   bool do_cemc_twr = true;
   bool do_cemc_cluster = true;
-  bool do_cemc_eval = true;
+  bool do_cemc_eval = false;//true;
 
   bool do_hcalin = true;
-  bool do_hcalin_cell = true;
-  bool do_hcalin_twr = true;
-  bool do_hcalin_cluster = true;
-  bool do_hcalin_eval = true;
+  bool do_hcalin_cell = false;
+  bool do_hcalin_twr = false;
+  bool do_hcalin_cluster = false;
+  bool do_hcalin_eval = false;//true;
 
   bool do_magnet = true;
   
@@ -60,7 +60,7 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_cell = true;
   bool do_hcalout_twr = true;
   bool do_hcalout_cluster = true;
-  bool do_hcalout_eval = true;
+  bool do_hcalout_eval = false;//true;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = false;
@@ -87,6 +87,15 @@ int Fun4All_G4_sPHENIX(
   //---------------
   // Fun4All server
   //---------------
+  // Test for Jprof "request"
+  const char* jprof_flags = gSystem->Getenv("JPROF_FLAGS");
+  if ( jprof_flags )
+    {
+      std::cout << "Loading JProf" << std::endl;
+      gSystem->Load("libjprof");
+      //prof* p = new prof();
+    }
+
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
@@ -172,11 +181,11 @@ int Fun4All_G4_sPHENIX(
   // HCAL towering and clustering
   //-----------------------------
   
-  if (do_hcalin_cell) HCALInner_Towers();
-  if (do_hcalin_cell) HCALInner_Clusters();
+  if (do_hcalin_twr) HCALInner_Towers();
+  if (do_hcalin_cluster) HCALInner_Clusters();
 
-  if (do_hcalout_cell) HCALOuter_Towers();
-  if (do_hcalout_cell) HCALOuter_Clusters();
+  if (do_hcalout_twr) HCALOuter_Towers();
+  if (do_hcalout_cluster) HCALOuter_Clusters();
 
   //--------------
   // SVTX tracking
@@ -247,6 +256,18 @@ int Fun4All_G4_sPHENIX(
   //-----------------
   // Event processing
   //-----------------
+  if (nEvents < 0)
+    {
+      return;
+    }
+  // if we run the particle generator and use 0 it'll run forever
+  if (nEvents == 0 && !readhits && !readhepmc)
+    {
+      cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
+      cout << "it will run forever, so I just return without running anything" << endl;
+      return;
+    }
+
   se->run(nEvents);
 
   //-----
