@@ -12,7 +12,7 @@ int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinati
 
 int Fun4All_G4_sPHENIX(
 		       const int nEvents = 100,
-		       const char * inputFile = "/phenix/sim02/phnxreco/sPHENIX/hijing_sims/output/G4sPHENIX-4fm-050-0199.root",
+		       const char * inputFile = "mu-",
 		       const char * outputFile = "G4sPHENIXCells.root"
 		       )
 {
@@ -63,7 +63,7 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_eval = false;//true;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  bool do_DSTReader = false;
+  bool do_DSTReader = true;
   //---------------
   // Load libraries
   //---------------
@@ -81,8 +81,8 @@ int Fun4All_G4_sPHENIX(
   G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout);
   
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
-  //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
-  const string magfield = "/phenix/upgrades/decadal/fieldmaps/bPHENIX.dp.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
+    const string magfield = "0.0"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
+//  const string magfield = "/phenix/upgrades/decadal/fieldmaps/bPHENIX.dp.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
 
   //---------------
   // Fun4All server
@@ -125,8 +125,9 @@ int Fun4All_G4_sPHENIX(
     {
       // toss low multiplicity dummy events
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-      gen->add_particles("e-",5); // mu+,e+,proton,pi+,Upsilon
-      gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
+//      gen->add_particles("pi-",1); // mu+,e+,proton,pi+,Upsilon
+      gen->add_particles(inputFile,1); // mu+,e+,proton,pi+,Upsilon
+//      gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
       if (readhepmc) {
 	gen->set_reuse_existing_vertex(true);
 	gen->set_existing_vertex_offset_vector(0.0,0.0,0.0);
@@ -139,9 +140,10 @@ int Fun4All_G4_sPHENIX(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
-      gen->set_eta_range(-0.5, 0.5);
-      gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
-      gen->set_pt_range(0.1, 10.0);
+      gen->set_eta_range(-0.01, 0.01);
+//      gen->set_phi_range(-TMath::Pi(), 1.0*TMath::Pi());
+      gen->set_phi_range(-0.1, 0.1);
+      gen->set_pt_range(50, 50);
       gen->set_embedflag(1);
       gen->set_seed(uniqueseed);
       gen->set_verbosity(0);
@@ -261,6 +263,7 @@ int Fun4All_G4_sPHENIX(
       return;
     }
   se->run(nEvents);
+  se->dumpHistos(string(outputFile) + string("_hist.root"),"recreate");
 
   //-----
   // Exit
