@@ -24,7 +24,7 @@ int Fun4All_G4_sPHENIX(
   // read previously generated g4-hits files, in this case it opens a DST and skips
   // the simulations step completely. The G4Setup macro is only loaded to get information
   // about the number of layers used for the cell reco code
-  const bool readhits = false;
+  const bool readhits = true;
   // Or:
   // read files in HepMC format (typically output from event generators like hijing or pythia)
   const bool readhepmc = false; // read HepMC files
@@ -181,11 +181,11 @@ int Fun4All_G4_sPHENIX(
   // HCAL towering and clustering
   //-----------------------------
   
-  if (do_hcalin_cell) HCALInner_Towers();
-  if (do_hcalin_cell) HCALInner_Clusters();
+  if (do_hcalin_twr) HCALInner_Towers();
+  if (do_hcalin_cluster) HCALInner_Clusters();
 
-  if (do_hcalout_cell) HCALOuter_Towers();
-  if (do_hcalout_cell) HCALOuter_Clusters();
+  if (do_hcalout_twr) HCALOuter_Towers();
+  if (do_hcalout_cluster) HCALOuter_Clusters();
 
   //--------------
   // SVTX tracking
@@ -256,10 +256,18 @@ int Fun4All_G4_sPHENIX(
   //-----------------
   // Event processing
   //-----------------
-  if (nEvents <= 0)
+  if (nEvents < 0)
     {
       return;
     }
+  // if we run the particle generator and use 0 it'll run forever
+  if (nEvents == 0 && !readhits && !readhepmc)
+    {
+      cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
+      cout << "it will run forever, so I just return without running anything" << endl;
+      return;
+    }
+
   se->run(nEvents);
 
   //-----
