@@ -140,10 +140,10 @@ int Fun4All_G4_sPHENIX(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
-      gen->set_eta_range(-0.01, 0.01);
+      gen->set_eta_range(-1, 1);
 //      gen->set_phi_range(-TMath::Pi(), 1.0*TMath::Pi());
-      gen->set_phi_range(-0.1, 0.1);
-      gen->set_pt_range(50, 50);
+      gen->set_phi_range(0, TMath::Pi()*2);
+      gen->set_pt_range(4, 4);
       gen->set_embedflag(1);
       gen->set_seed(uniqueseed);
       gen->set_verbosity(0);
