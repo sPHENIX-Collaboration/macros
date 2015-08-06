@@ -17,8 +17,8 @@ double
 CEmc(PHG4Reco* g4Reco, double radius, const int crossings,
     const int absorberactive = 0)
 {
-  double emc_inner_radius = 90.; // emc inner radius from engineering drawing
-  double cemcthickness = 26.00000 - 0.001;
+  double emc_inner_radius = 95.; // emc inner radius from engineering drawing
+  double cemcthickness = 21.00000 - no_overlapp;
   double emc_outer_radius = emc_inner_radius + cemcthickness; // outer radius
 
   if (radius > emc_inner_radius)
@@ -47,11 +47,12 @@ CEmc(PHG4Reco* g4Reco, double radius, const int crossings,
   cyl->SetRadius(radius);
   cyl->SetMaterial("G4_TEFLON"); // plastic
   cyl->SetThickness(1.5- no_overlapp);
+  cyl->OverlapCheck(overlapcheck);
   if (absorberactive)  cyl->SetActive();
   g4Reco->registerSubsystem( cyl );
 
-  radius += 2;
-  cemcthickness -= 2;
+  radius += 1.5;
+  cemcthickness -= 1.5+no_overlapp;
 
 
   // 0.5cm thick Stainless Steel as an approximation for EMCAl support system
@@ -59,12 +60,13 @@ CEmc(PHG4Reco* g4Reco, double radius, const int crossings,
   cyl->SuperDetector("CEMC_SPT");
   cyl->SetRadius(radius +cemcthickness - 0.5 );
   cyl->SetMaterial("SS310"); // SS310 Stainless Steel
-  cyl->SetThickness(0.5);
+  cyl->SetThickness(0.5 - no_overlapp);
+  cyl->OverlapCheck(overlapcheck);
   if (absorberactive)
     cyl->SetActive();
   g4Reco->registerSubsystem(cyl);
 
-  cemcthickness -= 0.5;
+  cemcthickness -= 0.5+no_overlapp;
 
 
   //---------------
