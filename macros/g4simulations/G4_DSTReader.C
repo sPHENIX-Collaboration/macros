@@ -56,7 +56,11 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
         {
           ana->AddNode("CEMC");
           if (absorberactive)
-            ana->AddNode("ABSORBER_CEMC");
+            {
+              ana->AddNode("ABSORBER_CEMC");
+              ana->AddNode("CEMC_ELECTRONICS");
+              ana->AddNode("CEMC_SPT");
+            }
         }
 
       if (do_hcalin)
