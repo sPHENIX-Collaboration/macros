@@ -1,0 +1,78 @@
+
+void Jet_Reco(int verbosity = 0) {
+
+  gSystem->Load("libg4jets.so");
+  
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  // truth particle level jets
+  JetReco *truthjetreco = new JetReco();
+  truthjetreco->add_input(new TruthJetInput(Jet::PARTICLE));
+  truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2),"AntiKt_Truth_r0.2");
+  truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3),"AntiKt_Truth_r0.3");
+  truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.4),"AntiKt_Truth_r0.4");
+  truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.5),"AntiKt_Truth_r0.5");
+  truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.6),"AntiKt_Truth_r0.6");
+  truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.7),"AntiKt_Truth_r0.7");
+  truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.8),"AntiKt_Truth_r0.8");
+  truthjetreco->set_algo_node("ANTIKT");
+  truthjetreco->set_input_node("TRUTH");
+  truthjetreco->Verbosity(verbosity);
+  se->registerSubsystem(truthjetreco);
+
+  // tower jets
+  JetReco *towerjetreco = new JetReco();
+  towerjetreco->add_input(new TowerJetInput(Jet::CEMC_TOWER));
+  towerjetreco->add_input(new TowerJetInput(Jet::HCALIN_TOWER));
+  towerjetreco->add_input(new TowerJetInput(Jet::HCALOUT_TOWER));
+  towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2),"AntiKt_Tower_r0.2");
+  towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3),"AntiKt_Tower_r0.3");
+  towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.4),"AntiKt_Tower_r0.4");
+  towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.5),"AntiKt_Tower_r0.5");
+  towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.6),"AntiKt_Tower_r0.6");
+  towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.7),"AntiKt_Tower_r0.7");
+  towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.8),"AntiKt_Tower_r0.8");
+  towerjetreco->set_algo_node("ANTIKT");
+  towerjetreco->set_input_node("TOWER");
+  towerjetreco->Verbosity(verbosity);
+  se->registerSubsystem(towerjetreco);
+
+  // cluster jets
+  JetReco *clusterjetreco = new JetReco();
+  clusterjetreco->add_input(new ClusterJetInput(Jet::CEMC_CLUSTER));
+  clusterjetreco->add_input(new ClusterJetInput(Jet::HCALIN_CLUSTER));
+  clusterjetreco->add_input(new ClusterJetInput(Jet::HCALOUT_CLUSTER));
+  clusterjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2),"AntiKt_Cluster_r0.2");
+  clusterjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3),"AntiKt_Cluster_r0.3");
+  clusterjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.4),"AntiKt_Cluster_r0.4");
+  clusterjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.5),"AntiKt_Cluster_r0.5");
+  clusterjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.6),"AntiKt_Cluster_r0.6");
+  clusterjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.7),"AntiKt_Cluster_r0.7");
+  clusterjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.8),"AntiKt_Cluster_r0.8");
+  clusterjetreco->set_algo_node("ANTIKT");
+  clusterjetreco->set_input_node("CLUSTER");
+  clusterjetreco->Verbosity(verbosity);
+  se->registerSubsystem(clusterjetreco);
+  
+  // track jets
+  JetReco *trackjetreco = new JetReco();
+  trackjetreco->add_input(new TrackJetInput(Jet::TRACK));
+  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2),"AntiKt_Track_r0.2");
+  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3),"AntiKt_Track_r0.3");
+  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.4),"AntiKt_Track_r0.4");
+  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.5),"AntiKt_Track_r0.5");
+  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.6),"AntiKt_Track_r0.6");
+  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.7),"AntiKt_Track_r0.7");
+  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.8),"AntiKt_Track_r0.8");
+  trackjetreco->set_algo_node("ANTIKT");
+  trackjetreco->set_input_node("TRACK");
+  trackjetreco->Verbosity(verbosity);
+  se->registerSubsystem(trackjetreco); 
+
+  return; 
+}
+
+void Jet_Eval(std::string outfilename = "g4jets_eval.root") {
+
+  return;
+}
