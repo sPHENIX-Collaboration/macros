@@ -45,6 +45,8 @@ void G4Init(bool do_svtx = true,
 
   gROOT->LoadMacro("G4_HcalOut_ref.C");       // default 
   if (do_hcalout) HCalOuterInit();
+
+  gROOT->LoadMacro("G4_Jets.C");
 }
 
 
