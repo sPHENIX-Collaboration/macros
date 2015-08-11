@@ -11,7 +11,7 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_sPHENIX(
-		       const int nEvents = 100,
+		       const int nEvents = 10,
 		       const char * inputFile = "/phenix/sim02/phnxreco/sPHENIX/hijing_sims/output/G4sPHENIX-4fm-050-0199.root",
 		       const char * outputFile = "G4sPHENIXCells.root"
 		       )
@@ -61,6 +61,9 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_twr = true;
   bool do_hcalout_cluster = true;
   bool do_hcalout_eval = false;//true;
+
+  bool do_jet_reco = false;
+  bool do_jet_eval = false;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = false;
@@ -193,6 +196,12 @@ int Fun4All_G4_sPHENIX(
 
   if (do_svtx_track) Svtx_Reco();
 
+  //---------
+  // Jet reco
+  //---------
+
+  if (do_jet_reco) Jet_Reco();
+
   //----------------------
   // Simulation evaluation
   //----------------------
@@ -204,6 +213,8 @@ int Fun4All_G4_sPHENIX(
   if (do_hcalin_eval) HCALInner_Eval("g4hcalin_eval.root");
 
   if (do_hcalout_eval) HCALOuter_Eval("g4hcalout_eval.root");
+
+  if (do_jet_eval) Jet_Eval("g4jet_eval.root");
 
   //-------------- 
   // IO management
