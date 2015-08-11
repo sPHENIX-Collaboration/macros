@@ -11,7 +11,7 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_sPHENIX(
-		       const int nEvents = 100,
+		       const int nEvents = 1,
 		       const char * inputFile = "mu-",
 		       const char * outputFile = "G4sPHENIXCells.root"
 		       )
@@ -140,7 +140,7 @@ int Fun4All_G4_sPHENIX(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
-      gen->set_eta_range(-1, 1);
+      gen->set_eta_range(0, 1);
 //      gen->set_phi_range(-TMath::Pi(), 1.0*TMath::Pi());
       gen->set_phi_range(0, TMath::Pi()*2);
       gen->set_pt_range(4, 4);
@@ -270,14 +270,18 @@ int Fun4All_G4_sPHENIX(
       return;
     }
 
+  gSystem->ListLibraries();
+
   se->run(nEvents);
   se->dumpHistos(string(outputFile) + string("_hist.root"),"recreate");
 
   //-----
   // Exit
   //-----
+  gSystem->Exec("ps -o sid,ppid,pid,user,comm,vsize,rssize,time");
 
   se->End();
+
   std::cout << "All done" << std::endl;
   delete se;
   gSystem->Exit(0);
