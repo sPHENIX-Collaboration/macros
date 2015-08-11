@@ -62,6 +62,9 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_cluster = true;
   bool do_hcalout_eval = false;//true;
 
+  bool do_jet_reco = false;
+  bool do_jet_eval = false;
+
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = true;
   //---------------
@@ -195,6 +198,12 @@ int Fun4All_G4_sPHENIX(
 
   if (do_svtx_track) Svtx_Reco();
 
+  //---------
+  // Jet reco
+  //---------
+
+  if (do_jet_reco) Jet_Reco();
+
   //----------------------
   // Simulation evaluation
   //----------------------
@@ -206,6 +215,8 @@ int Fun4All_G4_sPHENIX(
   if (do_hcalin_eval) HCALInner_Eval("g4hcalin_eval.root");
 
   if (do_hcalout_eval) HCALOuter_Eval("g4hcalout_eval.root");
+
+  if (do_jet_eval) Jet_Eval("g4jet_eval.root");
 
   //-------------- 
   // IO management
