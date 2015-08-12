@@ -28,7 +28,7 @@ void G4Init(bool do_svtx = true,
     PreShowerInit();
   }
 
-  gROOT->LoadMacro("G4_CEmc_Spacal.C");    // default
+  gROOT->LoadMacro("G4_CEmc_Spacal.C");    //
   //gROOT->LoadMacro("G4_CEmc_cross.C");   // obselete
   //gROOT->LoadMacro("G4_CEmc_Alice.C");   // obselete
   //gROOT->LoadMacro("G4_CEmc_Alice_W.C"); // obselete
@@ -106,8 +106,9 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // CEMC
-  
+//
   if (do_cemc) radius = CEmc(g4Reco, radius, 8, absorberactive);
+//  if (do_cemc) radius = CEmc_Vis(g4Reco, radius, 8, absorberactive);// for visualization substructure of SPACAL, slow to render
   
   //----------------------------------------
   // HCALIN
