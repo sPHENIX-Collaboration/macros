@@ -8,7 +8,7 @@ double Pipe(PHG4Reco* g4Reco,
 
   double pipe_radius = 2.0;     // 2 cm
   double pipe_thickness = 0.05; // 500 um
-  double pipe_length = 500.0;   // 5 m
+  double pipe_length = g4Reco->GetWorldSizeZ() - no_overlapp; // entire volume
   if (radius > pipe_radius) {
     cout << "inconsistency: radius: " << radius 
 	 << " larger than Pipe inner radius: " << pipe_radius << endl;
