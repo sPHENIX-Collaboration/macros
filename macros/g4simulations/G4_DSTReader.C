@@ -73,7 +73,7 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
       if (do_magnet)
         {
           if (absorberactive)
-            ana->AddNode("MAGNET_0");
+            ana->AddNode("MAGNET");
         }
 
       if (do_hcalout)
