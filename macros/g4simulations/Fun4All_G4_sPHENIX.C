@@ -13,7 +13,7 @@ int Cemc_spacal_configuration = -1;
 
 int Fun4All_G4_sPHENIX(
 		       const int nEvents = 1,
-		       const char * inputFile = "e-",
+		       const char * inputFile = "pi-",
 		       const char * outputFile = "G4sPHENIXCells.root"
 		       )
 {
@@ -89,8 +89,8 @@ int Fun4All_G4_sPHENIX(
   Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal; //2D full projective SPACAL
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
-    const string magfield = "0.0"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
-//  const string magfield = "/phenix/upgrades/decadal/fieldmaps/bPHENIX.dp.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
+//    const string magfield = "0.0"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
+  const string magfield = "/phenix/upgrades/decadal/fieldmaps/bPHENIX.dp.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
 
   //---------------
   // Fun4All server
