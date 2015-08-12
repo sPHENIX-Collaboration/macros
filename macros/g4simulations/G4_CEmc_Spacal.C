@@ -2,19 +2,52 @@
 // with what is used in this macro
 Min_cemc_layer = 1;
 Max_cemc_layer = 1;
-//Spacal_Tilt = 0;
+
+#include <iostream>
 
 // just a dummy parameter used by the tilted plate geom
 void CEmcInit(const int nslats = 1)
 {
   Min_cemc_layer = 1;
   Max_cemc_layer = 1;
+
+  // set a default value for SPACAL configuraiton. This may be overwritten in the main Fun4All macros
+  Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal; //1D azimuthal projective SPACAL
+//  Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal; //2D full projective SPACAL
+
 //  Spacal_Tilt = 0;
 }
 
 //! EMCal main setup macro
 double
-CEmc(PHG4Reco* g4Reco, double radius, const int crossings, const int absorberactive = 0)
+CEmc(PHG4Reco* g4Reco, double radius, const int crossings,
+    const int absorberactive = 0)
+{
+  if (Cemc_spacal_configuration
+      == PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal)
+    {
+      return CEmc_1DProjectiveSpacal(/*PHG4Reco**/g4Reco, /*double*/radius, /*const int */
+          crossings, /*const int*/absorberactive );
+    }
+  else if (Cemc_spacal_configuration
+      == PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal)
+    {
+      return CEmc_2DProjectiveSpacal(/*PHG4Reco**/g4Reco, /*double*/radius, /*const int */
+          crossings, /*const int*/absorberactive );
+    }
+  else
+    {
+      std::cout
+          << "G4_CEmc_Spacal.C::CEmc - Fatal Error - unrecognized SPACAL configuration #"
+          << Cemc_spacal_configuration<<". Force exiting..." << std::endl;
+      exit(-1);
+      return 0;
+    }
+}
+
+//! EMCal setup macro - 1D azimuthal projective SPACAL
+double
+CEmc_1DProjectiveSpacal(PHG4Reco* g4Reco, double radius, const int crossings, const int absorberactive = 0)
 {
   double emc_inner_radius = 95.; // emc inner radius from engineering drawing
   double cemcthickness = 12.7;
@@ -95,6 +128,102 @@ CEmc(PHG4Reco* g4Reco, double radius, const int crossings, const int absorberact
 
   return radius;
 }
+
+//! 2D full projective SPACAL
+double
+CEmc_2DProjectiveSpacal(PHG4Reco* g4Reco, double radius, const int crossings,
+    const int absorberactive = 0)
+{
+  double emc_inner_radius = 95.; // emc inner radius from engineering drawing
+  double cemcthickness = 21.00000 - no_overlapp;
+  double emc_outer_radius = emc_inner_radius + cemcthickness; // outer radius
+
+  if (radius > emc_inner_radius)
+    {
+      cout << "inconsistency: preshower radius+thickness: " << radius
+          << " larger than emc inner radius: " << emc_inner_radius << endl;
+      gSystem->Exit(-1);
+    }
+
+  //---------------
+  // Load libraries
+  //---------------
+
+  gSystem->Load("libg4detectors.so");
+
+  // the radii are only to determined the thickness of the cemc
+  radius = emc_inner_radius;
+
+  //---------------
+  // Load libraries
+  //---------------
+
+  // 1.5cm thick teflon as an approximation for EMCAl light collection + electronics (10% X0 total estimated)
+  PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("CEMC_ELECTRONICS", 0);
+  cyl->SuperDetector("CEMC_ELECTRONICS");
+  cyl->SetRadius(radius);
+  cyl->SetMaterial("G4_TEFLON"); // plastic
+  cyl->SetThickness(1.5- no_overlapp);
+  cyl->OverlapCheck(overlapcheck);
+  if (absorberactive)  cyl->SetActive();
+  g4Reco->registerSubsystem( cyl );
+
+  radius += 1.5;
+  cemcthickness -= 1.5+no_overlapp;
+
+
+  // 0.5cm thick Stainless Steel as an approximation for EMCAl support system
+  cyl = new PHG4CylinderSubsystem("CEMC_SPT", 0);
+  cyl->SuperDetector("CEMC_SPT");
+  cyl->SetRadius(radius +cemcthickness - 0.5 );
+  cyl->SetMaterial("SS310"); // SS310 Stainless Steel
+  cyl->SetThickness(0.5 - no_overlapp);
+  cyl->OverlapCheck(overlapcheck);
+  if (absorberactive)
+    cyl->SetActive();
+  g4Reco->registerSubsystem(cyl);
+
+  cemcthickness -= 0.5+no_overlapp;
+
+
+  //---------------
+  // Load libraries
+  //---------------
+
+  int ilayer = Min_cemc_layer;
+  PHG4SpacalSubsystem *cemc; // sorry the tilted slats are called HCal
+  cemc = new PHG4SpacalSubsystem("CEMC", ilayer);
+
+  cemc->get_geom().set_config(
+      PHG4CylinderGeom_Spacalv1::kFullProjective_2DTaper_SameLengthFiberPerTower);
+
+  // load from hard code map for now. Need to move to calibration file or database.
+  cemc->get_geom().load_demo_sector_tower_map3();
+  cemc->get_geom().set_radius(radius);
+  cemc->get_geom().set_thickness(cemcthickness);
+  cemc->get_geom().set_construction_verbose(1);
+
+  cemc->SetActive();
+  cemc->SuperDetector("CEMC");
+  if (absorberactive)
+    cemc->SetAbsorberActive();
+  cemc->OverlapCheck(overlapcheck);
+
+  g4Reco->registerSubsystem(cemc);
+
+  if (ilayer > Max_cemc_layer)
+    {
+      cout << "layer discrepancy, current layer " << ilayer
+          << " max cemc layer: " << Max_cemc_layer << endl;
+    }
+
+  radius += cemcthickness;
+  radius += no_overlapp;
+
+  return radius;
+}
+
+
 
 //! test for 2D projective SPACAL using 1D projective modules. For evaluation only
 double

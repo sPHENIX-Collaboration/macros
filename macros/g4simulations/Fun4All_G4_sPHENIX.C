@@ -9,6 +9,7 @@ int Max_preshower_layer = -1;
 int Min_si_layer = -1;
 int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
+int Cemc_spacal_configuration = -1;
 
 int Fun4All_G4_sPHENIX(
 		       const int nEvents = 10,
@@ -82,7 +83,11 @@ int Fun4All_G4_sPHENIX(
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
   G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout);
-  
+
+  // SPACAL configuration
+  Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal; //1D azimuthal projective SPACAL, also macro default
+//  Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal; //2D full projective SPACAL
+
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = "/phenix/upgrades/decadal/fieldmaps/bPHENIX.dp.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
