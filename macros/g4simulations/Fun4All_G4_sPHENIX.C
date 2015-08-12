@@ -38,7 +38,7 @@ int Fun4All_G4_sPHENIX(
   bool do_svtx = true;
   bool do_svtx_cell = true;
   bool do_svtx_track = true;
-  bool do_svtx_eval = true;
+  bool do_svtx_eval = false;
 
   bool do_preshower = false;
   
@@ -283,6 +283,7 @@ int Fun4All_G4_sPHENIX(
 
   gSystem->ListLibraries();
 
+//  se->Verbosity(10);
   se->run(nEvents);
   se->dumpHistos(string(outputFile) + string("_hist.root"),"recreate");
 
