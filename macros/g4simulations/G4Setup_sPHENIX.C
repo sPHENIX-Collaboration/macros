@@ -28,8 +28,7 @@ void G4Init(bool do_svtx = true,
     PreShowerInit();
   }
 
-  gROOT->LoadMacro("G4_CEmc_Spacal2D.C");    // new 2D projective SPACAL
-//  gROOT->LoadMacro("G4_CEmc_Spacal.C");    // default, for faster simulation and comparison studies
+  gROOT->LoadMacro("G4_CEmc_Spacal.C");    //
   //gROOT->LoadMacro("G4_CEmc_cross.C");   // obselete
   //gROOT->LoadMacro("G4_CEmc_Alice.C");   // obselete
   //gROOT->LoadMacro("G4_CEmc_Alice_W.C"); // obselete
