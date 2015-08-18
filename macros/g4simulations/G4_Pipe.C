@@ -6,8 +6,8 @@ double Pipe(PHG4Reco* g4Reco,
 	    const int absorberactive = 0,
 	    int verbosity = 0) {
 
-  double pipe_radius = 2.0;     // 2 cm
-  double pipe_thickness = 0.05; // 500 um
+  double pipe_radius    = 2.16;   // 2.16 cm based on spec sheet
+  double pipe_thickness = 0.0760; // 760 um based on spec sheet
   double pipe_length = g4Reco->GetWorldSizeZ() - no_overlapp; // entire volume
   if (radius > pipe_radius) {
     cout << "inconsistency: radius: " << radius 
