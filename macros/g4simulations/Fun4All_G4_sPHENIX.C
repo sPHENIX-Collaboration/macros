@@ -36,7 +36,7 @@ int Fun4All_G4_sPHENIX(
   // What to run
   //======================
 
-  bool do_pipe = false;
+  bool do_pipe = true;
   
   bool do_svtx = true;
   bool do_svtx_cell = true;
@@ -52,9 +52,9 @@ int Fun4All_G4_sPHENIX(
   bool do_cemc_eval = false;//true;
 
   bool do_hcalin = true;
-  bool do_hcalin_cell = false;
-  bool do_hcalin_twr = false;
-  bool do_hcalin_cluster = false;
+  bool do_hcalin_cell = true;
+  bool do_hcalin_twr = true;
+  bool do_hcalin_cluster = true;
   bool do_hcalin_eval = false;//true;
 
   bool do_magnet = true;
@@ -92,7 +92,7 @@ int Fun4All_G4_sPHENIX(
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
-  const string magfield = "/phenix/upgrades/decadal/fieldmaps/bPHENIX.dp.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
+  const string magfield = "/phenix/upgrades/decadal/fieldmaps/sPHENIX.2d.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
 
   //---------------
   // Fun4All server
