@@ -15,7 +15,11 @@ void G4Init(bool do_svtx = true,
 	    bool do_cemc = true,
 	    bool do_hcalin = true,
 	    bool do_magnet = true,
-	    bool do_hcalout = true) {
+	    bool do_hcalout = true,
+	    bool do_pipe = false) {
+
+  gROOT->LoadMacro("G4_Pipe.C");
+  if (do_pipe) PipeInit();
   
   // load detector macros and execute Init() function
   gROOT->LoadMacro("G4_Svtx.C");           // default
@@ -58,7 +62,8 @@ int G4Setup(const int absorberactive = 0,
 	    const bool do_cemc = true,
 	    const bool do_hcalin = true,
 	    const bool do_magnet = true,
-	    const bool do_hcalout = true) {
+	    const bool do_hcalout = true,
+	    const bool do_pipe = false) {
   
   //---------------
   // Load libraries
@@ -95,6 +100,10 @@ int G4Setup(const int absorberactive = 0,
 
   double radius = 0.;
 
+  //----------------------------------------
+  // PIPE
+  if (do_pipe) radius = Pipe(g4Reco, radius, absorberactive);
+  
   //----------------------------------------
   // SVTX
   if (do_svtx) radius = Svtx(g4Reco, radius, absorberactive);

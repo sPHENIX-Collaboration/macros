@@ -36,6 +36,8 @@ int Fun4All_G4_sPHENIX(
   // What to run
   //======================
 
+  bool do_pipe = true;
+  
   bool do_svtx = true;
   bool do_svtx_cell = true;
   bool do_svtx_track = true;
@@ -50,9 +52,9 @@ int Fun4All_G4_sPHENIX(
   bool do_cemc_eval = false;//true;
 
   bool do_hcalin = true;
-  bool do_hcalin_cell = false;
-  bool do_hcalin_twr = false;
-  bool do_hcalin_cluster = false;
+  bool do_hcalin_cell = true;
+  bool do_hcalin_twr = true;
+  bool do_hcalin_cluster = true;
   bool do_hcalin_eval = false;//true;
 
   bool do_magnet = true;
@@ -82,15 +84,16 @@ int Fun4All_G4_sPHENIX(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
-  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout);
+  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe);
 
   // SPACAL configuration
 //  Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal; //1D azimuthal projective SPACAL, also macro default
   Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal; //2D full projective SPACAL
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
-//    const string magfield = "0.0"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
-  const string magfield = "/phenix/upgrades/decadal/fieldmaps/bPHENIX.dp.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
+
+  //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
+  const string magfield = "/phenix/upgrades/decadal/fieldmaps/sPHENIX.2d.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
 
   //---------------
   // Fun4All server
@@ -165,7 +168,7 @@ int Fun4All_G4_sPHENIX(
       //---------------------
 
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout);
+	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe);
     }
 
   //------------------
