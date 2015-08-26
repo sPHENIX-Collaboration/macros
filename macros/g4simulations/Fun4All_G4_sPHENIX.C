@@ -12,7 +12,7 @@ int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinati
 int Cemc_spacal_configuration = -1;
 
 int Fun4All_G4_sPHENIX(
-		       const int nEvents = 10,
+		       const int nEvents = 100,
 		       const char * inputFile = "e-",
 		       const char * outputFile = "G4sPHENIXCells.root"
 		       )
@@ -148,7 +148,7 @@ int Fun4All_G4_sPHENIX(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
-      gen->set_eta_range(0, 1);
+      gen->set_eta_range(-1, 1);
 //      gen->set_phi_range(-TMath::Pi(), 1.0*TMath::Pi());
       gen->set_phi_range(0, TMath::Pi()*2);
       gen->set_pt_range(4, 4);
