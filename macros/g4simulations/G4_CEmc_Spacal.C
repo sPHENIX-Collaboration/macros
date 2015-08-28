@@ -403,7 +403,7 @@ void CEMC_Clusters(int verbosity = 0) {
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
-  
+
   RawClusterBuilder* ClusterBuilder = new RawClusterBuilder("EmcRawClusterBuilder");
   ClusterBuilder->Detector("CEMC");
   ClusterBuilder->Verbosity(verbosity);
