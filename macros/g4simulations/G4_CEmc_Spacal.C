@@ -373,13 +373,37 @@ void CEMC_Cells(int verbosity = 0) {
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
   
-  PHG4CylinderCellReco *cemc_cells = new PHG4CylinderCellReco("CEMCCYLCELLRECO");
-  cemc_cells->Detector("CEMC");
-  cemc_cells->Verbosity(verbosity);
-  for (int i = Min_cemc_layer; i <= Max_cemc_layer; i++) {
-    cemc_cells->etaphisize(i, 0.024, 0.024);
-  }
-  se->registerSubsystem(cemc_cells);
+
+
+  if (Cemc_spacal_configuration
+      == PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal)
+    {
+      PHG4CylinderCellReco *cemc_cells = new PHG4CylinderCellReco("CEMCCYLCELLRECO");
+      cemc_cells->Detector("CEMC");
+      cemc_cells->Verbosity(verbosity);
+      for (int i = Min_cemc_layer; i <= Max_cemc_layer; i++) {
+        cemc_cells->etaphisize(i, 0.024, 0.024);
+      }
+      se->registerSubsystem(cemc_cells);
+
+    }
+  else if (Cemc_spacal_configuration
+      == PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal)
+    {
+      PHG4FullProjSpacalCellReco *cemc_cells = new PHG4FullProjSpacalCellReco("CEMCCYLCELLRECO");
+      cemc_cells->Detector("CEMC");
+      cemc_cells->Verbosity(verbosity);
+      se->registerSubsystem(cemc_cells);
+
+    }
+  else
+    {
+      std::cout
+          << "G4_CEmc_Spacal.C::CEmc - Fatal Error - unrecognized SPACAL configuration #"
+          << Cemc_spacal_configuration<<". Force exiting..." << std::endl;
+      exit(-1);
+      return ;
+    }
 
   return;
 }
