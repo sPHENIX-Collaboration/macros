@@ -12,11 +12,15 @@ int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinati
 int Cemc_spacal_configuration = -1;
 
 int Fun4All_G4_sPHENIX(
-		       const int nEvents = 100,
-		       const char * inputFile = "e-",
-		       const char * outputFile = "G4sPHENIXCells.root"
+		       const int nEvents = 10,
+		       const char * inputFile = "G4sPHENIXCells_2DSpacal_100e10GeV.root"
 		       )
 {
+
+  TString s_outputFile = inputFile;
+  s_outputFile += "_Ana.root";
+  const char * outputFile = s_outputFile.Data();
+
   //===============
   // Input options
   //===============
@@ -25,7 +29,7 @@ int Fun4All_G4_sPHENIX(
   // read previously generated g4-hits files, in this case it opens a DST and skips
   // the simulations step completely. The G4Setup macro is only loaded to get information
   // about the number of layers used for the cell reco code
-  const bool readhits = false;
+  const bool readhits = true;
   // Or:
   // read files in HepMC format (typically output from event generators like hijing or pythia)
   const bool readhepmc = false; // read HepMC files
@@ -39,30 +43,30 @@ int Fun4All_G4_sPHENIX(
   bool do_pipe = true;
   
   bool do_svtx = true;
-  bool do_svtx_cell = false;
-  bool do_svtx_track = false;
-  bool do_svtx_eval = false;
+  bool do_svtx_cell = true;
+  bool do_svtx_track = true;
+  bool do_svtx_eval = true;
 
   bool do_preshower = false;
   
   bool do_cemc = true;
-  bool do_cemc_cell = false;
-  bool do_cemc_twr = false;
-  bool do_cemc_cluster = false;
+  bool do_cemc_cell = true;
+  bool do_cemc_twr = true;
+  bool do_cemc_cluster = true;
   bool do_cemc_eval = false;//true;
 
   bool do_hcalin = true;
-  bool do_hcalin_cell = false;
-  bool do_hcalin_twr = false;
-  bool do_hcalin_cluster = false;
+  bool do_hcalin_cell = true;
+  bool do_hcalin_twr = true;
+  bool do_hcalin_cluster = true;
   bool do_hcalin_eval = false;//true;
 
   bool do_magnet = true;
   
   bool do_hcalout = true;
-  bool do_hcalout_cell = false;
-  bool do_hcalout_twr = false;
-  bool do_hcalout_cluster = false;
+  bool do_hcalout_cell = true;
+  bool do_hcalout_twr = true;
+  bool do_hcalout_cluster = true;
   bool do_hcalout_eval = false;//true;
 
   bool do_jet_reco = false;
