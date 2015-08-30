@@ -51,8 +51,8 @@ int Fun4All_G4_sPHENIX(
   
   bool do_cemc = true;
   bool do_cemc_cell = true;
-  bool do_cemc_twr = true;
-  bool do_cemc_cluster = true;
+  bool do_cemc_twr = false;
+  bool do_cemc_cluster = false;
   bool do_cemc_eval = false;//true;
 
   bool do_hcalin = true;
