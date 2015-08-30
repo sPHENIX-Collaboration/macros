@@ -367,7 +367,7 @@ CEmc_Vis(PHG4Reco* g4Reco, double radius, const int crossings, const int absorbe
   return radius;
 }
 
-void CEMC_Cells(int verbosity = 0) {
+void CEMC_Cells(int verbosity = 5) {
 
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4detectors.so");
