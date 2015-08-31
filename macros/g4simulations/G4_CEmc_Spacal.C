@@ -3,6 +3,12 @@
 Min_cemc_layer = 1;
 Max_cemc_layer = 1;
 
+  // set a default value for SPACAL configuration
+  // 1D azimuthal projective SPACAL (fast)
+int Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal; 
+  // 2D azimuthal projective SPACAL (slow)
+// int Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal;
+
 #include <iostream>
 
 // just a dummy parameter used by the tilted plate geom
@@ -10,12 +16,6 @@ void CEmcInit(const int nslats = 1)
 {
   Min_cemc_layer = 1;
   Max_cemc_layer = 1;
-
-  // set a default value for SPACAL configuraiton. This may be overwritten in the main Fun4All macros
-  Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal; //1D azimuthal projective SPACAL
-//  Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal; //2D full projective SPACAL
-
-//  Spacal_Tilt = 0;
 }
 
 //! EMCal main setup macro
@@ -90,7 +90,7 @@ CEmc_1DProjectiveSpacal(PHG4Reco* g4Reco, double radius, const int crossings, co
 
 
   int ilayer = Min_cemc_layer;
-  PHG4SpacalSubsystem *cemc; // sorry the tilted slats are called HCal
+  PHG4SpacalSubsystem *cemc;
   cemc = new PHG4SpacalSubsystem("CEMC", ilayer);
 
   cemc ->get_geom().set_radius(emc_inner_radius);
@@ -191,7 +191,7 @@ CEmc_2DProjectiveSpacal(PHG4Reco* g4Reco, double radius, const int crossings,
   //---------------
 
   int ilayer = Min_cemc_layer;
-  PHG4SpacalSubsystem *cemc; // sorry the tilted slats are called HCal
+  PHG4SpacalSubsystem *cemc;
   cemc = new PHG4SpacalSubsystem("CEMC", ilayer);
 
   cemc->get_geom().set_config(
@@ -256,7 +256,7 @@ CEmc_Proj(PHG4Reco* g4Reco, double radius, const int crossings, const int absorb
   radius = emc_outer_radius;
   
   int ilayer = Min_cemc_layer;
-  PHG4SpacalSubsystem *cemc; // sorry the tilted slats are called HCal
+  PHG4SpacalSubsystem *cemc;
   cemc = new PHG4SpacalSubsystem("CEMC", ilayer);
 
   cemc ->get_geom().set_radius(emc_inner_radius);
@@ -331,7 +331,7 @@ CEmc_Vis(PHG4Reco* g4Reco, double radius, const int crossings, const int absorbe
   radius = emc_inner_radius;
 
   int ilayer = Min_cemc_layer;
-  PHG4SpacalSubsystem *cemc; // sorry the tilted slats are called HCal
+  PHG4SpacalSubsystem *cemc;
   cemc = new PHG4SpacalSubsystem("CEMC", ilayer);
 
   cemc ->get_geom().set_radius(emc_inner_radius);

@@ -9,7 +9,6 @@ int Max_preshower_layer = -1;
 int Min_si_layer = -1;
 int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
-int Cemc_spacal_configuration = -1;
 
 int Fun4All_G4_sPHENIX(
 		       const int nEvents = 10,
@@ -86,10 +85,6 @@ int Fun4All_G4_sPHENIX(
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
   G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe);
 
-  // SPACAL configuration
-  Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal; //1D azimuthal projective SPACAL, also macro default
-//  Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal; //2D full projective SPACAL
-
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = "/phenix/upgrades/decadal/fieldmaps/sPHENIX.2d.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
@@ -97,18 +92,9 @@ int Fun4All_G4_sPHENIX(
   //---------------
   // Fun4All server
   //---------------
-  // Test for Jprof "request"
-  const char* jprof_flags = gSystem->Getenv("JPROF_FLAGS");
-  if ( jprof_flags )
-    {
-      std::cout << "Loading JProf" << std::endl;
-      gSystem->Load("libjprof");
-      //prof* p = new prof();
-    }
-
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0);
+  se->Verbosity(0); 
 
   // unique seed
   int uniqueseed = TRandom3(0).GetSeed();
