@@ -1,7 +1,7 @@
 // these are defined in the Fun4All macro, here we just override the values
 // with what is used in this macro
-Min_hcal_in_layer = 1;
-Max_hcal_in_layer = 1;
+Min_hcal_in_layer = 0;
+Max_hcal_in_layer = 0;
 
 void HCalInnerInit() {
   Min_hcal_in_layer = 0;
@@ -78,13 +78,13 @@ void HCalInner_SupportRing(PHG4Reco* g4Reco,
 
   for (int i = 0; i < 4; i++)
     {
-      cyl = new PHG4CylinderSubsystem("HCALIN_SPT_N1", 0);
+      cyl = new PHG4CylinderSubsystem("HCALIN_SPT_N1", i);
       cyl->SetPosition(0, 0, z_rings[i]);
       cyl->SuperDetector("HCALIN_SPT");
       cyl->SetRadius(innerradius);
       cyl->SetLengthViaRapidityCoverage(false);
       cyl->SetLength(dz);
-      cyl->SetMaterial("G4_Fe"); // use 1 radiation length Al for magnet thickness
+      cyl->SetMaterial("SS310");
       cyl->SetThickness(maxradius - innerradius);
       if (absorberactive)
         cyl->SetActive();
