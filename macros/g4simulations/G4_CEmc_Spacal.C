@@ -408,7 +408,7 @@ void CEMC_Cells(int verbosity = 5) {
   return;
 }
 
-void CEMC_Towers(int verbosity = 0) {
+void CEMC_Towers(int verbosity = 5) {
 
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4detectors.so");
