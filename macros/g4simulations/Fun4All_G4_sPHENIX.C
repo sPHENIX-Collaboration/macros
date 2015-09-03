@@ -35,6 +35,8 @@ int Fun4All_G4_sPHENIX(
   // What to run
   //======================
 
+  bool do_bbc = true;
+  
   bool do_pipe = true;
   
   bool do_svtx = true;
@@ -63,7 +65,10 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_twr = true;
   bool do_hcalout_cluster = true;
   bool do_hcalout_eval = false;//true;
-
+  
+  bool do_global = true;
+  bool do_global_fastsim = false;
+  
   bool do_jet_reco = false;
   bool do_jet_eval = false;
 
@@ -83,7 +88,7 @@ int Fun4All_G4_sPHENIX(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
-  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe);
+  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_bbc);
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
@@ -156,9 +161,15 @@ int Fun4All_G4_sPHENIX(
       //---------------------
 
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe);
+	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_bbc);
     }
 
+  //---------
+  // BBC Reco
+  //---------
+  
+  if (do_bbc) Bbc_Reco();
+  
   //------------------
   // Detector Division
   //------------------
@@ -194,6 +205,13 @@ int Fun4All_G4_sPHENIX(
 
   if (do_svtx_track) Svtx_Reco();
 
+  //-----------------
+  // Global Vertexing
+  //-----------------
+
+  if (do_global) Global_Reco();
+  else if (do_global_fastsim) Global_FastSim();
+  
   //---------
   // Jet reco
   //---------

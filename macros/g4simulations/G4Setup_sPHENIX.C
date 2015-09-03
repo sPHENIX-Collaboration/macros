@@ -16,8 +16,13 @@ void G4Init(bool do_svtx = true,
 	    bool do_hcalin = true,
 	    bool do_magnet = true,
 	    bool do_hcalout = true,
-	    bool do_pipe = false) {
+	    bool do_pipe = true,
+	    bool do_bbc = true,
+	    bool do_global = true) {
 
+  gROOT->LoadMacro("G4_Bbc.C");
+  if (do_bbc) BbcInit();
+  
   gROOT->LoadMacro("G4_Pipe.C");
   if (do_pipe) PipeInit();
   
@@ -50,6 +55,8 @@ void G4Init(bool do_svtx = true,
   gROOT->LoadMacro("G4_HcalOut_ref.C");       // default 
   if (do_hcalout) HCalOuterInit();
 
+  gROOT->LoadMacro("G4_Global.C");
+  
   gROOT->LoadMacro("G4_Jets.C");
 }
 
@@ -63,7 +70,8 @@ int G4Setup(const int absorberactive = 0,
 	    const bool do_hcalin = true,
 	    const bool do_magnet = true,
 	    const bool do_hcalout = true,
-	    const bool do_pipe = false) {
+	    const bool do_pipe = true,
+	    const bool do_bbc = true) {
   
   //---------------
   // Load libraries
