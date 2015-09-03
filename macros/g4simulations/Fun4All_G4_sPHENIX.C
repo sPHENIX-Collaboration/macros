@@ -138,9 +138,9 @@ int Fun4All_G4_sPHENIX(
       gen->set_eta_range(-0.5, 0.5);
       gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
       gen->set_pt_range(0.1, 10.0);
-      gen->set_embedflag(1);
+      gen->Embed(1);
       gen->set_seed(uniqueseed);
-      gen->set_verbosity(0);
+      gen->Verbosity(0);
       se->registerSubsystem(gen);
     }
 
