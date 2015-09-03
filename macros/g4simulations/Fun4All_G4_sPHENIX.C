@@ -95,11 +95,17 @@ int Fun4All_G4_sPHENIX(
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0); 
-
-  // unique seed
-  int uniqueseed = TRandom3(0).GetSeed();
+  // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
-  rc->set_IntFlag("RANDOMSEED", uniqueseed);
+  // By default every random number generator uses
+  // PHRandomSeed() which reads /dev/urandom to get its seed
+  // if the RANDOMSEED flag is set its value is taken as seed
+  // You ca neither set this to a random value using PHRandomSeed()
+  // which will make all seeds identical (not sure what the point of
+  // this would be:
+  //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
+  // or set it to a fixed value so you can debug your code
+  // rc->set_IntFlag("RANDOMSEED", 12345);
 
   //-----------------
   // Event generation
@@ -139,7 +145,6 @@ int Fun4All_G4_sPHENIX(
       gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
       gen->set_pt_range(0.1, 10.0);
       gen->Embed(1);
-      gen->set_seed(uniqueseed);
       gen->Verbosity(0);
       se->registerSubsystem(gen);
     }
