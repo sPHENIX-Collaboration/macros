@@ -2,7 +2,7 @@
 // with what is used in this macro
 Min_si_layer = 0;
 Max_si_layer = 6;
- 
+
 void SvtxInit(int verbosity = 0)
 {
   Min_si_layer = 0;
@@ -93,7 +93,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     }
   radius += support_thickness[Max_si_layer] + no_overlapp;
 
-  if (verbosity >=0) {
+  if (verbosity > 0) {
     cout << "============================ G4_Svtx.C::Svtx() ============================" << endl;
     cout << " CVS Version: $Id: G4_Svtx.C,v 1.31 2015/04/06 22:32:44 mccumber Exp $" << endl;
     cout << " SVTX Material Description:" << endl;
