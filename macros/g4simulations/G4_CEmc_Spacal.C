@@ -441,10 +441,9 @@ void CEMC_Eval(std::string outputfile, int verbosity = 0) {
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4eval.so");
   Fun4AllServer *se = Fun4AllServer::instance();
-    
-  PHG4CalEvaluator* eval = new PHG4CalEvaluator("PHG4CEMCEVALUATOR", outputfile.c_str());
-  eval->Verbosity(0);
-  eval->Detector("CEMC");
+
+  CaloEvaluator* eval = new CaloEvaluator("CEMCEVALUATOR", "CEMC", outputfile.c_str());
+  eval->Verbosity(verbosity);
   se->registerSubsystem( eval );
       
   return;

@@ -97,10 +97,9 @@ void HCALOuter_Eval(std::string outputfile, int verbosity = 0) {
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4eval.so");
   Fun4AllServer *se = Fun4AllServer::instance();
-  
-  PHG4CalEvaluator* eval = new PHG4CalEvaluator("PHG4HCALOUTEVALUATOR", outputfile.c_str());
+
+  CaloEvaluator* eval = new CaloEvaluator("HCALOUTEVALUATOR", "HCALOUT", outputfile.c_str());
   eval->Verbosity(verbosity);
-  eval->Detector("HCALOUT");
   se->registerSubsystem( eval );
   
   return;

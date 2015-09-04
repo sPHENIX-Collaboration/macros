@@ -327,8 +327,8 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   //----------------
   // SVTX evaluation
   //----------------
-  // needs updates to put new nodes under SVTX_EVAL area
-  SubsysReco* eval = new PHG4Evaluator("PHG4EVALUATOR", outputfile.c_str());
+
+  SubsysReco* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
   eval->Verbosity(verbosity);
   se->registerSubsystem( eval );
 

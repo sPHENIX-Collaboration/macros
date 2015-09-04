@@ -144,9 +144,8 @@ void HCALInner_Eval(std::string outputfile, int verbosity = 0) {
   gSystem->Load("libg4eval.so");
   Fun4AllServer *se = Fun4AllServer::instance();
     
-  PHG4CalEvaluator* eval = new PHG4CalEvaluator("PHG4HCALINEVALUATOR", outputfile.c_str());
+  CaloEvaluator* eval = new CaloEvaluator("HCALINEVALUATOR", "HCALIN", outputfile.c_str());
   eval->Verbosity(verbosity);
-  eval->Detector("HCALIN");
   se->registerSubsystem( eval );
       
   return;
