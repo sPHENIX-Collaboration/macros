@@ -2,7 +2,7 @@
 // with what is used in this macro
 Min_si_layer = 0;
 Max_si_layer = 6;
- 
+
 void SvtxInit(int verbosity = 0)
 {
   Min_si_layer = 0;
