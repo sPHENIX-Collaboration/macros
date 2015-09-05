@@ -57,9 +57,8 @@ double Magnet(PHG4Reco* g4Reco,
 
   radius = magnet_outer_cryostat_wall_radius + magnet_outer_cryostat_wall_thickness; // outside of magnet
   
-  if (verbosity >= 0) {
+  if (verbosity > 0) {
     cout << "========================= G4_Magnet.C::Magnet() ===========================" << endl;
-    cout << " CVS Version: $Id: G4_Magnet.C,v 1.1 2015/04/14 23:19:09 mccumber Exp $" << endl;
     cout << " MAGNET Material Description:" << endl;
     cout << "  inner radius = " << magnet_inner_cryostat_wall_radius << " cm" << endl;
     cout << "  outer radius = " << magnet_outer_cryostat_wall_radius + magnet_outer_cryostat_wall_thickness << " cm" << endl;

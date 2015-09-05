@@ -45,7 +45,7 @@ double HCalInner(PHG4Reco* g4Reco,
 
   HCalInner_SupportRing(g4Reco,absorberactive);
   
-  if (verbosity >= 0) {
+  if (verbosity > 0) {
     cout << "==================== G4_HcalIn_ref.C::HCalInner() =========================" << endl;
     cout << " HCALIN Material Description:" << endl;
     cout << "  inner radius = " << hcal->GetInnerRadius() << " cm" << endl;

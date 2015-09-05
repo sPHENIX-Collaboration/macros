@@ -37,9 +37,8 @@ double HCalOuter(PHG4Reco* g4Reco,
 
   radius = outer_hcal_outer_radius;
   
-  if (verbosity >= 0) {
+  if (verbosity > 0) {
     cout << "==================== G4_HcalOut_ref.C::HCalOuter() ========================" << endl;
-    cout << " CVS Version: $Id: G4_HcalOut_ref.C,v 1.2 2015/04/14 23:19:30 mccumber Exp $" << endl;
     cout << " HCALOUT Material Description:" << endl;
     cout << "  outer radius = " << outer_hcal_outer_radius << " cm" << endl;
     cout << "===========================================================================" << endl;
