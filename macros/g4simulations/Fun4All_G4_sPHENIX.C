@@ -50,13 +50,13 @@ int Fun4All_G4_sPHENIX(
   bool do_cemc_cell = true;
   bool do_cemc_twr = true;
   bool do_cemc_cluster = true;
-  bool do_cemc_eval = false;//true;
+  bool do_cemc_eval = true;
 
   bool do_hcalin = true;
   bool do_hcalin_cell = true;
   bool do_hcalin_twr = true;
   bool do_hcalin_cluster = true;
-  bool do_hcalin_eval = false;//true;
+  bool do_hcalin_eval = true;
 
   bool do_magnet = true;
   
@@ -64,13 +64,13 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_cell = true;
   bool do_hcalout_twr = true;
   bool do_hcalout_cluster = true;
-  bool do_hcalout_eval = false;//true;
+  bool do_hcalout_eval = true;
   
   bool do_global = true;
   bool do_global_fastsim = false;
   
-  bool do_jet_reco = false;
-  bool do_jet_eval = false;
+  bool do_jet_reco = true;
+  bool do_jet_eval = true;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = false;
