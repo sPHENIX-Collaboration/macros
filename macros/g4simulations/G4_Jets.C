@@ -72,7 +72,19 @@ void Jet_Reco(int verbosity = 0) {
   return; 
 }
 
-void Jet_Eval(std::string outfilename = "g4jets_eval.root") {
+void Jet_Eval(std::string outfilename = "g4jets_eval.root",
+	      int verbosity = 0) {
 
+  gSystem->Load("libg4eval.so");
+  
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  JetEvaluator* eval = new JetEvaluator("JETEVALUATOR",
+   					"AntiKt_Tower_r0.3",
+   					"AntiKt_Truth_r0.3",
+   					outfilename);
+  eval->Verbosity(verbosity);
+  se->registerSubsystem(eval);
+  
   return;
 }
