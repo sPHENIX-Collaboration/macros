@@ -101,11 +101,10 @@ void HCALInner_Cells(int verbosity = 0) {
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  PHG4SlatCellReco *hcal_slats = new PHG4SlatCellReco("HCALSLATCELLRECO");
-  hcal_slats->Detector("HCALIN");
-  hcal_slats->Verbosity(verbosity);
-  hcal_slats->etasize_nslat(Min_hcal_in_layer, 0.1, 5);
-  se->registerSubsystem(hcal_slats);
+  PHG4HcalCellReco *hc = new PHG4HcalCellReco();
+  hc->Detector("HCALIN");
+  hc->etasize_nslat(0, 0, 5);
+  se->registerSubsystem(hc);
   
   return;  
 }
