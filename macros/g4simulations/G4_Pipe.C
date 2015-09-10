@@ -30,7 +30,7 @@ double Pipe(PHG4Reco* g4Reco,
 
   radius = pipe_radius + pipe_thickness;
   
-  if (verbosity >= 0) {
+  if (verbosity > 0) {
     cout << "=========================== G4_Pipe.C::Pipe() =============================" << endl;
     cout << " PIPE Material Description:" << endl;
     cout << "  inner radius = " << pipe_radius << " cm" << endl;

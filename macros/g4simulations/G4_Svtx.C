@@ -2,7 +2,7 @@
 // with what is used in this macro
 Min_si_layer = 0;
 Max_si_layer = 6;
- 
+
 void SvtxInit(int verbosity = 0)
 {
   Min_si_layer = 0;
@@ -93,9 +93,8 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     }
   radius += support_thickness[Max_si_layer] + no_overlapp;
 
-  if (verbosity >=0) {
+  if (verbosity > 0) {
     cout << "============================ G4_Svtx.C::Svtx() ============================" << endl;
-    cout << " CVS Version: $Id: G4_Svtx.C,v 1.31 2015/04/06 22:32:44 mccumber Exp $" << endl;
     cout << " SVTX Material Description:" << endl;
     for (int ilayer = Min_si_layer; ilayer <= Max_si_layer; ilayer++) {
       cout << "  layer " << ilayer
@@ -246,7 +245,7 @@ void Svtx_Reco(int verbosity = 0)
   hough->set_material(4, 0.010);
   hough->set_material(5, 0.010);
   hough->set_material(6, 0.020);
-  hough->setPtRescaleFactor(1.0156);
+  hough->setPtRescaleFactor(0.995288);
   hough->set_chi2_cut_init(3.0);
   hough->set_chi2_cut_full(3.0);
   hough->set_ca_chi2_cut(3.0);
@@ -327,8 +326,8 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   //----------------
   // SVTX evaluation
   //----------------
-  // needs updates to put new nodes under SVTX_EVAL area
-  SubsysReco* eval = new PHG4Evaluator("PHG4EVALUATOR", outputfile.c_str());
+
+  SubsysReco* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
   eval->Verbosity(verbosity);
   se->registerSubsystem( eval );
 

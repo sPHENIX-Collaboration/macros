@@ -9,7 +9,6 @@ int Max_preshower_layer = -1;
 int Min_si_layer = -1;
 int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
-int Cemc_spacal_configuration = -1;
 
 int Fun4All_G4_sPHENIX(
 		       const int nEvents = 10,
@@ -40,6 +39,8 @@ int Fun4All_G4_sPHENIX(
   // What to run
   //======================
 
+  bool do_bbc = true;
+  
   bool do_pipe = true;
   
   bool do_svtx = true;
@@ -53,13 +54,13 @@ int Fun4All_G4_sPHENIX(
   bool do_cemc_cell = true;
   bool do_cemc_twr = true;
   bool do_cemc_cluster = true;
-  bool do_cemc_eval = false;//true;
+  bool do_cemc_eval = true;
 
   bool do_hcalin = true;
   bool do_hcalin_cell = true;
   bool do_hcalin_twr = true;
   bool do_hcalin_cluster = true;
-  bool do_hcalin_eval = false;//true;
+  bool do_hcalin_eval = true;
 
   bool do_magnet = true;
   
@@ -67,10 +68,13 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_cell = true;
   bool do_hcalout_twr = true;
   bool do_hcalout_cluster = true;
-  bool do_hcalout_eval = false;//true;
-
-  bool do_jet_reco = false;
-  bool do_jet_eval = false;
+  bool do_hcalout_eval = true;
+  
+  bool do_global = true;
+  bool do_global_fastsim = false;
+  
+  bool do_jet_reco = true;
+  bool do_jet_eval = true;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = true;
@@ -88,11 +92,7 @@ int Fun4All_G4_sPHENIX(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
-  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe);
-
-  // SPACAL configuration
-//  Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal; //1D azimuthal projective SPACAL, also macro default
-  Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal; //2D full projective SPACAL
+  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_bbc);
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
 
@@ -102,23 +102,20 @@ int Fun4All_G4_sPHENIX(
   //---------------
   // Fun4All server
   //---------------
-  // Test for Jprof "request"
-  const char* jprof_flags = gSystem->Getenv("JPROF_FLAGS");
-  if ( jprof_flags )
-    {
-      std::cout << "Loading JProf" << std::endl;
-      gSystem->Load("libjprof");
-      //prof* p = new prof();
-    }
-
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0);
-
-  // unique seed
-  int uniqueseed = TRandom3(0).GetSeed();
+  se->Verbosity(0); 
+  // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
-  rc->set_IntFlag("RANDOMSEED", uniqueseed);
+  // By default every random number generator uses
+  // PHRandomSeed() which reads /dev/urandom to get its seed
+  // if the RANDOMSEED flag is set its value is taken as seed
+  // You ca neither set this to a random value using PHRandomSeed()
+  // which will make all seeds identical (not sure what the point of
+  // this would be:
+  //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
+  // or set it to a fixed value so you can debug your code
+  // rc->set_IntFlag("RANDOMSEED", 12345);
 
   //-----------------
   // Event generation
@@ -155,13 +152,11 @@ int Fun4All_G4_sPHENIX(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
-      gen->set_eta_range(-1, 1);
-//      gen->set_phi_range(-TMath::Pi(), 1.0*TMath::Pi());
-      gen->set_phi_range(0, TMath::Pi()*2);
-      gen->set_pt_range(10, 10);
-      gen->set_embedflag(1);
-      gen->set_seed(uniqueseed);
-      gen->set_verbosity(0);
+      gen->set_eta_range(-0.5, 0.5);
+      gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
+      gen->set_pt_range(0.1, 10.0);
+      gen->Embed(1);
+      gen->Verbosity(0);
       se->registerSubsystem(gen);
     }
 
@@ -172,9 +167,15 @@ int Fun4All_G4_sPHENIX(
       //---------------------
 
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe);
+	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_bbc);
     }
 
+  //---------
+  // BBC Reco
+  //---------
+  
+  if (do_bbc) Bbc_Reco();
+  
   //------------------
   // Detector Division
   //------------------
@@ -210,6 +211,13 @@ int Fun4All_G4_sPHENIX(
 
   if (do_svtx_track) Svtx_Reco();
 
+  //-----------------
+  // Global Vertexing
+  //-----------------
+
+  if (do_global) Global_Reco();
+  else if (do_global_fastsim) Global_FastSim();
+  
   //---------
   // Jet reco
   //---------

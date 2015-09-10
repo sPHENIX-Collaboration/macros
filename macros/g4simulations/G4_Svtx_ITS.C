@@ -101,7 +101,7 @@ double Svtx(PHG4Reco* g4Reco,
     }
   radius += support_thickness[Max_si_layer] + no_overlapp;
 
-  if (verbosity >=0) {
+  if (verbosity > 0) {
     cout << "========================== G4_Svtx_ITS.C::Svtx() ==========================" << endl;
     cout << " SVTX Material Description: " << endl;
     for (int ilayer = Min_si_layer; ilayer <= Max_si_layer; ilayer++) {
@@ -238,7 +238,7 @@ void Svtx_Reco(int verbosity = 0)
   hough->set_material(4, 0.008);
   hough->set_material(5, 0.008);
   hough->set_material(6, 0.008);
-  hough->setPtRescaleFactor(1.0156);
+  hough->setPtRescaleFactor(0.995288);
   hough->set_chi2_cut_init(5.0);
   //hough->set_chi2_cut_fast(60.0,0.0,100.0); // 10.0, 50.0, 75.0
   hough->set_chi2_cut_fast(10.0,50.0,75.0); // 10.0, 50.0, 75.0

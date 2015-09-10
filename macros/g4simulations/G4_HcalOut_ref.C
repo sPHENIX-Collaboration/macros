@@ -37,9 +37,8 @@ double HCalOuter(PHG4Reco* g4Reco,
 
   radius = outer_hcal_outer_radius;
   
-  if (verbosity >= 0) {
+  if (verbosity > 0) {
     cout << "==================== G4_HcalOut_ref.C::HCalOuter() ========================" << endl;
-    cout << " CVS Version: $Id: G4_HcalOut_ref.C,v 1.2 2015/04/14 23:19:30 mccumber Exp $" << endl;
     cout << " HCALOUT Material Description:" << endl;
     cout << "  outer radius = " << outer_hcal_outer_radius << " cm" << endl;
     cout << "===========================================================================" << endl;
@@ -97,10 +96,9 @@ void HCALOuter_Eval(std::string outputfile, int verbosity = 0) {
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4eval.so");
   Fun4AllServer *se = Fun4AllServer::instance();
-  
-  PHG4CalEvaluator* eval = new PHG4CalEvaluator("PHG4HCALOUTEVALUATOR", outputfile.c_str());
+
+  CaloEvaluator* eval = new CaloEvaluator("HCALOUTEVALUATOR", "HCALOUT", outputfile.c_str());
   eval->Verbosity(verbosity);
-  eval->Detector("HCALOUT");
   se->registerSubsystem( eval );
   
   return;

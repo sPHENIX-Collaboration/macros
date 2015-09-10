@@ -1,7 +1,7 @@
 // these are defined in the Fun4All macro, here we just override the values
 // with what is used in this macro
-Min_hcal_in_layer = 1;
-Max_hcal_in_layer = 1;
+Min_hcal_in_layer = 0;
+Max_hcal_in_layer = 0;
 
 void HCalInnerInit() {
   Min_hcal_in_layer = 0;
@@ -45,7 +45,7 @@ double HCalInner(PHG4Reco* g4Reco,
 
   HCalInner_SupportRing(g4Reco,absorberactive);
   
-  if (verbosity >= 0) {
+  if (verbosity > 0) {
     cout << "==================== G4_HcalIn_ref.C::HCalInner() =========================" << endl;
     cout << " HCALIN Material Description:" << endl;
     cout << "  inner radius = " << hcal->GetInnerRadius() << " cm" << endl;
@@ -78,13 +78,13 @@ void HCalInner_SupportRing(PHG4Reco* g4Reco,
 
   for (int i = 0; i < 4; i++)
     {
-      cyl = new PHG4CylinderSubsystem("HCALIN_SPT_N1", 0);
+      cyl = new PHG4CylinderSubsystem("HCALIN_SPT_N1", i);
       cyl->SetPosition(0, 0, z_rings[i]);
       cyl->SuperDetector("HCALIN_SPT");
       cyl->SetRadius(innerradius);
       cyl->SetLengthViaRapidityCoverage(false);
       cyl->SetLength(dz);
-      cyl->SetMaterial("G4_Fe"); // use 1 radiation length Al for magnet thickness
+      cyl->SetMaterial("SS310");
       cyl->SetThickness(maxradius - innerradius);
       if (absorberactive)
         cyl->SetActive();
@@ -101,11 +101,10 @@ void HCALInner_Cells(int verbosity = 0) {
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  PHG4SlatCellReco *hcal_slats = new PHG4SlatCellReco("HCALSLATCELLRECO");
-  hcal_slats->Detector("HCALIN");
-  hcal_slats->Verbosity(verbosity);
-  hcal_slats->etasize_nslat(Min_hcal_in_layer, 0.1, 6);
-  se->registerSubsystem(hcal_slats);
+  PHG4HcalCellReco *hc = new PHG4HcalCellReco();
+  hc->Detector("HCALIN");
+  hc->etasize_nslat(0, 0, 5);
+  se->registerSubsystem(hc);
   
   return;  
 }
@@ -144,9 +143,8 @@ void HCALInner_Eval(std::string outputfile, int verbosity = 0) {
   gSystem->Load("libg4eval.so");
   Fun4AllServer *se = Fun4AllServer::instance();
     
-  PHG4CalEvaluator* eval = new PHG4CalEvaluator("PHG4HCALINEVALUATOR", outputfile.c_str());
+  CaloEvaluator* eval = new CaloEvaluator("HCALINEVALUATOR", "HCALIN", outputfile.c_str());
   eval->Verbosity(verbosity);
-  eval->Detector("HCALIN");
   se->registerSubsystem( eval );
       
   return;
