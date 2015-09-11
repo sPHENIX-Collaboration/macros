@@ -11,8 +11,8 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_sPHENIX(
-		       const int nEvents = 10,
-		       const char * inputFile = "G4sPHENIXCells_2DSpacal_100e10GeV.root"
+		       const int nEvents = 1,
+		       const char * inputFile = "./G4Hits_sPHENIX_e-_eta0_8GeV.root"
 		       )
 {
 
@@ -192,7 +192,7 @@ int Fun4All_G4_sPHENIX(
   // CEMC towering and clustering
   //-----------------------------
 
-  if (do_cemc_twr) CEMC_Towers();
+  if (do_cemc_twr) CEMC_Towers(5);
   if (do_cemc_cluster) CEMC_Clusters();
 
   //-----------------------------
