@@ -418,7 +418,18 @@ void CEMC_Towers(int verbosity = 5) {
   TowerBuilder->Detector("CEMC");
   TowerBuilder->Verbosity(verbosity);
   se->registerSubsystem( TowerBuilder );
-      
+
+  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerBuilder");
+  TowerDigitizer->Detector("CEMC");
+  TowerDigitizer->Verbosity(verbosity);
+  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::ksimple_photon_digitalization);
+  TowerDigitizer->set_pedstal_central_ADC(0);
+  TowerDigitizer->set_pedstal_width_ADC(8);// eRD1 test beam setting
+  TowerDigitizer->set_photonelec_ADC(1);//not simulating ADC discretization error
+  TowerDigitizer->set_photonelec_yield_visible_GeV( 500/0.022 );//500 photon per total GeV deposition
+  TowerDigitizer->set_zero_suppression_ADC(16); // eRD1 test beam setting
+  se->registerSubsystem( TowerDigitizer );
+
   return;
 }
 
