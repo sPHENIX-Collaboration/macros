@@ -95,6 +95,7 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
     {
       ana->AddTower("SIM_CEMC");
       ana->AddTower("RAW_CEMC");
+      ana->AddTower("CALIB_CEMC");
     }
   if (do_hcalin_twr)
     {
