@@ -99,11 +99,15 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
     }
   if (do_hcalin_twr)
     {
-      ana->AddTower("HCALIN");
+      ana->AddTower("SIM_HCALIN");
+      ana->AddTower("RAW_HCALIN");
+      ana->AddTower("CALIB_HCALIN");
     }
   if (do_hcalout_twr)
     {
-      ana->AddTower("HCALOUT");
+      ana->AddTower("SIM_HCALOUT");
+      ana->AddTower("RAW_HCALOUT");
+      ana->AddTower("CALIB_HCALOUT");
     }
 
   // Jets disabled for now
