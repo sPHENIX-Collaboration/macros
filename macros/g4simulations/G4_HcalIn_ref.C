@@ -119,7 +119,20 @@ void HCALInner_Towers(int verbosity = 0) {
   TowerBuilder->Detector("HCALIN");
   TowerBuilder->Verbosity(verbosity);
   se->registerSubsystem( TowerBuilder );
-      
+
+  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalInRawTowerDigitizer");
+  TowerDigitizer->Detector("HCALIN");
+  TowerDigitizer->Verbosity(verbosity);
+  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kNo_digitalization);
+  se->registerSubsystem( TowerDigitizer );
+
+  RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalInRawTowerCalibration");
+  TowerCalibration->Detector("HCALIN");
+  TowerCalibration->Verbosity(verbosity);
+  TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration->set_calib_const_GeV_ADC(1./0.067);// muon sampling fraction from Abhisek Sen, 2015 SBU simulation workfest
+  TowerCalibration->set_pedstal_ADC(0);
+  se->registerSubsystem( TowerCalibration );
   return;
 }
 
