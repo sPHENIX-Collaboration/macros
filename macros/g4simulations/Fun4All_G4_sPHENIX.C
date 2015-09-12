@@ -11,7 +11,7 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_sPHENIX(
-		       const int nEvents = 1,
+		       const int nEvents = 100,
 		       const char * inputFile = "./G4Hits_sPHENIX_e-_eta0_8GeV.root"
 		       )
 {
@@ -45,36 +45,36 @@ int Fun4All_G4_sPHENIX(
   
   bool do_svtx = true;
   bool do_svtx_cell = true;
-  bool do_svtx_track = true;
-  bool do_svtx_eval = true;
+  bool do_svtx_track = false;
+  bool do_svtx_eval = false;
 
   bool do_preshower = false;
   
   bool do_cemc = true;
   bool do_cemc_cell = true;
   bool do_cemc_twr = true;
-  bool do_cemc_cluster = true;
-  bool do_cemc_eval = true;
+  bool do_cemc_cluster = false;
+  bool do_cemc_eval = false;
 
   bool do_hcalin = true;
   bool do_hcalin_cell = true;
   bool do_hcalin_twr = true;
-  bool do_hcalin_cluster = true;
-  bool do_hcalin_eval = true;
+  bool do_hcalin_cluster = false;
+  bool do_hcalin_eval = false;
 
-  bool do_magnet = true;
+  bool do_magnet = false;
   
   bool do_hcalout = true;
   bool do_hcalout_cell = true;
   bool do_hcalout_twr = true;
-  bool do_hcalout_cluster = true;
-  bool do_hcalout_eval = true;
+  bool do_hcalout_cluster = false;
+  bool do_hcalout_eval = false;
   
-  bool do_global = true;
+  bool do_global = false;
   bool do_global_fastsim = false;
   
-  bool do_jet_reco = true;
-  bool do_jet_eval = true;
+  bool do_jet_reco = false;
+  bool do_jet_eval = false;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = true;
@@ -192,7 +192,7 @@ int Fun4All_G4_sPHENIX(
   // CEMC towering and clustering
   //-----------------------------
 
-  if (do_cemc_twr) CEMC_Towers(5);
+  if (do_cemc_twr) CEMC_Towers();
   if (do_cemc_cluster) CEMC_Clusters();
 
   //-----------------------------
