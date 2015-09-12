@@ -12,14 +12,10 @@ int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinati
 
 int Fun4All_G4_sPHENIX(
 		       const int nEvents = 10,
-		       const char * inputFile = "G4sPHENIXCells_2DSpacal_100e10GeV.root"
+		       const char * inputFile = "/phenix/sim02/phnxreco/sPHENIX/hijing_sims/output/G4sPHENIX-4fm-050-0199.root",
+		       const char * outputFile = "G4sPHENIXCells.root"
 		       )
 {
-
-  TString s_outputFile = inputFile;
-  s_outputFile += "_Ana.root";
-  const char * outputFile = s_outputFile.Data();
-
   //===============
   // Input options
   //===============
@@ -28,7 +24,7 @@ int Fun4All_G4_sPHENIX(
   // read previously generated g4-hits files, in this case it opens a DST and skips
   // the simulations step completely. The G4Setup macro is only loaded to get information
   // about the number of layers used for the cell reco code
-  const bool readhits = true;
+  const bool readhits = false;
   // Or:
   // read files in HepMC format (typically output from event generators like hijing or pythia)
   const bool readhepmc = false; // read HepMC files
@@ -77,7 +73,7 @@ int Fun4All_G4_sPHENIX(
   bool do_jet_eval = true;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  bool do_DSTReader = true;
+  bool do_DSTReader = false;
   //---------------
   // Load libraries
   //---------------
@@ -95,7 +91,6 @@ int Fun4All_G4_sPHENIX(
   G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_bbc);
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
-
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = "/phenix/upgrades/decadal/fieldmaps/sPHENIX.2d.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
 
@@ -137,9 +132,8 @@ int Fun4All_G4_sPHENIX(
     {
       // toss low multiplicity dummy events
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-//      gen->add_particles("pi-",1); // mu+,e+,proton,pi+,Upsilon
-      gen->add_particles(inputFile,1); // mu+,e+,proton,pi+,Upsilon
-//      gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
+      gen->add_particles("e-",5); // mu+,e+,proton,pi+,Upsilon
+      gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
       if (readhepmc) {
 	gen->set_reuse_existing_vertex(true);
 	gen->set_existing_vertex_offset_vector(0.0,0.0,0.0);
@@ -283,8 +277,8 @@ int Fun4All_G4_sPHENIX(
           );
     }
 
-   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
-   se->registerOutputManager(out);
+  // Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+  // se->registerOutputManager(out);
 
   //-----------------
   // Event processing
@@ -301,19 +295,13 @@ int Fun4All_G4_sPHENIX(
       return;
     }
 
-  gSystem->ListLibraries();
-
-//  se->Verbosity(10);
   se->run(nEvents);
-  se->dumpHistos(string(outputFile) + string("_hist.root"),"recreate");
 
   //-----
   // Exit
   //-----
-  gSystem->Exec("ps -o sid,ppid,pid,user,comm,vsize,rssize,time");
 
   se->End();
-
   std::cout << "All done" << std::endl;
   delete se;
   gSystem->Exit(0);
