@@ -30,7 +30,7 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
   const bool debug = false;
 
   //! save raw g4 hits
-  const bool save_g4_raw = true;
+  const bool save_g4_raw = false;
 
   // save a comprehensive  evaluation file
   PHG4DSTReader* ana = new PHG4DSTReader(
