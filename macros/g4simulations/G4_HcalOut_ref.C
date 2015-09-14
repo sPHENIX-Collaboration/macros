@@ -71,6 +71,7 @@ void HCALOuter_Towers(int verbosity = 0) {
   
   RawTowerBuilder* TowerBuilder = new RawTowerBuilder("HcalOutRawTowerBuilder");
   TowerBuilder->Detector("HCALOUT");
+  TowerBuilder->set_sim_tower_node_prefix("SIM");
   TowerBuilder->Verbosity(verbosity);
   se->registerSubsystem( TowerBuilder );
 
