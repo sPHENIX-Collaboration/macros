@@ -4,9 +4,9 @@ Min_cemc_layer = 1;
 Max_cemc_layer = 1;
 
   // set a default value for SPACAL configuration
-  // 1D azimuthal projective SPACAL (fast)
-int Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal; 
-  // 2D azimuthal projective SPACAL (slow)
+//  // 1D azimuthal projective SPACAL (fast)
+int Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal;
+//   2D azimuthal projective SPACAL (slow)
 // int Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal;
 
 #include <iostream>
@@ -416,9 +416,35 @@ void CEMC_Towers(int verbosity = 0) {
   
   RawTowerBuilder *TowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
   TowerBuilder->Detector("CEMC");
+  TowerBuilder->set_sim_tower_node_prefix("SIM");
+  if (Cemc_spacal_configuration
+      == PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal)
+    TowerBuilder->set_tower_energy_src(RawTowerBuilder::kEnergyDeposition);
   TowerBuilder->Verbosity(verbosity);
   se->registerSubsystem( TowerBuilder );
-      
+
+  static const double sampling_fraction = 0.02244;//from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.3/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
+  static const double photoelectron_per_GeV = 500;//500 photon per total GeV deposition
+
+  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
+  TowerDigitizer->Detector("CEMC");
+  TowerDigitizer->Verbosity(verbosity);
+  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitalization);
+  TowerDigitizer->set_pedstal_central_ADC(0);
+  TowerDigitizer->set_pedstal_width_ADC(8);// eRD1 test beam setting
+  TowerDigitizer->set_photonelec_ADC(1);//not simulating ADC discretization error
+  TowerDigitizer->set_photonelec_yield_visible_GeV( photoelectron_per_GeV/sampling_fraction );
+  TowerDigitizer->set_zero_suppression_ADC(16); // eRD1 test beam setting
+  se->registerSubsystem( TowerDigitizer );
+
+  RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
+  TowerCalibration->Detector("CEMC");
+  TowerCalibration->Verbosity(verbosity);
+  TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration->set_calib_const_GeV_ADC(1./photoelectron_per_GeV);
+  TowerCalibration->set_pedstal_ADC(0);
+  se->registerSubsystem( TowerCalibration );
+
   return;
 }
 
@@ -427,7 +453,7 @@ void CEMC_Clusters(int verbosity = 0) {
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
-  
+
   RawClusterBuilder* ClusterBuilder = new RawClusterBuilder("EmcRawClusterBuilder");
   ClusterBuilder->Detector("CEMC");
   ClusterBuilder->Verbosity(verbosity);

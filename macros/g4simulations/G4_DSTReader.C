@@ -92,14 +92,22 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
 
   ana->set_tower_zero_sup(1e-6);
   if (do_cemc_twr)
-    ana->AddTower("CEMC");
+    {
+      ana->AddTower("SIM_CEMC");
+      ana->AddTower("RAW_CEMC");
+      ana->AddTower("CALIB_CEMC");
+    }
   if (do_hcalin_twr)
     {
-      ana->AddTower("HCALIN");
+      ana->AddTower("SIM_HCALIN");
+      ana->AddTower("RAW_HCALIN");
+      ana->AddTower("CALIB_HCALIN");
     }
   if (do_hcalout_twr)
     {
-      ana->AddTower("HCALOUT");
+      ana->AddTower("SIM_HCALOUT");
+      ana->AddTower("RAW_HCALOUT");
+      ana->AddTower("CALIB_HCALOUT");
     }
 
   // Jets disabled for now
