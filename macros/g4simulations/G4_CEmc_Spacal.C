@@ -417,6 +417,9 @@ void CEMC_Towers(int verbosity = 0) {
   RawTowerBuilder *TowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
   TowerBuilder->Detector("CEMC");
   TowerBuilder->set_sim_tower_node_prefix("SIM");
+  if (Cemc_spacal_configuration
+      == PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal)
+    TowerBuilder->set_tower_energy_src(RawTowerBuilder::kEnergyDeposition);
   TowerBuilder->Verbosity(verbosity);
   se->registerSubsystem( TowerBuilder );
 
