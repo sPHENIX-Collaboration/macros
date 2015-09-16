@@ -50,7 +50,6 @@ double HCalInner(PHG4Reco* g4Reco,
     cout << " HCALIN Material Description:" << endl;
     cout << "  inner radius = " << hcal->GetInnerRadius() << " cm" << endl;
     cout << "  outer radius = " << hcal->GetOuterRadius() << " cm" << endl;
-    cout << "  tilt angle = " <<  hcal->GetTiltAngle() << endl;
     cout << "===========================================================================" << endl;
   }
 
