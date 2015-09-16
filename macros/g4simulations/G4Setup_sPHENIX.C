@@ -71,7 +71,8 @@ int G4Setup(const int absorberactive = 0,
 	    const bool do_magnet = true,
 	    const bool do_hcalout = true,
 	    const bool do_pipe = true,
-	    const bool do_bbc = true) {
+	    const bool do_bbc = true,
+	    const float magfield_rescale = 1.0) {
   
   //---------------
   // Load libraries
@@ -105,7 +106,8 @@ int G4Setup(const int absorberactive = 0,
   } else {
     g4Reco->set_field(fieldstrength); // use const soleniodal field
   }
-
+  g4Reco->set_field_rescale(magfield_rescale);
+  
   double radius = 0.;
 
   //----------------------------------------
