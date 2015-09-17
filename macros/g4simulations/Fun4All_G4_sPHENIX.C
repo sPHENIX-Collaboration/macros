@@ -30,6 +30,7 @@ int Fun4All_G4_sPHENIX(
   const bool readhepmc = false; // read HepMC files
   // Or:
   // Use particle generator
+  const bool runpythia = false;
 
   //======================
   // What to run
@@ -126,6 +127,18 @@ int Fun4All_G4_sPHENIX(
     {
       // this module is needed to read the HepMC records into our G4 sims
       // but only if you read HepMC input files
+      HepMCNodeReader *hr = new HepMCNodeReader();
+      se->registerSubsystem(hr);
+    }
+  else if (runpythia)
+    {
+      gSystem->Load("libPHPythia8.so");
+      
+      PHPythia8* pythia8 = new PHPythia8();
+      // see coresoftware/generators/PHPythia8 for example config
+      pythia8->set_config_file("phpythia8.cfg"); 
+      se->registerSubsystem(pythia8);
+
       HepMCNodeReader *hr = new HepMCNodeReader();
       se->registerSubsystem(hr);
     }
