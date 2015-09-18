@@ -35,6 +35,7 @@ int Fun4All_G4_sPHENIX(
   const bool readhepmc = false; // read HepMC files
   // Or:
   // Use particle generator
+  const bool runpythia = false;
 
   //======================
   // What to run
@@ -99,6 +100,7 @@ int Fun4All_G4_sPHENIX(
 
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = "/phenix/upgrades/decadal/fieldmaps/sPHENIX.2d.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
+  const float magfield_rescale = 1.0;
 
   //---------------
   // Fun4All server
@@ -131,6 +133,18 @@ int Fun4All_G4_sPHENIX(
     {
       // this module is needed to read the HepMC records into our G4 sims
       // but only if you read HepMC input files
+      HepMCNodeReader *hr = new HepMCNodeReader();
+      se->registerSubsystem(hr);
+    }
+  else if (runpythia)
+    {
+      gSystem->Load("libPHPythia8.so");
+      
+      PHPythia8* pythia8 = new PHPythia8();
+      // see coresoftware/generators/PHPythia8 for example config
+      pythia8->set_config_file("phpythia8.cfg"); 
+      se->registerSubsystem(pythia8);
+
       HepMCNodeReader *hr = new HepMCNodeReader();
       se->registerSubsystem(hr);
     }
@@ -168,7 +182,8 @@ int Fun4All_G4_sPHENIX(
       //---------------------
 
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_bbc);
+	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_bbc,
+	      magfield_rescale);
     }
 
   //---------
