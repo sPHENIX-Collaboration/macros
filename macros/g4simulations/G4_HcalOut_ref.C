@@ -29,6 +29,7 @@ double HCalOuter(PHG4Reco* g4Reco,
 
   PHG4OuterHcalSubsystem *outerhcal = new PHG4OuterHcalSubsystem("HCALOUT");
   outerhcal->SetActive();
+  outerhcal->SetTiltViaNcross(-4); 
   //outerhcal->SetLightCorrection(178.0,0.65,260.3,1.0);
   outerhcal->SuperDetector("HCALOUT");
   if (absorberactive)  outerhcal->SetAbsorberActive();
