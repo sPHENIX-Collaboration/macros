@@ -321,7 +321,7 @@ int Fun4All_G4_sPHENIX(
 
 //  se->Verbosity(10);
   se->run(nEvents);
-  se->dumpHistos(string(inputFile) + string("_hist.root"),"recreate");
+//  se->dumpHistos(string(inputFile) + string("_hist.root"),"recreate");
 
   //-----
   // Exit

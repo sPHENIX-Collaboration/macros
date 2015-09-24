@@ -127,7 +127,7 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
 
 
   gSystem->Load("libemcal_ana.so");
-  EMCalAna * emcal_ana = new EMCalAna();
+  EMCalAna * emcal_ana = new EMCalAna("EMCalAna","CEMC", string(outputFile) + string("_EMCalAna.root"));
   se->registerSubsystem(emcal_ana);
 
 
