@@ -5,9 +5,9 @@ Max_cemc_layer = 1;
 
   // set a default value for SPACAL configuration
 //  // 1D azimuthal projective SPACAL (fast)
-//int Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal;
+int Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal;
 //   2D azimuthal projective SPACAL (slow)
- int Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal;
+// int Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal;
 
 #include <iostream>
 
@@ -423,7 +423,8 @@ void CEMC_Towers(int verbosity = 0) {
   TowerBuilder->Verbosity(verbosity);
   se->registerSubsystem( TowerBuilder );
 
-  static const double sampling_fraction = 0.02244;//from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.3/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
+//  static const double sampling_fraction = 0.02244;//from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.3/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
+  static const double sampling_fraction = 0.02344;//from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
   static const double photoelectron_per_GeV = 500;//500 photon per total GeV deposition
 
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
