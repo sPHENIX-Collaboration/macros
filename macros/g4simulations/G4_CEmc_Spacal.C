@@ -431,7 +431,8 @@ void CEMC_Towers(int verbosity = 0) {
   else if (Cemc_spacal_configuration
       == PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal)
     {
-      sampling_fraction = 0.02244; //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.3/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
+//      sampling_fraction = 0.02244; //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.3/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
+      sampling_fraction = 2.36081e-02;//from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
     }
   else
     {
