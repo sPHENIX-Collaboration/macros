@@ -11,6 +11,7 @@ PHG4Reco * DisplayOn(const char *mac = "vis.mac")
   char cmd[100];
   Fun4AllServer *se = Fun4AllServer::instance();
   PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
+  g4->InitRun(se->topNode());
   sprintf(cmd, "/control/execute %s", mac);
   g4->ApplyCommand(cmd);
   return g4;
