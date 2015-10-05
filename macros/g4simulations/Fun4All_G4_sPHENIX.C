@@ -301,12 +301,14 @@ int Fun4All_G4_sPHENIX(
 
   gSystem->Load("libemcal_ana.so");
   EMCalAna * emcal_ana = new EMCalAna(
-      string(outputFile) + string("_EMCalAna.root"));
+      string(inputFile) + string("_EMCalAna.root"));
   se->registerSubsystem(emcal_ana);
 
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT",
       outputFile);
+  out->AddNode("Sync");
   out->AddNode("UpsilonPair");
+  out->AddNode("GlobalVertexMap");
   se->registerOutputManager(out);
 
   //-----------------
