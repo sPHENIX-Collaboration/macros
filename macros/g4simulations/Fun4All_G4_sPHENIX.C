@@ -299,8 +299,15 @@ int Fun4All_G4_sPHENIX(
           );
     }
 
-//   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
-//   se->registerOutputManager(out);
+  gSystem->Load("libemcal_ana.so");
+  EMCalAna * emcal_ana = new EMCalAna(
+      string(outputFile) + string("_EMCalAna.root"));
+  se->registerSubsystem(emcal_ana);
+
+  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT",
+      outputFile);
+  out->AddNode("UpsilonPair");
+  se->registerOutputManager(out);
 
   //-----------------
   // Event processing
