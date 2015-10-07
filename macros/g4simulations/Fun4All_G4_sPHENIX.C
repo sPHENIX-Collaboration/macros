@@ -11,9 +11,9 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_sPHENIX(
-		       const int nEvents = 5,
-		       const char * inputFile = "./G4Hits_sPHENIX_pi-_eta0_8GeV.root"
-//		           const char * inputFile ="./G4Hits_sPHENIX_pi-_eta0_32GeV.root"
+		       const int nEvents = 50,
+//		       const char * inputFile = "./G4Hits_sPHENIX_e-_eta0_2GeV.root"
+		           const char * inputFile ="./G4Hits_sPHENIX_pi-_eta0_32GeV.root"
 		       )
 {
 
@@ -302,12 +302,15 @@ int Fun4All_G4_sPHENIX(
   gSystem->Load("libemcal_ana.so");
   EMCalAna * emcal_ana = new EMCalAna(
       string(inputFile) + string("_EMCalAna.root"));
+  emcal_ana->set_flag(EMCalAna::kProcessTrk);
+//  emcal_ana->Verbosity(5);
   se->registerSubsystem(emcal_ana);
 
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT",
       outputFile);
   out->AddNode("Sync");
   out->AddNode("UpsilonPair");
+  out->AddNode("EMCalTrk");
   out->AddNode("GlobalVertexMap");
   se->registerOutputManager(out);
 
