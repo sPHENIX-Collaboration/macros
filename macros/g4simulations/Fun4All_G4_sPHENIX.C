@@ -13,7 +13,7 @@ int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinati
 int Fun4All_G4_sPHENIX(
 		       const int nEvents = 50,
 //		       const char * inputFile = "./G4Hits_sPHENIX_e-_eta0_2GeV.root"
-		           const char * inputFile ="./G4Hits_sPHENIX_pi-_eta0_32GeV.root"
+		           const char * inputFile ="G4sPHENIXCells.root"
 		       )
 {
 
