@@ -11,9 +11,9 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_sPHENIX(
-		       const int nEvents = 50,
+		       const int nEvents = 1,
 //		       const char * inputFile = "./G4Hits_sPHENIX_e-_eta0_2GeV.root"
-		           const char * inputFile ="G4sPHENIXCells.root"
+		           const char * inputFile ="../../sPHENIX_work/sHijing/embedd_eta0_4GeV/Sim1001_eneg.root"
 		       )
 {
 
