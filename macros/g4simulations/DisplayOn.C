@@ -27,4 +27,8 @@ void displaycmd()
   cout << " g4->ApplyCommand(\"/vis/viewer/set/viewpointThetaPhi 0 0\")" << endl;
   cout << "panTo:" << endl;
   cout << " g4->ApplyCommand(\"/vis/viewer/panTo 0 0 cm\")" << endl;
+  cout << "print to eps:" << endl;
+  cout << " g4->ApplyCommand(\"/vis/ogl/printEPS\")" << endl;
+  cout << "set background color:" << endl;
+  cout << " g4->ApplyCommand(\"/vis/viewer/set/background white\")" << endl;
 }
