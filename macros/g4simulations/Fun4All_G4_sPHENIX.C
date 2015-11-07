@@ -11,8 +11,8 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_sPHENIX(
-		       const int nEvents = 300000,
-		           const char * inputFile ="G4Hits_sPHENIX_pi-_eta0_24GeV.root"
+		       const int nEvents = 3,
+		           const char * inputFile ="./G4Hits_sPHENIX_anti_proton_eta0_8GeV-0000.root"
 		       )
 {
 
@@ -78,7 +78,7 @@ int Fun4All_G4_sPHENIX(
   bool do_jet_eval = false;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  bool do_DSTReader = true;
+  bool do_DSTReader = false;
   //---------------
   // Load libraries
   //---------------
