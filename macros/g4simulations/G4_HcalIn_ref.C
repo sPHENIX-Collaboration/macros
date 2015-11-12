@@ -42,18 +42,17 @@ double HCalInner(PHG4Reco* g4Reco,
   hcal->SuperDetector("HCALIN");
   if (absorberactive)  hcal->SetAbsorberActive();
   hcal->OverlapCheck(overlapcheck);
-  //hcal->SetLightCorrection(116.0,0.85,135.0,1.0); 
-  double innerradius = hcal->get_inner_radius();
+  double innerradius = hcal->GetParameters()->get_inner_radius()/10;
   if (radius > innerradius) {
     cout << "inconsistency: radius: " << radius 
-	 << " larger than HCALIN inner radius: " << innerradius/10
+	 << " larger than HCALIN inner radius: " << innerradius
 	 << " cm" << endl;
     gSystem->Exit(-1);
   }
 
   g4Reco->registerSubsystem( hcal );
 
-  radius = hcal->GetOuterRadius();
+  radius = hcal->GetParameters()->get_outer_radius()/10;
 
   HCalInner_SupportRing(g4Reco,absorberactive);
   
