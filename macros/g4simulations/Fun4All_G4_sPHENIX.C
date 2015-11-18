@@ -11,8 +11,8 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_sPHENIX(
-		       const int nEvents = 3,
-		           const char * inputFile ="./G4Hits_sPHENIX_anti_proton_eta0_8GeV-0000.root"
+		       const int nEvents = 100,
+		           const char * inputFile ="G4Hits_sPHENIX_pi-_eta0_8GeV-0000.root"
 		       )
 {
 
@@ -55,13 +55,13 @@ int Fun4All_G4_sPHENIX(
   bool do_cemc_cell = true;
   bool do_cemc_twr = true;
   bool do_cemc_cluster = true;
-  bool do_cemc_eval = false;
+  bool do_cemc_eval = true;
 
   bool do_hcalin = true;
   bool do_hcalin_cell = true;
   bool do_hcalin_twr = true;
   bool do_hcalin_cluster = true;
-  bool do_hcalin_eval = false;
+  bool do_hcalin_eval = true;
 
   bool do_magnet = true;
   
@@ -69,7 +69,7 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_cell = true;
   bool do_hcalout_twr = true;
   bool do_hcalout_cluster = true;
-  bool do_hcalout_eval = false;
+  bool do_hcalout_eval = true;
   
   bool do_global = true;
   bool do_global_fastsim = false;
@@ -78,7 +78,7 @@ int Fun4All_G4_sPHENIX(
   bool do_jet_eval = false;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  bool do_DSTReader = false;
+  bool do_DSTReader = true;
   //---------------
   // Load libraries
   //---------------
@@ -106,7 +106,7 @@ int Fun4All_G4_sPHENIX(
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0); 
+  se->Verbosity(0);
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
