@@ -11,15 +11,11 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_sPHENIX(
-		       const int nEvents = 100,
-		           const char * inputFile ="G4Hits_sPHENIX_pi-_eta0_8GeV-0000.root"
+		       const int nEvents = 10,
+		       const char * inputFile = "/gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal1d/fieldmap/G4Hits_sPHENIX_e-_eta0_16GeV.root",
+		       const char * outputFile = "G4sPHENIXCells.root"
 		       )
 {
-
-  TString s_outputFile = inputFile;
-  s_outputFile += "_Ana.root";
-  const char * outputFile = s_outputFile.Data();
-
   //===============
   // Input options
   //===============
@@ -28,7 +24,7 @@ int Fun4All_G4_sPHENIX(
   // read previously generated g4-hits files, in this case it opens a DST and skips
   // the simulations step completely. The G4Setup macro is only loaded to get information
   // about the number of layers used for the cell reco code
-  const bool readhits = true;
+  const bool readhits = false;
   // Or:
   // read files in HepMC format (typically output from event generators like hijing or pythia)
   const bool readhepmc = false; // read HepMC files
@@ -74,11 +70,11 @@ int Fun4All_G4_sPHENIX(
   bool do_global = true;
   bool do_global_fastsim = false;
   
-  bool do_jet_reco = false;
-  bool do_jet_eval = false;
+  bool do_jet_reco = true;
+  bool do_jet_eval = true;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  bool do_DSTReader = true;
+  bool do_DSTReader = false;
   //---------------
   // Load libraries
   //---------------
@@ -96,7 +92,6 @@ int Fun4All_G4_sPHENIX(
   G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_bbc);
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
-
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = "/phenix/upgrades/decadal/fieldmaps/sPHENIX.2d.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
   const float magfield_rescale = 1.0;
@@ -106,7 +101,7 @@ int Fun4All_G4_sPHENIX(
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0);
+  se->Verbosity(0); 
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
@@ -151,9 +146,8 @@ int Fun4All_G4_sPHENIX(
     {
       // toss low multiplicity dummy events
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-//      gen->add_particles("pi-",1); // mu+,e+,proton,pi+,Upsilon
-      gen->add_particles(inputFile,1); // mu+,e+,proton,pi+,Upsilon
-//      gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
+      gen->add_particles("e-",5); // mu+,e+,proton,pi+,Upsilon
+      gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
       if (readhepmc) {
 	gen->set_reuse_existing_vertex(true);
 	gen->set_existing_vertex_offset_vector(0.0,0.0,0.0);
@@ -243,15 +237,15 @@ int Fun4All_G4_sPHENIX(
   // Simulation evaluation
   //----------------------
 
-  if (do_svtx_eval) Svtx_Eval(string(inputFile) + "_g4svtx_eval.root");
+  if (do_svtx_eval) Svtx_Eval("g4svtx_eval.root");
 
-  if (do_cemc_eval) CEMC_Eval(string(inputFile) + "_g4cemc_eval.root");
+  if (do_cemc_eval) CEMC_Eval("g4cemc_eval.root");
 
-  if (do_hcalin_eval) HCALInner_Eval(string(inputFile) + "_g4hcalin_eval.root");
+  if (do_hcalin_eval) HCALInner_Eval("g4hcalin_eval.root");
 
-  if (do_hcalout_eval) HCALOuter_Eval(string(inputFile) + "_g4hcalout_eval.root");
+  if (do_hcalout_eval) HCALOuter_Eval("g4hcalout_eval.root");
 
-  if (do_jet_eval) Jet_Eval(string(inputFile) + "_g4jet_eval.root");
+  if (do_jet_eval) Jet_Eval("g4jet_eval.root");
 
   //-------------- 
   // IO management
@@ -283,7 +277,7 @@ int Fun4All_G4_sPHENIX(
       //Convert DST to human command readable TTree for quick poke around the outputs
       gROOT->LoadMacro("G4_DSTReader.C");
 
-      G4DSTreader( inputFile, //
+      G4DSTreader( outputFile, //
           /*int*/ absorberactive ,
           /*bool*/ do_svtx ,
           /*bool*/ do_preshower ,
@@ -298,20 +292,8 @@ int Fun4All_G4_sPHENIX(
           );
     }
 
-  gSystem->Load("libemcal_ana.so");
-  EMCalAna * emcal_ana = new EMCalAna(
-      string(inputFile) + string("_EMCalAna.root"));
-  emcal_ana->set_flag(EMCalAna::kProcessTrk);
-//  emcal_ana->Verbosity(5);
-  se->registerSubsystem(emcal_ana);
-
-  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT",
-      outputFile);
-  out->AddNode("Sync");
-  out->AddNode("UpsilonPair");
-  out->AddNode("EMCalTrk");
-  out->AddNode("GlobalVertexMap");
-  se->registerOutputManager(out);
+  // Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+  // se->registerOutputManager(out);
 
   //-----------------
   // Event processing
@@ -328,19 +310,13 @@ int Fun4All_G4_sPHENIX(
       return;
     }
 
-  gSystem->ListLibraries();
-
-//  se->Verbosity(10);
   se->run(nEvents);
-//  se->dumpHistos(string(inputFile) + string("_hist.root"),"recreate");
 
   //-----
   // Exit
   //-----
-  gSystem->Exec("ps -o sid,ppid,pid,user,comm,vsize,rssize,time");
 
   se->End();
-
   std::cout << "All done" << std::endl;
   delete se;
   gSystem->Exit(0);
