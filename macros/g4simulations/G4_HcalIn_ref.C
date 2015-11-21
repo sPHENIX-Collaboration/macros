@@ -21,35 +21,46 @@ double HCalInner(PHG4Reco* g4Reco,
   int ilayer = Min_hcal_in_layer;
   PHG4InnerHcalSubsystem *hcal;
   hcal = new PHG4InnerHcalSubsystem("HCALIN");
-  hcal->SetMaterial("SS310"); // SS310 stainless steel
-  // these are all the defaults
-  // hcal->SetGapWidth(0.85);
-  // hcal->SetScintiThickness(0.7);
-  // hcal->SetNumScintiPlates(5*64);
-  hcal->SetTiltViaNcross(4); 
+  // these are the parameters you can change with their defaults
+  // cemc->GetParameters()->set_material("SS310");
+  // cemc->GetParameters()->set_ncross(4);
+  // cemc->GetParameters()->set_n_scinti_plates(5 * 64);
+  // cemc->GetParameters()->set_n_scinti_tiles(12);
+  // cemc->GetParameters()->set_light_scint_model(1);
+  // cemc->GetParameters()->set_inner_radius(116);
+  // cemc->GetParameters()->set_outer_radius(136);
+  // cemc->GetParameters()->set_scinti_gap(0.85);
+  // cemc->GetParameters()->set_scinti_tile_thickness(0.7);
+  // cemc->GetParameters()->set_scinti_gap_neighbor(0.1);
+  // cemc->GetParameters()->SetLightCorrection(NAN,NAN,NAN,NAN);
+  // cemc->GetParameters()->set_place(0, 0, 0);
+  // cemc->GetParameters()->set_rot_x(0);
+  // cemc->GetParameters()->set_rot_y(0);
+  // cemc->GetParameters()->set_rot_z(0);
+
   hcal->SetActive();
   hcal->SuperDetector("HCALIN");
   if (absorberactive)  hcal->SetAbsorberActive();
   hcal->OverlapCheck(overlapcheck);
-  //hcal->SetLightCorrection(116.0,0.85,135.0,1.0); 
-  double innerradius = hcal->GetInnerRadius();
+  double innerradius = hcal->GetParameters()->get_inner_radius()/10;
   if (radius > innerradius) {
     cout << "inconsistency: radius: " << radius 
-	 << " larger than HCALIN inner radius: " << innerradius << endl;
+	 << " larger than HCALIN inner radius: " << innerradius
+	 << " cm" << endl;
     gSystem->Exit(-1);
   }
 
   g4Reco->registerSubsystem( hcal );
 
-  radius = hcal->GetOuterRadius();
+  radius = hcal->GetParameters()->get_outer_radius()/10;
 
   HCalInner_SupportRing(g4Reco,absorberactive);
   
   if (verbosity > 0) {
     cout << "==================== G4_HcalIn_ref.C::HCalInner() =========================" << endl;
     cout << " HCALIN Material Description:" << endl;
-    cout << "  inner radius = " << hcal->GetInnerRadius() << " cm" << endl;
-    cout << "  outer radius = " << hcal->GetOuterRadius() << " cm" << endl;
+    cout << "  inner radius = " << hcal->get_inner_radius()/10 << " cm" << endl;
+    cout << "  outer radius = " << hcal->get_outer_radius()/10 << " cm" << endl;
     cout << "===========================================================================" << endl;
   }
 
