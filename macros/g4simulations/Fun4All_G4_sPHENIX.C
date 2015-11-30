@@ -6,8 +6,6 @@ int Min_hcal_out_layer = -1;
 int Max_hcal_out_layer = -1;
 int Min_preshower_layer = -1;
 int Max_preshower_layer = -1;
-int Min_si_layer = -1;
-int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_sPHENIX(
@@ -350,16 +348,6 @@ int Get_Min_hcal_out_layer()
 int Get_Max_hcal_out_layer()
 {
   return Max_hcal_out_layer;
-}
-
-int Get_Min_si_layer()
-{
-  return Min_si_layer;
-}
-
-int Get_Max_si_layer()
-{
-  return Max_si_layer;
 }
 
 int Get_Min_preshower_layer()

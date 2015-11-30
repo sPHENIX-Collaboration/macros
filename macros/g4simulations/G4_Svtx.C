@@ -1,7 +1,7 @@
 // these are defined in the Fun4All macro, here we just override the values
 // with what is used in this macro
-Min_si_layer = 0;
-Max_si_layer = 6;
+int Min_si_layer = 0;
+int Max_si_layer = 6;
 
 void SvtxInit(int verbosity = 0)
 {
