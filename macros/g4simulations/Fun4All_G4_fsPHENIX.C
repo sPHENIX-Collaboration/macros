@@ -80,10 +80,12 @@ int Fun4All_G4_fsPHENIX(
   bool do_FEMC = true; 
   bool do_FEMC_cell = true; 
   bool do_FEMC_twr = true; 
+  bool do_FEMC_cluster = true; 
 
   bool do_FHCAL = true; 
   bool do_FHCAL_cell = true; 
   bool do_FHCAL_twr = true; 
+  bool do_FHCAL_cluster = true; 
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = false;
@@ -236,7 +238,9 @@ int Fun4All_G4_fsPHENIX(
 
   if (do_EEMC_twr) EEMC_Towers();
   if (do_FEMC_twr) FEMC_Towers();
+  if (do_FEMC_cluster) FEMC_Clusters();
   if (do_FHCAL_twr) FHCAL_Towers();
+  if (do_FHCAL_cluster) FHCAL_Clusters();
 
   //--------------
   // SVTX tracking

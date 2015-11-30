@@ -91,3 +91,17 @@ void FEMC_Towers(int verbosity = 0) {
   se->registerSubsystem( TowerCalibration_FEMC );
 
 }
+
+void FEMC_Clusters(int verbosity = 0) {
+
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libg4detectors.so");
+  Fun4AllServer *se = Fun4AllServer::instance();
+  
+  RawClusterBuilder* ClusterBuilder = new RawClusterBuilder("HcalOutRawClusterBuilder");
+  ClusterBuilder->Detector("FEMC");
+  ClusterBuilder->Verbosity(verbosity);
+  se->registerSubsystem( ClusterBuilder );
+  
+  return;
+}

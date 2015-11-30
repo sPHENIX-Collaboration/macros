@@ -104,3 +104,17 @@ void FHCAL_Towers(int verbosity = 0) {
 
 
 }
+
+void FHCAL_Clusters(int verbosity = 0) {
+
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libg4detectors.so");
+  Fun4AllServer *se = Fun4AllServer::instance();
+  
+  RawClusterBuilder* ClusterBuilder = new RawClusterBuilder("HcalOutRawClusterBuilder");
+  ClusterBuilder->Detector("FHCAL");
+  ClusterBuilder->Verbosity(verbosity);
+  se->registerSubsystem( ClusterBuilder );
+  
+  return;
+}
