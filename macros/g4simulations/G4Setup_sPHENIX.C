@@ -28,6 +28,8 @@ void G4Init(bool do_svtx = true,
   
   // load detector macros and execute Init() function
   gROOT->LoadMacro("G4_Svtx.C");           // default
+  //gROOT->LoadMacro("G4_Svtx_pixels+strips.C"); // testing
+  //gROOT->LoadMacro("G4_Svtx_maps+strips.C"); // testing
   //gROOT->LoadMacro("G4_Svtx_ladders.C"); // testing
   //gROOT->LoadMacro("G4_Svtx_ITS.C");     // testing
   if (do_svtx) SvtxInit();
