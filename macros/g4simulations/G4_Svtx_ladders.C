@@ -1,5 +1,5 @@
-// these are defined in the Fun4All macro, here we just override the values
-// with what is used in this macro
+// development macro for realistic outer strip ladder geometries
+
 int Min_si_layer = 0;
 int Max_si_layer = 6;
  

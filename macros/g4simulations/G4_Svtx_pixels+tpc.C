@@ -1,5 +1,4 @@
-// these are defined in the Fun4All macro, here we just override the values
-// with what is used in this macro
+
 int Min_si_layer = 0;
 int Max_si_layer = 6;
 
@@ -334,9 +333,16 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   // SVTX evaluation
   //----------------
 
-  SubsysReco* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
-  eval->Verbosity(verbosity);
-  se->registerSubsystem( eval );
+  // SubsysReco* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
+  // eval->do_cluster_eval(false);
+  // eval->do_g4hit_eval(false);
+  // eval->do_hit_eval(false);
+  // eval->do_gpoint_eval(false);
+  // eval->Verbosity(verbosity);
+  // se->registerSubsystem( eval );
 
+  MomentumEvaluator* eval = new MomentumEvaluator(ss.str(),0.1,0.2,62,2,56,10.,80.);
+  se->registerSubsystem( eval );
+  
   return;
 }

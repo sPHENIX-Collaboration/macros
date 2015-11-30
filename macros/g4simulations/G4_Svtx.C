@@ -1,5 +1,5 @@
-// these are defined in the Fun4All macro, here we just override the values
-// with what is used in this macro
+// reference SVTX macro used for MIE projections
+
 int Min_si_layer = 0;
 int Max_si_layer = 6;
 
