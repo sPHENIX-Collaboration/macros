@@ -8,11 +8,11 @@ double Pipe(PHG4Reco* g4Reco,
 
   double be_pipe_radius    = 2.16;   // 2.16 cm based on spec sheet
   double be_pipe_thickness = 0.0760; // 760 um based on spec sheet
-  double be_pipe_length    = 80.0;
+  double be_pipe_length    = 80.0;   // +/- 40 cm
 
-  double al_pipe_radius    = 2.16;   // same as be pipe
+  double al_pipe_radius    = 2.16;   // same as Be pipe
   double al_pipe_thickness = 0.1600; // 1.6 mm based on spec
-  double al_pipe_length    = 88.3;   // length
+  double al_pipe_length    = 88.3;   // extension beyond +/- 40 cm
   
   if (radius > be_pipe_radius) {
     cout << "inconsistency: radius: " << radius 
@@ -23,6 +23,7 @@ double Pipe(PHG4Reco* g4Reco,
   gSystem->Load("libg4detectors.so");
   gSystem->Load("libg4testbench.so");
 
+  // mid-rapidity beryillium pipe
   PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("BE_PIPE", 0);
   cyl->SetRadius(be_pipe_radius);
   cyl->SetLengthViaRapidityCoverage(false);
@@ -33,7 +34,8 @@ double Pipe(PHG4Reco* g4Reco,
   if (absorberactive)  cyl->SetActive();
   g4Reco->registerSubsystem( cyl );
 
-  PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("N_AL_PIPE", 1);
+  // north aluminum pipe
+  cyl = new PHG4CylinderSubsystem("N_AL_PIPE", 1);
   cyl->SetPosition(0.0,0.0,0.5*be_pipe_length+0.5*al_pipe_length);
   cyl->SetRadius(al_pipe_radius);
   cyl->SetLengthViaRapidityCoverage(false);
@@ -44,7 +46,8 @@ double Pipe(PHG4Reco* g4Reco,
   if (absorberactive)  cyl->SetActive();
   g4Reco->registerSubsystem( cyl );
 
-  PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("S_AL_PIPE", 2);
+  // south aluminum pipe
+  cyl = new PHG4CylinderSubsystem("S_AL_PIPE", 2);
   cyl->SetPosition(0.0,0.0,-0.5*be_pipe_length-0.5*al_pipe_length);
   cyl->SetRadius(al_pipe_radius);
   cyl->SetLengthViaRapidityCoverage(false);
