@@ -2,6 +2,8 @@
 int Min_si_layer = 0;
 int Max_si_layer = 62;
 
+int n_svx_layer = 2;
+
 void SvtxInit(int verbosity = 0)
 {
   Min_si_layer = 0;
@@ -35,53 +37,57 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   // 0 Pixels: 1.3% X_0  (0.214% sensor + 1.086% support) sensor = 200 mc Si, support = 154 mc Cu
   // 1 Pixels: 1.3% X_0  (0.214% sensor + 1.086% support) sensor = 200 mc Si, support = 154 mc Cu
   
-  int n_svx_layer = 2;
   double si_thickness[2] = {0.0200, 0.0200};
   double svxrad[2] = {svtx_inner_radius, 3.63};
   double support_thickness[2] = {0.0154, 0.0154};
   double length[2] = {20., 20.};
-  
+
   for (int ilayer=0;ilayer<n_svx_layer;++ilayer) {
     cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
-    radius = vtx_radius[ilayer];
+    radius = svxrad[ilayer];
     cyl->SetRadius(radius);
-    cyl->SetLength( svxrad[ilayer] );
+    cyl->SetLength( length[ilayer] );
     cyl->SetMaterial("G4_Si");
     cyl->SetThickness( si_thickness[ilayer] );
     cyl->SetActive();
     cyl->SuperDetector("SVTX");
     g4Reco->registerSubsystem( cyl );
     
-    radius += silicon_radiation_length * n_rad_length_vtx_silicon[ilayer] + no_overlapp;
+    radius += si_thickness[ilayer] + no_overlapp;
     
     cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", ilayer);
     cyl->SetRadius(radius);
-    cyl->SetLength(vtx_length[ilayer]);
+    cyl->SetLength( length[ilayer] );
     cyl->SetMaterial("G4_Cu");
     cyl->SetThickness( support_thickness[ilayer] );
     cyl->SuperDetector("SVTXSUPPORT");
     g4Reco->registerSubsystem( cyl );
   }
-	
-  double n_rad_length_cage = 1.0e-02;
-  double cage_length = 400.;
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", 3);
-  cyl->SetRadius(radius);
-  cyl->SetLength(cage_length);
-  cyl->SetMaterial("G4_Cu");
-  cyl->SetThickness( copper_radiation_length * n_rad_length_cage );
-  cyl->SuperDetector("SVTXSUPPORT");
-  g4Reco->registerSubsystem( cyl );
 
   // time projection chamber layers --------------------------------------------
 
   double inner_cage_radius = 30.;
   string tpcgas = "G4_Ar";
+
+  radius = inner_cage_radius;
+  
+  double n_rad_length_cage = 1.0e-02;
+  double cage_length = 400.;
+  double cage_thickness = 1.43 * n_rad_length_cage;
+  
+  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", 3);
+  cyl->SetRadius(radius);
+  cyl->SetLength(cage_length);
+  cyl->SetMaterial("G4_Cu");
+  cyl->SetThickness( cage_thickness ); // Cu X_0 = 1.43 cm
+  cyl->SuperDetector("SVTXSUPPORT");
+  g4Reco->registerSubsystem( cyl );
+
+  radius += cage_thickness;
   
   double outer_radius = 80.;
   int npoints = Max_si_layer - n_svx_layer;
-  double delta_radius =  ( outer_radius - inner_cage_radius )/( (double)npoints );
-  radius = inner_cage_radius + delta_radius;
+  double delta_radius =  ( outer_radius - cage_thickness - radius )/( (double)npoints );
   
   for(int ilayer=n_svx_layer;ilayer<(2+npoints);++ilayer) {
     cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
@@ -95,7 +101,17 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     
     radius += delta_radius;
   }
-	
+
+  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", 2+npoints);
+  cyl->SetRadius(radius);
+  cyl->SetLength(cage_length);
+  cyl->SetMaterial("G4_Cu");
+  cyl->SetThickness( cage_thickness ); // Cu X_0 = 1.43 cm
+  cyl->SuperDetector("SVTXSUPPORT");
+  g4Reco->registerSubsystem( cyl );
+
+  radius += cage_thickness;
+
   return radius;
 }
 
@@ -141,7 +157,7 @@ void Svtx_Cells(int verbosity = 0)
   svtx_cells->setElectronsPerKeV(electrons_per_kev);
   svtx_cells->Detector("SVTX");
   for (int i=0;i<n_svx_layer;++i) {
-    svtx_cells->cellsize(i, vtx_cell_x[i], vtx_cell_y[i]);
+    svtx_cells->cellsize(i, svxcellsizex[i], svxcellsizey[i]);
   }
   for (int i=n_svx_layer;i<62;++i) {
     svtx_cells->cellsize(i, tpc_cell_x, tpc_cell_y);
@@ -154,7 +170,6 @@ void Svtx_Cells(int verbosity = 0)
 
 void Svtx_Reco(int verbosity = 0)
 {
-
   //---------------
   // Load libraries
   //---------------
@@ -173,10 +188,10 @@ void Svtx_Reco(int verbosity = 0)
   //----------------------------------
   PHG4SvtxDigitizer* digi = new PHG4SvtxDigitizer();
   digi->Verbosity(0);
-  for (i=0;i<n_svx_layer;++i) {
+  for (int i=0;i<n_svx_layer;++i) {
     digi->set_adc_scale(i, 255, 1.0e-6);
   }
-  for (i=n_svx_layer;i<62;++i) {
+  for (int i=n_svx_layer;i<62;++i) {
     digi->set_adc_scale(i, 10000, 1.0e-1);
   }
   se->registerSubsystem( digi );
@@ -195,6 +210,9 @@ void Svtx_Reco(int verbosity = 0)
   //-----------------------------
   // Apply MIP thresholds to Hits
   //-----------------------------
+
+  /// \todo update the threshold module to default to pass through when not set
+
   //PHG4SvtxThresholds* thresholds = new PHG4SvtxThresholds();
   //thresholds->Verbosity(verbosity);
   //thresholds->set_threshold(0.33);
@@ -221,7 +239,7 @@ void Svtx_Reco(int verbosity = 0)
   hough->setBinScale(1.0);
   hough->setZBinScale(1.0);
 
-  hough->Verbosity(10);
+  hough->Verbosity(0);
   double mat_scale = 1.0;
   hough->set_material(0, mat_scale*0.013);
   hough->set_material(1, mat_scale*0.013);
@@ -296,7 +314,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   // eval->Verbosity(verbosity);
   // se->registerSubsystem( eval );
 
-  MomentumEvaluator* eval = new MomentumEvaluator(ss.str(),0.1,0.2,62,2,56,10.,80.);
+  MomentumEvaluator* eval = new MomentumEvaluator(outputfile.c_str(),0.1,0.2,62,2,56,10.,80.);
   se->registerSubsystem( eval );
   
   return;
