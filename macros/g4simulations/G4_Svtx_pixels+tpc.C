@@ -203,8 +203,8 @@ void Svtx_Reco(int verbosity = 0)
   
   PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
   deadarea->Verbosity(verbosity);
-  deadarea->set_hit_efficiency(0,0.92.5);
-  deadarea->set_hit_efficiency(1,0.72.5);
+  deadarea->set_hit_efficiency(0,0.925);
+  deadarea->set_hit_efficiency(1,0.725);
   se->registerSubsystem( deadarea );
 
   //-----------------------------
