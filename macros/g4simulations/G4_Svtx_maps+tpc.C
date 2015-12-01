@@ -231,6 +231,7 @@ void Svtx_Reco(int verbosity = 0)
   // Track reconstruction
   //---------------------
   PHG4HoughTransformTPC* hough = new PHG4HoughTransformTPC(63,56);
+  hough->set_mag_field(1.4);
   hough->set_use_vertex(true);
   hough->setRemoveHits(true);
   hough->setRejectGhosts(true);

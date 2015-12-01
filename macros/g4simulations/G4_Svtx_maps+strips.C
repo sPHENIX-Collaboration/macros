@@ -251,6 +251,7 @@ void Svtx_Reco(int verbosity = 0)
   // Track reconstruction
   //---------------------
   PHG4HoughTransform* hough = new PHG4HoughTransform(8,8);
+  hough->set_mag_field(1.4);
   hough->Verbosity(verbosity);
   hough->set_material(0, 0.003);
   hough->set_material(1, 0.003);
@@ -260,7 +261,7 @@ void Svtx_Reco(int verbosity = 0)
   hough->set_material(5, 0.006);
   hough->set_material(6, 0.006);
   hough->set_material(7, 0.010);
-  hough->setPtRescaleFactor(0.995288);
+  hough->setPtRescaleFactor(0.9972);
   hough->set_chi2_cut_init(3.0);
   hough->set_chi2_cut_full(3.0);
   hough->set_ca_chi2_cut(3.0);
