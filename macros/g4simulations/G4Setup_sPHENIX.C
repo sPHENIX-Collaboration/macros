@@ -1,11 +1,3 @@
-int Min_si_layer = 1;
-int Max_si_layer = 6;
-int Min_cemc_layer = 1;
-int Max_cemc_layer = 30;
-int Min_hcal_in_layer = 1;
-int Max_hcal_in_layer = 1;
-int Min_hcal_out_layer = 1;
-int Max_hcal_out_layer = 1;
 
 double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
 bool overlapcheck = false; // set to true if you want to check for overlaps
@@ -27,32 +19,30 @@ void G4Init(bool do_svtx = true,
   if (do_pipe) PipeInit();
   
   // load detector macros and execute Init() function
-  gROOT->LoadMacro("G4_Svtx.C");           // default
-  //gROOT->LoadMacro("G4_Svtx_ladders.C"); // testing
-  //gROOT->LoadMacro("G4_Svtx_ITS.C");     // testing
+  gROOT->LoadMacro("G4_Svtx.C");                 // default MIE projections
+  //gROOT->LoadMacro("G4_Svtx_pixels+strips.C"); // testing
+  //gROOT->LoadMacro("G4_Svtx_pixels+tpc.C");    // testing
+  //gROOT->LoadMacro("G4_Svtx_maps+strips.C");   // testing
+  //gROOT->LoadMacro("G4_Svtx_maps+tpc.C");      // testing
+  //gROOT->LoadMacro("G4_Svtx_ladders.C");       // testing
+  //gROOT->LoadMacro("G4_Svtx_ITS.C");           // testing
   if (do_svtx) SvtxInit();
 
   if (do_preshower) {
-    gROOT->LoadMacro("G4_PreShower.C");   // testing
+    gROOT->LoadMacro("G4_PreShower.C");
     PreShowerInit();
   }
 
-  gROOT->LoadMacro("G4_CEmc_Spacal.C");    //
-  //gROOT->LoadMacro("G4_CEmc_cross.C");   // obselete
-  //gROOT->LoadMacro("G4_CEmc_Alice.C");   // obselete
-  //gROOT->LoadMacro("G4_CEmc_Alice_W.C"); // obselete
-  if (do_cemc) CEmcInit(Cemc_slats_per_cell);
+  gROOT->LoadMacro("G4_CEmc_Spacal.C");
+  if (do_cemc) CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
 
-  //gROOT->LoadMacro("G4_Hcal_ref.C");     // deprecated
-  //gROOT->LoadMacro("G4_Hcal_cross.C");   // deprecated
-
-  gROOT->LoadMacro("G4_HcalIn_ref.C");       // default 
+  gROOT->LoadMacro("G4_HcalIn_ref.C");
   if (do_hcalin) HCalInnerInit();
 
   gROOT->LoadMacro("G4_Magnet.C");
   if (do_magnet) MagnetInit();
 
-  gROOT->LoadMacro("G4_HcalOut_ref.C");       // default 
+  gROOT->LoadMacro("G4_HcalOut_ref.C");
   if (do_hcalout) HCalOuterInit();
 
   gROOT->LoadMacro("G4_Global.C");
@@ -189,35 +179,3 @@ int G4Setup(const int absorberactive = 0,
   g4Reco->registerSubsystem(truth);
   se->registerSubsystem( g4Reco );
 }
-
-int Get_Min_si_layer()
-{
-  return Min_si_layer;
-}
-
-int Get_Max_si_layer()
-{
-  return Max_si_layer;
-}
-
-int Get_Min_cemc_layer()
-{
-  return Min_cemc_layer;
-}
-
-int Get_Max_cemc_layer()
-{
-  return Max_cemc_layer;
-}
-
-int Get_Min_hcal_layer()
-{
-  return Min_hcal_layer;
-}
-
-int Get_Max_hcal_layer()
-{
-  return Max_hcal_layer;
-}
-
-
