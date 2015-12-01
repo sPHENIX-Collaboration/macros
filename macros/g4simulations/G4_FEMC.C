@@ -98,7 +98,7 @@ void FEMC_Clusters(int verbosity = 0) {
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
   
-  RawClusterBuilder* ClusterBuilder = new RawClusterBuilder("HcalOutRawClusterBuilder");
+  RawClusterBuilderFwd* ClusterBuilder = new RawClusterBuilderFwd("FEMCRawClusterBuilderFwd");
   ClusterBuilder->Detector("FEMC");
   ClusterBuilder->Verbosity(verbosity);
   se->registerSubsystem( ClusterBuilder );
