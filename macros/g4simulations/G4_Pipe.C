@@ -36,7 +36,7 @@ double Pipe(PHG4Reco* g4Reco,
 
   // north aluminum pipe
   cyl = new PHG4CylinderSubsystem("N_AL_PIPE", 1);
-  cyl->SetPosition(0.0,0.0,0.5*be_pipe_length+0.5*al_pipe_length+nooverlapp);
+  cyl->SetPosition(0.0,0.0,0.5*be_pipe_length+0.5*al_pipe_length+no_overlapp);
   cyl->SetRadius(al_pipe_radius);
   cyl->SetLengthViaRapidityCoverage(false);
   cyl->SetLength(al_pipe_length);
@@ -48,7 +48,7 @@ double Pipe(PHG4Reco* g4Reco,
 
   // south aluminum pipe
   cyl = new PHG4CylinderSubsystem("S_AL_PIPE", 2);
-  cyl->SetPosition(0.0,0.0,-0.5*be_pipe_length-0.5*al_pipe_length-nooverlapp);
+  cyl->SetPosition(0.0,0.0,-0.5*be_pipe_length-0.5*al_pipe_length-no_overlapp);
   cyl->SetRadius(al_pipe_radius);
   cyl->SetLengthViaRapidityCoverage(false);
   cyl->SetLength(al_pipe_length);
