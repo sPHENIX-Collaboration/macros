@@ -213,13 +213,13 @@ void Svtx_Reco(int verbosity = 0)
   // Apply MIP thresholds to Hits
   //-----------------------------
 
-  /// \todo update the threshold module to default to pass through when not set
-
-  //PHG4SvtxThresholds* thresholds = new PHG4SvtxThresholds();
-  //thresholds->Verbosity(verbosity);
-  //thresholds->set_threshold(0.33);
-  //thresholds->set_use_thickness_mip(0, true);
-  //se->registerSubsystem( thresholds );
+  PHG4SvtxThresholds* thresholds = new PHG4SvtxThresholds();
+  thresholds->Verbosity(verbosity);
+  thresholds->set_threshold(0,0.33);
+  thresholds->set_threshold(1,0.33);
+  thresholds->set_threshold(2,0.33);
+  thresholds->set_use_thickness_mip(0, true);
+  se->registerSubsystem( thresholds );
 
   //-------------
   // Cluster Hits
