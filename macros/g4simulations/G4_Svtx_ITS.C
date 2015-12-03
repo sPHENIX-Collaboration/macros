@@ -213,7 +213,13 @@ void Svtx_Reco(int verbosity = 0)
   //----------------------------------
   PHG4SvtxThresholds* thresholds = new PHG4SvtxThresholds();
   thresholds->Verbosity(verbosity);
-  thresholds->set_threshold(0.25);
+  thresholds->set_threshold(0,0.25);
+  thresholds->set_threshold(1,0.25);
+  thresholds->set_threshold(2,0.25);
+  thresholds->set_threshold(3,0.25);
+  thresholds->set_threshold(4,0.25);
+  thresholds->set_threshold(5,0.25);
+  thresholds->set_threshold(6,0.25);
   //thresholds->set_use_thickness_mip(0, true);
   se->registerSubsystem( thresholds );
 
