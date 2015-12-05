@@ -1,7 +1,7 @@
-// these are defined in the Fun4All macro, here we just override the values
-// with what is used in this macro
-Min_si_layer = 0;
-Max_si_layer = 6;
+// reference SVTX macro used for MIE projections
+
+int Min_si_layer = 0;
+int Max_si_layer = 6;
 
 void SvtxInit(int verbosity = 0)
 {
@@ -209,7 +209,13 @@ void Svtx_Reco(int verbosity = 0)
   //-----------------------------
   PHG4SvtxThresholds* thresholds = new PHG4SvtxThresholds();
   thresholds->Verbosity(verbosity);
-  thresholds->set_threshold(0.33);
+  thresholds->set_threshold(0,0.33);
+  thresholds->set_threshold(1,0.33);
+  thresholds->set_threshold(2,0.33);
+  thresholds->set_threshold(3,0.33);
+  thresholds->set_threshold(4,0.33);
+  thresholds->set_threshold(5,0.33);
+  thresholds->set_threshold(6,0.33);
   thresholds->set_use_thickness_mip(0, true);
   se->registerSubsystem( thresholds );
 
@@ -238,6 +244,7 @@ void Svtx_Reco(int verbosity = 0)
   //---------------------
   PHG4HoughTransform* hough = new PHG4HoughTransform(7,7);
   hough->Verbosity(verbosity);
+  hough->set_mag_field(1.4);
   hough->set_material(0, 0.013);
   hough->set_material(1, 0.013);
   hough->set_material(2, 0.013);
@@ -245,7 +252,7 @@ void Svtx_Reco(int verbosity = 0)
   hough->set_material(4, 0.010);
   hough->set_material(5, 0.010);
   hough->set_material(6, 0.020);
-  hough->setPtRescaleFactor(0.995288);
+  hough->setPtRescaleFactor(0.9972);
   hough->set_chi2_cut_init(3.0);
   hough->set_chi2_cut_full(3.0);
   hough->set_ca_chi2_cut(3.0);

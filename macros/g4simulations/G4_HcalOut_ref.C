@@ -1,7 +1,6 @@
-// these are defined in the Fun4All macro, here we just override the values
-// with what is used in this macro
-Min_hcal_out_layer = 0;
-Max_hcal_out_layer = 0;
+
+int Min_hcal_out_layer = 0;
+int Max_hcal_out_layer = 0;
 
 void HCalOuterInit()
 {

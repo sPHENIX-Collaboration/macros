@@ -6,37 +6,67 @@ double Pipe(PHG4Reco* g4Reco,
 	    const int absorberactive = 0,
 	    int verbosity = 0) {
 
-  double pipe_radius    = 2.16;   // 2.16 cm based on spec sheet
-  double pipe_thickness = 0.0760; // 760 um based on spec sheet
-  double pipe_length = g4Reco->GetWorldSizeZ() - no_overlapp; // entire volume
-  if (radius > pipe_radius) {
+  double be_pipe_radius    = 2.16;   // 2.16 cm based on spec sheet
+  double be_pipe_thickness = 0.0760; // 760 um based on spec sheet
+  double be_pipe_length    = 80.0;   // +/- 40 cm
+
+  double al_pipe_radius    = 2.16;   // same as Be pipe
+  double al_pipe_thickness = 0.1600; // 1.6 mm based on spec
+  double al_pipe_length    = 88.3;   // extension beyond +/- 40 cm
+  
+  if (radius > be_pipe_radius) {
     cout << "inconsistency: radius: " << radius 
-	 << " larger than Pipe inner radius: " << pipe_radius << endl;
+	 << " larger than pipe inner radius: " << be_pipe_radius << endl;
     gSystem->Exit(-1);
   }
   
   gSystem->Load("libg4detectors.so");
   gSystem->Load("libg4testbench.so");
 
-  PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("PIPE", 0);
-  cyl->SetRadius(pipe_radius);
+  // mid-rapidity beryillium pipe
+  PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("BE_PIPE", 0);
+  cyl->SetRadius(be_pipe_radius);
   cyl->SetLengthViaRapidityCoverage(false);
-  cyl->SetLength(pipe_length);
+  cyl->SetLength(be_pipe_length);
   cyl->SetMaterial("G4_Be");
-  cyl->SetThickness(pipe_thickness);
+  cyl->SetThickness(be_pipe_thickness);
   cyl->SuperDetector("PIPE");
   if (absorberactive)  cyl->SetActive();
   g4Reco->registerSubsystem( cyl );
 
-  radius = pipe_radius + pipe_thickness;
+  // north aluminum pipe
+  cyl = new PHG4CylinderSubsystem("N_AL_PIPE", 1);
+  cyl->SetPosition(0.0,0.0,0.5*be_pipe_length+0.5*al_pipe_length+no_overlapp);
+  cyl->SetRadius(al_pipe_radius);
+  cyl->SetLengthViaRapidityCoverage(false);
+  cyl->SetLength(al_pipe_length);
+  cyl->SetMaterial("G4_Al");
+  cyl->SetThickness(al_pipe_thickness);
+  cyl->SuperDetector("PIPE");
+  if (absorberactive)  cyl->SetActive();
+  g4Reco->registerSubsystem( cyl );
+
+  // south aluminum pipe
+  cyl = new PHG4CylinderSubsystem("S_AL_PIPE", 2);
+  cyl->SetPosition(0.0,0.0,-0.5*be_pipe_length-0.5*al_pipe_length-no_overlapp);
+  cyl->SetRadius(al_pipe_radius);
+  cyl->SetLengthViaRapidityCoverage(false);
+  cyl->SetLength(al_pipe_length);
+  cyl->SetMaterial("G4_Al");
+  cyl->SetThickness(al_pipe_thickness);
+  cyl->SuperDetector("PIPE");
+  if (absorberactive)  cyl->SetActive();
+  g4Reco->registerSubsystem( cyl );
+
+  radius = be_pipe_radius + be_pipe_thickness;
   
   if (verbosity > 0) {
     cout << "=========================== G4_Pipe.C::Pipe() =============================" << endl;
     cout << " PIPE Material Description:" << endl;
-    cout << "  inner radius = " << pipe_radius << " cm" << endl;
-    cout << "  thickness = " << pipe_thickness << " cm" << endl;
-    cout << "  outer radius = " << pipe_radius + pipe_thickness << " cm" << endl;
-    cout << "  length = " << pipe_length << " cm" << endl;
+    cout << "  inner radius = " << be_pipe_radius << " cm" << endl;
+    cout << "  thickness = " << be_pipe_thickness << " cm" << endl;
+    cout << "  outer radius = " << be_pipe_radius + be_pipe_thickness << " cm" << endl;
+    cout << "  length = " << be_pipe_length << " cm" << endl;
     cout << "===========================================================================" << endl;
   }
 

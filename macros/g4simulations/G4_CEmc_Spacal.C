@@ -1,7 +1,6 @@
-// these are defined in the Fun4All macro, here we just override the values
-// with what is used in this macro
-Min_cemc_layer = 1;
-Max_cemc_layer = 1;
+
+int Min_cemc_layer = 1;
+int Max_cemc_layer = 1;
 
   // set a default value for SPACAL configuration
 //  // 1D azimuthal projective SPACAL (fast)
