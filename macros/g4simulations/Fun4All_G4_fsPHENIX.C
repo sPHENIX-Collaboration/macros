@@ -11,7 +11,7 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_fsPHENIX(
-		       const int nEvents = -1,
+		       const int nEvents = 10,
 		       const char * inputFile = "/gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal1d/fieldmap/G4Hits_sPHENIX_e-_eta0_16GeV.root",
 		       const char * outputFile = "G4fsPHENIX.root"
 		       )
@@ -70,8 +70,8 @@ int Fun4All_G4_fsPHENIX(
   bool do_global = true;
   bool do_global_fastsim = false;
   
-  bool do_jet_reco = false;
-  bool do_jet_eval = false; 
+  bool do_jet_reco = true;
+  bool do_jet_eval = true; 
 
   // ePHENIX/fsPHENIX geometry
   bool do_EEMC = false;
@@ -176,10 +176,10 @@ int Fun4All_G4_fsPHENIX(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
-      //gen->set_eta_range(-0.5, 0.5);
-      gen->set_eta_range(3, 3.0); //fsPHENIX FWD
-      //gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
-      gen->set_phi_range(TMath::Pi()/2-0.1, TMath::Pi()/2-0.1);
+      gen->set_eta_range(-1.4, 4.0);
+      //gen->set_eta_range(3, 3.0); //fsPHENIX FWD
+      gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
+      //gen->set_phi_range(TMath::Pi()/2-0.1, TMath::Pi()/2-0.1);
       gen->set_p_range(30, 30.0);
       gen->Embed(1);
       gen->Verbosity(0);
@@ -345,15 +345,6 @@ int Fun4All_G4_fsPHENIX(
     }
   else
     {
-      if (verbosity)
-        {
-          se->Verbosity(3);
-          PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
-          g4->Verbosity(3);
-          g4->ApplyCommand("/control/verbose 5");
-          g4->ApplyCommand("/run/verbose  5");
-          g4->ApplyCommand("/tracking/verbose 5");
-        }
 
       se->run(nEvents);
 
