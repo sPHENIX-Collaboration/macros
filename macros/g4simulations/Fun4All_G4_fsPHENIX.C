@@ -11,7 +11,7 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_fsPHENIX(
-		       const int nEvents = 10,
+		       const int nEvents = -1,
 		       const char * inputFile = "/gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal1d/fieldmap/G4Hits_sPHENIX_e-_eta0_16GeV.root",
 		       const char * outputFile = "G4fsPHENIX.root"
 		       )
@@ -41,37 +41,37 @@ int Fun4All_G4_fsPHENIX(
   bool do_pipe = true;
   
   bool do_svtx = true;
-  bool do_svtx_cell = true;
-  bool do_svtx_track = true;
+  bool do_svtx_cell = false;
+  bool do_svtx_track = false;
   bool do_svtx_eval = false;
 
   bool do_preshower = false;
   
   bool do_cemc = true;
-  bool do_cemc_cell = true;
-  bool do_cemc_twr = true;
-  bool do_cemc_cluster = true;
+  bool do_cemc_cell = false;
+  bool do_cemc_twr = false;
+  bool do_cemc_cluster = false;
   bool do_cemc_eval = false;
 
   bool do_hcalin = true;
-  bool do_hcalin_cell = true;
-  bool do_hcalin_twr = true;
-  bool do_hcalin_cluster = true;
+  bool do_hcalin_cell = false;
+  bool do_hcalin_twr = false;
+  bool do_hcalin_cluster = false;
   bool do_hcalin_eval = false;
 
   bool do_magnet = true;
   
   bool do_hcalout = true;
-  bool do_hcalout_cell = true;
-  bool do_hcalout_twr = true;
-  bool do_hcalout_cluster = true;
+  bool do_hcalout_cell = false;
+  bool do_hcalout_twr = false;
+  bool do_hcalout_cluster = false;
   bool do_hcalout_eval = false;
   
   bool do_global = true;
   bool do_global_fastsim = false;
   
-  bool do_jet_reco = true;
-  bool do_jet_eval = true; 
+  bool do_jet_reco = false;
+  bool do_jet_eval = false; 
 
   // ePHENIX/fsPHENIX geometry
   bool do_EEMC = false;
@@ -79,7 +79,7 @@ int Fun4All_G4_fsPHENIX(
 
   bool do_FEMC = true; 
   bool do_FEMC_cell = true; 
-  bool do_FEMC_twr = true; 
+  bool do_FEMC_twr = true;  
   bool do_FEMC_cluster = true; 
 
   bool do_FHCAL = true; 
@@ -109,7 +109,7 @@ int Fun4All_G4_fsPHENIX(
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = "/phenix/upgrades/decadal/fieldmaps/sPHENIX.2d.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
-  const float magfield_rescale = 1.0;
+  const float magfield_rescale = 1.4/1.5; // max 1.4T field
 
   //---------------
   // Fun4All server
@@ -122,7 +122,7 @@ int Fun4All_G4_fsPHENIX(
   // By default every random number generator uses
   // PHRandomSeed() which reads /dev/urandom to get its seed
   // if the RANDOMSEED flag is set its value is taken as seed
-  // You ca neither set this to a random value using PHRandomSeed()
+  // You can either set this to a random value using PHRandomSeed()
   // which will make all seeds identical (not sure what the point of
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
@@ -177,9 +177,10 @@ int Fun4All_G4_fsPHENIX(
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
       //gen->set_eta_range(-0.5, 0.5);
-      gen->set_eta_range(1.3, 4.0); //fsPHENIX FWD
-      gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
-      gen->set_pt_range(0.1, 10.0);
+      gen->set_eta_range(3, 3.0); //fsPHENIX FWD
+      //gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
+      gen->set_phi_range(TMath::Pi()/2-0.1, TMath::Pi()/2-0.1);
+      gen->set_p_range(30, 30.0);
       gen->Embed(1);
       gen->Verbosity(0);
       se->registerSubsystem(gen);
@@ -237,8 +238,10 @@ int Fun4All_G4_fsPHENIX(
   if (do_hcalout_cluster) HCALOuter_Clusters();
 
   if (do_EEMC_twr) EEMC_Towers();
+
   if (do_FEMC_twr) FEMC_Towers();
   if (do_FEMC_cluster) FEMC_Clusters();
+
   if (do_FHCAL_twr) FHCAL_Towers();
   if (do_FHCAL_cluster) FHCAL_Clusters();
 
@@ -320,17 +323,9 @@ int Fun4All_G4_fsPHENIX(
           );
     }
 
-  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
-  se->registerOutputManager(out);
+  //Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+  //se->registerOutputManager(out);
 
-  //-----------------
-  // Event processing
-  //-----------------
-  if (nEvents < 0)
-    {
-      return;
-    }
-  // if we run the particle generator and use 0 it'll run forever
   if (nEvents == 0 && !readhits && !readhepmc)
     {
       cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
@@ -338,16 +333,36 @@ int Fun4All_G4_fsPHENIX(
       return;
     }
 
-  se->run(nEvents);
+  if (nEvents < 0)
+    {
+      PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
+      g4->ApplyCommand("/control/execute eic.mac");
+//      g4->StartGui();
+      se->run(1);
 
-  //-----
-  // Exit
-  //-----
+      se->End();
+      std::cout << "All done" << std::endl;
+    }
+  else
+    {
+      if (verbosity)
+        {
+          se->Verbosity(3);
+          PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
+          g4->Verbosity(3);
+          g4->ApplyCommand("/control/verbose 5");
+          g4->ApplyCommand("/run/verbose  5");
+          g4->ApplyCommand("/tracking/verbose 5");
+        }
 
-  se->End();
-  std::cout << "All done" << std::endl;
-  delete se;
-  gSystem->Exit(0);
+      se->run(nEvents);
+
+      se->End();
+      std::cout << "All done" << std::endl;
+      delete se;
+      gSystem->Exit(0);
+    }
+
 }
 
 int Get_Min_cemc_layer()
@@ -398,4 +413,13 @@ int Get_Min_preshower_layer()
 int Get_Max_preshower_layer()
 {
   return Max_preshower_layer;
+}
+
+
+void
+G4Cmd(const char * cmd)
+{
+  Fun4AllServer *se = Fun4AllServer::instance();
+  PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
+  g4->ApplyCommand(cmd);
 }

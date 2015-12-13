@@ -14,7 +14,7 @@ void FHCAL_Cells(int verbosity = 0) {
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco();
+  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("FHCALCellReco");
   hc->Detector("FHCAL");
   se->registerSubsystem(hc);
   
@@ -44,18 +44,9 @@ FHCALSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
   hhcal->SetTowerMappingFile( mapping_hhcal.str() );
   hhcal->OverlapCheck(overlapcheck);
 
-  g4Reco->registerSubsystem( hhcal );
+  if (absorberactive) hhcal->SetAbsorberActive();
 
-  // sPHENIX forward flux return 
-  PHG4ConeSubsystem *flux_return = new PHG4ConeSubsystem("FWDFLUXRET", 0);
-  flux_return->SetZlength(10.0);
-  flux_return->SetPlaceZ(340.0);
-  flux_return->Set_eta_range(1.2, 5.0);
-  flux_return->SetMaterial("G4_Fe");
-  flux_return->SetActive(true);
-  flux_return->SuperDetector("FWDFLUXRET");
-  flux_return->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(flux_return);
+  g4Reco->registerSubsystem( hhcal );
 
 }
 

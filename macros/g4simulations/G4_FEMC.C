@@ -14,7 +14,7 @@ void FEMC_Cells(int verbosity = 0) {
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco();
+  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("FEMCCellReco");
   hc->Detector("FEMC");
   se->registerSubsystem(hc);
   
@@ -43,6 +43,8 @@ FEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
   femc->SetTowerMappingFile( mapping_femc.str() );
   femc->OverlapCheck(overlapcheck);
+
+  if (absorberactive)  femc->SetAbsorberActive();
 
   g4Reco->registerSubsystem( femc );
 

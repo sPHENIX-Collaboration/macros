@@ -106,10 +106,7 @@ int G4Setup(const int absorberactive = 0,
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4Reco* g4Reco = new PHG4Reco();
-  if(do_EEMC || do_FEMC || do_FHCAL)
-    g4Reco->set_rapidity_coverage(4.0); 
-  else
-    g4Reco->set_rapidity_coverage(1.1); // according to drawings
+  g4Reco->set_rapidity_coverage(1.1); // according to drawings
 
   if (decayType != TPythia6Decayer::kAll) {
     g4Reco->set_force_decay(decayType);
@@ -183,6 +180,32 @@ int G4Setup(const int absorberactive = 0,
 
   if ( do_FHCAL )
     FHCALSetup(g4Reco, absorberactive);
+
+  // sPHENIX forward flux return(s)
+  PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
+  flux_return_plus->SetLength(10.2);
+  flux_return_plus->SetPosition(0,0,335.9);
+  flux_return_plus->SetRadius(10);
+  flux_return_plus->SetLengthViaRapidityCoverage(false);
+  flux_return_plus->SetThickness(263.5-10.0);
+  flux_return_plus->SetMaterial("G4_Fe");
+  flux_return_plus->SetActive(false);
+  flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
+  flux_return_plus->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(flux_return_plus);
+
+  PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
+  flux_return_minus->SetLength(10.2);
+  flux_return_minus->SetPosition(0,0,-335.9);
+  flux_return_minus->SetRadius(10);
+  flux_return_minus->SetLengthViaRapidityCoverage(false);
+  flux_return_minus->SetThickness(263.5-10.0);
+  flux_return_minus->SetMaterial("G4_Fe");
+  flux_return_minus->SetActive(false);
+  flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
+  flux_return_minus->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(flux_return_minus);
+
 
   //----------------------------------------
   // BLACKHOLE
