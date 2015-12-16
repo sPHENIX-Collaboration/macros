@@ -58,7 +58,7 @@ void HCALOuter_Cells(int verbosity = 0) {
   PHG4HcalCellReco *hc = new PHG4HcalCellReco();
   hc->Detector("HCALOUT");
   hc->etasize_nslat(0, 0, 5);
-  hc->set_timing_window_size(100);
+  hc->set_timing_window_size(60);
   se->registerSubsystem(hc);
 
   return;
