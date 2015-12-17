@@ -11,7 +11,7 @@ int Max_si_layer = -1;
 int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_fsPHENIX(
-		       const int nEvents = 10,
+		       const int nEvents = 100,
 		       const char * inputFile = "/gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal1d/fieldmap/G4Hits_sPHENIX_e-_eta0_16GeV.root",
 		       const char * outputFile = "G4fsPHENIX.root"
 		       )
@@ -48,23 +48,23 @@ int Fun4All_G4_fsPHENIX(
   bool do_preshower = false;
   
   bool do_cemc = true;
-  bool do_cemc_cell = false;
-  bool do_cemc_twr = false;
-  bool do_cemc_cluster = false;
+  bool do_cemc_cell = true;
+  bool do_cemc_twr = true;
+  bool do_cemc_cluster = true;
   bool do_cemc_eval = false;
 
   bool do_hcalin = true;
-  bool do_hcalin_cell = false;
-  bool do_hcalin_twr = false;
-  bool do_hcalin_cluster = false;
+  bool do_hcalin_cell = true;
+  bool do_hcalin_twr = true;
+  bool do_hcalin_cluster = true;
   bool do_hcalin_eval = false;
 
   bool do_magnet = true;
   
   bool do_hcalout = true;
-  bool do_hcalout_cell = false;
-  bool do_hcalout_twr = false;
-  bool do_hcalout_cluster = false;
+  bool do_hcalout_cell = true;
+  bool do_hcalout_twr = true;
+  bool do_hcalout_cluster = true;
   bool do_hcalout_eval = false;
   
   bool do_global = true;
@@ -163,7 +163,7 @@ int Fun4All_G4_fsPHENIX(
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
       //gen->add_particles("e-",5); // mu+,e+,proton,pi+,Upsilon
       //gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
-      gen->add_particles("pi+",1); // mu-,e-,anti_proton,pi-
+      gen->add_particles("pi-",1); // mu-,e-,anti_proton,pi-
       if (readhepmc) {
 	gen->set_reuse_existing_vertex(true);
 	gen->set_existing_vertex_offset_vector(0.0,0.0,0.0);
@@ -176,11 +176,12 @@ int Fun4All_G4_fsPHENIX(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
-      gen->set_eta_range(-1.4, 4.0);
-      //gen->set_eta_range(3, 3.0); //fsPHENIX FWD
-      gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
-      //gen->set_phi_range(TMath::Pi()/2-0.1, TMath::Pi()/2-0.1);
-      gen->set_p_range(30, 30.0);
+      //gen->set_eta_range(1.4, 4.0);
+      gen->set_eta_range(3.0, 3.0); //fsPHENIX FWD
+      //gen->set_eta_range(0.2, 0.2); //sPHENIX
+      //gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
+      gen->set_phi_range(TMath::Pi()/2-0.1, TMath::Pi()/2-0.1);
+      gen->set_p_range(30.0, 30.0);
       gen->Embed(1);
       gen->Verbosity(0);
       se->registerSubsystem(gen);
@@ -337,7 +338,7 @@ int Fun4All_G4_fsPHENIX(
     {
       PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
       g4->ApplyCommand("/control/execute eic.mac");
-//      g4->StartGui();
+      //g4->StartGui();
       se->run(1);
 
       se->End();
