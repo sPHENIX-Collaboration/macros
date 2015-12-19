@@ -19,7 +19,6 @@ void G4Init(bool do_svtx = true,
 	    bool do_pipe = true,
 	    bool do_bbc = true,
 	    bool do_global = true,
-	    bool do_EEMC = true,
 	    bool do_FEMC = true,
 	    bool do_FHCAL = true) {
 
@@ -64,9 +63,6 @@ void G4Init(bool do_svtx = true,
 
   gROOT->LoadMacro("G4_FwdJets.C");
 
-  gROOT->LoadMacro("G4_EEMC.C");
-  if ( do_EEMC ) EEMCInit();
-
   gROOT->LoadMacro("G4_FEMC.C");
   if ( do_FEMC ) FEMCInit();
 
@@ -87,7 +83,6 @@ int G4Setup(const int absorberactive = 0,
 	    const bool do_hcalout = true,
 	    const bool do_pipe = true,
 	    const bool do_bbc = true,
-	    const bool do_EEMC = false,
 	    const bool do_FEMC = false,
 	    const bool do_FHCAL = false,
      	    const float magfield_rescale = 1.0) {
@@ -162,12 +157,6 @@ int G4Setup(const int absorberactive = 0,
   // HCALOUT
   
   if (do_hcalout) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
-
-  //----------------------------------------
-  // EEMC
-    
-  if ( do_EEMC )
-    EEMCSetup(g4Reco, absorberactive);
 
   //----------------------------------------
   // FEMC
