@@ -89,7 +89,7 @@ int Fun4All_G4_fsPHENIX(
   bool do_FHCAL_cluster = true; 
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  bool do_DSTReader = false;
+  bool do_DSTReader = true;
   //---------------
   // Load libraries
   //---------------
@@ -107,7 +107,7 @@ int Fun4All_G4_fsPHENIX(
   G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_bbc,
 	 do_FEMC,do_FHCAL);
 
-  int absorberactive = 1; // set to 1 to make all absorbers active volumes
+  int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = "/phenix/upgrades/decadal/fieldmaps/sPHENIX.2d.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
   const float magfield_rescale = 1.4/1.5; // max 1.4T field
@@ -164,7 +164,7 @@ int Fun4All_G4_fsPHENIX(
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
       //gen->add_particles("e-",5); // mu+,e+,proton,pi+,Upsilon
       //gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
-      gen->add_particles("mu-",1); // mu-,e-,anti_proton,pi-
+      gen->add_particles("pi-",1); // mu-,e-,anti_proton,pi-
       if (readhepmc) {
 	gen->set_reuse_existing_vertex(true);
 	gen->set_existing_vertex_offset_vector(0.0,0.0,0.0);
@@ -177,10 +177,10 @@ int Fun4All_G4_fsPHENIX(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
-      //gen->set_eta_range(1.4, 4.0);
-      gen->set_eta_range(3.0, 3.0); //fsPHENIX FWD
-      //gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
-      gen->set_phi_range(TMath::Pi()/2-0.1, TMath::Pi()/2-0.1);
+      gen->set_eta_range(1.4, 4.0);
+      //gen->set_eta_range(3.0, 3.0); //fsPHENIX FWD
+      gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
+      //gen->set_phi_range(TMath::Pi()/2-0.1, TMath::Pi()/2-0.1);
       gen->set_p_range(30.0, 30.0);
       gen->Embed(1);
       gen->Verbosity(0);
@@ -309,9 +309,9 @@ int Fun4All_G4_fsPHENIX(
   if (do_DSTReader)
     {
       //Convert DST to human command readable TTree for quick poke around the outputs
-      gROOT->LoadMacro("G4_DSTReader.C");
+      gROOT->LoadMacro("G4_DSTReader_fsPHENIX.C");
 
-      G4DSTreader( outputFile, //
+      G4DSTreader_fsPHENIX( outputFile, //
           /*int*/ absorberactive ,
           /*bool*/ do_svtx ,
           /*bool*/ do_preshower ,
@@ -322,7 +322,11 @@ int Fun4All_G4_fsPHENIX(
           /*bool*/ do_cemc_twr ,
           /*bool*/ do_hcalin_twr ,
           /*bool*/ do_magnet  ,
-          /*bool*/ do_hcalout_twr
+	  /*bool*/ do_hcalout_twr,
+	  /*bool*/ do_FHCAL,
+	  /*bool*/ do_FHCAL_twr,
+	  /*bool*/ do_FEMC,
+	  /*bool*/ do_FEMC_twr
           );
     }
 
