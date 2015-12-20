@@ -1,7 +1,6 @@
-// these are defined in the Fun4All macro, here we just override the values
-// with what is used in this macro
-Min_hcal_in_layer = 0;
-Max_hcal_in_layer = 0;
+
+int Min_hcal_in_layer = 0;
+int Max_hcal_in_layer = 0;
 
 void HCalInnerInit() {
   Min_hcal_in_layer = 0;
@@ -119,6 +118,7 @@ void HCALInner_Cells(int verbosity = 0) {
   PHG4HcalCellReco *hc = new PHG4HcalCellReco();
   hc->Detector("HCALIN");
   hc->etasize_nslat(0, 0, 5);
+  hc->set_timing_window_size(60);
   se->registerSubsystem(hc);
   
   return;  

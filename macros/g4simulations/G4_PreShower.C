@@ -1,7 +1,6 @@
-// these are defined in the Fun4All macro, here we just override the values
-// with what is used in this macro
-Min_preshower_layer = 1;
-Max_preshower_layer = 1;
+
+int Min_preshower_layer = 1;
+int Max_preshower_layer = 1;
 
 void PreShowerInit()
 {

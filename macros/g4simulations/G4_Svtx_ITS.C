@@ -1,7 +1,7 @@
-// these are defined in the Fun4All macro, here we just override the values
-// with what is used in this macro
-Min_si_layer = 0;
-Max_si_layer = 6;
+// development macro for a full ITS style silicon detector
+
+int Min_si_layer = 0;
+int Max_si_layer = 6;
 
 void SvtxInit()
 {
@@ -213,7 +213,13 @@ void Svtx_Reco(int verbosity = 0)
   //----------------------------------
   PHG4SvtxThresholds* thresholds = new PHG4SvtxThresholds();
   thresholds->Verbosity(verbosity);
-  thresholds->set_threshold(0.25);
+  thresholds->set_threshold(0,0.25);
+  thresholds->set_threshold(1,0.25);
+  thresholds->set_threshold(2,0.25);
+  thresholds->set_threshold(3,0.25);
+  thresholds->set_threshold(4,0.25);
+  thresholds->set_threshold(5,0.25);
+  thresholds->set_threshold(6,0.25);
   //thresholds->set_use_thickness_mip(0, true);
   se->registerSubsystem( thresholds );
 
@@ -229,6 +235,7 @@ void Svtx_Reco(int verbosity = 0)
   // Track reconstruction
   //---------------------
   PHG4HoughTransform* hough = new PHG4HoughTransform(7,7);
+  hough->set_mag_field(1.4);
   hough->Verbosity(verbosity);
   // ALICE ITS upgrade values for total thickness in X_0
   hough->set_material(0, 0.003);
@@ -238,7 +245,7 @@ void Svtx_Reco(int verbosity = 0)
   hough->set_material(4, 0.008);
   hough->set_material(5, 0.008);
   hough->set_material(6, 0.008);
-  hough->setPtRescaleFactor(0.995288);
+  hough->setPtRescaleFactor(0.9972);
   hough->set_chi2_cut_init(5.0);
   //hough->set_chi2_cut_fast(60.0,0.0,100.0); // 10.0, 50.0, 75.0
   hough->set_chi2_cut_fast(10.0,50.0,75.0); // 10.0, 50.0, 75.0

@@ -1,7 +1,6 @@
-// these are defined in the Fun4All macro, here we just override the values
-// with what is used in this macro
-Min_hcal_out_layer = 0;
-Max_hcal_out_layer = 0;
+
+int Min_hcal_out_layer = 0;
+int Max_hcal_out_layer = 0;
 
 void HCalOuterInit()
 {
@@ -29,7 +28,7 @@ double HCalOuter(PHG4Reco* g4Reco,
 
   PHG4OuterHcalSubsystem *outerhcal = new PHG4OuterHcalSubsystem("HCALOUT");
   outerhcal->SetActive();
-  outerhcal->SetTiltViaNcross(-4); 
+  outerhcal->set_int_param("ncross",-4);
   //outerhcal->SetLightCorrection(178.0,0.65,260.3,1.0);
   outerhcal->SuperDetector("HCALOUT");
   if (absorberactive)  outerhcal->SetAbsorberActive();
@@ -59,6 +58,7 @@ void HCALOuter_Cells(int verbosity = 0) {
   PHG4HcalCellReco *hc = new PHG4HcalCellReco();
   hc->Detector("HCALOUT");
   hc->etasize_nslat(0, 0, 5);
+  hc->set_timing_window_size(60);
   se->registerSubsystem(hc);
 
   return;
