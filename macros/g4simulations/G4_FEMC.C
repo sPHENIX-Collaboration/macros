@@ -101,7 +101,7 @@ void FEMC_Towers(int verbosity = 0) {
   TowerCalibration->Detector("FEMC");
   TowerCalibration->Verbosity(verbosity);
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration->set_calib_const_GeV_ADC(1.0/0.073);
+  TowerCalibration->set_calib_const_GeV_ADC(1.0/0.06376);  // calibrated with muons
   TowerCalibration->set_pedstal_ADC(0);
   se->registerSubsystem( TowerCalibration );
 

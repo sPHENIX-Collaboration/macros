@@ -102,7 +102,7 @@ void FHCAL_Towers(int verbosity = 0) {
   TowerCalibration->Detector("FHCAL");
   TowerCalibration->Verbosity(verbosity);
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration->set_calib_const_GeV_ADC(1./0.038);
+  TowerCalibration->set_calib_const_GeV_ADC(1./0.03898);  // calibrated with muons
   TowerCalibration->set_pedstal_ADC(0);
   se->registerSubsystem( TowerCalibration );
 
