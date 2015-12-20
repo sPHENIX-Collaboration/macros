@@ -1,11 +1,3 @@
-int Min_si_layer = 1;
-int Max_si_layer = 6;
-int Min_cemc_layer = 1;
-int Max_cemc_layer = 30;
-int Min_hcal_in_layer = 1;
-int Max_hcal_in_layer = 1;
-int Min_hcal_out_layer = 1;
-int Max_hcal_out_layer = 1;
 
 double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
 bool overlapcheck = false; // set to true if you want to check for overlaps
@@ -40,11 +32,8 @@ void G4Init(bool do_svtx = true,
   }
 
   gROOT->LoadMacro("G4_CEmc_Spacal.C");    //
-  //gROOT->LoadMacro("G4_CEmc_cross.C");   // obselete
-  //gROOT->LoadMacro("G4_CEmc_Alice.C");   // obselete
-  //gROOT->LoadMacro("G4_CEmc_Alice_W.C"); // obselete
-  if (do_cemc) CEmcInit(Cemc_slats_per_cell);
-
+  if (do_cemc) CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
+  
   //gROOT->LoadMacro("G4_Hcal_ref.C");     // deprecated
   //gROOT->LoadMacro("G4_Hcal_cross.C");   // deprecated
 
@@ -241,35 +230,3 @@ int G4Setup(const int absorberactive = 0,
   g4Reco->registerSubsystem(truth);
   se->registerSubsystem( g4Reco );
 }
-
-int Get_Min_si_layer()
-{
-  return Min_si_layer;
-}
-
-int Get_Max_si_layer()
-{
-  return Max_si_layer;
-}
-
-int Get_Min_cemc_layer()
-{
-  return Min_cemc_layer;
-}
-
-int Get_Max_cemc_layer()
-{
-  return Max_cemc_layer;
-}
-
-int Get_Min_hcal_layer()
-{
-  return Min_hcal_layer;
-}
-
-int Get_Max_hcal_layer()
-{
-  return Max_hcal_layer;
-}
-
-

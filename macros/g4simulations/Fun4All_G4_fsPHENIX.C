@@ -1,14 +1,3 @@
-int Min_cemc_layer = -1;
-int Max_cemc_layer = -1;
-int Min_hcal_in_layer = -1;
-int Max_hcal_in_layer = -1;
-int Min_hcal_out_layer = -1;
-int Max_hcal_out_layer = -1;
-int Min_preshower_layer = -1;
-int Max_preshower_layer = -1;
-int Min_si_layer = -1;
-int Max_si_layer = -1;
-int Cemc_slats_per_cell = 72; // make it 2*2*2*3*3 so we can try other combinations
 
 int Fun4All_G4_fsPHENIX(
 		       const int nEvents = 10,
@@ -361,63 +350,4 @@ int Fun4All_G4_fsPHENIX(
       gSystem->Exit(0);
     }
 
-}
-
-int Get_Min_cemc_layer()
-{
-  return Min_cemc_layer;
-}
-
-int Get_Max_cemc_layer()
-{
-  return Max_cemc_layer;
-}
-
-int Get_Min_hcal_in_layer()
-{
-  return Min_hcal_in_layer;
-}
-
-int Get_Max_hcal_in_layer()
-{
-  return Max_hcal_in_layer;
-}
-
-int Get_Min_hcal_out_layer()
-{
-  return Min_hcal_out_layer;
-}
-
-int Get_Max_hcal_out_layer()
-{
-  return Max_hcal_out_layer;
-}
-
-int Get_Min_si_layer()
-{
-  return Min_si_layer;
-}
-
-int Get_Max_si_layer()
-{
-  return Max_si_layer;
-}
-
-int Get_Min_preshower_layer()
-{
-  return Min_preshower_layer;
-}
-
-int Get_Max_preshower_layer()
-{
-  return Max_preshower_layer;
-}
-
-
-void
-G4Cmd(const char * cmd)
-{
-  Fun4AllServer *se = Fun4AllServer::instance();
-  PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
-  g4->ApplyCommand(cmd);
 }
