@@ -285,7 +285,7 @@ int Fun4All_G4_fsPHENIX(
     {
       Fun4AllInputManager *in = new Fun4AllHepMCInputManager( "DSTIN");
       se->registerInputManager( in );
-      se->fileopen( in->Name(), inputFile );
+      se->fileopen( in->Name().c_str(), inputFile );
     }
   else
     {
