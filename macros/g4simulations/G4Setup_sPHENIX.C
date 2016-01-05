@@ -180,10 +180,13 @@ int G4Setup(const int absorberactive = 0,
   se->registerSubsystem( g4Reco );
 }
 
-void G4Compress(int verbosity = 0) {
+void ShowerCompress(int verbosity = 0) {
 
+  gSystem->Load("libfun4all.so");
   gSystem->Load("libg4eval.so");
 
+  Fun4AllServer *se = Fun4AllServer::instance();
+  
   PHG4DstCompressReco* compress = new PHG4DstCompressReco("PHG4DstCompressReco");
   compress->AddHitContainer("G4HIT_PIPE");
   compress->AddHitContainer("G4HIT_SVTXSUPPORT");
@@ -215,4 +218,27 @@ void G4Compress(int verbosity = 0) {
   se->registerSubsystem(compress);
   
   return; 
+}
+
+void DstCompress(Fun4AllDstOutputManager* out) {
+  if (out) {
+    out->StripNode("G4HIT_PIPE");
+    out->StripNode("G4HIT_SVTXSUPPORT");
+    out->StripNode("G4HIT_CEMC_ELECTRONICS");
+    out->StripNode("G4HIT_CEMC");
+    out->StripNode("G4HIT_ABSORBER_CEMC");
+    out->StripNode("G4HIT_CEMC_SPT");
+    out->StripNode("G4HIT_ABSORBER_HCALIN");
+    out->StripNode("G4HIT_HCALIN");
+    out->StripNode("G4HIT_HCALIN_SPT");
+    out->StripNode("G4HIT_MAGNET");
+    out->StripNode("G4HIT_ABSORBER_HCALOUT");
+    out->StripNode("G4HIT_HCALOUT");
+    out->StripNode("G4HIT_BH_1");
+    out->StripNode("G4HIT_BH_FORWARD_PLUS");
+    out->StripNode("G4HIT_BH_FORWARD_NEG");
+    out->StripNode("G4CELL_CEMC");
+    out->StripNode("G4CELL_HCALIN");
+    out->StripNode("G4CELL_HCALOUT");
+  }
 }
