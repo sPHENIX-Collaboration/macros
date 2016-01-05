@@ -235,7 +235,7 @@ int Fun4All_G4_fsPHENIX(
   if (do_FHCAL_twr) FHCAL_Towers();
   if (do_FHCAL_cluster) FHCAL_Clusters();
 
-  if (do_dst_compress) G4Compress();
+  if (do_dst_compress) ShowerCompress();
   
   //--------------
   // SVTX tracking
@@ -324,6 +324,7 @@ int Fun4All_G4_fsPHENIX(
     }
 
   //Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+  //if (do_dst_compress) DstCompress(out);
   //se->registerOutputManager(out);
 
   if (nEvents == 0 && !readhits && !readhepmc)
