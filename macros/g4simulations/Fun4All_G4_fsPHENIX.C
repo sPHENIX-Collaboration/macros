@@ -233,6 +233,8 @@ int Fun4All_G4_fsPHENIX(
   if (do_FHCAL_twr) FHCAL_Towers();
   if (do_FHCAL_cluster) FHCAL_Clusters();
 
+  if (do_dst_compress) G4Compress();
+  
   //--------------
   // SVTX tracking
   //--------------
