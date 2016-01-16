@@ -205,7 +205,7 @@ int Fun4All_G4_sPHENIX(
   if (do_hcalout_twr) HCALOuter_Towers();
   if (do_hcalout_cluster) HCALOuter_Clusters();
 
-  if (do_dst_compress) G4Compress();
+  if (do_dst_compress) ShowerCompress();
 
   //--------------
   // SVTX tracking
