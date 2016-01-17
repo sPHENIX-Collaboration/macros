@@ -286,6 +286,7 @@ int Fun4All_G4_sPHENIX(
     }
 
   // Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+  // if (do_dst_compress) DstCompress(out);
   // se->registerOutputManager(out);
 
   //-----------------
