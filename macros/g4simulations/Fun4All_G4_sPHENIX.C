@@ -62,7 +62,7 @@ int Fun4All_G4_sPHENIX(
   bool do_jet_reco = true;
   bool do_jet_eval = true;
 
-  bool do_dst_compress = true;
+  bool do_dst_compress = false;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = false;

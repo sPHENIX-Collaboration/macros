@@ -77,7 +77,7 @@ int Fun4All_G4_fsPHENIX(
   bool do_FHCAL_twr = true; 
   bool do_FHCAL_cluster = true; 
 
-  bool do_dst_compress = true;
+  bool do_dst_compress = false;
   
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = true;
