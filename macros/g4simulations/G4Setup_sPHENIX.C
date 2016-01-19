@@ -179,3 +179,66 @@ int G4Setup(const int absorberactive = 0,
   g4Reco->registerSubsystem(truth);
   se->registerSubsystem( g4Reco );
 }
+
+void ShowerCompress(int verbosity = 0) {
+
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libg4eval.so");
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+  
+  PHG4DstCompressReco* compress = new PHG4DstCompressReco("PHG4DstCompressReco");
+  compress->AddHitContainer("G4HIT_PIPE");
+  compress->AddHitContainer("G4HIT_SVTXSUPPORT");
+  compress->AddHitContainer("G4HIT_CEMC_ELECTRONICS");
+  compress->AddHitContainer("G4HIT_CEMC");
+  compress->AddHitContainer("G4HIT_ABSORBER_CEMC");
+  compress->AddHitContainer("G4HIT_CEMC_SPT");
+  compress->AddHitContainer("G4HIT_ABSORBER_HCALIN");
+  compress->AddHitContainer("G4HIT_HCALIN");
+  compress->AddHitContainer("G4HIT_HCALIN_SPT");
+  compress->AddHitContainer("G4HIT_MAGNET");
+  compress->AddHitContainer("G4HIT_ABSORBER_HCALOUT");
+  compress->AddHitContainer("G4HIT_HCALOUT");
+  compress->AddHitContainer("G4HIT_BH_1");
+  compress->AddHitContainer("G4HIT_BH_FORWARD_PLUS");
+  compress->AddHitContainer("G4HIT_BH_FORWARD_NEG");
+  compress->AddCellContainer("G4CELL_CEMC");
+  compress->AddCellContainer("G4CELL_HCALIN");
+  compress->AddCellContainer("G4CELL_HCALOUT");
+  compress->AddTowerContainer("TOWER_SIM_CEMC");
+  compress->AddTowerContainer("TOWER_RAW_CEMC");
+  compress->AddTowerContainer("TOWER_CALIB_CEMC");
+  compress->AddTowerContainer("TOWER_SIM_HCALIN");
+  compress->AddTowerContainer("TOWER_RAW_HCALIN");
+  compress->AddTowerContainer("TOWER_CALIB_HCALIN");
+  compress->AddTowerContainer("TOWER_SIM_HCALOUT");
+  compress->AddTowerContainer("TOWER_RAW_HCALOUT");
+  compress->AddTowerContainer("TOWER_CALIB_HCALOUT");
+  se->registerSubsystem(compress);
+  
+  return; 
+}
+
+void DstCompress(Fun4AllDstOutputManager* out) {
+  if (out) {
+    out->StripNode("G4HIT_PIPE");
+    out->StripNode("G4HIT_SVTXSUPPORT");
+    out->StripNode("G4HIT_CEMC_ELECTRONICS");
+    out->StripNode("G4HIT_CEMC");
+    out->StripNode("G4HIT_ABSORBER_CEMC");
+    out->StripNode("G4HIT_CEMC_SPT");
+    out->StripNode("G4HIT_ABSORBER_HCALIN");
+    out->StripNode("G4HIT_HCALIN");
+    out->StripNode("G4HIT_HCALIN_SPT");
+    out->StripNode("G4HIT_MAGNET");
+    out->StripNode("G4HIT_ABSORBER_HCALOUT");
+    out->StripNode("G4HIT_HCALOUT");
+    out->StripNode("G4HIT_BH_1");
+    out->StripNode("G4HIT_BH_FORWARD_PLUS");
+    out->StripNode("G4HIT_BH_FORWARD_NEG");
+    out->StripNode("G4CELL_CEMC");
+    out->StripNode("G4CELL_HCALIN");
+    out->StripNode("G4CELL_HCALOUT");
+  }
+}

@@ -62,6 +62,8 @@ int Fun4All_G4_sPHENIX(
   bool do_jet_reco = true;
   bool do_jet_eval = true;
 
+  bool do_dst_compress = false;
+
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = false;
   //---------------
@@ -203,6 +205,8 @@ int Fun4All_G4_sPHENIX(
   if (do_hcalout_twr) HCALOuter_Towers();
   if (do_hcalout_cluster) HCALOuter_Clusters();
 
+  if (do_dst_compress) ShowerCompress();
+
   //--------------
   // SVTX tracking
   //--------------
@@ -282,6 +286,7 @@ int Fun4All_G4_sPHENIX(
     }
 
   // Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+  // if (do_dst_compress) DstCompress(out);
   // se->registerOutputManager(out);
 
   //-----------------

@@ -77,6 +77,8 @@ int Fun4All_G4_fsPHENIX(
   bool do_FHCAL_twr = true; 
   bool do_FHCAL_cluster = true; 
 
+  bool do_dst_compress = false;
+  
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = true;
   //---------------
@@ -233,6 +235,8 @@ int Fun4All_G4_fsPHENIX(
   if (do_FHCAL_twr) FHCAL_Towers();
   if (do_FHCAL_cluster) FHCAL_Clusters();
 
+  if (do_dst_compress) ShowerCompress();
+  
   //--------------
   // SVTX tracking
   //--------------
@@ -320,6 +324,7 @@ int Fun4All_G4_fsPHENIX(
     }
 
   //Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+  //if (do_dst_compress) DstCompress(out);
   //se->registerOutputManager(out);
 
   if (nEvents == 0 && !readhits && !readhepmc)
