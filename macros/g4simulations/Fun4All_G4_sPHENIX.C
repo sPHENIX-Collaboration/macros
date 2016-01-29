@@ -80,7 +80,7 @@ int Fun4All_G4_sPHENIX(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
-  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_bbc);
+  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe);
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
@@ -166,16 +166,19 @@ int Fun4All_G4_sPHENIX(
       //---------------------
 
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_bbc,
-	      magfield_rescale);
+	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, magfield_rescale);
     }
 
   //---------
   // BBC Reco
   //---------
   
-  if (do_bbc) Bbc_Reco();
-  
+  if (do_bbc) 
+    {
+      gROOT->LoadMacro("G4_Bbc.C");
+      BbcInit();
+      Bbc_Reco();
+    }
   //------------------
   // Detector Division
   //------------------
@@ -217,15 +220,27 @@ int Fun4All_G4_sPHENIX(
   // Global Vertexing
   //-----------------
 
-  if (do_global) Global_Reco();
-  else if (do_global_fastsim) Global_FastSim();
-  
+  if (do_global) 
+    {
+      gROOT->LoadMacro("G4_Global.C");
+      Global_Reco();
+    }
+
+  else if (do_global_fastsim) 
+    {
+      gROOT->LoadMacro("G4_Global.C");
+      Global_FastSim();
+    }  
+
   //---------
   // Jet reco
   //---------
 
-  if (do_jet_reco) Jet_Reco();
-
+  if (do_jet_reco) 
+    {
+      gROOT->LoadMacro("G4_Jets.C");
+      Jet_Reco();
+    }
   //----------------------
   // Simulation evaluation
   //----------------------

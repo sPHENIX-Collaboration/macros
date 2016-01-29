@@ -8,46 +8,56 @@ void G4Init(bool do_svtx = true,
 	    bool do_hcalin = true,
 	    bool do_magnet = true,
 	    bool do_hcalout = true,
-	    bool do_pipe = true,
-	    bool do_bbc = true,
-	    bool do_global = true) {
+	    bool do_pipe = true)
+  {
 
-  gROOT->LoadMacro("G4_Bbc.C");
-  if (do_bbc) BbcInit();
-  
-  gROOT->LoadMacro("G4_Pipe.C");
-  if (do_pipe) PipeInit();
-  
+  if (do_pipe)
+    {
+      gROOT->LoadMacro("G4_Pipe.C");
+      PipeInit();
+    }  
   // load detector macros and execute Init() function
-  gROOT->LoadMacro("G4_Svtx.C");                 // default MIE projections
-  //gROOT->LoadMacro("G4_Svtx_pixels+strips.C"); // testing
-  //gROOT->LoadMacro("G4_Svtx_pixels+tpc.C");    // testing
-  //gROOT->LoadMacro("G4_Svtx_maps+strips.C");   // testing
-  //gROOT->LoadMacro("G4_Svtx_maps+tpc.C");      // testing
-  //gROOT->LoadMacro("G4_Svtx_ladders.C");       // testing
-  //gROOT->LoadMacro("G4_Svtx_ITS.C");           // testing
-  if (do_svtx) SvtxInit();
+  if (do_svtx)
+    {
+      gROOT->LoadMacro("G4_Svtx.C");                 // default MIE projections
+      //gROOT->LoadMacro("G4_Svtx_pixels+strips.C"); // testing
+      //gROOT->LoadMacro("G4_Svtx_pixels+tpc.C");    // testing
+      //gROOT->LoadMacro("G4_Svtx_maps+strips.C");   // testing
+      //gROOT->LoadMacro("G4_Svtx_maps+tpc.C");      // testing
+      //gROOT->LoadMacro("G4_Svtx_ladders.C");       // testing
+      //gROOT->LoadMacro("G4_Svtx_ITS.C");           // testing
+      SvtxInit();
+    }
 
-  if (do_preshower) {
-    gROOT->LoadMacro("G4_PreShower.C");
-    PreShowerInit();
-  }
+  if (do_preshower) 
+    {
+      gROOT->LoadMacro("G4_PreShower.C");
+      PreShowerInit();
+    }
 
-  gROOT->LoadMacro("G4_CEmc_Spacal.C");
-  if (do_cemc) CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
+  if (do_cemc)
+    {
+      gROOT->LoadMacro("G4_CEmc_Spacal.C");
+      CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
+    }
 
-  gROOT->LoadMacro("G4_HcalIn_ref.C");
-  if (do_hcalin) HCalInnerInit();
+  if (do_hcalin) 
+    {
+      gROOT->LoadMacro("G4_HcalIn_ref.C");
+      HCalInnerInit();
+    }
 
-  gROOT->LoadMacro("G4_Magnet.C");
-  if (do_magnet) MagnetInit();
+  if (do_magnet)
+    {
+      gROOT->LoadMacro("G4_Magnet.C");
+      MagnetInit();
+    }
+  if (do_hcalout)
+    {
+      gROOT->LoadMacro("G4_HcalOut_ref.C");
+      HCalOuterInit();
+    }
 
-  gROOT->LoadMacro("G4_HcalOut_ref.C");
-  if (do_hcalout) HCalOuterInit();
-
-  gROOT->LoadMacro("G4_Global.C");
-  
-  gROOT->LoadMacro("G4_Jets.C");
 }
 
 
@@ -61,7 +71,6 @@ int G4Setup(const int absorberactive = 0,
 	    const bool do_magnet = true,
 	    const bool do_hcalout = true,
 	    const bool do_pipe = true,
-	    const bool do_bbc = true,
 	    const float magfield_rescale = 1.0) {
   
   //---------------
