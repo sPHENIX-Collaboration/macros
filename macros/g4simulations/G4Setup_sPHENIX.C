@@ -11,12 +11,13 @@ void G4Init(bool do_svtx = true,
 	    bool do_pipe = true)
   {
 
+  // load detector/material macros and execute Init() function
+
   if (do_pipe)
     {
       gROOT->LoadMacro("G4_Pipe.C");
       PipeInit();
     }  
-  // load detector macros and execute Init() function
   if (do_svtx)
     {
       gROOT->LoadMacro("G4_Svtx.C");                 // default MIE projections
