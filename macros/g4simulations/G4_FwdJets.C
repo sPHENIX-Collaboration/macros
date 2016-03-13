@@ -11,9 +11,9 @@ void Jet_FwdReco(int verbosity = 0) {
   //truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2),"AntiKt_Truth_r02");
   truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3),"AntiKt_Truth_r03");
   // truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.4),"AntiKt_Truth_r04");
-  // truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.5),"AntiKt_Truth_r05");
+   truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.5),"AntiKt_Truth_r05");
   // truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.6),"AntiKt_Truth_r06");
-  // truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.7),"AntiKt_Truth_r07");
+   truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.7),"AntiKt_Truth_r07");
   // truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.8),"AntiKt_Truth_r08");
   truthjetreco->set_algo_node("ANTIKT");
   truthjetreco->set_input_node("TRUTH");
@@ -27,9 +27,9 @@ void Jet_FwdReco(int verbosity = 0) {
   // towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2),"AntiKt_Tower_r02");
   towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3),"AntiKt_Tower_r03");
   // towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.4),"AntiKt_Tower_r04");
-  // towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.5),"AntiKt_Tower_r05");
+   towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.5),"AntiKt_Tower_r05");
   // towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.6),"AntiKt_Tower_r06");
-  // towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.7),"AntiKt_Tower_r07");
+   towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.7),"AntiKt_Tower_r07");
   // towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.8),"AntiKt_Tower_r08");
   towerjetreco->set_algo_node("ANTIKT");
   towerjetreco->set_input_node("TOWER");
@@ -47,8 +47,8 @@ void Jet_FwdEval(std::string outfilename = "g4fwdjets_eval.root",
   Fun4AllServer *se = Fun4AllServer::instance();
 
   JetEvaluator* eval = new JetEvaluator("JETEVALUATOR",
-   					"AntiKt_Tower_r03",
-   					"AntiKt_Truth_r03",
+   					"AntiKt_Tower_r05",
+   					"AntiKt_Truth_r05",
    					outfilename);
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
