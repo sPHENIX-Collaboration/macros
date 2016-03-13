@@ -357,7 +357,7 @@ int Fun4All_G4_fsPHENIX(
   if (nEvents < 0)
     {
       PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
-      g4->ApplyCommand("/control/execute eic.mac");
+      g4->ApplyCommand("/control/execute vis.mac");
       //g4->StartGui();
       se->run(1);
 
