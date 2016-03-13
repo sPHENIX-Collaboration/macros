@@ -63,6 +63,10 @@
 # For example, select colour by particle ID
 #/vis/modeling/trajectories/create/drawByParticleID
 #/vis/modeling/trajectories/drawByParticleID-0/set e- red
+# remove low energy stuff
+/vis/filtering/trajectories/create/attributeFilter
+/vis/filtering/trajectories/attributeFilter-0/setAttribute IMag
+/vis/filtering/trajectories/attributeFilter-0/addInterval 2 MeV 1000 GeV
 #
 /vis/scene/endOfEventAction accumulate
 #
