@@ -1,6 +1,6 @@
 
 int Fun4All_G4_fsPHENIX(
-		       const int nEvents = 10,
+		       const int nEvents = 2,
 		       const char * inputFile = "/gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal1d/fieldmap/G4Hits_sPHENIX_e-_eta0_16GeV.root",
 		       const char * outputFile = "G4fsPHENIX.root"
 		       )
@@ -62,8 +62,8 @@ int Fun4All_G4_fsPHENIX(
   bool do_jet_reco = false;
   bool do_jet_eval = false; 
 
-  bool do_fwd_jet_reco = false;
-  bool do_fwd_jet_eval = false; 
+  bool do_fwd_jet_reco = true;
+  bool do_fwd_jet_eval = true;
 
   // fsPHENIX geometry
 
@@ -107,7 +107,8 @@ int Fun4All_G4_fsPHENIX(
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0); 
+//  se->Verbosity(0); // uncomment for batch production running with minimal output messages
+  se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
@@ -167,7 +168,7 @@ int Fun4All_G4_fsPHENIX(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
-      gen->set_eta_range(1.4, 4.0);
+      gen->set_eta_range(1.4, 3.0);
       //gen->set_eta_range(3.0, 3.0); //fsPHENIX FWD
       gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
       //gen->set_phi_range(TMath::Pi()/2-0.1, TMath::Pi()/2-0.1);
