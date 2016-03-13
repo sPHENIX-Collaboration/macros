@@ -364,6 +364,22 @@ int Fun4All_G4_fsPHENIX(
 
       se->End();
       std::cout << "All done" << std::endl;
+
+
+      std::cout << "==== Useful display commands ==" << std::endl;
+      cout << "draw axis: " << endl;
+      cout << " G4Cmd(\"/vis/scene/add/axes 0 0 0 50 cm\")" << endl;
+      cout << "zoom" << endl;
+      cout << " G4Cmd(\"/vis/viewer/zoom 1\")" << endl;
+      cout << "viewpoint:" << endl;
+      cout << " G4Cmd(\"/vis/viewer/set/viewpointThetaPhi 0 0\")" << endl;
+      cout << "panTo:" << endl;
+      cout << " G4Cmd(\"/vis/viewer/panTo 0 0 cm\")" << endl;
+      cout << "print to eps:" << endl;
+      cout << " G4Cmd(\"/vis/ogl/printEPS\")" << endl;
+      cout << "set background color:" << endl;
+      cout << " G4Cmd(\"/vis/viewer/set/background white\")" << endl;
+      std::cout << "===============================" << std::endl;
     }
   else
     {
@@ -376,4 +392,13 @@ int Fun4All_G4_fsPHENIX(
       gSystem->Exit(0);
     }
 
+}
+
+
+void
+G4Cmd(const char * cmd)
+{
+  Fun4AllServer *se = Fun4AllServer::instance();
+  PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
+  g4->ApplyCommand(cmd);
 }
