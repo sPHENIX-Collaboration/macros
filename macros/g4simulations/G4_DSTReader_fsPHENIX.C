@@ -104,11 +104,12 @@ G4DSTreader_fsPHENIX( const char * outputFile = "G4sPHENIXCells.root",//
 
       if (do_FGEM)
         {
-          ana->AddNode("GEMSTATION1");
-          ana->AddNode("GEMSTATION2");
-          ana->AddNode("GEMSTATION3");
+          ana->AddNode("FGEM_0");
+          ana->AddNode("FGEM_1");
+          ana->AddNode("FGEM_2");
+          ana->AddNode("FGEM_3");
+          ana->AddNode("FGEM_4");
         }
-
 
       ana->AddNode("BH_1");
       ana->AddNode("BH_FORWARD_PLUS");

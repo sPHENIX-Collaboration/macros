@@ -30,12 +30,12 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   double zpos;
   PHG4SectorSubsystem *gem;
 
-  make_GEM_station("FGEM", g4Reco, 17, 1.01, 2.7, N_Sector);
-  make_GEM_station("FGEM", g4Reco, 62, 2.15, 4.0, N_Sector);
+  make_GEM_station("FGEM_0", g4Reco, 17, 1.01, 2.7, N_Sector);
+  make_GEM_station("FGEM_1", g4Reco, 62, 2.15, 4.0, N_Sector);
 
   ///////////////////////////////////////////////////////////////////////////
 
-  name = "GEMSTATION1";
+  name = "FGEM_2";
   etamax = 4;
   etamin = min_eta;
   zpos = 1.2e2;
@@ -60,12 +60,13 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
 
   ///////////////////////////////////////////////////////////////////////////
 
-  name = "GEMSTATION2";
+  name = "FGEM_3";
   etamax = 4;
   etamin = min_eta;
   zpos = 1.6e2;
   gem = new PHG4SectorSubsystem(name.c_str());
 
+  gem->SuperDetector(name);
   gem->get_geometry().set_normal_polar_angle(tilt);
   gem->get_geometry().set_normal_start(
       zpos * PHG4Sector::Sector_Geometry::Unit_cm(), 0);
@@ -82,8 +83,8 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   gem->get_geometry().AddLayers_HBD_GEM();
   g4Reco->registerSubsystem(gem);
 
-  gem = new PHG4SectorSubsystem("GEMSTATION2_LowerEta");
-  gem->SuperDetector("GEMSTATION2");
+  gem = new PHG4SectorSubsystem(name + "_LowerEta");
+  gem->SuperDetector(name);
 
   zpos = zpos
       - (zpos * sin(tilt)
@@ -113,12 +114,13 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
 
   ///////////////////////////////////////////////////////////////////////////
 
-  name = "GEMSTATION3";
+  name = "FGEM_4";
   etamax = 4;
   etamin = min_eta;
   zpos = 2.75e2;
   gem = new PHG4SectorSubsystem(name.c_str());
 
+  gem->SuperDetector(name);
   gem->get_geometry().set_normal_polar_angle(tilt);
   gem->get_geometry().set_normal_start(
       zpos * PHG4Sector::Sector_Geometry::Unit_cm(), 0);
@@ -141,8 +143,8 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
               * tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(2) - tilt))
           * sin(tilt);
 
-  gem = new PHG4SectorSubsystem("GEMSTATION3_LowerEta");
-  gem->SuperDetector("GEMSTATION3");
+  gem = new PHG4SectorSubsystem(name + "_LowerEta");
+  gem->SuperDetector(name);
 
   gem->get_geometry().set_normal_polar_angle(
       (PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta)
