@@ -23,6 +23,7 @@ G4DSTreader_fsPHENIX( const char * outputFile = "G4sPHENIXCells.root",//
     bool do_hcalin_twr = true, //
     bool do_magnet = true, //
     bool do_hcalout_twr = true, //
+    bool do_FGEM = true, //
     bool do_FHCAL = true, //
     bool do_FHCAL_twr = true, //
     bool do_FEMC = true, //
@@ -99,6 +100,13 @@ G4DSTreader_fsPHENIX( const char * outputFile = "G4sPHENIXCells.root",//
           ana->AddNode("FEMC");
           if (absorberactive)
             ana->AddNode("ABSORBER_FEMC");
+        }
+
+      if (do_FGEM)
+        {
+          ana->AddNode("GEMSTATION1");
+          ana->AddNode("GEMSTATION2");
+          ana->AddNode("GEMSTATION3");
         }
 
 

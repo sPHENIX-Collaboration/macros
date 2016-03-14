@@ -8,7 +8,8 @@ void G4Init(bool do_svtx = true,
 	    bool do_hcalin = true,
 	    bool do_magnet = true,
 	    bool do_hcalout = true,
-	    bool do_pipe = true,
+      bool do_pipe = true,
+      bool do_FGEM = true,
 	    bool do_FEMC = true,
 	    bool do_FHCAL = true) {
 
@@ -56,6 +57,12 @@ void G4Init(bool do_svtx = true,
       HCalOuterInit();
     }
 
+  if (do_FGEM)
+    {
+      gROOT->LoadMacro("G4_FGEM_fsPHENIX.C");
+      FGEM_Init();
+    }
+
   if (do_FEMC)
     {
       gROOT->LoadMacro("G4_FEMC.C");
@@ -80,6 +87,7 @@ int G4Setup(const int absorberactive = 0,
 	    const bool do_magnet = true,
 	    const bool do_hcalout = true,
 	    const bool do_pipe = true,
+	    const bool do_FGEM = true,
 	    const bool do_FEMC = false,
 	    const bool do_FHCAL = false,
      	    const float magfield_rescale = 1.0) {
@@ -156,6 +164,12 @@ int G4Setup(const int absorberactive = 0,
   if (do_hcalout) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
 
   //----------------------------------------
+  // Forward tracking
+
+  if ( do_FGEM )
+    FGEMSetup(g4Reco);
+
+  //----------------------------------------
   // FEMC
 
   if ( do_FEMC )
@@ -192,6 +206,9 @@ int G4Setup(const int absorberactive = 0,
   flux_return_minus->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(flux_return_minus);
 
+  //----------------------------------------
+  // piston magnet
+  make_piston("magpiston", g4Reco);
 
   //----------------------------------------
   // BLACKHOLE
@@ -324,3 +341,68 @@ void DstCompress(Fun4AllDstOutputManager* out) {
   }
 }
 
+
+int
+make_piston(string name, PHG4Reco* g4Reco)
+{
+  const double zpos0 = 120.0;
+  const double zpos1 = 350.0;
+  const double beampipe_radius = 2.1;
+  const double number_of_wteeth = 100;
+  const double teeth_thickness = 0.3504 * 2; //2 X0
+  const double eta_inner = -log(tan(atan((beampipe_radius + 0.1) / zpos0) / 2));
+  const double eta_outter = 4.2;
+  const double eta_teeth_outter = 4.05;
+  double pos = zpos0 + (zpos1 - zpos0) / 2;
+  cout << "MAGNETIC PISTON:" << eta_inner << " " << eta_outter << " " << pos
+      << endl;
+
+  PHG4ConeSubsystem *magpiston = new PHG4ConeSubsystem("Piston", 0);
+  magpiston->SetZlength((zpos1 - zpos0) / 2);
+  magpiston->SetPlaceZ((zpos1 + zpos0) / 2);
+  magpiston->SetR1(beampipe_radius,
+      tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter)) * zpos0);
+  magpiston->SetR2(beampipe_radius,
+      tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter)) * zpos1);
+  magpiston->SetMaterial("G4_Fe");
+  magpiston->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(magpiston);
+
+//  PHG4ConeSubsystem *magpiston = new PHG4ConeSubsystem(name.c_str(), 1);
+//  magpiston->SetZlength((zpos1 - zpos0) / 2);
+//  magpiston->SetPlaceZ(pos);
+//  magpiston->Set_eta_range(eta_outter, eta_inner);
+//  magpiston->SetMaterial("G4_Fe");
+//  magpiston->SuperDetector(name.c_str());
+//  magpiston->SetActive(false);
+//  g4Reco->registerSubsystem(magpiston);
+
+  pos = zpos0 + 1.0 + teeth_thickness / 2;
+  for (int i = 0; i < number_of_wteeth; i++)
+    {
+      stringstream s;
+      s << name;
+      s << "_teeth_";
+      s << i;
+
+      magpiston = new PHG4ConeSubsystem(s.str(), i);
+      magpiston->SuperDetector(name);
+      magpiston->SetZlength(teeth_thickness / 2);
+      magpiston->SetPlaceZ(pos);
+      magpiston->SetR1(//
+          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter - .01 )) * (pos - teeth_thickness / 2),//
+          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_teeth_outter)) * (pos - teeth_thickness / 2) //
+          );
+      magpiston->SetR2(//
+          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter - .01 )) * (pos + teeth_thickness / 2),//
+          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter - .01 )) * (pos + teeth_thickness / 2) + .1//
+              );
+      magpiston->SetMaterial("G4_W");
+      magpiston->SuperDetector(name.c_str());
+      magpiston->SetActive(false);
+      magpiston->OverlapCheck(overlapcheck);
+      g4Reco->registerSubsystem(magpiston);
+      pos += ((320 - zpos0) / number_of_wteeth);
+    }
+  return 0;
+}
