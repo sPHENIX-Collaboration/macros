@@ -30,6 +30,9 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   double zpos;
   PHG4SectorSubsystem *gem;
 
+  make_GEM_station("FGEM", g4Reco, 17, 1.01, 2.7, N_Sector);
+  make_GEM_station("FGEM", g4Reco, 62, 2.15, 4.0, N_Sector);
+
   ///////////////////////////////////////////////////////////////////////////
 
   name = "GEMSTATION1";
@@ -197,7 +200,7 @@ AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem)
 
 int
 make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
-    double etamax)
+    double etamax,  const int N_Sector = 8)
 {
 
   cout
@@ -222,6 +225,8 @@ make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
   PHG4SectorSubsystem *gem;
   gem = new PHG4SectorSubsystem(name.c_str());
 
+  gem->SuperDetector(name);
+
   gem->get_geometry().set_normal_polar_angle(polar_angle);
   gem->get_geometry().set_normal_start(
       zpos * PHG4Sector::Sector_Geometry::Unit_cm());
@@ -229,8 +234,12 @@ make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
       PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamax));
   gem->get_geometry().set_max_polar_angle(
       PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamin));
+  gem->get_geometry().set_max_polar_edge(
+      PHG4Sector::Sector_Geometry::FlatEdge());
+  gem->get_geometry().set_min_polar_edge(
+      PHG4Sector::Sector_Geometry::FlatEdge());
+  gem->get_geometry().set_N_Sector(N_Sector);
   gem->get_geometry().set_material("G4_METHANE");
-  gem->get_geometry().set_N_Sector(1);
   gem->OverlapCheck(overlapcheck);
 
   AddLayers_MiniTPCDrift(gem);
