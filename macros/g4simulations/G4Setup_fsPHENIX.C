@@ -346,7 +346,7 @@ int
 make_piston(string name, PHG4Reco* g4Reco)
 {
   const double zpos0 = 120.0;
-  const double zpos1 = 350.0;
+  const double zpos1 = 335.9 - 5;
   const double beampipe_radius = 2.1;
   const double number_of_wteeth = 100;
   const double teeth_thickness = 0.3504 * 2; //2 X0
