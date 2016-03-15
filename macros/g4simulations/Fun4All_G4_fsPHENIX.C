@@ -99,8 +99,8 @@ int Fun4All_G4_fsPHENIX(
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
-  const string magfield = "/phenix/upgrades/decadal/fieldmaps/sPHENIX.2d.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
-  const float magfield_rescale = 1.4/1.5; // max 1.4T field
+  const string magfield = "/phenix/upgrades/decadal/fieldmaps/fsPHENIX.2d.root"; // fsPHENIX field map by Cesar Luiz da Silva <slash@rcf.rhic.bnl.gov>, sPHENIX + piston
+  const float magfield_rescale = 1.0; // already adjusted to 1.4T central field
 
   //---------------
   // Fun4All server
