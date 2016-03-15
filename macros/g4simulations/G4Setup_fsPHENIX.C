@@ -345,9 +345,14 @@ void DstCompress(Fun4AllDstOutputManager* out) {
 int
 make_piston(string name, PHG4Reco* g4Reco)
 {
-  const double zpos0 = 120.0;
-  const double zpos1 = 335.9 - 5;
+  const double zpos0 = 120.0;     // first large GEM station
+  const double zpos1 = 305 - 20;  // front of forward ECal/MPC
+  const double zpos2 = 335.9 - 10.2/2.; // front of the forward field endcap
+  const double calorimeter_hole_diamater =  2.2 * 4; // side length of the middle hole of MPC that can hold the piston. Also the max diameter of the piston in that region
+
   const double beampipe_radius = 2.1;
+
+  // teeth cone section specific
   const double number_of_wteeth = 100;
   const double teeth_thickness = 0.3504 * 2; //2 X0
   const double eta_inner = -log(tan(atan((beampipe_radius + 0.1) / zpos0) / 2));
