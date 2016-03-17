@@ -341,14 +341,13 @@ void DstCompress(Fun4AllDstOutputManager* out) {
   }
 }
 
-
 int
 make_piston(string name, PHG4Reco* g4Reco)
 {
-  const double zpos0 = 120.0;     // first large GEM station
-  const double zpos1 = 305 - 20;  // front of forward ECal/MPC
-  const double zpos2 = 335.9 - 10.2/2.; // front of the forward field endcap
-  const double calorimeter_hole_diamater =  2.2 * 4; // side length of the middle hole of MPC that can hold the piston. Also the max diameter of the piston in that region
+  const double zpos0 = 120.0; // first large GEM station
+  const double zpos1 = 305 - 20; // front of forward ECal/MPC
+  const double zpos2 = 335.9 - 10.2 / 2.; // front of the forward field endcap
+  const double calorimeter_hole_diamater = 9.92331 *2; // side length of the middle hole of MPC that can hold the piston. Also the max diameter of the piston in that region
 
   const double beampipe_radius = 2.1;
 
@@ -394,20 +393,41 @@ make_piston(string name, PHG4Reco* g4Reco)
       magpiston->SuperDetector(name);
       magpiston->SetZlength(teeth_thickness / 2);
       magpiston->SetPlaceZ(pos);
-      magpiston->SetR1(//
-          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter - .01 )) * (pos - teeth_thickness / 2),//
-          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_teeth_outter)) * (pos - teeth_thickness / 2) //
-          );
-      magpiston->SetR2(//
-          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter - .01 )) * (pos + teeth_thickness / 2),//
-          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter - .01 )) * (pos + teeth_thickness / 2) + .1//
+      magpiston->SetR1(
+          //
+          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter - .01))
+              * (pos - teeth_thickness / 2), //
+          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_teeth_outter))
+              * (pos - teeth_thickness / 2) //
+              );
+      magpiston->SetR2(
+          //
+          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter - .01))
+              * (pos + teeth_thickness / 2), //
+          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter - .01))
+              * (pos + teeth_thickness / 2) + .1 //
               );
       magpiston->SetMaterial("G4_W");
       magpiston->SuperDetector(name.c_str());
       magpiston->SetActive(false);
       magpiston->OverlapCheck(overlapcheck);
       g4Reco->registerSubsystem(magpiston);
-      pos += ((320 - zpos0) / number_of_wteeth);
+      pos += ((zpos1 - zpos0) / number_of_wteeth);
     }
+
+  // last piece connect to the field return
+  PHG4CylinderSubsystem *magpiston2 = new PHG4CylinderSubsystem(
+      "Piston_EndSection", 0);
+  magpiston2->SetLength(zpos2 - zpos1);
+  magpiston2->SuperDetector(name);
+  magpiston2->SetPosition(0, 0, (zpos2 + zpos1) / 2.);
+  magpiston2->SetRadius(beampipe_radius);
+  magpiston2->SetLengthViaRapidityCoverage(false);
+  magpiston2->SetThickness(calorimeter_hole_diamater / 2. - beampipe_radius);
+  magpiston2->SetMaterial("G4_Fe");
+  magpiston2->SetActive(false);
+  magpiston2->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(magpiston2);
+
   return 0;
 }
