@@ -185,7 +185,7 @@ int G4Setup(const int absorberactive = 0,
   PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
   flux_return_plus->SetLength(10.2);
   flux_return_plus->SetPosition(0,0,335.9);
-  flux_return_plus->SetRadius(5.0);
+  flux_return_plus->SetRadius(2.1);
   flux_return_plus->SetLengthViaRapidityCoverage(false);
   flux_return_plus->SetThickness(263.5-5.0);
   flux_return_plus->SetMaterial("G4_Fe");
@@ -197,7 +197,7 @@ int G4Setup(const int absorberactive = 0,
   PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
   flux_return_minus->SetLength(10.2);
   flux_return_minus->SetPosition(0,0,-335.9);
-  flux_return_minus->SetRadius(5.0);
+  flux_return_minus->SetRadius(2.1);
   flux_return_minus->SetLengthViaRapidityCoverage(false);
   flux_return_minus->SetThickness(263.5-5.0);
   flux_return_minus->SetMaterial("G4_Fe");
