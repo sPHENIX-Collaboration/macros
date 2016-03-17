@@ -67,6 +67,8 @@ int Fun4All_G4_fsPHENIX(
 
   // fsPHENIX geometry
 
+  bool do_FGEM = true;
+
   bool do_FEMC = true; 
   bool do_FEMC_cell = true; 
   bool do_FEMC_twr = true;  
@@ -95,7 +97,7 @@ int Fun4All_G4_fsPHENIX(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_fsPHENIX.C");
-  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FEMC,do_FHCAL);
+  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_FEMC,do_FHCAL);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
@@ -155,7 +157,7 @@ int Fun4All_G4_fsPHENIX(
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
       //gen->add_particles("e-",5); // mu+,e+,proton,pi+,Upsilon
       //gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
-      gen->add_particles("pi-",1); // mu-,e-,anti_proton,pi-
+      gen->add_particles("mu-",1); // mu-,e-,anti_proton,pi-
       if (readhepmc) {
 	gen->set_reuse_existing_vertex(true);
 	gen->set_existing_vertex_offset_vector(0.0,0.0,0.0);
@@ -186,7 +188,7 @@ int Fun4All_G4_fsPHENIX(
 
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
 	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
-	      do_FEMC, do_FHCAL,
+	      do_FGEM, do_FEMC, do_FHCAL,
 	      magfield_rescale);
       
     }
@@ -337,6 +339,7 @@ int Fun4All_G4_fsPHENIX(
           /*bool*/ do_hcalin_twr ,
           /*bool*/ do_magnet  ,
 	  /*bool*/ do_hcalout_twr,
+    /*bool*/ do_FGEM,
 	  /*bool*/ do_FHCAL,
 	  /*bool*/ do_FHCAL_twr,
 	  /*bool*/ do_FEMC,
