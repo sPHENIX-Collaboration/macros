@@ -1,6 +1,6 @@
 
 int Fun4All_G4_fsPHENIX(
-		       const int nEvents = 10,
+		       const int nEvents = 2,
 		       const char * inputFile = "/gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal1d/fieldmap/G4Hits_sPHENIX_e-_eta0_16GeV.root",
 		       const char * outputFile = "G4fsPHENIX.root"
 		       )
@@ -62,8 +62,8 @@ int Fun4All_G4_fsPHENIX(
   bool do_jet_reco = false;
   bool do_jet_eval = false; 
 
-  bool do_fwd_jet_reco = false;
-  bool do_fwd_jet_eval = false; 
+  bool do_fwd_jet_reco = true;
+  bool do_fwd_jet_eval = true;
 
   // fsPHENIX geometry
 
@@ -99,15 +99,16 @@ int Fun4All_G4_fsPHENIX(
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
-  const string magfield = "/phenix/upgrades/decadal/fieldmaps/sPHENIX.2d.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
-  const float magfield_rescale = 1.4/1.5; // max 1.4T field
+  const string magfield = "/phenix/upgrades/decadal/fieldmaps/fsPHENIX.2d.root"; // fsPHENIX field map by Cesar Luiz da Silva <slash@rcf.rhic.bnl.gov>, sPHENIX + piston
+  const float magfield_rescale = 1.0; // already adjusted to 1.4T central field
 
   //---------------
   // Fun4All server
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0); 
+//  se->Verbosity(0); // uncomment for batch production running with minimal output messages
+  se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
@@ -167,7 +168,7 @@ int Fun4All_G4_fsPHENIX(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
-      gen->set_eta_range(1.4, 4.0);
+      gen->set_eta_range(1.4, 3.0);
       //gen->set_eta_range(3.0, 3.0); //fsPHENIX FWD
       gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
       //gen->set_phi_range(TMath::Pi()/2-0.1, TMath::Pi()/2-0.1);
@@ -357,12 +358,28 @@ int Fun4All_G4_fsPHENIX(
   if (nEvents < 0)
     {
       PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
-      g4->ApplyCommand("/control/execute eic.mac");
+      g4->ApplyCommand("/control/execute vis.mac");
       //g4->StartGui();
       se->run(1);
 
       se->End();
       std::cout << "All done" << std::endl;
+
+
+      std::cout << "==== Useful display commands ==" << std::endl;
+      cout << "draw axis: " << endl;
+      cout << " G4Cmd(\"/vis/scene/add/axes 0 0 0 50 cm\")" << endl;
+      cout << "zoom" << endl;
+      cout << " G4Cmd(\"/vis/viewer/zoom 1\")" << endl;
+      cout << "viewpoint:" << endl;
+      cout << " G4Cmd(\"/vis/viewer/set/viewpointThetaPhi 0 0\")" << endl;
+      cout << "panTo:" << endl;
+      cout << " G4Cmd(\"/vis/viewer/panTo 0 0 cm\")" << endl;
+      cout << "print to eps:" << endl;
+      cout << " G4Cmd(\"/vis/ogl/printEPS\")" << endl;
+      cout << "set background color:" << endl;
+      cout << " G4Cmd(\"/vis/viewer/set/background white\")" << endl;
+      std::cout << "===============================" << std::endl;
     }
   else
     {
@@ -375,4 +392,13 @@ int Fun4All_G4_fsPHENIX(
       gSystem->Exit(0);
     }
 
+}
+
+
+void
+G4Cmd(const char * cmd)
+{
+  Fun4AllServer *se = Fun4AllServer::instance();
+  PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
+  g4->ApplyCommand(cmd);
 }

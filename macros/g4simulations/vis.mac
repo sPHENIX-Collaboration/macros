@@ -26,8 +26,9 @@
 # machines. You might have to play with it. GEANT prints out a
 # list of available graphics systems at some point.
 #/vis/open OGLIX
-/vis/open OGLSX
-/vis/viewer/set/viewpointThetaPhi 20 0
+/vis/open OGLSX 1200x900-0+0
+/vis/viewer/set/viewpointThetaPhi 240 -10
+/vis/viewer/addCutawayPlane 0 0 0 m 1 0 0
 # our world is 4x4 meters, the detector is about 1m across
 # zooming by 4 makes it fill the display
 /vis/viewer/zoom 1.5
@@ -62,6 +63,10 @@
 # For example, select colour by particle ID
 #/vis/modeling/trajectories/create/drawByParticleID
 #/vis/modeling/trajectories/drawByParticleID-0/set e- red
+# remove low energy stuff
+/vis/filtering/trajectories/create/attributeFilter
+/vis/filtering/trajectories/attributeFilter-0/setAttribute IMag
+/vis/filtering/trajectories/attributeFilter-0/addInterval 2 MeV 1000 GeV
 #
 /vis/scene/endOfEventAction accumulate
 #
