@@ -52,12 +52,30 @@ int Fun4All_G4_Prototype2(
   outerhcal->SuperDetector("OUTERHCAL");
   g4Reco->registerSubsystem(outerhcal);
 
-  PHG4Prototype2CryostatSubsystem *cryo = new PHG4Prototype2CryostatSubsystem("Cryo");
-  cryo->SetActive();
-  cryo->SetAbsorberActive();
-  cryo->OverlapCheck(true);
-  cryo->SuperDetector("CRYO");
-  g4Reco->registerSubsystem(cryo);
+  // Cryostat
+  PHG4BlockSubsystem *cryo1 = new PHG4BlockSubsystem("cryo1",1);
+  cryo1->SetSize(0.95,60.96,60.96);
+  cryo1->SetCenter(141.96+0.95/2.,0,0); // shift cryo1 so we do not create particles in its center
+  cryo1->SetMaterial("G4_Al");
+  cryo1->SetActive(); // it is an active volume - save G4Hits
+  cryo1->SuperDetector("CRYO");
+  g4Reco->registerSubsystem(cryo1);
+
+  PHG4BlockSubsystem *cryo2 = new PHG4BlockSubsystem("cryo2",2);
+  cryo2->SetSize(8.89,60.96,60.96);
+  cryo2->SetCenter(150.72+8.89/2.,0,0); // shift cryo2 so we do not create particles in its center
+  cryo2->SetMaterial("G4_Al");
+  cryo2->SetActive(); // it is an active volume - save G4Hits
+  cryo2->SuperDetector("CRYO");
+  g4Reco->registerSubsystem(cryo2);
+
+  PHG4BlockSubsystem *cryo3 = new PHG4BlockSubsystem("cryo3",3);
+  cryo3->SetSize(2.54,60.96,60.96);
+  cryo3->SetCenter(173.93+2.54/2.,0,0); // shift cryo3 so we do not create particles in its center
+  cryo3->SetMaterial("G4_Al");
+  cryo3->SetActive(); // it is an active volume - save G4Hits
+  cryo3->SuperDetector("CRYO");
+  g4Reco->registerSubsystem(cryo3);
   // BLACKHOLE
   
   // swallow all particles coming out of the backend of sPHENIX
@@ -79,9 +97,9 @@ int Fun4All_G4_Prototype2(
   G4HitNtuple *hit = new G4HitNtuple("G4HitNtuple","/phenix/scratch/pinkenbu/g4hitntuple.root");
   hit->AddNode("INNERHCAL", 0);
   hit->AddNode("OUTERHCAL", 1);
+  hit->AddNode("CRYO", 2);
   hit->AddNode("ABSORBER_INNERHCAL", 10);
   hit->AddNode("ABSORBER_OUTERHCAL", 11);
-  hit->AddNode("ABSORBER_CRYO", 12);
   se->registerSubsystem(hit);
 
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT","G4Prototype2.root");
