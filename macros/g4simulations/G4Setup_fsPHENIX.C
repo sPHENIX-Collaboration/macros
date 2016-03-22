@@ -344,12 +344,20 @@ void DstCompress(Fun4AllDstOutputManager* out) {
 int
 make_piston(string name, PHG4Reco* g4Reco)
 {
-  const double zpos0 = 120.0; // first large GEM station
+  double be_pipe_radius    = 2.16;   // 2.16 cm based on spec sheet
+  double be_pipe_thickness = 0.0760; // 760 um based on spec sheet
+  double be_pipe_length    = 80.0;   // +/- 40 cm
+
+  double al_pipe_radius    = 2.16;   // same as Be pipe
+  double al_pipe_thickness = 0.1600; // 1.6 mm based on spec
+  double al_pipe_length    = 88.3;   // extension beyond +/- 40 cm
+
+  const double zpos0 = al_pipe_length + be_pipe_length * 0.5; // first large GEM station
   const double zpos1 = 305 - 20; // front of forward ECal/MPC
   const double zpos2 = 335.9 - 10.2 / 2.; // front of the forward field endcap
   const double calorimeter_hole_diamater = 9.92331 *2; // side length of the middle hole of MPC that can hold the piston. Also the max diameter of the piston in that region
 
-  const double beampipe_radius = 2.1;
+  const double beampipe_radius = be_pipe_radius;
 
   // teeth cone section specific
   const double number_of_wteeth = 100;
@@ -358,8 +366,8 @@ make_piston(string name, PHG4Reco* g4Reco)
   const double eta_outter = 4.2;
   const double eta_teeth_outter = 4.05;
   double pos = zpos0 + (zpos1 - zpos0) / 2;
-  cout << "MAGNETIC PISTON:" << eta_inner << " " << eta_outter << " " << pos
-      << endl;
+//  cout << "MAGNETIC PISTON:" << eta_inner << " " << eta_outter << " " << pos
+//      << endl;
 
   PHG4ConeSubsystem *magpiston = new PHG4ConeSubsystem("Piston", 0);
   magpiston->SetZlength((zpos1 - zpos0) / 2);
@@ -412,7 +420,7 @@ make_piston(string name, PHG4Reco* g4Reco)
       magpiston->SetActive(false);
       magpiston->OverlapCheck(overlapcheck);
       g4Reco->registerSubsystem(magpiston);
-      pos += ((zpos1 - zpos0) / number_of_wteeth);
+      pos += ((zpos1 - zpos0 - 10) / number_of_wteeth);
     }
 
   // last piece connect to the field return
@@ -431,3 +439,4 @@ make_piston(string name, PHG4Reco* g4Reco)
 
   return 0;
 }
+
