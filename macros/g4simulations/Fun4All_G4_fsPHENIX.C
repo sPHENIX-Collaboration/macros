@@ -157,7 +157,7 @@ int Fun4All_G4_fsPHENIX(
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
       //gen->add_particles("e-",5); // mu+,e+,proton,pi+,Upsilon
       //gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
-      gen->add_particles("mu-",1); // mu-,e-,anti_proton,pi-
+      gen->add_particles("pi-",1); // mu-,e-,anti_proton,pi-
       if (readhepmc) {
 	gen->set_reuse_existing_vertex(true);
 	gen->set_existing_vertex_offset_vector(0.0,0.0,0.0);
