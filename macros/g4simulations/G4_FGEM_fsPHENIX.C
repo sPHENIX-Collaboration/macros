@@ -205,9 +205,9 @@ make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
     double etamax,  const int N_Sector = 8)
 {
 
-  cout
-      << "make_GEM_station - GEM construction with PHG4SectorSubsystem - make_GEM_station_EdgeReadout  of "
-      << name << endl;
+//  cout
+//      << "make_GEM_station - GEM construction with PHG4SectorSubsystem - make_GEM_station_EdgeReadout  of "
+//      << name << endl;
 
   double polar_angle = 0;
 
