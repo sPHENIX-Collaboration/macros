@@ -24,6 +24,9 @@ void Jet_FwdReco(int verbosity = 0) {
   JetReco *towerjetreco = new JetReco();
   towerjetreco->add_input(new TowerJetInput(Jet::FEMC_TOWER));
   towerjetreco->add_input(new TowerJetInput(Jet::FHCAL_TOWER));
+  towerjetreco->add_input(new TowerJetInput(Jet::CEMC_TOWER));
+  towerjetreco->add_input(new TowerJetInput(Jet::HCALIN_TOWER));
+  towerjetreco->add_input(new TowerJetInput(Jet::HCALOUT_TOWER));
   // towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2),"AntiKt_Tower_r02");
   towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3),"AntiKt_Tower_r03");
   // towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.4),"AntiKt_Tower_r04");
