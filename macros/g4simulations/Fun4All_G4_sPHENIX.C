@@ -136,9 +136,9 @@ int Fun4All_G4_sPHENIX(
     }
   else if (runpythia6)
     {
-      gSystem->Load("libPHPythia.so");
+      gSystem->Load("libPHPythia6.so");
 
-      PHPythia *pythia6 = new PHPythia();
+      PHPythia6 *pythia6 = new PHPythia6();
       pythia6->set_config_file("phpythia6.cfg");
       se->registerSubsystem(pythia6);
 
