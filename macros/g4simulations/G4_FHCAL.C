@@ -1,8 +1,5 @@
 using namespace std;
 
-// global macro parameters
-bool overlapcheck = false; // set to true if you want to check for overlaps
-
 void
 FHCALInit()
 {

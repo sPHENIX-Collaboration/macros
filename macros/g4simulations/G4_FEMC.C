@@ -1,8 +1,5 @@
 using namespace std;
 
-// global macro parameters
-bool overlapcheck = false; // set to true if you want to check for overlaps
-
 void
 FEMCInit()
 {
@@ -34,11 +31,15 @@ FEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
   ostringstream mapping_femc;
 
-  /* path to central copy of calibrations repositry */
-  mapping_femc << getenv("OFFLINE_MAIN") << "/share/calibrations";
-  mapping_femc << "/ForwardEcal/mapping/towerMap_FEMC_v005.txt";
+  // EIC ECAL
+  //femc->SetEICDetector(); 
+  //mapping_femc << getenv("OFFLINE_MAIN") << "/share/calibrations/ForwardEcal/mapping/towerMap_FEMC_v005.txt";
+
+  // fsPHENIX ECAL
+  femc->SetfsPHENIXDetector(); 
+  mapping_femc << getenv("OFFLINE_MAIN") << "/share/calibrations/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v001.txt";
+
   cout << mapping_femc.str() << endl;
-  //mapping_femc << "towerMap_FEMC_latest.txt";
 
   femc->SetTowerMappingFile( mapping_femc.str() );
   femc->OverlapCheck(overlapcheck);
@@ -56,9 +57,13 @@ void FEMC_Towers(int verbosity = 0) {
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_femc;
+  // EIC ECAL
+  //mapping_femc << getenv("OFFLINE_MAIN") <<
+  // 	"/share/calibrations/ForwardEcal/mapping/towerMap_FEMC_v005.txt";
+
+  // fsPHENIX ECAL
   mapping_femc << getenv("OFFLINE_MAIN") <<
-   	"/share/calibrations/ForwardEcal/mapping/towerMap_FEMC_v005.txt";
-  //mapping_femc << "towerMap_FEMC_latest.txt";
+   	"/share/calibrations/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v001.txt";
 
   RawTowerBuilderByHitIndex* tower_FEMC = new RawTowerBuilderByHitIndex("TowerBuilder_FEMC");
   tower_FEMC->Detector("FEMC");
@@ -101,7 +106,7 @@ void FEMC_Towers(int verbosity = 0) {
   TowerCalibration->Detector("FEMC");
   TowerCalibration->Verbosity(verbosity);
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration->set_calib_const_GeV_ADC(1.0/0.2949);  // calibrated with muons
+  TowerCalibration->set_calib_const_GeV_ADC(1.0);  // sanpling fraction = 1.0
   TowerCalibration->set_pedstal_ADC(0);
   se->registerSubsystem( TowerCalibration );
 
