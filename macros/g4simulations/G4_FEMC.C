@@ -40,7 +40,7 @@ FEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
   // fsPHENIX ECAL
   femc->SetfsPHENIXDetector(); 
-  mapping_femc << getenv("OFFLINE_MAIN") << "/share/calibrations/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v001.txt";
+  mapping_femc << getenv("OFFLINE_MAIN") << "/share/calibrations/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v002.txt";
 
   cout << mapping_femc.str() << endl;
 
@@ -66,7 +66,7 @@ void FEMC_Towers(int verbosity = 0) {
 
   // fsPHENIX ECAL
   mapping_femc << getenv("OFFLINE_MAIN") <<
-   	"/share/calibrations/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v001.txt";
+   	"/share/calibrations/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v002.txt";
 
   RawTowerBuilderByHitIndex* tower_FEMC = new RawTowerBuilderByHitIndex("TowerBuilder_FEMC");
   tower_FEMC->Detector("FEMC");
