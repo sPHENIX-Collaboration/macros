@@ -21,7 +21,7 @@ int Fun4All_G4_Prototype2(
   PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
   gen->add_particles("pi-", 1); // mu-,e-,anti_proton,pi-
   gen->set_vertex_distribution_mean(0.0, 0.0, 0);
-  gen->set_vertex_distribution_width(0.0, .3, 0.3); // 3x3 mm beam spot as measured in Si-telescope
+  gen->set_vertex_distribution_width(0.0, .3/2, .3/2); // 3x3 mm beam spot as measured in Si-telescope
   gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Gaus,
       PHG4SimpleEventGenerator::Gaus, PHG4SimpleEventGenerator::Gaus); // Gauss beam profile
   gen->set_eta_range(-.001, .001); // 1mrad angular divergence
