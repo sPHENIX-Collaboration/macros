@@ -16,18 +16,21 @@ int Fun4All_G4_Prototype2(
   //  se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
   rc->set_IntFlag("RANDOMSEED",12345);
-  PHG4ParticleGenerator *gen = new PHG4ParticleGenerator();
-  gen->set_name("geantino");
-  //  gen->set_name("proton");
-  gen->set_vtx(0, 0, 0);
-  //  gen->set_eta_range(0.297, 0.303);
-  gen->set_eta_range(-0.2, 0.2);
-  gen->set_mom_range(1.0, 1.0);
-  gen->set_z_range(0.,0.);
-  gen->set_phi_range(18/180.*TMath::Pi(), -16/180.*TMath::Pi());
-  //    gen->set_phi_range(-17./180.*TMath::Pi(),-7./180.*TMath::Pi());
-  //  se->registerSubsystem(gen);
 
+  // Test beam generator
+  PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
+  gen->add_particles("pi-", 1); // mu-,e-,anti_proton,pi-
+  gen->set_vertex_distribution_mean(0.0, 0.0, 0);
+  gen->set_vertex_distribution_width(0.0, .3, 0.3); // 3x3 mm beam spot as measured in Si-telescope
+  gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Gaus,
+      PHG4SimpleEventGenerator::Gaus, PHG4SimpleEventGenerator::Gaus); // Gauss beam profile
+  gen->set_eta_range(-.001, .001); // 1mrad angular divergence
+  gen->set_phi_range(-.001, .001); // 1mrad angular divergence
+  const double momentum = 32;
+  gen->set_p_range(momentum,momentum, momentum*2e-2); // 2% momentum smearing
+  se->registerSubsystem(gen);
+
+  // Simple single particle generator
   PHG4ParticleGun *gun = new PHG4ParticleGun();
   //  gun->set_name("anti_proton");
   //  gun->set_name("geantino");
@@ -38,7 +41,7 @@ int Fun4All_G4_Prototype2(
   // gun->AddParticle("geantino",1.7709,-0.4598,0.);
   // gun->AddParticle("geantino",2.5621,0.60964,0.);
   // gun->AddParticle("geantino",1.8121,0.253,0.);
-  se->registerSubsystem(gun);
+//  se->registerSubsystem(gun);
 
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->set_field(0);
@@ -53,9 +56,11 @@ int Fun4All_G4_Prototype2(
   cemc->SuperDetector("CEMC");
   cemc->SetAbsorberActive();
   cemc->OverlapCheck(true);
-  cemc->GetParameters().ReadFromFile("root", "./test_geom/");
+  cemc->GetParameters().ReadFromFile("xml", string(getenv("OFFLINE_MAIN")) + string("/share/calibrations/Prototype2/Geometry/") ); // geometry database
 //  cemc->GetParameters().set_double_param("z_rotation_degree", 15); // rotation around CG
   cemc->GetParameters().set_double_param("xpos", 105); // location in cm of EMCal CG. Update with final positioning of EMCal
+//  cemc->GetParameters().set_double_param("ypos", 0); // vertical shift
+//  cemc->GetParameters().set_double_param("zpos", 0); // horizontal shift
   g4Reco->registerSubsystem(cemc);
 
   //----------------------------------------
