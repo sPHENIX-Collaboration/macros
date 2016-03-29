@@ -1,5 +1,5 @@
 int Fun4All_G4_Prototype2(
-			  int nEvents = -1
+			  int nEvents = 1
 			  )
 {
 
@@ -7,6 +7,7 @@ int Fun4All_G4_Prototype2(
   gSystem->Load("libg4detectors");
   gSystem->Load("libg4testbench");
   gSystem->Load("libg4histos");
+  gSystem->Load("libg4eval.so");
 
   ///////////////////////////////////////////
   // Make the Server
@@ -38,8 +39,29 @@ int Fun4All_G4_Prototype2(
   // gun->AddParticle("geantino",2.5621,0.60964,0.);
   // gun->AddParticle("geantino",1.8121,0.253,0.);
   se->registerSubsystem(gun);
+
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->set_field(0);
+
+
+  //----------------------------------------
+  // EMCal G4
+  //----------------------------------------
+  PHG4SpacalPrototypeSubsystem *cemc;
+  cemc = new PHG4SpacalPrototypeSubsystem("CEMC");
+  cemc->SetActive();
+  cemc->SuperDetector("CEMC");
+  cemc->SetAbsorberActive();
+  cemc->OverlapCheck(true);
+  cemc->GetParameters().ReadFromFile("root", "./test_geom/");
+//  cemc->GetParameters().set_double_param("z_rotation_degree", 15); // rotation around CG
+  cemc->GetParameters().set_double_param("xpos", 105); // location in cm of EMCal CG. Update with final positioning of EMCal
+  g4Reco->registerSubsystem(cemc);
+
+  //----------------------------------------
+  // HCal G4
+  //----------------------------------------
+
   PHG4Prototype2InnerHcalSubsystem *innerhcal = new PHG4Prototype2InnerHcalSubsystem("HCalIn");
   innerhcal->SetActive();
   innerhcal->SetAbsorberActive();
@@ -114,6 +136,51 @@ int Fun4All_G4_Prototype2(
 
   se->registerSubsystem( g4Reco );
 
+  //----------------------------------------
+  // EMCal digitization
+  //----------------------------------------
+
+  PHG4FullProjSpacalCellReco *cemc_cells = new PHG4FullProjSpacalCellReco(
+      "CEMCCYLCELLRECO");
+  cemc_cells->Detector("CEMC");
+  cemc_cells->set_timing_window_size(60);
+  se->registerSubsystem(cemc_cells);
+
+  RawTowerBuilder *TowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
+  TowerBuilder->Detector("CEMC");
+  TowerBuilder->set_sim_tower_node_prefix("SIM");
+  se->registerSubsystem(TowerBuilder);
+
+  const double sampling_fraction = 0.0240372; //  +/-   8.54119e-05  from 15 Degree indenting 8 GeV electron showers
+  const double photoelectron_per_GeV = 500; //500 photon per total GeV deposition
+
+  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer(
+      "EmcRawTowerDigitizer");
+  TowerDigitizer->Detector("CEMC");
+  TowerDigitizer->set_digi_algorithm(
+      RawTowerDigitizer::kSimple_photon_digitalization);
+  TowerDigitizer->set_pedstal_central_ADC(0);
+  TowerDigitizer->set_pedstal_width_ADC(1);
+  TowerDigitizer->set_photonelec_ADC(1); //not simulating ADC discretization error
+  TowerDigitizer->set_photonelec_yield_visible_GeV(
+      photoelectron_per_GeV / sampling_fraction);
+  TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
+//  TowerDigitizer->Verbosity(10);
+  se->registerSubsystem(TowerDigitizer);
+
+  RawTowerCalibration *TowerCalibration = new RawTowerCalibration(
+      "EmcRawTowerCalibration");
+  TowerCalibration->Detector("CEMC");
+  TowerCalibration->set_calib_algorithm(
+      RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV);
+  TowerCalibration->set_pedstal_ADC(0);
+  TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
+  se->registerSubsystem(TowerCalibration);
+
+  //----------------------------------------
+  // HCal digitization
+  //----------------------------------------
   PHG4Prototype2HcalCellReco *hccell = new PHG4Prototype2HcalCellReco();
   hccell->Detector("INNERHCAL");
   se->registerSubsystem(hccell);
@@ -128,10 +195,13 @@ int Fun4All_G4_Prototype2(
 
   hcaltwr = new Prototype2RawTowerBuilder();
   hcaltwr->Detector("OUTERHCAL");
-  hcaltwr->Verbosity(2);
+//  hcaltwr->Verbosity(2);
   se->registerSubsystem(hcaltwr);
 
-  G4HitNtuple *hit = new G4HitNtuple("G4HitNtuple","/phenix/scratch/pinkenbu/g4hitntuple.root");
+  //----------------------
+  // G4HitNtuple
+  //----------------------
+  G4HitNtuple *hit = new G4HitNtuple("G4HitNtuple","g4hitntuple.root");
   hit->AddNode("INNERHCAL", 0);
   hit->AddNode("OUTERHCAL", 1);
   hit->AddNode("CRYO", 2);
@@ -139,6 +209,32 @@ int Fun4All_G4_Prototype2(
   hit->AddNode("ABSORBER_INNERHCAL", 10);
   hit->AddNode("ABSORBER_OUTERHCAL", 11);
   se->registerSubsystem(hit);
+
+  //----------------------
+  // save a comprehensive  evaluation file
+  //----------------------
+  PHG4DSTReader* ana = new PHG4DSTReader(
+      string("DSTReader.root"));
+  ana->set_save_particle(true);
+  ana->set_load_all_particle(false);
+  ana->set_load_active_particle(false);
+  ana->set_save_vertex(true);
+  ana->set_tower_zero_sup(-1000); // no zero suppression
+
+//  ana->AddNode("CEMC");
+//  if (absorberactive)
+//    {
+//      ana->AddNode("ABSORBER_CEMC");
+//    }
+  ana->AddTower("SIM_CEMC");
+  ana->AddTower("RAW_CEMC");
+  ana->AddTower("CALIB_CEMC");
+  ana->AddTower("OUTERHCAL");
+  ana->AddTower("INNERHCAL");
+
+  ana->AddNode("BlackHole");// add a G4Hit node
+
+  se->registerSubsystem(ana);
 
   // Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT","G4Prototype2.root");
   // se->registerOutputManager(out);
