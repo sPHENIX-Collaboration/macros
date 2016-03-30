@@ -72,43 +72,41 @@ void FEMC_Towers(int verbosity = 0) {
 
   se->registerSubsystem(tower_FEMC);
 
-  // const double FEMC_photoelectron_per_GeV = 500; //500 photon per total GeV deposition
+  // PbW crystals
+  RawTowerDigitizer *TowerDigitizer1 = new RawTowerDigitizer("FEMCRawTowerDigitizer1");
+  TowerDigitizer1->Detector("FEMC");
+  TowerDigitizer1->TowerType(1.0); 
+  TowerDigitizer1->Verbosity(verbosity);
+  TowerDigitizer1->set_digi_algorithm(RawTowerDigitizer::kNo_digitalization);
+  se->registerSubsystem( TowerDigitizer1 );
 
-  // RawTowerDigitizer *TowerDigitizer_FEMC = new RawTowerDigitizer("FEMCRawTowerDigitizer");
-  // TowerDigitizer_FEMC->Detector("FEMC");
-  // TowerDigitizer_FEMC->Verbosity(verbosity);
-  // TowerDigitizer_FEMC->set_raw_tower_node_prefix("RAW");
-  // TowerDigitizer_FEMC->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitalization);
-  // TowerDigitizer_FEMC->set_pedstal_central_ADC(0);
-  // TowerDigitizer_FEMC->set_pedstal_width_ADC(8);// eRD1 test beam setting
-  // TowerDigitizer_FEMC->set_photonelec_ADC(1);//not simulating ADC discretization error
-  // TowerDigitizer_FEMC->set_photonelec_yield_visible_GeV( FEMC_photoelectron_per_GeV );
-  // TowerDigitizer_FEMC->set_zero_suppression_ADC(16); // eRD1 test beam setting
+  // PbSc towers
+  RawTowerDigitizer *TowerDigitizer2 = new RawTowerDigitizer("FEMCRawTowerDigitizer2");
+  TowerDigitizer2->Detector("FEMC");
+  TowerDigitizer2->TowerType(2.0); 
+  TowerDigitizer2->Verbosity(verbosity);
+  TowerDigitizer2->set_digi_algorithm(RawTowerDigitizer::kNo_digitalization);
+  se->registerSubsystem( TowerDigitizer2 );
 
-  // se->registerSubsystem( TowerDigitizer_FEMC );
+  // PbW crystals
+  RawTowerCalibration *TowerCalibration1 = new RawTowerCalibration("FEMCRawTowerCalibration1");
+  TowerCalibration1->Detector("FEMC");
+  TowerCalibration1->TowerType(1.0);
+  TowerCalibration1->Verbosity(verbosity);
+  TowerCalibration1->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration1->set_calib_const_GeV_ADC(1.0);  // sampling fraction = 1.0
+  TowerCalibration1->set_pedstal_ADC(0);
+  se->registerSubsystem( TowerCalibration1 );
 
-  // RawTowerCalibration *TowerCalibration_FEMC = new RawTowerCalibration("FEMCRawTowerCalibration");
-  // TowerCalibration_FEMC->Detector("FEMC");
-  // TowerCalibration_FEMC->Verbosity(verbosity);
-  // TowerCalibration_FEMC->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  // TowerCalibration_FEMC->set_calib_const_GeV_ADC( 1. / FEMC_photoelectron_per_GeV );
-  // TowerCalibration_FEMC->set_pedstal_ADC( 0 );
-
-  // se->registerSubsystem( TowerCalibration_FEMC );
-
-  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("FEMCRawTowerDigitizer");
-  TowerDigitizer->Detector("FEMC");
-  TowerDigitizer->Verbosity(verbosity);
-  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kNo_digitalization);
-  se->registerSubsystem( TowerDigitizer );
-
-  RawTowerCalibration *TowerCalibration = new RawTowerCalibration("FEMCRawTowerCalibration");
-  TowerCalibration->Detector("FEMC");
-  TowerCalibration->Verbosity(verbosity);
-  TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration->set_calib_const_GeV_ADC(1.0);  // sanpling fraction = 1.0
-  TowerCalibration->set_pedstal_ADC(0);
-  se->registerSubsystem( TowerCalibration );
+  // PbSc towers
+  RawTowerCalibration *TowerCalibration2 = new RawTowerCalibration("FEMCRawTowerCalibration2");
+  TowerCalibration2->Detector("FEMC");
+  TowerCalibration2->TowerType(2.0);
+  TowerCalibration2->Verbosity(verbosity);
+  TowerCalibration2->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration2->set_calib_const_GeV_ADC(1.0/0.2949);  // sampling fraction = 0.2949
+  TowerCalibration2->set_pedstal_ADC(0);
+  se->registerSubsystem( TowerCalibration2 );
 
 }
 
