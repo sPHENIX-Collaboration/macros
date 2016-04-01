@@ -6,11 +6,11 @@ double Pipe(PHG4Reco* g4Reco,
 	    const int absorberactive = 0,
 	    int verbosity = 0) {
 
-  double be_pipe_radius    = 2.16;   // 2.16 cm based on spec sheet
+  double be_pipe_radius    = 2.0005; // 4.001 cm inner diameter from spec sheet
   double be_pipe_thickness = 0.0760; // 760 um based on spec sheet
   double be_pipe_length    = 80.0;   // +/- 40 cm
 
-  double al_pipe_radius    = 2.16;   // same as Be pipe
+  double al_pipe_radius    = 2.0005; // same as Be pipe
   double al_pipe_thickness = 0.1600; // 1.6 mm based on spec
   double al_pipe_length    = 88.3;   // extension beyond +/- 40 cm
   
