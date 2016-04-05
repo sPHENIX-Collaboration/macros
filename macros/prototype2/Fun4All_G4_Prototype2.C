@@ -268,8 +268,10 @@ int Fun4All_G4_Prototype2(
 //      ana->AddNode("ABSORBER_CEMC");
 //    }
   ana->AddTower("SIM_CEMC");
-  ana->AddTower("RAW_CEMC");
-  ana->AddTower("CALIB_CEMC");
+  ana->AddTower("RAW_LG_CEMC");
+  ana->AddTower("CALIB_LG_CEMC");// Low gain CEMC
+  ana->AddTower("RAW_HG_CEMC");
+  ana->AddTower("CALIB_HG_CEMC");// High gain CEMC
   ana->AddTower("OUTERHCAL");
   ana->AddTower("INNERHCAL");
 
