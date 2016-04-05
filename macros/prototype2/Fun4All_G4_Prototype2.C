@@ -145,43 +145,79 @@ int Fun4All_G4_Prototype2(
   // EMCal digitization
   //----------------------------------------
 
-  PHG4FullProjSpacalCellReco *cemc_cells = new PHG4FullProjSpacalCellReco(
-      "CEMCCYLCELLRECO");
-  cemc_cells->Detector("CEMC");
-  cemc_cells->set_timing_window_size(60);
-  se->registerSubsystem(cemc_cells);
+  {
+    PHG4FullProjSpacalCellReco *cemc_cells = new PHG4FullProjSpacalCellReco(
+        "CEMCCYLCELLRECO");
+    cemc_cells->Detector("CEMC");
+    cemc_cells->set_timing_window_size(60);
+    se->registerSubsystem(cemc_cells);
 
-  RawTowerBuilder *TowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
-  TowerBuilder->Detector("CEMC");
-  TowerBuilder->set_sim_tower_node_prefix("SIM");
-  se->registerSubsystem(TowerBuilder);
+    RawTowerBuilder *TowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
+    TowerBuilder->Detector("CEMC");
+    TowerBuilder->set_sim_tower_node_prefix("SIM");
+    se->registerSubsystem(TowerBuilder);
 
-  const double sampling_fraction = 0.0240372; //  +/-   8.54119e-05  from 15 Degree indenting 8 GeV electron showers
-  const double photoelectron_per_GeV = 500; //500 photon per total GeV deposition
+    const double sampling_fraction = 0.0233369; //  +/-   8.22211e-05  from 15 Degree indenting 8 GeV electron showers
+    const double photoelectron_per_GeV = 500; //500 photon per total GeV deposition
+    const double ADC_per_photoelectron_HG = 3.8; // From Sean Stoll, Mar 29
+    const double ADC_per_photoelectron_LG = 0.24; // From Sean Stoll, Mar 29
 
-  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer(
-      "EmcRawTowerDigitizer");
-  TowerDigitizer->Detector("CEMC");
-  TowerDigitizer->set_digi_algorithm(
-      RawTowerDigitizer::kSimple_photon_digitalization);
-  TowerDigitizer->set_pedstal_central_ADC(0);
-  TowerDigitizer->set_pedstal_width_ADC(1);
-  TowerDigitizer->set_photonelec_ADC(1); //not simulating ADC discretization error
-  TowerDigitizer->set_photonelec_yield_visible_GeV(
-      photoelectron_per_GeV / sampling_fraction);
-  TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
-//  TowerDigitizer->Verbosity(10);
-  se->registerSubsystem(TowerDigitizer);
+    // low gains
+    RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer(
+        "EmcRawTowerDigitizer");
+    TowerDigitizer->Detector("CEMC");
+    TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
+    TowerDigitizer->set_digi_algorithm(
+        RawTowerDigitizer::kSimple_photon_digitalization);
+    TowerDigitizer->set_pedstal_central_ADC(0);
+    TowerDigitizer->set_pedstal_width_ADC(1); // From Jin's guess. No EMCal High Gain data yet! TODO: update
+    TowerDigitizer->set_photonelec_ADC(1. / ADC_per_photoelectron_LG);
+    TowerDigitizer->set_photonelec_yield_visible_GeV(
+        photoelectron_per_GeV / sampling_fraction);
+    TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
+    se->registerSubsystem(TowerDigitizer);
 
-  RawTowerCalibration *TowerCalibration = new RawTowerCalibration(
-      "EmcRawTowerCalibration");
-  TowerCalibration->Detector("CEMC");
-  TowerCalibration->set_calib_algorithm(
-      RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV);
-  TowerCalibration->set_pedstal_ADC(0);
-  TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
-  se->registerSubsystem(TowerCalibration);
+    RawTowerCalibration *TowerCalibration = new RawTowerCalibration(
+        "EmcRawTowerCalibration");
+    TowerCalibration->Detector("CEMC");
+    TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
+    TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
+    TowerCalibration->set_calib_algorithm(
+        RawTowerCalibration::kSimple_linear_calibration);
+    TowerCalibration->set_calib_const_GeV_ADC(
+        1. / ADC_per_photoelectron_LG / photoelectron_per_GeV);
+    TowerCalibration->set_pedstal_ADC(0);
+    TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
+    se->registerSubsystem(TowerCalibration);
+
+    // high gains
+    RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer(
+        "EmcRawTowerDigitizer");
+    TowerDigitizer->Detector("CEMC");
+    TowerDigitizer->set_raw_tower_node_prefix("RAW_HG");
+    TowerDigitizer->set_digi_algorithm(
+        RawTowerDigitizer::kSimple_photon_digitalization);
+    TowerDigitizer->set_pedstal_central_ADC(0);
+    TowerDigitizer->set_pedstal_width_ADC(15); // From John Haggerty, Mar 29
+    TowerDigitizer->set_photonelec_ADC(1. / ADC_per_photoelectron_HG);
+    TowerDigitizer->set_photonelec_yield_visible_GeV(
+        photoelectron_per_GeV / sampling_fraction);
+    TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
+    se->registerSubsystem(TowerDigitizer);
+
+    RawTowerCalibration *TowerCalibration = new RawTowerCalibration(
+        "EmcRawTowerCalibration");
+    TowerCalibration->Detector("CEMC");
+    TowerCalibration->set_raw_tower_node_prefix("RAW_HG");
+    TowerCalibration->set_calib_tower_node_prefix("CALIB_HG");
+    TowerCalibration->set_calib_algorithm(
+        RawTowerCalibration::kSimple_linear_calibration);
+    TowerCalibration->set_calib_const_GeV_ADC(
+        1. / ADC_per_photoelectron_HG / photoelectron_per_GeV);
+    TowerCalibration->set_pedstal_ADC(0);
+    TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
+    se->registerSubsystem(TowerCalibration);
+  }
 
   //----------------------------------------
   // HCal digitization
