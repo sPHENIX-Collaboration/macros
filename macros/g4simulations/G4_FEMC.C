@@ -104,7 +104,7 @@ void FEMC_Towers(int verbosity = 0) {
   TowerCalibration2->TowerType(2);
   TowerCalibration2->Verbosity(verbosity);
   TowerCalibration2->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration2->set_calib_const_GeV_ADC(1.0/0.2949);  // sampling fraction = 0.2949
+  TowerCalibration2->set_calib_const_GeV_ADC(1.0/0.249);  // sampling fraction = 0.249 for e-
   TowerCalibration2->set_pedstal_ADC(0);
   se->registerSubsystem( TowerCalibration2 );
 
