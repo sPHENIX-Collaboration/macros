@@ -13,7 +13,7 @@ int Fun4All_G4_Prototype2(
   // Make the Server
   //////////////////////////////////////////
   Fun4AllServer *se = Fun4AllServer::instance();
-//    se->Verbosity(1);
+    se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
   rc->set_IntFlag("RANDOMSEED",12345);
 
@@ -71,13 +71,13 @@ int Fun4All_G4_Prototype2(
   innerhcal->SetActive();
   innerhcal->SetAbsorberActive();
   innerhcal->OverlapCheck(true);
-  innerhcal->SuperDetector("INNERHCAL");
+  innerhcal->SuperDetector("HCALIN");
   g4Reco->registerSubsystem(innerhcal);
   PHG4Prototype2OuterHcalSubsystem *outerhcal = new PHG4Prototype2OuterHcalSubsystem("HCalOut");
   outerhcal->SetActive();
   outerhcal->SetAbsorberActive();
   outerhcal->OverlapCheck(true);
-  outerhcal->SuperDetector("OUTERHCAL");
+  outerhcal->SuperDetector("HCALOUT");
   g4Reco->registerSubsystem(outerhcal);
 
   // Cryostat from engineering drawing
