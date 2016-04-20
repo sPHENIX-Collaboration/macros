@@ -223,19 +223,19 @@ int Fun4All_G4_Prototype2(
   // HCal digitization
   //----------------------------------------
   PHG4Prototype2HcalCellReco *hccell = new PHG4Prototype2HcalCellReco();
-  hccell->Detector("INNERHCAL");
+  hccell->Detector("HCALIN");
   se->registerSubsystem(hccell);
 
   hccell = new PHG4Prototype2HcalCellReco();
-  hccell->Detector("OUTERHCAL");
+  hccell->Detector("HCALOUT");
   se->registerSubsystem(hccell);
 
   Prototype2RawTowerBuilder *hcaltwr = new Prototype2RawTowerBuilder();
-  hcaltwr->Detector("INNERHCAL");
+  hcaltwr->Detector("HCALIN");
   se->registerSubsystem(hcaltwr);
 
   hcaltwr = new Prototype2RawTowerBuilder();
-  hcaltwr->Detector("OUTERHCAL");
+  hcaltwr->Detector("HCALOUT");
 //  hcaltwr->Verbosity(2);
   se->registerSubsystem(hcaltwr);
 
@@ -243,8 +243,8 @@ int Fun4All_G4_Prototype2(
   // G4HitNtuple
   //----------------------
   G4HitNtuple *hit = new G4HitNtuple("G4HitNtuple","g4hitntuple.root");
-  hit->AddNode("INNERHCAL", 0);
-  hit->AddNode("OUTERHCAL", 1);
+  hit->AddNode("HCALIN", 0);
+  hit->AddNode("HCALOUT", 1);
   hit->AddNode("CRYO", 2);
   hit->AddNode("BlackHole", 3);
   hit->AddNode("ABSORBER_INNERHCAL", 10);
@@ -272,8 +272,8 @@ int Fun4All_G4_Prototype2(
   ana->AddTower("CALIB_LG_CEMC");// Low gain CEMC
   ana->AddTower("RAW_HG_CEMC");
   ana->AddTower("CALIB_HG_CEMC");// High gain CEMC
-  ana->AddTower("OUTERHCAL");
-  ana->AddTower("INNERHCAL");
+  ana->AddTower("SIM_HCALOUT");
+  ana->AddTower("SIM_HCALIN");
 
   ana->AddNode("BlackHole");// add a G4Hit node
 
