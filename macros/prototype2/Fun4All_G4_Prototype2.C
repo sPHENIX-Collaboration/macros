@@ -19,9 +19,9 @@ int Fun4All_G4_Prototype2(
 
   // Test beam generator
   PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-  gen->add_particles("pi-", 1); // mu-,e-,anti_proton,pi-
+  gen->add_particles("mu-", 1); // mu-,e-,anti_proton,pi-
   gen->set_vertex_distribution_mean(0.0, 0.0, 0);
-  gen->set_vertex_distribution_width(0.0, .3/2, .3/2); // 3x3 mm beam spot as measured in Si-telescope
+  gen->set_vertex_distribution_width(0.0, .7, .7); // Rough beam profile size @ 16 GeV measured by Abhisek
   gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Gaus,
       PHG4SimpleEventGenerator::Gaus, PHG4SimpleEventGenerator::Gaus); // Gauss beam profile
   gen->set_eta_range(-.001, .001); // 1mrad angular divergence
@@ -58,9 +58,9 @@ int Fun4All_G4_Prototype2(
   cemc->OverlapCheck(true);
   cemc->GetParameters().ReadFromFile("xml", string(getenv("OFFLINE_MAIN")) + string("/share/calibrations/Prototype2/Geometry/") ); // geometry database
 //  cemc->GetParameters().set_double_param("z_rotation_degree", 15); // rotation around CG
-  cemc->GetParameters().set_double_param("xpos", 105); // location in cm of EMCal CG. Update with final positioning of EMCal
-  cemc->GetParameters().set_double_param("ypos", 5.5); // put it some where in UIUC blocks
-  cemc->GetParameters().set_double_param("zpos", 5.5); // put it some where in UIUC blocks
+  cemc->GetParameters().set_double_param("xpos", (116.77 + 137.0)*.5 - 26.5 - 10.2); // location in cm of EMCal CG. Updated with final positioning of EMCal
+  cemc->GetParameters().set_double_param("ypos", 4); // put it some where in UIUC blocks
+  cemc->GetParameters().set_double_param("zpos", 4); // put it some where in UIUC blocks
   g4Reco->registerSubsystem(cemc);
 
   //----------------------------------------
@@ -70,12 +70,14 @@ int Fun4All_G4_Prototype2(
   PHG4Prototype2InnerHcalSubsystem *innerhcal = new PHG4Prototype2InnerHcalSubsystem("HCalIn");
   innerhcal->SetActive();
   innerhcal->SetAbsorberActive();
+  innerhcal->SetAbsorberTruth(1);
   innerhcal->OverlapCheck(true);
   innerhcal->SuperDetector("HCALIN");
   g4Reco->registerSubsystem(innerhcal);
   PHG4Prototype2OuterHcalSubsystem *outerhcal = new PHG4Prototype2OuterHcalSubsystem("HCalOut");
   outerhcal->SetActive();
   outerhcal->SetAbsorberActive();
+  outerhcal->SetAbsorberTruth(1);
   outerhcal->OverlapCheck(true);
   outerhcal->SuperDetector("HCALOUT");
   g4Reco->registerSubsystem(outerhcal);
@@ -272,8 +274,8 @@ int Fun4All_G4_Prototype2(
   ana->AddTower("CALIB_LG_CEMC");// Low gain CEMC
   ana->AddTower("RAW_HG_CEMC");
   ana->AddTower("CALIB_HG_CEMC");// High gain CEMC
-  ana->AddTower("SIM_HCALOUT");
-  ana->AddTower("SIM_HCALIN");
+  ana->AddTower("HCALOUT");
+  ana->AddTower("HCALIN");
 
   ana->AddNode("BlackHole");// add a G4Hit node
 
