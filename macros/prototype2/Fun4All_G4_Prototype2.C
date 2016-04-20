@@ -13,7 +13,7 @@ int Fun4All_G4_Prototype2(
   // Make the Server
   //////////////////////////////////////////
   Fun4AllServer *se = Fun4AllServer::instance();
-  //  se->Verbosity(1);
+//    se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
   rc->set_IntFlag("RANDOMSEED",12345);
 
@@ -59,8 +59,8 @@ int Fun4All_G4_Prototype2(
   cemc->GetParameters().ReadFromFile("xml", string(getenv("OFFLINE_MAIN")) + string("/share/calibrations/Prototype2/Geometry/") ); // geometry database
 //  cemc->GetParameters().set_double_param("z_rotation_degree", 15); // rotation around CG
   cemc->GetParameters().set_double_param("xpos", 105); // location in cm of EMCal CG. Update with final positioning of EMCal
-//  cemc->GetParameters().set_double_param("ypos", 0); // vertical shift
-//  cemc->GetParameters().set_double_param("zpos", 0); // horizontal shift
+  cemc->GetParameters().set_double_param("ypos", 5.5); // put it some where in UIUC blocks
+  cemc->GetParameters().set_double_param("zpos", 5.5); // put it some where in UIUC blocks
   g4Reco->registerSubsystem(cemc);
 
   //----------------------------------------
