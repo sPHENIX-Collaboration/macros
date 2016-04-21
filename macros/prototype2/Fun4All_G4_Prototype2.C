@@ -314,9 +314,9 @@ int Fun4All_G4_Prototype2(
   //----------------------------------------
   // HCal calibration
   //----------------------------------------
-  // 32 GeV Muon scan
-  const double visible_sample_fraction_HCALIN = 0.0782311; //   +/-   0.0212201
-  const double visible_sample_fraction_HCALOUT = 0.0305822; //  +/-   0.00714456
+  // 32 GeV Pi+ scan
+  const double visible_sample_fraction_HCALIN = 7.19505e-02 ;  1.34152e-02
+  const double visible_sample_fraction_HCALOUT = 0.0313466 ; //  +/-   0.0067744
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration(
       "EmcRawTowerCalibration");
