@@ -1,5 +1,5 @@
 int Fun4All_G4_Prototype2(
-			  int nEvents = 100
+			  int nEvents = 1
 			  )
 {
 
@@ -14,13 +14,13 @@ int Fun4All_G4_Prototype2(
   // Make the Server
   //////////////////////////////////////////
   Fun4AllServer *se = Fun4AllServer::instance();
-    se->Verbosity(1);
+  //  se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
   rc->set_IntFlag("RANDOMSEED",12345);
 
   // Test beam generator
   PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-  gen->add_particles("mu-", 1); // mu-,e-,anti_proton,pi-
+  gen->add_particles("pi-", 1); // mu-,e-,anti_proton,pi-
   gen->set_vertex_distribution_mean(0.0, 0.0, 0);
   gen->set_vertex_distribution_width(0.0, .7, .7); // Rough beam profile size @ 16 GeV measured by Abhisek
   gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Gaus,
