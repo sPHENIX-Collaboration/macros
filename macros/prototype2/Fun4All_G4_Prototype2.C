@@ -8,6 +8,7 @@ int Fun4All_G4_Prototype2(
   gSystem->Load("libg4testbench");
   gSystem->Load("libg4histos");
   gSystem->Load("libg4eval.so");
+  gSystem->Load("libqa_modules");
 
   ///////////////////////////////////////////
   // Make the Server
@@ -21,7 +22,7 @@ int Fun4All_G4_Prototype2(
   PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
   gen->add_particles("pi-", 1); // mu-,e-,anti_proton,pi-
   gen->set_vertex_distribution_mean(0.0, 0.0, 0);
-  gen->set_vertex_distribution_width(0.0, .3/2, .3/2); // 3x3 mm beam spot as measured in Si-telescope
+  gen->set_vertex_distribution_width(0.0, .7, .7); // Rough beam profile size @ 16 GeV measured by Abhisek
   gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Gaus,
       PHG4SimpleEventGenerator::Gaus, PHG4SimpleEventGenerator::Gaus); // Gauss beam profile
   gen->set_eta_range(-.001, .001); // 1mrad angular divergence
@@ -58,9 +59,9 @@ int Fun4All_G4_Prototype2(
   cemc->OverlapCheck(true);
   cemc->GetParameters().ReadFromFile("xml", string(getenv("OFFLINE_MAIN")) + string("/share/calibrations/Prototype2/Geometry/") ); // geometry database
 //  cemc->GetParameters().set_double_param("z_rotation_degree", 15); // rotation around CG
-  cemc->GetParameters().set_double_param("xpos", 105); // location in cm of EMCal CG. Update with final positioning of EMCal
-//  cemc->GetParameters().set_double_param("ypos", 0); // vertical shift
-//  cemc->GetParameters().set_double_param("zpos", 0); // horizontal shift
+  cemc->GetParameters().set_double_param("xpos", (116.77 + 137.0)*.5 - 26.5 - 10.2); // location in cm of EMCal CG. Updated with final positioning of EMCal
+  cemc->GetParameters().set_double_param("ypos", 4); // put it some where in UIUC blocks
+  cemc->GetParameters().set_double_param("zpos", 4); // put it some where in UIUC blocks
   g4Reco->registerSubsystem(cemc);
 
   //----------------------------------------
@@ -70,14 +71,16 @@ int Fun4All_G4_Prototype2(
   PHG4Prototype2InnerHcalSubsystem *innerhcal = new PHG4Prototype2InnerHcalSubsystem("HCalIn");
   innerhcal->SetActive();
   innerhcal->SetAbsorberActive();
+  innerhcal->SetAbsorberTruth(1);
   innerhcal->OverlapCheck(true);
-  innerhcal->SuperDetector("INNERHCAL");
+  innerhcal->SuperDetector("HCALIN");
   g4Reco->registerSubsystem(innerhcal);
   PHG4Prototype2OuterHcalSubsystem *outerhcal = new PHG4Prototype2OuterHcalSubsystem("HCalOut");
   outerhcal->SetActive();
   outerhcal->SetAbsorberActive();
+  outerhcal->SetAbsorberTruth(1);
   outerhcal->OverlapCheck(true);
-  outerhcal->SuperDetector("OUTERHCAL");
+  outerhcal->SuperDetector("HCALOUT");
   g4Reco->registerSubsystem(outerhcal);
 
   // Cryostat from engineering drawing
@@ -220,35 +223,172 @@ int Fun4All_G4_Prototype2(
   }
 
   //----------------------------------------
-  // HCal digitization
+  // HCal towering
   //----------------------------------------
   PHG4Prototype2HcalCellReco *hccell = new PHG4Prototype2HcalCellReco();
-  hccell->Detector("INNERHCAL");
+  hccell->Detector("HCALIN");
   se->registerSubsystem(hccell);
 
   hccell = new PHG4Prototype2HcalCellReco();
-  hccell->Detector("OUTERHCAL");
+  hccell->Detector("HCALOUT");
   se->registerSubsystem(hccell);
 
   Prototype2RawTowerBuilder *hcaltwr = new Prototype2RawTowerBuilder();
-  hcaltwr->Detector("INNERHCAL");
+  hcaltwr->Detector("HCALIN");
+  hcaltwr->set_sim_tower_node_prefix("SIM");
   se->registerSubsystem(hcaltwr);
 
   hcaltwr = new Prototype2RawTowerBuilder();
-  hcaltwr->Detector("OUTERHCAL");
-//  hcaltwr->Verbosity(2);
+  hcaltwr->Detector("HCALOUT");
+  hcaltwr->set_sim_tower_node_prefix("SIM");
   se->registerSubsystem(hcaltwr);
 
+  //----------------------------------------
+  // HCal digitization
+  //----------------------------------------
+//  From: Abhisek Sen [mailto:sen.abhisek@gmail.com]
+//  Sent: Tuesday, April 19, 2016 10:55 PM
+//  To: Huang, Jin <jhuang@bnl.gov>; Haggerty, John <haggerty@bnl.gov>
+
+//  HCALIN:
+//     1/5 pixel / HG ADC channel
+//     32/5 pixel / LG ADC channel
+//     0.4 MeV/ LG ADC
+//     0.4/32 MeV/ HG ADC
+
+//  HCALOUT:
+//     1/5 pixel / HG ADC channel
+//     16/5 pixel / LG ADC channel
+//     0.2 MeV/ LG ADC
+//     0.2/16 MeV/ HG ADC
+
+  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer(
+      "EmcRawTowerDigitizer");
+  TowerDigitizer->Detector("HCALIN");
+  TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
+  TowerDigitizer->set_digi_algorithm(
+      RawTowerDigitizer::kSimple_photon_digitalization);
+  TowerDigitizer->set_pedstal_central_ADC(0);
+  TowerDigitizer->set_pedstal_width_ADC(1); // From Jin's guess. No EMCal High Gain data yet! TODO: update
+  TowerDigitizer->set_photonelec_ADC(32. / 5.);
+  TowerDigitizer->set_photonelec_yield_visible_GeV(32. / 5 / (0.4e-3));
+  TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
+  se->registerSubsystem(TowerDigitizer);
+
+  TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
+  TowerDigitizer->Detector("HCALIN");
+  TowerDigitizer->set_raw_tower_node_prefix("RAW_HG");
+  TowerDigitizer->set_digi_algorithm(
+      RawTowerDigitizer::kSimple_photon_digitalization);
+  TowerDigitizer->set_pedstal_central_ADC(0);
+  TowerDigitizer->set_pedstal_width_ADC(1); // From Jin's guess. No EMCal High Gain data yet! TODO: update
+  TowerDigitizer->set_photonelec_ADC(1. / 5.);
+  TowerDigitizer->set_photonelec_yield_visible_GeV(1. / 5 / (0.4e-3 / 32));
+  TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
+  se->registerSubsystem(TowerDigitizer);
+
+  TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
+  TowerDigitizer->Detector("HCALOUT");
+  TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
+  TowerDigitizer->set_digi_algorithm(
+      RawTowerDigitizer::kSimple_photon_digitalization);
+  TowerDigitizer->set_pedstal_central_ADC(0);
+  TowerDigitizer->set_pedstal_width_ADC(1); // From Jin's guess. No EMCal High Gain data yet! TODO: update
+  TowerDigitizer->set_photonelec_ADC(16. / 5.);
+  TowerDigitizer->set_photonelec_yield_visible_GeV(16. / 5 / (0.2e-3));
+  TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
+  se->registerSubsystem(TowerDigitizer);
+
+  TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
+  TowerDigitizer->Detector("HCALOUT");
+  TowerDigitizer->set_raw_tower_node_prefix("RAW_HG");
+  TowerDigitizer->set_digi_algorithm(
+      RawTowerDigitizer::kSimple_photon_digitalization);
+  TowerDigitizer->set_pedstal_central_ADC(0);
+  TowerDigitizer->set_pedstal_width_ADC(1); // From Jin's guess. No EMCal High Gain data yet! TODO: update
+  TowerDigitizer->set_photonelec_ADC(1. / 5.);
+  TowerDigitizer->set_photonelec_yield_visible_GeV(1. / 5 / (0.2e-3 / 16));
+  TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
+  se->registerSubsystem(TowerDigitizer);
+
+  //----------------------------------------
+  // HCal calibration
+  //----------------------------------------
+  // 32 GeV Pi+ scan
+  const double visible_sample_fraction_HCALIN = 7.19505e-02 ;  1.34152e-02
+  const double visible_sample_fraction_HCALOUT = 0.0313466 ; //  +/-   0.0067744
+
+  RawTowerCalibration *TowerCalibration = new RawTowerCalibration(
+      "EmcRawTowerCalibration");
+  TowerCalibration->Detector("HCALIN");
+  TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
+  TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
+  TowerCalibration->set_calib_algorithm(
+      RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration->set_calib_const_GeV_ADC(
+      0.4e-3 / visible_sample_fraction_HCALIN);
+  TowerCalibration->set_pedstal_ADC(0);
+  TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
+  se->registerSubsystem(TowerCalibration);
+
+  TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
+  TowerCalibration->Detector("HCALIN");
+  TowerCalibration->set_raw_tower_node_prefix("RAW_HG");
+  TowerCalibration->set_calib_tower_node_prefix("CALIB_HG");
+  TowerCalibration->set_calib_algorithm(
+      RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration->set_calib_const_GeV_ADC(
+      0.4e-3 / 32 / visible_sample_fraction_HCALIN);
+  TowerCalibration->set_pedstal_ADC(0);
+  TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
+  se->registerSubsystem(TowerCalibration);
+
+  TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
+  TowerCalibration->Detector("HCALOUT");
+  TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
+  TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
+  TowerCalibration->set_calib_algorithm(
+      RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration->set_calib_const_GeV_ADC(
+      0.2e-3 / visible_sample_fraction_HCALOUT);
+  TowerCalibration->set_pedstal_ADC(0);
+  TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
+  se->registerSubsystem(TowerCalibration);
+
+  TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
+  TowerCalibration->Detector("HCALOUT");
+  TowerCalibration->set_raw_tower_node_prefix("RAW_HG");
+  TowerCalibration->set_calib_tower_node_prefix("CALIB_HG");
+  TowerCalibration->set_calib_algorithm(
+      RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration->set_calib_const_GeV_ADC(
+      0.2e-3 / 16 / visible_sample_fraction_HCALOUT);
+  TowerCalibration->set_pedstal_ADC(0);
+  TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
+  se->registerSubsystem(TowerCalibration);
+
+  //----------------------
+  // QA Histograms
+  //----------------------
+  se->registerSubsystem(
+      new QAG4SimulationCalorimeter("CEMC",
+          QAG4SimulationCalorimeter::kProcessG4Hit));
+  se->registerSubsystem(
+      new QAG4SimulationCalorimeter("HCALIN",
+          QAG4SimulationCalorimeter::kProcessG4Hit));
+  se->registerSubsystem(
+      new QAG4SimulationCalorimeter("HCALOUT",
+          QAG4SimulationCalorimeter::kProcessG4Hit));
   //----------------------
   // G4HitNtuple
   //----------------------
   G4HitNtuple *hit = new G4HitNtuple("G4HitNtuple","g4hitntuple.root");
-  hit->AddNode("INNERHCAL", 0);
-  hit->AddNode("OUTERHCAL", 1);
+  hit->AddNode("HCALIN", 0);
+  hit->AddNode("HCALOUT", 1);
   hit->AddNode("CRYO", 2);
   hit->AddNode("BlackHole", 3);
-  hit->AddNode("ABSORBER_INNERHCAL", 10);
-  hit->AddNode("ABSORBER_OUTERHCAL", 11);
+  hit->AddNode("ABSORBER_HCALIN", 10);
+  hit->AddNode("ABSORBER_HCALOUT", 11);
   se->registerSubsystem(hit);
 
   //----------------------
@@ -272,8 +412,19 @@ int Fun4All_G4_Prototype2(
   ana->AddTower("CALIB_LG_CEMC");// Low gain CEMC
   ana->AddTower("RAW_HG_CEMC");
   ana->AddTower("CALIB_HG_CEMC");// High gain CEMC
-  ana->AddTower("OUTERHCAL");
-  ana->AddTower("INNERHCAL");
+
+  ana->AddTower("SIM_HCALOUT");
+  ana->AddTower("SIM_HCALIN");
+
+  ana->AddTower("RAW_LG_HCALIN");
+  ana->AddTower("RAW_HG_HCALIN");
+  ana->AddTower("RAW_LG_HCALOUT");
+  ana->AddTower("RAW_HG_HCALOUT");
+
+  ana->AddTower("CALIB_LG_HCALIN");
+  ana->AddTower("CALIB_HG_HCALIN");
+  ana->AddTower("CALIB_LG_HCALOUT");
+  ana->AddTower("CALIB_HG_HCALOUT");
 
   ana->AddNode("BlackHole");// add a G4Hit node
 
@@ -291,6 +442,10 @@ int Fun4All_G4_Prototype2(
   se->run(nEvents);
 
   se->End();
+
+  QAHistManagerDef::saveQARootFile("G4Prototype2_qa.root");
+
+
   //   std::cout << "All done" << std::endl;
     delete se;
 //   return 0;
