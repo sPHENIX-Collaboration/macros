@@ -19,7 +19,7 @@ void Bbc_Reco(int verbosity = 0) {
   //---------------
 
   gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4vertex.so");
+  gSystem->Load("libg4bbc.so");
 
   //---------------
   // Fun4All server
