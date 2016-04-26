@@ -106,16 +106,25 @@ Fun4All_TestBeam(int nEvents = 100,
   se->registerSubsystem(gunpack);
 
   calib = new CaloCalibration("C1");
+  calib->GetCalibrationParameters().set_int_param("calib_const_scale", -1);
   se->registerSubsystem(calib);
 
+  // more info see https://wiki.bnl.gov/sPHENIX/index.php/T-1044#Cerenkov_Counters
   gunpack = new GenericUnpackPRDF("C2");
 // unpack->Verbosity(1);
   gunpack->add_channel(second_packet_id, 25, 0); //25 Cerenkov 2 Inner
   gunpack->add_channel(second_packet_id, 26, 1); //26  Cerenkov 2 Outer
+  gunpack->add_channel(second_packet_id, 22, 10); //Channel 22 C2inner earlier copy added before run 2210
+  gunpack->add_channel(second_packet_id, 23, 11); //Channel 23 C2outer earlier copy added before run 2210
   se->registerSubsystem(gunpack);
 
   calib = new CaloCalibration("C2");
   calib->GetCalibrationParameters().set_int_param("calib_const_scale", 1);
+  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", +1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", -1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row10", -1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row11", +1);
   se->registerSubsystem(calib);
 
 //  John H. : should be 19, 20, 21 and the other channels are a litle permuted from  what I thought
