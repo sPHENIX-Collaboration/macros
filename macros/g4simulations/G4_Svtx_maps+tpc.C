@@ -139,10 +139,10 @@ void Svtx_Cells(int verbosity = 0)
   //-----------
 
   // 50 micron pixels + 60 micron strips
-  double svxcellsizex[2] = {0.0028, 0.0028, 0.0028};
+  double svxcellsizex[3] = {0.0028, 0.0028, 0.0028};
 
   // 425 micron pixels + 9.6 mm tracking strips
-  double svxcellsizey[2] = {0.0028, 0.0028, 0.0028};
+  double svxcellsizey[3] = {0.0028, 0.0028, 0.0028};
 
   double diffusion = 0.0057;
   double electrons_per_kev = 38.;
@@ -247,7 +247,8 @@ void Svtx_Reco(int verbosity = 0)
   hough->set_material(0, mat_scale*0.003);
   hough->set_material(1, mat_scale*0.003);
   hough->set_material(2, mat_scale*0.003);
-  for (int i=3;i<63;++i) {
+  hough->set_material(3, mat_scale*0.01);
+  for (int i=4;i<63;++i) {
     hough->set_material(i, mat_scale*0.06/60.);
   }
   hough->setUseCellSize(false);
@@ -317,7 +318,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   // eval->Verbosity(verbosity);
   // se->registerSubsystem( eval );
 
-  MomentumEvaluator* eval = new MomentumEvaluator(outputfile.c_str(),0.1,0.2,62,2,56,10.,80.);
+  MomentumEvaluator* eval = new MomentumEvaluator(outputfile.c_str(),0.1,0.2,63,2,56,10.,80.);
   se->registerSubsystem( eval );
   
   return;
