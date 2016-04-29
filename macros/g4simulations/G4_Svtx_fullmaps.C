@@ -43,7 +43,7 @@ double Svtx(PHG4Reco* g4Reco,
   //=======================================================================================================
 
   //double svxrad[7] = {2.3, 3.2, 3.9, 19.6, 24.5, 34.4, 39.3}; // ALICE ITS upgrade layer radii in cm
-  double svxrad[7] = {svtx_inner_radius, 3.2, 3.9, 19.6, 24.5, 34.4, 60.0}; // ALICE ITS upgrade with outer layer pushed out
+  double svxrad[7] = {svtx_inner_radius, 3.2, 3.9, 19.6, 24.5, 34.4, 64.0}; // ALICE ITS upgrade with outer layer pushed out
   double si_thickness[7] = {0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005};  // ALICE ITS upgrade Si thickness is 50 microns
   double length[7] = {27.0, 27.0, 27.0, 88.0, 88.0, 148.0, 148.0}; // ALICE ladder lengths (stave - 2cm)
 
