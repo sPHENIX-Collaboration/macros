@@ -218,11 +218,10 @@ void Svtx_Reco(int verbosity = 0)
   thresholds->set_threshold(2,0.25);
   se->registerSubsystem( thresholds );
 
-  /// no clustering for the MAPS layers???
-  
   //-------------
   // Cluster Hits
   //------------- 
+
   PHG4TPCClusterizer* clusterizer = new PHG4TPCClusterizer("PHG4SvtxClusterizer",4,1);
   se->registerSubsystem( clusterizer );
 
@@ -308,13 +307,13 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   // SVTX evaluation
   //----------------
 
-  // SubsysReco* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
-  // eval->do_cluster_eval(false);
-  // eval->do_g4hit_eval(false);
-  // eval->do_hit_eval(false);
-  // eval->do_gpoint_eval(false);
-  // eval->Verbosity(verbosity);
-  // se->registerSubsystem( eval );
+  //SvtxEvaluator* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
+  //eval->do_cluster_eval(false);
+  //eval->do_g4hit_eval(false);
+  //eval->do_hit_eval(false);
+  //eval->do_gpoint_eval(false);
+  //eval->Verbosity(verbosity);
+  //se->registerSubsystem( eval );
 
   MomentumEvaluator* eval = new MomentumEvaluator(outputfile.c_str(),0.1,0.2,63,2,56,10.,80.);
   se->registerSubsystem( eval );
