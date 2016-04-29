@@ -218,10 +218,12 @@ void Svtx_Reco(int verbosity = 0)
   thresholds->set_threshold(2,0.25);
   se->registerSubsystem( thresholds );
 
+  /// no clustering for the MAPS layers???
+  
   //-------------
   // Cluster Hits
   //------------- 
-  PHG4TPCClusterizer* clusterizer = new PHG4TPCClusterizer("PHG4SvtxClusterizer",4,1);;
+  PHG4TPCClusterizer* clusterizer = new PHG4TPCClusterizer("PHG4SvtxClusterizer",4,1);
   se->registerSubsystem( clusterizer );
 
   //---------------------
@@ -240,13 +242,12 @@ void Svtx_Reco(int verbosity = 0)
   hough->setZBinScale(1.0);
 
   hough->Verbosity(0);
-  double mat_scale = 1.0;
   hough->set_material(0, 0.003);
   hough->set_material(1, 0.003);
   hough->set_material(2, 0.003);
-  hough->set_material(3, mat_scale*0.01);
+  hough->set_material(3, 0.010);
   for (int i=4;i<63;++i) {
-    hough->set_material(i, mat_scale*0.06/60.);
+    hough->set_material(i, 0.060/60.);
   }
   hough->setUseCellSize(false);
   
