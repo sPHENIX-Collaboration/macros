@@ -162,9 +162,9 @@ void Svtx_Cells(int verbosity = 0)
   // strips are ganged together into a common readout channel
   PHG4SvtxAddConnectedCells *gang = new PHG4SvtxAddConnectedCells();
   gang->Verbosity(verbosity);
-  gang->set_ncells_connected(5,3);
-  gang->set_ncells_connected(6,3);
-  gang->set_ncells_connected(7,6);
+  gang->set_ncells_connected(4,2); // enter nganged channels - 1
+  gang->set_ncells_connected(5,2);
+  gang->set_ncells_connected(6,5);
   se->registerSubsystem(gang);
   
   return;
