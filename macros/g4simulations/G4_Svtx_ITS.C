@@ -45,7 +45,7 @@ double Svtx(PHG4Reco* g4Reco,
   //double svxrad[7] = {2.3, 3.2, 3.9, 19.6, 24.5, 34.4, 39.3}; // ALICE ITS upgrade layer radii in cm
   double svxrad[7] = {svtx_inner_radius, 3.2, 3.9, 19.6, 24.5, 34.4, 60.0}; // ALICE ITS upgrade with outer layer pushed out
   double si_thickness[7] = {0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005};  // ALICE ITS upgrade Si thickness is 50 microns
-  double length[7] = {20.0, 20.0, -1., - 1., - 1., -1., -1.}; // -1 use eta coverage to determine length - modified from ITS
+  double length[7] = {27.0, 27.0, 27.0, 88.0, 88.0, 148.0, 148.0}; // ALICE ladder lengths (stave - 2cm)
 
   // ALICE ITS total thickness (% of X_0 of 0.3, 0.3, 0.3, 0.8, 0.8, 0.8, 0.8
   // Pixel chip thickness of 50 um (% of X_0 of 0.05 x 1.07 = 0.053%) in all layers
@@ -142,8 +142,8 @@ void Svtx_Cells(int verbosity = 0)
 
   // updated for ITS layers
 
-  double svxcellsizex[7] = {0.0020, 0.0020, 0.0020, 0.0020, 0.0020, 0.0020, 0.0020};
-  double svxcellsizey[7] = {0.0020, 0.0020, 0.0020, 0.0020, 0.0020, 0.0020, 0.0020};
+  double svxcellsizex[7] = {0.0020, 0.0020, 0.0020, 0.0020, 0.0020, 0.0020, 0.0020}; // 28 um / sqrt(2) from cluster size (not simulated)
+  double svxcellsizey[7] = {0.0020, 0.0020, 0.0020, 0.0020, 0.0020, 0.0020, 0.0020}; // 28 um / sqrt(2) from cluster size (not simulated)
   
   PHG4CylinderCellReco *svtx_cells = new PHG4CylinderCellReco();
   svtx_cells->Detector("SVTX");
@@ -199,13 +199,13 @@ void Svtx_Reco(int verbosity = 0)
   // defaults to 1.0 (fully active)
   PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
   deadarea->Verbosity(verbosity);
-  deadarea->set_hit_efficiency(0,0.998);
-  deadarea->set_hit_efficiency(1,0.998);
-  deadarea->set_hit_efficiency(2,0.998);
-  deadarea->set_hit_efficiency(3,0.998);
-  deadarea->set_hit_efficiency(4,0.998);
-  deadarea->set_hit_efficiency(5,0.998);
-  deadarea->set_hit_efficiency(6,0.998);
+  deadarea->set_hit_efficiency(0,0.99); // Leo says use 1% inefficiency
+  deadarea->set_hit_efficiency(1,0.99);
+  deadarea->set_hit_efficiency(2,0.99);
+  deadarea->set_hit_efficiency(3,0.99);
+  deadarea->set_hit_efficiency(4,0.99);
+  deadarea->set_hit_efficiency(5,0.99);
+  deadarea->set_hit_efficiency(6,0.99);
   se->registerSubsystem( deadarea );
   
   //----------------------------------
