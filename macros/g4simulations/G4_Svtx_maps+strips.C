@@ -50,8 +50,8 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   double si_thickness[8] = {0.0050, 0.0050, 0.0050, 0.0240, 0.0240, 0.0240, 0.0240, 0.0320};
   double svxrad[8] = {svtx_inner_radius, 3.132, 3.904, 7.5, 8.5, 31.0, 34.0, 64.0};
-  double support_thickness[8] = {0.0035, 0.0035, 0.0035, 0.0107, 0.0107, 0.0049, 0.0049, 0.0095};
-  double length[8] = {27., 27., 27., -1, -1., -1., -1., -1}; // -1 use eta coverage to determine length
+  double support_thickness[8] = {0.0036, 0.0036, 0.0036, 0.0107, 0.0107, 0.0049, 0.0049, 0.0095};
+  double length[8] = {27.0, 27.0, 27.0, -1, -1., -1., -1., -1}; // -1 use eta coverage to determine length
 
   // here is our silicon:
   double inner_radius = radius;
@@ -143,10 +143,11 @@ void Svtx_Cells(int verbosity = 0)
   // Layers 3, 5 and 7 are long strips parallel to the beam line
 
   // 28 micron pixels + 60 micron strips
-  double svxcellsizex[8] = {0.0028, 0.0028, 0.0028, 0.0060, 0.0060, 0.0060, 0.0060, 0.0060}; 
+  // 28 um / sqrt(2) from typical cluster size (not yet simulated for MAPS)
+  double svxcellsizex[8] = {0.0020, 0.0020, 0.0020, 0.0060, 0.0060, 0.0060, 0.0060, 0.0060}; 
 
   // 28 micron pixels + 9.6 mm tracking strips
-  double svxcellsizey[8] = {0.0028, 0.0028, 0.0028, 0.9600, 0.9600, 0.9600, 0.9600, 0.9600};
+  double svxcellsizey[8] = {0.0020, 0.0020, 0.0020, 0.9600, 0.9600, 0.9600, 0.9600, 0.9600};
   
   PHG4CylinderCellReco *svtx_cells = new PHG4CylinderCellReco();
   svtx_cells->Detector("SVTX");
@@ -206,9 +207,9 @@ void Svtx_Reco(int verbosity = 0)
   // defaults to 1.0 (fully active)
   PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
   deadarea->Verbosity(verbosity);
-  deadarea->set_hit_efficiency(0,0.998);
-  deadarea->set_hit_efficiency(1,0.998);
-  deadarea->set_hit_efficiency(2,0.998);
+  deadarea->set_hit_efficiency(0,0.99);
+  deadarea->set_hit_efficiency(1,0.99);
+  deadarea->set_hit_efficiency(2,0.99);
   deadarea->set_hit_efficiency(3,0.980);
   deadarea->set_hit_efficiency(4,0.980);
   deadarea->set_hit_efficiency(5,0.980);
@@ -260,7 +261,7 @@ void Svtx_Reco(int verbosity = 0)
   hough->Verbosity(verbosity);
   hough->set_material(0, 0.003);
   hough->set_material(1, 0.003);
-  hough->set_material(2, 0.033);
+  hough->set_material(2, 0.003);
   hough->set_material(3, 0.010);
   hough->set_material(4, 0.010);
   hough->set_material(5, 0.006);
