@@ -203,8 +203,8 @@ void Svtx_Reco(int verbosity = 0)
   
   PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
   deadarea->Verbosity(verbosity);
-  deadarea->set_hit_efficiency(0,0.925);
-  deadarea->set_hit_efficiency(1,0.725);
+  deadarea->set_hit_efficiency(0,0.880 * 0.9); // Run16 live pixels X perfect coverage fraction
+  deadarea->set_hit_efficiency(1,0.705 * 0.9); // 90% is a place holder value
   se->registerSubsystem( deadarea );
 
   //-----------------------------
