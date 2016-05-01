@@ -125,7 +125,6 @@ Fun4All_TestBeam(int nEvents = 100,
   se->registerSubsystem(gunpack);
 
   calib = new CaloCalibration("HODO_VERTICAL");
-  calib->GetCalibrationParameters().set_int_param("calib_const_scale", 1);
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
   // Martin find that even channel has negative polarity and odd channel has positive polarity
   for (int i = 0; i < N_hodo; ++i)
@@ -134,7 +133,6 @@ Fun4All_TestBeam(int nEvents = 100,
   se->registerSubsystem(calib);
 
   calib = new CaloCalibration("HODO_HORIZONTAL");
-  calib->GetCalibrationParameters().set_int_param("calib_const_scale", 1);
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
   // Martin find that even channel has negative polarity and odd channel has positive polarity
   for (int i = 0; i < N_hodo; ++i)
@@ -150,7 +148,6 @@ Fun4All_TestBeam(int nEvents = 100,
   se->registerSubsystem(gunpack);
 
   calib = new CaloCalibration("C1");
-  calib->GetCalibrationParameters().set_int_param("calib_const_scale", -1);
   se->registerSubsystem(calib);
 
   // more info see https://wiki.bnl.gov/sPHENIX/index.php/T-1044#Cerenkov_Counters
@@ -163,7 +160,7 @@ Fun4All_TestBeam(int nEvents = 100,
   se->registerSubsystem(gunpack);
 
   calib = new CaloCalibration("C2");
-  calib->GetCalibrationParameters().set_int_param("calib_const_scale", 1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
   calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", +1);
   calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", -1);
