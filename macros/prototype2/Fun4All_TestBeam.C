@@ -195,13 +195,20 @@ Fun4All_TestBeam(int nEvents = 100,
   gunpack->add_channel(second_packet_id, 31, 3); //  31  Right trigger veto
   se->registerSubsystem(gunpack);
 
+  // Calibrate the MIP peak to an relative energy of +1.0
   calib = new CaloCalibration("TRIGGER_VETO");
+  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
+  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", -1./29.4155);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", +1./91);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row2", -1./31.3981);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row3", +1./1.43839e+02);
   se->registerSubsystem(calib);
 
   const int N_TileMapper = 16;
 
   gunpack = new GenericUnpackPRDF("TILE_MAPPER");
-  for (int i = 0; i < N_hodo; ++i)
+  for (int i = 0; i < N_TileMapper; ++i)
     gunpack->add_channel(second_packet_id, 32 + i, i); // 24 Cerenkov 1
   se->registerSubsystem(gunpack);
 
