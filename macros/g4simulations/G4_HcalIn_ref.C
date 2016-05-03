@@ -28,7 +28,8 @@ double HCalInner(PHG4Reco* g4Reco,
   // hcal->set_int_param("light_scint_model",1);
   // hcal->set_double_param("inner_radius",116);
   // hcal->set_double_param("outer_radius",136);
-  // hcal->set_double_param("scinti_gap",0.85);
+  // hcal->set_double_param("scinti_inner_gap",0.85);
+  // hcal->set_double_param("scinti_outer_gap",1.22);
   // hcal->set_double_param("scinti_tile_thickness",0.7);
   // hcal->set_double_param("scinti_gap_neighbor",0.1);
   // the SetLightCorrection is a convenience method, no
