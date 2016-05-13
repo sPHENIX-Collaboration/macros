@@ -273,6 +273,10 @@ Fun4All_TestBeam(int nEvents = 100,
   reader->AddTower("RAW_TILE_MAPPER");
   reader->AddTower("CALIB_TILE_MAPPER");
 
+  reader->AddTowerTemperature("HCALIN");
+  reader->AddTowerTemperature("HCALIN");
+  reader->AddTowerTemperature("HCALOUT");
+
   se->registerSubsystem(reader);
 
   Fun4AllInputManager *in = new Fun4AllPrdfInputManager("PRDFin");
