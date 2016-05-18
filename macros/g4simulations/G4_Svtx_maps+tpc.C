@@ -93,7 +93,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
     cyl->SetRadius(radius);
     cyl->SetLength( cage_length );
-    cyl->SetLengthViaRapidityCoverage(false)
+    cyl->SetLengthViaRapidityCoverage(false);
     cyl->SetMaterial(tpcgas.c_str());
     cyl->SetThickness(  delta_radius - 0.01 );
     cyl->SetActive();
