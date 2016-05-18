@@ -1,24 +1,23 @@
-
 int Min_si_layer = 0;
-int Max_si_layer = 63;
+int Max_si_layer = 48;
 
-int n_svx_layer = 3;
+const int n_svx_layer = 3;
 
 void SvtxInit(int verbosity = 0)
 {
   Min_si_layer = 0;
-  Max_si_layer = 63;
+  Max_si_layer = 48;
 }
 
 double Svtx(PHG4Reco* g4Reco, double radius, 
-	    const int absorberactive = 0,
-	    int verbosity = 0) {
+      const int absorberactive = 0,
+      int verbosity = 0) {
 
-  float svtx_inner_radius = 2.3; 
+  float svtx_inner_radius = 2.48; // based on a 13/19 pixel ladder reconfig
   
   if (radius > svtx_inner_radius) {
     cout << "inconsistency: radius: " << radius 
-	 << " larger than SVTX inner radius: " << svtx_inner_radius << endl;
+   << " larger than SVTX inner radius: " << svtx_inner_radius << endl;
     gSystem->Exit(-1);
   }
  
@@ -26,7 +25,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   // silicon layers ------------------------------------------------------------
 
-  // inner pixels are a copy of the MAPS ITS inner layers
+  // inner pixels are a 13/19 ladder reconfiguration developed by MPM and YA
   // outer strips are from YA at the Santa Fe Tracking Workshop 10/27/2015
   // see: https://indico.bnl.gov/conferenceDisplay.py?confId=1364
 
@@ -34,9 +33,8 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   // For Si 1mm = 1.07% X_0
   // For Cu 1mm = 6.96% X_0
   // The thickness of the tracking layers is:
-  // 0 MAPS: 0.3% X_0  (0.053% sensor + 0.247% support) sensor =  50 mc Si, support =  35 mc Cu
-  // 1 MAPS: 0.3% X_0  (0.053% sensor + 0.247% support) sensor =  50 mc Si, support =  35 mc Cu
-  // 2 MAPS: 0.3% X_0  (0.053% sensor + 0.247% support) sensor =  50 mc Si, support =  35 mc Cu
+  // 0 Pixels: 1.3% X_0  (0.214% sensor + 1.086% support) sensor = 200 mc Si, support = 154 mc Cu
+  // 1 Pixels: 1.3% X_0  (0.214% sensor + 1.086% support) sensor = 200 mc Si, support = 154 mc Cu
   
   double si_thickness[3] = {0.0050, 0.0050, 0.0050};
   double svxrad[3] = {svtx_inner_radius, 3.2, 3.9};
@@ -48,6 +46,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     radius = svxrad[ilayer];
     cyl->SetRadius(radius);
     cyl->SetLength( length[ilayer] );
+    cyl->SetLengthViaRapidityCoverage(false);
     cyl->SetMaterial("G4_Si");
     cyl->SetThickness( si_thickness[ilayer] );
     cyl->SetActive();
@@ -76,7 +75,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   double cage_length = 400.;
   double cage_thickness = 1.43 * n_rad_length_cage;
   
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", 3);
+  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_svx_layer);
   cyl->SetRadius(radius);
   cyl->SetLength(cage_length);
   cyl->SetMaterial("G4_Cu");
@@ -90,10 +89,11 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   int npoints = Max_si_layer - n_svx_layer;
   double delta_radius =  ( outer_radius - cage_thickness - radius )/( (double)npoints );
   
-  for(int ilayer=n_svx_layer;ilayer<(2+npoints);++ilayer) {
+  for(int ilayer=n_svx_layer;ilayer<(n_svx_layer+npoints);++ilayer) {
     cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
     cyl->SetRadius(radius);
     cyl->SetLength( cage_length );
+    cyl->SetLengthViaRapidityCoverage(false)
     cyl->SetMaterial(tpcgas.c_str());
     cyl->SetThickness(  delta_radius - 0.01 );
     cyl->SetActive();
@@ -103,7 +103,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     radius += delta_radius;
   }
 
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", 2+npoints);
+  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_svx_layer+npoints);
   cyl->SetRadius(radius);
   cyl->SetLength(cage_length);
   cyl->SetMaterial("G4_Cu");
@@ -138,7 +138,6 @@ void Svtx_Cells(int verbosity = 0)
   // SVTX cells
   //-----------
 
-  // 28 um / sqrt(2) from typical cluster size (not yet simulated for MAPS)
   double svxcellsizex[3] = {0.0020, 0.0020, 0.0020};
   double svxcellsizey[3] = {0.0020, 0.0020, 0.0020};
 
@@ -151,14 +150,14 @@ void Svtx_Cells(int verbosity = 0)
   // eventually this will be replaced with an actual simulation of timing amplitude.
   double tpc_cell_y = 0.17;
   
-  PHG4CylinderCellTPCReco *svtx_cells = new PHG4CylinderCellTPCReco();
+  PHG4CylinderCellTPCReco *svtx_cells = new PHG4CylinderCellTPCReco(n_svx_layer);
   svtx_cells->setDiffusion(diffusion);
   svtx_cells->setElectronsPerKeV(electrons_per_kev);
   svtx_cells->Detector("SVTX");
   for (int i=0;i<n_svx_layer;++i) {
     svtx_cells->cellsize(i, svxcellsizex[i], svxcellsizey[i]);
   }
-  for (int i=n_svx_layer;i<63;++i) {
+  for (int i=n_svx_layer;i<Max_si_layer;++i) {
     svtx_cells->cellsize(i, tpc_cell_x, tpc_cell_y);
   }
   
@@ -190,7 +189,7 @@ void Svtx_Reco(int verbosity = 0)
   for (int i=0;i<n_svx_layer;++i) {
     digi->set_adc_scale(i, 255, 1.0e-6);
   }
-  for (int i=n_svx_layer;i<63;++i) {
+  for (int i=n_svx_layer;i<Max_si_layer;++i) {
     digi->set_adc_scale(i, 10000, 1.0e-1);
   }
   se->registerSubsystem( digi );
@@ -213,22 +212,21 @@ void Svtx_Reco(int verbosity = 0)
 
   PHG4SvtxThresholds* thresholds = new PHG4SvtxThresholds();
   thresholds->Verbosity(verbosity);
-  thresholds->set_threshold(0,0.25);
-  thresholds->set_threshold(1,0.25);
-  thresholds->set_threshold(2,0.25);
+  thresholds->set_threshold(0,0.33);
+  thresholds->set_threshold(1,0.33);
+  thresholds->set_use_thickness_mip(0, true);
   se->registerSubsystem( thresholds );
 
   //-------------
   // Cluster Hits
   //------------- 
-
-  PHG4TPCClusterizer* clusterizer = new PHG4TPCClusterizer("PHG4SvtxClusterizer",4,1);
+  PHG4TPCClusterizer* clusterizer = new PHG4TPCClusterizer("PHG4SvtxClusterizer",4,1);;
   se->registerSubsystem( clusterizer );
 
   //---------------------
   // Track reconstruction
   //---------------------
-  PHG4HoughTransformTPC* hough = new PHG4HoughTransformTPC(63,56);
+  PHG4HoughTransformTPC* hough = new PHG4HoughTransformTPC(Max_si_layer,Max_si_layer);
   hough->set_mag_field(1.4);
   hough->set_use_vertex(true);
   hough->setRemoveHits(true);
@@ -240,21 +238,27 @@ void Svtx_Reco(int verbosity = 0)
   hough->setBinScale(1.0);
   hough->setZBinScale(1.0);
 
-  hough->Verbosity(0);
-  hough->set_material(0, 0.003);
-  hough->set_material(1, 0.003);
-  hough->set_material(2, 0.003);
-  hough->set_material(3, 0.010);
-  for (int i=4;i<63;++i) {
-    hough->set_material(i, 0.060/60.);
+  hough->Verbosity(10);
+  double mat_scale = 1.0;
+  hough->set_material(0, mat_scale*0.013);
+  hough->set_material(1, mat_scale*0.013);
+  hough->set_material(2, mat_scale*0.01);
+  for (int i=(n_svx_layer+1);i<Max_si_layer;++i) {
+    hough->set_material(i, mat_scale*0.06/60.);
   }
-  hough->setUseCellSize(false);
+  hough->setUseCellSize(true);
   
-  for (int i=3;i<63;++i) {
+  for (int i=n_svx_layer;i<Max_si_layer;++i) {
     hough->setFitErrorScale(i, 1./sqrt(12.));
   }
-  for (int i=3;i<63;++i) {
-    hough->setVoteErrorScale(i, 0.2);
+  for (int i=n_svx_layer;i<Max_si_layer;++i) {
+    hough->setVoteErrorScale(i, 1.0);
+  }
+  for (int i=0;i<n_svx_layer;++i) {
+    hough->setVoteErrorScale(i, 1.0);
+  }
+  for (int i=0;i<n_svx_layer;++i) {
+    hough->setFitErrorScale(i, 1./sqrt(12.));
   }
   
   se->registerSubsystem( hough );
@@ -307,15 +311,15 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   // SVTX evaluation
   //----------------
 
-  //SvtxEvaluator* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
-  //eval->do_cluster_eval(false);
-  //eval->do_g4hit_eval(false);
-  //eval->do_hit_eval(false);
-  //eval->do_gpoint_eval(false);
-  //eval->Verbosity(verbosity);
-  //se->registerSubsystem( eval );
+  // SubsysReco* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
+  // eval->do_cluster_eval(false);
+  // eval->do_g4hit_eval(false);
+  // eval->do_hit_eval(false);
+  // eval->do_gpoint_eval(false);
+  // eval->Verbosity(verbosity);
+  // se->registerSubsystem( eval );
 
-  MomentumEvaluator* eval = new MomentumEvaluator(outputfile.c_str(),0.1,0.2,63,2,56,10.,80.);
+  MomentumEvaluator* eval = new MomentumEvaluator(outputfile.c_str(),0.2,0.4,Max_si_layer,2,Max_si_layer-4,10.,80.);
   se->registerSubsystem( eval );
   
   return;
