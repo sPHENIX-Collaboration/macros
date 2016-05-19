@@ -13,7 +13,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
       const int absorberactive = 0,
       int verbosity = 0) {
 
-  float svtx_inner_radius = 2.48; // based on a 13/19 pixel ladder reconfig
+  float svtx_inner_radius = 2.3;
   
   if (radius > svtx_inner_radius) {
     cout << "inconsistency: radius: " << radius 
@@ -212,9 +212,9 @@ void Svtx_Reco(int verbosity = 0)
 
   PHG4SvtxThresholds* thresholds = new PHG4SvtxThresholds();
   thresholds->Verbosity(verbosity);
-  thresholds->set_threshold(0,0.33);
-  thresholds->set_threshold(1,0.33);
-  thresholds->set_use_thickness_mip(0, true);
+  thresholds->set_threshold(0,0.25);
+  thresholds->set_threshold(1,0.25);
+  thresholds->set_threshold(2,0.25);
   se->registerSubsystem( thresholds );
 
   //-------------
@@ -240,11 +240,12 @@ void Svtx_Reco(int verbosity = 0)
 
   hough->Verbosity(10);
   double mat_scale = 1.0;
-  hough->set_material(0, mat_scale*0.013);
-  hough->set_material(1, mat_scale*0.013);
-  hough->set_material(2, mat_scale*0.01);
+  hough->set_material(0, mat_scale*0.003);
+  hough->set_material(1, mat_scale*0.003);
+  hough->set_material(2, mat_scale*0.003);
+  hough->set_material(3, mat_scale*0.010);
   for (int i=(n_svx_layer+1);i<Max_si_layer;++i) {
-    hough->set_material(i, mat_scale*0.06/60.);
+    hough->set_material(i, mat_scale*0.06/45.);
   }
   hough->setUseCellSize(true);
   
@@ -311,7 +312,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   // SVTX evaluation
   //----------------
 
-  // SubsysReco* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
+  // SvtxEvaluator* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
   // eval->do_cluster_eval(false);
   // eval->do_g4hit_eval(false);
   // eval->do_hit_eval(false);
