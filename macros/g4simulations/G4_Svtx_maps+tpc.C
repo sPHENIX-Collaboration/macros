@@ -1,5 +1,6 @@
 int Min_si_layer = 0;
 int Max_si_layer = 48;
+double inner_cage_radius = 20.;
 
 const int n_svx_layer = 3;
 
@@ -7,6 +8,7 @@ void SvtxInit(int verbosity = 0)
 {
   Min_si_layer = 0;
   Max_si_layer = 48;
+  double inner_cage_radius = 20.; // options of 20.0 or 30.0 cm
 }
 
 double Svtx(PHG4Reco* g4Reco, double radius, 
@@ -66,28 +68,45 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   // time projection chamber layers --------------------------------------------
 
-  double inner_cage_radius = 30.;
-  string tpcgas = "G4_Ar";
-
   radius = inner_cage_radius;
   
   double n_rad_length_cage = 1.0e-02;
-  double cage_length = 400.;
+  double cage_length = 160.; // rough length from Tom, also used in charge distortion calculation
   double cage_thickness = 1.43 * n_rad_length_cage;
   
   cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_svx_layer);
   cyl->SetRadius(radius);
   cyl->SetLength(cage_length);
+  cyl->SetLengthViaRapidityCoverage(false);
   cyl->SetMaterial("G4_Cu");
   cyl->SetThickness( cage_thickness ); // Cu X_0 = 1.43 cm
   cyl->SuperDetector("SVTXSUPPORT");
   g4Reco->registerSubsystem( cyl );
 
   radius += cage_thickness;
+
+  double inner_readout_radius = 30.;
+  if (inner_readout_radius<radius)  inner_readout_radius = radius;
+
+  string tpcgas = "G4_Ar";
+
+  if (inner_readout_radius  - radius > 0)
+    {
+      cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_svx_layer + 1);
+      cyl->SetRadius(radius);
+      cyl->SetLength(cage_length);
+      cyl->SetLengthViaRapidityCoverage(false);
+      cyl->SetMaterial(tpcgas.c_str());
+      cyl->SetThickness( inner_readout_radius  - radius ); // Cu X_0 = 1.43 cm
+      cyl->SuperDetector("SVTXSUPPORT");
+      g4Reco->registerSubsystem( cyl );
+    }
+
+  radius = inner_readout_radius;
   
   double outer_radius = 80.;
   int npoints = Max_si_layer - n_svx_layer;
-  double delta_radius =  ( outer_radius - cage_thickness - radius )/( (double)npoints );
+  double delta_radius =  ( outer_radius - inner_readout_radius )/( (double)npoints );
   
   for(int ilayer=n_svx_layer;ilayer<(n_svx_layer+npoints);++ilayer) {
     cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
@@ -106,6 +125,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_svx_layer+npoints);
   cyl->SetRadius(radius);
   cyl->SetLength(cage_length);
+  cyl->SetLengthViaRapidityCoverage(false);
   cyl->SetMaterial("G4_Cu");
   cyl->SetThickness( cage_thickness ); // Cu X_0 = 1.43 cm
   cyl->SuperDetector("SVTXSUPPORT");
@@ -150,7 +170,24 @@ void Svtx_Cells(int verbosity = 0)
   // eventually this will be replaced with an actual simulation of timing amplitude.
   double tpc_cell_y = 0.17;
   
+  // Main switch for TPC distortion
+  const bool do_tpc_distoration = false;
+  PHG4TPCSpaceChargeDistortion * tpc_distortion = NULL;
+  if (do_tpc_distoration)
+    {
+      if (inner_cage_radius != 20. && inner_cage_radius!=30.)
+        {
+          cout <<"Svtx_Cells - Fatal Error - TPC distoration required that inner_cage_radius is either 20 or 30 cm."<<endl;
+          exit (3);
+        }
+      string TPC_distroation_file = string(getenv("CALIBRATIONROOT"))
+          + Form( "/Tracking/TPC/SpaceChargeDistortion/sPHENIX%.0f.root", inner_cage_radius);
+      PHG4TPCSpaceChargeDistortion * tpc_distortion = new PHG4TPCSpaceChargeDistortion(TPC_distroation_file);
+      //  tpc_distortion -> setAccuracy(0); // option to over write default factors
+      //  tpc_distortion -> setPrecision(1); // option to over write default factors
+    }
   PHG4CylinderCellTPCReco *svtx_cells = new PHG4CylinderCellTPCReco(n_svx_layer);
+  svtx_cells->setDistortion(tpc_distortion); // apply TPC distrotion if tpc_distortion is not NULL
   svtx_cells->setDiffusion(diffusion);
   svtx_cells->setElectronsPerKeV(electrons_per_kev);
   svtx_cells->Detector("SVTX");
