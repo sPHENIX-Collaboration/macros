@@ -1,13 +1,15 @@
-int Min_si_layer = 0;
-int Max_si_layer = 48;
-double inner_cage_radius = 20.;
 
 const int n_svx_layer = 3;
+const int n_gas_layer = 60;
+double inner_cage_radius = 20.;
+
+int Min_si_layer = 0;
+int Max_si_layer = n_svx_layer + n_gas_layer;
 
 void SvtxInit(int verbosity = 0)
 {
   Min_si_layer = 0;
-  Max_si_layer = 48;
+  Max_si_layer = n_svx_layer + n_gas_layer;
   double inner_cage_radius = 20.; // options of 20.0 or 30.0 cm
 }
 
@@ -90,17 +92,16 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   string tpcgas = "G4_Ar";
 
-  if (inner_readout_radius  - radius > 0)
-    {
-      cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_svx_layer + 1);
-      cyl->SetRadius(radius);
-      cyl->SetLength(cage_length);
-      cyl->SetLengthViaRapidityCoverage(false);
-      cyl->SetMaterial(tpcgas.c_str());
-      cyl->SetThickness( inner_readout_radius  - radius ); // Cu X_0 = 1.43 cm
-      cyl->SuperDetector("SVTXSUPPORT");
-      g4Reco->registerSubsystem( cyl );
-    }
+  if (inner_readout_radius - radius > 0) {
+    cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_svx_layer + 1);
+    cyl->SetRadius(radius);
+    cyl->SetLength(cage_length);
+    cyl->SetLengthViaRapidityCoverage(false);
+    cyl->SetMaterial(tpcgas.c_str());
+    cyl->SetThickness( inner_readout_radius  - radius );
+    cyl->SuperDetector("SVTXSUPPORT");
+    g4Reco->registerSubsystem( cyl );
+  }
 
   radius = inner_readout_radius;
   
@@ -171,21 +172,26 @@ void Svtx_Cells(int verbosity = 0)
   double tpc_cell_y = 0.17;
   
   // Main switch for TPC distortion
-  const bool do_tpc_distoration = false;
-  PHG4TPCSpaceChargeDistortion * tpc_distortion = NULL;
-  if (do_tpc_distoration)
-    {
-      if (inner_cage_radius != 20. && inner_cage_radius!=30.)
-        {
-          cout <<"Svtx_Cells - Fatal Error - TPC distoration required that inner_cage_radius is either 20 or 30 cm."<<endl;
-          exit (3);
-        }
-      string TPC_distroation_file = string(getenv("CALIBRATIONROOT"))
-          + Form( "/Tracking/TPC/SpaceChargeDistortion/sPHENIX%.0f.root", inner_cage_radius);
-      PHG4TPCSpaceChargeDistortion * tpc_distortion = new PHG4TPCSpaceChargeDistortion(TPC_distroation_file);
-      //  tpc_distortion -> setAccuracy(0); // option to over write default factors
-      //  tpc_distortion -> setPrecision(1); // option to over write default factors
+  const bool do_tpc_distoration = true;
+  PHG4TPCSpaceChargeDistortion* tpc_distortion = NULL;
+  if (do_tpc_distoration) {
+    if (inner_cage_radius != 20. && inner_cage_radius != 30.) {
+      cout << "Svtx_Cells - Fatal Error - TPC distoration required that "
+              "inner_cage_radius is either 20 or 30 cm."
+           << endl;
+      exit(3);
     }
+    string TPC_distroation_file =
+        string(getenv("CALIBRATIONROOT")) +
+        Form("/Tracking/TPC/SpaceChargeDistortion/sPHENIX%.0f.root",
+             inner_cage_radius);
+    PHG4TPCSpaceChargeDistortion* tpc_distortion =
+        new PHG4TPCSpaceChargeDistortion(TPC_distroation_file);
+    //  tpc_distortion -> setAccuracy(0); // option to over write default
+    //  factors
+    //  tpc_distortion -> setPrecision(1); // option to over write default
+    //  factors
+  }
   PHG4CylinderCellTPCReco *svtx_cells = new PHG4CylinderCellTPCReco(n_svx_layer);
   svtx_cells->setDistortion(tpc_distortion); // apply TPC distrotion if tpc_distortion is not NULL
   svtx_cells->setDiffusion(diffusion);
@@ -199,7 +205,6 @@ void Svtx_Cells(int verbosity = 0)
   }
   
   se->registerSubsystem(svtx_cells);
-
   return;
 }
 
@@ -227,7 +232,7 @@ void Svtx_Reco(int verbosity = 0)
     digi->set_adc_scale(i, 255, 1.0e-6);
   }
   for (int i=n_svx_layer;i<Max_si_layer;++i) {
-    digi->set_adc_scale(i, 10000, 1.0e-1);
+    digi->set_adc_scale(i, 10000, 1.0);
   }
   se->registerSubsystem( digi );
   
@@ -256,33 +261,36 @@ void Svtx_Reco(int verbosity = 0)
 
   //-------------
   // Cluster Hits
-  //------------- 
-  PHG4TPCClusterizer* clusterizer = new PHG4TPCClusterizer("PHG4SvtxClusterizer",4,1);;
+  //-------------
+
+  PHG4TPCClusterizer* clusterizer = new PHG4TPCClusterizer("PHG4TPCClusterizer",3,4);
+  clusterizer->setEnergyCut(20.0*45.0/n_gas_layer);
   se->registerSubsystem( clusterizer );
 
   //---------------------
   // Track reconstruction
   //---------------------
-  PHG4HoughTransformTPC* hough = new PHG4HoughTransformTPC(Max_si_layer,Max_si_layer);
+  PHG4HoughTransformTPC* hough = new PHG4HoughTransformTPC(Max_si_layer,Max_si_layer-6);
   hough->set_mag_field(1.4);
+  hough->setPtRescaleFactor(1.00/0.993892);
   hough->set_use_vertex(true);
   hough->setRemoveHits(true);
   hough->setRejectGhosts(true);
   hough->set_min_pT(0.2);
-  hough->set_chi2_cut_full( 3.0 );
-  hough->set_chi2_cut_init( 3.0 );
+  hough->set_chi2_cut_full( 2.0 );
+  hough->set_chi2_cut_init( 2.0 );
 
   hough->setBinScale(1.0);
   hough->setZBinScale(1.0);
 
-  hough->Verbosity(10);
+  hough->Verbosity(verbosity);
   double mat_scale = 1.0;
   hough->set_material(0, mat_scale*0.003);
   hough->set_material(1, mat_scale*0.003);
   hough->set_material(2, mat_scale*0.003);
   hough->set_material(3, mat_scale*0.010);
   for (int i=(n_svx_layer+1);i<Max_si_layer;++i) {
-    hough->set_material(i, mat_scale*0.06/45.);
+    hough->set_material(i, mat_scale*0.06/n_gas_layer);
   }
   hough->setUseCellSize(true);
   
@@ -300,7 +308,14 @@ void Svtx_Reco(int verbosity = 0)
   }
   
   se->registerSubsystem( hough );
- 
+
+  //-----------------------
+  // Momentum Recalibration
+  //----------------------- 
+  TF1 *corr = new TF1("corr","1.0/(1+0.00908642+5.91337e-05*x+-1.87201e-05*x*x+-3.31928e-06*x*x*x+1.03004e-07*x*x*x*x+-1.05111e-09*x*x*x*x*x)",0.0,40.0);
+  PHG4SvtxMomentumRecal* recal = new PHG4SvtxMomentumRecal("PHG4SvtxMomentumRecal",corr);
+  se->registerSubsystem(recal);
+    
   //------------------
   // Track Projections
   //------------------
@@ -349,16 +364,17 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   // SVTX evaluation
   //----------------
 
-  // SvtxEvaluator* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
-  // eval->do_cluster_eval(false);
-  // eval->do_g4hit_eval(false);
-  // eval->do_hit_eval(false);
-  // eval->do_gpoint_eval(false);
-  // eval->Verbosity(verbosity);
-  // se->registerSubsystem( eval );
-
-  MomentumEvaluator* eval = new MomentumEvaluator(outputfile.c_str(),0.2,0.4,Max_si_layer,2,Max_si_layer-4,10.,80.);
+  SvtxEvaluator* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
+  eval->do_cluster_eval(true);
+  eval->do_g4hit_eval(true);
+  eval->do_hit_eval(false);
+  eval->do_gpoint_eval(false);
+  eval->scan_for_embedded(true);
+  eval->Verbosity(verbosity);
   se->registerSubsystem( eval );
+
+  // MomentumEvaluator* eval = new MomentumEvaluator(outputfile.c_str(),0.2,0.4,Max_si_layer,2,Max_si_layer-4,10.,80.);
+  // se->registerSubsystem( eval );
   
   return;
 }
