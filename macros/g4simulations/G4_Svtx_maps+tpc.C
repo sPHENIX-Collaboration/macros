@@ -197,11 +197,14 @@ void Svtx_Cells(int verbosity = 0)
   svtx_cells->setDiffusion(diffusion);
   svtx_cells->setElectronsPerKeV(electrons_per_kev);
   svtx_cells->Detector("SVTX");
+
   for (int i=0;i<n_svx_layer;++i) {
     svtx_cells->cellsize(i, svxcellsizex[i], svxcellsizey[i]);
+    svtx_cells->set_timing_window(i, -2000.0, +2000.0);
   }
   for (int i=n_svx_layer;i<Max_si_layer;++i) {
     svtx_cells->cellsize(i, tpc_cell_x, tpc_cell_y);
+    svtx_cells->set_timing_window(i, -14000.0, +14000.0);
   }
   
   se->registerSubsystem(svtx_cells);
@@ -263,10 +266,13 @@ void Svtx_Reco(int verbosity = 0)
   // Cluster Hits
   //-------------
 
-  PHG4TPCClusterizer* clusterizer = new PHG4TPCClusterizer("PHG4TPCClusterizer",3,4);
-  clusterizer->setEnergyCut(20.0*45.0/n_gas_layer);
+  PHG4SvtxClusterizer* clusterizer = new PHG4SvtxClusterizer("PHG4SvtxClusterizer",Min_si_layer,n_svx_layer-1);
   se->registerSubsystem( clusterizer );
-
+  
+  PHG4TPCClusterizer* tpcclusterizer = new PHG4TPCClusterizer("PHG4TPCClusterizer",3,4,n_svx_layer,Max_si_layer);
+  tpcclusterizer->setEnergyCut(20.0*45.0/n_gas_layer);
+  se->registerSubsystem( tpcclusterizer );
+  
   //---------------------
   // Track reconstruction
   //---------------------
