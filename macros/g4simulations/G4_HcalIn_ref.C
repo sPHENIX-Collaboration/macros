@@ -94,13 +94,13 @@ void HCalInner_SupportRing(PHG4Reco* g4Reco,
   for (int i = 0; i < 4; i++)
     {
       cyl = new PHG4CylinderSubsystem("HCALIN_SPT_N1", i);
-      cyl->SetPosition(0, 0, z_rings[i]);
+      cyl->set_double_param("place_z",z_rings[i]);
       cyl->SuperDetector("HCALIN_SPT");
-      cyl->SetRadius(innerradius);
-      cyl->SetLengthViaRapidityCoverage(false);
-      cyl->SetLength(dz);
-      cyl->SetMaterial("SS310");
-      cyl->SetThickness(maxradius - innerradius);
+      cyl->set_double_param("radius",innerradius);
+      cyl->set_int_param("lengthviarapidity",0);
+      cyl->set_double_param("length",dz);
+      cyl->set_string_param("material","SS310");
+      cyl->set_double_param("thickness",maxradius - innerradius);
       if (absorberactive)
         cyl->SetActive();
       g4Reco->registerSubsystem(cyl);

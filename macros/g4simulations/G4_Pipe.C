@@ -25,35 +25,35 @@ double Pipe(PHG4Reco* g4Reco,
 
   // mid-rapidity beryillium pipe
   PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("BE_PIPE", 0);
-  cyl->SetRadius(be_pipe_radius);
-  cyl->SetLengthViaRapidityCoverage(false);
-  cyl->SetLength(be_pipe_length);
-  cyl->SetMaterial("G4_Be");
-  cyl->SetThickness(be_pipe_thickness);
+  cyl->set_double_param("radius",be_pipe_radius);
+  cyl->set_int_param("lengthviarapidity",0);
+  cyl->set_double_param("length",be_pipe_length);
+  cyl->set_string_param("material","G4_Be");
+  cyl->set_double_param("thickness",be_pipe_thickness);
   cyl->SuperDetector("PIPE");
   if (absorberactive)  cyl->SetActive();
   g4Reco->registerSubsystem( cyl );
 
   // north aluminum pipe
   cyl = new PHG4CylinderSubsystem("N_AL_PIPE", 1);
-  cyl->SetPosition(0.0,0.0,0.5*be_pipe_length+0.5*al_pipe_length+no_overlapp);
-  cyl->SetRadius(al_pipe_radius);
-  cyl->SetLengthViaRapidityCoverage(false);
-  cyl->SetLength(al_pipe_length);
-  cyl->SetMaterial("G4_Al");
-  cyl->SetThickness(al_pipe_thickness);
+  cyl->set_double_param("place_z",0.5*be_pipe_length+0.5*al_pipe_length+no_overlapp);
+  cyl->set_double_param("radius",al_pipe_radius);
+  cyl->set_int_param("lengthviarapidity",0);
+  cyl->set_double_param("length",al_pipe_length);
+  cyl->set_string_param("material","G4_Al");
+  cyl->set_double_param("thickness",al_pipe_thickness);
   cyl->SuperDetector("PIPE");
   if (absorberactive)  cyl->SetActive();
   g4Reco->registerSubsystem( cyl );
 
   // south aluminum pipe
   cyl = new PHG4CylinderSubsystem("S_AL_PIPE", 2);
-  cyl->SetPosition(0.0,0.0,-0.5*be_pipe_length-0.5*al_pipe_length-no_overlapp);
-  cyl->SetRadius(al_pipe_radius);
-  cyl->SetLengthViaRapidityCoverage(false);
-  cyl->SetLength(al_pipe_length);
-  cyl->SetMaterial("G4_Al");
-  cyl->SetThickness(al_pipe_thickness);
+  cyl->set_double_param("place_z",-0.5*be_pipe_length-0.5*al_pipe_length-no_overlapp);
+  cyl->set_double_param("radius",al_pipe_radius);
+  cyl->set_int_param("lengthviarapidity",0);
+  cyl->set_double_param("length",al_pipe_length);
+  cyl->set_string_param("material","G4_Al");
+  cyl->set_double_param("thickness",al_pipe_thickness);
   cyl->SuperDetector("PIPE");
   if (absorberactive)  cyl->SetActive();
   g4Reco->registerSubsystem( cyl );
