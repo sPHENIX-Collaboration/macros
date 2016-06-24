@@ -67,7 +67,7 @@ double Svtx(PHG4Reco* g4Reco,
 	       << inner_radius << endl;
 	  gSystem->Exit(-1);
 	}
-  cyl->set_double_param("radius",radius);
+      cyl->set_double_param("radius",radius);
       if (length[ilayer] > 0)
         {
           cyl->set_int_param("lengthviarapidity",0);
