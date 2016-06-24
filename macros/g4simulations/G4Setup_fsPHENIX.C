@@ -183,24 +183,24 @@ int G4Setup(const int absorberactive = 0,
 
   // sPHENIX forward flux return(s)
   PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
-  flux_return_plus->SetLength(10.2);
-  flux_return_plus->SetPosition(0,0,335.9);
-  flux_return_plus->SetRadius(2.1);
-  flux_return_plus->SetLengthViaRapidityCoverage(false);
-  flux_return_plus->SetThickness(263.5-5.0);
-  flux_return_plus->SetMaterial("G4_Fe");
+  flux_return_plus->set_int_param("lengthviarapidity",0);
+  flux_return_plus->set_double_param("length",10.2);
+  flux_return_plus->set_double_param("radius",2.1);
+  flux_return_plus->set_double_param("thickness",263.5-5.0);
+  flux_return_plus->set_double_param("place_z",335.9);
+  flux_return_plus->set_string_param("material","G4_Fe");
   flux_return_plus->SetActive(false);
   flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
   flux_return_plus->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(flux_return_plus);
 
   PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
-  flux_return_minus->SetLength(10.2);
-  flux_return_minus->SetPosition(0,0,-335.9);
-  flux_return_minus->SetRadius(2.1);
-  flux_return_minus->SetLengthViaRapidityCoverage(false);
-  flux_return_minus->SetThickness(263.5-5.0);
-  flux_return_minus->SetMaterial("G4_Fe");
+  flux_return_minus->set_int_param("lengthviarapidity",0);
+  flux_return_minus->set_double_param("length",10.2);
+  flux_return_minus->set_double_param("radius",2.1);
+  flux_return_minus->set_double_param("place_z",-335.9);
+  flux_return_minus->set_double_param("thickness",263.5-5.0);
+  flux_return_minus->set_string_param("material","G4_Fe");
   flux_return_minus->SetActive(false);
   flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
   flux_return_minus->OverlapCheck(overlapcheck);
@@ -215,11 +215,12 @@ int G4Setup(const int absorberactive = 0,
   
   // swallow all particles coming out of the backend of sPHENIX
   PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
-  blackhole->SetRadius(radius + 10); // add 10 cm
-  blackhole->SetLengthViaRapidityCoverage(false);
-  blackhole->SetLength(g4Reco->GetWorldSizeZ() - no_overlapp); // make it cover the world in length
+blackhole->set_double_param("radius",radius + 10); // add 10 cm
+
+  blackhole->set_int_param("lengthviarapidity",0);
+  blackhole->set_double_param("length",g4Reco->GetWorldSizeZ() - no_overlapp); // make it cover the world in length
   blackhole->BlackHole();
-  blackhole->SetThickness(0.1); // it needs some thickness
+  blackhole->set_double_param("thickness",0.1); // it needs some thickness
   blackhole->SetActive(); // always see what leaks out
   blackhole->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(blackhole);
@@ -229,24 +230,24 @@ int G4Setup(const int absorberactive = 0,
   // +Z
   blackhole = new PHG4CylinderSubsystem("BH_FORWARD_PLUS", 1);
   blackhole->SuperDetector("BH_FORWARD_PLUS");
-  blackhole->SetRadius(0); // add 10 cm
-  blackhole->SetLengthViaRapidityCoverage(false);
-  blackhole->SetLength(0.1); // make it cover the world in length
-  blackhole->SetPosition(0,0, g4Reco->GetWorldSizeZ()/2. - 0.1  - no_overlapp);
+  blackhole->set_double_param("radius",0); // add 10 cm
+  blackhole->set_int_param("lengthviarapidity",0);
+  blackhole->set_double_param("length",0.1); // make it cover the world in length
+  blackhole->set_double_param("place_z",g4Reco->GetWorldSizeZ()/2. - 0.1  - no_overlapp);
   blackhole->BlackHole();
-  blackhole->SetThickness(radius - no_overlapp); // it needs some thickness
+  blackhole->set_double_param("thickness",radius - no_overlapp); // it needs some thickness
   blackhole->SetActive(); // always see what leaks out
   blackhole->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(blackhole);
 
   blackhole = new PHG4CylinderSubsystem("BH_FORWARD_NEG", 1);
   blackhole->SuperDetector("BH_FORWARD_NEG");
-  blackhole->SetRadius(0); // add 10 cm
-  blackhole->SetLengthViaRapidityCoverage(false);
-  blackhole->SetLength(0.1); // make it cover the world in length
-  blackhole->SetPosition(0,0, - g4Reco->GetWorldSizeZ()/2. +0.1  + no_overlapp);
+  blackhole->set_double_param("radius",0); // add 10 cm
+  blackhole->set_int_param("lengthviarapidity",0);
+  blackhole->set_double_param("length",0.1); // make it cover the world in length
+  blackhole->set_double_param("place_z", - g4Reco->GetWorldSizeZ()/2. +0.1  + no_overlapp);
   blackhole->BlackHole();
-  blackhole->SetThickness(radius - no_overlapp); // it needs some thickness
+  blackhole->set_double_param("thickness",radius - no_overlapp); // it needs some thickness
   blackhole->SetActive(); // always see what leaks out
   blackhole->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(blackhole);
@@ -424,15 +425,14 @@ make_piston(string name, PHG4Reco* g4Reco)
     }
 
   // last piece connect to the field return
-  PHG4CylinderSubsystem *magpiston2 = new PHG4CylinderSubsystem(
-      "Piston_EndSection", 0);
-  magpiston2->SetLength(zpos2 - zpos1);
+  PHG4CylinderSubsystem *magpiston2 = new PHG4CylinderSubsystem("Piston_EndSection", 0);
+  magpiston2->set_int_param("lengthviarapidity",0);
+  magpiston2->set_double_param("length",zpos2 - zpos1);
+  magpiston2->set_double_param("place_z", (zpos2 + zpos1) / 2.);
+  magpiston2->set_double_param("radius",beampipe_radius);
+  magpiston2->set_double_param("thickness",calorimeter_hole_diamater / 2. - beampipe_radius);
+  magpiston2->set_string_param("material","G4_Fe");
   magpiston2->SuperDetector(name);
-  magpiston2->SetPosition(0, 0, (zpos2 + zpos1) / 2.);
-  magpiston2->SetRadius(beampipe_radius);
-  magpiston2->SetLengthViaRapidityCoverage(false);
-  magpiston2->SetThickness(calorimeter_hole_diamater / 2. - beampipe_radius);
-  magpiston2->SetMaterial("G4_Fe");
   magpiston2->SetActive(false);
   magpiston2->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(magpiston2);
