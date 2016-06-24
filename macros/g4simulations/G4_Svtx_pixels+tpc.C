@@ -79,8 +79,8 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   
   cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", 3);
   cyl->set_double_param("radius",radius);
-  cyl->set_int_param("lengthviarapidity",1);
-  //  cyl->set_double_param("length",cage_length);
+  cyl->set_int_param("lengthviarapidity",0);
+  cyl->set_double_param("length",cage_length);
   cyl->set_string_param("material","G4_Cu");
   cyl->set_double_param("thickness",cage_thickness ); // Cu X_0 = 1.43 cm
   cyl->SuperDetector("SVTXSUPPORT");
@@ -95,8 +95,8 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   for(int ilayer=n_svx_layer;ilayer<(2+npoints);++ilayer) {
     cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
     cyl->set_double_param("radius",radius);
-    cyl->set_int_param("lengthviarapidity",1);
-    //    cyl->set_double_param("length",cage_length);
+    cyl->set_int_param("lengthviarapidity",0);
+    cyl->set_double_param("length",cage_length);
     cyl->set_string_param("material",tpcgas.c_str());
     cyl->set_double_param("thickness", delta_radius - 0.01 );
     cyl->SetActive();
