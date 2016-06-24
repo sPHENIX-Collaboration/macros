@@ -46,8 +46,8 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
     radius = svxrad[ilayer];
     cyl->set_double_param("radius",radius);
-    cyl->set_int_param("lengthviarapidity",1);
-    //    cyl->set_double_param("length",length[ilayer]);
+    cyl->set_int_param("lengthviarapidity",0);
+    cyl->set_double_param("length",length[ilayer]);
     cyl->set_string_param("material","G4_Si");
     cyl->set_double_param("thickness",si_thickness[ilayer]);
     cyl->SetActive();
