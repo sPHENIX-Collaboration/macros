@@ -66,28 +66,37 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 	       << inner_radius << endl;
 	  gSystem->Exit(-1);
 	}
-      cyl->SetRadius(radius);
+      cyl->set_double_param("radius",radius);
+
       if (length[ilayer] > 0)
         {
-          cyl->SetLengthViaRapidityCoverage(false);
-          cyl->SetLength(length[ilayer]);
+	  cyl->set_int_param("lengthviarapidity",0);
+	  cyl->set_double_param("length",length[ilayer]);
         }
-      cyl->SetMaterial("G4_Si");
-      cyl->SetThickness(si_thickness[ilayer]);
+      else
+	{
+	  cyl->set_int_param("lengthviarapidity",1);
+	}
+      cyl->set_string_param("material","G4_Si");
+      cyl->set_double_param("thickness",si_thickness[ilayer]);
       cyl->SetActive();
       cyl->SuperDetector("SVTX");
       g4Reco->registerSubsystem( cyl );
 
       radius += si_thickness[ilayer] + no_overlapp;
       cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", ilayer);
-      cyl->SetRadius(radius);
+      cyl->set_double_param("radius",radius);
       if (length[ilayer] > 0)
         {
-          cyl->SetLengthViaRapidityCoverage(false);
-          cyl->SetLength(length[ilayer]);
+	  cyl->set_int_param("lengthviarapidity",0);
+	  cyl->set_double_param("length",length[ilayer]);
         }
-      cyl->SetMaterial("G4_Cu");
-      cyl->SetThickness(support_thickness[ilayer]);
+      else
+	{
+	  cyl->set_int_param("lengthviarapidity",1);
+	}
+      cyl->set_string_param("material","G4_Cu");
+      cyl->set_double_param("thickness",support_thickness[ilayer]);
       if (absorberactive)  cyl->SetActive();
       cyl->SuperDetector("SVTXSUPPORT");
       g4Reco->registerSubsystem( cyl );
