@@ -16,7 +16,9 @@ int Fun4All_G4_Prototype2(
   Fun4AllServer *se = Fun4AllServer::instance();
   //  se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
-  rc->set_IntFlag("RANDOMSEED",12345);
+  // only set this if you want a fixed random seed to make
+  // results reproducible for testing
+  //  rc->set_IntFlag("RANDOMSEED",12345);
 
   // Test beam generator
   PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
@@ -169,8 +171,7 @@ int Fun4All_G4_Prototype2(
   //----------------------------------------
 
   {
-    PHG4FullProjSpacalCellReco *cemc_cells = new PHG4FullProjSpacalCellReco(
-        "CEMCCYLCELLRECO");
+    PHG4FullProjSpacalCellReco *cemc_cells = new PHG4FullProjSpacalCellReco("CEMCCYLCELLRECO");
     cemc_cells->Detector("CEMC");
     cemc_cells->set_timing_window_defaults(0.,60.);
     se->registerSubsystem(cemc_cells);
@@ -186,8 +187,7 @@ int Fun4All_G4_Prototype2(
     const double ADC_per_photoelectron_LG = 0.24; // From Sean Stoll, Mar 29
 
     // low gains
-    RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer(
-        "EmcRawTowerDigitizer");
+    RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizerLG");
     TowerDigitizer->Detector("CEMC");
     TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
     TowerDigitizer->set_digi_algorithm(
@@ -200,8 +200,7 @@ int Fun4All_G4_Prototype2(
     TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
     se->registerSubsystem(TowerDigitizer);
 
-    RawTowerCalibration *TowerCalibration = new RawTowerCalibration(
-        "EmcRawTowerCalibration");
+    RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibrationLG");
     TowerCalibration->Detector("CEMC");
     TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
     TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
@@ -214,8 +213,7 @@ int Fun4All_G4_Prototype2(
     se->registerSubsystem(TowerCalibration);
 
     // high gains
-    RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer(
-        "EmcRawTowerDigitizer");
+    RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizerHG");
     TowerDigitizer->Detector("CEMC");
     TowerDigitizer->set_raw_tower_node_prefix("RAW_HG");
     TowerDigitizer->set_digi_algorithm(
@@ -228,8 +226,7 @@ int Fun4All_G4_Prototype2(
     TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
     se->registerSubsystem(TowerDigitizer);
 
-    RawTowerCalibration *TowerCalibration = new RawTowerCalibration(
-        "EmcRawTowerCalibration");
+    RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibrationHG");
     TowerCalibration->Detector("CEMC");
     TowerCalibration->set_raw_tower_node_prefix("RAW_HG");
     TowerCalibration->set_calib_tower_node_prefix("CALIB_HG");
@@ -245,20 +242,20 @@ int Fun4All_G4_Prototype2(
   //----------------------------------------
   // HCal towering
   //----------------------------------------
-  PHG4Prototype2HcalCellReco *hccell = new PHG4Prototype2HcalCellReco();
+  PHG4Prototype2HcalCellReco *hccell = new PHG4Prototype2HcalCellReco("HCALinCellReco");
   hccell->Detector("HCALIN");
   se->registerSubsystem(hccell);
 
-  hccell = new PHG4Prototype2HcalCellReco();
+  hccell = new PHG4Prototype2HcalCellReco("HCALoutCellReco");
   hccell->Detector("HCALOUT");
   se->registerSubsystem(hccell);
 
-  Prototype2RawTowerBuilder *hcaltwr = new Prototype2RawTowerBuilder();
+  Prototype2RawTowerBuilder *hcaltwr = new Prototype2RawTowerBuilder("HCALinRawTowerBuilder");
   hcaltwr->Detector("HCALIN");
   hcaltwr->set_sim_tower_node_prefix("SIM");
   se->registerSubsystem(hcaltwr);
 
-  hcaltwr = new Prototype2RawTowerBuilder();
+  hcaltwr = new Prototype2RawTowerBuilder("HCALoutRawTowerBuilder");
   hcaltwr->Detector("HCALOUT");
   hcaltwr->set_sim_tower_node_prefix("SIM");
   se->registerSubsystem(hcaltwr);
@@ -282,8 +279,7 @@ int Fun4All_G4_Prototype2(
 //     0.2 MeV/ LG ADC
 //     0.2/16 MeV/ HG ADC
 
-  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer(
-      "EmcRawTowerDigitizer");
+  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HCALinTowerDigitizerLG");
   TowerDigitizer->Detector("HCALIN");
   TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
   TowerDigitizer->set_digi_algorithm(
@@ -295,7 +291,7 @@ int Fun4All_G4_Prototype2(
   TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
   se->registerSubsystem(TowerDigitizer);
 
-  TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
+  TowerDigitizer = new RawTowerDigitizer("HCALinTowerDigitizerHG");
   TowerDigitizer->Detector("HCALIN");
   TowerDigitizer->set_raw_tower_node_prefix("RAW_HG");
   TowerDigitizer->set_digi_algorithm(
@@ -307,7 +303,7 @@ int Fun4All_G4_Prototype2(
   TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
   se->registerSubsystem(TowerDigitizer);
 
-  TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
+  TowerDigitizer = new RawTowerDigitizer("HCALoutTowerDigitizerLG");
   TowerDigitizer->Detector("HCALOUT");
   TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
   TowerDigitizer->set_digi_algorithm(
@@ -319,7 +315,7 @@ int Fun4All_G4_Prototype2(
   TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
   se->registerSubsystem(TowerDigitizer);
 
-  TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
+  TowerDigitizer = new RawTowerDigitizer("HCALoutTowerDigitizerHG");
   TowerDigitizer->Detector("HCALOUT");
   TowerDigitizer->set_raw_tower_node_prefix("RAW_HG");
   TowerDigitizer->set_digi_algorithm(
@@ -338,8 +334,7 @@ int Fun4All_G4_Prototype2(
   const double visible_sample_fraction_HCALIN = 7.19505e-02 ; // 1.34152e-02
   const double visible_sample_fraction_HCALOUT = 0.0313466 ; //  +/-   0.0067744
 
-  RawTowerCalibration *TowerCalibration = new RawTowerCalibration(
-      "EmcRawTowerCalibration");
+  RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HCALinRawTowerCalibrationLG");
   TowerCalibration->Detector("HCALIN");
   TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
   TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
@@ -351,7 +346,7 @@ int Fun4All_G4_Prototype2(
   TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
   se->registerSubsystem(TowerCalibration);
 
-  TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
+  TowerCalibration = new RawTowerCalibration("HCALinRawTowerCalibrationHG");
   TowerCalibration->Detector("HCALIN");
   TowerCalibration->set_raw_tower_node_prefix("RAW_HG");
   TowerCalibration->set_calib_tower_node_prefix("CALIB_HG");
@@ -363,7 +358,7 @@ int Fun4All_G4_Prototype2(
   TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
   se->registerSubsystem(TowerCalibration);
 
-  TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
+  TowerCalibration = new RawTowerCalibration("HCALoutRawTowerCalibrationLG");
   TowerCalibration->Detector("HCALOUT");
   TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
   TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
@@ -375,7 +370,7 @@ int Fun4All_G4_Prototype2(
   TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
   se->registerSubsystem(TowerCalibration);
 
-  TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
+  TowerCalibration = new RawTowerCalibration("HCALoutRawTowerCalibrationHG");
   TowerCalibration->Detector("HCALOUT");
   TowerCalibration->set_raw_tower_node_prefix("RAW_HG");
   TowerCalibration->set_calib_tower_node_prefix("CALIB_HG");
