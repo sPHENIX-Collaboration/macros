@@ -254,7 +254,7 @@ void Svtx_Reco(int verbosity = 0)
   hough->set_material(4, 0.008);
   hough->set_material(5, 0.008);
   hough->set_material(6, 0.008);
-  hough->setPtRescaleFactor(0.9972);
+  hough->setPtRescaleFactor(0.9972/1.00117);
   hough->set_chi2_cut_init(5.0);
   //hough->set_chi2_cut_fast(60.0,0.0,100.0); // 10.0, 50.0, 75.0
   hough->set_chi2_cut_fast(10.0,50.0,75.0); // 10.0, 50.0, 75.0
