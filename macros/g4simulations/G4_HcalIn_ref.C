@@ -43,6 +43,10 @@ double HCalInner(PHG4Reco* g4Reco,
   // hcal->set_double_param("rot_y",0);
   // hcal->set_double_param("rot_z",0);
 
+  // Flat plates with 4 scintillators per tower:
+  hcal->set_int_param("n_scinti_plates",4 * 64);
+  hcal->set_double_param("scinti_outer_gap",1.22*(5.0/4.0));
+
   hcal->SetActive();
   hcal->SuperDetector("HCALIN");
   if (absorberactive)  hcal->SetAbsorberActive();
