@@ -24,7 +24,17 @@ double Pipe(PHG4Reco* g4Reco,
   gSystem->Load("libg4testbench.so");
 
   // mid-rapidity beryillium pipe
-  PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("BE_PIPE", 0);
+  PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("VAC_BE_PIPE", 0);
+  cyl->set_double_param("radius",0.0);
+  cyl->set_int_param("lengthviarapidity",0);
+  cyl->set_double_param("length",be_pipe_length);
+  cyl->set_string_param("material","G4_Galactic");
+  cyl->set_double_param("thickness",be_pipe_radius);
+  cyl->SuperDetector("PIPE");
+  if (absorberactive)  cyl->SetActive();
+  g4Reco->registerSubsystem( cyl );
+  
+  PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("BE_PIPE", 1);
   cyl->set_double_param("radius",be_pipe_radius);
   cyl->set_int_param("lengthviarapidity",0);
   cyl->set_double_param("length",be_pipe_length);
@@ -35,7 +45,18 @@ double Pipe(PHG4Reco* g4Reco,
   g4Reco->registerSubsystem( cyl );
 
   // north aluminum pipe
-  cyl = new PHG4CylinderSubsystem("N_AL_PIPE", 1);
+  cyl = new PHG4CylinderSubsystem("VAC_N_AL_PIPE", 2);
+  cyl->set_double_param("place_z",0.5*be_pipe_length+0.5*al_pipe_length+no_overlapp);
+  cyl->set_double_param("radius",0.0);
+  cyl->set_int_param("lengthviarapidity",0);
+  cyl->set_double_param("length",al_pipe_length);
+  cyl->set_string_param("material","G4_Galactic");
+  cyl->set_double_param("thickness",al_pipe_radius);
+  cyl->SuperDetector("PIPE");
+  if (absorberactive)  cyl->SetActive();
+  g4Reco->registerSubsystem( cyl );
+
+  cyl = new PHG4CylinderSubsystem("N_AL_PIPE", 3);
   cyl->set_double_param("place_z",0.5*be_pipe_length+0.5*al_pipe_length+no_overlapp);
   cyl->set_double_param("radius",al_pipe_radius);
   cyl->set_int_param("lengthviarapidity",0);
@@ -47,7 +68,18 @@ double Pipe(PHG4Reco* g4Reco,
   g4Reco->registerSubsystem( cyl );
 
   // south aluminum pipe
-  cyl = new PHG4CylinderSubsystem("S_AL_PIPE", 2);
+  cyl = new PHG4CylinderSubsystem("VAC_S_AL_PIPE", 4);
+  cyl->set_double_param("place_z",-0.5*be_pipe_length-0.5*al_pipe_length-no_overlapp);
+  cyl->set_double_param("radius",0.0);
+  cyl->set_int_param("lengthviarapidity",0);
+  cyl->set_double_param("length",al_pipe_length);
+  cyl->set_string_param("material","G4_Galactic");
+  cyl->set_double_param("thickness",al_pipe_radius);
+  cyl->SuperDetector("PIPE");
+  if (absorberactive)  cyl->SetActive();
+  g4Reco->registerSubsystem( cyl );
+
+  cyl = new PHG4CylinderSubsystem("S_AL_PIPE", 5);
   cyl->set_double_param("place_z",-0.5*be_pipe_length-0.5*al_pipe_length-no_overlapp);
   cyl->set_double_param("radius",al_pipe_radius);
   cyl->set_int_param("lengthviarapidity",0);
@@ -57,7 +89,7 @@ double Pipe(PHG4Reco* g4Reco,
   cyl->SuperDetector("PIPE");
   if (absorberactive)  cyl->SetActive();
   g4Reco->registerSubsystem( cyl );
-
+  
   radius = be_pipe_radius + be_pipe_thickness;
   
   if (verbosity > 0) {
