@@ -59,7 +59,7 @@ int Fun4All_G4_Prototype2(
   cemc->SuperDetector("CEMC");
   cemc->SetAbsorberActive();
   cemc->OverlapCheck(true);
-  cemc->GetParameters().ReadFromFile("xml", string(getenv("OFFLINE_MAIN")) + string("/share/calibrations/Prototype2/Geometry/") ); // geometry database
+  cemc->GetParameters().ReadFromFile("xml", string(getenv("CALIBRATIONROOT")) + string("/Prototype2/Geometry/") ); // geometry database
 //  cemc->GetParameters().set_double_param("z_rotation_degree", 15); // rotation around CG
   cemc->GetParameters().set_double_param("xpos", (116.77 + 137.0)*.5 - 26.5 - 10.2); // location in cm of EMCal CG. Updated with final positioning of EMCal
   cemc->GetParameters().set_double_param("ypos", 4); // put it some where in UIUC blocks
@@ -174,6 +174,10 @@ int Fun4All_G4_Prototype2(
     PHG4FullProjSpacalCellReco *cemc_cells = new PHG4FullProjSpacalCellReco("CEMCCYLCELLRECO");
     cemc_cells->Detector("CEMC");
     cemc_cells->set_timing_window_defaults(0.,60.);
+    cemc_cells->get_light_collection_model().load_data_file(
+        string(getenv("CALIBRATIONROOT")) + string("CEMC/LightCollection/Prototype2Module.xml"),
+        "data_grid_light_guide_efficiency","data_grid_fiber_trans");
+
     se->registerSubsystem(cemc_cells);
 
     RawTowerBuilder *TowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
