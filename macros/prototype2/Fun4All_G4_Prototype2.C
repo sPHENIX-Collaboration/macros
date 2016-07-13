@@ -175,7 +175,7 @@ int Fun4All_G4_Prototype2(
     cemc_cells->Detector("CEMC");
     cemc_cells->set_timing_window_defaults(0.,60.);
     cemc_cells->get_light_collection_model().load_data_file(
-        string(getenv("CALIBRATIONROOT")) + string("CEMC/LightCollection/Prototype2Module.xml"),
+        string(getenv("CALIBRATIONROOT")) + string("/CEMC/LightCollection/Prototype2Module.xml"),
         "data_grid_light_guide_efficiency","data_grid_fiber_trans");
 
     se->registerSubsystem(cemc_cells);
