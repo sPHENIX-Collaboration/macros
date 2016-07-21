@@ -2,7 +2,8 @@
 int Fun4All_G4_sPHENIX(
 		       const int nEvents = 10,
 		       const char * inputFile = "/gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal1d/fieldmap/G4Hits_sPHENIX_e-_eta0_16GeV.root",
-		       const char * outputFile = "G4sPHENIXCells.root"
+		       const char * outputFile = "G4sPHENIXCells.root",
+           const char * embed_input_file = "sHijing.lst"
 		       )
 {
   //===============
@@ -21,6 +22,9 @@ int Fun4All_G4_sPHENIX(
   // Use particle generator
   const bool runpythia8 = false;
   const bool runpythia6 = false;
+  // And
+  // One further choose to embed newly simulated events to a previous simulation:
+  const bool do_embedding = false;
 
   //======================
   // What to run
@@ -33,7 +37,7 @@ int Fun4All_G4_sPHENIX(
   bool do_svtx = true;
   bool do_svtx_cell = true;
   bool do_svtx_track = true;
-  bool do_svtx_eval = true;
+  bool do_svtx_eval = false;
 
   bool do_preshower = false;
   
@@ -47,7 +51,7 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalin_cell = true;
   bool do_hcalin_twr = true;
   bool do_hcalin_cluster = true;
-  bool do_hcalin_eval = true;
+  bool do_hcalin_eval = false;
 
   bool do_magnet = true;
   
@@ -55,13 +59,13 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_cell = true;
   bool do_hcalout_twr = true;
   bool do_hcalout_cluster = true;
-  bool do_hcalout_eval = true;
+  bool do_hcalout_eval = false;
   
   bool do_global = true;
   bool do_global_fastsim = false;
   
-  bool do_jet_reco = true;
-  bool do_jet_eval = true;
+  bool do_jet_reco = false;
+  bool do_jet_eval = false;
 
   bool do_dst_compress = false;
 
@@ -93,7 +97,7 @@ int Fun4All_G4_sPHENIX(
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0); 
+  se->Verbosity(0);
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
@@ -114,6 +118,13 @@ int Fun4All_G4_sPHENIX(
     {
       // Get the hits from a file
       // The input manager is declared later
+
+      if (do_embedding)
+       {
+         cout <<"Do not support read hits and embed background at the same time."<<endl;
+         exit(1);
+       }
+
     }
   else if (readhepmc)
     {
@@ -151,7 +162,7 @@ int Fun4All_G4_sPHENIX(
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
       gen->add_particles("e-",1); // mu+,e+,proton,pi+,Upsilon
       // gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
-      if (readhepmc) {
+      if (readhepmc || do_embedding) {
 	gen->set_reuse_existing_vertex(true);
 	gen->set_existing_vertex_offset_vector(0.0,0.0,0.0);
       } else {
@@ -277,6 +288,19 @@ int Fun4All_G4_sPHENIX(
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager("DSTin");
       hitsin->fileopen(inputFile);
       se->registerInputManager(hitsin);
+    }
+  if (do_embedding)
+    {
+      if (embed_input_file == NULL)
+        {
+          cout << "Missing embed_input_file! Exit";
+          exit(3);
+        }
+
+      Fun4AllDstInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTinEmbed");
+      //      in1->AddFile(embed_input_file); // if one use a single input file
+      in1->AddListFile(embed_input_file); // RecommendedL: if one use a text list of many input files
+      se->registerInputManager(in1);
     }
   if (readhepmc)
     {
