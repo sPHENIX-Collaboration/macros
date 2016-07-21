@@ -1,9 +1,9 @@
 
 int Fun4All_G4_sPHENIX(
 		       const int nEvents = 10,
-		       const char * inputFile = "/gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal1d/fieldmap/G4Hits_sPHENIX_e-_eta0_16GeV.root",
+		       const char * inputFile = "/sphenix/sim/sim01/production/2016-07-06/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_gamma_eta0.30_32GeV-0000.root",
 		       const char * outputFile = "G4sPHENIXCells.root",
-           const char * embed_input_file = "sHijing.lst"
+           const char * embed_input_file = "/sphenix/sim/sim01/production/2016-07-12/sHijing/spacal2d/G4Hits_sPHENIX_sHijing-0-4.4fm.list"
 		       )
 {
   //===============
@@ -23,8 +23,8 @@ int Fun4All_G4_sPHENIX(
   const bool runpythia8 = false;
   const bool runpythia6 = false;
   // And
-  // One further choose to embed newly simulated events to a previous simulation:
-  const bool do_embedding = false;
+  // One further choose to embed newly simulated events to a previous simulation. Not compatible with readhits = true
+  const bool do_embedding = true;
 
   //======================
   // What to run
