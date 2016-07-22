@@ -23,8 +23,8 @@ int Fun4All_G4_sPHENIX(
   const bool runpythia8 = false;
   const bool runpythia6 = false;
   // And
-  // One further choose to embed newly simulated events to a previous simulation. Not compatible with readhits = true
-  const bool do_embedding = true;
+  // Further choose to embed newly simulated events to a previous simulation. Not compatible with `readhits = true`
+  const bool do_embedding = false;
 
   //======================
   // What to run
@@ -37,7 +37,7 @@ int Fun4All_G4_sPHENIX(
   bool do_svtx = true;
   bool do_svtx_cell = true;
   bool do_svtx_track = true;
-  bool do_svtx_eval = false;
+  bool do_svtx_eval = true;
 
   bool do_preshower = false;
   
@@ -51,7 +51,7 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalin_cell = true;
   bool do_hcalin_twr = true;
   bool do_hcalin_cluster = true;
-  bool do_hcalin_eval = false;
+  bool do_hcalin_eval = true;
 
   bool do_magnet = true;
   
@@ -59,13 +59,13 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_cell = true;
   bool do_hcalout_twr = true;
   bool do_hcalout_cluster = true;
-  bool do_hcalout_eval = false;
+  bool do_hcalout_eval = true;
   
   bool do_global = true;
   bool do_global_fastsim = false;
   
-  bool do_jet_reco = false;
-  bool do_jet_eval = false;
+  bool do_jet_reco = true;
+  bool do_jet_eval = true;
 
   bool do_dst_compress = false;
 
