@@ -90,7 +90,7 @@ int Fun4All_G4_EICDetector(
 
   // EICDetector geometry - 'hadron' direction
 
-  bool do_EGEM = false;
+  bool do_EGEM = true;
 
   bool do_EEMC = true;
   bool do_EEMC_cell = true;
