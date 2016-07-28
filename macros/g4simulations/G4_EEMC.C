@@ -1,7 +1,5 @@
 using namespace std;
 
-// global macro parameters
-
 void
 EEMCInit()
 {
@@ -23,6 +21,9 @@ void EEMC_Cells(int verbosity = 0) {
 void
 EEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 {
+
+  gSystem->Load("libg4detectors.so");
+
   /** Use dedicated EEMC module */
   PHG4CrystalCalorimeterSubsystem *eemc = new PHG4CrystalCalorimeterSubsystem("EEMC");
 
@@ -30,16 +31,16 @@ EEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
   ostringstream mapping_eemc;
 
   /* Use non-projective geometry */
-  mapping_eemc << getenv("OFFLINE_MAIN") << "/share/calibrations";
-  mapping_eemc << "/CrystalCalorimeter/mapping/towerMap_EEMC_v003.txt";
+  mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v003.txt";
 
   cout << mapping_eemc.str() << endl;
-  eemc->SetTowerMappingFile( mapping_eemc.str() );
 
-  /* register Ecal module */
+  eemc->SetTowerMappingFile( mapping_eemc.str() );
   eemc->OverlapCheck(overlapcheck);
+
   if (absorberactive)  eemc->SetAbsorberActive();
 
+  /* register Ecal module */
   g4Reco->registerSubsystem( eemc );
 
 }
@@ -51,9 +52,8 @@ void EEMC_Towers(int verbosity = 0) {
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_eemc;
-  mapping_eemc << getenv("OFFLINE_MAIN") <<
-    "/share/calibrations/CrystalCalorimeter/mapping/towerMap_EEMC_v003.txt";
-  //mapping_eemc << "towerMap_EEMC_latest.txt";
+  mapping_eemc << getenv("CALIBRATIONROOT") <<
+    "/CrystalCalorimeter/mapping/towerMap_EEMC_v003.txt";
 
   RawTowerBuilderByHitIndex* tower_EEMC = new RawTowerBuilderByHitIndex("TowerBuilder_EEMC");
   tower_EEMC->Detector("EEMC");
@@ -61,6 +61,7 @@ void EEMC_Towers(int verbosity = 0) {
   tower_EEMC->GeometryTableFile( mapping_eemc.str() );
 
   se->registerSubsystem(tower_EEMC);
+
 
   /* Calorimeter digitization */
 
@@ -79,6 +80,7 @@ void EEMC_Towers(int verbosity = 0) {
   TowerDigitizer_EEMC->set_zero_suppression_ADC(16); // eRD1 test beam setting
 
   se->registerSubsystem( TowerDigitizer_EEMC );
+
 
   /* Calorimeter calibration */
 
