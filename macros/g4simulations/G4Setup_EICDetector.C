@@ -67,9 +67,15 @@ void G4Init(bool do_svtx = true,
       FGEM_Init();
     }
 
+  if (do_EGEM)
+    {
+      gROOT->LoadMacro("G4_EGEM_EIC.C");
+      EGEM_Init();
+    }
+
   if (do_FEMC)
     {
-      gROOT->LoadMacro("G4_FEMC.C");
+      gROOT->LoadMacro("G4_FEMC_EIC.C");
       FEMCInit();
     }
 
@@ -84,6 +90,26 @@ void G4Init(bool do_svtx = true,
       gROOT->LoadMacro("G4_EEMC.C");
       EEMCInit();
     }
+
+  if (do_DIRC)
+    {
+      gROOT->LoadMacro("G4_DIRC.C");
+      DIRCInit();
+    }
+
+  if (do_RICH)
+    {
+      gROOT->LoadMacro("G4_RICH.C");
+      RICHInit();
+    }
+
+  if (do_Aerogel)
+    {
+      gROOT->LoadMacro("G4_Aerogel.C");
+      AerogelInit();
+    }
+
+
 }
 
 
@@ -184,6 +210,9 @@ int G4Setup(const int absorberactive = 0,
   if ( do_FGEM )
     FGEMSetup(g4Reco);
 
+  if ( do_EGEM )
+    EGEMSetup(g4Reco);
+
   //----------------------------------------
   // FEMC
 
@@ -201,6 +230,18 @@ int G4Setup(const int absorberactive = 0,
 
   if ( do_EEMC )
     EEMCSetup(g4Reco, absorberactive);
+
+  //----------------------------------------
+  // PID
+
+  if ( do_DIRC )
+    DIRCSetup(g4Reco);
+
+  if ( do_RICH )
+    RICHSetup(g4Reco);
+
+  if ( do_Aerogel )
+    AerogelSetup(g4Reco);
 
   // sPHENIX forward flux return(s)
   PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
