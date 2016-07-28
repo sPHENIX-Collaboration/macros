@@ -25,7 +25,7 @@ void
 RICHSetup(PHG4Reco* g4Reco, //
 	  const int N_RICH_Sector = 8, //
 	  const double min_eta = 1.2, //
-	  const double R_mirror_ref = 195, //cm
+	  const double R_mirror_ref = 155, //cm
 	  )
 {
 
