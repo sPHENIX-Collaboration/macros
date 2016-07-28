@@ -28,7 +28,35 @@ EGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   double zpos;
   PHG4SectorSubsystem *gem;
 
-  make_GEM_station("EGEM_0", g4Reco, 17, -1.01, 2.7, N_Sector);
+  make_GEM_station("EGEM_0", g4Reco, -30, 1.01, 2.7, N_Sector);
+  make_GEM_station("EGEM_1", g4Reco, -55, 2.15, 4.0, N_Sector);
+
+  ///////////////////////////////////////////////////////////////////////////
+
+  ///////////////////////////////////////////////////////////////////////////
+
+  name = "EGEM_2";
+  etamax = 4;
+  etamin = min_eta;
+  zpos = -1.0e2;
+
+  gem = new PHG4SectorSubsystem(name.c_str());
+
+  gem->get_geometry().set_normal_polar_angle(tilt);
+  gem->get_geometry().set_normal_start(
+      zpos * PHG4Sector::Sector_Geometry::Unit_cm(), 0);
+  gem->get_geometry().set_min_polar_angle(
+      PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamax));
+  gem->get_geometry().set_max_polar_angle(
+      PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamin));
+  gem->get_geometry().set_max_polar_edge(
+      PHG4Sector::Sector_Geometry::FlatEdge());
+  gem->get_geometry().set_material("G4_METHANE");
+  gem->get_geometry().set_N_Sector(N_Sector);
+  gem->OverlapCheck(overlapcheck);
+  AddLayers_MiniTPCDrift(gem);
+  gem->get_geometry().AddLayers_HBD_GEM();
+  g4Reco->registerSubsystem(gem);
 
   ///////////////////////////////////////////////////////////////////////////
 
