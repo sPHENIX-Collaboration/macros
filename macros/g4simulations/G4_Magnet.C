@@ -26,31 +26,31 @@ double Magnet(PHG4Reco* g4Reco,
 
   radius = magnet_inner_cryostat_wall_radius;
   PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("MAGNET", 0);
-  cyl->SetRadius(magnet_inner_cryostat_wall_radius);
-  cyl->SetLengthViaRapidityCoverage(false);
-  cyl->SetLength(magnet_length);
-  cyl->SetMaterial("Al5083"); // use 1 radiation length Al for magnet thickness
-  cyl->SetThickness(magnet_inner_cryostat_wall_thickness);
+  cyl->set_double_param("radius",magnet_inner_cryostat_wall_radius);
+  cyl->set_int_param("lengthviarapidity",0);
+  cyl->set_double_param("length",magnet_length);
+cyl->set_double_param("thickness",magnet_inner_cryostat_wall_thickness);
+cyl->set_string_param("material","Al5083"); // use 1 radiation length Al for magnet thickness
   cyl->SuperDetector("MAGNET");
   if (absorberactive)  cyl->SetActive();
   g4Reco->registerSubsystem( cyl );
 
   cyl = new PHG4CylinderSubsystem("MAGNET", 1);
-  cyl->SetRadius(magnet_coil_radius);
-  cyl->SetLengthViaRapidityCoverage(false);
-  cyl->SetLength(coil_length);
-  cyl->SetMaterial("Al5083"); // use 1 radiation length Al for magnet thickness
-  cyl->SetThickness(magnet_coil_thickness);
+  cyl->set_double_param("radius",magnet_coil_radius);
+  cyl->set_int_param("lengthviarapidity",0);
+  cyl->set_double_param("length",coil_length);
+  cyl->set_double_param("thickness",magnet_coil_thickness);
+  cyl->set_string_param("material","Al5083"); // use 1 radiation length Al for magnet thickness
   cyl->SuperDetector("MAGNET");
   if (absorberactive)  cyl->SetActive();
   g4Reco->registerSubsystem( cyl );
 
   cyl = new PHG4CylinderSubsystem("MAGNET", 2);
-  cyl->SetRadius(magnet_outer_cryostat_wall_radius);
-  cyl->SetLengthViaRapidityCoverage(false);
-  cyl->SetLength(magnet_length);
-  cyl->SetMaterial("Al5083"); // use 1 radiation length Al for magnet thickness
-  cyl->SetThickness(magnet_outer_cryostat_wall_thickness);
+  cyl->set_double_param("radius",magnet_outer_cryostat_wall_radius);
+  cyl->set_int_param("lengthviarapidity",0);
+  cyl->set_double_param("length",magnet_length);
+  cyl->set_double_param("thickness",magnet_outer_cryostat_wall_thickness);
+  cyl->set_string_param("material","Al5083"); // use 1 radiation length Al for magnet thickness
   cyl->SuperDetector("MAGNET");
   if (absorberactive)  cyl->SetActive();
   g4Reco->registerSubsystem( cyl );

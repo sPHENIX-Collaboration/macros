@@ -1,12 +1,12 @@
 // development macro for a full ITS style silicon detector
 
 int Min_si_layer = 0;
-int Max_si_layer = 6;
+int Max_si_layer = 4;
 
 void SvtxInit()
 {
   Min_si_layer = 0;
-  Max_si_layer = 6;
+  Max_si_layer = 4;
 }
 
 double Svtx(PHG4Reco* g4Reco,
@@ -43,16 +43,16 @@ double Svtx(PHG4Reco* g4Reco,
   //=======================================================================================================
 
   //double svxrad[7] = {2.3, 3.2, 3.9, 19.6, 24.5, 34.4, 39.3}; // ALICE ITS upgrade layer radii in cm
-  double svxrad[7] = {svtx_inner_radius, 3.2, 3.9, 19.6, 24.5, 34.4, 60.0}; // ALICE ITS upgrade with outer layer pushed out
-  double si_thickness[7] = {0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005};  // ALICE ITS upgrade Si thickness is 50 microns
-  double length[7] = {20.0, 20.0, -1., - 1., - 1., -1., -1.}; // -1 use eta coverage to determine length - modified from ITS
+  double svxrad[5] = {svtx_inner_radius, 3.2, 3.9, 24.5, 64.0}; // ALICE ITS upgrade with outer layer pushed out
+  double si_thickness[5] = {0.005, 0.005, 0.005, 0.005, 0.005};  // ALICE ITS upgrade Si thickness is 50 microns
+  double length[5] = {27.0, 27.0, 27.0, 88.0, 148.0}; // ALICE ladder lengths (stave - 2cm)
 
   // ALICE ITS total thickness (% of X_0 of 0.3, 0.3, 0.3, 0.8, 0.8, 0.8, 0.8
   // Pixel chip thickness of 50 um (% of X_0 of 0.05 x 1.07 = 0.053%) in all layers
   // so inner 3 layers support thickness = 0.3 - 0.053 = 0.25%, outer 4 layers = 0.8 - 0.053 = 0.75%
   // Support thickness equivalent for Cu in inner layer = 0.25%/6.96% x 1 mm = 0.036 mm = 0.0036 cm
   // Support thickness equivalent for Cu in outer layer = 0.75%/6.96% x 1 mm = 0.108 mm = 0.0108 cm
-  double support_thickness[7] = {0.0036, 0.0036, 0.0036, 0.0108, 0.0108, 0.0108, 0.0108};
+  double support_thickness[5] = {0.0036, 0.0036, 0.0036, 0.0108, 0.0108};
 
   // here is our silicon:
   double inner_radius = radius;
@@ -67,28 +67,36 @@ double Svtx(PHG4Reco* g4Reco,
 	       << inner_radius << endl;
 	  gSystem->Exit(-1);
 	}
-      cyl->SetRadius(radius);
+      cyl->set_double_param("radius",radius);
       if (length[ilayer] > 0)
         {
-          cyl->SetLengthViaRapidityCoverage(false);
-          cyl->SetLength(length[ilayer]);
+          cyl->set_int_param("lengthviarapidity",0);
+          cyl->set_double_param("length",length[ilayer]);
         }
-      cyl->SetMaterial("G4_Si");
-      cyl->SetThickness(si_thickness[ilayer]);
+      else
+	{
+          cyl->set_int_param("lengthviarapidity",1);
+	}
+      cyl->set_string_param("material","G4_Si");
+      cyl->set_double_param("thickness",si_thickness[ilayer]);
       cyl->SetActive();
       cyl->SuperDetector("SVTX");
       g4Reco->registerSubsystem( cyl );
 
       radius += si_thickness[ilayer] + no_overlapp;
       cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", ilayer);
-      cyl->SetRadius(radius);
+      cyl->set_double_param("radius",radius);
       if (length[ilayer] > 0)
         {
-          cyl->SetLengthViaRapidityCoverage(false);
-          cyl->SetLength(length[ilayer]);
+          cyl->set_int_param("lengthviarapidity",0);
+          cyl->set_double_param("length",length[ilayer]);
         }
-      cyl->SetMaterial("G4_Cu");
-      cyl->SetThickness(support_thickness[ilayer]);
+      else
+	{
+          cyl->set_int_param("lengthviarapidity",1);
+	}
+      cyl->set_string_param("material","G4_Cu");
+      cyl->set_double_param("thickness",support_thickness[ilayer]);
       if (absorberactive)  cyl->SetActive();
       cyl->SuperDetector("SVTXSUPPORT");
       g4Reco->registerSubsystem( cyl );
@@ -142,8 +150,9 @@ void Svtx_Cells(int verbosity = 0)
 
   // updated for ITS layers
 
-  double svxcellsizex[7] = {0.0020, 0.0020, 0.0020, 0.0020, 0.0020, 0.0020, 0.0020};
-  double svxcellsizey[7] = {0.0020, 0.0020, 0.0020, 0.0020, 0.0020, 0.0020, 0.0020};
+  // 28 um / sqrt(2) from typical cluster size (not yet simulated for MAPS)
+  double svxcellsizex[5] = {0.0020, 0.0020, 0.0020, 0.0020, 0.0020};
+  double svxcellsizey[5] = {0.0020, 0.0020, 0.0020, 0.0020, 0.0020};
   
   PHG4CylinderCellReco *svtx_cells = new PHG4CylinderCellReco();
   svtx_cells->Detector("SVTX");
@@ -189,8 +198,6 @@ void Svtx_Reco(int verbosity = 0)
   digi->set_adc_scale(2, 255, 1.6e-6); // 1.6 keV / bit
   digi->set_adc_scale(3, 255, 1.6e-6); // 1.6 keV / bit
   digi->set_adc_scale(4, 255, 1.6e-6); // 1.6 keV / bit
-  digi->set_adc_scale(5, 255, 1.6e-6); // 1.6 keV / bit
-  digi->set_adc_scale(6, 255, 1.6e-6); // 1.6 keV / bit
   se->registerSubsystem( digi );
   
   //------------------------------------------
@@ -199,13 +206,11 @@ void Svtx_Reco(int verbosity = 0)
   // defaults to 1.0 (fully active)
   PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
   deadarea->Verbosity(verbosity);
-  deadarea->set_hit_efficiency(0,0.998);
-  deadarea->set_hit_efficiency(1,0.998);
-  deadarea->set_hit_efficiency(2,0.998);
-  deadarea->set_hit_efficiency(3,0.998);
-  deadarea->set_hit_efficiency(4,0.998);
-  deadarea->set_hit_efficiency(5,0.998);
-  deadarea->set_hit_efficiency(6,0.998);
+  deadarea->set_hit_efficiency(0,0.99); // Leo says use 1% inefficiency
+  deadarea->set_hit_efficiency(1,0.99);
+  deadarea->set_hit_efficiency(2,0.99);
+  deadarea->set_hit_efficiency(3,0.99);
+  deadarea->set_hit_efficiency(4,0.99);
   se->registerSubsystem( deadarea );
   
   //----------------------------------
@@ -218,8 +223,6 @@ void Svtx_Reco(int verbosity = 0)
   thresholds->set_threshold(2,0.25);
   thresholds->set_threshold(3,0.25);
   thresholds->set_threshold(4,0.25);
-  thresholds->set_threshold(5,0.25);
-  thresholds->set_threshold(6,0.25);
   //thresholds->set_use_thickness_mip(0, true);
   se->registerSubsystem( thresholds );
 
@@ -234,7 +237,7 @@ void Svtx_Reco(int verbosity = 0)
   //---------------------
   // Track reconstruction
   //---------------------
-  PHG4HoughTransform* hough = new PHG4HoughTransform(7,7);
+  PHG4HoughTransform* hough = new PHG4HoughTransform(5,5);
   hough->set_mag_field(1.4);
   hough->Verbosity(verbosity);
   // ALICE ITS upgrade values for total thickness in X_0
@@ -243,8 +246,6 @@ void Svtx_Reco(int verbosity = 0)
   hough->set_material(2, 0.003);
   hough->set_material(3, 0.008);
   hough->set_material(4, 0.008);
-  hough->set_material(5, 0.008);
-  hough->set_material(6, 0.008);
   hough->setPtRescaleFactor(0.9972);
   hough->set_chi2_cut_init(5.0);
   //hough->set_chi2_cut_fast(60.0,0.0,100.0); // 10.0, 50.0, 75.0
@@ -260,7 +261,7 @@ void Svtx_Reco(int verbosity = 0)
   //---------------------
   // Ghost rejection
   //---------------------
-  PHG4TrackGhostRejection* rejection = new PHG4TrackGhostRejection(7);
+  PHG4TrackGhostRejection* rejection = new PHG4TrackGhostRejection(5);
   rejection->Verbosity(verbosity);
   rejection->set_max_shared_hits(3);
   se->registerSubsystem( rejection );
@@ -313,7 +314,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   // SVTX evaluation
   //----------------
 
-  SubsysReco* eval = new PHG4Evaluator("PHG4EVALUATOR", outputfile.c_str());
+  SubsysReco* eval = new SvtxEvaluator("SvtxEVALUATOR", outputfile.c_str());
   eval->Verbosity(verbosity);
   se->registerSubsystem( eval );
 

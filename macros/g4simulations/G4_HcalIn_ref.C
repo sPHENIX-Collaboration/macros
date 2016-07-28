@@ -28,7 +28,8 @@ double HCalInner(PHG4Reco* g4Reco,
   // hcal->set_int_param("light_scint_model",1);
   // hcal->set_double_param("inner_radius",116);
   // hcal->set_double_param("outer_radius",136);
-  // hcal->set_double_param("scinti_gap",0.85);
+  // hcal->set_double_param("scinti_inner_gap",0.85);
+  // hcal->set_double_param("scinti_outer_gap",1.22);
   // hcal->set_double_param("scinti_tile_thickness",0.7);
   // hcal->set_double_param("scinti_gap_neighbor",0.1);
   // the SetLightCorrection is a convenience method, no
@@ -41,6 +42,10 @@ double HCalInner(PHG4Reco* g4Reco,
   // hcal->set_double_param("rot_x",0);
   // hcal->set_double_param("rot_y",0);
   // hcal->set_double_param("rot_z",0);
+
+  // Flat plates with 4 scintillators per tower:
+  hcal->set_int_param("n_scinti_plates",4 * 64);
+  hcal->set_double_param("scinti_outer_gap",1.22*(5.0/4.0));
 
   hcal->SetActive();
   hcal->SuperDetector("HCALIN");
@@ -93,13 +98,13 @@ void HCalInner_SupportRing(PHG4Reco* g4Reco,
   for (int i = 0; i < 4; i++)
     {
       cyl = new PHG4CylinderSubsystem("HCALIN_SPT_N1", i);
-      cyl->SetPosition(0, 0, z_rings[i]);
+      cyl->set_double_param("place_z",z_rings[i]);
       cyl->SuperDetector("HCALIN_SPT");
-      cyl->SetRadius(innerradius);
-      cyl->SetLengthViaRapidityCoverage(false);
-      cyl->SetLength(dz);
-      cyl->SetMaterial("SS310");
-      cyl->SetThickness(maxradius - innerradius);
+      cyl->set_double_param("radius",innerradius);
+      cyl->set_int_param("lengthviarapidity",0);
+      cyl->set_double_param("length",dz);
+      cyl->set_string_param("material","SS310");
+      cyl->set_double_param("thickness",maxradius - innerradius);
       if (absorberactive)
         cyl->SetActive();
       g4Reco->registerSubsystem(cyl);
@@ -118,7 +123,7 @@ void HCALInner_Cells(int verbosity = 0) {
   PHG4HcalCellReco *hc = new PHG4HcalCellReco();
   hc->Detector("HCALIN");
   hc->etasize_nslat(0, 0, 5);
-  hc->set_timing_window_size(60);
+  hc->set_timing_window_defaults(0.0,60.0);
   se->registerSubsystem(hc);
   
   return;  

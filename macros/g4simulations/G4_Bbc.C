@@ -19,7 +19,7 @@ void Bbc_Reco(int verbosity = 0) {
   //---------------
 
   gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4vertex.so");
+  gSystem->Load("libg4bbc.so");
 
   //---------------
   // Fun4All server
@@ -28,7 +28,7 @@ void Bbc_Reco(int verbosity = 0) {
   Fun4AllServer *se = Fun4AllServer::instance();
 
   BbcVertexFastSimReco* bbcvertex = new BbcVertexFastSimReco();
-  bbcvertex->set_z_smearing(0.6);   // 6 mm
+  bbcvertex->set_z_smearing(0.0);   // 6 mm, temporarily perfect for TPC initial vertexing
   bbcvertex->set_t_smearing(0.002); // 20 ps
   se->registerSubsystem(bbcvertex);
 

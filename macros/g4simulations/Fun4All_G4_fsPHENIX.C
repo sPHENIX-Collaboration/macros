@@ -19,7 +19,8 @@ int Fun4All_G4_fsPHENIX(
   const bool readhepmc = false; // read HepMC files
   // Or:
   // Use particle generator
-  const bool runpythia = false;
+  const bool runpythia8 = false;
+  const bool runpythia6 = false;
 
   //======================
   // What to run
@@ -67,6 +68,8 @@ int Fun4All_G4_fsPHENIX(
 
   // fsPHENIX geometry
 
+  bool do_FGEM = true;
+
   bool do_FEMC = true; 
   bool do_FEMC_cell = true; 
   bool do_FEMC_twr = true;  
@@ -95,7 +98,7 @@ int Fun4All_G4_fsPHENIX(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_fsPHENIX.C");
-  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FEMC,do_FHCAL);
+  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_FEMC,do_FHCAL);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
@@ -137,7 +140,7 @@ int Fun4All_G4_fsPHENIX(
       HepMCNodeReader *hr = new HepMCNodeReader();
       se->registerSubsystem(hr);
     }
-  else if (runpythia)
+  else if (runpythia8)
     {
       gSystem->Load("libPHPythia8.so");
       
@@ -145,6 +148,17 @@ int Fun4All_G4_fsPHENIX(
       // see coresoftware/generators/PHPythia8 for example config
       pythia8->set_config_file("phpythia8.cfg"); 
       se->registerSubsystem(pythia8);
+
+      HepMCNodeReader *hr = new HepMCNodeReader();
+      se->registerSubsystem(hr);
+    }
+  else if (runpythia6)
+    {
+      gSystem->Load("libPHPythia6.so");
+
+      PHPythia6 *pythia6 = new PHPythia6();
+      pythia6->set_config_file("phpythia6.cfg");
+      se->registerSubsystem(pythia6);
 
       HepMCNodeReader *hr = new HepMCNodeReader();
       se->registerSubsystem(hr);
@@ -186,7 +200,7 @@ int Fun4All_G4_fsPHENIX(
 
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
 	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
-	      do_FEMC, do_FHCAL,
+	      do_FGEM, do_FEMC, do_FHCAL,
 	      magfield_rescale);
       
     }
@@ -337,6 +351,7 @@ int Fun4All_G4_fsPHENIX(
           /*bool*/ do_hcalin_twr ,
           /*bool*/ do_magnet  ,
 	  /*bool*/ do_hcalout_twr,
+    /*bool*/ do_FGEM,
 	  /*bool*/ do_FHCAL,
 	  /*bool*/ do_FHCAL_twr,
 	  /*bool*/ do_FEMC,
