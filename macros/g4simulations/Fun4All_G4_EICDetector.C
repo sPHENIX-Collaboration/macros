@@ -68,14 +68,14 @@ int Fun4All_G4_EICDetector(
 
   // EICDetector geometry - barrel
 
-  bool do_DIRC = true;
+  bool do_DIRC = false;
 
   // EICDetector geometry - 'hadron' direction
 
   bool do_FGEM = true;
 
   bool do_RICH = true;
-  bool do_Aerogel = true;
+  bool do_Aerogel = false;
 
   bool do_FEMC = true;
   bool do_FEMC_cell = true;
@@ -90,7 +90,7 @@ int Fun4All_G4_EICDetector(
 
   // EICDetector geometry - 'hadron' direction
 
-  bool do_EGEM = true;
+  bool do_EGEM = false;
 
   bool do_EEMC = true;
   bool do_EEMC_cell = true;
