@@ -3,95 +3,92 @@ double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
 bool overlapcheck = false; // set to true if you want to check for overlaps
 
 void G4Init(bool do_svtx = true,
-	    bool do_preshower = false,
-	    bool do_cemc = true,
-	    bool do_hcalin = true,
-	    bool do_magnet = true,
-	    bool do_hcalout = true,
-	    bool do_pipe = true,
-	    bool do_bbc = true,
-	    bool do_global = true,
-	    bool do_FEMC = true,
-	    bool do_FHCAL = true,
-	    bool do_EEMC = true,
-	    bool do_DIRC = true,
-	    bool do_RICH = true,
-	    bool do_Aerogel = true) {
+            bool do_preshower = false,
+            bool do_cemc = true,
+            bool do_hcalin = true,
+            bool do_magnet = true,
+            bool do_hcalout = true,
+            bool do_pipe = true,
+            bool do_FGEM = true,
+            bool do_FEMC = true,
+            bool do_FHCAL = true) {
 
-  gROOT->LoadMacro("G4_Bbc.C");
-  if (do_bbc) BbcInit();
+  // load detector/material macros and execute Init() function
 
-  gROOT->LoadMacro("G4_Pipe.C");
-  if (do_pipe) PipeInit();
+  if (do_pipe)
+    {
+      gROOT->LoadMacro("G4_Pipe.C");
+      PipeInit();
+    }
+  if (do_svtx)
+    {
+      gROOT->LoadMacro("G4_Svtx_maps+tpc.C");
+      SvtxInit();
+    }
 
-  // load detector macros and execute Init() function
-  gROOT->LoadMacro("G4_Svtx.C");           // default
-  //gROOT->LoadMacro("G4_Svtx_ladders.C"); // testing
-  //gROOT->LoadMacro("G4_Svtx_ITS.C");     // testing
-  if (do_svtx) SvtxInit();
+  if (do_preshower)
+    {
+      gROOT->LoadMacro("G4_PreShower.C");
+      PreShowerInit();
+    }
 
-  if (do_preshower) {
-    gROOT->LoadMacro("G4_PreShower.C");   // testing
-    PreShowerInit();
-  }
+  if (do_cemc)
+    {
+      gROOT->LoadMacro("G4_CEmc_Spacal.C");
+      CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
+    }
 
-  gROOT->LoadMacro("G4_CEmc_Spacal.C");    //
-  if (do_cemc) CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
+  if (do_hcalin)
+    {
+      gROOT->LoadMacro("G4_HcalIn_ref.C");
+      HCalInnerInit();
+    }
 
-  gROOT->LoadMacro("G4_HcalIn_ref.C");       // default
-  if (do_hcalin) HCalInnerInit();
+  if (do_magnet)
+    {
+      gROOT->LoadMacro("G4_Magnet.C");
+      MagnetInit();
+    }
+  if (do_hcalout)
+    {
+      gROOT->LoadMacro("G4_HcalOut_ref.C");
+      HCalOuterInit();
+    }
 
-  gROOT->LoadMacro("G4_Magnet.C");
-  if (do_magnet) MagnetInit();
+  if (do_FGEM)
+    {
+      gROOT->LoadMacro("G4_FGEM_fsPHENIX.C");
+      FGEM_Init();
+    }
 
-  gROOT->LoadMacro("G4_HcalOut_ref.C");       // default
-  if (do_hcalout) HCalOuterInit();
+  if (do_FEMC)
+    {
+      gROOT->LoadMacro("G4_FEMC.C");
+      FEMCInit();
+    }
 
-  gROOT->LoadMacro("G4_Global.C");
-
-  gROOT->LoadMacro("G4_Jets.C");
-
-  gROOT->LoadMacro("G4_FwdJets.C");
-
-  gROOT->LoadMacro("G4_FEMC.C");
-  if ( do_FEMC ) FEMCInit();
-
-  gROOT->LoadMacro("G4_FHCAL.C");
-  if ( do_FHCAL ) FHCALInit();
-
-  gROOT->LoadMacro("G4_EEMC.C");
-  if ( do_EEMC ) EEMCInit();
-
-  gROOT->LoadMacro("G4_DIRC.C");
-  if ( do_DIRC ) DIRCInit();
-
-  gROOT->LoadMacro("G4_RICH.C");
-  if ( do_RICH ) RICHInit();
-
-  gROOT->LoadMacro("G4_Aerogel.C");
-  if ( do_Aerogel ) AerogelInit();
-
+  if (do_FHCAL)
+    {
+      gROOT->LoadMacro("G4_FHCAL.C");
+      FHCALInit();
+    }
 }
 
 
 int G4Setup(const int absorberactive = 0,
-	    const string &field ="1.5",
-	    const EDecayType decayType = TPythia6Decayer::kAll,
-	    const bool do_svtx = true,
-	    const bool do_preshower = false,
-	    const bool do_cemc = true,
-	    const bool do_hcalin = true,
-	    const bool do_magnet = true,
-	    const bool do_hcalout = true,
-	    const bool do_pipe = true,
-	    const bool do_bbc = true,
-	    const bool do_FEMC = false,
-	    const bool do_FHCAL = false,
-	    const bool do_EEMC = false,
-	    const bool do_DIRC = false,
-	    const bool do_RICH = false,
-	    const bool do_Aerogel = false,
-     	    const float magfield_rescale = 1.0) {
+            const string &field ="1.5",
+            const EDecayType decayType = TPythia6Decayer::kAll,
+            const bool do_svtx = true,
+            const bool do_preshower = false,
+            const bool do_cemc = true,
+            const bool do_hcalin = true,
+            const bool do_magnet = true,
+            const bool do_hcalout = true,
+            const bool do_pipe = true,
+            const bool do_FGEM = true,
+            const bool do_FEMC = false,
+            const bool do_FHCAL = false,
+            const float magfield_rescale = 1.0) {
 
   //---------------
   // Load libraries
@@ -145,9 +142,9 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // CEMC
-//
+  //
   if (do_cemc) radius = CEmc(g4Reco, radius, 8, absorberactive);
-//  if (do_cemc) radius = CEmc_Vis(g4Reco, radius, 8, absorberactive);// for visualization substructure of SPACAL, slow to render
+  //  if (do_cemc) radius = CEmc_Vis(g4Reco, radius, 8, absorberactive);// for visualization substructure of SPACAL, slow to render
 
   //----------------------------------------
   // HCALIN
@@ -165,6 +162,12 @@ int G4Setup(const int absorberactive = 0,
   if (do_hcalout) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
 
   //----------------------------------------
+  // Forward tracking
+
+  if ( do_FGEM )
+    FGEMSetup(g4Reco);
+
+  //----------------------------------------
   // FEMC
 
   if ( do_FEMC )
@@ -176,66 +179,42 @@ int G4Setup(const int absorberactive = 0,
   if ( do_FHCAL )
     FHCALSetup(g4Reco, absorberactive);
 
-  //----------------------------------------
-  // EEMC
-
-  if ( do_EEMC )
-    EEMCSetup(g4Reco, absorberactive);
-
-  //----------------------------------------
-  // Barrel DIRC
-
-  if ( do_DIRC )
-    DIRCSetup(g4Reco);
-
-  //----------------------------------------
-  // Forward gas RICH
-
-  if ( do_RICH )
-    RICHSetup(g4Reco);
-
-  //----------------------------------------
-  // Forward Aerogel
-
-  if ( do_Aerogel )
-    AerogelSetup(g4Reco);
-
   // sPHENIX forward flux return(s)
   PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
-  flux_return_plus->SetLength(10.2);
-  flux_return_plus->SetPosition(0,0,335.9);
-  flux_return_plus->SetRadius(5.0);
-  flux_return_plus->SetLengthViaRapidityCoverage(false);
-  flux_return_plus->SetThickness(263.5-5.0);
-  flux_return_plus->SetMaterial("G4_Fe");
+  flux_return_plus->set_int_param("lengthviarapidity",0);
+  flux_return_plus->set_double_param("length",10.2);
+  flux_return_plus->set_double_param("radius",2.1);
+  flux_return_plus->set_double_param("thickness",263.5-5.0);
+  flux_return_plus->set_double_param("place_z",335.9);
+  flux_return_plus->set_string_param("material","G4_Fe");
   flux_return_plus->SetActive(false);
   flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
   flux_return_plus->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(flux_return_plus);
 
   PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
-  flux_return_minus->SetLength(10.2);
-  flux_return_minus->SetPosition(0,0,-335.9);
-  flux_return_minus->SetRadius(5.0);
-  flux_return_minus->SetLengthViaRapidityCoverage(false);
-  flux_return_minus->SetThickness(263.5-5.0);
-  flux_return_minus->SetMaterial("G4_Fe");
+  flux_return_minus->set_int_param("lengthviarapidity",0);
+  flux_return_minus->set_double_param("length",10.2);
+  flux_return_minus->set_double_param("radius",2.1);
+  flux_return_minus->set_double_param("place_z",-335.9);
+  flux_return_minus->set_double_param("thickness",263.5-5.0);
+  flux_return_minus->set_string_param("material","G4_Fe");
   flux_return_minus->SetActive(false);
   flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
   flux_return_minus->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(flux_return_minus);
-
 
   //----------------------------------------
   // BLACKHOLE
 
   // swallow all particles coming out of the backend of sPHENIX
   PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
-  blackhole->SetRadius(radius + 10); // add 10 cm
-  blackhole->SetLengthViaRapidityCoverage(false);
-  blackhole->SetLength(g4Reco->GetWorldSizeZ() - no_overlapp); // make it cover the world in length
+  blackhole->set_double_param("radius",radius + 10); // add 10 cm
+
+  blackhole->set_int_param("lengthviarapidity",0);
+  blackhole->set_double_param("length",g4Reco->GetWorldSizeZ() - no_overlapp); // make it cover the world in length
   blackhole->BlackHole();
-  blackhole->SetThickness(0.1); // it needs some thickness
+  blackhole->set_double_param("thickness",0.1); // it needs some thickness
   blackhole->SetActive(); // always see what leaks out
   blackhole->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(blackhole);
@@ -245,24 +224,24 @@ int G4Setup(const int absorberactive = 0,
   // +Z
   blackhole = new PHG4CylinderSubsystem("BH_FORWARD_PLUS", 1);
   blackhole->SuperDetector("BH_FORWARD_PLUS");
-  blackhole->SetRadius(0); // add 10 cm
-  blackhole->SetLengthViaRapidityCoverage(false);
-  blackhole->SetLength(0.1); // make it cover the world in length
-  blackhole->SetPosition(0,0, g4Reco->GetWorldSizeZ()/2. - 0.1  - no_overlapp);
+  blackhole->set_double_param("radius",0); // add 10 cm
+  blackhole->set_int_param("lengthviarapidity",0);
+  blackhole->set_double_param("length",0.1); // make it cover the world in length
+  blackhole->set_double_param("place_z",g4Reco->GetWorldSizeZ()/2. - 0.1  - no_overlapp);
   blackhole->BlackHole();
-  blackhole->SetThickness(radius - no_overlapp); // it needs some thickness
+  blackhole->set_double_param("thickness",radius - no_overlapp); // it needs some thickness
   blackhole->SetActive(); // always see what leaks out
   blackhole->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(blackhole);
 
   blackhole = new PHG4CylinderSubsystem("BH_FORWARD_NEG", 1);
   blackhole->SuperDetector("BH_FORWARD_NEG");
-  blackhole->SetRadius(0); // add 10 cm
-  blackhole->SetLengthViaRapidityCoverage(false);
-  blackhole->SetLength(0.1); // make it cover the world in length
-  blackhole->SetPosition(0,0, - g4Reco->GetWorldSizeZ()/2. +0.1  + no_overlapp);
+  blackhole->set_double_param("radius",0); // add 10 cm
+  blackhole->set_int_param("lengthviarapidity",0);
+  blackhole->set_double_param("length",0.1); // make it cover the world in length
+  blackhole->set_double_param("place_z", - g4Reco->GetWorldSizeZ()/2. +0.1  + no_overlapp);
   blackhole->BlackHole();
-  blackhole->SetThickness(radius - no_overlapp); // it needs some thickness
+  blackhole->set_double_param("thickness",radius - no_overlapp); // it needs some thickness
   blackhole->SetActive(); // always see what leaks out
   blackhole->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(blackhole);
@@ -270,4 +249,89 @@ int G4Setup(const int absorberactive = 0,
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
   se->registerSubsystem( g4Reco );
+}
+
+
+void ShowerCompress(int verbosity = 0) {
+
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libg4eval.so");
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  PHG4DstCompressReco* compress = new PHG4DstCompressReco("PHG4DstCompressReco");
+  compress->AddHitContainer("G4HIT_PIPE");
+  compress->AddHitContainer("G4HIT_SVTXSUPPORT");
+  compress->AddHitContainer("G4HIT_CEMC_ELECTRONICS");
+  compress->AddHitContainer("G4HIT_CEMC");
+  compress->AddHitContainer("G4HIT_ABSORBER_CEMC");
+  compress->AddHitContainer("G4HIT_CEMC_SPT");
+  compress->AddHitContainer("G4HIT_ABSORBER_HCALIN");
+  compress->AddHitContainer("G4HIT_HCALIN");
+  compress->AddHitContainer("G4HIT_HCALIN_SPT");
+  compress->AddHitContainer("G4HIT_MAGNET");
+  compress->AddHitContainer("G4HIT_ABSORBER_HCALOUT");
+  compress->AddHitContainer("G4HIT_HCALOUT");
+  compress->AddHitContainer("G4HIT_BH_1");
+  compress->AddHitContainer("G4HIT_BH_FORWARD_PLUS");
+  compress->AddHitContainer("G4HIT_BH_FORWARD_NEG");
+  compress->AddCellContainer("G4CELL_CEMC");
+  compress->AddCellContainer("G4CELL_HCALIN");
+  compress->AddCellContainer("G4CELL_HCALOUT");
+  compress->AddTowerContainer("TOWER_SIM_CEMC");
+  compress->AddTowerContainer("TOWER_RAW_CEMC");
+  compress->AddTowerContainer("TOWER_CALIB_CEMC");
+  compress->AddTowerContainer("TOWER_SIM_HCALIN");
+  compress->AddTowerContainer("TOWER_RAW_HCALIN");
+  compress->AddTowerContainer("TOWER_CALIB_HCALIN");
+  compress->AddTowerContainer("TOWER_SIM_HCALOUT");
+  compress->AddTowerContainer("TOWER_RAW_HCALOUT");
+  compress->AddTowerContainer("TOWER_CALIB_HCALOUT");
+
+  compress->AddHitContainer("G4HIT_FEMC");
+  compress->AddHitContainer("G4HIT_ABSORBER_FEMC");
+  compress->AddHitContainer("G4HIT_FHCAL");
+  compress->AddHitContainer("G4HIT_ABSORBER_FHCAL");
+  compress->AddCellContainer("G4CELL_FEMC");
+  compress->AddCellContainer("G4CELL_FHCAL");
+  compress->AddTowerContainer("TOWER_SIM_FEMC");
+  compress->AddTowerContainer("TOWER_RAW_FEMC");
+  compress->AddTowerContainer("TOWER_CALIB_FEMC");
+  compress->AddTowerContainer("TOWER_SIM_FHCAL");
+  compress->AddTowerContainer("TOWER_RAW_FHCAL");
+  compress->AddTowerContainer("TOWER_CALIB_FHCAL");
+
+  se->registerSubsystem(compress);
+
+  return;
+}
+
+void DstCompress(Fun4AllDstOutputManager* out) {
+  if (out) {
+    out->StripNode("G4HIT_PIPE");
+    out->StripNode("G4HIT_SVTXSUPPORT");
+    out->StripNode("G4HIT_CEMC_ELECTRONICS");
+    out->StripNode("G4HIT_CEMC");
+    out->StripNode("G4HIT_ABSORBER_CEMC");
+    out->StripNode("G4HIT_CEMC_SPT");
+    out->StripNode("G4HIT_ABSORBER_HCALIN");
+    out->StripNode("G4HIT_HCALIN");
+    out->StripNode("G4HIT_HCALIN_SPT");
+    out->StripNode("G4HIT_MAGNET");
+    out->StripNode("G4HIT_ABSORBER_HCALOUT");
+    out->StripNode("G4HIT_HCALOUT");
+    out->StripNode("G4HIT_BH_1");
+    out->StripNode("G4HIT_BH_FORWARD_PLUS");
+    out->StripNode("G4HIT_BH_FORWARD_NEG");
+    out->StripNode("G4CELL_CEMC");
+    out->StripNode("G4CELL_HCALIN");
+    out->StripNode("G4CELL_HCALOUT");
+
+    out->StripNode("G4HIT_FEMC");
+    out->StripNode("G4HIT_ABSORBER_FEMC");
+    out->StripNode("G4HIT_FHCAL");
+    out->StripNode("G4HIT_ABSORBER_FHCAL");
+    out->StripNode("G4CELL_FEMC");
+    out->StripNode("G4CELL_FHCAL");
+  }
 }

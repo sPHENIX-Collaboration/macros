@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////
 /*!
- \file G4_DSTReader_EICDetector.C
- \brief Adapt G4_DSTReader.C for use with EIC detector
- \author  Nils Feege
+ \file G4_DSTReader.C
+ \brief Convert DST to human command readable TTree for quick poke around the outputs
+ \author  Jin Huang
  \version $Revision:  $
  \date    $Date: $
  */
@@ -11,25 +11,24 @@
 #include <string>
 
 void
-G4DSTreader_EICDetector( const char * outputFile = "G4EICDetectorCells.root",//
-			 int absorberactive = 1, //
-			 bool do_svtx = true, //
-			 bool do_preshower = false, //
-			 bool do_cemc = true, //
-			 bool do_hcalin = true, //
-			 bool do_magnet = true, //
-			 bool do_hcalout = true, //
-			 bool do_cemc_twr = true, //
-			 bool do_hcalin_twr = true, //
-			 bool do_magnet = true, //
-			 bool do_hcalout_twr = true, //
-			 bool do_FHCAL = true, //
-			 bool do_FHCAL_twr = true, //
-			 bool do_FEMC = true, //
-			 bool do_FEMC_twr = true, //
-			 bool do_EEMC = true, //
-			 bool do_EEMC_twr = true //
-			 )
+G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
+    int absorberactive = 1, //
+    bool do_svtx = true, //
+    bool do_preshower = false, //
+    bool do_cemc = true, //
+    bool do_hcalin = true, //
+    bool do_magnet = true, //
+    bool do_hcalout = true, //
+    bool do_cemc_twr = true, //
+    bool do_hcalin_twr = true, //
+    bool do_magnet = true, //
+    bool do_hcalout_twr = true, //
+    bool do_FGEM = true, //
+    bool do_FHCAL = true, //
+    bool do_FHCAL_twr = true, //
+    bool do_FEMC = true, //
+    bool do_FEMC_twr = true //
+    )
 {
 
   //! debug output on screen?
@@ -103,11 +102,13 @@ G4DSTreader_EICDetector( const char * outputFile = "G4EICDetectorCells.root",//
             ana->AddNode("ABSORBER_FEMC");
         }
 
-      if (do_EEMC)
+      if (do_FGEM)
         {
-          ana->AddNode("EEMC");
-          if (absorberactive)
-            ana->AddNode("ABSORBER_EEMC");
+          ana->AddNode("FGEM_0");
+          ana->AddNode("FGEM_1");
+          ana->AddNode("FGEM_2");
+          ana->AddNode("FGEM_3");
+          ana->AddNode("FGEM_4");
         }
 
       ana->AddNode("BH_1");
@@ -146,12 +147,6 @@ G4DSTreader_EICDetector( const char * outputFile = "G4EICDetectorCells.root",//
       ana->AddTower("SIM_FEMC");
       ana->AddTower("RAW_FEMC");
       ana->AddTower("CALIB_FEMC");
-    }
-  if (do_EEMC_twr)
-    {
-      ana->AddTower("SIM_EEMC");
-      ana->AddTower("RAW_EEMC");
-      ana->AddTower("CALIB_EEMC");
     }
 
   // Jets disabled for now

@@ -1,9 +1,9 @@
 
 int Fun4All_G4_EICDetector(
-		       const int nEvents = 10,
-		       const char * inputFile = "/gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal1d/fieldmap/G4Hits_sPHENIX_e-_eta0_16GeV.root",
-		       const char * outputFile = "G4EICDetector.root"
-		       )
+                           const int nEvents = 2,
+                           const char * inputFile = "/gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal1d/fieldmap/G4Hits_sPHENIX_e-_eta0_16GeV.root",
+                           const char * outputFile = "G4EICDetector.root"
+                           )
 {
   //===============
   // Input options
@@ -19,7 +19,8 @@ int Fun4All_G4_EICDetector(
   const bool readhepmc = false; // read HepMC files
   // Or:
   // Use particle generator
-  const bool runpythia = false;
+  const bool runpythia8 = false;
+  const bool runpythia6 = false;
 
   //======================
   // What to run
@@ -62,10 +63,12 @@ int Fun4All_G4_EICDetector(
   bool do_jet_reco = false;
   bool do_jet_eval = false;
 
-  bool do_fwd_jet_reco = false;
-  bool do_fwd_jet_eval = false;
+  bool do_fwd_jet_reco = true;
+  bool do_fwd_jet_eval = true;
 
   // EICDetector geometry
+
+  bool do_FGEM = true;
 
   bool do_FEMC = true;
   bool do_FEMC_cell = true;
@@ -77,14 +80,7 @@ int Fun4All_G4_EICDetector(
   bool do_FHCAL_twr = true;
   bool do_FHCAL_cluster = true;
 
-  bool do_EEMC = true;
-  bool do_EEMC_cell = true;
-  bool do_EEMC_twr = true;
-  bool do_EEMC_cluster = true;
-
-  bool do_DIRC = true;
-  bool do_RICH = true;
-  bool do_Aerogel = true;
+  bool do_dst_compress = false;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = true;
@@ -102,20 +98,20 @@ int Fun4All_G4_EICDetector(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_EICDetector.C");
-  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_bbc,
-	 do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel);
+  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_FEMC,do_FHCAL);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = "/phenix/upgrades/decadal/fieldmaps/sPHENIX.2d.root"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
-  const float magfield_rescale = 1.4/1.5; // max 1.4T field
+  const float magfield_rescale = 1.4/1.5; // scale the map to a 1.4 T field
 
   //---------------
   // Fun4All server
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0);
+  //  se->Verbosity(0); // uncomment for batch production running with minimal output messages
+  se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
@@ -144,7 +140,7 @@ int Fun4All_G4_EICDetector(
       HepMCNodeReader *hr = new HepMCNodeReader();
       se->registerSubsystem(hr);
     }
-  else if (runpythia)
+  else if (runpythia8)
     {
       gSystem->Load("libPHPythia8.so");
 
@@ -152,6 +148,17 @@ int Fun4All_G4_EICDetector(
       // see coresoftware/generators/PHPythia8 for example config
       pythia8->set_config_file("phpythia8.cfg");
       se->registerSubsystem(pythia8);
+
+      HepMCNodeReader *hr = new HepMCNodeReader();
+      se->registerSubsystem(hr);
+    }
+  else if (runpythia6)
+    {
+      gSystem->Load("libPHPythia6.so");
+
+      PHPythia6 *pythia6 = new PHPythia6();
+      pythia6->set_config_file("phpythia6.cfg");
+      se->registerSubsystem(pythia6);
 
       HepMCNodeReader *hr = new HepMCNodeReader();
       se->registerSubsystem(hr);
@@ -164,18 +171,19 @@ int Fun4All_G4_EICDetector(
       //gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
       gen->add_particles("pi-",1); // mu-,e-,anti_proton,pi-
       if (readhepmc) {
-	gen->set_reuse_existing_vertex(true);
-	gen->set_existing_vertex_offset_vector(0.0,0.0,0.0);
+        gen->set_reuse_existing_vertex(true);
+        gen->set_existing_vertex_offset_vector(0.0,0.0,0.0);
       } else {
-	gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
-					       PHG4SimpleEventGenerator::Uniform,
-					       PHG4SimpleEventGenerator::Uniform);
-	gen->set_vertex_distribution_mean(0.0,0.0,0.0);
-	gen->set_vertex_distribution_width(0.0,0.0,5.0);
+        gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
+                                              PHG4SimpleEventGenerator::Uniform,
+                                              PHG4SimpleEventGenerator::Uniform);
+        gen->set_vertex_distribution_mean(0.0,0.0,0.0);
+        gen->set_vertex_distribution_width(0.0,0.0,5.0);
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
-      gen->set_eta_range(-2.0, -2.0);
+      gen->set_eta_range(1.4, 3.0);
+      //gen->set_eta_range(3.0, 3.0); //EICDetector FWD
       gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
       //gen->set_phi_range(TMath::Pi()/2-0.1, TMath::Pi()/2-0.1);
       gen->set_p_range(30.0, 30.0);
@@ -191,9 +199,9 @@ int Fun4All_G4_EICDetector(
       //---------------------
 
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_bbc,
-	      do_FEMC, do_FHCAL, do_EEMC, do_DIRC, do_RICH, do_Aerogel,
-	      magfield_rescale);
+              do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
+              do_FGEM, do_FEMC, do_FHCAL,
+              magfield_rescale);
 
     }
 
@@ -201,7 +209,12 @@ int Fun4All_G4_EICDetector(
   // BBC Reco
   //---------
 
-  if (do_bbc) Bbc_Reco();
+  if (do_bbc)
+    {
+      gROOT->LoadMacro("G4_Bbc.C");
+      BbcInit();
+      Bbc_Reco();
+    }
 
   //------------------
   // Detector Division
@@ -217,8 +230,6 @@ int Fun4All_G4_EICDetector(
 
   if (do_FEMC_cell) FEMC_Cells();
   if (do_FHCAL_cell) FHCAL_Cells();
-
-  if (do_EEMC_cell) EEMC_Cells();
 
   //-----------------------------
   // CEMC towering and clustering
@@ -243,8 +254,7 @@ int Fun4All_G4_EICDetector(
   if (do_FHCAL_twr) FHCAL_Towers();
   if (do_FHCAL_cluster) FHCAL_Clusters();
 
-  if (do_EEMC_twr) EEMC_Towers();
-  if (do_EEMC_cluster) EEMC_Clusters();
+  if (do_dst_compress) ShowerCompress();
 
   //--------------
   // SVTX tracking
@@ -256,17 +266,33 @@ int Fun4All_G4_EICDetector(
   // Global Vertexing
   //-----------------
 
-  if (do_global) Global_Reco();
-  else if (do_global_fastsim) Global_FastSim();
+  if (do_global)
+    {
+      gROOT->LoadMacro("G4_Global.C");
+      Global_Reco();
+    }
+
+  else if (do_global_fastsim)
+    {
+      gROOT->LoadMacro("G4_Global.C");
+      Global_FastSim();
+    }
 
   //---------
   // Jet reco
   //---------
 
-  if (do_jet_reco) Jet_Reco();
+  if (do_jet_reco)
+    {
+      gROOT->LoadMacro("G4_Jets.C");
+      Jet_Reco();
+    }
 
-  if (do_fwd_jet_reco) Jet_FwdReco();
-
+  if (do_fwd_jet_reco)
+    {
+      gROOT->LoadMacro("G4_FwdJets.C");
+      Jet_FwdReco();
+    }
   //----------------------
   // Simulation evaluation
   //----------------------
@@ -314,27 +340,27 @@ int Fun4All_G4_EICDetector(
       gROOT->LoadMacro("G4_DSTReader_EICDetector.C");
 
       G4DSTreader_EICDetector( outputFile, //
-			       /*int*/ absorberactive ,
-			       /*bool*/ do_svtx ,
-			       /*bool*/ do_preshower ,
-			       /*bool*/ do_cemc ,
-			       /*bool*/ do_hcalin ,
-			       /*bool*/ do_magnet ,
-			       /*bool*/ do_hcalout ,
-			       /*bool*/ do_cemc_twr ,
-			       /*bool*/ do_hcalin_twr ,
-			       /*bool*/ do_magnet  ,
-			       /*bool*/ do_hcalout_twr,
-			       /*bool*/ do_FHCAL,
-			       /*bool*/ do_FHCAL_twr,
-			       /*bool*/ do_FEMC,
-			       /*bool*/ do_FEMC_twr,
-			       /*bool*/ do_EEMC,
-			       /*bool*/ do_EEMC_twr
-			       );
+                               /*int*/ absorberactive ,
+                               /*bool*/ do_svtx ,
+                               /*bool*/ do_preshower ,
+                               /*bool*/ do_cemc ,
+                               /*bool*/ do_hcalin ,
+                               /*bool*/ do_magnet ,
+                               /*bool*/ do_hcalout ,
+                               /*bool*/ do_cemc_twr ,
+                               /*bool*/ do_hcalin_twr ,
+                               /*bool*/ do_magnet  ,
+                               /*bool*/ do_hcalout_twr,
+                               /*bool*/ do_FGEM,
+                               /*bool*/ do_FHCAL,
+                               /*bool*/ do_FHCAL_twr,
+                               /*bool*/ do_FEMC,
+                               /*bool*/ do_FEMC_twr
+                               );
     }
 
   //Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+  //if (do_dst_compress) DstCompress(out);
   //se->registerOutputManager(out);
 
   if (nEvents == 0 && !readhits && !readhepmc)
@@ -347,12 +373,28 @@ int Fun4All_G4_EICDetector(
   if (nEvents < 0)
     {
       PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
-      g4->ApplyCommand("/control/execute eic.mac");
+      g4->ApplyCommand("/control/execute vis.mac");
       //g4->StartGui();
       se->run(1);
 
       se->End();
       std::cout << "All done" << std::endl;
+
+
+      std::cout << "==== Useful display commands ==" << std::endl;
+      cout << "draw axis: " << endl;
+      cout << " G4Cmd(\"/vis/scene/add/axes 0 0 0 50 cm\")" << endl;
+      cout << "zoom" << endl;
+      cout << " G4Cmd(\"/vis/viewer/zoom 1\")" << endl;
+      cout << "viewpoint:" << endl;
+      cout << " G4Cmd(\"/vis/viewer/set/viewpointThetaPhi 0 0\")" << endl;
+      cout << "panTo:" << endl;
+      cout << " G4Cmd(\"/vis/viewer/panTo 0 0 cm\")" << endl;
+      cout << "print to eps:" << endl;
+      cout << " G4Cmd(\"/vis/ogl/printEPS\")" << endl;
+      cout << "set background color:" << endl;
+      cout << " G4Cmd(\"/vis/viewer/set/background white\")" << endl;
+      std::cout << "===============================" << std::endl;
     }
   else
     {
@@ -365,4 +407,13 @@ int Fun4All_G4_EICDetector(
       gSystem->Exit(0);
     }
 
+}
+
+
+void
+G4Cmd(const char * cmd)
+{
+  Fun4AllServer *se = Fun4AllServer::instance();
+  PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
+  g4->ApplyCommand(cmd);
 }
