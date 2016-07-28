@@ -66,9 +66,16 @@ int Fun4All_G4_EICDetector(
   bool do_fwd_jet_reco = true;
   bool do_fwd_jet_eval = true;
 
-  // EICDetector geometry
+  // EICDetector geometry - barrel
+
+  bool do_DIRC = true;
+
+  // EICDetector geometry - 'hadron' direction
 
   bool do_FGEM = true;
+
+  bool do_RICH = true;
+  bool do_Aerogel = true;
 
   bool do_FEMC = true;
   bool do_FEMC_cell = true;
@@ -79,6 +86,18 @@ int Fun4All_G4_EICDetector(
   bool do_FHCAL_cell = true;
   bool do_FHCAL_twr = true;
   bool do_FHCAL_cluster = true;
+
+
+  // EICDetector geometry - 'hadron' direction
+
+  bool do_EGEM = true;
+
+  bool do_EEMC = true;
+  bool do_EEMC_cell = true;
+  bool do_EEMC_twr = true;
+  bool do_EEMC_cluster = true;
+
+  // Other options
 
   bool do_dst_compress = false;
 
@@ -98,7 +117,7 @@ int Fun4All_G4_EICDetector(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_EICDetector.C");
-  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_FEMC,do_FHCAL);
+  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_EGEM,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
@@ -198,10 +217,7 @@ int Fun4All_G4_EICDetector(
       // Detector description
       //---------------------
 
-      G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-              do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
-              do_FGEM, do_FEMC, do_FHCAL,
-              magfield_rescale);
+      G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_EGEM,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,magfield_rescale);
 
     }
 
@@ -231,6 +247,8 @@ int Fun4All_G4_EICDetector(
   if (do_FEMC_cell) FEMC_Cells();
   if (do_FHCAL_cell) FHCAL_Cells();
 
+  if (do_EEMC_cell) EEMC_Cells();
+
   //-----------------------------
   // CEMC towering and clustering
   //-----------------------------
@@ -248,11 +266,18 @@ int Fun4All_G4_EICDetector(
   if (do_hcalout_twr) HCALOuter_Towers();
   if (do_hcalout_cluster) HCALOuter_Clusters();
 
+  //-----------------------------
+  // e, h direction Calorimeter  towering and clustering
+  //-----------------------------
+
   if (do_FEMC_twr) FEMC_Towers();
   if (do_FEMC_cluster) FEMC_Clusters();
 
   if (do_FHCAL_twr) FHCAL_Towers();
   if (do_FHCAL_cluster) FHCAL_Clusters();
+
+  if (do_EEMC_twr) EEMC_Towers();
+  if (do_EEMC_cluster) EEMC_Clusters();
 
   if (do_dst_compress) ShowerCompress();
 
@@ -352,10 +377,13 @@ int Fun4All_G4_EICDetector(
                                /*bool*/ do_magnet  ,
                                /*bool*/ do_hcalout_twr,
                                /*bool*/ do_FGEM,
+                               /*bool*/ do_EGEM,
                                /*bool*/ do_FHCAL,
                                /*bool*/ do_FHCAL_twr,
                                /*bool*/ do_FEMC,
-                               /*bool*/ do_FEMC_twr
+                               /*bool*/ do_FEMC_twr,
+			       /*bool*/ do_EEMC,
+			       /*bool*/ do_EEMC_twr
                                );
     }
 

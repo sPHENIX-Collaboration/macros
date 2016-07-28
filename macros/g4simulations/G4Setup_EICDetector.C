@@ -10,8 +10,14 @@ void G4Init(bool do_svtx = true,
             bool do_hcalout = true,
             bool do_pipe = true,
             bool do_FGEM = true,
+            bool do_EGEM = true,
             bool do_FEMC = true,
-            bool do_FHCAL = true) {
+            bool do_FHCAL = true,
+            bool do_EEMC = true,
+            bool do_DIRC = true,
+            bool do_RICH = true,
+            bool do_Aerogel = true
+	    ) {
 
   // load detector/material macros and execute Init() function
 
@@ -72,6 +78,12 @@ void G4Init(bool do_svtx = true,
       gROOT->LoadMacro("G4_FHCAL.C");
       FHCALInit();
     }
+
+  if (do_EEMC)
+    {
+      gROOT->LoadMacro("G4_EEMC.C");
+      EEMCInit();
+    }
 }
 
 
@@ -86,8 +98,13 @@ int G4Setup(const int absorberactive = 0,
             const bool do_hcalout = true,
             const bool do_pipe = true,
             const bool do_FGEM = true,
+            const bool do_EGEM = true,
             const bool do_FEMC = false,
             const bool do_FHCAL = false,
+            const bool do_EEMC = true,
+            const bool do_DIRC = true,
+            const bool do_RICH = true,
+            const bool do_Aerogel = true,
             const float magfield_rescale = 1.0) {
 
   //---------------
@@ -178,6 +195,12 @@ int G4Setup(const int absorberactive = 0,
 
   if ( do_FHCAL )
     FHCALSetup(g4Reco, absorberactive);
+
+  //----------------------------------------
+  // EEMC
+
+  if ( do_EEMC )
+    EEMCSetup(g4Reco, absorberactive);
 
   // sPHENIX forward flux return(s)
   PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
@@ -301,6 +324,13 @@ void ShowerCompress(int verbosity = 0) {
   compress->AddTowerContainer("TOWER_RAW_FHCAL");
   compress->AddTowerContainer("TOWER_CALIB_FHCAL");
 
+  compress->AddHitContainer("G4HIT_EEMC");
+  compress->AddHitContainer("G4HIT_ABSORBER_EEMC");
+  compress->AddCellContainer("G4CELL_EEMC");
+  compress->AddTowerContainer("TOWER_SIM_EEMC");
+  compress->AddTowerContainer("TOWER_RAW_EEMC");
+  compress->AddTowerContainer("TOWER_CALIB_EEMC");
+
   se->registerSubsystem(compress);
 
   return;
@@ -333,5 +363,9 @@ void DstCompress(Fun4AllDstOutputManager* out) {
     out->StripNode("G4HIT_ABSORBER_FHCAL");
     out->StripNode("G4CELL_FEMC");
     out->StripNode("G4CELL_FHCAL");
+
+    out->StripNode("G4HIT_EEMC");
+    out->StripNode("G4HIT_ABSORBER_EEMC");
+    out->StripNode("G4CELL_EEMC");
   }
 }
