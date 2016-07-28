@@ -24,8 +24,9 @@ RICHInit()
 void
 RICHSetup(PHG4Reco* g4Reco, //
 	  const int N_RICH_Sector = 8, //
-	  const double min_eta = 1.2, //
-	  const double R_mirror_ref = 155, //cm
+	  const double min_eta = 1.45, //
+	  const double R_mirror_ref = 195, //cm
+	  const double z_shift = 65 // cm
 	  )
 {
 
@@ -37,6 +38,9 @@ RICHSetup(PHG4Reco* g4Reco, //
   //  rich->get_RICH_geometry().set_R_shift(10 * ePHENIXRICH::RICH_Geometry::Unit_cm()); // For compact RICH of 2<Eta<4
 
   rich->get_RICH_geometry().set_R_mirror_ref(R_mirror_ref * ePHENIXRICH::RICH_Geometry::Unit_cm());
+
+  rich->get_RICH_geometry().set_z_shift(z_shift * ePHENIXRICH::RICH_Geometry::Unit_cm());
+
 
   /* Register RICH module */
   rich->OverlapCheck( overlapcheck );

@@ -16,7 +16,7 @@ AerogelInit()
 
 void
 AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
-    const double min_eta = 1.1 //
+    const double min_eta = 1.45 //
     )
 {
 
@@ -28,7 +28,7 @@ AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
           + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
 //  ag->get_geometry().set_normal_polar_angle(0);
   ag->get_geometry().set_normal_start(
-      307 * PHG4Sector::Sector_Geometry::Unit_cm());
+      283 * PHG4Sector::Sector_Geometry::Unit_cm()); // 307
   ag->get_geometry().set_min_polar_angle(
       PHG4Sector::Sector_Geometry::eta_to_polar_angle(1.9));
   ag->get_geometry().set_max_polar_angle(
