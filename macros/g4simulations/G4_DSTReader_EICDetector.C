@@ -165,6 +165,12 @@ G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
       ana->AddTower("RAW_FEMC");
       ana->AddTower("CALIB_FEMC");
     }
+  if (do_EEMC_twr)
+    {
+      ana->AddTower("SIM_EEMC");
+      ana->AddTower("RAW_EEMC");
+      ana->AddTower("CALIB_EEMC");
+    }
 
   // Jets disabled for now
   //  if (do_jet_reco)
