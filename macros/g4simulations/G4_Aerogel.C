@@ -39,7 +39,7 @@ AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   ag->get_geometry().set_N_Sector(N_Sector);
   ag->OverlapCheck(overlapcheck);
 
-  ag->get_geometry().AddLayers_Aerogel_ePHENIX();
+  ag->get_geometry().AddLayers_AeroGel_ePHENIX();
   g4Reco->registerSubsystem(ag);
 
 }
