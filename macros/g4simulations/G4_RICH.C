@@ -26,7 +26,8 @@ RICHSetup(PHG4Reco* g4Reco, //
 	  const int N_RICH_Sector = 8, //
 	  const double min_eta = 1.45, //
 	  const double R_mirror_ref = 195, //cm
-	  const double z_shift = 65 // cm
+	  const double z_shift = 75, // cm
+	  const double R_shift = 18.5 // cm
 	  )
 {
 
@@ -40,7 +41,7 @@ RICHSetup(PHG4Reco* g4Reco, //
   rich->get_RICH_geometry().set_R_mirror_ref(R_mirror_ref * ePHENIXRICH::RICH_Geometry::Unit_cm());
 
   rich->get_RICH_geometry().set_z_shift(z_shift * ePHENIXRICH::RICH_Geometry::Unit_cm());
-
+  rich->get_RICH_geometry().set_R_shift(R_shift * ePHENIXRICH::RICH_Geometry::Unit_cm());
 
   /* Register RICH module */
   rich->OverlapCheck( overlapcheck );
