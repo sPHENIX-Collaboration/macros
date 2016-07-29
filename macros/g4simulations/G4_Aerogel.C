@@ -16,7 +16,7 @@ AerogelInit()
 
 void
 AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
-    const double min_eta = 1.45 //
+    const double min_eta = 1.1 // 1.45
     )
 {
 
@@ -39,7 +39,12 @@ AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   ag->get_geometry().set_N_Sector(N_Sector);
   ag->OverlapCheck(overlapcheck);
 
-  ag->get_geometry().AddLayers_AeroGel_ePHENIX();
+  // Aerogel dimensions ins cm
+  double radiator_length = 2.;
+  double expansion_length = 10.;
+
+  ag->get_geometry().AddLayers_AeroGel_ePHENIX( radiator_length * PHG4Sector::Sector_Geometry::Unit_cm(),
+						expansion_length * PHG4Sector::Sector_Geometry::Unit_cm() );
   g4Reco->registerSubsystem(ag);
 
 }
