@@ -19,7 +19,7 @@ EGEMSetup(PHG4Reco* g4Reco)
 {
   make_GEM_station("EGEM_0", g4Reco, -32., -1.6, -3.4);
   make_GEM_station("EGEM_1", g4Reco, -58., -2.1, -3.98); // reduce max eta from -4.0 to -3.98 to avoid overlap with volume S_AL_PIPE_5 (aluminum beam pipe)
-  make_GEM_station("EGEM_2", g4Reco, -98., -1.2, -4.5);
+  make_GEM_station("EGEM_2", g4Reco, -101., -1.2, -4.5);
 }
 
 int
