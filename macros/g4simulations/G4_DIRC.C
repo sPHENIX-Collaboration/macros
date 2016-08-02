@@ -24,8 +24,7 @@ DIRCSetup(PHG4Reco* g4Reco)
 {
   const double radiator_R = 83.65;
   const double length = 470;
-  //const double z_shift = -135; // ePHENIX LOI
-  const double z_shift = -75; // shift to fit within flux return doors; NF 1/13/2016
+  const double z_shift = -115;
   const double z_start = z_shift + length / 2.;
   const double z_end = z_shift - length / 2.;
 
