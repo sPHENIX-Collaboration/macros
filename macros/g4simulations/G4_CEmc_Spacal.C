@@ -94,7 +94,7 @@ CEmc_1DProjectiveSpacal(PHG4Reco* g4Reco, double radius, const int crossings, co
 
   cemc ->get_geom().set_radius(emc_inner_radius);
   cemc ->get_geom().set_thickness(cemcthickness);
-  cemc ->get_geom().set_construction_verbose(1);
+//  cemc ->get_geom().set_construction_verbose(1);
 
   cemc->SetActive();
   cemc->SuperDetector("CEMC");
@@ -200,7 +200,7 @@ cyl->set_double_param("thickness",0.5 - no_overlapp);
   cemc->get_geom().load_demo_sector_tower_map3();
   cemc->get_geom().set_radius(radius);
   cemc->get_geom().set_thickness(cemcthickness);
-  cemc->get_geom().set_construction_verbose(1);
+//  cemc->get_geom().set_construction_verbose(1);
 
   cemc->SetActive();
   cemc->SuperDetector("CEMC");
@@ -260,7 +260,7 @@ CEmc_Proj(PHG4Reco* g4Reco, double radius, const int crossings, const int absorb
 
   cemc ->get_geom().set_radius(emc_inner_radius);
   cemc ->get_geom().set_thickness(cemcthickness);
-  cemc ->get_geom().set_construction_verbose(2);
+//  cemc ->get_geom().set_construction_verbose(2);
 
   cemc ->get_geom().set_config(PHG4CylinderGeom_Spacalv1::kProjective_PolarTaper);
   cemc ->get_geom().set_azimuthal_tilt(Get_Spacal_Tilt());
