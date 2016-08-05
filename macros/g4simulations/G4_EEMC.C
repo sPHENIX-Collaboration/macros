@@ -32,7 +32,6 @@ EEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
   /* Use non-projective geometry */
   mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v004.txt";
-
   cout << mapping_eemc.str() << endl;
 
   eemc->SetTowerMappingFile( mapping_eemc.str() );
@@ -53,7 +52,7 @@ void EEMC_Towers(int verbosity = 0) {
 
   ostringstream mapping_eemc;
   mapping_eemc << getenv("CALIBRATIONROOT") <<
-    "/CrystalCalorimeter/mapping/towerMap_EEMC_v003.txt";
+    "/CrystalCalorimeter/mapping/towerMap_EEMC_v004.txt";
 
   RawTowerBuilderByHitIndex* tower_EEMC = new RawTowerBuilderByHitIndex("TowerBuilder_EEMC");
   tower_EEMC->Detector("EEMC");
