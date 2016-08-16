@@ -1,44 +1,46 @@
 using namespace std;
 
-bool overlapcheck = false; // set to true if you want to check for overlaps
-
 void
 EEMCInit()
 {
-  // load detector macros
+}
+
+void EEMC_Cells(int verbosity = 0) {
+
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libg4detectors.so");
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("EEMCCellReco");
+  hc->Detector("EEMC");
+  se->registerSubsystem(hc);
+
+  return;
 }
 
 void
 EEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 {
-  //---------------
-  // Load libraries
-  //---------------
 
   gSystem->Load("libg4detectors.so");
 
-  //---------------
-  // Fun4All server
-  //---------------
-  Fun4AllServer *se = Fun4AllServer::instance();
+  /** Use dedicated EEMC module */
+  PHG4CrystalCalorimeterSubsystem *eemc = new PHG4CrystalCalorimeterSubsystem("EEMC");
 
-  /////////////////////////////////////////////////
-  //  electron going detectors
-  /////////////////////////////////////////////////
-
-  PHG4CrystalCalorimeterSubsystem *eecal = new PHG4CrystalCalorimeterSubsystem("EEMC");
+  /* path to central copy of calibrations repositry */
+  ostringstream mapping_eemc;
 
   /* Use non-projective geometry */
-  ostringstream mapping_eecal;
-  mapping_eecal << getenv("OFFLINE_MAIN") <<
-    "/share/calibrations/CrystalCalorimeter/mapping/towerMap_EEMC_v003.txt";
+  mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v004.txt";
+  cout << mapping_eemc.str() << endl;
 
-  cout << mapping_eecal.str() << endl;
-  eecal->SetTowerMappingFile( mapping_eecal.str() );
+  eemc->SetTowerMappingFile( mapping_eemc.str() );
+  eemc->OverlapCheck(overlapcheck);
+
+  if (absorberactive)  eemc->SetAbsorberActive();
 
   /* register Ecal module */
-  eecal->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem( eecal );
+  g4Reco->registerSubsystem( eemc );
 
 }
 
@@ -49,9 +51,8 @@ void EEMC_Towers(int verbosity = 0) {
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_eemc;
-  //mapping_eemc << getenv("OFFLINE_MAIN") <<
-  //	"/share/calibrations/CrystalCalorimeter/mapping/towerMap_EEMC_v003.txt";
-  mapping_eemc << "towerMap_EEMC_latest.txt";
+  mapping_eemc << getenv("CALIBRATIONROOT") <<
+    "/CrystalCalorimeter/mapping/towerMap_EEMC_v004.txt";
 
   RawTowerBuilderByHitIndex* tower_EEMC = new RawTowerBuilderByHitIndex("TowerBuilder_EEMC");
   tower_EEMC->Detector("EEMC");
@@ -59,6 +60,9 @@ void EEMC_Towers(int verbosity = 0) {
   tower_EEMC->GeometryTableFile( mapping_eemc.str() );
 
   se->registerSubsystem(tower_EEMC);
+
+
+  /* Calorimeter digitization */
 
   // CMS lead tungstate barrel ECAL at 18 degree centrigrade: 4.5 photoelectrons per MeV
   const double EEMC_photoelectron_per_GeV = 4500;
@@ -76,6 +80,9 @@ void EEMC_Towers(int verbosity = 0) {
 
   se->registerSubsystem( TowerDigitizer_EEMC );
 
+
+  /* Calorimeter calibration */
+
   RawTowerCalibration *TowerCalibration_EEMC = new RawTowerCalibration("EEMCRawTowerCalibration");
   TowerCalibration_EEMC->Detector("EEMC");
   TowerCalibration_EEMC->Verbosity(verbosity);
@@ -84,5 +91,19 @@ void EEMC_Towers(int verbosity = 0) {
   TowerCalibration_EEMC->set_pedstal_ADC( 0 );
 
   se->registerSubsystem( TowerCalibration_EEMC );
-      
+
+}
+
+void EEMC_Clusters(int verbosity = 0) {
+
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libg4detectors.so");
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  RawClusterBuilderFwd* ClusterBuilder = new RawClusterBuilderFwd("EEMCRawClusterBuilderFwd");
+  ClusterBuilder->Detector("EEMC");
+  ClusterBuilder->Verbosity(verbosity);
+  se->registerSubsystem( ClusterBuilder );
+
+  return;
 }
