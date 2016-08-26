@@ -1,6 +1,6 @@
 
 const int n_ib_layer = 3;   // number of maps inner barrel layers
-const int n_intt_layer = 4; // number of int. tracker layers
+const int n_intt_layer = 4; // number of int. tracker layers. Make this number 0 to use MAPS + TPC only.
 const int n_gas_layer = 60; // number of TPC layers
 double inner_cage_radius = 20.;
 
