@@ -43,18 +43,12 @@ int Fun4All_G4_Prototype3(
 
   // Simple single particle generator
   PHG4ParticleGun *gun = new PHG4ParticleGun();
-  //  gun->set_name("anti_proton");
   gun->set_name("geantino");
   //  gun->set_name("proton");
   gun->set_vtx(0, 0, 0);
   gun->set_mom(120, 0, 0);
   double angle = 46.4*TMath::Pi()/180.;
-  double px = cos(angle);
-  double pz = sin(angle);
   gun->AddParticle("geantino",cos(angle),0.,sin(angle));
-  // gun->AddParticle("geantino",1.7709,-0.4598,0.);
-  // gun->AddParticle("geantino",2.5621,0.60964,0.);
-  // gun->AddParticle("geantino",1.8121,0.253,0.);
   se->registerSubsystem(gun);
 
 
