@@ -32,6 +32,7 @@
 # our world is 4x4 meters, the detector is about 1m across
 # zooming by 4 makes it fill the display
 /vis/viewer/zoom 1.5
+/vis/viewer/panTo 0 30 cm
 #
 # Use this open statement instead to get a HepRep version 1 file
 # suitable for viewing in WIRED.
