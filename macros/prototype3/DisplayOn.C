@@ -6,7 +6,7 @@
 // start up the visualization, the next event will
 // be displayed. Do not execute this macro
 // before PHG4Reco was registered with Fun4All
-PHG4Reco * DisplayOn(const char *mac = "vis_prototype2.mac")
+PHG4Reco * DisplayOn(const char *mac = "vis_prototype3.mac")
 {
   char cmd[100];
   Fun4AllServer *se = Fun4AllServer::instance();
