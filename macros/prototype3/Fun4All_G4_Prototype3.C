@@ -11,9 +11,18 @@ int Fun4All_G4_Prototype3(
   gSystem->Load("libqa_modules");
 
   bool cemc_on = false;
+  bool cemc_twr = false;
   bool ihcal_on = true;
+  bool ihcal_cell = ihcal_on && true;
+  bool ihcal_twr = ihcal_cell && false;
+  bool ihcal_digi = ihcal_twr && false;
+  bool ihcal_twrcal = ihcal_digi && false;
   bool ohcal_on = true;
-  bool cryo_on = false;
+  bool ohcal_cell = ohcal_on && true;
+  bool ohcal_twr = ohcal_cell && false;
+  bool ohcal_digi = ohcal_twr && false;
+  bool ohcal_twrcal =  ohcal_digi && false;
+  bool cryo_on = true;
   bool bh_on = false;
   bool dstreader = false;
 
@@ -21,11 +30,11 @@ int Fun4All_G4_Prototype3(
   // Make the Server
   //////////////////////////////////////////
   Fun4AllServer *se = Fun4AllServer::instance();
-  //  se->Verbosity(1);
+  se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
   // only set this if you want a fixed random seed to make
   // results reproducible for testing
-  rc->set_IntFlag("RANDOMSEED",12345);
+  //  rc->set_IntFlag("RANDOMSEED",12345);
 
   // Test beam generator
   PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
@@ -35,21 +44,38 @@ int Fun4All_G4_Prototype3(
   gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Gaus,
 					PHG4SimpleEventGenerator::Gaus, 
                                         PHG4SimpleEventGenerator::Gaus); // Gauss beam profile
-  gen->set_eta_range(-.001, .001); // 1mrad angular divergence
-  gen->set_phi_range(-.001, .001); // 1mrad angular divergence
+  double angle = 46.4*TMath::Pi()/180.;
+  double eta = -1.*TMath::Log(TMath::Tan(angle/2.));
+  gen->set_eta_range(eta-0.001,eta+0.001); // 1mrad angular divergence
+  gen->set_phi_range(-0.001, 0.001); // 1mrad angular divergence
   const double momentum = 32;
   gen->set_p_range(momentum,momentum, momentum*2e-2); // 2% momentum smearing
-  //  se->registerSubsystem(gen);
+  se->registerSubsystem(gen);
+
+  PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
+  pgen->set_name("geantino");
+  //pgen->set_name(particle);
+  pgen->set_vtx(0, 0, 0);
+  //pgen->set_vtx(0, ypos, 0);
+  double angle = 46.4*TMath::Pi()/180.;
+  double eta = -1.*TMath::Log(TMath::Tan(angle/2.));
+  pgen->set_eta_range(0.2*eta, 1.8*eta);
+  //pgen->set_phi_range(-0.001, 0.001); // 1mrad angular diverpgence
+  //pgen->set_phi_range(-0.5/180.*TMath::Pi(), 0.5/180.*TMath::Pi());
+  //pgen->set_eta_range(-1., 1.);
+  //pgen->set_phi_range(-0./180.*TMath::Pi(), 0./180.*TMath::Pi());
+  pgen->set_phi_range(-20/180.*TMath::Pi(), 20/180.*TMath::Pi());
+  pgen->set_mom_range(1, 1);
+  //  se->registerSubsystem(pgen);
 
   // Simple single particle generator
   PHG4ParticleGun *gun = new PHG4ParticleGun();
   gun->set_name("geantino");
   //  gun->set_name("proton");
   gun->set_vtx(0, 0, 0);
-  gun->set_mom(120, 0, 0);
   double angle = 46.4*TMath::Pi()/180.;
-  gun->AddParticle("geantino",cos(angle),0.,sin(angle));
-  se->registerSubsystem(gun);
+  gun->set_mom(sin(angle),0.,cos(angle));
+  //  se->registerSubsystem(gun);
 
 
   PHG4Reco* g4Reco = new PHG4Reco();
@@ -82,7 +108,7 @@ int Fun4All_G4_Prototype3(
     {
       PHG4Prototype2InnerHcalSubsystem *innerhcal = new PHG4Prototype2InnerHcalSubsystem("HCalIn");
       innerhcal->set_int_param("hi_eta",1);
-      innerhcal->set_double_param("place_z",134.);
+      innerhcal->set_double_param("place_z",123.);
       innerhcal->SetActive();
       innerhcal->SetAbsorberActive();
       innerhcal->SetAbsorberTruth(1);
@@ -94,7 +120,7 @@ int Fun4All_G4_Prototype3(
     {
       PHG4Prototype2OuterHcalSubsystem *outerhcal = new PHG4Prototype2OuterHcalSubsystem("HCalOut");
       outerhcal->set_int_param("hi_eta",1);
-      outerhcal->set_double_param("place_z",219);
+      outerhcal->set_double_param("place_z",200);
       outerhcal->SetActive();
       outerhcal->SetAbsorberActive();
       outerhcal->SetAbsorberTruth(1);
@@ -104,12 +130,14 @@ int Fun4All_G4_Prototype3(
     }
   if (cryo_on)
     {
+      double place_z = 160.;
       // Cryostat from engineering drawing
       PHG4BlockSubsystem *cryo1 = new PHG4BlockSubsystem("cryo1",1);
       cryo1->set_double_param("size_x",0.95);
       cryo1->set_double_param("size_y",60.96);
       cryo1->set_double_param("size_z",60.96);
       cryo1->set_double_param("place_x",141.96+0.95/2.);
+      cryo1->set_double_param("place_z",place_z);
       cryo1->set_string_param("material","G4_Al");
       cryo1->SetActive(); // it is an active volume - save G4Hits
       cryo1->SuperDetector("CRYO");
@@ -120,6 +148,7 @@ int Fun4All_G4_Prototype3(
       cryo2->set_double_param("size_y",60.96);
       cryo2->set_double_param("size_z",60.96);
       cryo2->set_double_param("place_x",150.72+8.89/2.);
+      cryo2->set_double_param("place_z",place_z);
       cryo2->set_string_param("material","G4_Al");
       cryo2->SetActive(); // it is an active volume - save G4Hits
       cryo2->SuperDetector("CRYO");
@@ -130,6 +159,7 @@ int Fun4All_G4_Prototype3(
       cryo3->set_double_param("size_y",60.96);
       cryo3->set_double_param("size_z",60.96);
       cryo3->set_double_param("place_x",173.93+2.54/2.);
+      cryo3->set_double_param("place_z",place_z);
       cryo3->set_string_param("material","G4_Al");
       cryo3->SetActive(); // it is an active volume - save G4Hits
       cryo3->SuperDetector("CRYO");
@@ -156,10 +186,10 @@ int Fun4All_G4_Prototype3(
       bh[1]->set_double_param("place_y",-125./2.);
       // right side
       bh[2] = new PHG4BlockSubsystem("bh3",3);
-      bh[2]->set_double_param("size_x",270.);
+      bh[2]->set_double_param("size_x",200.);
       bh[2]->set_double_param("size_y",125.);
       bh[2]->set_double_param("size_z",0.01);
-      bh[2]->set_double_param("place_x",270./2.);
+      bh[2]->set_double_param("place_x",200./2.);
       bh[2]->set_double_param("place_z",165./2.);
       // left side
       bh[3] = new PHG4BlockSubsystem("bh4",4);
@@ -259,29 +289,35 @@ int Fun4All_G4_Prototype3(
   //----------------------------------------
   // HCal towering
   //----------------------------------------
-  if (ihcal_on)
+  if (ihcal_cell)
     {
       PHG4Prototype2HcalCellReco *hccell = new PHG4Prototype2HcalCellReco("HCALinCellReco");
       hccell->Detector("HCALIN");
       se->registerSubsystem(hccell);
-
+    }
+  if (ihcal_twr)
+    {
       Prototype2RawTowerBuilder *hcaltwr = new Prototype2RawTowerBuilder("HCALinRawTowerBuilder");
       hcaltwr->Detector("HCALIN");
       hcaltwr->set_sim_tower_node_prefix("SIM");
       se->registerSubsystem(hcaltwr);
     }
 
-  if (ohcal_on)
+
+  if (ohcal_cell)
     {
       hccell = new PHG4Prototype2HcalCellReco("HCALoutCellReco");
       hccell->Detector("HCALOUT");
       se->registerSubsystem(hccell);
-
+    }
+  if (ohcal_twr)
+    {
       hcaltwr = new Prototype2RawTowerBuilder("HCALoutRawTowerBuilder");
       hcaltwr->Detector("HCALOUT");
       hcaltwr->set_sim_tower_node_prefix("SIM");
       se->registerSubsystem(hcaltwr);
     }
+
   //----------------------------------------
   // HCal digitization
   //----------------------------------------
@@ -301,7 +337,7 @@ int Fun4All_G4_Prototype3(
   //     0.2 MeV/ LG ADC
   //     0.2/16 MeV/ HG ADC
   RawTowerDigitizer *TowerDigitizer = NULL;
-  if (ihcal_on)
+  if (ihcal_digi)
     {
       TowerDigitizer = new RawTowerDigitizer("HCALinTowerDigitizerLG");
       TowerDigitizer->Detector("HCALIN");
@@ -325,7 +361,7 @@ int Fun4All_G4_Prototype3(
       TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
       se->registerSubsystem(TowerDigitizer);
     }
-  if (ohcal_on)
+  if (ohcal_digi)
     {
       TowerDigitizer = new RawTowerDigitizer("HCALoutTowerDigitizerLG");
       TowerDigitizer->Detector("HCALOUT");
@@ -356,7 +392,7 @@ int Fun4All_G4_Prototype3(
   const double visible_sample_fraction_HCALIN = 7.19505e-02 ; // 1.34152e-02
   const double visible_sample_fraction_HCALOUT = 0.0313466 ; //  +/-   0.0067744
   RawTowerCalibration *TowerCalibration = NULL;
-  if (ihcal_on)
+  if (ihcal_twrcal)
     {
       TowerCalibration = new RawTowerCalibration("HCALinRawTowerCalibrationLG");
       TowerCalibration->Detector("HCALIN");
@@ -378,7 +414,7 @@ int Fun4All_G4_Prototype3(
       TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
       se->registerSubsystem(TowerCalibration);
     }
-  if (ohcal_on)
+  if (ohcal_twrcal)
     {
       TowerCalibration = new RawTowerCalibration("HCALoutRawTowerCalibrationLG");
       TowerCalibration->Detector("HCALOUT");
@@ -427,6 +463,15 @@ int Fun4All_G4_Prototype3(
   hit->AddNode("ABSORBER_HCALOUT", 11);
   se->registerSubsystem(hit);
 
+  // G4ScintillatorSlatTTree *scintcell = new G4ScintillatorSlatTTree("inslat");
+  // scintcell->Detector("HCALIN");
+  // se->registerSubsystem(scintcell);
+
+  // scintcell = new G4ScintillatorSlatTTree("outslat");
+  // scintcell->Detector("HCALOUT");
+  // se->registerSubsystem(scintcell);
+
+
   //----------------------
   // save a comprehensive  evaluation file
   //----------------------
@@ -468,8 +513,13 @@ int Fun4All_G4_Prototype3(
       se->registerSubsystem(ana);
     }
 
-  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT","/phenix/scratch/pinkenbu/G4Prototype2New.root");
-  se->registerOutputManager(out);
+  // Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT","/phenix/scratch/pinkenbu/G4Prototype2Hcalin.root");
+  // out->AddNode("G4RootScintillatorSlat_HCALIN");
+  // se->registerOutputManager(out);
+
+  // out = new Fun4AllDstOutputManager("DSTHCOUT","/phenix/scratch/pinkenbu/G4Prototype2Hcalout.root");
+  // out->AddNode("G4RootScintillatorSlat_HCALOUT");
+  // se->registerOutputManager(out);
 
   Fun4AllInputManager *in = new Fun4AllDummyInputManager( "JADE");
   se->registerInputManager( in );
