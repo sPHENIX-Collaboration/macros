@@ -74,7 +74,7 @@ Fun4All_TestBeam(int nEvents = 100,
   CaloCalibration * calib = NULL;
 
   calib = new CaloCalibration("CEMC");
-  calib->GetCalibrationParameters().ReadFromFile("xml",
+  calib->GetCalibrationParameters().ReadFromFile("CEMC","xml",0,0,
       string(getenv("CALIBRATIONROOT")) + string("/Prototype2/Calibration/")); // calibration database
   se->registerSubsystem(calib);
 
@@ -82,7 +82,7 @@ Fun4All_TestBeam(int nEvents = 100,
   calib->set_calib_tower_node_prefix("CALIB_LG");
   calib->set_raw_tower_node_prefix("RAW_LG");
   calib->GetCalibrationParameters().set_name("hcalin_lg");
-  calib->GetCalibrationParameters().ReadFromFile("xml",
+  calib->GetCalibrationParameters().ReadFromFile("hcalin_lg", "xml",0,0,
       string(getenv("CALIBRATIONROOT")) + string("/Prototype2/Calibration/")); // calibration database
   se->registerSubsystem(calib);
 
@@ -90,7 +90,7 @@ Fun4All_TestBeam(int nEvents = 100,
   calib->set_calib_tower_node_prefix("CALIB_HG");
   calib->set_raw_tower_node_prefix("RAW_HG");
   calib->GetCalibrationParameters().set_name("hcalin_hg");
-  calib->GetCalibrationParameters().ReadFromFile("xml",
+  calib->GetCalibrationParameters().ReadFromFile("hcalin_hg", "xml",0,0,
       string(getenv("CALIBRATIONROOT")) + string("/Prototype2/Calibration/")); // calibration database
   se->registerSubsystem(calib);
 
@@ -98,7 +98,7 @@ Fun4All_TestBeam(int nEvents = 100,
   calib->set_calib_tower_node_prefix("CALIB_LG");
   calib->set_raw_tower_node_prefix("RAW_LG");
   calib->GetCalibrationParameters().set_name("hcalout_lg");
-  calib->GetCalibrationParameters().ReadFromFile("xml",
+  calib->GetCalibrationParameters().ReadFromFile("hcalout_lg", "xml",0,0,
       string(getenv("CALIBRATIONROOT")) + string("/Prototype2/Calibration/")); // calibration database
   se->registerSubsystem(calib);
 
@@ -106,7 +106,7 @@ Fun4All_TestBeam(int nEvents = 100,
   calib->set_calib_tower_node_prefix("CALIB_HG");
   calib->set_raw_tower_node_prefix("RAW_HG");
   calib->GetCalibrationParameters().set_name("hcalout_hg");
-  calib->GetCalibrationParameters().ReadFromFile("xml",
+  calib->GetCalibrationParameters().ReadFromFile("hcalout_hg", "xml",0,0,
       string(getenv("CALIBRATIONROOT")) + string("/Prototype2/Calibration/")); // calibration database
   se->registerSubsystem(calib);
 
