@@ -106,6 +106,7 @@ int G4Setup(const int absorberactive = 0,
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4Reco* g4Reco = new PHG4Reco();
+  g4Reco->save_DST_geometry(true); //Save geometry from Geant4 to DST
   g4Reco->set_rapidity_coverage(1.1); // according to drawings
 
   if (decayType != TPythia6Decayer::kAll) {
