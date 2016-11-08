@@ -1,6 +1,4 @@
-int Fun4All_G4_Prototype3(
-				int nEvents = 1
-				)
+int Fun4All_G4_Prototype3(int nEvents = 1)
 {
 
   gSystem->Load("libfun4all");
@@ -23,7 +21,7 @@ int Fun4All_G4_Prototype3(
   bool ohcal_digi = ohcal_twr && false;
   bool ohcal_twrcal =  ohcal_digi && false;
   bool cryo_on = true;
-  bool bh_on = false;
+  bool bh_on = false; // the surrounding boxes need some further thinking
   bool dstreader = false;
 
   ///////////////////////////////////////////
@@ -36,6 +34,10 @@ int Fun4All_G4_Prototype3(
   // results reproducible for testing
   //  rc->set_IntFlag("RANDOMSEED",12345);
 
+  // simulated setup sits at eta=1, theta=40.395 degrees
+  double theta = 90-46.4;
+  // shift in x with respect to midrapidity setup
+  double add_place_x = 183.-173.93+2.54/2.;
   // Test beam generator
   PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
   gen->add_particles("pi-", 1); // mu-,e-,anti_proton,pi-
@@ -44,20 +46,20 @@ int Fun4All_G4_Prototype3(
   gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Gaus,
 					PHG4SimpleEventGenerator::Gaus, 
                                         PHG4SimpleEventGenerator::Gaus); // Gauss beam profile
-  double angle = 46.4*TMath::Pi()/180.;
+  double angle = theta*TMath::Pi()/180.;
   double eta = -1.*TMath::Log(TMath::Tan(angle/2.));
   gen->set_eta_range(eta-0.001,eta+0.001); // 1mrad angular divergence
   gen->set_phi_range(-0.001, 0.001); // 1mrad angular divergence
   const double momentum = 32;
   gen->set_p_range(momentum,momentum, momentum*2e-2); // 2% momentum smearing
-  se->registerSubsystem(gen);
+  //se->registerSubsystem(gen);
 
   PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
   pgen->set_name("geantino");
   //pgen->set_name(particle);
   pgen->set_vtx(0, 0, 0);
   //pgen->set_vtx(0, ypos, 0);
-  double angle = 46.4*TMath::Pi()/180.;
+  double angle = theta*TMath::Pi()/180.;
   double eta = -1.*TMath::Log(TMath::Tan(angle/2.));
   pgen->set_eta_range(0.2*eta, 1.8*eta);
   //pgen->set_phi_range(-0.001, 0.001); // 1mrad angular diverpgence
@@ -73,9 +75,9 @@ int Fun4All_G4_Prototype3(
   gun->set_name("geantino");
   //  gun->set_name("proton");
   gun->set_vtx(0, 0, 0);
-  double angle = 46.4*TMath::Pi()/180.;
+  double angle = theta*TMath::Pi()/180.;
   gun->set_mom(sin(angle),0.,cos(angle));
-  //  se->registerSubsystem(gun);
+  se->registerSubsystem(gun);
 
 
   PHG4Reco* g4Reco = new PHG4Reco();
@@ -108,7 +110,8 @@ int Fun4All_G4_Prototype3(
     {
       PHG4Prototype2InnerHcalSubsystem *innerhcal = new PHG4Prototype2InnerHcalSubsystem("HCalIn");
       innerhcal->set_int_param("hi_eta",1);
-      innerhcal->set_double_param("place_z",123.);
+      innerhcal->set_double_param("place_x",add_place_x);
+      innerhcal->set_double_param("place_z",144);
       innerhcal->SetActive();
       innerhcal->SetAbsorberActive();
       innerhcal->SetAbsorberTruth(1);
@@ -120,7 +123,8 @@ int Fun4All_G4_Prototype3(
     {
       PHG4Prototype2OuterHcalSubsystem *outerhcal = new PHG4Prototype2OuterHcalSubsystem("HCalOut");
       outerhcal->set_int_param("hi_eta",1);
-      outerhcal->set_double_param("place_z",200);
+      outerhcal->set_double_param("place_x",add_place_x);
+      outerhcal->set_double_param("place_z",229.5);
       outerhcal->SetActive();
       outerhcal->SetAbsorberActive();
       outerhcal->SetAbsorberTruth(1);
@@ -130,13 +134,13 @@ int Fun4All_G4_Prototype3(
     }
   if (cryo_on)
     {
-      double place_z = 160.;
+      double place_z = 175.;
       // Cryostat from engineering drawing
       PHG4BlockSubsystem *cryo1 = new PHG4BlockSubsystem("cryo1",1);
       cryo1->set_double_param("size_x",0.95);
       cryo1->set_double_param("size_y",60.96);
       cryo1->set_double_param("size_z",60.96);
-      cryo1->set_double_param("place_x",141.96+0.95/2.);
+      cryo1->set_double_param("place_x",141.96+0.95/2.+add_place_x);
       cryo1->set_double_param("place_z",place_z);
       cryo1->set_string_param("material","G4_Al");
       cryo1->SetActive(); // it is an active volume - save G4Hits
@@ -147,7 +151,7 @@ int Fun4All_G4_Prototype3(
       cryo2->set_double_param("size_x",8.89);
       cryo2->set_double_param("size_y",60.96);
       cryo2->set_double_param("size_z",60.96);
-      cryo2->set_double_param("place_x",150.72+8.89/2.);
+      cryo2->set_double_param("place_x",150.72+8.89/2.+add_place_x);
       cryo2->set_double_param("place_z",place_z);
       cryo2->set_string_param("material","G4_Al");
       cryo2->SetActive(); // it is an active volume - save G4Hits
@@ -158,7 +162,7 @@ int Fun4All_G4_Prototype3(
       cryo3->set_double_param("size_x",2.54);
       cryo3->set_double_param("size_y",60.96);
       cryo3->set_double_param("size_z",60.96);
-      cryo3->set_double_param("place_x",173.93+2.54/2.);
+      cryo3->set_double_param("place_x",173.93+2.54/2.+add_place_x);
       cryo3->set_double_param("place_z",place_z);
       cryo3->set_string_param("material","G4_Al");
       cryo3->SetActive(); // it is an active volume - save G4Hits
