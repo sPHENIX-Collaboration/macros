@@ -9,14 +9,17 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   gSystem->Load("libqa_modules");
 
   bool cemc_on = false;
-  bool cemc_twr = false;
+  bool cemc_cell = cemc_on && false;
+  bool cemc_twr = cemc_cell && false;
+  bool cemc_digi = cemc_twr && false;
+  bool cemc_twrcal = cemc_digi && false;
   bool ihcal_on = true;
-  bool ihcal_cell = ihcal_on && true;
+  bool ihcal_cell = ihcal_on && false;
   bool ihcal_twr = ihcal_cell && false;
   bool ihcal_digi = ihcal_twr && false;
   bool ihcal_twrcal = ihcal_digi && false;
   bool ohcal_on = true;
-  bool ohcal_cell = ohcal_on && true;
+  bool ohcal_cell = ohcal_on && false;
   bool ohcal_twr = ohcal_cell && false;
   bool ohcal_digi = ohcal_twr && false;
   bool ohcal_twrcal =  ohcal_digi && false;
@@ -224,7 +227,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   //----------------------------------------
   // EMCal digitization
   //----------------------------------------
-  if (cemc_on)
+  if (cemc_cell)
     {
       PHG4FullProjSpacalCellReco *cemc_cells = new PHG4FullProjSpacalCellReco("CEMCCYLCELLRECO");
       cemc_cells->Detector("CEMC");
@@ -232,18 +235,22 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
       cemc_cells->get_light_collection_model().load_data_file(string(getenv("CALIBRATIONROOT")) + string("/CEMC/LightCollection/Prototype2Module.xml"),"data_grid_light_guide_efficiency","data_grid_fiber_trans");
 
       se->registerSubsystem(cemc_cells);
-
+    }
+  if (cemc_twr)
+    {
       RawTowerBuilder *TowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
       TowerBuilder->Detector("CEMC");
       TowerBuilder->set_sim_tower_node_prefix("SIM");
       se->registerSubsystem(TowerBuilder);
+    }
+  const double sampling_fraction = 0.0233369; //  +/-   8.22211e-05  from 15 Degree indenting 8 GeV electron showers
+  const double photoelectron_per_GeV = 500; //500 photon per total GeV deposition
+  const double ADC_per_photoelectron_HG = 3.8; // From Sean Stoll, Mar 29
+  const double ADC_per_photoelectron_LG = 0.24; // From Sean Stoll, Mar 29
 
-      const double sampling_fraction = 0.0233369; //  +/-   8.22211e-05  from 15 Degree indenting 8 GeV electron showers
-      const double photoelectron_per_GeV = 500; //500 photon per total GeV deposition
-      const double ADC_per_photoelectron_HG = 3.8; // From Sean Stoll, Mar 29
-      const double ADC_per_photoelectron_LG = 0.24; // From Sean Stoll, Mar 29
-
-      // low gains
+  // low gains
+  if (cemc_digi)
+    {
       RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizerLG");
       TowerDigitizer->Detector("CEMC");
       TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
@@ -254,19 +261,8 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
       TowerDigitizer->set_photonelec_yield_visible_GeV(photoelectron_per_GeV / sampling_fraction);
       TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
       se->registerSubsystem(TowerDigitizer);
-
-      RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibrationLG");
-      TowerCalibration->Detector("CEMC");
-      TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
-      TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
-      TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-      TowerCalibration->set_calib_const_GeV_ADC(1. / ADC_per_photoelectron_LG / photoelectron_per_GeV);
-      TowerCalibration->set_pedstal_ADC(0);
-      TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
-      se->registerSubsystem(TowerCalibration);
-
       // high gains
-      RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizerHG");
+      TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizerHG");
       TowerDigitizer->Detector("CEMC");
       TowerDigitizer->set_raw_tower_node_prefix("RAW_HG");
       TowerDigitizer->set_digi_algorithm(
@@ -277,8 +273,21 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
       TowerDigitizer->set_photonelec_yield_visible_GeV(photoelectron_per_GeV / sampling_fraction);
       TowerDigitizer->set_zero_suppression_ADC(-1000); // no-zero suppression
       se->registerSubsystem(TowerDigitizer);
+    }
+  if (cemc_twrcal)
+    {
+      RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibrationLG");
+      TowerCalibration->Detector("CEMC");
+      TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
+      TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
+      TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+      TowerCalibration->set_calib_const_GeV_ADC(1. / ADC_per_photoelectron_LG / photoelectron_per_GeV);
+      TowerCalibration->set_pedstal_ADC(0);
+      TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
+      se->registerSubsystem(TowerCalibration);
 
-      RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibrationHG");
+
+      TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibrationHG");
       TowerCalibration->Detector("CEMC");
       TowerCalibration->set_raw_tower_node_prefix("RAW_HG");
       TowerCalibration->set_calib_tower_node_prefix("CALIB_HG");
@@ -458,15 +467,17 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   //----------------------
   // G4HitNtuple
   //----------------------
-  G4HitNtuple *hit = new G4HitNtuple("G4HitNtuple","g4hitntuple.root");
-  hit->AddNode("HCALIN", 0);
-  hit->AddNode("HCALOUT", 1);
-  hit->AddNode("CRYO", 2);
-  hit->AddNode("BlackHole", 3);
-  hit->AddNode("ABSORBER_HCALIN", 10);
-  hit->AddNode("ABSORBER_HCALOUT", 11);
-  se->registerSubsystem(hit);
-
+  if (hit_ntuple)
+    {
+      G4HitNtuple *hit = new G4HitNtuple("G4HitNtuple","g4hitntuple.root");
+      hit->AddNode("HCALIN", 0);
+      hit->AddNode("HCALOUT", 1);
+      hit->AddNode("CRYO", 2);
+      hit->AddNode("BlackHole", 3);
+      hit->AddNode("ABSORBER_HCALIN", 10);
+      hit->AddNode("ABSORBER_HCALOUT", 11);
+      se->registerSubsystem(hit);
+    }
   // G4ScintillatorSlatTTree *scintcell = new G4ScintillatorSlatTTree("inslat");
   // scintcell->Detector("HCALIN");
   // se->registerSubsystem(scintcell);
