@@ -434,15 +434,18 @@ int Fun4All_G4_Prototype2(int nEvents = 1)
   //----------------------
   // QA Histograms
   //----------------------
-  se->registerSubsystem(
-			new QAG4SimulationCalorimeter("CEMC",
-						      QAG4SimulationCalorimeter::kProcessG4Hit));
-  se->registerSubsystem(
-			new QAG4SimulationCalorimeter("HCALIN",
-						      QAG4SimulationCalorimeter::kProcessG4Hit));
-  se->registerSubsystem(
-			new QAG4SimulationCalorimeter("HCALOUT",
-						      QAG4SimulationCalorimeter::kProcessG4Hit));
+  if (cemc_on)
+    {
+      se->registerSubsystem(new QAG4SimulationCalorimeter("CEMC",QAG4SimulationCalorimeter::kProcessG4Hit));
+    }
+  if (ihcal_on)
+    {
+      se->registerSubsystem(new QAG4SimulationCalorimeter("HCALIN",QAG4SimulationCalorimeter::kProcessG4Hit));
+    }
+  if (ohcal_on)
+    {
+      se->registerSubsystem(new QAG4SimulationCalorimeter("HCALOUT",QAG4SimulationCalorimeter::kProcessG4Hit));
+    }
   //----------------------
   // G4HitNtuple
   //----------------------
