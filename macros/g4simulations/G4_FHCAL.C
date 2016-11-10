@@ -115,6 +115,7 @@ void FHCAL_Clusters(int verbosity = 0) {
   RawClusterBuilderFwd* ClusterBuilder = new RawClusterBuilderFwd("FHCALRawClusterBuilderFwd");
   ClusterBuilder->Detector("FHCAL");
   ClusterBuilder->Verbosity(verbosity);
+  ClusterBuilder->set_threshold_energy(0.100);  
   se->registerSubsystem( ClusterBuilder );
   
   return;
