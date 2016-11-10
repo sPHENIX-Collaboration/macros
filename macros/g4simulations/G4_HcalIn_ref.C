@@ -122,7 +122,7 @@ void HCALInner_Cells(int verbosity = 0) {
 
   PHG4HcalCellReco *hc = new PHG4HcalCellReco();
   hc->Detector("HCALIN");
-  hc->etasize_nslat(0, 0, 5);
+  hc->etasize_nslat(0, 0, 4);
   hc->set_timing_window_defaults(0.0,60.0);
   se->registerSubsystem(hc);
   
