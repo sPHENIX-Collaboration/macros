@@ -20,10 +20,9 @@ double HCalInner(PHG4Reco* g4Reco,
   int ilayer = Min_hcal_in_layer;
   PHG4InnerHcalSubsystem *hcal;
   hcal = new PHG4InnerHcalSubsystem("HCALIN");
-  // these are the parameters you can change with their defaults
+  // these are the parameters you can change with their default settings
   // hcal->set_string_param("material","SS310");
   // hcal->set_int_param("ncross",4);
-  // hcal->set_int_param("n_scinti_plates",5 * 64);
   // hcal->set_int_param("n_scinti_tiles",12);
   // hcal->set_int_param("light_scint_model",1);
   // hcal->set_double_param("inner_radius",116);
@@ -44,7 +43,7 @@ double HCalInner(PHG4Reco* g4Reco,
   // hcal->set_double_param("rot_z",0);
 
   // Flat plates with 4 scintillators per tower:
-  hcal->set_int_param("n_scinti_plates",4 * 64);
+  hcal->set_int_param("n_scinti_plates_per_tower",4);
   hcal->set_double_param("scinti_outer_gap",1.22*(5.0/4.0));
 
   hcal->SetActive();
@@ -123,7 +122,7 @@ void HCALInner_Cells(int verbosity = 0) {
   PHG4HcalCellReco *hc = new PHG4HcalCellReco();
   hc->Detector("HCALIN");
   hc->etasize_nslat(0, 0, 4);
-  hc->set_timing_window_defaults(0.0,60.0);
+  //  hc->set_timing_window_defaults(0.0,60.0);
   se->registerSubsystem(hc);
   
   return;  
