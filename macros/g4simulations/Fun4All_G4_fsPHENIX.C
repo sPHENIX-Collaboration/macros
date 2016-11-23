@@ -75,6 +75,7 @@ int Fun4All_G4_fsPHENIX(
   // fsPHENIX geometry
 
   bool do_FGEM = true;
+  bool do_FGEM_track =true;
 
   bool do_FEMC = true; 
   bool do_FEMC_cell = true; 
@@ -272,6 +273,12 @@ int Fun4All_G4_fsPHENIX(
   //--------------
 
   if (do_svtx_track) Svtx_Reco();
+
+  //--------------
+  // FGEM tracking
+  //--------------
+
+  if(do_FGEM_track) FGEM_FastSim_Reco();
 
   //-----------------
   // Global Vertexing
