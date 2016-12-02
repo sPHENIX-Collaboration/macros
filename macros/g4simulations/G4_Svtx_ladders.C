@@ -1,3 +1,7 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
 // development macro for realistic outer strip ladder geometries
 
 int Min_si_layer = 0;
