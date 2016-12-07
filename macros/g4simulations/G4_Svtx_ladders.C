@@ -201,6 +201,8 @@ void Svtx_Reco(int verbosity = 0)
   digi->set_adc_scale(0,   1, 6.40e-6); // 6.4 keV / bit
   digi->set_adc_scale(1,   1, 6.40e-6); // 6.4 keV / bit
   digi->Verbosity(verbosity);
+
+  // INTT
   std::vector<double> userrange; // 3-bit ADC threshold relative to the mip_e at each layer.
   userrange.push_back(0.05);
   userrange.push_back(0.10);
@@ -210,11 +212,13 @@ void Svtx_Reco(int verbosity = 0)
   userrange.push_back(0.30);
   userrange.push_back(0.35);
   userrange.push_back(0.40);
-  digi->set_fphx_adc_scale(2, userrange);
-  digi->set_fphx_adc_scale(3, userrange);
-  digi->set_fphx_adc_scale(4, userrange);
-  digi->set_fphx_adc_scale(5, userrange);
-  se->registerSubsystem( digi );
+  PHG4SiliconTrackerDigitizer* digiintt = new PHG4SiliconTrackerDigitizer();
+  digiintt->Verbosity(verbosity);
+  digiintt->set_adc_scale(2, userrange);
+  digiintt->set_adc_scale(3, userrange);
+  digiintt->set_adc_scale(4, userrange);
+  digiintt->set_adc_scale(5, userrange);
+  se->registerSubsystem( digiintt );
   
   //-------------------------------------
   // Apply Live Area Inefficiency to Hits
