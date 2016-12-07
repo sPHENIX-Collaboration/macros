@@ -11,8 +11,7 @@ double HCalInner(PHG4Reco* g4Reco,
   gSystem->Load("libg4detectors.so");
   gSystem->Load("libg4testbench.so");
 
-  PHG4InnerHcalSubsystem *hcal;
-  hcal = new PHG4InnerHcalSubsystem("HCALIN");
+  PHG4InnerHcalSubsystem *hcal = new PHG4InnerHcalSubsystem("HCALIN");
   // these are the parameters you can change with their default settings
   // hcal->set_string_param("material","SS310");
   // hcal->set_int_param("ncross",4);
@@ -40,7 +39,10 @@ double HCalInner(PHG4Reco* g4Reco,
 
   hcal->SetActive();
   hcal->SuperDetector("HCALIN");
-  if (absorberactive)  hcal->SetAbsorberActive();
+  if (absorberactive)  
+    {
+      hcal->SetAbsorberActive();
+    }
   hcal->OverlapCheck(overlapcheck);
 
   g4Reco->registerSubsystem( hcal );
