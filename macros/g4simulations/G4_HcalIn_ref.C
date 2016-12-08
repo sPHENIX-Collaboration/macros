@@ -1,11 +1,5 @@
-
-int Min_hcal_in_layer = 0;
-int Max_hcal_in_layer = 0;
-
-void HCalInnerInit() {
-  Min_hcal_in_layer = 0;
-  Max_hcal_in_layer = 0;
-}
+// Init is called by G4Setup.C
+void HCalInnerInit() {}
 
 double HCalInner(PHG4Reco* g4Reco,
 		 double radius,
@@ -17,9 +11,7 @@ double HCalInner(PHG4Reco* g4Reco,
   gSystem->Load("libg4detectors.so");
   gSystem->Load("libg4testbench.so");
 
-  int ilayer = Min_hcal_in_layer;
-  PHG4InnerHcalSubsystem *hcal;
-  hcal = new PHG4InnerHcalSubsystem("HCALIN");
+  PHG4InnerHcalSubsystem *hcal = new PHG4InnerHcalSubsystem("HCALIN");
   // these are the parameters you can change with their default settings
   // hcal->set_string_param("material","SS310");
   // hcal->set_int_param("ncross",4);
@@ -41,22 +33,17 @@ double HCalInner(PHG4Reco* g4Reco,
   // hcal->set_double_param("rot_x",0);
   // hcal->set_double_param("rot_y",0);
   // hcal->set_double_param("rot_z",0);
-
   // Flat plates with 4 scintillators per tower:
   hcal->set_int_param("n_scinti_plates_per_tower",4);
   hcal->set_double_param("scinti_outer_gap",1.22*(5.0/4.0));
 
   hcal->SetActive();
   hcal->SuperDetector("HCALIN");
-  if (absorberactive)  hcal->SetAbsorberActive();
+  if (absorberactive)  
+    {
+      hcal->SetAbsorberActive();
+    }
   hcal->OverlapCheck(overlapcheck);
-  double innerradius = hcal->get_double_param("inner_radius");
-  if (radius > innerradius) {
-    cout << "inconsistency: radius: " << radius 
-	 << " larger than HCALIN inner radius: " << innerradius
-	 << " cm" << endl;
-    gSystem->Exit(-1);
-  }
 
   g4Reco->registerSubsystem( hcal );
 
@@ -64,14 +51,6 @@ double HCalInner(PHG4Reco* g4Reco,
 
   HCalInner_SupportRing(g4Reco,absorberactive);
   
-  if (verbosity > 0) {
-    cout << "==================== G4_HcalIn_ref.C::HCalInner() =========================" << endl;
-    cout << " HCALIN Material Description:" << endl;
-    cout << "  inner radius = " << innerradius << " cm" << endl;
-    cout << "  outer radius = " << radius << " cm" << endl;
-    cout << "===========================================================================" << endl;
-  }
-
   radius += no_overlapp;
   return radius;
 }
@@ -105,7 +84,9 @@ void HCalInner_SupportRing(PHG4Reco* g4Reco,
       cyl->set_string_param("material","SS310");
       cyl->set_double_param("thickness",maxradius - innerradius);
       if (absorberactive)
-        cyl->SetActive();
+	{
+	  cyl->SetActive();
+	}
       g4Reco->registerSubsystem(cyl);
     }
   
@@ -119,10 +100,17 @@ void HCALInner_Cells(int verbosity = 0) {
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  PHG4HcalCellReco *hc = new PHG4HcalCellReco();
+  PHG4HcalCellReco *hc = new PHG4HcalCellReco("HCALIN_CELLRECO");
   hc->Detector("HCALIN");
-  hc->etasize_nslat(0, 0, 4);
-  //  hc->set_timing_window_defaults(0.0,60.0);
+  //  hc->Verbosity(2);
+  // check for energy conservation - needs modified "infinite" timing cuts
+  // 0-999999999 
+  //  hc->checkenergy();
+  // timing cuts with their default settings
+  // hc->set_double_param("tmin",0.); 
+  // hc->set_double_param("tmax",60.0); 
+  // or all at once:
+  // hc->set_timing_window(0.0,60.0);
   se->registerSubsystem(hc);
   
   return;  
@@ -134,7 +122,7 @@ void HCALInner_Towers(int verbosity = 0) {
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
   
-  RawTowerBuilder *TowerBuilder = new RawTowerBuilder("HcalInRawTowerBuilder");
+  HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalInRawTowerBuilder");
   TowerBuilder->Detector("HCALIN");
   TowerBuilder->set_sim_tower_node_prefix("SIM");
   TowerBuilder->Verbosity(verbosity);
