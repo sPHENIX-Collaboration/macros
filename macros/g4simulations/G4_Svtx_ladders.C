@@ -1,3 +1,7 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
 // development macro for realistic outer strip ladder geometries
 
 int Min_si_layer = 0;
@@ -97,38 +101,26 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   bool overlapcheck = false; // set to true if you want to check for overlaps
   
   // instantiate the Silicon tracker subsystem and register it
-  // We make one instance of PHG4TrackerSubsystem per layer of tracker
+  // We make one instance of PHG4TrackerSubsystem for all four layers of tracker
   // dimensions are in mm, angles are in radians
  
-  bool option_double_layer[5] = {false, true, false, true, false};
-  double layer_radius[5] = {85.0, 85.0, 400.0, 400.0, 800.0};
-  int N_strips_sensor_phi[5] = {256, 256, 512, 512, 1536}; 
-  double radius_stagger[5] = {10.0, 10.0, 10.0, 10.0, 10.0};
-  int N_staggers[5] = {4, 4, 4, 4, 2};
-  bool add_lower_roc[5] = {false, false, true, true, true};
-  double strip_tilt[5] = {0.0156, -0.0156, 0.0156, -0.0156, 0.0};  // radians, usually 1:64 tilt
-  //double strip_tilt[num_si_layers] = {0.0, 0.0, 0.0, 0.0, 0.0};  // radians, usually 1:64 tilt
+  // PHG4SiliconTrackerSubsystem creates the detetor layer using PHG4SiliconTrackerDetector
+  // and instantiates the appropriate PHG4SteppingAction
+  const double intt_radius_max = 140.; // including stagger radius (mm)
 
-  for(int ilayer = 2; ilayer <= Max_si_layer; ++ilayer)
-    {  
-      // PHG4SiliconTrackerSubsystem creates the detetor layer using PHG4SiliconTrackerDetector
-      // and instantiates the appropriate PHG4SteppingAction
-      PHG4SiliconTrackerSubsystem *sitrack = new PHG4SiliconTrackerSubsystem("SILICON_TRACKER", ilayer); 
-      sitrack->Verbosity(verbosity);
-      sitrack->set_nominal_layer_radius(layer_radius[ilayer-2]);   // mm
-      sitrack->set_radius_stagger(radius_stagger[ilayer-2]);          // mm
-      sitrack->set_N_staggers(N_staggers[ilayer-2]);
-      sitrack->set_N_strips_in_sensor_phi(N_strips_sensor_phi[ilayer-2]);
-      sitrack->set_strip_tilt(strip_tilt[ilayer-2]);      // radians
-      sitrack->set_option_double_layer(option_double_layer[ilayer-2]);
-      sitrack->set_add_lower_roc(add_lower_roc[ilayer-2]);
-      sitrack->SetActive();
-      sitrack->OverlapCheck(overlapcheck);
-      g4Reco->registerSubsystem( sitrack);
-    }
+  std::vector<std::pair<int, int>> vpair; // (sphxlayer, inttlayer)
+  vpair.push_back(std::make_pair(2, 0)); // sphxlayer=2 corresponding to inttlayer=0
+  vpair.push_back(std::make_pair(3, 1)); // sphxlayer=3 corresponding to inttlayer=1
+  vpair.push_back(std::make_pair(4, 2)); // sphxlayer=4 corresponding to inttlayer=2
+  vpair.push_back(std::make_pair(5, 3)); // sphxlayer=5 corresponding to inttlayer=3
+  PHG4SiliconTrackerSubsystem *sitrack = new PHG4SiliconTrackerSubsystem("SILICON_TRACKER", vpair);
+  sitrack->Verbosity(verbosity);
+  sitrack->SetActive(1);
+  sitrack->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem( sitrack);
 
   // report roughly our outer radius marker (translation back to cm)
-  return layer_radius[4]*0.1+radius_stagger[4]*0.1;
+  return intt_radius_max*0.1;
 }
 
 void Svtx_Cells(int verbosity = 0)
@@ -182,7 +174,7 @@ void Svtx_Cells(int verbosity = 0)
 
 void Svtx_Reco(int verbosity = 0)
 {
-  // reconstructs the MIE Svtx v2 detector (7 layers)
+  // reconstructs the 2-layers VTX and 4-layers INTT
 
   // requires Svtx setup and Svtx cell routines
   // prefers calorimeter reconstruction prior (once projections are working)
@@ -204,16 +196,29 @@ void Svtx_Reco(int verbosity = 0)
   // Digitize the cell energy into ADC
   //----------------------------------
   // defaults to 8-bit ADC with MIP at 0.25% dynamic range
+  // FPHX 3-bit ADC is tuned by  userrange layer by layer
   PHG4SvtxDigitizer* digi = new PHG4SvtxDigitizer();
+  digi->set_adc_scale(0,   1, 6.40e-6); // 6.4 keV / bit
+  digi->set_adc_scale(1,   1, 6.40e-6); // 6.4 keV / bit
   digi->Verbosity(verbosity);
-  // digi->set_adc_scale(0,   1, 6.40e-6); // 6.4 keV / bit
-  // digi->set_adc_scale(1,   1, 6.40e-6); // 6.4 keV / bit
-  // digi->set_adc_scale(2, 255, 0.36e-6); // 0.36 keV / bit
-  // digi->set_adc_scale(3, 255, 1.45e-6); // 1.45 keV / bit
-  // digi->set_adc_scale(4, 255, 0.36e-6); // 0.36 keV / bit
-  // digi->set_adc_scale(5, 255, 1.45e-6); // 1.45 keV / bit
-  // digi->set_adc_scale(6, 255, 0.36e-6); // 0.36 keV / bit
-  se->registerSubsystem( digi );
+
+  // INTT
+  std::vector<double> userrange; // 3-bit ADC threshold relative to the mip_e at each layer.
+  userrange.push_back(0.05);
+  userrange.push_back(0.10);
+  userrange.push_back(0.15);
+  userrange.push_back(0.20);
+  userrange.push_back(0.25);
+  userrange.push_back(0.30);
+  userrange.push_back(0.35);
+  userrange.push_back(0.40);
+  PHG4SiliconTrackerDigitizer* digiintt = new PHG4SiliconTrackerDigitizer();
+  digiintt->Verbosity(verbosity);
+  digiintt->set_adc_scale(2, userrange);
+  digiintt->set_adc_scale(3, userrange);
+  digiintt->set_adc_scale(4, userrange);
+  digiintt->set_adc_scale(5, userrange);
+  se->registerSubsystem( digiintt );
   
   //-------------------------------------
   // Apply Live Area Inefficiency to Hits
@@ -241,7 +246,10 @@ void Svtx_Reco(int verbosity = 0)
   thresholds->set_threshold(3,0.25);
   thresholds->set_threshold(4,0.25);
   thresholds->set_threshold(5,0.25);
-  thresholds->set_threshold(6,0.25);
+  thresholds->set_use_thickness_mip(2, true);
+  thresholds->set_use_thickness_mip(3, true);
+  thresholds->set_use_thickness_mip(4, true);
+  thresholds->set_use_thickness_mip(5, true);
   se->registerSubsystem( thresholds );
  
   //---------------------
@@ -254,22 +262,20 @@ void Svtx_Reco(int verbosity = 0)
   clusterizer->set_z_clustering(3, false);
   clusterizer->set_z_clustering(4, false);
   clusterizer->set_z_clustering(5, false);
-  clusterizer->set_z_clustering(6, false);
   se->registerSubsystem( clusterizer );
  
   //---------------------
   // Track reconstruction
   //---------------------
-  PHG4HoughTransform* hough = new PHG4HoughTransform(7,7);
+  PHG4HoughTransform* hough = new PHG4HoughTransform(6,6);
   hough->set_mag_field(1.4);
   hough->Verbosity(verbosity);
   hough->set_material(0, 0.013);
   hough->set_material(1, 0.013);
-  hough->set_material(2, 0.013);
-  hough->set_material(3, 0.013);
+  hough->set_material(2, 0.010);
+  hough->set_material(3, 0.010);
   hough->set_material(4, 0.010);
   hough->set_material(5, 0.010);
-  hough->set_material(6, 0.020);
   hough->setPtRescaleFactor(0.9972);
   hough->set_chi2_cut_init(3.0);
   hough->set_chi2_cut_full(3.0);
@@ -284,7 +290,7 @@ void Svtx_Reco(int verbosity = 0)
   //---------------------
   // Ghost rejection
   //---------------------
-  PHG4TrackGhostRejection* rejection = new PHG4TrackGhostRejection(7);
+  PHG4TrackGhostRejection* rejection = new PHG4TrackGhostRejection(6);
   rejection->Verbosity(verbosity);
   rejection->set_max_shared_hits(3);
   se->registerSubsystem( rejection );
