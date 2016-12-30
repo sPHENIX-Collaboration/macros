@@ -8,7 +8,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   gSystem->Load("libg4eval.so");
   gSystem->Load("libqa_modules");
 
-  bool cemc_on = false;
+  bool cemc_on = true;
   bool cemc_cell = cemc_on && false;
   bool cemc_twr = cemc_cell && false;
   bool cemc_digi = cemc_twr && false;
@@ -25,7 +25,8 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   bool ohcal_twrcal =  ohcal_digi && false;
   bool cryo_on = true;
   bool bh_on = false; // the surrounding boxes need some further thinking
-  bool dstreader = false;
+  bool dstreader = true;
+  bool hit_ntuple = false;
 
   ///////////////////////////////////////////
   // Make the Server
@@ -43,7 +44,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   double add_place_x = 183.-173.93+2.54/2.;
   // Test beam generator
   PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-  gen->add_particles("pi-", 1); // mu-,e-,anti_proton,pi-
+  gen->add_particles("mu-", 1); // mu-,e-,anti_proton,pi-
   gen->set_vertex_distribution_mean(0.0, 0.0, 0);
   gen->set_vertex_distribution_width(0.0, .7, .7); // Rough beam profile size @ 16 GeV measured by Abhisek
   gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Gaus,
