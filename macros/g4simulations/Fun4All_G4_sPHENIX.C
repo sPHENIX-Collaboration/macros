@@ -1,6 +1,6 @@
 int Fun4All_G4_sPHENIX(
 		       const int nEvents = 10,
-		       const char * inputFile = "/sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
+		       const char * inputFile = "/sphenix/sim/sim01/production/2016-07-21/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
 		       const char * outputFile = "G4sPHENIXCells.root",
            const char * embed_input_file = "/sphenix/sim/sim01/production/2016-07-12/sHijing/spacal2d/G4Hits_sPHENIX_sHijing-0-4.4fm.list"
 		       )
@@ -26,6 +26,7 @@ int Fun4All_G4_sPHENIX(
   const bool runpythia6 = false;
   // else
   // Use particle generator (default simple generator)
+  // or gun/ very simple generator
   const bool usegun = false;
   // And
   // Further choose to embed newly simulated events to a previous simulation. Not compatible with `readhits = true`
@@ -197,14 +198,28 @@ int Fun4All_G4_sPHENIX(
 	{
 	  PHG4ParticleGun *gun = new PHG4ParticleGun();
 	  //  gun->set_name("anti_proton");
-	  gun->set_name("proton");
+	  gun->set_name("geantino");
 	  gun->set_vtx(0, 0, 0);
 	  gun->set_mom(10, 0, 0.01);
 	  // gun->AddParticle("geantino",1.7776,-0.4335,0.);
 	  // gun->AddParticle("geantino",1.7709,-0.4598,0.);
 	  // gun->AddParticle("geantino",2.5621,0.60964,0.);
 	  // gun->AddParticle("geantino",1.8121,0.253,0.);
-	  se->registerSubsystem(gun);
+	  //	  se->registerSubsystem(gun);
+	  PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
+          pgen->set_name("geantino");
+	  pgen->set_z_range(0,0);
+	  pgen->set_eta_range(0.01,0.01);
+	  pgen->set_mom_range(10,10);
+	  pgen->set_phi_range(5.3./180.*TMath::Pi(),5.7./180.*TMath::Pi());
+	  se->registerSubsystem(pgen);
+	  pgen = new PHG4ParticleGenerator();
+          pgen->set_name("geantino");
+	  pgen->set_z_range(0,0);
+	  pgen->set_eta_range(0.01,0.01);
+	  pgen->set_mom_range(10,10);
+	  pgen->set_phi_range(-0.2./180.*TMath::Pi(),0.2./180.*TMath::Pi());
+	  se->registerSubsystem(pgen);
 	}
     }
 
