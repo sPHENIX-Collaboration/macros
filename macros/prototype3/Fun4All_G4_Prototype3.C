@@ -9,10 +9,10 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   gSystem->Load("libqa_modules");
 
   bool cemc_on = true;
-  bool cemc_cell = cemc_on && false;
-  bool cemc_twr = cemc_cell && false;
-  bool cemc_digi = cemc_twr && false;
-  bool cemc_twrcal = cemc_digi && false;
+  bool cemc_cell = cemc_on && true;
+  bool cemc_twr = cemc_cell && true;
+  bool cemc_digi = cemc_twr && true;
+  bool cemc_twrcal = cemc_digi && true;
   bool ihcal_on = true;
   bool ihcal_cell = ihcal_on && false;
   bool ihcal_twr = ihcal_cell && false;
@@ -36,7 +36,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   recoConsts *rc = recoConsts::instance();
   // only set this if you want a fixed random seed to make
   // results reproducible for testing
-  //  rc->set_IntFlag("RANDOMSEED",12345);
+//    rc->set_IntFlag("RANDOMSEED",12345678);
 
   // simulated setup sits at eta=1, theta=40.395 degrees
   double theta = 90-46.4;
@@ -44,7 +44,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   double add_place_x = 183.-173.93+2.54/2.;
   // Test beam generator
   PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-  gen->add_particles("mu-", 1); // mu-,e-,anti_proton,pi-
+  gen->add_particles("e-", 1); // mu-,e-,anti_proton,pi-
   gen->set_vertex_distribution_mean(0.0, 0.0, 0);
   gen->set_vertex_distribution_width(0.0, .7, .7); // Rough beam profile size @ 16 GeV measured by Abhisek
   gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Gaus,
@@ -56,7 +56,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   gen->set_phi_range(-0.001, 0.001); // 1mrad angular divergence
   const double momentum = 32;
   gen->set_p_range(momentum,momentum, momentum*2e-2); // 2% momentum smearing
-  //se->registerSubsystem(gen);
+  se->registerSubsystem(gen);
 
   PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
   pgen->set_name("geantino");
@@ -81,7 +81,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   gun->set_vtx(0, 0, 0);
   double angle = theta*TMath::Pi()/180.;
   gun->set_mom(sin(angle),0.,cos(angle));
-  se->registerSubsystem(gun);
+//  se->registerSubsystem(gun);
 
 
   PHG4Reco* g4Reco = new PHG4Reco();
@@ -99,12 +99,15 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
       cemc->SuperDetector("CEMC");
       cemc->SetAbsorberActive();
       cemc->OverlapCheck(true);
+//      cemc->Verbosity(2);
+//      cemc->set_int_param("construction_verbose",2);
       cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
-      cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/Prototype2/Geometry/") ); 
+//      cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Geometry/") );
+      cemc->SetCalibrationFileDir("./test_geom/" );
       //  cemc->set_double_param("z_rotation_degree", 15); // rotation around CG
-      cemc->set_double_param("xpos", (116.77 + 137.0)*.5 - 26.5 - 10.2); // location in cm of EMCal CG. Updated with final positioning of EMCal
-      cemc->set_double_param("ypos", 4); // put it some where in UIUC blocks
-      cemc->set_double_param("zpos", 4); // put it some where in UIUC blocks
+//      cemc->set_double_param("xpos", (116.77 + 137.0)*.5 - 26.5 - 10.2); // location in cm of EMCal CG. Updated with final positioning of EMCal
+//      cemc->set_double_param("ypos", 4); // put it some where in UIUC blocks
+//      cemc->set_double_param("zpos", 4); // put it some where in UIUC blocks
       g4Reco->registerSubsystem(cemc);
     }
   //----------------------------------------
