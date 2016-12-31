@@ -102,8 +102,8 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
 //      cemc->Verbosity(2);
 //      cemc->set_int_param("construction_verbose",2);
       cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
-//      cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Geometry/") );
-      cemc->SetCalibrationFileDir("./test_geom/" );
+      cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Geometry/") );
+//      cemc->SetCalibrationFileDir("./test_geom/" );
       //  cemc->set_double_param("z_rotation_degree", 15); // rotation around CG
 //      cemc->set_double_param("xpos", (116.77 + 137.0)*.5 - 26.5 - 10.2); // location in cm of EMCal CG. Updated with final positioning of EMCal
 //      cemc->set_double_param("ypos", 4); // put it some where in UIUC blocks
