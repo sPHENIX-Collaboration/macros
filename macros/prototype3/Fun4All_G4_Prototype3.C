@@ -248,7 +248,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
       TowerBuilder->set_sim_tower_node_prefix("SIM");
       se->registerSubsystem(TowerBuilder);
     }
-  const double sampling_fraction = 0.0233369; //  +/-   8.22211e-05  from 15 Degree indenting 8 GeV electron showers
+  const double sampling_fraction = 0.0190134; //  +/-   0.000224984  from 0 Degree indenting 32 GeV electron showers
   const double photoelectron_per_GeV = 500; //500 photon per total GeV deposition
   const double ADC_per_photoelectron_HG = 3.8; // From Sean Stoll, Mar 29
   const double ADC_per_photoelectron_LG = 0.24; // From Sean Stoll, Mar 29
