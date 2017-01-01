@@ -27,6 +27,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   bool bh_on = false; // the surrounding boxes need some further thinking
   bool dstreader = true;
   bool hit_ntuple = false;
+  bool dstoutput = false;
 
   ///////////////////////////////////////////
   // Make the Server
@@ -508,26 +509,43 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
       //    {
       //      ana->AddNode("ABSORBER_CEMC");
       //    }
-      ana->AddTower("SIM_CEMC");
-      ana->AddTower("RAW_LG_CEMC");
-      ana->AddTower("CALIB_LG_CEMC");// Low gain CEMC
-      ana->AddTower("RAW_HG_CEMC");
-      ana->AddTower("CALIB_HG_CEMC");// High gain CEMC
 
-      ana->AddTower("SIM_HCALOUT");
-      ana->AddTower("SIM_HCALIN");
+      if (cemc_twr)
+        ana->AddTower("SIM_CEMC");
+      if (cemc_digi)
+        ana->AddTower("RAW_LG_CEMC");
+      if (cemc_twrcal)
+        ana->AddTower("CALIB_LG_CEMC"); // Low gain CEMC
+      if (cemc_digi)
+        ana->AddTower("RAW_HG_CEMC");
+      if (cemc_twrcal)
+        ana->AddTower("CALIB_HG_CEMC"); // High gain CEMC
 
-      ana->AddTower("RAW_LG_HCALIN");
-      ana->AddTower("RAW_HG_HCALIN");
-      ana->AddTower("RAW_LG_HCALOUT");
-      ana->AddTower("RAW_HG_HCALOUT");
+      if (ohcal_twr)
+        ana->AddTower("SIM_HCALOUT");
+      if (ihcal_twr)
+        ana->AddTower("SIM_HCALIN");
 
-      ana->AddTower("CALIB_LG_HCALIN");
-      ana->AddTower("CALIB_HG_HCALIN");
-      ana->AddTower("CALIB_LG_HCALOUT");
-      ana->AddTower("CALIB_HG_HCALOUT");
+      if (ihcal_digi)
+        ana->AddTower("RAW_LG_HCALIN");
+      if (ihcal_digi)
+        ana->AddTower("RAW_HG_HCALIN");
+      if (ohcal_digi)
+        ana->AddTower("RAW_LG_HCALOUT");
+      if (ohcal_digi)
+        ana->AddTower("RAW_HG_HCALOUT");
 
-      ana->AddNode("BlackHole");// add a G4Hit node
+      if (ihcal_twrcal)
+        ana->AddTower("CALIB_LG_HCALIN");
+      if (ihcal_twrcal)
+        ana->AddTower("CALIB_HG_HCALIN");
+      if (ohcal_twrcal)
+        ana->AddTower("CALIB_LG_HCALOUT");
+      if (ohcal_twrcal)
+        ana->AddTower("CALIB_HG_HCALOUT");
+
+      if (bh_on)
+        ana->AddNode("BlackHole"); // add a G4Hit node
 
       se->registerSubsystem(ana);
     }
@@ -539,6 +557,12 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   // out = new Fun4AllDstOutputManager("DSTHCOUT","/phenix/scratch/pinkenbu/G4Prototype2Hcalout.root");
   // out->AddNode("G4RootScintillatorSlat_HCALOUT");
   // se->registerOutputManager(out);
+
+  if (dstoutput)
+    {
+      Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT","G4Prototype3New.root");
+      se->registerOutputManager(out);
+    }
 
   Fun4AllInputManager *in = new Fun4AllDummyInputManager( "JADE");
   se->registerInputManager( in );
