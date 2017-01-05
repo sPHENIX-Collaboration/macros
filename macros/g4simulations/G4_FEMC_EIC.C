@@ -68,7 +68,7 @@ void FEMC_Towers(int verbosity = 0) {
   TowerDigitizer2->Detector("FEMC");
   TowerDigitizer2->TowerType(2);
   TowerDigitizer2->Verbosity(verbosity);
-  TowerDigitizer2->set_digi_algorithm(RawTowerDigitizer::kNo_digitalization);
+  TowerDigitizer2->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem( TowerDigitizer2 );
 
   // PbSc towers

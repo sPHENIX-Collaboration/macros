@@ -71,7 +71,7 @@ void EEMC_Towers(int verbosity = 0) {
   TowerDigitizer_EEMC->Detector("EEMC");
   TowerDigitizer_EEMC->Verbosity(verbosity);
   TowerDigitizer_EEMC->set_raw_tower_node_prefix("RAW");
-  TowerDigitizer_EEMC->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitalization);
+  TowerDigitizer_EEMC->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitization);
   TowerDigitizer_EEMC->set_pedstal_central_ADC(0);
   TowerDigitizer_EEMC->set_pedstal_width_ADC(8);// eRD1 test beam setting
   TowerDigitizer_EEMC->set_photonelec_ADC(1);//not simulating ADC discretization error

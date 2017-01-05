@@ -131,7 +131,7 @@ void HCALInner_Towers(int verbosity = 0) {
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalInRawTowerDigitizer");
   TowerDigitizer->Detector("HCALIN");
   TowerDigitizer->Verbosity(verbosity);
-  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kNo_digitalization);
+  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem( TowerDigitizer );
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalInRawTowerCalibration");

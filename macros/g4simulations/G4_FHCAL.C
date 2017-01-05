@@ -71,7 +71,7 @@ void FHCAL_Towers(int verbosity = 0) {
   // TowerDigitizer_FHCAL->Detector("FHCAL");
   // TowerDigitizer_FHCAL->Verbosity(verbosity);
   // TowerDigitizer_FHCAL->set_raw_tower_node_prefix("RAW");
-  // TowerDigitizer_FHCAL->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitalization);
+  // TowerDigitizer_FHCAL->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitization);
   // TowerDigitizer_FHCAL->set_pedstal_central_ADC(0);
   // TowerDigitizer_FHCAL->set_pedstal_width_ADC(8);// eRD1 test beam setting
   // TowerDigitizer_FHCAL->set_photonelec_ADC(1);//not simulating ADC discretization error
@@ -92,7 +92,7 @@ void FHCAL_Towers(int verbosity = 0) {
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("FHCALRawTowerDigitizer");
   TowerDigitizer->Detector("FHCAL");
   TowerDigitizer->Verbosity(verbosity);
-  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kNo_digitalization);
+  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem( TowerDigitizer );
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("FHCALRawTowerCalibration");
