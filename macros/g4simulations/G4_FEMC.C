@@ -70,7 +70,7 @@ void FEMC_Towers(int verbosity = 0) {
   TowerDigitizer1->Detector("FEMC");
   TowerDigitizer1->TowerType(1); 
   TowerDigitizer1->Verbosity(verbosity);
-  TowerDigitizer1->set_digi_algorithm(RawTowerDigitizer::kNo_digitalization);
+  TowerDigitizer1->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem( TowerDigitizer1 );
 
   // PbSc towers
@@ -78,7 +78,7 @@ void FEMC_Towers(int verbosity = 0) {
   TowerDigitizer2->Detector("FEMC");
   TowerDigitizer2->TowerType(2); 
   TowerDigitizer2->Verbosity(verbosity);
-  TowerDigitizer2->set_digi_algorithm(RawTowerDigitizer::kNo_digitalization);
+  TowerDigitizer2->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem( TowerDigitizer2 );
 
   // PbW crystals
