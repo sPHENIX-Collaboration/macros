@@ -43,7 +43,7 @@ double IRSetup(PHG4Reco* g4Reco,
     string volname = "IRMAGNET_";
     volname.append(name);
 
-    PHG4CylinderSubsystem *ir_magnet_i = new PHG4CylinderSubsystem(volname, 0);
+    PHG4BeamlineMagnetSubsystem *ir_magnet_i = new PHG4BeamlineMagnetSubsystem(volname, 0);
     ir_magnet_i->set_int_param("lengthviarapidity",0);
     ir_magnet_i->set_double_param("length",length);
     ir_magnet_i->set_double_param("radius",aperture_radius);
@@ -51,7 +51,31 @@ double IRSetup(PHG4Reco* g4Reco,
     ir_magnet_i->set_double_param("place_x",center_x);
     ir_magnet_i->set_double_param("place_y",center_y);
     ir_magnet_i->set_double_param("place_z",center_z);
-    ir_magnet_i->set_string_param("material","G4_Fe");
+    ir_magnet_i->set_string_param("material","G4_Galactic");
+    //ir_magnet_i->set_string_param("material","G4_Fe");
+
+    if ( B != 0 && gradient == 0.0 )
+      {
+	ir_magnet_i->set_string_param("magtype","dipole");
+	ir_magnet_i->set_double_param("field_y",B);
+
+	// debug: change field
+	ir_magnet_i->set_double_param("field_y",B*0.5);
+      }
+    else if ( B == 0 && gradient != 0.0 )
+      {
+	ir_magnet_i->set_string_param("magtype","quadrupole");
+	ir_magnet_i->set_double_param("fieldgradient",gradient);
+
+	// debug: set gradient to 0
+	ir_magnet_i->set_double_param("fieldgradient",0);
+      }
+    else
+      {
+	cout << "Error in G4_IR_EIC: Could not identify magnet type. Abort." << endl;
+	return 1;
+      }
+
     ir_magnet_i->SetActive(false);
     //ir_magnet_i->SuperDetector("FLUXRET_ETA_PLUS");
     ir_magnet_i->OverlapCheck(overlapcheck);
