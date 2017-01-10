@@ -58,9 +58,6 @@ double IRSetup(PHG4Reco* g4Reco,
       {
 	ir_magnet_i->set_string_param("magtype","dipole");
 	ir_magnet_i->set_double_param("field_y",B);
-
-	// debug: change field
-	ir_magnet_i->set_double_param("field_y",B*0.5);
       }
     else if ( B == 0 && gradient != 0.0 )
       {
@@ -69,6 +66,9 @@ double IRSetup(PHG4Reco* g4Reco,
 
 	// debug: set gradient to 0
 	ir_magnet_i->set_double_param("fieldgradient",0);
+
+	// debug: skip quadrupoles
+	continue;
       }
     else
       {
