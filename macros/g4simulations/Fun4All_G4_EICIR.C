@@ -22,6 +22,9 @@ int Fun4All_G4_EICIR(
   const bool runpythia8 = false;
   const bool runpythia6 = false;
 
+  // USe particle gun
+  const bool pgun = true;
+
   //======================
   // What to run
   //======================
@@ -30,39 +33,37 @@ int Fun4All_G4_EICIR(
 
   bool do_pipe = false;
 
+  bool do_magnet = true;
+
+  // Extended IR
+  bool do_ExtendedIR = true;
+
+  //================
+
   bool do_svtx = false;
   bool do_svtx_cell = false;
   bool do_svtx_track = false;
   bool do_svtx_eval = false;
-
   bool do_preshower = false;
-
   bool do_cemc = false;
   bool do_cemc_cell = false;
   bool do_cemc_twr = false;
   bool do_cemc_cluster = false;
   bool do_cemc_eval = false;
-
   bool do_hcalin = false;
   bool do_hcalin_cell = false;
   bool do_hcalin_twr = false;
   bool do_hcalin_cluster = false;
   bool do_hcalin_eval = false;
-
-  bool do_magnet = false;
-
   bool do_hcalout = false;
   bool do_hcalout_cell = false;
   bool do_hcalout_twr = false;
   bool do_hcalout_cluster = false;
   bool do_hcalout_eval = false;
-
   bool do_global = false;
   bool do_global_fastsim = false;
-
   bool do_jet_reco = false;
   bool do_jet_eval = false;
-
   bool do_fwd_jet_reco = false;
   bool do_fwd_jet_eval = false;
 
@@ -97,18 +98,7 @@ int Fun4All_G4_EICIR(
   bool do_EEMC_twr = false;
   bool do_EEMC_cluster = false;
 
-  bool do_eemc_eval = false;
 
-  // Extended IR
-  bool do_ExtendedIR = false;
-
-
-  // Other options
-
-  bool do_dst_compress = false;
-
-  //Option to convert DST to human command readable TTree for quick poke around the outputs
-  bool do_DSTReader = false;
   //---------------
   // Load libraries
   //---------------
@@ -135,7 +125,7 @@ int Fun4All_G4_EICIR(
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  //  se->Verbosity(0); // uncomment for batch production running with minimal output messages
+  //se->Verbosity(100); // uncomment for batch production running with minimal output messages
   se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
@@ -188,6 +178,14 @@ int Fun4All_G4_EICIR(
       HepMCNodeReader *hr = new HepMCNodeReader();
       se->registerSubsystem(hr);
     }
+  else if (pgun)
+    {
+      PHG4ParticleGun*gun = new PHG4ParticleGun();
+      //gun->set_name("gamma");
+      gun->set_name("proton");
+      gun->set_mom(0,0,250);
+      se->registerSubsystem(gun);
+    }
   else
     {
       // toss low multiplicity dummy events
@@ -207,7 +205,7 @@ int Fun4All_G4_EICIR(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
-      gen->set_eta_range(6.0, 6.0);
+      gen->set_eta_range(100.0, 100.0);
       //gen->set_eta_range(3.0, 3.0); //EICDetector FWD
       gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
       //gen->set_phi_range(TMath::Pi()/2-0.1, TMath::Pi()/2-0.1);
@@ -238,110 +236,6 @@ int Fun4All_G4_EICIR(
       Bbc_Reco();
     }
 
-  //------------------
-  // Detector Division
-  //------------------
-
-  if (do_svtx_cell) Svtx_Cells();
-
-  if (do_cemc_cell) CEMC_Cells();
-
-  if (do_hcalin_cell) HCALInner_Cells();
-
-  if (do_hcalout_cell) HCALOuter_Cells();
-
-  if (do_FEMC_cell) FEMC_Cells();
-  if (do_FHCAL_cell) FHCAL_Cells();
-
-  if (do_EEMC_cell) EEMC_Cells();
-
-  //-----------------------------
-  // CEMC towering and clustering
-  //-----------------------------
-
-  if (do_cemc_twr) CEMC_Towers();
-  if (do_cemc_cluster) CEMC_Clusters();
-
-  //-----------------------------
-  // HCAL towering and clustering
-  //-----------------------------
-
-  if (do_hcalin_twr) HCALInner_Towers();
-  if (do_hcalin_cluster) HCALInner_Clusters();
-
-  if (do_hcalout_twr) HCALOuter_Towers();
-  if (do_hcalout_cluster) HCALOuter_Clusters();
-
-  //-----------------------------
-  // e, h direction Calorimeter  towering and clustering
-  //-----------------------------
-
-  if (do_FEMC_twr) FEMC_Towers();
-  if (do_FEMC_cluster) FEMC_Clusters();
-
-  if (do_FHCAL_twr) FHCAL_Towers();
-  if (do_FHCAL_cluster) FHCAL_Clusters();
-
-  if (do_EEMC_twr) EEMC_Towers();
-  if (do_EEMC_cluster) EEMC_Clusters();
-
-  if (do_dst_compress) ShowerCompress();
-
-  //--------------
-  // SVTX tracking
-  //--------------
-
-  if (do_svtx_track) Svtx_Reco();
-
-  //-----------------
-  // Global Vertexing
-  //-----------------
-
-  if (do_global)
-    {
-      gROOT->LoadMacro("G4_Global.C");
-      Global_Reco();
-    }
-
-  else if (do_global_fastsim)
-    {
-      gROOT->LoadMacro("G4_Global.C");
-      Global_FastSim();
-    }
-
-  //---------
-  // Jet reco
-  //---------
-
-  if (do_jet_reco)
-    {
-      gROOT->LoadMacro("G4_Jets.C");
-      Jet_Reco();
-    }
-
-  if (do_fwd_jet_reco)
-    {
-      gROOT->LoadMacro("G4_FwdJets.C");
-      Jet_FwdReco();
-    }
-  //----------------------
-  // Simulation evaluation
-  //----------------------
-
-  if (do_svtx_eval) Svtx_Eval("g4svtx_eval.root");
-
-  if (do_cemc_eval) CEMC_Eval("g4cemc_eval.root");
-
-  if (do_eemc_eval) EEMC_Eval("g4eemc_eval.root");
-
-  if (do_hcalin_eval) HCALInner_Eval("g4hcalin_eval.root");
-
-  if (do_hcalout_eval) HCALOuter_Eval("g4hcalout_eval.root");
-
-  if (do_jet_eval) Jet_Eval("g4jet_eval.root");
-
-  if (do_fwd_jet_eval) Jet_FwdEval("g4fwdjet_eval.root");
-
   //--------------
   // IO management
   //--------------
@@ -365,34 +259,6 @@ int Fun4All_G4_EICIR(
       // the event loop, the Dummy Input Mgr does just that
       Fun4AllInputManager *in = new Fun4AllDummyInputManager( "JADE");
       se->registerInputManager( in );
-    }
-
-  if (do_DSTReader)
-    {
-      //Convert DST to human command readable TTree for quick poke around the outputs
-      gROOT->LoadMacro("G4_DSTReader_EICDetector.C");
-
-      G4DSTreader_EICDetector( outputFile, //
-                               /*int*/ absorberactive ,
-                               /*bool*/ do_svtx ,
-                               /*bool*/ do_preshower ,
-                               /*bool*/ do_cemc ,
-                               /*bool*/ do_hcalin ,
-                               /*bool*/ do_magnet ,
-                               /*bool*/ do_hcalout ,
-                               /*bool*/ do_cemc_twr ,
-                               /*bool*/ do_hcalin_twr ,
-                               /*bool*/ do_magnet  ,
-                               /*bool*/ do_hcalout_twr,
-                               /*bool*/ do_FGEM,
-                               /*bool*/ do_EGEM,
-                               /*bool*/ do_FHCAL,
-                               /*bool*/ do_FHCAL_twr,
-                               /*bool*/ do_FEMC,
-                               /*bool*/ do_FEMC_twr,
-			       /*bool*/ do_EEMC,
-			       /*bool*/ do_EEMC_twr
-                               );
     }
 
   //Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
