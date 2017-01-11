@@ -180,10 +180,20 @@ int Fun4All_G4_EICIR(
     }
   else if (pgun)
     {
+      /* angle of particle phi:
+	 pz = p * cos(psi)
+	 px = p * sin(psi) */
+      double psi_mrad = 0;
+      double ptot = 250*1;
+
+      double px = ptot * sin(psi_mrad / 1000.);
+      double py = 0;
+      double pz = ptot * cos(psi_mrad / 1000.);
+
       PHG4ParticleGun*gun = new PHG4ParticleGun();
       //gun->set_name("gamma");
       gun->set_name("proton");
-      gun->set_mom(0,0,250);
+      gun->set_mom(px,py,pz);
       se->registerSubsystem(gun);
     }
   else
@@ -260,6 +270,12 @@ int Fun4All_G4_EICIR(
       Fun4AllInputManager *in = new Fun4AllDummyInputManager( "JADE");
       se->registerInputManager( in );
     }
+
+  //Convert DST to human command readable TTree for quick poke around the outputs
+  gROOT->LoadMacro("G4_DSTReader_EICIR.C");
+
+  G4DSTreader_EICIR( outputFile, //
+		     /*int*/ absorberactive );
 
   //Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
   //if (do_dst_compress) DstCompress(out);
