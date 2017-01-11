@@ -4,11 +4,11 @@ void IRInit() {
 }
 
 double IRSetup(PHG4Reco* g4Reco,
-	      const int absorberactive = 0,
+	      const int absorberactive = 1,
 	      int verbosity = 0) {
 
   /* Increase world size to fit extended IR magnets */
-  g4Reco->SetWorldSizeZ(4000);
+  g4Reco->SetWorldSizeZ(6500);
 
   /* Define outer radius for all extneded IR magnets */
   double ir_magnet_outer_radius = 50;
@@ -37,6 +37,9 @@ double IRSetup(PHG4Reco* g4Reco,
     aperture_radius *= 100;
     length *= 100;
 
+    /* convert angle from millirad to degrees */
+    angle = (angle / 1000.) * (180./TMath::Pi());
+
     /* Place IR component */
     cout << "New IR component: " << name << " at z = " << center_z << endl;
 
@@ -51,8 +54,9 @@ double IRSetup(PHG4Reco* g4Reco,
     ir_magnet_i->set_double_param("place_x",center_x);
     ir_magnet_i->set_double_param("place_y",center_y);
     ir_magnet_i->set_double_param("place_z",center_z);
-    ir_magnet_i->set_string_param("material","G4_Galactic");
-    //ir_magnet_i->set_string_param("material","G4_Fe");
+    ir_magnet_i->set_double_param("rot_y",angle);
+    //ir_magnet_i->set_string_param("material","G4_Galactic");
+    ir_magnet_i->set_string_param("material","G4_Fe");
 
     if ( B != 0 && gradient == 0.0 )
       {
@@ -63,12 +67,6 @@ double IRSetup(PHG4Reco* g4Reco,
       {
 	ir_magnet_i->set_string_param("magtype","quadrupole");
 	ir_magnet_i->set_double_param("fieldgradient",gradient);
-
-	// debug: set gradient to 0
-	ir_magnet_i->set_double_param("fieldgradient",0);
-
-	// debug: skip quadrupoles
-	continue;
       }
     else
       {
