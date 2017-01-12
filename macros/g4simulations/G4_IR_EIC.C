@@ -37,6 +37,11 @@ double IRSetup(PHG4Reco* g4Reco,
     aperture_radius *= 100;
     length *= 100;
 
+    /* flip sign of dipole field component- positive y axis in Geant4 is defined as 'up',
+     * positive z axis  as the hadron-going direction
+     * in a right-handed coordinate system x,y,z */
+    B *= -1;
+
     /* convert angle from millirad to degrees */
     angle = (angle / 1000.) * (180./TMath::Pi());
 
