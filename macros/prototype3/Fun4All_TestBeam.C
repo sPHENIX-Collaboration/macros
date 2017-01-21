@@ -236,6 +236,7 @@ Fun4All_TestBeam(int nEvents = 100,
   reader->AddRunInfo("EMCAL_A0_HighGain");
   reader->AddRunInfo("EMCAL_GR0_BiasOffset_Tower21");
   reader->AddRunInfo("EMCAL_T0_Tower21");
+  reader->AddRunInfo("EMCAL_Is_HighEta");
 
   reader->AddTower("RAW_LG_HCALIN");
   reader->AddTower("RAW_HG_HCALIN");
