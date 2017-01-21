@@ -112,7 +112,7 @@ Fun4All_TestBeam(int nEvents = 100,
 
   // ------------------- Hodoscpes -------------------
 
-  const int first_packet_id = Prototype3_FEM::PACKET_ID; // 21101
+  const int first_packet_id = PROTOTYPE3_FEM::PACKET_ID; // 21101
   const int second_packet_id = 21102;
 
   GenericUnpackPRDF *gunpack = NULL;
