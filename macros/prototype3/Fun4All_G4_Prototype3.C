@@ -463,11 +463,12 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
     }
   if (ihcal_on)
     {
-      se->registerSubsystem(new QAG4SimulationCalorimeter("HCALIN",QAG4SimulationCalorimeter::kProcessG4Hit));
+      // TODO: disable QA for HCal right now as there is a hit->particle truth association error at the moment
+      // se->registerSubsystem(new QAG4SimulationCalorimeter("HCALIN",QAG4SimulationCalorimeter::kProcessG4Hit));
     }
   if (ohcal_on)
     {
-      se->registerSubsystem(new QAG4SimulationCalorimeter("HCALOUT",QAG4SimulationCalorimeter::kProcessG4Hit));
+      // se->registerSubsystem(new QAG4SimulationCalorimeter("HCALOUT",QAG4SimulationCalorimeter::kProcessG4Hit));
     }
   //----------------------
   // G4HitNtuple
