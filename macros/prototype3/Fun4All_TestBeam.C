@@ -5,8 +5,8 @@ using namespace std;
 void
 Fun4All_TestBeam(int nEvents = 1000,
     const char *input_file =
-        "/gpfs/mnt/gpfs02/sphenix/data/data01/t1044-2016a/fnal/beam/beam_00003533-0000.prdf",
-    const char *output_file = "data/beam_00003533.root")
+        "/gpfs/mnt/gpfs02/sphenix/data/data01/t1044-2016a/fnal/beam/beam_00003310-0000.prdf",
+    const char *output_file = "data/beam_00003310.root")
 {
   gSystem->Load("libfun4all");
   gSystem->Load("libPrototype3.so");
@@ -240,6 +240,12 @@ Fun4All_TestBeam(int nEvents = 1000,
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", -1);
   se->registerSubsystem(calib);
 
+
+  gunpack = new GenericUnpackPRDF("SPILL_WARBLER");
+// unpack->Verbosity(1);
+  gunpack->add_channel(second_packet_id, 16, 0); // Short Meritec cable 0 16  Spill warbler
+  se->registerSubsystem(gunpack);
+
   // -------------------  Output -------------------
   //main DST output
   Fun4AllDstOutputManager *out_Manager = new Fun4AllDstOutputManager("DSTOUT",
@@ -300,9 +306,11 @@ Fun4All_TestBeam(int nEvents = 1000,
   reader->AddTower("RAW_SC_MWPC4");
   reader->AddTower("CALIB_SC_MWPC4");
 
-  reader->AddTowerTemperature("HCALIN");
-  reader->AddTowerTemperature("HCALIN");
-  reader->AddTowerTemperature("HCALOUT");
+  reader->AddTower("SPILL_WARBLER");
+
+//  reader->AddTowerTemperature("EMCAL");
+//  reader->AddTowerTemperature("HCALIN");
+//  reader->AddTowerTemperature("HCALOUT");
 
   se->registerSubsystem(reader);
 
