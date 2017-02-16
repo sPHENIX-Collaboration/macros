@@ -3,10 +3,10 @@
 using namespace std;
 
 void
-Fun4All_TestBeam(int nEvents = 100,
+Fun4All_TestBeam(int nEvents = 1000,
     const char *input_file =
-        "/gpfs/mnt/gpfs02/sphenix/data/data01/t1044-2016a/fnal/beam/beam_00003513-0000.prdf",
-    const char *output_file = "data/beam_00003513.root")
+        "/gpfs/mnt/gpfs02/sphenix/data/data01/t1044-2016a/fnal/beam/beam_00003533-0000.prdf",
+    const char *output_file = "data/beam_00003533.root")
 {
   gSystem->Load("libfun4all");
   gSystem->Load("libPrototype3.so");
