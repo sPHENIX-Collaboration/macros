@@ -3,10 +3,10 @@
 using namespace std;
 
 void
-Fun4All_TestBeam(int nEvents = 100,
+Fun4All_TestBeam(int nEvents = 1000,
     const char *input_file =
-        "/gpfs/mnt/gpfs02/sphenix/data/data01/t1044-2016a/fnal/beam/beam_00003513-0000.prdf",
-    const char *output_file = "data/beam_00003513.root")
+        "/gpfs/mnt/gpfs02/sphenix/data/data01/t1044-2016a/fnal/beam/beam_00003310-0000.prdf",
+    const char *output_file = "data/beam_00003310.root")
 {
   gSystem->Load("libfun4all");
   gSystem->Load("libPrototype3.so");
@@ -240,6 +240,15 @@ Fun4All_TestBeam(int nEvents = 100,
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", -1);
   se->registerSubsystem(calib);
 
+  gunpack = new GenericUnpackPRDF("SPILL_WARBLER");
+// unpack->Verbosity(1);
+  gunpack->add_channel(second_packet_id, 16, 0); // Short Meritec cable 0 16  Spill warbler
+  se->registerSubsystem(gunpack);
+
+  // -------------------  Event summary -------------------
+
+  se->registerSubsystem(new EventInfoSummary());
+
   // -------------------  Output -------------------
   //main DST output
   Fun4AllDstOutputManager *out_Manager = new Fun4AllDstOutputManager("DSTOUT",
@@ -257,6 +266,12 @@ Fun4All_TestBeam(int nEvents = 100,
   reader->AddRunInfo("EMCAL_GR0_BiasOffset_Tower21");
   reader->AddRunInfo("EMCAL_T0_Tower21");
   reader->AddRunInfo("EMCAL_Is_HighEta");
+
+  reader->AddEventInfo("beam_Is_In_Spill");
+  reader->AddEventInfo("beam_SPILL_WARBLER_RMS");
+  reader->AddEventInfo("CALIB_CEMC_Sum");
+  reader->AddEventInfo("CALIB_LG_HCALIN_Sum");
+  reader->AddEventInfo("CALIB_LG_HCALOUT_Sum");
 
   reader->AddTower("RAW_LG_HCALIN");
   reader->AddTower("RAW_HG_HCALIN");
@@ -300,9 +315,11 @@ Fun4All_TestBeam(int nEvents = 100,
   reader->AddTower("RAW_SC_MWPC4");
   reader->AddTower("CALIB_SC_MWPC4");
 
-  reader->AddTowerTemperature("HCALIN");
-  reader->AddTowerTemperature("HCALIN");
-  reader->AddTowerTemperature("HCALOUT");
+  reader->AddTower("RAW_SPILL_WARBLER");
+
+//  reader->AddTowerTemperature("EMCAL");
+//  reader->AddTowerTemperature("HCALIN");
+//  reader->AddTowerTemperature("HCALOUT");
 
   se->registerSubsystem(reader);
 
