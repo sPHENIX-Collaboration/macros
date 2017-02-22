@@ -30,6 +30,9 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   // silicon layers ------------------------------------------------------------
 
+  std::string silicon("G4_Si");
+  std::string copper("G4_Cu");
+  
   // inner barrel
   
   double ib_si_thickness[3] = {0.0050, 0.0050, 0.0050};
@@ -42,13 +45,19 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     cyl->Verbosity(2);
     radius = ib_rad[ilayer];
     cyl->set_double_param("radius",radius);
-    //cyl->set_int_param("lengthviarapidity",0);
     cyl->set_double_param("length",ib_length[ilayer]);
-    cyl->set_string_param("material","G4_Si");
+    cyl->set_string_param("material",silicon);
     cyl->set_double_param("thickness",ib_si_thickness[ilayer]);
     cyl->SetActive();
     cyl->SuperDetector("SVTX");
     g4Reco->registerSubsystem( cyl );
+    
+    cout << "Added SVTX        layer " << ilayer 
+	 << " inner barrel layer         radius " << ib_rad[ilayer]
+	 << " thickness " << ib_si_thickness[ilayer]
+	 << " length " << ib_length[ilayer]
+	 << " material " << silicon.c_str()
+	 << endl;
     
     radius += ib_si_thickness[ilayer] + no_overlapp;
     
@@ -57,7 +66,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     cyl->set_double_param("radius",radius);
     //cyl->set_int_param("lengthviarapidity",1);
     cyl->set_double_param("length",ib_length[ilayer]);
-    cyl->set_string_param("material","G4_Cu");
+    cyl->set_string_param("material",copper);
     cyl->set_double_param("thickness",ib_support_thickness[ilayer]);
     cyl->SuperDetector("SVTXSUPPORT");
     g4Reco->registerSubsystem( cyl );
@@ -91,6 +100,13 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     cyl->SetActive();
     cyl->SuperDetector("SVTX");
     g4Reco->registerSubsystem( cyl );
+
+    cout << "Added SVTX        layer " << ilayer 
+	 << " INTT layer                 radius " << intt_rad[ilayer-n_ib_layer]
+	 << " thickness " << intt_si_thickness[ilayer-n_ib_layer]
+	 << " length " << intt_length[ilayer-n_ib_layer]
+	 << " material " << silicon.c_str()
+	 << endl;
     
     radius += intt_si_thickness[ilayer-n_ib_layer] + no_overlapp;
     
@@ -130,6 +146,12 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   cyl->SuperDetector("SVTXSUPPORT");
   g4Reco->registerSubsystem( cyl );
 
+  cout << "Added SVTXSUPPORT layer " << n_ib_layer+n_intt_layer << " TPC inner field cage layer radius " << radius
+       << " thickness " << cage_thickness
+       << " length " << cage_length
+       << " material " << "G4_Cu"
+       << endl;
+  
   radius += cage_thickness;
 
   // TPC gas material in region not read out
@@ -148,8 +170,15 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     cyl->set_double_param("thickness",  inner_readout_radius  - radius);
     cyl->SuperDetector("SVTXSUPPORT");
     g4Reco->registerSubsystem( cyl );
-  }
 
+    cout << "Added SVTXSUPPORT layer " << n_ib_layer+n_intt_layer+1 << " TPC inactive gas layer     radius " << radius
+	 << " thickness " << inner_readout_radius - radius
+	 << " length " << cage_length
+	 << " material " << tpcgas.c_str()
+	 << endl;
+  }
+  
+  
   radius = inner_readout_radius;
 
   // Active TPC gas layers  
@@ -168,6 +197,12 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     cyl->SetActive();
     cyl->SuperDetector("SVTX");
     g4Reco->registerSubsystem( cyl );
+
+    cout << "Added SVTX        layer " << ilayer << " TPC active gas layer       radius " << radius
+	 << " thickness " << delta_radius - 0.01
+	 << " length " << cage_length
+	 << " material " << tpcgas.c_str()
+	 << endl;
     
     radius += delta_radius;
   }
@@ -182,6 +217,12 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   cyl->set_double_param("thickness",cage_thickness ); // Cu X_0 = 1.43 cm
   cyl->SuperDetector("SVTXSUPPORT");
   g4Reco->registerSubsystem( cyl );
+
+  cout << "Added SVTXSUPPORT layer " << n_ib_layer+n_intt_layer+npoints << " TPC outer field cage layer radius " << radius
+       << " thickness " << cage_thickness
+       << " length " << cage_length
+       << " material " << copper.c_str()
+       << endl;
 
   radius += cage_thickness;
 
@@ -322,7 +363,7 @@ void Svtx_Reco(int verbosity = 0)
   PHG4SvtxThresholds* thresholds = new PHG4SvtxThresholds();
   thresholds->Verbosity(verbosity);
   for(int i=0;i<n_ib_layer;i++)
-    thresholds->set_threshold(i,0.25);  // reduce to 0.1 for increased efficiency
+    thresholds->set_threshold(i,0.25); 
 
   for(int i=n_ib_layer;i<n_ib_layer+n_intt_layer;i++)
     thresholds->set_threshold(i,0.25);  
@@ -334,7 +375,7 @@ void Svtx_Reco(int verbosity = 0)
   //-------------
 
   PHG4SvtxClusterizer* clusterizer = new PHG4SvtxClusterizer("PHG4SvtxClusterizer",Min_si_layer,n_ib_layer+n_intt_layer-1);
-  clusterizer->set_threshold(0.25);  // reduced from 0.5, should be same as cell threshold, since many hits are single cell
+  clusterizer->set_threshold(0.25);  // should be same as cell threshold, since many hits are single cell
   se->registerSubsystem( clusterizer );
   
   PHG4TPCClusterizer* tpcclusterizer = new PHG4TPCClusterizer("PHG4TPCClusterizer",3,4,n_ib_layer+n_intt_layer,Max_si_layer);
@@ -344,7 +385,8 @@ void Svtx_Reco(int verbosity = 0)
   //---------------------
   // Track reconstruction
   //---------------------
-  PHG4HoughTransformTPC* hough = new PHG4HoughTransformTPC(Max_si_layer,Max_si_layer-30);
+
+  PHG4HoughTransformTPC* hough = new PHG4HoughTransformTPC(Max_si_layer,Max_si_layer-4); // allow 4 missed layers-> trade-off between reco track eff. and clusters/layer
   hough->set_mag_field(1.4);
   hough->setPtRescaleFactor(1.00/0.993892);
   hough->set_use_vertex(true);
@@ -449,7 +491,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
 
   SvtxEvaluator* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
   eval->do_cluster_eval(true);   // make cluster ntuple
-  eval->do_g4hit_eval(false);     // make g4hit ntuple
+  eval->do_g4hit_eval(false);     // make g4hit ntuple  NOTE: set to true in intt version
   eval->do_hit_eval(false);         // make hit ntuple
   eval->do_gpoint_eval(false);  
   //eval->scan_for_embedded(true);  // evaluator will only collect embedded tracks - it will also ignore decay tracks from embedded particles!
