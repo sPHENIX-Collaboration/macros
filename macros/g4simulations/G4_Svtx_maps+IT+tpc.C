@@ -1,4 +1,3 @@
-
 const int n_ib_layer = 3;   // number of maps inner barrel layers
 const int n_intt_layer = 4; // number of int. tracker layers. Make this number 0 to use MAPS + TPC only.
 const int n_gas_layer = 60; // number of TPC layers
@@ -182,7 +181,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   radius = inner_readout_radius;
 
   // Active TPC gas layers  
-  double outer_radius = 80.; // should be 78 cm, right?
+  double outer_radius = 78.;
   int npoints = Max_si_layer - n_ib_layer-n_intt_layer;
   double delta_radius =  ( outer_radius - inner_readout_radius )/( (double)npoints );
   
@@ -291,10 +290,14 @@ void Svtx_Cells(int verbosity = 0)
     //  factors
   }
   PHG4CylinderCellTPCReco *svtx_cells = new PHG4CylinderCellTPCReco(n_ib_layer+n_intt_layer);
-  svtx_cells->setDistortion(tpc_distortion); // apply TPC distrotion if tpc_distortion is not NULL
-  svtx_cells->setDiffusion(diffusion);
-  svtx_cells->setElectronsPerKeV(electrons_per_kev);
   svtx_cells->Detector("SVTX");
+  svtx_cells->setDistortion(tpc_distortion);
+  svtx_cells->setDiffusionT(0.0120);
+  svtx_cells->setDiffusionL(0.0120);
+  svtx_cells->set_drift_velocity(6.0/1000.0l);
+  svtx_cells->setHalfLength( 105.5 );
+  svtx_cells->setElectronsPerKeV(28);
+  svtx_cells->Verbosity(0);
 
   for (int i=0;i<n_ib_layer;++i) {
     svtx_cells->cellsize(i, svxcellsizex[i], svxcellsizey[i]);
@@ -378,8 +381,13 @@ void Svtx_Reco(int verbosity = 0)
   clusterizer->set_threshold(0.25);  // should be same as cell threshold, since many hits are single cell
   se->registerSubsystem( clusterizer );
   
-  PHG4TPCClusterizer* tpcclusterizer = new PHG4TPCClusterizer("PHG4TPCClusterizer",3,4,n_ib_layer+n_intt_layer,Max_si_layer);
-  tpcclusterizer->setEnergyCut(20.0*45.0/n_gas_layer);
+  PHG4TPCClusterizer* tpcclusterizer = new PHG4TPCClusterizer();
+  tpcclusterizer->Verbosity(0);
+  tpcclusterizer->setEnergyCut(15/*adc*/);
+  tpcclusterizer->setRangeLayers(n_ib_layer+n_intt_layer,Max_si_layer);
+  tpcclusterizer->setFitWindowSigmas(0.0120,0.0120);
+  tpcclusterizer->setFitWindowMax(4/*rphibins*/,3/*zbins*/);
+  tpcclusterizer->setFitEnergyThreshold( 0.05 /*fraction*/ );
   se->registerSubsystem( tpcclusterizer );
   
   //---------------------
@@ -470,6 +478,8 @@ void G4_Svtx_Reco()
 
 void Svtx_Eval(std::string outputfile, int verbosity = 0)
 {
+  cout << "Called EVALUATOR" << endl;
+
   //---------------
   // Load libraries
   //---------------
