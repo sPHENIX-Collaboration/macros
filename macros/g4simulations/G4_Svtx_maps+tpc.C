@@ -106,7 +106,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   radius = inner_readout_radius;
   
-  double outer_radius = 80.;
+  double outer_radius = 78.;
   int npoints = Max_si_layer - n_svx_layer;
   double delta_radius =  ( outer_radius - inner_readout_radius )/( (double)npoints );
   
@@ -194,10 +194,14 @@ void Svtx_Cells(int verbosity = 0)
     //  factors
   }
   PHG4CylinderCellTPCReco *svtx_cells = new PHG4CylinderCellTPCReco(n_svx_layer);
-  svtx_cells->setDistortion(tpc_distortion); // apply TPC distrotion if tpc_distortion is not NULL
-  svtx_cells->setDiffusion(diffusion);
-  svtx_cells->setElectronsPerKeV(electrons_per_kev);
   svtx_cells->Detector("SVTX");
+  svtx_cells->setDistortion(tpc_distortion);
+  svtx_cells->setDiffusionT(0.0120);
+  svtx_cells->setDiffusionL(0.0120);
+  svtx_cells->set_drift_velocity(6.0/1000.0l);
+  svtx_cells->setHalfLength( 105.5 );
+  svtx_cells->setElectronsPerKeV(28);
+  svtx_cells->Verbosity(0);
 
   for (int i=0;i<n_svx_layer;++i) {
     svtx_cells->cellsize(i, svxcellsizex[i], svxcellsizey[i]);
@@ -270,9 +274,13 @@ void Svtx_Reco(int verbosity = 0)
   PHG4SvtxClusterizer* clusterizer = new PHG4SvtxClusterizer("PHG4SvtxClusterizer",Min_si_layer,n_svx_layer-1);
   se->registerSubsystem( clusterizer );
   
-  PHG4TPCClusterizer* tpcclusterizer = new PHG4TPCClusterizer("PHG4TPCClusterizer",3,4,n_svx_layer,Max_si_layer);
-  tpcclusterizer->setEnergyCut(20.0*45.0/n_gas_layer);
-  se->registerSubsystem( tpcclusterizer );
+  PHG4TPCClusterizer* tpcclusterizer = new PHG4TPCClusterizer();
+  tpcclusterizer->Verbosity(0);
+  tpcclusterizer->setEnergyCut(15/*adc*/);
+  tpcclusterizer->setRangeLayers(n_svx_layer,Max_si_layer);
+  tpcclusterizer->setFitWindowSigmas(0.0120,0.0120);
+  tpcclusterizer->setFitWindowMax(4/*rphibins*/,3/*zbins*/);
+  tpcclusterizer->setFitEnergyThreshold( 0.05 /*fraction*/ );
   
   //---------------------
   // Track reconstruction
