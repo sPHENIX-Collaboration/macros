@@ -25,7 +25,8 @@ To ensure some consistency among plots produced by different sPHENIX members, a 
 For general use, copy or link the ``sPHENIXStyle.h`` and ``sPHENIXStyle.C`` files somewhere, either locally or in your macro path (``gROOT->GetMacroPath()`` will tell you, and add it in ``.rootrc`` if you need one).
 Then do
 ``
-[0] gROOT->LoadMacro("sPhenixStyle.C") [1] SetsPhenixStyle()
+[0] gROOT->LoadMacro("sPhenixStyle.C")
+[1] SetsPhenixStyle()
 ``
 and you're good to go (even better, add this all into your ``.rootlogon.C`` file)
 
