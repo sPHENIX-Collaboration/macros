@@ -15,7 +15,7 @@
 
 #include "TStyle.h"
 
-//! \brief
+//! \brief sPHENIX Style, based on a style file from ATLAS by Peter Steinberg
 /*
 Please find instruction at https://wiki.bnl.gov/sPHENIX/index.php/Plot_template . Here is a snapshot:
 
