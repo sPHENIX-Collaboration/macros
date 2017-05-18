@@ -33,6 +33,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
    
   for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
     {
+      if (verbosity)
       cout << "Create Maps layer " << ilayer  << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer] 
 	   << " pixel size 30 x 30 microns " << " active pixel thickness 0.0018 microns" << endl;
 
@@ -80,7 +81,8 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 	{
 	  // We want the sPHENIX layer numbers for the INTT to be from n_maps_layer to n_maps_layer+n_intt_layer - 1
 	  vpair.push_back(std::make_pair(n_maps_layer+i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
-	  cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  "  << vpair[i].first << endl;
+
+    if (verbosity)	  cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  "  << vpair[i].first << endl;
 	}
       PHG4SiliconTrackerSubsystem *sitrack = new PHG4SiliconTrackerSubsystem("SILICON_TRACKER", vpair);
       sitrack->Verbosity(verbosity);
@@ -139,8 +141,9 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   
   for(int ilayer=n_maps_layer + n_intt_layer;ilayer<(n_maps_layer + n_intt_layer + npoints);++ilayer) {
 
-    cout << "Create TPC gas layer " << ilayer  << " with radius " << radius  << " cm " 
-	 << " thickness " << delta_radius - 0.01 << " length " << cage_length << endl;
+      if (verbosity)
+        cout << "Create TPC gas layer " << ilayer  << " with radius " << radius  << " cm "
+	       << " thickness " << delta_radius - 0.01 << " length " << cage_length << endl;
 
     cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
     cyl->set_double_param("radius",radius);
@@ -193,11 +196,11 @@ void Svtx_Cells(int verbosity = 0)
 
   // MAPS cells
   PHG4MapsCellReco *maps_cells = new PHG4MapsCellReco("MAPS");
+  maps_cells->Verbosity(verbosity);
   for(int ilayer = 0;ilayer < n_maps_layer;ilayer++)
     {
       maps_cells->set_timing_window(ilayer,-2000,2000);
     }
-  maps_cells->Verbosity(verbosity);
   se->registerSubsystem(maps_cells);
 
   if(n_intt_layer > 0)
