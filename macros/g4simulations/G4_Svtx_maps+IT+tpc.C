@@ -41,7 +41,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   for (int ilayer=0;ilayer<n_ib_layer;++ilayer) {
     cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
-    cyl->Verbosity(2);
+    cyl->Verbosity(0);
     radius = ib_rad[ilayer];
     cyl->set_double_param("radius",radius);
     cyl->set_double_param("length",ib_length[ilayer]);
@@ -61,7 +61,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     radius += ib_si_thickness[ilayer] + no_overlapp;
     
     cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", ilayer);
-    cyl->Verbosity(2);
+    cyl->Verbosity(0);
     cyl->set_double_param("radius",radius);
     //cyl->set_int_param("lengthviarapidity",1);
     cyl->set_double_param("length",ib_length[ilayer]);
@@ -89,7 +89,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   for (int ilayer=n_ib_layer;ilayer<n_intt_layer+n_ib_layer;++ilayer) {
     cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
-    cyl->Verbosity(2);
+    cyl->Verbosity(0);
     radius = intt_rad[ilayer-n_ib_layer];
     cyl->set_double_param("radius",radius);
     cyl->set_int_param("lengthviarapidity",1);
@@ -110,7 +110,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     radius += intt_si_thickness[ilayer-n_ib_layer] + no_overlapp;
     
     cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", ilayer);
-    cyl->Verbosity(2);
+    cyl->Verbosity(0);
     cyl->set_double_param("radius",radius);
     cyl->set_int_param("lengthviarapidity",1);
     //cyl->set_double_param("length", intt_length[ilayer-n_ib_layer]);
@@ -131,12 +131,12 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   // inner field cage wall
   radius = inner_cage_radius;
   
-  double n_rad_length_cage = 1.0e-02;
-  double cage_length = 160.; // rough length from Tom, also used in charge distortion calculation
+  double n_rad_length_cage = 1.5e-02;
+  double cage_length = 210.; // rough length from Tom, also used in charge distortion calculation
   double cage_thickness = 1.43 * n_rad_length_cage;
   
   cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_ib_layer+n_intt_layer);
-  cyl->Verbosity(2);
+  cyl->Verbosity(0);
   cyl->set_double_param("radius",radius);
   cyl->set_int_param("lengthviarapidity",0);
   cyl->set_double_param("length",cage_length);
@@ -161,7 +161,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   if (inner_readout_radius - radius > 0) {
     cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_ib_layer + n_intt_layer+1);
-    cyl->Verbosity(2);
+    cyl->Verbosity(0);
     cyl->set_double_param("radius",radius);
     cyl->set_int_param("lengthviarapidity",0);
     cyl->set_double_param("length",cage_length);
@@ -187,7 +187,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   
   for(int ilayer=n_ib_layer+n_intt_layer;ilayer<(n_ib_layer+n_intt_layer+npoints);++ilayer) {
     cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
-    cyl->Verbosity(2);
+    cyl->Verbosity(0);
     cyl->set_double_param("radius",radius);
     cyl->set_int_param("lengthviarapidity",0);
     cyl->set_double_param("length",cage_length);
@@ -208,7 +208,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   // outer field cage wall
   cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_ib_layer+n_intt_layer+npoints);
-  cyl->Verbosity(2);
+  cyl->Verbosity(0);
   cyl->set_double_param("radius",radius);
   cyl->set_int_param("lengthviarapidity",0);
   cyl->set_double_param("length",cage_length);
@@ -269,7 +269,7 @@ void Svtx_Cells(int verbosity = 0)
   double tpc_cell_y = 0.17;
   
   // Main switch for TPC distortion
-  const bool do_tpc_distoration = true;
+  const bool do_tpc_distoration = false;
   PHG4TPCSpaceChargeDistortion* tpc_distortion = NULL;
   if (do_tpc_distoration) {
     if (inner_cage_radius != 20. && inner_cage_radius != 30.) {
@@ -294,6 +294,8 @@ void Svtx_Cells(int verbosity = 0)
   svtx_cells->setDistortion(tpc_distortion);
   svtx_cells->setDiffusionT(0.0120);
   svtx_cells->setDiffusionL(0.0120);
+  svtx_cells->setSmearRPhi(0.09);
+  svtx_cells->setSmearZ(0.06);
   svtx_cells->set_drift_velocity(6.0/1000.0l);
   svtx_cells->setHalfLength( 105.5 );
   svtx_cells->setElectronsPerKeV(28);
@@ -385,11 +387,13 @@ void Svtx_Reco(int verbosity = 0)
   tpcclusterizer->Verbosity(0);
   tpcclusterizer->setEnergyCut(15/*adc*/);
   tpcclusterizer->setRangeLayers(n_ib_layer+n_intt_layer,Max_si_layer);
-  tpcclusterizer->setFitWindowSigmas(0.0120,0.0120);
+  tpcclusterizer->setFitWindowSigmas(0.0150,0.0160);
   tpcclusterizer->setFitWindowMax(4/*rphibins*/,3/*zbins*/);
   tpcclusterizer->setFitEnergyThreshold( 0.05 /*fraction*/ );
   se->registerSubsystem( tpcclusterizer );
-  
+
+  return;
+
   //---------------------
   // Track reconstruction
   //---------------------
@@ -504,7 +508,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   eval->do_g4hit_eval(false);     // make g4hit ntuple  NOTE: set to true in intt version
   eval->do_hit_eval(false);         // make hit ntuple
   eval->do_gpoint_eval(false);  
-  //eval->scan_for_embedded(true);  // evaluator will only collect embedded tracks - it will also ignore decay tracks from embedded particles!
+  eval->scan_for_embedded(true);  // evaluator will only collect embedded tracks - it will also ignore decay tracks from embedded particles!
   eval->scan_for_embedded(false); // evaluator takes all tracks
   eval->Verbosity(verbosity);
   se->registerSubsystem( eval );
