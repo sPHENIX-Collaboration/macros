@@ -81,8 +81,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 	{
 	  // We want the sPHENIX layer numbers for the INTT to be from n_maps_layer to n_maps_layer+n_intt_layer - 1
 	  vpair.push_back(std::make_pair(n_maps_layer+i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
-
-    if (verbosity)	  cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  "  << vpair[i].first << endl;
+	  if (verbosity)	  cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  "  << vpair[i].first << endl;
 	}
       PHG4SiliconTrackerSubsystem *sitrack = new PHG4SiliconTrackerSubsystem("SILICON_TRACKER", vpair);
       sitrack->Verbosity(verbosity);
@@ -100,17 +99,17 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   radius = inner_cage_radius;
   
-  double n_rad_length_cage = 1.0e-02;
-  double cage_length = 211.0; // From TPC group, gives eta = 1.1 at 78 cm radius
-  double cage_thickness = 1.43 * n_rad_length_cage;
+  double cage_length = 211.0; // From TPC group, gives eta = 1.1 at 78 cm
+  double n_rad_length_cage = 1.13e-02;
+  double cage_thickness = 28.6 * n_rad_length_cage;   // Kapton X_0 = 28.6 cm  // mocks up Kapton + carbon fiber structure
 
   // inner field cage  
   cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_maps_layer + n_intt_layer);
   cyl->set_double_param("radius",radius);
   cyl->set_int_param("lengthviarapidity",0);
   cyl->set_double_param("length",cage_length);
-  cyl->set_string_param("material","G4_Cu");
-  cyl->set_double_param("thickness",cage_thickness ); // Cu X_0 = 1.43 cm
+  cyl->set_string_param("material","G4_KAPTON");
+  cyl->set_double_param("thickness",cage_thickness ); 
   cyl->SuperDetector("SVTXSUPPORT");
   g4Reco->registerSubsystem( cyl );
 
@@ -120,6 +119,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   if (inner_readout_radius<radius)  inner_readout_radius = radius;
 
   string tpcgas = "G4_Ar";
+  //string tpcgas = "sPHENIX_TPC_Gas";  // leave this change until later - will require some parameter retuning
 
   // Layer of inert TPC gas from 20-30 cm
   if (inner_readout_radius - radius > 0) {
@@ -158,12 +158,13 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     radius += delta_radius;
   }
 
+  // outer field cage
   cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_maps_layer + n_intt_layer + npoints);
   cyl->set_double_param("radius",radius);
   cyl->set_int_param("lengthviarapidity",0);
   cyl->set_double_param("length",cage_length);
-  cyl->set_string_param("material","G4_Cu");
-  cyl->set_double_param("thickness",cage_thickness ); // Cu X_0 = 1.43 cm
+  cyl->set_string_param("material","G4_KAPTON");
+  cyl->set_double_param("thickness",cage_thickness ); // Kapton X_0 = 28.6 cm
   cyl->SuperDetector("SVTXSUPPORT");
   g4Reco->registerSubsystem( cyl );
 
@@ -232,10 +233,11 @@ void Svtx_Cells(int verbosity = 0)
            << endl;
       exit(3);
     }
+    
+
     string TPC_distortion_file =
         string(getenv("CALIBRATIONROOT")) +
-        Form("/Tracking/TPC/SpaceChargeDistortion/sPHENIX%.0f.root",
-             inner_cage_radius);
+        Form("/Tracking/TPC/SpaceChargeDistortion/TPCCAGE_20_78_211_2.root"); 
     PHG4TPCSpaceChargeDistortion* tpc_distortion =
         new PHG4TPCSpaceChargeDistortion(TPC_distortion_file);
     //tpc_distortion -> setAccuracy(0); // option to over write default  factors
@@ -249,7 +251,7 @@ void Svtx_Cells(int verbosity = 0)
   svtx_cells->setDiffusionT(0.0120);
   svtx_cells->setDiffusionL(0.0120);
   svtx_cells->setSmearRPhi(0.09);  // additional smearing of cluster positions 
-  svtx_cells->setSmearZ(0.06);
+  svtx_cells->setSmearZ(0.06);       // additional smearing of cluster positions 
   svtx_cells->set_drift_velocity(6.0/1000.0l);
   svtx_cells->setHalfLength( 105.5 );
   svtx_cells->setElectronsPerKeV(28);
@@ -435,7 +437,7 @@ void Svtx_Reco(int verbosity = 0)
 		kalman_pat_rec->set_seeding_layer(seeding_layer, seeding_nlayer);
 
 		kalman_pat_rec->set_mag_field(1.4);
-		kalman_pat_rec->Verbosity(10);
+		kalman_pat_rec->Verbosity(0);
 		// ALICE ITS upgrade values for total thickness in X_0
 		kalman_pat_rec->set_material(0, 0.003);
 		kalman_pat_rec->set_material(1, 0.003);
