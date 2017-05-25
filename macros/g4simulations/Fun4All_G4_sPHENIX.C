@@ -72,6 +72,8 @@ int Fun4All_G4_sPHENIX(
   bool do_global = true;
   bool do_global_fastsim = true;
   
+  bool do_calotrigger = true;
+
   bool do_jet_reco = true;
   bool do_jet_eval = true;
 
@@ -295,6 +297,16 @@ int Fun4All_G4_sPHENIX(
       gROOT->LoadMacro("G4_Global.C");
       Global_FastSim();
     }  
+
+  //-----------------
+  // Calo Trigger Simulation
+  //-----------------
+  
+  if (do_calotrigger) 
+    {
+      gROOT->LoadMacro("G4_CaloTrigger.C");
+      CaloTrigger_Sim();
+    }
 
   //---------
   // Jet reco
