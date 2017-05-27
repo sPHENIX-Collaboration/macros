@@ -1,8 +1,5 @@
 #include <vector>
 
-#define _USE_NEW_TPC_
-//#define _ONLY_SEEDING_
-
 const int n_maps_layer = 3;
 const int n_intt_layer = 4;   // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
 const int n_gas_layer = 60;
@@ -244,7 +241,6 @@ void Svtx_Cells(int verbosity = 0)
     //tpc_distortion -> setPrecision(0.001); // option to over write default  factors      // default is 0.001
   }
 
-#ifdef _USE_NEW_TPC_
   PHG4CylinderCellTPCReco *svtx_cells = new PHG4CylinderCellTPCReco(n_maps_layer+n_intt_layer);
   svtx_cells->Detector("SVTX");
   svtx_cells->setDistortion(tpc_distortion);
@@ -256,13 +252,6 @@ void Svtx_Cells(int verbosity = 0)
   svtx_cells->setHalfLength( 105.5 );
   svtx_cells->setElectronsPerKeV(28);
   svtx_cells->Verbosity(0);
-#else
-  PHG4CylinderCellTPCReco *svtx_cells = new PHG4CylinderCellTPCReco(n_maps_layer+n_intt_layer);
-  svtx_cells->setDistortion(tpc_distortion); // apply TPC distrotion if tpc_distortion is not NULL
-  svtx_cells->setDiffusion(diffusion);
-  svtx_cells->setElectronsPerKeV(electrons_per_kev);
-  svtx_cells->Detector("SVTX");
-#endif
 
   // The maps cell size is set when the detector is constructed because it is needed by the geometry object
   // The INTT ladder cell size is set in the detector construction code
@@ -391,7 +380,6 @@ void Svtx_Reco(int verbosity = 0)
 
   se->registerSubsystem( clusterizer );
 
-#ifdef _USE_NEW_TPC_
   PHG4TPCClusterizer* tpcclusterizer = new PHG4TPCClusterizer();
   tpcclusterizer->Verbosity(0);
   tpcclusterizer->setEnergyCut(15/*adc*/);
@@ -400,16 +388,8 @@ void Svtx_Reco(int verbosity = 0)
   tpcclusterizer->setFitWindowMax(4/*rphibins*/,3/*zbins*/);
   tpcclusterizer->setFitEnergyThreshold( 0.05 /*fraction*/ );
   se->registerSubsystem( tpcclusterizer );
-#else
-  PHG4TPCClusterizer* tpcclusterizer = new PHG4TPCClusterizer("PHG4TPCClusterizer",3,4,n_maps_layer+n_intt_layer,Max_si_layer-1);
-  tpcclusterizer->setEnergyCut(20.0*45.0/n_gas_layer);
-  tpcclusterizer->Verbosity(verbosity);
-  se->registerSubsystem( tpcclusterizer );
-#endif
-//}
-//
-//void Svtx_Reco(int verbosity = 0)
-//{
+
+  /*
   //---------------
   // Load libraries
   //---------------
@@ -417,110 +397,56 @@ void Svtx_Reco(int verbosity = 0)
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4hough.so");
 
+
   //---------------
   // Fun4All server
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
+*/
 
-  const bool use_kalman_pat_rec = false;
-	if (use_kalman_pat_rec) {
-		//---------------------
-		// PHG4KalmanPatRec
-		//---------------------
-		const int seeding_nlayer = 8;
-		const int min_seeding_nlayer = 8;
-		int seeding_layer[] = { 0, 1, 2, 7, 20, 35, 50, 66 };
-
-		PHG4KalmanPatRec* kalman_pat_rec = new PHG4KalmanPatRec(seeding_nlayer,
-				min_seeding_nlayer);
-		kalman_pat_rec->set_seeding_layer(seeding_layer, seeding_nlayer);
-
-		kalman_pat_rec->set_mag_field(1.4);
-		kalman_pat_rec->Verbosity(0);
-		// ALICE ITS upgrade values for total thickness in X_0
-		kalman_pat_rec->set_material(0, 0.003);
-		kalman_pat_rec->set_material(1, 0.003);
-		kalman_pat_rec->set_material(2, 0.003);
-		kalman_pat_rec->set_material(3, 0.008);
-		kalman_pat_rec->set_material(4, 0.008);
-		kalman_pat_rec->set_material(5, 0.008);
-		kalman_pat_rec->set_material(6, 0.008);
-		kalman_pat_rec->setPtRescaleFactor(0.9972 / 1.00117);
-		kalman_pat_rec->set_chi2_cut_init(5.0);  // 5.0
-		kalman_pat_rec->set_chi2_cut_fast(10.0, 50.0, 75.0); // 10.0, 50.0, 75.0
-		kalman_pat_rec->set_chi2_cut_full(5.0); //5.0
-		kalman_pat_rec->set_ca_chi2_cut(5.0); //5.0
-		kalman_pat_rec->setMaxClusterError(3.0); //3.0
-		kalman_pat_rec->setRejectGhosts(false);
-		kalman_pat_rec->setRemoveHits(false);
-		kalman_pat_rec->setCutOnDCA(true);
-
-#ifdef _ONLY_SEEDING_
-		kalman_pat_rec->set_seeding_only_mode(true);
-#else
-		kalman_pat_rec->set_seeding_only_mode(false);
-#endif
-		kalman_pat_rec->set_do_evt_display(false);
-
-		//! nightly build 2017-05-04, 30GeV
-		kalman_pat_rec->set_search_win_phi(5.);
-		kalman_pat_rec->set_search_win_z(5.);
-		kalman_pat_rec->set_max_incr_chi2(20.);
-		kalman_pat_rec->set_max_consecutive_missing_layer(20);
-
-		kalman_pat_rec->set_max_splitting_chi2(0.);
-		kalman_pat_rec->set_min_good_track_hits(30);
-
-		//! nightly build 2017-05-04
-		kalman_pat_rec->set_max_merging_dphi(0.1000);
-		kalman_pat_rec->set_max_merging_deta(0.1000);
-		kalman_pat_rec->set_max_merging_dr(0.1000);
-		kalman_pat_rec->set_max_merging_dz(0.1000);
-		kalman_pat_rec->set_max_share_hits(3); // tracks share more than this #hits are merged
-
-		//KalmanFitter, KalmanFitterRefTrack, DafSimple, DafRef
-		//	kalman_pat_rec->set_track_fitting_alg_name("DafSimple");
-		kalman_pat_rec->set_track_fitting_alg_name("DafRef");
-
-		se->registerSubsystem(kalman_pat_rec);
-
-	} else {
-		//---------------------
-		// Truth Pattern Recognition
-		//---------------------
-		PHG4TruthPatRec* pat_rec = new PHG4TruthPatRec();
-		se->registerSubsystem(pat_rec);
-
-	}
-
-	//---------------------
-	// Kalman Filter
-	//---------------------
-#ifdef _ONLY_SEEDING_
-#else
-	PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
-	kalman->set_do_evt_display(false);
-	kalman->set_over_write_svtxtrackmap(true);
-	kalman->set_over_write_svtxvertexmap(true);
-	kalman->set_do_eval(false);
-	kalman->set_eval_filename("PHG4TrackKalmanFitter_eval.root");
-	se->registerSubsystem(kalman);
-#endif
+  const bool use_kalman_pat_rec = true;
+  if (use_kalman_pat_rec) {
+    //---------------------
+    // PHG4KalmanPatRec
+    //---------------------
+    
+    PHG4KalmanPatRec* kalman_pat_rec = new PHG4KalmanPatRec("PHG4KalmanPatRec");
+    se->registerSubsystem(kalman_pat_rec);
+    
+  } else {
+    //---------------------
+    // Truth Pattern Recognition
+    //---------------------
+    PHG4TruthPatRec* pat_rec = new PHG4TruthPatRec();
+    se->registerSubsystem(pat_rec);
+    
+  }
   
+  //---------------------
+  // Kalman Filter
+  //---------------------
+  
+  PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
+  
+  se->registerSubsystem(kalman);
+  
+    
   //------------------
   // Track Projections
   //------------------
-//  PHG4SvtxTrackProjection* projection = new PHG4SvtxTrackProjection();
-//  projection->Verbosity(verbosity);
-//  se->registerSubsystem( projection );
+  //  PHG4SvtxTrackProjection* projection = new PHG4SvtxTrackProjection();
+  //  projection->Verbosity(verbosity);
+  //  se->registerSubsystem( projection );
 
+  /*  
   //----------------------
   // Beam Spot Calculation
   //----------------------
-//  PHG4SvtxBeamSpotReco* beamspot = new PHG4SvtxBeamSpotReco();
-//  beamspot->Verbosity(verbosity);
-//  se->registerSubsystem( beamspot );
+  PHG4SvtxBeamSpotReco* beamspot = new PHG4SvtxBeamSpotReco();
+  beamspot->Verbosity(verbosity);
+  se->registerSubsystem( beamspot );
+  */
 
   return;
 }
@@ -558,7 +484,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
 
   SvtxEvaluator* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
   eval->do_cluster_eval(true);
-  eval->do_g4hit_eval(true);
+  eval->do_g4hit_eval(false);
   eval->do_hit_eval(false);
   eval->do_gpoint_eval(false);
   eval->scan_for_embedded(false); // take all tracks if false - take only embedded tracks if true (will not record decay particles!! - loses Upsilon electrons)
