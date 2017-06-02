@@ -365,7 +365,9 @@ void CEMC_Recalib_Clusters(int verbosity=0)
   
   RawClusterRecalibrator *recalibrator = new RawClusterRecalibrator("CEMC");
   recalibrator->GetCalibrationParameters().ReadFromFile("CEMC_RECALIB","xml",0,0,
-							string("/sphenix/user/jdosbo/calibrations/CEMC/PositionRecalibration"));
+							//raw location
+							//string("/sphenix/user/jdosbo/calibrations/CEMC/PositionRecalibration"));
+							string(getenv("CALIBRATIONROOT"))+STRING("/CEMC/PositionRecalibration/"));
   recalibrator->Verbosity(verbosity);
   se->registerSubsystem(recalibrator);
 
