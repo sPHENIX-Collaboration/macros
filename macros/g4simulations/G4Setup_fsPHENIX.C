@@ -8,8 +8,8 @@ void G4Init(bool do_svtx = true,
 	    bool do_hcalin = true,
 	    bool do_magnet = true,
 	    bool do_hcalout = true,
-      bool do_pipe = true,
-      bool do_FGEM = true,
+            bool do_pipe = true,
+            bool do_FGEM = true,
 	    bool do_FEMC = true,
 	    bool do_FHCAL = true) {
 
@@ -108,7 +108,10 @@ int G4Setup(const int absorberactive = 0,
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->save_DST_geometry(true); //Save geometry from Geant4 to DST
   g4Reco->set_rapidity_coverage(1.1); // according to drawings
-
+// uncomment to set QGSP_BERT_HP physics list for productions 
+// (default is QGSP_BERT for speed)
+  //  g4Reco->SetPhysicsList("QGSP_BERT_HP"); 
+ 
   if (decayType != TPythia6Decayer::kAll) {
     g4Reco->set_force_decay(decayType);
   }

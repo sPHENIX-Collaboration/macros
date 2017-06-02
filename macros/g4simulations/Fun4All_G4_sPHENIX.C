@@ -1,5 +1,5 @@
 int Fun4All_G4_sPHENIX(
-		       const int nEvents = 10,
+		       const int nEvents = 1,
 		       const char * inputFile = "/sphenix/sim/sim01/production/2016-07-21/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
 		       const char * outputFile = "G4sPHENIXCells.root",
            const char * embed_input_file = "/sphenix/sim/sim01/production/2016-07-12/sHijing/spacal2d/G4Hits_sPHENIX_sHijing-0-4.4fm.list"
@@ -72,6 +72,8 @@ int Fun4All_G4_sPHENIX(
   bool do_global = true;
   bool do_global_fastsim = true;
   
+  bool do_calotrigger = true;
+
   bool do_jet_reco = true;
   bool do_jet_eval = true;
 
@@ -295,6 +297,16 @@ int Fun4All_G4_sPHENIX(
       gROOT->LoadMacro("G4_Global.C");
       Global_FastSim();
     }  
+
+  //-----------------
+  // Calo Trigger Simulation
+  //-----------------
+  
+  if (do_calotrigger) 
+    {
+      gROOT->LoadMacro("G4_CaloTrigger.C");
+      CaloTrigger_Sim();
+    }
 
   //---------
   // Jet reco

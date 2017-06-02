@@ -27,12 +27,13 @@
 # list of available graphics systems at some point.
 #/vis/open OGLIX
 /vis/open OGLSX 1200x900-0+0
-/vis/viewer/set/viewpointThetaPhi 270 271
+/vis/viewer/set/viewpointThetaPhi 90 90
+/vis/viewer/set/upThetaPhi 90 0
 # /vis/viewer/addCutawayPlane 0 0 0 m 1 0 0
 # our world is 4x4 meters, the detector is about 1m across
 # zooming by 4 makes it fill the display
 /vis/viewer/zoom 1.5
-/vis/viewer/panTo 0 30 cm
+#/vis/viewer/panTo 0 30 cm
 #
 # Use this open statement instead to get a HepRep version 1 file
 # suitable for viewing in WIRED.

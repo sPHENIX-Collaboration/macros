@@ -8,11 +8,11 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   gSystem->Load("libg4eval.so");
   gSystem->Load("libqa_modules");
 
-  bool cemc_on = false;
-  bool cemc_cell = cemc_on && false;
-  bool cemc_twr = cemc_cell && false;
-  bool cemc_digi = cemc_twr && false;
-  bool cemc_twrcal = cemc_digi && false;
+  bool cemc_on = true;
+  bool cemc_cell = cemc_on && true;
+  bool cemc_twr = cemc_cell && true;
+  bool cemc_digi = cemc_twr && true;
+  bool cemc_twrcal = cemc_digi && true;
   bool ihcal_on = true;
   bool ihcal_cell = ihcal_on && false;
   bool ihcal_twr = ihcal_cell && false;
@@ -25,7 +25,9 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   bool ohcal_twrcal =  ohcal_digi && false;
   bool cryo_on = true;
   bool bh_on = false; // the surrounding boxes need some further thinking
-  bool dstreader = false;
+  bool dstreader = true;
+  bool hit_ntuple = false;
+  bool dstoutput = false;
 
   ///////////////////////////////////////////
   // Make the Server
@@ -35,7 +37,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   recoConsts *rc = recoConsts::instance();
   // only set this if you want a fixed random seed to make
   // results reproducible for testing
-  //  rc->set_IntFlag("RANDOMSEED",12345);
+//    rc->set_IntFlag("RANDOMSEED",12345678);
 
   // simulated setup sits at eta=1, theta=40.395 degrees
   double theta = 90-46.4;
@@ -43,7 +45,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   double add_place_x = 183.-173.93+2.54/2.;
   // Test beam generator
   PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-  gen->add_particles("pi-", 1); // mu-,e-,anti_proton,pi-
+  gen->add_particles("e-", 1); // mu-,e-,anti_proton,pi-
   gen->set_vertex_distribution_mean(0.0, 0.0, 0);
   gen->set_vertex_distribution_width(0.0, .7, .7); // Rough beam profile size @ 16 GeV measured by Abhisek
   gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Gaus,
@@ -55,7 +57,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   gen->set_phi_range(-0.001, 0.001); // 1mrad angular divergence
   const double momentum = 32;
   gen->set_p_range(momentum,momentum, momentum*2e-2); // 2% momentum smearing
-  //se->registerSubsystem(gen);
+  se->registerSubsystem(gen);
 
   PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
   pgen->set_name("geantino");
@@ -80,7 +82,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   gun->set_vtx(0, 0, 0);
   double angle = theta*TMath::Pi()/180.;
   gun->set_mom(sin(angle),0.,cos(angle));
-  se->registerSubsystem(gun);
+//  se->registerSubsystem(gun);
 
 
   PHG4Reco* g4Reco = new PHG4Reco();
@@ -98,12 +100,15 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
       cemc->SuperDetector("CEMC");
       cemc->SetAbsorberActive();
       cemc->OverlapCheck(true);
+//      cemc->Verbosity(2);
+//      cemc->set_int_param("construction_verbose",2);
       cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
-      cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/Prototype2/Geometry/") ); 
+      cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Geometry/") );
+//      cemc->SetCalibrationFileDir("./test_geom/" );
       //  cemc->set_double_param("z_rotation_degree", 15); // rotation around CG
-      cemc->set_double_param("xpos", (116.77 + 137.0)*.5 - 26.5 - 10.2); // location in cm of EMCal CG. Updated with final positioning of EMCal
-      cemc->set_double_param("ypos", 4); // put it some where in UIUC blocks
-      cemc->set_double_param("zpos", 4); // put it some where in UIUC blocks
+//      cemc->set_double_param("xpos", (116.77 + 137.0)*.5 - 26.5 - 10.2); // location in cm of EMCal CG. Updated with final positioning of EMCal
+//      cemc->set_double_param("ypos", 4); // put it some where in UIUC blocks
+//      cemc->set_double_param("zpos", 4); // put it some where in UIUC blocks
       g4Reco->registerSubsystem(cemc);
     }
   //----------------------------------------
@@ -231,7 +236,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
     {
       PHG4FullProjSpacalCellReco *cemc_cells = new PHG4FullProjSpacalCellReco("CEMCCYLCELLRECO");
       cemc_cells->Detector("CEMC");
-      cemc_cells->set_timing_window_defaults(0.,60.);
+      cemc_cells->set_timing_window(0.,60.);
       cemc_cells->get_light_collection_model().load_data_file(string(getenv("CALIBRATIONROOT")) + string("/CEMC/LightCollection/Prototype2Module.xml"),"data_grid_light_guide_efficiency","data_grid_fiber_trans");
 
       se->registerSubsystem(cemc_cells);
@@ -243,7 +248,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
       TowerBuilder->set_sim_tower_node_prefix("SIM");
       se->registerSubsystem(TowerBuilder);
     }
-  const double sampling_fraction = 0.0233369; //  +/-   8.22211e-05  from 15 Degree indenting 8 GeV electron showers
+  const double sampling_fraction = 0.0190134; //  +/-   0.000224984  from 0 Degree indenting 32 GeV electron showers
   const double photoelectron_per_GeV = 500; //500 photon per total GeV deposition
   const double ADC_per_photoelectron_HG = 3.8; // From Sean Stoll, Mar 29
   const double ADC_per_photoelectron_LG = 0.24; // From Sean Stoll, Mar 29
@@ -458,11 +463,12 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
     }
   if (ihcal_on)
     {
-      se->registerSubsystem(new QAG4SimulationCalorimeter("HCALIN",QAG4SimulationCalorimeter::kProcessG4Hit));
+      // TODO: disable QA for HCal right now as there is a hit->particle truth association error at the moment
+      // se->registerSubsystem(new QAG4SimulationCalorimeter("HCALIN",QAG4SimulationCalorimeter::kProcessG4Hit));
     }
   if (ohcal_on)
     {
-      se->registerSubsystem(new QAG4SimulationCalorimeter("HCALOUT",QAG4SimulationCalorimeter::kProcessG4Hit));
+      // se->registerSubsystem(new QAG4SimulationCalorimeter("HCALOUT",QAG4SimulationCalorimeter::kProcessG4Hit));
     }
   //----------------------
   // G4HitNtuple
@@ -504,26 +510,43 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
       //    {
       //      ana->AddNode("ABSORBER_CEMC");
       //    }
-      ana->AddTower("SIM_CEMC");
-      ana->AddTower("RAW_LG_CEMC");
-      ana->AddTower("CALIB_LG_CEMC");// Low gain CEMC
-      ana->AddTower("RAW_HG_CEMC");
-      ana->AddTower("CALIB_HG_CEMC");// High gain CEMC
 
-      ana->AddTower("SIM_HCALOUT");
-      ana->AddTower("SIM_HCALIN");
+      if (cemc_twr)
+        ana->AddTower("SIM_CEMC");
+      if (cemc_digi)
+        ana->AddTower("RAW_LG_CEMC");
+      if (cemc_twrcal)
+        ana->AddTower("CALIB_LG_CEMC"); // Low gain CEMC
+      if (cemc_digi)
+        ana->AddTower("RAW_HG_CEMC");
+      if (cemc_twrcal)
+        ana->AddTower("CALIB_HG_CEMC"); // High gain CEMC
 
-      ana->AddTower("RAW_LG_HCALIN");
-      ana->AddTower("RAW_HG_HCALIN");
-      ana->AddTower("RAW_LG_HCALOUT");
-      ana->AddTower("RAW_HG_HCALOUT");
+      if (ohcal_twr)
+        ana->AddTower("SIM_HCALOUT");
+      if (ihcal_twr)
+        ana->AddTower("SIM_HCALIN");
 
-      ana->AddTower("CALIB_LG_HCALIN");
-      ana->AddTower("CALIB_HG_HCALIN");
-      ana->AddTower("CALIB_LG_HCALOUT");
-      ana->AddTower("CALIB_HG_HCALOUT");
+      if (ihcal_digi)
+        ana->AddTower("RAW_LG_HCALIN");
+      if (ihcal_digi)
+        ana->AddTower("RAW_HG_HCALIN");
+      if (ohcal_digi)
+        ana->AddTower("RAW_LG_HCALOUT");
+      if (ohcal_digi)
+        ana->AddTower("RAW_HG_HCALOUT");
 
-      ana->AddNode("BlackHole");// add a G4Hit node
+      if (ihcal_twrcal)
+        ana->AddTower("CALIB_LG_HCALIN");
+      if (ihcal_twrcal)
+        ana->AddTower("CALIB_HG_HCALIN");
+      if (ohcal_twrcal)
+        ana->AddTower("CALIB_LG_HCALOUT");
+      if (ohcal_twrcal)
+        ana->AddTower("CALIB_HG_HCALOUT");
+
+      if (bh_on)
+        ana->AddNode("BlackHole"); // add a G4Hit node
 
       se->registerSubsystem(ana);
     }
@@ -535,6 +558,12 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   // out = new Fun4AllDstOutputManager("DSTHCOUT","/phenix/scratch/pinkenbu/G4Prototype2Hcalout.root");
   // out->AddNode("G4RootScintillatorSlat_HCALOUT");
   // se->registerOutputManager(out);
+
+  if (dstoutput)
+    {
+      Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT","G4Prototype3New.root");
+      se->registerOutputManager(out);
+    }
 
   Fun4AllInputManager *in = new Fun4AllDummyInputManager( "JADE");
   se->registerInputManager( in );
