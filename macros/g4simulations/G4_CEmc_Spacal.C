@@ -356,7 +356,21 @@ void CEMC_Clusters(int verbosity = 0)
 
   return;
 }
+void CEMC_Recalib_Clusters(int verbosity=0)
+{
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libg4detectors.so");
+  
+  Fun4AllServer *se = Fun4AllServer::instance();
+  
+  RawClusterRecalibrator *recalibrator = new RawClusterRecalibrator("CEMC");
+  recalibrator->GetCalibrationParameters().ReadFromFile("CEMC_RECALIB","xml",0,0,
+							string("/sphenix/user/jdosbo/calibrations/CEMC/PositionRecalibration"));
+  recalibrator->Verbosity(verbosity);
+  se->registerSubsystem(recalibrator);
 
+  return;
+}
 void CEMC_Eval(std::string outputfile, int verbosity = 0)
 {
   gSystem->Load("libfun4all.so");
