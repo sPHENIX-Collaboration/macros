@@ -53,9 +53,7 @@ int Fun4All_G4_sPHENIX(
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
-  bool do_cemc_recalib_cluster = do_cemc_cluster && true;
   bool do_cemc_eval = do_cemc_cluster && true;
- 
 
   bool do_hcalin = true;
   bool do_hcalin_cell = do_hcalin && true;
@@ -265,7 +263,6 @@ int Fun4All_G4_sPHENIX(
 
   if (do_cemc_twr) CEMC_Towers();
   if (do_cemc_cluster) CEMC_Clusters();
-  if (do_cemc_recalib_cluster) CEMC_Recalib_Clusters();
   
   //-----------------------------
   // HCAL towering and clustering
@@ -327,8 +324,6 @@ int Fun4All_G4_sPHENIX(
   if (do_svtx_eval) Svtx_Eval("g4svtx_eval.root");
 
   if (do_cemc_eval) CEMC_Eval("g4cemc_eval.root");
-
- 
 
   if (do_hcalin_eval) HCALInner_Eval("g4hcalin_eval.root");
 
