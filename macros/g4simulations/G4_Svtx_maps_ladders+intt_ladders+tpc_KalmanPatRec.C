@@ -1,8 +1,9 @@
 #include <vector>
 
-const int n_maps_layer = 3;
+const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
 const int n_intt_layer = 4;   // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
 const int n_gas_layer = 60;
+
 double inner_cage_radius = 20.;
 
 int Max_si_layer = n_maps_layer + n_intt_layer + n_gas_layer;
@@ -17,43 +18,46 @@ double Svtx(PHG4Reco* g4Reco, double radius,
       const int absorberactive = 0,
       int verbosity = 0) {
 
-  bool maps_overlapcheck = false; // set to true if you want to check for overlaps
-
-  // MAPS inner barrel layers 
-  //======================================================
-
-  //double maps_layer_radius[3] = {23.4, 31.5, 39.3};   // mm  - precise numbers from ITS.gdml
-  double maps_layer_radius[3] = {23.635, 31.5, 39.385};   // mm  - adjusted for closest fit
-  // type 1 = inner barrel stave, 2 = middle barrel stave, 3 = outer barrel stave
-  // we use only type 0 here
-  int stave_type[3] = {0, 0, 0};
-   
-  for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
+  if(n_maps_layer > 0)
     {
-      if (verbosity)
-      cout << "Create Maps layer " << ilayer  << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer] 
-	   << " pixel size 30 x 30 microns " << " active pixel thickness 0.0018 microns" << endl;
-
-      PHG4MapsSubsystem  *lyr = new PHG4MapsSubsystem("MAPS", ilayer, stave_type[ilayer]);
-      lyr->Verbosity(verbosity);
-
-      lyr->set_double_param("layer_nominal_radius",maps_layer_radius[ilayer]);// thickness in cm
-
-      // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
-      lyr->set_double_param("pixel_x",0.0030);// pitch in cm
-      lyr->set_double_param("pixel_z",0.0030);// length in cm
-      lyr->set_double_param("pixel_thickness",0.0018);// thickness in cm
-      lyr->set_double_param("phitilt",0.304);   // radians, equivalent to 17.4 degrees
-
-      lyr->set_int_param("active",1);
-      lyr->OverlapCheck(maps_overlapcheck);
-
-      lyr->set_string_param("stave_geometry_file",
-          string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/ALICE_ITS_tgeo.gdml"));
+      bool maps_overlapcheck = false; // set to true if you want to check for overlaps
       
-      g4Reco->registerSubsystem( lyr );      
-
-      radius = maps_layer_radius[ilayer];
+      // MAPS inner barrel layers 
+      //======================================================
+      
+      //double maps_layer_radius[3] = {23.4, 31.5, 39.3};   // mm  - precise numbers from ITS.gdml
+      double maps_layer_radius[3] = {23.635, 31.5, 39.385};   // mm  - adjusted for closest fit
+      // type 1 = inner barrel stave, 2 = middle barrel stave, 3 = outer barrel stave
+      // we use only type 0 here
+      int stave_type[3] = {0, 0, 0};
+      
+      for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
+	{
+	  if (verbosity)
+	    cout << "Create Maps layer " << ilayer  << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer] 
+		 << " pixel size 30 x 30 microns " << " active pixel thickness 0.0018 microns" << endl;
+	  
+	  PHG4MapsSubsystem  *lyr = new PHG4MapsSubsystem("MAPS", ilayer, stave_type[ilayer]);
+	  lyr->Verbosity(verbosity);
+	  
+	  lyr->set_double_param("layer_nominal_radius",maps_layer_radius[ilayer]);// thickness in cm
+	  
+	  // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
+	  lyr->set_double_param("pixel_x",0.0030);// pitch in cm
+	  lyr->set_double_param("pixel_z",0.0030);// length in cm
+	  lyr->set_double_param("pixel_thickness",0.0018);// thickness in cm
+	  lyr->set_double_param("phitilt",0.304);   // radians, equivalent to 17.4 degrees
+	  
+	  lyr->set_int_param("active",1);
+	  lyr->OverlapCheck(maps_overlapcheck);
+	  
+	  lyr->set_string_param("stave_geometry_file",
+				string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/ALICE_ITS_tgeo.gdml"));
+	  
+	  g4Reco->registerSubsystem( lyr );      
+	  
+	  radius = maps_layer_radius[ilayer];
+	}
     }
 
   if(n_intt_layer > 0)
@@ -108,6 +112,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   cyl->set_string_param("material","G4_KAPTON");
   cyl->set_double_param("thickness",cage_thickness ); 
   cyl->SuperDetector("SVTXSUPPORT");
+  cyl->Verbosity(0);
   g4Reco->registerSubsystem( cyl );
 
   radius += cage_thickness;
@@ -192,14 +197,17 @@ void Svtx_Cells(int verbosity = 0)
   // SVTX cells
   //-----------
 
-  // MAPS cells
-  PHG4MapsCellReco *maps_cells = new PHG4MapsCellReco("MAPS");
-  maps_cells->Verbosity(verbosity);
-  for(int ilayer = 0;ilayer < n_maps_layer;ilayer++)
+  if(n_maps_layer > 0)
     {
-      maps_cells->set_timing_window(ilayer,-2000,2000);
+      // MAPS cells
+      PHG4MapsCellReco *maps_cells = new PHG4MapsCellReco("MAPS");
+      maps_cells->Verbosity(verbosity);
+      for(int ilayer = 0;ilayer < n_maps_layer;ilayer++)
+	{
+	  maps_cells->set_timing_window(ilayer,-2000,2000);
+	}
+      se->registerSubsystem(maps_cells);
     }
-  se->registerSubsystem(maps_cells);
 
   if(n_intt_layer > 0)
     {
@@ -285,7 +293,7 @@ void Svtx_Reco(int verbosity = 0)
   // Digitize the cell energy into ADC
   //----------------------------------
   PHG4SvtxDigitizer* digi = new PHG4SvtxDigitizer();
-  digi->Verbosity(verbosity);
+  digi->Verbosity(0);
   for (int i=0;i<n_maps_layer;++i) {
       digi->set_adc_scale(i, 255, 0.4e-6);  // reduced by a factor of 2.5 when going from maps thickess of 50 microns to 18 microns
   }
@@ -405,13 +413,15 @@ void Svtx_Reco(int verbosity = 0)
   Fun4AllServer *se = Fun4AllServer::instance();
 */
 
+  // This should be true for everything except testing!
   const bool use_kalman_pat_rec = true;
   if (use_kalman_pat_rec) {
     //---------------------
     // PHG4KalmanPatRec
     //---------------------
     
-    PHG4KalmanPatRec* kalman_pat_rec = new PHG4KalmanPatRec("PHG4KalmanPatRec");
+    PHG4KalmanPatRec* kalman_pat_rec = new PHG4KalmanPatRec("PHG4KalmanPatRec", n_maps_layer, n_intt_layer, n_gas_layer);
+    kalman_pat_rec->Verbosity(0);
     se->registerSubsystem(kalman_pat_rec);
     
   } else {
@@ -428,7 +438,7 @@ void Svtx_Reco(int verbosity = 0)
   //---------------------
   
   PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
-  
+  kalman->Verbosity(0);  
   se->registerSubsystem(kalman);
   
     
@@ -487,7 +497,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   eval->do_g4hit_eval(false);
   eval->do_hit_eval(false);
   eval->do_gpoint_eval(false);
-  eval->scan_for_embedded(false); // take all tracks if false - take only embedded tracks if true (will not record decay particles!! - loses Upsilon electrons)
+  eval->scan_for_embedded(true); // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(verbosity);
   se->registerSubsystem( eval );
 
