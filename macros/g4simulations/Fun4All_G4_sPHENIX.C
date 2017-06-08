@@ -263,7 +263,7 @@ int Fun4All_G4_sPHENIX(
 
   if (do_cemc_twr) CEMC_Towers();
   if (do_cemc_cluster) CEMC_Clusters();
-
+  
   //-----------------------------
   // HCAL towering and clustering
   //-----------------------------
