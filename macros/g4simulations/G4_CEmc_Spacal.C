@@ -354,15 +354,6 @@ void CEMC_Clusters(int verbosity = 0)
   ClusterBuilder->Verbosity(verbosity);
   se->registerSubsystem(ClusterBuilder);
 
-  return;
-}
-void CEMC_Recalib_Clusters(int verbosity=0)
-{
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
-  
-  Fun4AllServer *se = Fun4AllServer::instance();
-  
   RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
   clusterCorrection->GetCalibrationParameters().ReadFromFile("CEMC_RECALIB","xml",0,0,
 							//raw location
