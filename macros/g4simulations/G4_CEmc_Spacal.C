@@ -357,8 +357,7 @@ void CEMC_Clusters(int verbosity = 0)
   RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
   clusterCorrection->GetCalibrationParameters().ReadFromFile("CEMC_RECALIB","xml",0,0,
 							//raw location
-							string("/sphenix/user/jdosbo/calibrations/CEMC/PositionRecalibration"));
-							//string(getenv("CALIBRATIONROOT"))+string("/CEMC/PositionRecalibration/"));
+							string(getenv("CALIBRATIONROOT"))+string("/CEMC/PositionRecalibration/"));
   clusterCorrection->Verbosity(verbosity);
   se->registerSubsystem(clusterCorrection);
 
