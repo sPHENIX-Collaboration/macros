@@ -354,9 +354,15 @@ void CEMC_Clusters(int verbosity = 0)
   ClusterBuilder->Verbosity(verbosity);
   se->registerSubsystem(ClusterBuilder);
 
+  RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
+  clusterCorrection->GetCalibrationParameters().ReadFromFile("CEMC_RECALIB","xml",0,0,
+							//raw location
+							string(getenv("CALIBRATIONROOT"))+string("/CEMC/PositionRecalibration/"));
+  clusterCorrection->Verbosity(verbosity);
+  se->registerSubsystem(clusterCorrection);
+
   return;
 }
-
 void CEMC_Eval(std::string outputfile, int verbosity = 0)
 {
   gSystem->Load("libfun4all.so");
