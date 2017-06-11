@@ -2,7 +2,7 @@
 
 const int n_maps_layer = 3;
 const int n_intt_layer = 4;   // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
-const int n_gas_layer = 60;
+const int n_gas_layer = 40;
 double inner_cage_radius = 20.;
 
 int Max_si_layer = n_maps_layer + n_intt_layer + n_gas_layer;
@@ -211,14 +211,8 @@ void Svtx_Cells(int verbosity = 0)
     }
 
   // TPC cells
-  double diffusion = 0.0057; //0.012: Ne(96%),CF4, etc mm/sqrt(cm) 0.0057: by Alan
-  double electrons_per_kev = 38.;//28.,  38.;
-  
-  // tpc_cell_x is the TPC pad size.  The actual hit resolution depends not only on this pad size but also on the diffusion in the gas and amplification step
-  double tpc_cell_x = 0.12;
-  // tpc_cell_y is the z "bin" size.  It is approximately the z resolution * sqrt(12)
-  // eventually this will be replaced with an actual simulation of timing amplitude.
-  double tpc_cell_y = 0.17;
+  double tpc_cell_x = 0.12*0.5;
+  double tpc_cell_y = 0.17*0.5;
   
   // Main switch for TPC distortion
   const bool do_tpc_distortion = true;
@@ -244,10 +238,10 @@ void Svtx_Cells(int verbosity = 0)
   PHG4CylinderCellTPCReco *svtx_cells = new PHG4CylinderCellTPCReco(n_maps_layer+n_intt_layer);
   svtx_cells->Detector("SVTX");
   svtx_cells->setDistortion(tpc_distortion);
-  svtx_cells->setDiffusionT(0.0120);
-  svtx_cells->setDiffusionL(0.0120);
-  svtx_cells->setSmearRPhi(0.09);  // additional smearing of cluster positions 
-  svtx_cells->setSmearZ(0.06);       // additional smearing of cluster positions 
+  svtx_cells->setDiffusionT(0.0130);
+  svtx_cells->setDiffusionL(0.0130);
+  svtx_cells->setSmearRPhi(0.10);  // additional smearing of cloud positions wrt hits
+  svtx_cells->setSmearZ(0.09);     // additional smearing of cloud positions wrt hits
   svtx_cells->set_drift_velocity(6.0/1000.0l);
   svtx_cells->setHalfLength( 105.5 );
   svtx_cells->setElectronsPerKeV(28);
@@ -382,11 +376,11 @@ void Svtx_Reco(int verbosity = 0)
 
   PHG4TPCClusterizer* tpcclusterizer = new PHG4TPCClusterizer();
   tpcclusterizer->Verbosity(0);
-  tpcclusterizer->setEnergyCut(15/*adc*/);
+  tpcclusterizer->setEnergyCut(0/*15 adc*/);
   tpcclusterizer->setRangeLayers(n_maps_layer+n_intt_layer,Max_si_layer);
-  tpcclusterizer->setFitWindowSigmas(0.0150,0.0160);  // should be changed when TPC cluster resolution changes
-  tpcclusterizer->setFitWindowMax(4/*rphibins*/,3/*zbins*/);
-  tpcclusterizer->setFitEnergyThreshold( 0.05 /*fraction*/ );
+  tpcclusterizer->setFitWindowSigmas(0.0160,0.0160);  // should be changed when TPC cluster resolution changes
+  tpcclusterizer->setFitWindowMax(8/*rphibins*/,6/*zbins*/);
+  tpcclusterizer->setFitEnergyThreshold( 0.01 /*fraction*/ );
   se->registerSubsystem( tpcclusterizer );
 
   /*
