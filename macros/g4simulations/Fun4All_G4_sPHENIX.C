@@ -267,13 +267,6 @@ int Fun4All_G4_sPHENIX(
 	  pgen->set_mom_range(10,10);
 	  pgen->set_phi_range(5.3/180.*TMath::Pi(),5.7/180.*TMath::Pi());
 	  se->registerSubsystem(pgen);
-	  pgen = new PHG4ParticleGenerator();
-          pgen->set_name("geantino");
-	  pgen->set_z_range(0,0);
-	  pgen->set_eta_range(0.01,0.01);
-	  pgen->set_mom_range(10,10);
-	  pgen->set_phi_range(-0.2/180.*TMath::Pi(),0.2/180.*TMath::Pi());
-	  se->registerSubsystem(pgen);
 	}
 
   if (!readhits)
