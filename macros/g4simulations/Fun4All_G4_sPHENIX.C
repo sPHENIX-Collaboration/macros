@@ -365,15 +365,15 @@ int Fun4All_G4_sPHENIX(
   // Simulation evaluation
   //----------------------
 
-  if (do_svtx_eval) Svtx_Eval("g4svtx_eval.root");
+  if (do_svtx_eval) Svtx_Eval(string(outputFile) + "_g4svtx_eval.root");
 
-  if (do_cemc_eval) CEMC_Eval("g4cemc_eval.root");
+  if (do_cemc_eval) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
 
-  if (do_hcalin_eval) HCALInner_Eval("g4hcalin_eval.root");
+  if (do_hcalin_eval) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
 
-  if (do_hcalout_eval) HCALOuter_Eval("g4hcalout_eval.root");
+  if (do_hcalout_eval) HCALOuter_Eval(string(outputFile) + "_g4hcalout_eval.root");
 
-  if (do_jet_eval) Jet_Eval("g4jet_eval.root");
+  if (do_jet_eval) Jet_Eval(string(outputFile) + "_g4jet_eval.root");
 
   //-------------- 
   // IO management
