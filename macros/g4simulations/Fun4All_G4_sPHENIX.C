@@ -1,8 +1,8 @@
 int Fun4All_G4_sPHENIX(
 		       const int nEvents = 1,
-		       const char * inputFile = "/sphenix/sim/sim01/production/2016-07-21/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
-		       const char * outputFile = "G4sPHENIXCells.root",
-           const char * embed_input_file = "/sphenix/sim/sim01/production/2016-07-12/sHijing/spacal2d/G4Hits_sPHENIX_sHijing-0-4.4fm.list"
+		       const char * inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
+		       const char * outputFile = "G4sPHENIX.root",
+           const char * embed_input_file = "/sphenix/data/data02/review_2017-08-02/sHijing/fm_0-4.list"
 		       )
 {
   //===============
@@ -24,15 +24,18 @@ int Fun4All_G4_sPHENIX(
   // Use pythia
   const bool runpythia8 = false;
   const bool runpythia6 = false;
-  // else
-  // Use particle generator (default simple generator)
-  // or gun/ very simple generator
-  const bool usegun = false;
-  // And
+  //
+  // **** And ****
   // Further choose to embed newly simulated events to a previous simulation. Not compatible with `readhits = true`
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
   const bool do_embedding = false;
+  // Use multi-particle generator (PHG4SimpleEventGenerator)
+  const bool particles = true;
+  // or gun/ very simple single particle gun generator
+  const bool usegun = false;
+  // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
+  const bool upsilons = false;
 
   //======================
   // What to run
@@ -171,12 +174,55 @@ int Fun4All_G4_sPHENIX(
       HepMCNodeReader *hr = new HepMCNodeReader();
       se->registerSubsystem(hr);
     }
-  else
+
+
+  // If readhepMC is also set, the Upsilons will be embedded in Hijing events
+  if(upsilons)
     {
+      // run upsilons for momentum, dca performance, alone or embedded in Hijing
+      
+      PHG4ParticleGeneratorVectorMeson *vgen = new PHG4ParticleGeneratorVectorMeson();
+      vgen->set_decay_types("e+","e-");    // dielectron decay
+      vgen->set_vtx_zrange(-10.0, +10.0);
+      //vgen->set_vtx_zrange(0.0, 0.0); // use if Hijing events are at Z = 0
+      // Note: this rapidity range completely fills the acceptance of eta = +/- 1 unit
+      vgen->set_rapidity_range(-1.0, +1.0);
+      vgen->set_pt_range(0.0, 10.0);
+      
+      int istate = 1;
+      
+      if(istate == 1)
+	{
+	  // Upsilon(1S)
+	  vgen->set_mass(9.46);
+	  vgen->set_width(54.02e-6);
+	}
+      else if (istate == 2)
+	{
+	  // Upsilon(2S)
+	  vgen->set_mass(10.0233);
+	  vgen->set_width(31.98e-6);
+	}
+      else
+	{
+	  // Upsilon(3S)
+	  vgen->set_mass(10.3552);
+	  vgen->set_width(20.32e-6);
+	}
+      
+      vgen->Verbosity(0);
+      vgen->Embed(2);
+      se->registerSubsystem(vgen);
+      
+      cout << "Upsilon generator for istate = " << istate << " created and registered "  << endl;	  
+    }      
+  
+  if(particles)
+    {      
       // toss low multiplicity dummy events
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
       gen->add_particles("e-",1); // mu+,e+,proton,pi+,Upsilon
-      // gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
+      // gen->add_particles("pi+",100); // 100 pion option
       if (readhepmc || do_embedding)
 	{
 	  gen->set_reuse_existing_vertex(true);
@@ -197,11 +243,10 @@ int Fun4All_G4_sPHENIX(
       gen->set_pt_range(0.1, 10.0);
       gen->Embed(1);
       gen->Verbosity(0);
-      if (! usegun)
-	{
-	  se->registerSubsystem(gen);
-	}
-      else
+
+      se->registerSubsystem(gen);
+    }
+      if (usegun)
 	{
 	  PHG4ParticleGun *gun = new PHG4ParticleGun();
 	  //  gun->set_name("anti_proton");
@@ -218,17 +263,16 @@ int Fun4All_G4_sPHENIX(
 	  pgen->set_z_range(0,0);
 	  pgen->set_eta_range(0.01,0.01);
 	  pgen->set_mom_range(10,10);
-	  pgen->set_phi_range(5.3./180.*TMath::Pi(),5.7./180.*TMath::Pi());
+	  pgen->set_phi_range(5.3/180.*TMath::Pi(),5.7/180.*TMath::Pi());
 	  se->registerSubsystem(pgen);
 	  pgen = new PHG4ParticleGenerator();
           pgen->set_name("geantino");
 	  pgen->set_z_range(0,0);
 	  pgen->set_eta_range(0.01,0.01);
 	  pgen->set_mom_range(10,10);
-	  pgen->set_phi_range(-0.2./180.*TMath::Pi(),0.2./180.*TMath::Pi());
+	  pgen->set_phi_range(-0.2/180.*TMath::Pi(),0.2/180.*TMath::Pi());
 	  se->registerSubsystem(pgen);
 	}
-    }
 
   if (!readhits)
     {
@@ -332,15 +376,15 @@ int Fun4All_G4_sPHENIX(
   // Simulation evaluation
   //----------------------
 
-  if (do_svtx_eval) Svtx_Eval("g4svtx_eval.root");
+  if (do_svtx_eval) Svtx_Eval(string(outputFile) + "_g4svtx_eval.root");
 
-  if (do_cemc_eval) CEMC_Eval("g4cemc_eval.root");
+  if (do_cemc_eval) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
 
-  if (do_hcalin_eval) HCALInner_Eval("g4hcalin_eval.root");
+  if (do_hcalin_eval) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
 
-  if (do_hcalout_eval) HCALOuter_Eval("g4hcalout_eval.root");
+  if (do_hcalout_eval) HCALOuter_Eval(string(outputFile) + "_g4hcalout_eval.root");
 
-  if (do_jet_eval) Jet_Eval("g4jet_eval.root");
+  if (do_jet_eval) Jet_Eval(string(outputFile) + "_g4jet_eval.root");
 
   //-------------- 
   // IO management
