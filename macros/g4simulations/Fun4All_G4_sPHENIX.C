@@ -28,14 +28,16 @@ int Fun4All_G4_sPHENIX(
   // **** And ****
   // Further choose to embed newly simulated events to a previous simulation. Not compatible with `readhits = true`
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
-  // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
+  // E.g. /sphenix/data/data02/review_2017-08-02/
   const bool do_embedding = false;
-  // Use multi-particle generator (PHG4SimpleEventGenerator)
-  const bool particles = true;
+
+  // Besides the above flags. One can further choose to further put in following particles in Geant4 simulation
+  // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
+  const bool particles = true && !readhits;
   // or gun/ very simple single particle gun generator
-  const bool usegun = false;
+  const bool usegun = false && !readhits;
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
-  const bool upsilons = false;
+  const bool upsilons = false && !readhits;
 
   //======================
   // What to run
