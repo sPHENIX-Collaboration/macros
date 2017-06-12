@@ -72,10 +72,15 @@ int Fun4All_G4_sPHENIX(
   bool do_global = true;
   bool do_global_fastsim = true;
   
-  bool do_calotrigger = true;
+  bool do_calotrigger = true && do_cemc_twr;
 
   bool do_jet_reco = true;
   bool do_jet_eval = true;
+
+  // HI Jet Reco for jet simulations in Au+Au (default is false for
+  // single particle / p+p simulations, or for Au+Au simulations which
+  // don't care about jets)
+  bool do_HIjetreco = false && do_jet_reco && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
 
   bool do_dst_compress = false;
 
@@ -317,6 +322,12 @@ int Fun4All_G4_sPHENIX(
       gROOT->LoadMacro("G4_Jets.C");
       Jet_Reco();
     }
+
+  if (do_HIjetreco) {
+      gROOT->LoadMacro("G4_HIJetReco.C");
+      HIJetReco();
+  }
+
   //----------------------
   // Simulation evaluation
   //----------------------
