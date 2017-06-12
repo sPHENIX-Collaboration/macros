@@ -77,7 +77,10 @@ int Fun4All_G4_sPHENIX(
   bool do_jet_reco = true;
   bool do_jet_eval = true;
 
-  bool do_HIjetreco = true && do_jet_reco && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
+  // HI Jet Reco for jet simulations in Au+Au (default is false for
+  // single particle / p+p simulations, or for Au+Au simulations which
+  // don't care about jets)
+  bool do_HIjetreco = false && do_jet_reco && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
 
   bool do_dst_compress = false;
 
