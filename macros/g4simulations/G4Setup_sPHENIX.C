@@ -20,7 +20,8 @@ void G4Init(bool do_svtx = true,
     }  
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
+      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C");  // default tracker setup with laddered silicon trackers and 60-layer TPC (approximation of final design)
+      // gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_40layer_KalmanPatRec.C"); // 40-layer TPC under test by tracking team
       SvtxInit();
     }
 
