@@ -1,5 +1,7 @@
 #include <vector>
 
+bool use_primary_vertex = false;   // include primary vertex in track fit if true 
+
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
 const int n_intt_layer = 4;   // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
 const int n_gas_layer = 40;
@@ -358,7 +360,7 @@ void Svtx_Reco(int verbosity = 0)
   // INTT
   for(int i=n_maps_layer;i<n_maps_layer + n_intt_layer;i++)
     {
-      thresholds->set_threshold(i,0.25);
+      thresholds->set_threshold(i,0.1);
       thresholds->set_use_thickness_mip(i, true);
 
     }
@@ -417,6 +419,8 @@ void Svtx_Reco(int verbosity = 0)
   
   PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
   kalman->Verbosity(0);  
+  if(use_primary_vertex)
+    kalman->set_fit_primary_tracks(true); // include primary vertex in track fit if true
   se->registerSubsystem(kalman);
   
     
@@ -470,12 +474,16 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   // SVTX evaluation
   //----------------
 
-  SvtxEvaluator* eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
+  SvtxEvaluator* eval;
+  if(use_primary_vertex)
+    eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str(), "PrimaryTrackMap");
+  else
+    eval = new SvtxEvaluator("SVTXEVALUATOR",  outputfile.c_str());
   eval->do_cluster_eval(true);
-  eval->do_g4hit_eval(false);
-  eval->do_hit_eval(false);
-  eval->do_gpoint_eval(false);
-  eval->scan_for_embedded(true); // take all tracks if false - take only embedded tracks if true
+  eval->do_g4hit_eval(true);
+  eval->do_hit_eval(true);
+  eval->do_gpoint_eval(true);
+  eval->scan_for_embedded(false); // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(verbosity);
   se->registerSubsystem( eval );
 
