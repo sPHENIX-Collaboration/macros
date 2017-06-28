@@ -8,7 +8,8 @@ void G4Init(bool do_svtx = true,
 	    bool do_hcalin = true,
 	    bool do_magnet = true,
 	    bool do_hcalout = true,
-	    bool do_pipe = true)
+	    bool do_pipe = true,
+	    int n_TPC_layers = 40)
   {
 
   // load detector/material macros and execute Init() function
@@ -20,9 +21,8 @@ void G4Init(bool do_svtx = true,
     }  
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C");  // default tracker setup with laddered silicon trackers and 60-layer TPC (approximation of final design)
-      // gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_40layer_KalmanPatRec.C"); // 40-layer TPC under test by tracking team
-      SvtxInit();
+      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
+      SvtxInit(n_TPC_layers);
     }
 
   if (do_preshower) 

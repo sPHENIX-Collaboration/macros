@@ -11,7 +11,8 @@ void G4Init(bool do_svtx = true,
             bool do_pipe = true,
             bool do_FGEM = true,
 	    bool do_FEMC = true,
-	    bool do_FHCAL = true) {
+	    bool do_FHCAL = true,
+            int n_TPC_layers = 40) {
 
   // load detector/material macros and execute Init() function
 
@@ -22,10 +23,8 @@ void G4Init(bool do_svtx = true,
     }
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx.C");
-      //gROOT->LoadMacro("G4_Svtx_ladders.C"); // testing
-      //gROOT->LoadMacro("G4_Svtx_ITS.C");     // testing
-      SvtxInit();
+      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
+      SvtxInit(n_TPC_layers);
     }
 
   if (do_preshower) 

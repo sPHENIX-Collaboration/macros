@@ -5,6 +5,9 @@ int Fun4All_G4_sPHENIX(
            const char * embed_input_file = "/sphenix/data/data02/review_2017-08-02/sHijing/fm_0-4.list"
 		       )
 {
+  // Set the number of TPC layer
+  const int n_TPC_layers = 60;  // use 60 for backward compatibility only
+  
   //===============
   // Input options
   //===============
@@ -54,11 +57,13 @@ int Fun4All_G4_sPHENIX(
 
   bool do_preshower = false;
   
+
   bool do_cemc = true;
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
+
 
   bool do_hcalin = true;
   bool do_hcalin_cell = do_hcalin && true;
@@ -80,7 +85,7 @@ int Fun4All_G4_sPHENIX(
   bool do_calotrigger = true && do_cemc_twr;
 
   bool do_jet_reco = true;
-  bool do_jet_eval = true;
+  bool do_jet_eval = do_jet_reco &&true;
 
   // HI Jet Reco for jet simulations in Au+Au (default is false for
   // single particle / p+p simulations, or for Au+Au simulations which
@@ -105,7 +110,7 @@ int Fun4All_G4_sPHENIX(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
-  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe);
+  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,n_TPC_layers);
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
@@ -177,54 +182,13 @@ int Fun4All_G4_sPHENIX(
       se->registerSubsystem(hr);
     }
 
-
-  // If readhepMC is also set, the Upsilons will be embedded in Hijing events
-  if(upsilons)
-    {
-      // run upsilons for momentum, dca performance, alone or embedded in Hijing
-      
-      PHG4ParticleGeneratorVectorMeson *vgen = new PHG4ParticleGeneratorVectorMeson();
-      vgen->set_decay_types("e+","e-");    // dielectron decay
-      vgen->set_vtx_zrange(-10.0, +10.0);
-      //vgen->set_vtx_zrange(0.0, 0.0); // use if Hijing events are at Z = 0
-      // Note: this rapidity range completely fills the acceptance of eta = +/- 1 unit
-      vgen->set_rapidity_range(-1.0, +1.0);
-      vgen->set_pt_range(0.0, 10.0);
-      
-      int istate = 1;
-      
-      if(istate == 1)
-	{
-	  // Upsilon(1S)
-	  vgen->set_mass(9.46);
-	  vgen->set_width(54.02e-6);
-	}
-      else if (istate == 2)
-	{
-	  // Upsilon(2S)
-	  vgen->set_mass(10.0233);
-	  vgen->set_width(31.98e-6);
-	}
-      else
-	{
-	  // Upsilon(3S)
-	  vgen->set_mass(10.3552);
-	  vgen->set_width(20.32e-6);
-	}
-      
-      vgen->Verbosity(0);
-      vgen->Embed(2);
-      se->registerSubsystem(vgen);
-      
-      cout << "Upsilon generator for istate = " << istate << " created and registered "  << endl;	  
-    }      
-  
+  // If "readhepMC" is also set, the particles will be embedded in Hijing events
   if(particles)
     {      
       // toss low multiplicity dummy events
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-      gen->add_particles("e-",1); // mu+,e+,proton,pi+,Upsilon
-      // gen->add_particles("pi+",100); // 100 pion option
+      gen->add_particles("pi-",2); // mu+,e+,proton,pi+,Upsilon
+      //gen->add_particles("pi+",100); // 100 pion option
       if (readhepmc || do_embedding)
 	{
 	  gen->set_reuse_existing_vertex(true);
@@ -240,9 +204,10 @@ int Fun4All_G4_sPHENIX(
 	}
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0, 0.0);
-      gen->set_eta_range(-0.5, 0.5);
+      gen->set_eta_range(-1.0, 1.0);
       gen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi());
-      gen->set_pt_range(0.1, 10.0);
+      //gen->set_pt_range(0.1, 50.0);
+      gen->set_pt_range(0.1, 20.0);
       gen->Embed(1);
       gen->Verbosity(0);
 
@@ -268,6 +233,56 @@ int Fun4All_G4_sPHENIX(
 	  pgen->set_phi_range(5.3/180.*TMath::Pi(),5.7/180.*TMath::Pi());
 	  se->registerSubsystem(pgen);
 	}
+
+      // If "readhepMC" is also set, the Upsilons will be embedded in Hijing events, if 'particles" is set, the Upsilons will be embedded in whatever particles are thrown
+      if(upsilons)
+	{
+	  // run upsilons for momentum, dca performance, alone or embedded in Hijing
+      
+	  PHG4ParticleGeneratorVectorMeson *vgen = new PHG4ParticleGeneratorVectorMeson();
+	  vgen->set_decay_types("e+","e-");    // dielectron decay
+
+	  // event vertex
+	  if (readhepmc || do_embedding || particles)
+	    {
+	      vgen->set_reuse_existing_vertex(true);
+	    }
+	  else
+	    {
+	      vgen->set_vtx_zrange(-10.0, +10.0);
+	    }
+
+	  // Note: this rapidity range completely fills the acceptance of eta = +/- 1 unit
+	  vgen->set_rapidity_range(-1.0, +1.0);
+	  vgen->set_pt_range(0.0, 10.0);
+      
+	  int istate = 1;
+      
+	  if(istate == 1)
+	    {
+	      // Upsilon(1S)
+	      vgen->set_mass(9.46);
+	      vgen->set_width(54.02e-6);
+	    }
+	  else if (istate == 2)
+	    {
+	      // Upsilon(2S)
+	      vgen->set_mass(10.0233);
+	      vgen->set_width(31.98e-6);
+	    }
+	  else
+	    {
+	      // Upsilon(3S)
+	      vgen->set_mass(10.3552);
+	      vgen->set_width(20.32e-6);
+	    }
+      
+	  vgen->Verbosity(0);
+	  vgen->Embed(2);
+	  se->registerSubsystem(vgen);
+      
+	  cout << "Upsilon generator for istate = " << istate << " created and registered "  << endl;	  
+	}      
 
   if (!readhits)
     {

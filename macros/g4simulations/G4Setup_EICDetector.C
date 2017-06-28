@@ -16,8 +16,9 @@ void G4Init(bool do_svtx = true,
             bool do_EEMC = true,
             bool do_DIRC = true,
             bool do_RICH = true,
-            bool do_Aerogel = true
-	    ) {
+            bool do_Aerogel = true,
+            int n_TPC_layers = 40)
+{
 
   // load detector/material macros and execute Init() function
 
@@ -28,8 +29,8 @@ void G4Init(bool do_svtx = true,
     }
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx_maps+tpc.C");
-      SvtxInit();
+      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
+      SvtxInit(n_TPC_layers);
     }
 
   if (do_preshower)
