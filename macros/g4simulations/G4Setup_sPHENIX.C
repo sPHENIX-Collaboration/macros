@@ -21,7 +21,7 @@ void G4Init(bool do_svtx = true,
     }  
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_40layer_KalmanPatRec.C"); 
+      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
       SvtxInit(n_TPC_layers);
     }
 
