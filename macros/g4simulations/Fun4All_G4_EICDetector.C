@@ -5,6 +5,8 @@ int Fun4All_G4_EICDetector(
                            const char * outputFile = "G4EICDetector.root"
                            )
 {
+  // Set the number of TPC layer
+  const int n_TPC_layers = 60;  // use 60 for backward compatibility only
   //===============
   // Input options
   //===============
@@ -31,40 +33,40 @@ int Fun4All_G4_EICDetector(
   bool do_pipe = true;
 
   bool do_svtx = true;
-  bool do_svtx_cell = false;
-  bool do_svtx_track = false;
-  bool do_svtx_eval = false;
+  bool do_svtx_cell = do_svtx && true;
+  bool do_svtx_track = do_svtx_cell && true;
+  bool do_svtx_eval = do_svtx_track && true;
 
   bool do_preshower = false;
 
   bool do_cemc = true;
-  bool do_cemc_cell = true;
-  bool do_cemc_twr = true;
-  bool do_cemc_cluster = true;
-  bool do_cemc_eval = false;
+  bool do_cemc_cell = do_cemc && true;
+  bool do_cemc_twr = do_cemc_cell && true;
+  bool do_cemc_cluster = do_cemc_twr && true;
+  bool do_cemc_eval = do_cemc_cluster && true;
 
   bool do_hcalin = true;
-  bool do_hcalin_cell = true;
-  bool do_hcalin_twr = true;
-  bool do_hcalin_cluster = true;
-  bool do_hcalin_eval = false;
+  bool do_hcalin_cell = do_hcalin && true;
+  bool do_hcalin_twr = do_hcalin_cell && true;
+  bool do_hcalin_cluster = do_hcalin_twr && true;
+  bool do_hcalin_eval = do_hcalin_cluster && true;
 
   bool do_magnet = true;
 
   bool do_hcalout = true;
-  bool do_hcalout_cell = true;
-  bool do_hcalout_twr = true;
-  bool do_hcalout_cluster = true;
-  bool do_hcalout_eval = false;
+  bool do_hcalout_cell = do_hcalout && true;
+  bool do_hcalout_twr = do_hcalout_cell && true;
+  bool do_hcalout_cluster = do_hcalout_twr && true;
+  bool do_hcalout_eval = do_hcalout_cluster && true;
 
   bool do_global = true;
   bool do_global_fastsim = false;
 
   bool do_jet_reco = false;
-  bool do_jet_eval = false;
+  bool do_jet_eval = do_jet_reco && true;
 
   bool do_fwd_jet_reco = true;
-  bool do_fwd_jet_eval = true;
+  bool do_fwd_jet_eval = do_fwd_jet_reco && true;
 
   // EICDetector geometry - barrel
 
@@ -78,14 +80,14 @@ int Fun4All_G4_EICDetector(
   bool do_Aerogel = true;
 
   bool do_FEMC = true;
-  bool do_FEMC_cell = true;
-  bool do_FEMC_twr = true;
-  bool do_FEMC_cluster = true;
+  bool do_FEMC_cell = do_FEMC && true;
+  bool do_FEMC_twr = do_FEMC_cell && true;
+  bool do_FEMC_cluster = do_FEMC_twr && true;
 
   bool do_FHCAL = true;
-  bool do_FHCAL_cell = true;
-  bool do_FHCAL_twr = true;
-  bool do_FHCAL_cluster = true;
+  bool do_FHCAL_cell = do_FHCAL && true;
+  bool do_FHCAL_twr = do_FHCAL_cell && true;
+  bool do_FHCAL_cluster = do_FHCAL_twr && true;
 
 
   // EICDetector geometry - 'hadron' direction
@@ -93,9 +95,9 @@ int Fun4All_G4_EICDetector(
   bool do_EGEM = true;
 
   bool do_EEMC = true;
-  bool do_EEMC_cell = true;
-  bool do_EEMC_twr = true;
-  bool do_EEMC_cluster = true;
+  bool do_EEMC_cell = do_EEMC && true;
+  bool do_EEMC_twr = do_EEMC_cell && true;
+  bool do_EEMC_cluster = do_EEMC_twr && true;
 
   // Other options
 
@@ -117,7 +119,7 @@ int Fun4All_G4_EICDetector(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_EICDetector.C");
-  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_EGEM,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel);
+  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_EGEM,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,n_TPC_layers);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
