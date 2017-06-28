@@ -6,7 +6,7 @@ int Fun4All_G4_sPHENIX(
 		       )
 {
   // Set the number of TPC layer
-  const int n_TPC_layers = 40;  // use 60 for backward compatibility only
+  const int n_TPC_layers = 60;  // use 60 for backward compatibility only
   
   //===============
   // Input options
@@ -85,7 +85,7 @@ int Fun4All_G4_sPHENIX(
   bool do_calotrigger = true && do_cemc_twr;
 
   bool do_jet_reco = true;
-  bool do_jet_eval = true;
+  bool do_jet_eval = do_jet_reco &&true;
 
   // HI Jet Reco for jet simulations in Au+Au (default is false for
   // single particle / p+p simulations, or for Au+Au simulations which
