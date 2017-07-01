@@ -240,8 +240,7 @@ int Fun4All_G4_sPHENIX(
 	  // run upsilons for momentum, dca performance, alone or embedded in Hijing
       
 	  PHG4ParticleGeneratorVectorMeson *vgen = new PHG4ParticleGeneratorVectorMeson();
-	  vgen->set_decay_types("e+","e-");    // dielectron decay
-
+	  vgen->add_decay_particles("e+","e-",0); // i = decay id
 	  // event vertex
 	  if (readhepmc || do_embedding || particles)
 	    {
