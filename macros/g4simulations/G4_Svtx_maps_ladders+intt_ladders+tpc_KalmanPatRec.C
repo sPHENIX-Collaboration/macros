@@ -420,10 +420,10 @@ void Svtx_Reco(int verbosity = 0)
   tpcclusterizer->setRangeLayers(n_maps_layer+n_intt_layer,Max_si_layer);
   if(n_gas_layer == 40)
     {
-      tpcclusterizer->setEnergyCut(0/*15 adc*/);
+      tpcclusterizer->setEnergyCut(12/*15 adc*/);
       tpcclusterizer->setFitWindowSigmas(0.0160,0.0160);  // should be changed when TPC cluster resolution changes
-      tpcclusterizer->setFitWindowMax(8/*rphibins*/,6/*zbins*/);
-      tpcclusterizer->setFitEnergyThreshold( 0.01 /*fraction*/ );
+      tpcclusterizer->setFitWindowMax(9/*rphibins*/,7/*zbins*/);
+      tpcclusterizer->setFitEnergyThreshold( 0.1 /*fraction*/ );
     }
   else
     {
@@ -469,9 +469,9 @@ void Svtx_Reco(int verbosity = 0)
   //------------------
   // Track Projections
   //------------------
-  //  PHG4SvtxTrackProjection* projection = new PHG4SvtxTrackProjection();
-  //  projection->Verbosity(verbosity);
-  //  se->registerSubsystem( projection );
+    PHG4SvtxTrackProjection* projection = new PHG4SvtxTrackProjection();
+    projection->Verbosity(verbosity);
+    se->registerSubsystem( projection );
 
   /*  
   //----------------------
