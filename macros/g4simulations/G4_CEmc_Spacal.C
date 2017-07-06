@@ -339,7 +339,7 @@ void CEMC_Towers(int verbosity = 0)
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
   TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC","xml",0,0,
       string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalib_2017ProjTilted/")); // calibration database
-  TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715 );
+  TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715 ); // overall energy scale based on 4-GeV photon simulations
   TowerCalibration->set_pedstal_ADC(0);
   se->registerSubsystem(TowerCalibration);
 
