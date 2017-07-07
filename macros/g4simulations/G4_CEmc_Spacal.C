@@ -308,7 +308,8 @@ void CEMC_Towers(int verbosity = 0)
   {
     //      sampling_fraction = 0.02244; //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.3/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
 //    sampling_fraction = 2.36081e-02;  //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
-    sampling_fraction = 1.90951e-02; // 2017 Tilt porjective SPACAL, 8 GeV photon, eta = 0.3 - 0.4
+//    sampling_fraction = 1.90951e-02; // 2017 Tilt porjective SPACAL, 8 GeV photon, eta = 0.3 - 0.4
+    sampling_fraction = 2e-02; // 2017 Tilt porjective SPACAL, tower-by-tower calibration
   }
   else
   {
@@ -335,8 +336,10 @@ void CEMC_Towers(int verbosity = 0)
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
   TowerCalibration->Detector("CEMC");
   TowerCalibration->Verbosity(verbosity);
-  TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV);
+  TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
+  TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC","xml",0,0,
+      string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalib_2017ProjTilted/")); // calibration database
+  TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715 ); // overall energy scale based on 4-GeV photon simulations
   TowerCalibration->set_pedstal_ADC(0);
   se->registerSubsystem(TowerCalibration);
 
