@@ -525,10 +525,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   //----------------
 
   SvtxEvaluator* eval;
-  if(use_primary_vertex)
-    eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str(), "PrimaryTrackMap");
-  else
-    eval = new SvtxEvaluator("SVTXEVALUATOR",  outputfile.c_str());
+  eval = new SvtxEvaluator("SVTXEVALUATOR",  outputfile.c_str());
   eval->do_cluster_eval(true);
   eval->do_g4hit_eval(true);
   eval->do_hit_eval(false);
