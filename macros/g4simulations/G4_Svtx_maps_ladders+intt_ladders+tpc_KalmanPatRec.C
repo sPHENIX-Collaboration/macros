@@ -1,6 +1,9 @@
 #include <vector>
 
-bool use_primary_vertex = false;   // include primary vertex in track fit if true 
+// if true, refit tracks with primary vertex included in track fit  - good for analysis of prompt tracks only
+// Adds second node to node tree, keeps original track node undisturbed
+// Adds second evaluator to process refitted tracks and outputs separate ntuples
+bool use_primary_vertex = false;   
 
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
 const int n_intt_layer = 4;   // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
@@ -236,8 +239,11 @@ void Svtx_Cells(int verbosity = 0)
     }
 
   // TPC cells
-  double tpc_cell_x = 0.12*0.5;
-  double tpc_cell_y = 0.17*0.5;
+  //double tpc_cell_x = 0.12*0.5;
+  //double tpc_cell_y = 0.17*0.5;
+  // use same cell size for 40 layers to limit memory size
+  double tpc_cell_x = 0.12;
+  double tpc_cell_y = 0.17;
   if(n_gas_layer == 60)
     {
       tpc_cell_x = 0.12;
@@ -422,8 +428,10 @@ void Svtx_Reco(int verbosity = 0)
     {
       tpcclusterizer->setEnergyCut(12/*15 adc*/);
       tpcclusterizer->setFitWindowSigmas(0.0160,0.0160);  // should be changed when TPC cluster resolution changes
-      tpcclusterizer->setFitWindowMax(9/*rphibins*/,7/*zbins*/);
-      tpcclusterizer->setFitEnergyThreshold( 0.1 /*fraction*/ );
+      //tpcclusterizer->setFitWindowMax(9/*rphibins*/,7/*zbins*/);
+      tpcclusterizer->setFitWindowMax(4/*rphibins*/,3/*zbins*/);  // for double cell size
+      //tpcclusterizer->setFitEnergyThreshold( 0.1 /*fraction*/ );
+      tpcclusterizer->setFitEnergyThreshold( 0.05 /*fraction*/ ); // for double cell size
     }
   else
     {
@@ -517,17 +525,30 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   //----------------
 
   SvtxEvaluator* eval;
-  if(use_primary_vertex)
-    eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str(), "PrimaryTrackMap");
-  else
-    eval = new SvtxEvaluator("SVTXEVALUATOR",  outputfile.c_str());
+  eval = new SvtxEvaluator("SVTXEVALUATOR",  outputfile.c_str());
   eval->do_cluster_eval(true);
   eval->do_g4hit_eval(true);
-  eval->do_hit_eval(true);
+  eval->do_hit_eval(false);
   eval->do_gpoint_eval(false);
   eval->scan_for_embedded(true); // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(verbosity);
   se->registerSubsystem( eval );
+
+  
+  if(use_primary_vertex)
+    {
+      // make a second evaluator that records tracks fitted with primary vertex included
+      // good for analysis of prompt tracks, particularly if MVTX is not present
+      SvtxEvaluator* evalp;    
+      evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap");
+      evalp->do_cluster_eval(true);
+      evalp->do_g4hit_eval(true);
+      evalp->do_hit_eval(false);
+      evalp->do_gpoint_eval(false);
+      evalp->scan_for_embedded(true); // take all tracks if false - take only embedded tracks if true
+      evalp->Verbosity(0);
+      se->registerSubsystem( evalp );
+    }
 
   // MomentumEvaluator* eval = new MomentumEvaluator(outputfile.c_str(),0.2,0.4,Max_si_layer,2,Max_si_layer-4,10.,80.);
   // se->registerSubsystem( eval );
