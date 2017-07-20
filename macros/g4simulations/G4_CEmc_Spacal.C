@@ -88,10 +88,8 @@ CEmc_1DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings, co
   int ilayer = Min_cemc_layer;
   PHG4SpacalSubsystem *cemc;
   cemc = new PHG4SpacalSubsystem("CEMC", ilayer);
-
-  cemc->get_geom().set_radius(emc_inner_radius);
-  cemc->get_geom().set_thickness(cemcthickness);
-  //  cemc ->get_geom().set_construction_verbose(1);
+  cemc->set_double_param("radius",emc_inner_radius);
+  cemc->set_double_param("thickness", cemcthickness); 
 
   cemc->SetActive();
   cemc->SuperDetector("CEMC");
