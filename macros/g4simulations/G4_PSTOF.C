@@ -30,8 +30,8 @@ double PSTOF(PHG4Reco* g4Reco, double radius, const int absorberactive = 0)
   */
 
   PHG4PSTOFSubsystem *pstof = new PHG4PSTOFSubsystem( "PSTOF" );
-  pstof->set_int_param("active",1);
-  pstof->set_int_param("use_g4steps",0);
+  // pstof->set_int_param("active",1);
+  // pstof->set_int_param("use_g4steps",0);
   //pstof->OverlapCheck( overlapcheck );
  
   g4Reco->registerSubsystem( pstof );
