@@ -3,6 +3,7 @@ double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
 bool overlapcheck = false; // set to true if you want to check for overlaps
 
 void G4Init(bool do_svtx = true,
+	    bool do_pstof = true,
 	    bool do_preshower = false,
 	    bool do_cemc = true,
 	    bool do_hcalin = true,
@@ -23,6 +24,12 @@ void G4Init(bool do_svtx = true,
     {
       gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
       SvtxInit(n_TPC_layers);
+    }
+
+  if (do_pstof) 
+    {
+      gROOT->LoadMacro("G4_PSTOF.C");
+      PSTOFInit();
     }
 
   if (do_preshower) 
@@ -61,6 +68,7 @@ int G4Setup(const int absorberactive = 0,
 	    const string &field ="1.5",
 	    const EDecayType decayType = TPythia6Decayer::kAll,
 	    const bool do_svtx = true,
+	    const bool do_pstof = true,
 	    const bool do_preshower = false,
 	    const bool do_cemc = true,
 	    const bool do_hcalin = true,
@@ -115,6 +123,11 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // SVTX
   if (do_svtx) radius = Svtx(g4Reco, radius, absorberactive);
+
+  //----------------------------------------
+  // PSTOF
+  
+  if (do_pstof) radius = PSTOF(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // PRESHOWER
