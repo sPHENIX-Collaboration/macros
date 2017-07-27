@@ -4,7 +4,6 @@ bool overlapcheck = false; // set to true if you want to check for overlaps
 
 void G4Init(bool do_svtx = true,
 	    bool do_pstof = true,
-	    bool do_preshower = false,
 	    bool do_cemc = true,
 	    bool do_hcalin = true,
 	    bool do_magnet = true,
@@ -30,12 +29,6 @@ void G4Init(bool do_svtx = true,
     {
       gROOT->LoadMacro("G4_PSTOF.C");
       PSTOFInit();
-    }
-
-  if (do_preshower) 
-    {
-      gROOT->LoadMacro("G4_PreShower.C");
-      PreShowerInit();
     }
 
   if (do_cemc)
@@ -69,7 +62,6 @@ int G4Setup(const int absorberactive = 0,
 	    const EDecayType decayType = TPythia6Decayer::kAll,
 	    const bool do_svtx = true,
 	    const bool do_pstof = true,
-	    const bool do_preshower = false,
 	    const bool do_cemc = true,
 	    const bool do_hcalin = true,
 	    const bool do_magnet = true,
@@ -128,11 +120,6 @@ int G4Setup(const int absorberactive = 0,
   // PSTOF
   
   if (do_pstof) radius = PSTOF(g4Reco, radius, absorberactive);
-
-  //----------------------------------------
-  // PRESHOWER
-  
-  if (do_preshower) radius = PreShower(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // CEMC
