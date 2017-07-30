@@ -128,19 +128,46 @@ void HCALInner_Towers(int verbosity = 0) {
   TowerBuilder->Verbosity(verbosity);
   se->registerSubsystem( TowerBuilder );
 
+//  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalInRawTowerDigitizer");
+//  TowerDigitizer->Detector("HCALIN");
+//  TowerDigitizer->Verbosity(verbosity);
+//  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
+//  se->registerSubsystem( TowerDigitizer );
+
+//  RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalInRawTowerCalibration");
+//  TowerCalibration->Detector("HCALIN");
+//  TowerCalibration->Verbosity(verbosity);
+//  TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+//  TowerCalibration->set_calib_const_GeV_ADC(1./0.067);// muon sampling fraction from Abhisek Sen, 2015 SBU simulation workfest
+//  TowerCalibration->set_pedstal_ADC(0);
+//  se->registerSubsystem( TowerCalibration );
+
+  // From 2016 Test beam sim
+
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalInRawTowerDigitizer");
   TowerDigitizer->Detector("HCALIN");
-  TowerDigitizer->Verbosity(verbosity);
-  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
-  se->registerSubsystem( TowerDigitizer );
+//  TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
+  TowerDigitizer->set_digi_algorithm(
+       RawTowerDigitizer::kSimple_photon_digitalization);
+  TowerDigitizer->set_pedstal_central_ADC(0);
+  TowerDigitizer->set_pedstal_width_ADC(1); // From Jin's guess. No EMCal High Gain data yet! TODO: update
+  TowerDigitizer->set_photonelec_ADC(32. / 5.);
+  TowerDigitizer->set_photonelec_yield_visible_GeV(32. / 5 / (0.4e-3));
+  TowerDigitizer->set_zero_suppression_ADC(-0); // no-zero suppression
+  se->registerSubsystem(TowerDigitizer);
+
+  const double visible_sample_fraction_HCALIN = 0.067 ; //  muon sampling fraction from Abhisek Sen, 2015 SBU simulation workfest
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalInRawTowerCalibration");
   TowerCalibration->Detector("HCALIN");
-  TowerCalibration->Verbosity(verbosity);
+//  TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
+//  TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration->set_calib_const_GeV_ADC(1./0.067);// muon sampling fraction from Abhisek Sen, 2015 SBU simulation workfest
+  TowerCalibration->set_calib_const_GeV_ADC(0.4e-3 / visible_sample_fraction_HCALIN);
   TowerCalibration->set_pedstal_ADC(0);
-  se->registerSubsystem( TowerCalibration );
+  TowerCalibration->set_zero_suppression_GeV(-1); // no-zero suppression
+  se->registerSubsystem(TowerCalibration);
+
   return;
 }
 
