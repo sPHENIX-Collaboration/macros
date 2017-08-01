@@ -91,21 +91,7 @@ void HCALOuter_Towers(int verbosity = 0) {
   TowerBuilder->Verbosity(verbosity);
   se->registerSubsystem( TowerBuilder );
 
-//  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalOutRawTowerDigitizer");
-//  TowerDigitizer->Detector("HCALOUT");
-//  TowerDigitizer->Verbosity(verbosity);
-//  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
-//  se->registerSubsystem( TowerDigitizer );
-//
-//  RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalOutRawTowerCalibration");
-//  TowerCalibration->Detector("HCALOUT");
-//  TowerCalibration->Verbosity(verbosity);
-//  TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-//  TowerCalibration->set_calib_const_GeV_ADC(1./0.0305);// muon sampling fraction from Abhisek Sen, 2015 SBU simulation workfest
-//  TowerCalibration->set_pedstal_ADC(0);
-//  se->registerSubsystem( TowerCalibration );
-
-
+  // From 2016 Test beam sim
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalOutRawTowerDigitizer");
   TowerDigitizer->Detector("HCALOUT");
 //  TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
