@@ -118,7 +118,7 @@ void HCALOuter_Towers(int verbosity = 0) {
   TowerDigitizer->set_zero_suppression_ADC(-0); // no-zero suppression
   se->registerSubsystem(TowerDigitizer);
 
-  const double visible_sample_fraction_HCALOUT = 0.0305 ; //  muon sampling fraction from Abhisek Sen, 2015 SBU simulation workfest
+  const double visible_sample_fraction_HCALOUT = 3.38021e-02; // /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV.root_qa.rootQA_Draw_HCALOUT_G4Hit.pdf
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalOutRawTowerCalibration");
   TowerCalibration->Detector("HCALOUT");

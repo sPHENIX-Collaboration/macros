@@ -156,7 +156,7 @@ void HCALInner_Towers(int verbosity = 0) {
   TowerDigitizer->set_zero_suppression_ADC(-0); // no-zero suppression
   se->registerSubsystem(TowerDigitizer);
 
-  const double visible_sample_fraction_HCALIN = 0.067 ; //  muon sampling fraction from Abhisek Sen, 2015 SBU simulation workfest
+  const double visible_sample_fraction_HCALIN = 0.0631283 ; //, /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV-0000.root_qa.rootQA_Draw_HCALIN_G4Hit.pdf
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalInRawTowerCalibration");
   TowerCalibration->Detector("HCALIN");
