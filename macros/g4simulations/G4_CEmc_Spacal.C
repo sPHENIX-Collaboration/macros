@@ -312,7 +312,7 @@ void CEMC_Towers(int verbosity = 0)
   else
   {
     std::cout
-        << "G4_CEmc_Spacal.C::G4_CEmc_Spacal - Fatal Error - unrecognized SPACAL configuration #"
+        << "G4_CEmc_Spacal.C::CEMC_Towers - Fatal Error - unrecognized SPACAL configuration #"
         << Cemc_spacal_configuration << ". Force exiting..." << std::endl;
     exit(-1);
     return;
@@ -331,15 +331,36 @@ void CEMC_Towers(int verbosity = 0)
   TowerDigitizer->set_zero_suppression_ADC(16);  // eRD1 test beam setting
   se->registerSubsystem(TowerDigitizer);
 
-  RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
-  TowerCalibration->Detector("CEMC");
-  TowerCalibration->Verbosity(verbosity);
-  TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
-  TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC","xml",0,0,
-      string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalib_2017ProjTilted/")); // calibration database
-  TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715 ); // overall energy scale based on 4-GeV photon simulations
-  TowerCalibration->set_pedstal_ADC(0);
-  se->registerSubsystem(TowerCalibration);
+  if (Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal)
+  {
+    RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
+    TowerCalibration->Detector("CEMC");
+    TowerCalibration->Verbosity(verbosity);
+    TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV);
+    TowerCalibration->set_pedstal_ADC(0);
+    se->registerSubsystem(TowerCalibration);
+  }
+  else if (Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal)
+  {
+    RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
+    TowerCalibration->Detector("CEMC");
+    TowerCalibration->Verbosity(verbosity);
+    TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
+    TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC","xml",0,0,
+        string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalib_2017ProjTilted/")); // calibration database
+    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715 ); // overall energy scale based on 4-GeV photon simulations
+    TowerCalibration->set_pedstal_ADC(0);
+    se->registerSubsystem(TowerCalibration);
+  }
+  else
+  {
+    std::cout
+        << "G4_CEmc_Spacal.C::CEMC_Towers - Fatal Error - unrecognized SPACAL configuration #"
+        << Cemc_spacal_configuration << ". Force exiting..." << std::endl;
+    exit(-1);
+    return;
+  }
 
   return;
 }
