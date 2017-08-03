@@ -37,8 +37,6 @@ int Fun4All_G4_EICDetector(
   bool do_svtx_track = do_svtx_cell && true;
   bool do_svtx_eval = do_svtx_track && true;
 
-  bool do_preshower = false;
-
   bool do_cemc = true;
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
@@ -119,7 +117,7 @@ int Fun4All_G4_EICDetector(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_EICDetector.C");
-  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_EGEM,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,n_TPC_layers);
+  G4Init(do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_EGEM,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,n_TPC_layers);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
@@ -219,7 +217,7 @@ int Fun4All_G4_EICDetector(
       // Detector description
       //---------------------
 
-      G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_EGEM,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,magfield_rescale);
+      G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_EGEM,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,magfield_rescale);
 
     }
 
@@ -369,7 +367,6 @@ int Fun4All_G4_EICDetector(
       G4DSTreader_EICDetector( outputFile, //
                                /*int*/ absorberactive ,
                                /*bool*/ do_svtx ,
-                               /*bool*/ do_preshower ,
                                /*bool*/ do_cemc ,
                                /*bool*/ do_hcalin ,
                                /*bool*/ do_magnet ,
