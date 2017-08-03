@@ -15,7 +15,6 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
     int absorberactive = 1, //
     bool do_svtx = true, //
     bool do_pstof = true, //
-    bool do_preshower = false, //
     bool do_cemc = true, //
     bool do_hcalin = true, //
     bool do_magnet = true, //
