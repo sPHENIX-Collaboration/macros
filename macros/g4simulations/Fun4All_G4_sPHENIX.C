@@ -55,10 +55,7 @@ int Fun4All_G4_sPHENIX(
   bool do_svtx_track = do_svtx_cell && true;
   bool do_svtx_eval = do_svtx_track && true;
 
-  bool do_pstof = false;
-
-  bool do_preshower = false;
-  
+  bool do_pstof = true;
 
   bool do_cemc = true;
   bool do_cemc_cell = do_cemc && true;
@@ -292,7 +289,7 @@ int Fun4All_G4_sPHENIX(
       //---------------------
 
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-	      do_svtx, do_pstof, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, magfield_rescale);
+	      do_svtx, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, magfield_rescale);
     }
 
   //---------
@@ -444,7 +441,6 @@ int Fun4All_G4_sPHENIX(
           /*int*/ absorberactive ,
           /*bool*/ do_svtx ,
           /*bool*/ do_pstof ,
-          /*bool*/ do_preshower ,
           /*bool*/ do_cemc ,
           /*bool*/ do_hcalin ,
           /*bool*/ do_magnet ,
