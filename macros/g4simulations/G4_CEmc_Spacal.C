@@ -52,7 +52,7 @@ CEmc_1DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings, co
 
   if (radius > emc_inner_radius)
   {
-    cout << "inconsistency: preshower radius+thickness: " << radius
+    cout << "inconsistency: pstof outer radius: " << radius
          << " larger than emc inner radius: " << emc_inner_radius
          << endl;
     gSystem->Exit(-1);
