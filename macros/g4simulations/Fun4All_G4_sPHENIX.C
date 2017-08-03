@@ -55,7 +55,7 @@ int Fun4All_G4_sPHENIX(
   bool do_svtx_track = do_svtx_cell && true;
   bool do_svtx_eval = do_svtx_track && true;
 
-  bool do_pstof = true;
+  bool do_pstof = false;
 
   bool do_cemc = true;
   bool do_cemc_cell = do_cemc && true;
