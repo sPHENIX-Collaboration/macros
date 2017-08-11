@@ -81,11 +81,13 @@ int Fun4All_G4_EICDetector(
   bool do_FEMC_cell = do_FEMC && true;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
+  bool do_FEMC_eval = do_FEMC_cluster && true;
 
   bool do_FHCAL = true;
   bool do_FHCAL_cell = do_FHCAL && true;
   bool do_FHCAL_twr = do_FHCAL_cell && true;
   bool do_FHCAL_cluster = do_FHCAL_twr && true;
+  bool do_FHCAL_eval = do_FHCAL_cluster && true;
 
 
   // EICDetector geometry - 'hadron' direction
@@ -96,6 +98,7 @@ int Fun4All_G4_EICDetector(
   bool do_EEMC_cell = do_EEMC && true;
   bool do_EEMC_twr = do_EEMC_cell && true;
   bool do_EEMC_cluster = do_EEMC_twr && true;
+  bool do_EEMC_eval = do_EEMC_cluster && true;
 
   // Other options
 
@@ -329,6 +332,12 @@ int Fun4All_G4_EICDetector(
   if (do_hcalin_eval) HCALInner_Eval("g4hcalin_eval.root");
 
   if (do_hcalout_eval) HCALOuter_Eval("g4hcalout_eval.root");
+
+  if (do_FEMC_eval) FEMC_Eval("g4femc_eval.root");
+
+  if (do_FHCAL_eval) FHCAL_Eval("g4fhcal_eval.root");
+
+  if (do_EEMC_eval) EEMC_Eval("g4eemc_eval.root");
 
   if (do_jet_eval) Jet_Eval("g4jet_eval.root");
 
