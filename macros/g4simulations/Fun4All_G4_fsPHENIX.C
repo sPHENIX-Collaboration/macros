@@ -7,7 +7,7 @@ int Fun4All_G4_fsPHENIX(
 		       )
 {
   // Set the number of TPC layer
-  const int n_TPC_layers = 60;  // use 60 for backward compatibility only
+  const int n_TPC_layers = 40;  // use 60 for backward compatibility only
 
   //===============
   // Input options
