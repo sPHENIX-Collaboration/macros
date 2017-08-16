@@ -3,7 +3,6 @@ double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
 bool overlapcheck = false; // set to true if you want to check for overlaps
 
 void G4Init(bool do_svtx = true,
-            bool do_preshower = false,
             bool do_cemc = true,
             bool do_hcalin = true,
             bool do_magnet = true,
@@ -16,8 +15,9 @@ void G4Init(bool do_svtx = true,
             bool do_EEMC = true,
             bool do_DIRC = true,
             bool do_RICH = true,
-            bool do_Aerogel = true
-	    ) {
+            bool do_Aerogel = true,
+            int n_TPC_layers = 40)
+{
 
   // load detector/material macros and execute Init() function
 
@@ -28,14 +28,8 @@ void G4Init(bool do_svtx = true,
     }
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx_maps+tpc.C");
-      SvtxInit();
-    }
-
-  if (do_preshower)
-    {
-      gROOT->LoadMacro("G4_PreShower.C");
-      PreShowerInit();
+      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
+      SvtxInit(n_TPC_layers);
     }
 
   if (do_cemc)
@@ -117,7 +111,6 @@ int G4Setup(const int absorberactive = 0,
             const string &field ="1.5",
             const EDecayType decayType = TPythia6Decayer::kAll,
             const bool do_svtx = true,
-            const bool do_preshower = false,
             const bool do_cemc = true,
             const bool do_hcalin = true,
             const bool do_magnet = true,
@@ -180,11 +173,6 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // SVTX
   if (do_svtx) radius = Svtx(g4Reco, radius, absorberactive);
-
-  //----------------------------------------
-  // PRESHOWER
-
-  if (do_preshower) radius = PreShower(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // CEMC

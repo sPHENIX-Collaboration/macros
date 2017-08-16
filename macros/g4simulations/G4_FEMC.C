@@ -117,3 +117,16 @@ void FEMC_Clusters(int verbosity = 0) {
   
   return;
 }
+
+void FEMC_Eval(std::string outputfile, int verbosity = 0)
+{
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libg4eval.so");
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  CaloEvaluator *eval = new CaloEvaluator("FEMCEVALUATOR", "FEMC", outputfile.c_str());
+  eval->Verbosity(verbosity);
+  se->registerSubsystem(eval);
+
+  return;
+}
