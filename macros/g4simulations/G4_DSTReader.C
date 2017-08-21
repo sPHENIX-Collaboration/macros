@@ -14,7 +14,7 @@ void
 G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
     int absorberactive = 1, //
     bool do_svtx = true, //
-    bool do_preshower = false, //
+    bool do_pstof = true, //
     bool do_cemc = true, //
     bool do_hcalin = true, //
     bool do_magnet = true, //
@@ -50,6 +50,11 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
       if (do_svtx)
         {
           ana->AddNode("SVTX");
+        }
+
+      if (do_pstof)
+        {
+          ana->AddNode("PSTOF_0");
         }
 
       if (do_cemc)

@@ -120,3 +120,16 @@ void FHCAL_Clusters(int verbosity = 0) {
   
   return;
 }
+
+void FHCAL_Eval(std::string outputfile, int verbosity = 0)
+{
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libg4eval.so");
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  CaloEvaluator *eval = new CaloEvaluator("FHCALEVALUATOR", "FHCAL", outputfile.c_str());
+  eval->Verbosity(verbosity);
+  se->registerSubsystem(eval);
+
+  return;
+}
