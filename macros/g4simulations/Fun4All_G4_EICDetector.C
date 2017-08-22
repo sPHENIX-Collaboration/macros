@@ -89,6 +89,7 @@ int Fun4All_G4_EICDetector(
 
   // EICDetector geometry - 'hadron' direction
   bool do_FGEM = true;
+  bool do_FGEM_track = do_FGEM &&  true;
 
   bool do_RICH = true;
   bool do_Aerogel = true;
@@ -107,6 +108,7 @@ int Fun4All_G4_EICDetector(
 
   // EICDetector geometry - 'electron' direction
   bool do_EGEM = true;
+  bool do_EGEM_track = do_EGEM &&  true;
 
   bool do_EEMC = true;
   bool do_EEMC_cell = do_EEMC && true;
@@ -448,6 +450,18 @@ int Fun4All_G4_EICDetector(
   //--------------
 
   if (do_svtx_track) Svtx_Reco();
+
+  //--------------
+  // FGEM tracking
+  //--------------
+
+  if(do_FGEM_track) FGEM_FastSim_Reco();
+
+  //--------------
+  // EGEM tracking
+  //--------------
+
+  if(do_EGEM_track) EGEM_FastSim_Reco();
 
   //-----------------
   // Global Vertexing
