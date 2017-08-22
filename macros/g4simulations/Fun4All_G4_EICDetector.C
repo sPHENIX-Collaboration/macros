@@ -34,6 +34,11 @@ int Fun4All_G4_EICDetector(
   // Or:
   // Use HEPGen
   const bool runhepgen = false;
+  // Or:
+  // Use Sartre
+  const bool runsartre = false;
+
+
 
   // Besides the above flags. One can further choose to further put in following particles in Geant4 simulation
   // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
@@ -235,6 +240,29 @@ int Fun4All_G4_EICDetector(
       hepgen->set_momentum_electron(-20);
       hepgen->set_momentum_hadron(250);
       se->registerSubsystem(hepgen);
+
+      HepMCNodeReader *hr = new HepMCNodeReader();
+      se->registerSubsystem(hr);
+    }
+  else if (runsartre)
+    {
+      // see coresoftware/generators/PHSartre/README for setup instructions
+      // before running:
+      // setenv SARTRE_DIR /opt/sphenix/core/sartre-1.20_root-5.34.36
+      gSystem->Load("libPHSartre.so");
+
+      PHSartre* mysartre = new PHSartre();
+      // see coresoftware/generators/PHSartre for example config
+      mysartre->set_config_file("sartre.cfg");
+
+      // particle trigger to enhance forward J/Psi -> ee
+      PHSartreParticleTrigger* pTrig = new PHSartreParticleTrigger("MySartreTrigger");
+      pTrig->AddParticles(-11);
+      //pTrig->SetEtaHighLow(4.0,1.4);
+      pTrig->SetEtaHighLow(1.0,-1.1);  // central arm
+      pTrig->PrintConfig();
+      mysartre->register_trigger((PHSartreGenTrigger *)pTrig);
+      se->registerSubsystem(mysartre);
 
       HepMCNodeReader *hr = new HepMCNodeReader();
       se->registerSubsystem(hr);
