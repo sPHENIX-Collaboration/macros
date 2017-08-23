@@ -106,9 +106,8 @@ void EGEM_FastSim_Reco(int verbosity = 0) {
   kalman->set_trackmap_out_name("SvtxTrackMapEside");
 
   // Saved track states (projections)
-  // @TODO: Implement projections to EEMC in coresoftware/simulation/g4simulation/g4hough/PHG4TrackFastSim.C
-  //  std::string state_names[] = {"EEMC"};
-  //  kalman->set_state_names(state_names, 1);
+  std::string state_names[] = {"EEMC"};
+  kalman->set_state_names(state_names, 1);
 
   kalman->set_fit_alg_name("KalmanFitterRefTrack");//
   kalman->set_primary_assumption_pid(-211); // -211 = pi-
