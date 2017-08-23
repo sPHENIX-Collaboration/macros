@@ -103,7 +103,7 @@ void EGEM_FastSim_Reco(int verbosity = 0) {
   std::string phg4hits_names[] = {"G4HIT_EGEM_0","G4HIT_EGEM_1","G4HIT_EGEM_2"};
   kalman->set_phg4hits_names(phg4hits_names, 3);
   kalman->set_sub_top_node_name("SVTX");
-  kalman->set_trackmap_out_name("SvtxTrackMapEside");
+  kalman->set_trackmap_out_name("SvtxTrackMapNegativeEta");
 
   // Saved track states (projections)
   std::string state_names[] = {"EEMC"};
