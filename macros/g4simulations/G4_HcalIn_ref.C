@@ -153,7 +153,7 @@ void HCALInner_Towers(int verbosity = 0) {
   //Default sampling fraction for SS310
   double visible_sample_fraction_HCALIN = 0.0631283 ; //, /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV-0000.root_qa.rootQA_Draw_HCALIN_G4Hit.pdf
 
-  if(material_Al) visible_sample_fraction_HCALIN = 1.62166; //for "G4_Al"
+  if(material_Al) visible_sample_fraction_HCALIN = 0.162166; //for "G4_Al"
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalInRawTowerCalibration");
   TowerCalibration->Detector("HCALIN");
