@@ -11,9 +11,14 @@ double HCalInner(PHG4Reco* g4Reco,
   gSystem->Load("libg4detectors.so");
   gSystem->Load("libg4testbench.so");
 
+  //Default absorber material is SS310
+  //Choose if you want Aluminum
+  const bool material_Al = false;
+
   PHG4InnerHcalSubsystem *hcal = new PHG4InnerHcalSubsystem("HCALIN");
   // these are the parameters you can change with their default settings
   // hcal->set_string_param("material","SS310");
+  if(material_Al) hcal->set_string_param("material","G4_Al");
   // hcal->set_int_param("ncross",4);
   // hcal->set_int_param("n_scinti_tiles",12);
   // hcal->set_int_param("light_scint_model",1);
@@ -141,7 +146,14 @@ void HCALInner_Towers(int verbosity = 0) {
   TowerDigitizer->set_zero_suppression_ADC(-0); // no-zero suppression
   se->registerSubsystem(TowerDigitizer);
 
-  const double visible_sample_fraction_HCALIN = 0.0631283 ; //, /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV-0000.root_qa.rootQA_Draw_HCALIN_G4Hit.pdf
+  //Default absorber material is SS310
+  //Choose if you want Aluminum
+  const bool material_Al = false;
+
+  //Default sampling fraction for SS310
+  double visible_sample_fraction_HCALIN = 0.0631283 ; //, /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV-0000.root_qa.rootQA_Draw_HCALIN_G4Hit.pdf
+
+  if(material_Al) visible_sample_fraction_HCALIN = 1.62166; //for "G4_Al"
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalInRawTowerCalibration");
   TowerCalibration->Detector("HCALIN");
