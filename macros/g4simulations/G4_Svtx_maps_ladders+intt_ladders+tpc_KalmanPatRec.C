@@ -3,7 +3,7 @@
 // if true, refit tracks with primary vertex included in track fit  - good for analysis of prompt tracks only
 // Adds second node to node tree, keeps original track node undisturbed
 // Adds second evaluator to process refitted tracks and outputs separate ntuples
-bool use_primary_vertex = true;   
+bool use_primary_vertex = false;   
 
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
 const int n_intt_layer = 4;   // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
