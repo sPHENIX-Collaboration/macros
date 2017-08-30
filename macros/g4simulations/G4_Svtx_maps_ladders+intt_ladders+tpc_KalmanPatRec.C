@@ -3,7 +3,7 @@
 // if true, refit tracks with primary vertex included in track fit  - good for analysis of prompt tracks only
 // Adds second node to node tree, keeps original track node undisturbed
 // Adds second evaluator to process refitted tracks and outputs separate ntuples
-bool use_primary_vertex = false;   
+bool use_primary_vertex = true;   
 
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
 const int n_intt_layer = 4;   // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
@@ -287,8 +287,11 @@ void Svtx_Cells(int verbosity = 0)
       svtx_cells->setDiffusionL(0.0130);
       svtx_cells->setShapingRMSLead(TPCShapingRMSLead * TPCDriftVelocity);
       svtx_cells->setShapingRMSTail(TPCShapingRMSTail * TPCDriftVelocity);
-      svtx_cells->setSmearRPhi(0.10);  // additional random displacement of cloud positions wrt hits to give expected cluster resolution of 150 microns for charge at membrane
-      svtx_cells->setSmearZ(0.15);     // additional random displacement of cloud positions wrt hits to give expected cluster rsolution of 360 microns for charge at membrane
+      // Expected cluster resolutions:
+      //    r-phi: diffusion + GEM smearing = 750 microns, assume resolution is 20% of that => 150 microns
+      //    Z:  amplifier shaping time (RMS 32 ns, 48 ns) and drift vel of 3 cm/microsec gives smearing of 3 x (32+48/2 = 1.2 mm, assume resolution is 20% of that => 240 microns   
+      svtx_cells->setSmearRPhi(0.10);  // additional random displacement of cloud positions wrt hits to give expected cluster resolution of 150 microns for charge at membrane 
+      svtx_cells->setSmearZ(0.15);     // additional random displacement of cloud positions wrt hits to give expected cluster rsolution of 240 microns for charge at membrane
     }
   else
     {
@@ -537,7 +540,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   eval->do_g4hit_eval(true);
   eval->do_hit_eval(false);
   eval->do_gpoint_eval(false);
-  eval->scan_for_embedded(true); // take all tracks if false - take only embedded tracks if true
+  eval->scan_for_embedded(false); // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(verbosity);
   se->registerSubsystem( eval );
 
