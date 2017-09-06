@@ -400,6 +400,9 @@ int Fun4All_G4_sPHENIX(
 
   if (readhits)
     {
+      //meta-lib for DST objects used in simulation outputs
+      gSystem->Load("libg4dst.so");
+
       // Hits file
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager("DSTin");
       hitsin->fileopen(inputFile);
@@ -413,6 +416,9 @@ int Fun4All_G4_sPHENIX(
           exit(3);
         }
 
+      //meta-lib for DST objects used in simulation outputs
+      gSystem->Load("libg4dst.so");
+
       Fun4AllDstInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTinEmbed");
       //      in1->AddFile(embed_input_file); // if one use a single input file
       in1->AddListFile(embed_input_file); // RecommendedL: if one use a text list of many input files
@@ -420,6 +426,9 @@ int Fun4All_G4_sPHENIX(
     }
   if (readhepmc)
     {
+      //meta-lib for DST objects used in simulation outputs
+      gSystem->Load("libg4dst.so");
+
       Fun4AllInputManager *in = new Fun4AllHepMCInputManager( "DSTIN");
       se->registerInputManager( in );
       se->fileopen( in->Name().c_str(), inputFile );
