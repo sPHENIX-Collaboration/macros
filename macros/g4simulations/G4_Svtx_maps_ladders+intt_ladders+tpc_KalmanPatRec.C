@@ -11,6 +11,17 @@ int n_gas_layer  = 40;
 
 double inner_cage_radius = 20.;
 
+// TPC readout shaping time and ADC clock parameters
+//=======================================
+
+double TPCDriftVelocity = 3.0 / 1000.0; // cm/ns
+double TPCShapingRMSLead = 32.0;  // ns, rising RMS equivalent of shaping amplifier for 80 ns SAMPA
+double TPCShapingRMSTail = 48.0;  // ns, falling RMS equivalent of shaping amplifier for 80 ns SAMPA
+double TPCADCClock = 53.0;  // ns, corresponds to an ADC clock rate of 18.8 MHz
+
+double tpc_cell_x = 0.15;  // bin size for pads in rphi 
+double tpc_cell_y = TPCADCClock * TPCDriftVelocity;  // cm
+
 int Max_si_layer;
 
 void SvtxInit(int n_TPC_layers = 40, int verbosity = 0)
@@ -238,14 +249,10 @@ void Svtx_Cells(int verbosity = 0)
       se->registerSubsystem(reco);
     }
 
-  // TPC cells
-  //double tpc_cell_x = 0.12*0.5;
-  //double tpc_cell_y = 0.17*0.5;
-  // use same cell size for 40 layers to limit memory size
-  double tpc_cell_x = 0.12;
-  double tpc_cell_y = 0.17;
+  // TPC cell sizes are defined at top of macro, this is for backward compatibility with old hits files
   if(n_gas_layer == 60)
     {
+      TPCDriftVelocity = 6.0 / 1000.0; // cm/ns
       tpc_cell_x = 0.12;
       tpc_cell_y = 0.17;
     }
@@ -278,8 +285,13 @@ void Svtx_Cells(int verbosity = 0)
     {
       svtx_cells->setDiffusionT(0.0130);
       svtx_cells->setDiffusionL(0.0130);
-      svtx_cells->setSmearRPhi(0.10);  // additional smearing of cloud positions wrt hits
-      svtx_cells->setSmearZ(0.09);     // additional smearing of cloud positions wrt hits
+      svtx_cells->setShapingRMSLead(TPCShapingRMSLead * TPCDriftVelocity);
+      svtx_cells->setShapingRMSTail(TPCShapingRMSTail * TPCDriftVelocity);
+      // Expected cluster resolutions:
+      //    r-phi: diffusion + GEM smearing = 750 microns, assume resolution is 20% of that => 150 microns
+      //    Z:  amplifier shaping time (RMS 32 ns, 48 ns) and drift vel of 3 cm/microsec gives smearing of 3 x (32+48/2 = 1.2 mm, assume resolution is 20% of that => 240 microns   
+      svtx_cells->setSmearRPhi(0.10);  // additional random displacement of cloud positions wrt hits to give expected cluster resolution of 150 microns for charge at membrane 
+      svtx_cells->setSmearZ(0.15);     // additional random displacement of cloud positions wrt hits to give expected cluster rsolution of 240 microns for charge at membrane
     }
   else
     {
@@ -289,7 +301,7 @@ void Svtx_Cells(int verbosity = 0)
       svtx_cells->setSmearRPhi(0.09);  // additional smearing of cluster positions 
       svtx_cells->setSmearZ(0.06);       // additional smearing of cluster positions 
     }
-  svtx_cells->set_drift_velocity(6.0/1000.0l);
+  svtx_cells->set_drift_velocity(TPCDriftVelocity);
   svtx_cells->setHalfLength( 105.5 );
   svtx_cells->setElectronsPerKeV(28);
   svtx_cells->Verbosity(0);
@@ -356,7 +368,7 @@ void Svtx_Reco(int verbosity = 0)
 
   // TPC layers
   for (int i=n_maps_layer+n_intt_layer;i<Max_si_layer;++i) {
-    digi->set_adc_scale(i, 10000, 1.0);
+    digi->set_adc_scale(i, 30000, 1.0);
   }
   se->registerSubsystem( digi );
   
@@ -428,10 +440,8 @@ void Svtx_Reco(int verbosity = 0)
     {
       tpcclusterizer->setEnergyCut(12/*15 adc*/);
       tpcclusterizer->setFitWindowSigmas(0.0160,0.0160);  // should be changed when TPC cluster resolution changes
-      //tpcclusterizer->setFitWindowMax(9/*rphibins*/,7/*zbins*/);
-      tpcclusterizer->setFitWindowMax(4/*rphibins*/,3/*zbins*/);  // for double cell size
-      //tpcclusterizer->setFitEnergyThreshold( 0.1 /*fraction*/ );
-      tpcclusterizer->setFitEnergyThreshold( 0.05 /*fraction*/ ); // for double cell size
+      tpcclusterizer->setFitWindowMax(4/*rphibins*/,6/*zbins*/);  
+      tpcclusterizer->setFitEnergyThreshold( 0.05 /*fraction*/ ); 
     }
   else
     {
@@ -530,7 +540,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   eval->do_g4hit_eval(true);
   eval->do_hit_eval(false);
   eval->do_gpoint_eval(false);
-  eval->scan_for_embedded(true); // take all tracks if false - take only embedded tracks if true
+  eval->scan_for_embedded(false); // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(verbosity);
   se->registerSubsystem( eval );
 

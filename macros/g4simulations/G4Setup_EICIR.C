@@ -3,6 +3,7 @@ double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
 bool overlapcheck = false; // set to true if you want to check for overlaps
 
 void G4Init(bool do_svtx = true,
+            bool do_preshower = false,
             bool do_cemc = true,
             bool do_hcalin = true,
             bool do_magnet = true,
@@ -16,9 +17,8 @@ void G4Init(bool do_svtx = true,
             bool do_DIRC = true,
             bool do_RICH = true,
             bool do_Aerogel = true,
-            int n_TPC_layers = 40,
-      	    bool do_ExtendedIR = true
-	         ) {
+	    bool do_ExtendedIR = true
+	    ) {
 
   // load detector/material macros and execute Init() function
 
@@ -29,8 +29,14 @@ void G4Init(bool do_svtx = true,
     }
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
-      SvtxInit(n_TPC_layers);
+      gROOT->LoadMacro("G4_Svtx_maps+tpc.C");
+      SvtxInit();
+    }
+
+  if (do_preshower)
+    {
+      gROOT->LoadMacro("G4_PreShower.C");
+      PreShowerInit();
     }
 
   if (do_cemc)
@@ -117,6 +123,7 @@ int G4Setup(const int absorberactive = 0,
             const string &field ="1.5",
             const EDecayType decayType = TPythia6Decayer::kAll,
             const bool do_svtx = true,
+            const bool do_preshower = false,
             const bool do_cemc = true,
             const bool do_hcalin = true,
             const bool do_magnet = true,
@@ -148,10 +155,7 @@ int G4Setup(const int absorberactive = 0,
 
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->set_rapidity_coverage(1.1); // according to drawings
-// uncomment to set QGSP_BERT_HP physics list for productions 
-// (default is QGSP_BERT for speed)
-  //  g4Reco->SetPhysicsList("QGSP_BERT_HP"); 
- 
+
   if (decayType != TPythia6Decayer::kAll) {
     g4Reco->set_force_decay(decayType);
   }
@@ -180,6 +184,11 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // SVTX
   if (do_svtx) radius = Svtx(g4Reco, radius, absorberactive);
+
+  //----------------------------------------
+  // PRESHOWER
+
+  if (do_preshower) radius = PreShower(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // CEMC
@@ -271,21 +280,21 @@ int G4Setup(const int absorberactive = 0,
   flux_return_minus->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(flux_return_minus);
 
-  //----------------------------------------
-  // BLACKHOLE
-
-  // swallow all particles coming out of the backend of sPHENIX
-  PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
-  blackhole->set_double_param("radius",radius + 100); // add 100 cm
-
-  blackhole->set_int_param("lengthviarapidity",0);
-  blackhole->set_double_param("length",g4Reco->GetWorldSizeZ() - no_overlapp); // make it cover the world in length
-  blackhole->BlackHole();
-  blackhole->set_double_param("thickness",0.1); // it needs some thickness
-  blackhole->SetActive(); // always see what leaks out
-  blackhole->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(blackhole);
-
+//  //----------------------------------------
+//  // BLACKHOLE
+//
+//  // swallow all particles coming out of the backend of sPHENIX
+//  PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
+//  blackhole->set_double_param("radius",radius + 100); // add 100 cm
+//
+//  blackhole->set_int_param("lengthviarapidity",0);
+//  blackhole->set_double_param("length",g4Reco->GetWorldSizeZ() - no_overlapp); // make it cover the world in length
+//  blackhole->BlackHole();
+//  blackhole->set_double_param("thickness",0.1); // it needs some thickness
+//  blackhole->SetActive(); // always see what leaks out
+//  blackhole->OverlapCheck(overlapcheck);
+//  g4Reco->registerSubsystem(blackhole);
+//
   //----------------------------------------
   // FORWARD BLACKHOLEs
   // +Z
@@ -294,24 +303,25 @@ int G4Setup(const int absorberactive = 0,
   blackhole->set_double_param("radius",0); // add 10 cm
   blackhole->set_int_param("lengthviarapidity",0);
   blackhole->set_double_param("length",0.1); // make it cover the world in length
-  blackhole->set_double_param("place_z",g4Reco->GetWorldSizeZ()/2. - 0.1  - no_overlapp);
+  //blackhole->set_double_param("place_z",g4Reco->GetWorldSizeZ()/2. - 0.1  - no_overlapp);
+  blackhole->set_double_param("place_z",3000);
   blackhole->BlackHole();
   blackhole->set_double_param("thickness",radius - no_overlapp); // it needs some thickness
   blackhole->SetActive(); // always see what leaks out
   blackhole->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(blackhole);
 
-  blackhole = new PHG4CylinderSubsystem("BH_FORWARD_NEG", 1);
-  blackhole->SuperDetector("BH_FORWARD_NEG");
-  blackhole->set_double_param("radius",0); // add 10 cm
-  blackhole->set_int_param("lengthviarapidity",0);
-  blackhole->set_double_param("length",0.1); // make it cover the world in length
-  blackhole->set_double_param("place_z", - g4Reco->GetWorldSizeZ()/2. +0.1  + no_overlapp);
-  blackhole->BlackHole();
-  blackhole->set_double_param("thickness",radius - no_overlapp); // it needs some thickness
-  blackhole->SetActive(); // always see what leaks out
-  blackhole->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(blackhole);
+//  blackhole = new PHG4CylinderSubsystem("BH_FORWARD_NEG", 1);
+//  blackhole->SuperDetector("BH_FORWARD_NEG");
+//  blackhole->set_double_param("radius",0); // add 10 cm
+//  blackhole->set_int_param("lengthviarapidity",0);
+//  blackhole->set_double_param("length",0.1); // make it cover the world in length
+//  blackhole->set_double_param("place_z", - g4Reco->GetWorldSizeZ()/2. +0.1  + no_overlapp);
+//  blackhole->BlackHole();
+//  blackhole->set_double_param("thickness",radius - no_overlapp); // it needs some thickness
+//  blackhole->SetActive(); // always see what leaks out
+//  blackhole->OverlapCheck(overlapcheck);
+//  g4Reco->registerSubsystem(blackhole);
 
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
