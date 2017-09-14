@@ -16,9 +16,8 @@ void G4Init(bool do_svtx = true,
             bool do_DIRC = true,
             bool do_RICH = true,
             bool do_Aerogel = true,
-            int n_TPC_layers = 40,
-      	    bool do_ExtendedIR = true
-	         ) {
+            int n_TPC_layers = 40)
+{
 
   // load detector/material macros and execute Init() function
 
@@ -104,11 +103,6 @@ void G4Init(bool do_svtx = true,
       AerogelInit();
     }
 
-  if (do_ExtendedIR)
-    {
-      gROOT->LoadMacro("G4_IR_EIC.C");
-      IRInit();
-    }
 
 }
 
@@ -130,7 +124,6 @@ int G4Setup(const int absorberactive = 0,
             const bool do_DIRC = true,
             const bool do_RICH = true,
             const bool do_Aerogel = true,
-	    const bool do_ExtendedIR = true,
             const float magfield_rescale = 1.0) {
 
   //---------------
@@ -240,11 +233,6 @@ int G4Setup(const int absorberactive = 0,
 
   if ( do_Aerogel )
     AerogelSetup(g4Reco);
-
-  //----------------------------------------
-  // Extended IR
-  if ( do_ExtendedIR )
-    IRSetup(g4Reco);
 
   // sPHENIX forward flux return(s)
   PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
