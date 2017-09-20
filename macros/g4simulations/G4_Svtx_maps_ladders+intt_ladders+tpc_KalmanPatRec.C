@@ -151,7 +151,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   double inner_readout_radius = 30.;
   if (inner_readout_radius<radius)  inner_readout_radius = radius;
 
-  string tpcgas = "sPHENIX_TPC_Gas";  //  Ne(90%) CF4(10%) - defined in g4main/PHG4CylinderReco.cc
+  string tpcgas = "sPHENIX_TPC_Gas";  //  Ne(90%) CF4(10%) - defined in g4main/PHG4Reco.cc
 
   // Layer of inert TPC gas from 20-30 cm
   if (inner_readout_radius - radius > 0) {
