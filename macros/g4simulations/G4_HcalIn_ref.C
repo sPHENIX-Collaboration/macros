@@ -51,10 +51,10 @@ double HCalInner(PHG4Reco* g4Reco,
   // hcal->set_double_param("scinti_tile_thickness", 0.7);
   // hcal->set_double_param("size_z", 175.94 * 2);
   // hcal->set_double_param("steplimits", NAN);
-  // hcal->set_double_param("tilt_angle", NAN);  // default is 4 crossinge, angle is calculated from this
+  // hcal->set_double_param("tilt_angle", 36.15);
 
   // hcal->set_int_param("light_scint_model", 1);
-  // hcal->set_int_param("ncross", 4);
+  // hcal->set_int_param("ncross", 0);
   // hcal->set_int_param("n_towers", 64);
   // hcal->set_int_param("n_scinti_plates_per_tower", 4);
   // hcal->set_int_param("n_scinti_tiles", 12);
