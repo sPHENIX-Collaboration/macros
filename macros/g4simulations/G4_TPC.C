@@ -1,247 +1,81 @@
-//Three radial modules |-||-||-|
-//Sixteen layers per module
-//Choosing Readable Radius => 23.1 cm to 75cm => module size is 17.3
-//OPTION 1:
-//R1:  6 cards/R1  * 12 R1/end * 2 end/TPC = 144 cards/TPC
-//R2:  8 cards/R2  * 12 R2/end * 2 end/TPC = 192 cards/TPC
-//R3: 12 cards/R3  * 12 R3/end * 2 end/TPC = 288 cards/TPC
-//TOTAL = 624 cards/TPC * 8 SAMPA/card = 4992 SAMPA/TPC * 32 channels/SAMPA = 159,744 channels/TPC
 
-const double TPC_CAGE_LENGTH = 211.;
-const double TPC_CAGE_IR = 20.;
-const double TPC_CAGE_OR = 78.;
-const int TPC_MOD_NLAY = 16;
-const int TPC_MOD_CH[3] = {1152,1536,2304};
-const int TPC_GAS_LAYERS = TPC_MOD_NLAY*5/2;
-const int previous_active_layers = 3/*maps*/ + 4/*itt*/;
-double TPC_RI[TPC_GAS_LAYERS];
+void TPCInit() {}
 
-double AddTPC2G4Geo(PHG4Reco* g4Reco, double radius, int verbosity) {
-  cout << "TPC::AddTPC2G4Geo called" << endl;
-  if(radius > TPC_CAGE_IR) {
-    cout << "ConstructDetector_TPC: No space for TPC" << endl;
-    exit(0);
+double TPC(PHG4Reco* g4Reco,
+	    double radius,
+	    const int absorberactive = 0,
+	    int verbosity = 0) {
+
+  overlappcheck = 1;  
+  if (radius > 21-1.17) {
+    cout << "inconsistency: radius: " << radius 
+	 << " larger than tpc inner  radius: " << 21-1.17 << endl;
+    gSystem->Exit(-1);
   }
+  
+  gSystem->Load("libg4tpc.so");
+  gSystem->Load("libg4testbench.so");
 
-  int previous_support_layers = 3/*maps*/ + 4/*itt*/;
+  PHG4TPCSubsystem *tpc = new PHG4TPCSubsystem("TPC");
+  tpc->SetActive();
+  tpc->SuperDetector("TPC");
+  // tpc_set_double_param("gas_inner_radius",21.);
+  // tpc_set_double_param("gas_outer_radius",77.);
+  // tpc_set_double_param("place_x", 0.);
+  // tpc_set_double_param("place_y", 0.);
+  // tpc_set_double_param("place_z", 0.);
+  // tpc_set_double_param("rot_x", 0.);
+  // tpc_set_double_param("rot_y", 0.);
+  // tpc_set_double_param("rot_z", 0.);
+  // tpc_set_double_param("tpc_length",211.);
 
-  PHG4CylinderSubsystem *cyl;
+  // tpc_set_double_param("steplimits", NAN);
 
-  radius = TPC_CAGE_IR;
+  // tpc_set_string_param("tpc_gas", "sPHENIX_TPC_Gas");
 
-  double n_rad_length_cage = 1.0e-02;
-  double cage_thickness = 1.436 * n_rad_length_cage;
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", previous_support_layers++ );
-  cyl->Verbosity(verbosity);
-  cyl->set_double_param("radius",radius);
-  cyl->set_int_param("lengthviarapidity",0);
-  cyl->set_double_param("length",TPC_CAGE_LENGTH);
-  cyl->set_string_param("material","G4_Cu");
-  cyl->set_double_param("thickness",cage_thickness );
-  cyl->SuperDetector("SVTXSUPPORT");
-  g4Reco->registerSubsystem( cyl );
+// material budget:
+// Cu (all layers): 0.5 oz cu per square foot, 1oz == 0.0347mm --> 0.5 oz ==  0.00347cm/2. 
+// Kapton insulation 18 layers of * 5mil = 18*0.0127=0.2286
+// 250 um FR4 (Substrate for Cu layers)
+// HoneyComb (nomex) 1/2 inch=0.5*2.54 cm
+  // tpc_set_string_param("cage_layer_1_material","G4_Cu");
+  // tpc_set_double_param("cage_layer_1_thickness",0.00347/2.);
 
-  radius += cage_thickness;
+  // tpc_set_string_param("cage_layer_2_material","FR4");
+  // tpc_set_double_param("cage_layer_2_thickness",0.025);
 
-  TString tpcgas = "G4_Ar";
-  double st_mod = 23.1;
-  const double TPC_MOD_DR = 17.3;
-  const double TPC_MOD_WL = 0.3;
-  const double lay_dr = (TPC_MOD_DR - TPC_MOD_WL*2)/double(TPC_MOD_NLAY);
+  // tpc_set_string_param("cage_layer_3_material","NOMEX");
+  // tpc_set_double_param("cage_layer_3_thickness",0.5*2.54);
 
-  //=== GAS UNTIL FIRST READOUT
-  double delta = TPC_MOD_DR/2 + st_mod - radius;
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", previous_support_layers++);
-  cyl->Verbosity(verbosity);
-  cyl->set_double_param("radius",radius);
-  cyl->set_int_param("lengthviarapidity",0);
-  cyl->set_double_param("length",TPC_CAGE_LENGTH);
-  cyl->set_string_param("material",tpcgas.Data());
-  cyl->set_double_param("thickness", delta);
-  cyl->SuperDetector("SVTXSUPPORT");
-  g4Reco->registerSubsystem( cyl );
+  // tpc_set_string_param("cage_layer_4_material","G4_Cu");
+  // tpc_set_double_param("cage_layer_4_thickness",0.00347/2.);
 
-  radius += delta;
+  // tpc_set_string_param("cage_layer_5_material","FR4");
+  // tpc_set_double_param("cage_layer_5_thickness",0.025);
 
-  //=== ACTIVE FIRST HALF MODULE
-  delta = lay_dr;
-  for(int ilayer=0; ilayer<TPC_MOD_NLAY/2; ++ilayer) {
-    TPC_RI[ilayer] = radius;
-    cyl = new PHG4CylinderSubsystem("SVTX", previous_active_layers+ilayer );
-    cyl->Verbosity(verbosity);
-    cyl->set_double_param("radius",radius);
-    cyl->set_int_param("lengthviarapidity",0);
-    cyl->set_double_param("length",TPC_CAGE_LENGTH);
-    cyl->set_string_param("material",tpcgas.Data());
-    cyl->set_double_param("thickness", delta-0.0038 );
-    cyl->SetActive();
-    cyl->SuperDetector("SVTX");
-    g4Reco->registerSubsystem( cyl );
-    radius += delta;
-  }
+  // tpc_set_string_param("cage_layer_6_material","G4_KAPTON");
+  // tpc_set_double_param("cage_layer_6_thickness",0.2286);
 
-  //=== GAS UNTIL SECOND READOUT
-  double delta = 0.6;
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", previous_support_layers++);
-  cyl->Verbosity(verbosity);
-  cyl->set_double_param("radius",radius);
-  cyl->set_int_param("lengthviarapidity",0);
-  cyl->set_double_param("length",TPC_CAGE_LENGTH);
-  cyl->set_string_param("material",tpcgas.Data());
-  cyl->set_double_param("thickness", delta);
-  cyl->SuperDetector("SVTXSUPPORT");
-  g4Reco->registerSubsystem( cyl );
+  // tpc_set_string_param("cage_layer_7_material","G4_Cu");
+  // tpc_set_double_param("cage_layer_7_thickness",0.00347/2.);
 
-  radius += delta;
+  // tpc_set_string_param("cage_layer_8_material","G4_KAPTON");
+  // tpc_set_double_param("cage_layer_8_thickness",0.05); // 50 um
 
-  //=== ACTIVE SECOND MODULE
-  delta = lay_dr;
-  for(int ilayer=TPC_MOD_NLAY/2; ilayer<TPC_MOD_NLAY*3/2; ++ilayer) {
-    TPC_RI[ilayer] = radius;
-    cyl = new PHG4CylinderSubsystem("SVTX", previous_active_layers+ilayer );
-    cyl->Verbosity(verbosity);
-    cyl->set_double_param("radius",radius);
-    cyl->set_int_param("lengthviarapidity",0);
-    cyl->set_double_param("length",TPC_CAGE_LENGTH);
-    cyl->set_string_param("material",tpcgas.Data());
-    cyl->set_double_param("thickness", delta-0.0038 );
-    cyl->SetActive();
-    cyl->SuperDetector("SVTX");
-    g4Reco->registerSubsystem( cyl );
-    radius += delta;
-  }
-
-  //=== GAS UNTIL THIRD READOUT
-  double delta = 0.6;
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", previous_support_layers++);
-  cyl->Verbosity(verbosity);
-  cyl->set_double_param("radius",radius);
-  cyl->set_int_param("lengthviarapidity",0);
-  cyl->set_double_param("length",TPC_CAGE_LENGTH);
-  cyl->set_string_param("material",tpcgas.Data());
-  cyl->set_double_param("thickness", delta);
-  cyl->SuperDetector("SVTXSUPPORT");
-  g4Reco->registerSubsystem( cyl );
-
-  radius += delta;
-
-  //=== ACTIVE THIRD MODULE
-  delta = lay_dr;
-  for(int ilayer=TPC_MOD_NLAY*3/2; ilayer<TPC_MOD_NLAY*5/2; ++ilayer) {
-    TPC_RI[ilayer] = radius;
-    cyl = new PHG4CylinderSubsystem("SVTX", previous_active_layers+ilayer );
-    cyl->Verbosity(verbosity);
-    cyl->set_double_param("radius",radius);
-    cyl->set_int_param("lengthviarapidity",0);
-    cyl->set_double_param("length",TPC_CAGE_LENGTH);
-    cyl->set_string_param("material",tpcgas.Data());
-    cyl->set_double_param("thickness", delta-0.0038 );
-    cyl->SetActive();
-    cyl->SuperDetector("SVTX");
-    g4Reco->registerSubsystem( cyl );
-    radius += delta;
-  }
-
-  //=== GAS UNTIL OUTER CAGE
-  delta = TPC_CAGE_OR-cage_thickness - radius;
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", previous_support_layers++);
-  cyl->Verbosity(verbosity);
-  cyl->set_double_param("radius",radius);
-  cyl->set_int_param("lengthviarapidity",0);
-  cyl->set_double_param("length",TPC_CAGE_LENGTH);
-  cyl->set_string_param("material",tpcgas.Data());
-  cyl->set_double_param("thickness",delta);
-  cyl->SuperDetector("SVTXSUPPORT");
-  g4Reco->registerSubsystem( cyl );
-
-  radius = TPC_CAGE_OR-cage_thickness;
-
-  //=== OUTER CAGE
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", previous_support_layers++);
-  cyl->Verbosity(verbosity);
-  cyl->set_double_param("radius",radius);
-  cyl->set_int_param("lengthviarapidity",0);
-  cyl->set_double_param("length",TPC_CAGE_LENGTH);
-  cyl->set_string_param("material","G4_Cu");
-  cyl->set_double_param("thickness",cage_thickness );
-  cyl->SuperDetector("SVTXSUPPORT");
-  g4Reco->registerSubsystem( cyl );
-
-  radius = TPC_CAGE_OR;
-
-  return radius;
-}
-
-void AddTPC2CellReco(PHG4CylinderCellTPCReco *svtx_cells, int verbosity=0) {
-  cout << "TPC::AddTPC2CellReco called" << endl;
-  const bool do_tpc_distoration = false;//true;
-  const double diffusion = 0.0057;
-  const double electrons_per_kev = 38.;
-
-  PHG4TPCSpaceChargeDistortion* tpc_distortion = NULL;
-  if(do_tpc_distoration) {
-    if(TPC_CAGE_IR != 20. && TPC_CAGE_IR != 30.) {
-      cout << "Svtx_Cells - Fatal Error - TPC distoration required that "
-	"TPC_CAGE_IR is either 20 or 30 cm."
-           << endl;
-      exit(3);
+  // tpc_set_string_param("cage_layer_9_material","G4_Cu");
+  // tpc_set_double_param("cage_layer_9_thickness",0.00347/2.);
+  if (absorberactive)  
+    {
+      tpc->SetAbsorberActive();
     }
-    string TPC_distroation_file = string(getenv("CALIBRATIONROOT")) + Form("/Tracking/TPC/SpaceChargeDistortion/sPHENIX%.0f.root",TPC_CAGE_IR);
-    PHG4TPCSpaceChargeDistortion* tpc_distortion = new PHG4TPCSpaceChargeDistortion(TPC_distroation_file);
-    //  tpc_distortion -> setAccuracy(0); // option to overwrite default
-    //  tpc_distortion -> setPrecision(1); // option to overwrite default
-  }
-  svtx_cells->setDistortion(tpc_distortion); // apply TPC distrotion if tpc_distortion is not NULL
-  svtx_cells->setDiffusion(diffusion);
-  svtx_cells->setElectronsPerKeV(electrons_per_kev);
+  tpc->OverlapCheck(overlapcheck);
 
-  if(verbosity>0) {
-    for(int i=0; i!=TPC_GAS_LAYERS; ++i)
-      cout << "Added TPC layer " << i << " starting at " << TPC_RI[i] << " cm." << endl;
-  }
+  g4Reco->registerSubsystem( tpc );  
 
-  const double tpc_dt = 0.17;
-  //=== FIRST MODULE
-  for(int i=0; i<TPC_MOD_NLAY/2; ++i) {
-    double tpc_rdphi = TMath::TwoPi()*TPC_RI[i]/double(TPC_MOD_CH[0]);
-    svtx_cells->cellsize(previous_active_layers+i, tpc_rdphi, tpc_dt);
-    svtx_cells->set_timing_window(previous_active_layers+i, -14000.0, +14000.0);
-  }
-  //=== SECOND MODULE
-  for(int i=TPC_MOD_NLAY/2; i<TPC_MOD_NLAY*3/2; ++i) {
-    double tpc_rdphi = TMath::TwoPi()*TPC_RI[i]/double(TPC_MOD_CH[1]);
-    svtx_cells->cellsize(previous_active_layers+i, tpc_rdphi, tpc_dt);
-    svtx_cells->set_timing_window(previous_active_layers+i, -14000.0, +14000.0);
-  }
-  //=== THIRD MODULE
-  for(int i=TPC_MOD_NLAY*3/2; i<TPC_MOD_NLAY*5/2; ++i) {
-    double tpc_rdphi = TMath::TwoPi()*TPC_RI[i]/double(TPC_MOD_CH[2]);
-    svtx_cells->cellsize(previous_active_layers+i, tpc_rdphi, tpc_dt);
-    svtx_cells->set_timing_window(previous_active_layers+i, -14000.0, +14000.0);
-  }
-  return;
-}
+  radius = 77.+1.17;
+  
 
-void AddTPC2Reco(PHG4SvtxDigitizer* digi, PHG4HoughTransformTPC* hough) {
-  cout << "TPC::AddTPC2Reco called" << endl;
-  Fun4AllServer *se = Fun4AllServer::instance();
-
-  //clusterizer
-  PHG4TPCClusterizer* tpcclusterizer = new PHG4TPCClusterizer("PHG4TPCClusterizer",3,4,previous_active_layers,previous_active_layers+TPC_GAS_LAYERS);
-  tpcclusterizer->setEnergyCut(20.0*45.0/TPC_GAS_LAYERS);
-  se->registerSubsystem( tpcclusterizer );
-  //digitizer
-  for(int i=previous_active_layers;i<previous_active_layers+TPC_GAS_LAYERS;++i) {
-    digi->set_adc_scale(i, 10000, 1.0);
-  }
-  //hough
-  hough->setUseCellSize(true);
-  double mat_scale = 1.0;
-  for(int i=previous_active_layers;i<previous_active_layers+TPC_GAS_LAYERS;++i) {
-    hough->set_material(i, mat_scale*0.06/TPC_GAS_LAYERS);
-    hough->setFitErrorScale(i, 1./sqrt(12.));
-    hough->setVoteErrorScale(i, 1.0);
-  }
-  hough->set_material(previous_active_layers, mat_scale*0.010);   // TPC inner field cage wall, 1% of X_0
-  return;
+  radius += no_overlapp;
+  
+  return radius; 
 }

@@ -11,35 +11,43 @@ double HCalOuter(PHG4Reco* g4Reco,
   gSystem->Load("libg4testbench.so");
 
   PHG4OuterHcalSubsystem *hcal = new PHG4OuterHcalSubsystem("HCALOUT");
-  // integer params:
-  //  hcal->set_int_param("light_scint_model",1);
-  //  hcal->set_int_param("magnet_cutout_first_scint",8);
-  //  hcal->set_int_param("n_scinti_plates_per_tower",5);
-  //  hcal->set_int_param("n_scinti_tiles",12);
-  //  hcal->set_int_param("n_towers",64);
-  //  hcal->set_int_param("ncross",-4);
-  // double params:
-  //  hcal->set_double_param("inner_radius", 178);
-  //  hcal->set_double_param("magnet_cutout", 12);
-  //  hcal->set_double_param("outer_radius", 260);
-  //  hcal->set_double_param("place_x", 0);
-  //  hcal->set_double_param("place_y", 0);
-  //  hcal->set_double_param("place_z", 0);
-  //  hcal->set_double_param("rot_x", 0);
-  //  hcal->set_double_param("rot_y", 0);
-  //  hcal->set_double_param("rot_z", 0);
-  //  hcal->set_double_param("scinti_eta_coverage", 1.1);
-  //  hcal->set_double_param("scinti_gap", 0.85);
-  //  hcal->set_double_param("scinti_gap_neighbor", 0.1);
-  //  hcal->set_double_param("scinti_tile_thickness", 0.7);
-  //  hcal->set_double_param("size_z", 609.82);
-  //  hcal->set_double_param("steplimits", nan);
-  // angle is calculated from crossings
-  //  hcal->set_double_param("tilt_angle",NAN);
-  // convenience method so we do not forget to set all of them
-  //  hcal->SetLightCorrection(NAN,NAN,NAN,NAN);
-  // string params:
-  //  hcal->set_string_param("material","Steel_1006");
+  // hcal->set_double_param("inner_radius", 183.3);
+  //-----------------------------------------
+  // the light correction can be set in a single call
+  // hcal->set_double_param("light_balance_inner_corr", NAN);
+  // hcal->set_double_param("light_balance_inner_radius", NAN);
+  // hcal->set_double_param("light_balance_outer_corr", NAN);
+  // hcal->set_double_param("light_balance_outer_radius", NAN);
+  // hcal->set_double_param("magnet_cutout_radius", 195.31);
+  // hcal->set_double_param("magnet_cutout_scinti_radius", 195.96);
+  // hcal->SetLightCorrection(NAN,NAN,NAN,NAN);
+  //-----------------------------------------
+  // hcal->set_double_param("outer_radius", 264.71);
+  // hcal->set_double_param("place_x", 0.);
+  // hcal->set_double_param("place_y", 0.);
+  // hcal->set_double_param("place_z", 0.);
+  // hcal->set_double_param("rot_x", 0.);
+  // hcal->set_double_param("rot_y", 0.);
+  // hcal->set_double_param("rot_z", 0.);
+  // hcal->set_double_param("scinti_eta_coverage", 1.1);
+  // hcal->set_double_param("scinti_gap", 0.85);
+  // hcal->set_double_param("scinti_gap_neighbor", 0.1);
+  // hcal->set_double_param("scinti_inner_radius",183.89);
+  // hcal->set_double_param("scinti_outer_radius",263.27);
+  // hcal->set_double_param("scinti_tile_thickness", 0.7);
+  // hcal->set_double_param("size_z", 304.91 * 2);
+  // hcal->set_double_param("steplimits", NAN);
+  // hcal->set_double_param("tilt_angle", -11.23);
+
+  // hcal->set_int_param("light_scint_model", 1);
+  // hcal->set_int_param("magnet_cutout_first_scinti", 8);
+  // hcal->set_int_param("ncross", 0);
+  // hcal->set_int_param("n_towers", 64);
+  // hcal->set_int_param("n_scinti_plates_per_tower", 5);
+  // hcal->set_int_param("n_scinti_tiles", 12);
+
+  // hcal->set_string_param("material", "Steel_1006");
+
 
   hcal->SetActive();
   hcal->SuperDetector("HCALOUT");
