@@ -257,8 +257,7 @@ void CEMC_Cells(int verbosity = 0)
       //          cemc_cells->etaphisize(i, 0.024, 0.024);
       const double radius = 95;
       cemc_cells->cellsize(i, 2 * TMath::Pi() / 256. * radius, 2 * TMath::Pi() / 256. * radius);
-      cemc_cells->set_double_param(i, "tmin", 0.);
-      cemc_cells->set_double_param(i, "tmax", 60.);
+
     }
     se->registerSubsystem(cemc_cells);
   }
@@ -267,7 +266,6 @@ void CEMC_Cells(int verbosity = 0)
     PHG4FullProjSpacalCellReco *cemc_cells = new PHG4FullProjSpacalCellReco("CEMCCYLCELLRECO");
     cemc_cells->Detector("CEMC");
     cemc_cells->Verbosity(verbosity);
-    cemc_cells->set_timing_window(0.0, 60.0);
     cemc_cells->get_light_collection_model().load_data_file(
         string(getenv("CALIBRATIONROOT")) + string("/CEMC/LightCollection/Prototype3Module.xml"),
         "data_grid_light_guide_efficiency", "data_grid_fiber_trans");
