@@ -164,6 +164,9 @@ int Fun4All_G4_sPHENIX(
       PHPythia8* pythia8 = new PHPythia8();
       // see coresoftware/generators/PHPythia8 for example config
       pythia8->set_config_file("phpythia8.cfg"); 
+      if (readhepmc)
+        pythia8->set_reuse_vertex(0);// reuse vertex of subevent with embedding ID of 0
+      // pythia8->set_vertex_distribution_width(0,0,10,0); // additional vertex smearing if needed, more vertex options available
       se->registerSubsystem(pythia8);
     }
   else if (runpythia6)
@@ -172,6 +175,9 @@ int Fun4All_G4_sPHENIX(
 
       PHPythia6 *pythia6 = new PHPythia6();
       pythia6->set_config_file("phpythia6.cfg");
+      if (readhepmc)
+        pythia6->set_reuse_vertex(0);// reuse vertex of subevent with embedding ID of 0
+      // pythia6->set_vertex_distribution_width(0,0,10,0); // additional vertex smearing if needed, more vertex options available
       se->registerSubsystem(pythia6);
     }
 
