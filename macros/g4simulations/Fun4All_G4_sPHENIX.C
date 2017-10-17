@@ -450,7 +450,7 @@ int Fun4All_G4_sPHENIX(
 
     Fun4AllHepMCPileupInputManager *pileup = new Fun4AllHepMCPileupInputManager( "HepMCPileupInput");
     se->registerInputManager( pileup );
-    pileup->AddFile("/sphenix/sim/sim01/sHijing/sHijing_0-12fm.dat");// this file will be
+    pileup->AddFile("/sphenix/sim/sim01/sHijing/sHijing_0-12fm.dat");// HepMC events used in pile up collisions. You can add multiple files, and the file list will be reused.
     //pileup->set_vertex_distribution_width(100e-4,100e-4,30,5);//override collision smear in space time
     //pileup->set_vertex_distribution_mean(0,0,0,0);//override collision central position shift in space time
     //pileup->set_time_window(-17500.,+17500.); // override timing window in ns
