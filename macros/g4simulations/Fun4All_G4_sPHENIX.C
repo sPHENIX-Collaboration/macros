@@ -446,8 +446,6 @@ int Fun4All_G4_sPHENIX(
   {
     // pile up simulation.
     // add random beam collisions following a collision diamond and rate from a HepMC stream
-
-
     Fun4AllHepMCPileupInputManager *pileup = new Fun4AllHepMCPileupInputManager( "HepMCPileupInput");
     se->registerInputManager( pileup );
     pileup->AddFile("/sphenix/sim/sim01/sHijing/sHijing_0-12fm.dat");// HepMC events used in pile up collisions. You can add multiple files, and the file list will be reused.
