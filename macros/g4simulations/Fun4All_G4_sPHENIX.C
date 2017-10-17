@@ -448,13 +448,13 @@ int Fun4All_G4_sPHENIX(
     // add random beam collisions following a collision diamond and rate from a HepMC stream
 
 
-    Fun4AllHepMCPileupInputManager *in = new Fun4AllHepMCPileupInputManager( "HepMCPileupInput");
-    se->registerInputManager( in );
+    Fun4AllHepMCPileupInputManager *pileup = new Fun4AllHepMCPileupInputManager( "HepMCPileupInput");
+    se->registerInputManager( pileup );
     pileup->AddFile("/sphenix/sim/sim01/sHijing/sHijing_0-12fm.dat");// this file will be
-    //in->set_vertex_distribution_width(100e-4,100e-4,30,5);//override collision smear in space time
-    //in->set_vertex_distribution_mean(0,0,0,0);//override collision central position shift in space time
-    //in->set_time_window(-17500.,+17500.); // override timing window in ns
-    //in->set_collision_rate(100e3); // override collisions rate in Hz
+    //pileup->set_vertex_distribution_width(100e-4,100e-4,30,5);//override collision smear in space time
+    //pileup->set_vertex_distribution_mean(0,0,0,0);//override collision central position shift in space time
+    //pileup->set_time_window(-17500.,+17500.); // override timing window in ns
+    //pileup->set_collision_rate(100e3); // override collisions rate in Hz
   }
 
   if (do_DSTReader)
