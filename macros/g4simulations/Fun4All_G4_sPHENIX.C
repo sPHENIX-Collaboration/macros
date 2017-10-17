@@ -182,7 +182,7 @@ int Fun4All_G4_sPHENIX(
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
       gen->add_particles("pi-",2); // mu+,e+,proton,pi+,Upsilon
       //gen->add_particles("pi+",100); // 100 pion option
-      if (readhepmc || do_embedding)
+      if (readhepmc || do_embedding || runpythia8 || runpythia6)
 	{
 	  gen->set_reuse_existing_vertex(true);
 	  gen->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
@@ -201,7 +201,7 @@ int Fun4All_G4_sPHENIX(
       gen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi());
       //gen->set_pt_range(0.1, 50.0);
       gen->set_pt_range(0.1, 20.0);
-      gen->Embed(1);
+      gen->Embed(2);
       gen->Verbosity(0);
 
       se->registerSubsystem(gen);
@@ -235,7 +235,7 @@ int Fun4All_G4_sPHENIX(
 	  PHG4ParticleGeneratorVectorMeson *vgen = new PHG4ParticleGeneratorVectorMeson();
 	  vgen->add_decay_particles("e+","e-",0); // i = decay id
 	  // event vertex
-	  if (readhepmc || do_embedding || particles)
+	  if (readhepmc || do_embedding || particles || runpythia8 || runpythia6)
 	    {
 	      vgen->set_reuse_existing_vertex(true);
 	    }
@@ -270,7 +270,7 @@ int Fun4All_G4_sPHENIX(
 	    }
       
 	  vgen->Verbosity(0);
-	  vgen->Embed(2);
+	  vgen->Embed(3);
 	  se->registerSubsystem(vgen);
       
 	  cout << "Upsilon generator for istate = " << istate << " created and registered "  << endl;	  
