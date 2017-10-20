@@ -158,6 +158,7 @@ int Fun4All_G4_sPHENIX(
     {
       // place holder. Additional action is performed in later stage at the input manager level
     }
+
     if (runpythia8)
     {
       gSystem->Load("libPHPythia8.so");
@@ -170,6 +171,7 @@ int Fun4All_G4_sPHENIX(
       // pythia8->set_vertex_distribution_width(0,0,10,0); // additional vertex smearing if needed, more vertex options available
       se->registerSubsystem(pythia8);
     }
+
     if (runpythia6)
     {
       gSystem->Load("libPHPythia6.so");
@@ -213,6 +215,7 @@ int Fun4All_G4_sPHENIX(
 
       se->registerSubsystem(gen);
     }
+
     if (usegun)
     {
       PHG4ParticleGun *gun = new PHG4ParticleGun();
@@ -411,6 +414,7 @@ int Fun4All_G4_sPHENIX(
     hitsin->fileopen(inputFile);
     se->registerInputManager(hitsin);
   }
+
   if (do_embedding)
   {
     if (embed_input_file == NULL)
@@ -427,6 +431,7 @@ int Fun4All_G4_sPHENIX(
     in1->AddListFile(embed_input_file);  // RecommendedL: if one use a text list of many input files
     se->registerInputManager(in1);
   }
+
   if (readhepmc)
   {
     //meta-lib for DST objects used in simulation outputs
