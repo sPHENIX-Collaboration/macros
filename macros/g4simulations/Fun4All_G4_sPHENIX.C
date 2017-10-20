@@ -153,11 +153,15 @@ int Fun4All_G4_sPHENIX(
        }
 
     }
-  else if (readhepmc)
+  else
     {
-      // action is performed in later stage at the input manager level
+    // running Geant4 stage. First load event generators.
+
+    if (readhepmc)
+    {
+      // place holder. Additional action is performed in later stage at the input manager level
     }
-  else if (runpythia8)
+    if (runpythia8)
     {
       gSystem->Load("libPHPythia8.so");
       
@@ -169,7 +173,7 @@ int Fun4All_G4_sPHENIX(
       // pythia8->set_vertex_distribution_width(0,0,10,0); // additional vertex smearing if needed, more vertex options available
       se->registerSubsystem(pythia8);
     }
-  else if (runpythia6)
+   if (runpythia6)
     {
       gSystem->Load("libPHPythia6.so");
 
@@ -280,7 +284,8 @@ int Fun4All_G4_sPHENIX(
 	  se->registerSubsystem(vgen);
       
 	  cout << "Upsilon generator for istate = " << istate << " created and registered "  << endl;	  
-	}      
+	}
+    }
 
   if (!readhits)
     {
