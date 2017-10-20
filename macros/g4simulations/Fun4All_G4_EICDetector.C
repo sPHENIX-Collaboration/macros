@@ -191,10 +191,7 @@ int Fun4All_G4_EICDetector(
     }
   else if (readhepmc)
     {
-      // this module is needed to read the HepMC records into our G4 sims
-      // but only if you read HepMC input files
-      HepMCNodeReader *hr = new HepMCNodeReader();
-      se->registerSubsystem(hr);
+    // action is performed in later stage at the input manager level
     }
   else if (readeictree)
     {
@@ -203,9 +200,6 @@ int Fun4All_G4_EICDetector(
       eicr->OpenInputFile(inputFile);
 
       se->registerSubsystem(eicr);
-
-      HepMCNodeReader *hr = new HepMCNodeReader();
-      se->registerSubsystem(hr);
     }
   else if (runpythia8)
     {
@@ -215,9 +209,6 @@ int Fun4All_G4_EICDetector(
       // see coresoftware/generators/PHPythia8 for example config
       pythia8->set_config_file("phpythia8.cfg");
       se->registerSubsystem(pythia8);
-
-      HepMCNodeReader *hr = new HepMCNodeReader();
-      se->registerSubsystem(hr);
     }
   else if (runpythia6)
     {
@@ -227,9 +218,6 @@ int Fun4All_G4_EICDetector(
       // see coresoftware/generators/PHPythia6 for example config
       pythia6->set_config_file("phpythia6_ep.cfg");
       se->registerSubsystem(pythia6);
-
-      HepMCNodeReader *hr = new HepMCNodeReader();
-      se->registerSubsystem(hr);
     }
   else if (runhepgen)
     {
@@ -242,9 +230,6 @@ int Fun4All_G4_EICDetector(
       hepgen->set_momentum_electron(-20);
       hepgen->set_momentum_hadron(250);
       se->registerSubsystem(hepgen);
-
-      HepMCNodeReader *hr = new HepMCNodeReader();
-      se->registerSubsystem(hr);
     }
   else if (runsartre)
     {
@@ -265,9 +250,6 @@ int Fun4All_G4_EICDetector(
       pTrig->PrintConfig();
       mysartre->register_trigger((PHSartreGenTrigger *)pTrig);
       se->registerSubsystem(mysartre);
-
-      HepMCNodeReader *hr = new HepMCNodeReader();
-      se->registerSubsystem(hr);
     }
 
   // If "readhepMC" is also set, the particles will be embedded in Hijing events

@@ -96,6 +96,10 @@ int G4Setup(const int absorberactive = 0,
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
+  // read-in HepMC events to Geant4 if there is any
+  HepMCNodeReader *hr = new HepMCNodeReader();
+  se->registerSubsystem(hr);
+
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->save_DST_geometry(true); //Save geometry from Geant4 to DST
   g4Reco->set_rapidity_coverage(1.1); // according to drawings
