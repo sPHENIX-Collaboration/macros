@@ -310,7 +310,7 @@ void Svtx_Cells(int verbosity = 0)
   // set cylinder cell TPC cell sizes
   for (int i=n_maps_layer + n_intt_layer;i<Max_si_layer;++i) {
     svtx_cells->cellsize(i, tpc_cell_x, tpc_cell_y);
-    svtx_cells->set_timing_window(i, -14000.0, +14000.0);
+    svtx_cells->set_timing_window(i, -35000.0, +35000.0);
   }
   
   se->registerSubsystem(svtx_cells);
