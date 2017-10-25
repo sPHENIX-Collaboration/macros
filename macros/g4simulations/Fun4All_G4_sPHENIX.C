@@ -467,6 +467,7 @@ int Fun4All_G4_sPHENIX(
     //pileup->set_vertex_distribution_mean(0,0,0,0);//override collision central position shift in space time
     pileup->set_time_window(-35000.,+35000.); // override timing window in ns
     //pileup->set_collision_rate(100e3); // override collisions rate in Hz
+    pileup->set_collision_rate(pileup_collision_rate);
   }
 
   if (do_DSTReader)
