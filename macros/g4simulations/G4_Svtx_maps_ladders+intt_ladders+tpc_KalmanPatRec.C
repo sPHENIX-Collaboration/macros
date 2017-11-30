@@ -7,27 +7,188 @@ bool use_primary_vertex = false;
 
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
 const int n_intt_layer = 4;   // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
-int n_gas_layer  = 40;
+
+
+int n_tpc_layer_inner = 8;
+double tpc_layer_thick_inner = 1.25;
+int tpc_layer_rphi_count_inner = 1920;
+
+
+// make inner layers a factor of 2 thinner
+/*
+int n_tpc_layer_inner = 8 * 2;
+double tpc_layer_thick_inner = 1.25 / 2.0;
+int tpc_layer_rphi_count_inner = 1920 / 2;
+*/
+
+int n_tpc_layer_mid = 16;
+double tpc_layer_thick_mid = 1.25;
+int tpc_layer_rphi_count_mid = 1536;
+
+int n_tpc_layer_outer = 16;
+double tpc_layer_thick_outer = 1.25;
+int tpc_layer_rphi_count_outer = 2304;
+
+int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
 
 double inner_cage_radius = 20.;
+double inner_readout_radius = 30.;
+
+
+// TPC gas parameters
+// These are set for a variety of gas choices...
+//==============================================
+enum TPC_Gas{ Ne2K_100, Ne2K_400, NeCF4_100, NeCF4_300, NeCF4_400, ByHand};
+TPC_Gas ether = TPC_Gas::NeCF4_400;
+//TPC_Gas ether = TPC_Gas::ByHand;
+
+// Data on gasses @20 C and 760 Torr from the following source:
+// http://www.slac.stanford.edu/pubs/icfa/summer98/paper3/paper3.pdf
+double Ne_dEdx   = 1.56;  // keV/cm
+double CF4_dEdx  = 7.00;  // keV/cm
+double iBut_dEdx = 5.93;  // keV/cm
+
+double Ne_NPrimary   = 12;  // Number/cm
+double CF4_NPrimary  = 51;  // Number/cm
+double iBut_NPrimary = 84;  // Number/cm
+
+double Ne_NTotal   =  43;  // Number/cm
+double CF4_NTotal  = 100;  // Number/cm
+double iBut_NTotal = 195;  // Number/cm
+
+// TPC Performance Parameter (applies extra smear to mimic the avalanche):
+double TPC_SigmaT = 0.03;  // 0.03 means 300 microns...Prakhar Garg Simulation...desire measurement...
+
+// to be overwritten...
+double TPCDriftVelocity;
+double TPC_Trans_Diffusion;
+double TPC_Long_Diffusion;
+double TPC_dEdx;
+double TPC_NPri;
+double TPC_NTot;
+double TPC_ElectronsPerKeV;
 
 // TPC readout shaping time and ADC clock parameters
+// these set the Z size of the TPC cells
+// These need to be set in the init since some of them require the drift velocity...
 //=======================================
-
-double TPCDriftVelocity = 3.0 / 1000.0; // cm/ns
-double TPCShapingRMSLead = 32.0;  // ns, rising RMS equivalent of shaping amplifier for 80 ns SAMPA
-double TPCShapingRMSTail = 48.0;  // ns, falling RMS equivalent of shaping amplifier for 80 ns SAMPA
-double TPCADCClock = 53.0;  // ns, corresponds to an ADC clock rate of 18.8 MHz
-
-double tpc_cell_x = 0.15;  // bin size for pads in rphi 
-double tpc_cell_y = TPCADCClock * TPCDriftVelocity;  // cm
+double TPCADCClock;
+double TPCShapingRMSLead;
+double TPCShapingRMSTail;
+double tpc_cell_z;
+double TPC_SmearRPhi;
+double TPC_SmearZ;
 
 int Max_si_layer;
 
 void SvtxInit(int n_TPC_layers = 40, int verbosity = 0)
 {
-  n_gas_layer = n_TPC_layers;
   Max_si_layer = n_maps_layer + n_intt_layer + n_gas_layer;
+
+  switch(ether)
+    {
+      // https://www.phenix.bnl.gov/WWW/p/draft/prakhar/tpc/HTML_Gas_Linear/Ne_CF4_IC4H10_95_3_2.html
+    case TPC_Gas::Ne2K_100:
+      {
+	cout << "Gas Choice:  TPC_Gas::Ne2K_100" << endl;
+	TPCDriftVelocity    = 3.2 / 1000.0; // cm/ns
+	TPC_Trans_Diffusion = 0.0065;    // cm/SQRT(cm)
+	TPC_Long_Diffusion  = 0.0300;    // cm/SQRT(cm)
+	TPC_dEdx = 0.95*Ne_dEdx     + 0.03*CF4_dEdx    + 0.02*iBut_dEdx;
+	TPC_NPri = 0.95*Ne_NPrimary + 0.03*CF4_NPrimary + 0.02*iBut_NPrimary;
+	TPC_NTot = 0.95*Ne_NTotal   + 0.03*CF4_NTotal   + 0.02*iBut_NTotal;
+	break;
+      }
+    case TPC_Gas::Ne2K_400:
+      {
+	cout << "Gas Choice:  TPC_Gas::Ne2K_400" << endl;
+	TPCDriftVelocity    = 5.5 / 1000.0; // cm/ns
+	TPC_Trans_Diffusion = 0.0120;    // cm/SQRT(cm)
+	TPC_Long_Diffusion  = 0.0175;    // cm/SQRT(cm)
+	TPC_dEdx = 0.95*Ne_dEdx     + 0.03*CF4_dEdx    + 0.02*iBut_dEdx;
+	TPC_NPri = 0.95*Ne_NPrimary + 0.03*CF4_NPrimary + 0.02*iBut_NPrimary;
+	TPC_NTot = 0.95*Ne_NTotal   + 0.03*CF4_NTotal   + 0.02*iBut_NTotal;
+	break;
+      }
+      // https://www.phenix.bnl.gov/WWW/p/draft/prakhar/tpc/HTML_Gas_Linear/Ne_CF4_90_10.html
+    case TPC_Gas::NeCF4_100:
+      {
+	cout << "Gas Choice:  TPC_Gas::NeCF4_100" << endl;
+	TPCDriftVelocity    = 4.0 / 1000.0; // cm/ns
+	TPC_Trans_Diffusion = 0.0045;    // cm/SQRT(cm)
+	TPC_Long_Diffusion  = 0.0270;    // cm/SQRT(cm)
+	TPC_dEdx = 0.90*Ne_dEdx     + 0.10*CF4_dEdx  ;
+	TPC_NPri = 0.90*Ne_NPrimary + 0.10*CF4_NPrimary ;
+	TPC_NTot = 0.90*Ne_NTotal   + 0.10*CF4_NTotal ;
+	break;
+      }
+    case TPC_Gas::NeCF4_300:
+      {
+	cout << "Gas Choice:  TPC_Gas::NeCF4_300" << endl;
+	TPCDriftVelocity    = 7.0 / 1000.0; // cm/ns
+	TPC_Trans_Diffusion = 0.0052;    // cm/SQRT(cm)
+	TPC_Long_Diffusion  = 0.0170;    // cm/SQRT(cm)
+	TPC_dEdx = 0.90*Ne_dEdx     + 0.10*CF4_dEdx  ;
+	TPC_NPri = 0.90*Ne_NPrimary + 0.10*CF4_NPrimary ;
+	TPC_NTot = 0.90*Ne_NTotal   + 0.10*CF4_NTotal ;
+	break;
+      }
+    case TPC_Gas::NeCF4_400:
+      {
+	cout << "Gas Choice:  TPC_Gas::NeCF4_400" << endl;
+	TPCDriftVelocity    = 8.0 / 1000.0; // cm/ns
+	TPC_Trans_Diffusion = 0.0060;    // cm/SQRT(cm)
+	TPC_Long_Diffusion  = 0.0150;    // cm/SQRT(cm)
+	TPC_dEdx = 0.90*Ne_dEdx     + 0.10*CF4_dEdx  ;
+	TPC_NPri = 0.90*Ne_NPrimary + 0.10*CF4_NPrimary ;
+	TPC_NTot = 0.90*Ne_NTotal   + 0.10*CF4_NTotal ;
+	break;
+      }
+    case TPC_Gas::ByHand:
+      {
+	cout << "Gas Choice:  TPC_Gas::ByHand" << endl;
+	TPCDriftVelocity    = 6.0 / 1000.0; // cm/ns
+	TPC_Trans_Diffusion = 0.0130;    // cm/SQRT(cm)
+	TPC_Long_Diffusion  = 0.0130;    // cm/SQRT(cm)
+	TPC_ElectronsPerKeV = 28.0;
+	TPC_dEdx = 0.90*Ne_dEdx     + 0.10*CF4_dEdx  ;
+	TPC_NPri = 0.90*Ne_NPrimary + 0.10*CF4_NPrimary ;
+	TPC_NTot = TPC_ElectronsPerKeV*TPC_dEdx ;
+	break;
+      }
+    default:   // defaults to NeCF4_400
+      {
+	cout << "Gas Choice Undefined...using TPC_Gas::NeCF4_400" << endl;
+	TPCDriftVelocity    = 8.0 / 1000.0; // cm/ns
+	TPC_Trans_Diffusion = 0.0060;    // cm/SQRT(cm)
+	TPC_Long_Diffusion  = 0.0150;    // cm/SQRT(cm)
+	TPC_dEdx = 0.90*Ne_dEdx     + 0.10*CF4_dEdx  ;
+	TPC_NPri = 0.90*Ne_NPrimary + 0.10*CF4_NPrimary ;
+	TPC_NTot = 0.90*Ne_NTotal   + 0.10*CF4_NTotal ;
+	break;
+      }
+      
+    }
+  
+  TPC_ElectronsPerKeV = TPC_NTot/TPC_dEdx;
+
+  // TPC readout shaping time and ADC clock parameters
+  // these set the Z size of the TPC cells
+  //=======================================
+  // TPCShapingRMSLead = 32.0;  // ns, rising RMS equivalent of shaping amplifier for 80 ns SAMPA
+  // TPCShapingRMSTail = 48.0;  // ns, falling RMS equivalent of shaping amplifier for 80 ns SAMPA
+   TPCADCClock = 53.0;  // ns, corresponds to an ADC clock rate of 18.8 MHz
+   TPCShapingRMSLead = 16.0;  // ns, rising RMS equivalent of shaping amplifier for 40 ns SAMPA
+   TPCShapingRMSTail = 24.0;  // ns, falling RMS equivalent of shaping amplifier for 40 ns SAMPA
+  // TPCADCClock = 27.0;  // ns, corresponds to an ADC clock rate of 18.8 MHz * 2
+   tpc_cell_z = TPCADCClock * TPCDriftVelocity;  // cm
+
+   //  TKH does not understand the physical origin of these parameters.
+   //  however, their impact seems quite small...
+   TPC_SmearRPhi = 0.10;
+   TPC_SmearZ    = 0.15;
+
+  
 }
 
 double Svtx(PHG4Reco* g4Reco, double radius, 
@@ -168,30 +329,73 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   radius = inner_readout_radius;
   
   double outer_radius = 78.;
-  int npoints = Max_si_layer - n_maps_layer - n_intt_layer;
-  double delta_radius =  ( outer_radius - inner_readout_radius )/( (double)npoints );
+  //int npoints = Max_si_layer - n_maps_layer - n_intt_layer;
+  //double delta_radius =  ( outer_radius - inner_readout_radius )/( (double)npoints );
   
-  for(int ilayer=n_maps_layer + n_intt_layer;ilayer<(n_maps_layer + n_intt_layer + npoints);++ilayer) {
+ // Active layers of the TPC from 30-40 cm (inner layers)
+  
+  for(int ilayer=n_maps_layer + n_intt_layer;ilayer<(n_maps_layer + n_intt_layer + n_tpc_layer_inner);++ilayer) {
 
-      if (verbosity)
-        cout << "Create TPC gas layer " << ilayer  << " with radius " << radius  << " cm "
-	       << " thickness " << delta_radius - 0.01 << " length " << cage_length << endl;
+    //if (verbosity)
+        cout << "Create TPC gas layer " << ilayer  << " with inner radius " << radius  << " cm "
+	       << " thickness " << tpc_layer_thick_inner - 0.01 << " length " << cage_length << endl;
 
     cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
     cyl->set_double_param("radius",radius);
     cyl->set_int_param("lengthviarapidity",0);
     cyl->set_double_param("length",cage_length);
     cyl->set_string_param("material",tpcgas.c_str());
-    cyl->set_double_param("thickness", delta_radius - 0.01 );
+    cyl->set_double_param("thickness", tpc_layer_thick_inner - 0.01 );
     cyl->SetActive();
     cyl->SuperDetector("SVTX");
     g4Reco->registerSubsystem( cyl );
     
-    radius += delta_radius;
+    radius += tpc_layer_thick_inner;
+  }
+
+  // Active layers of the TPC from 40-60 cm (mid layers)
+
+  for(int ilayer=n_maps_layer + n_intt_layer+n_tpc_layer_inner;ilayer<(n_maps_layer + n_intt_layer + n_tpc_layer_inner+n_tpc_layer_mid);++ilayer) {
+
+    //if (verbosity)
+        cout << "Create TPC gas layer " << ilayer  << " with inner radius " << radius  << " cm "
+	       << " thickness " << tpc_layer_thick_mid - 0.01 << " length " << cage_length << endl;
+
+    cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
+    cyl->set_double_param("radius",radius);
+    cyl->set_int_param("lengthviarapidity",0);
+    cyl->set_double_param("length",cage_length);
+    cyl->set_string_param("material",tpcgas.c_str());
+    cyl->set_double_param("thickness", tpc_layer_thick_mid - 0.01 );
+    cyl->SetActive();
+    cyl->SuperDetector("SVTX");
+    g4Reco->registerSubsystem( cyl );
+    
+    radius += tpc_layer_thick_mid;
+  }
+
+  // Active layers of the TPC from 60-80 cm (outer layers)
+
+  for(int ilayer=n_maps_layer + n_intt_layer+n_tpc_layer_inner+n_tpc_layer_mid;ilayer<(n_maps_layer + n_intt_layer + n_tpc_layer_inner+n_tpc_layer_mid+n_tpc_layer_outer);++ilayer) {
+
+    cout << "Create TPC gas layer " << ilayer  << " with inner radius " << radius  << " cm "
+	 << " thickness " << tpc_layer_thick_outer - 0.01 << " length " << cage_length << endl;
+
+    cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
+    cyl->set_double_param("radius",radius);
+    cyl->set_int_param("lengthviarapidity",0);
+    cyl->set_double_param("length",cage_length);
+    cyl->set_string_param("material",tpcgas.c_str());
+    cyl->set_double_param("thickness", tpc_layer_thick_outer - 0.01 );
+    cyl->SetActive();
+    cyl->SuperDetector("SVTX");
+    g4Reco->registerSubsystem( cyl );
+    
+    radius += tpc_layer_thick_outer;
   }
 
   // outer field cage
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_maps_layer + n_intt_layer + npoints);
+  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_maps_layer + n_intt_layer + n_gas_layer);
   cyl->set_double_param("radius",radius);
   cyl->set_int_param("lengthviarapidity",0);
   cyl->set_double_param("length",cage_length);
@@ -226,6 +430,24 @@ void Svtx_Cells(int verbosity = 0)
   //-----------
   // SVTX cells
   //-----------
+
+  if (true)
+    {
+      cout << "  TPC Drift Velocity: " << TPCDriftVelocity << " cm/nsec" << endl;
+      cout << "  TPC Transverse Diffusion: " << TPC_Trans_Diffusion << " cm/SQRT(cm)" << endl;
+      cout << "  TPC Longitudinal Diffusion: " << TPC_Long_Diffusion << " cm/SQRT(cm)" << endl;
+      cout << "  TPC dE/dx: " << TPC_dEdx << " keV/cm" << endl;
+      cout << "  TPC N Primary: " << TPC_NPri << " electrons/cm" << endl;
+      cout << "  TPC N Total: " << TPC_NTot << " electrons/cm" << endl;
+      cout << "  TPC Electrons Per keV: " << TPC_ElectronsPerKeV << " electrons/keV" << endl;
+      cout << "  TPC ADC Clock: " << TPCADCClock << " nsec" << endl;
+      cout << "  TPC ADC Rate: " << 1000.0/TPCADCClock << " MHZ" << endl;
+      cout << "  TPC Shaping Lead: " << TPCShapingRMSLead << " nsec" << endl;
+      cout << "  TPC Shaping Tail: " << TPCShapingRMSTail << " nsec" << endl;
+      cout << "  TPC z cell " << tpc_cell_z << " cm" << endl;
+      cout << "  TPC Smear R-Phi " << TPC_SmearRPhi << " cm" << endl;
+      cout << "  TPC Smear Z " << TPC_SmearZ << " cm" << endl;
+    }
 
   if(n_maps_layer > 0)
     {
@@ -280,17 +502,19 @@ void Svtx_Cells(int verbosity = 0)
   PHG4CylinderCellTPCReco *svtx_cells = new PHG4CylinderCellTPCReco(n_maps_layer+n_intt_layer);
   svtx_cells->Detector("SVTX");
   svtx_cells->setDistortion(tpc_distortion);
-  if(n_gas_layer == 40)
+  if(n_gas_layer != 60)
     {
-      svtx_cells->setDiffusionT(0.0130);
-      svtx_cells->setDiffusionL(0.0130);
+      svtx_cells->setDiffusionT(TPC_Trans_Diffusion);
+      svtx_cells->setDiffusionL(TPC_Long_Diffusion);
+      svtx_cells->setSigmaT(TPC_SigmaT);
+
       svtx_cells->setShapingRMSLead(TPCShapingRMSLead * TPCDriftVelocity);
       svtx_cells->setShapingRMSTail(TPCShapingRMSTail * TPCDriftVelocity);
       // Expected cluster resolutions:
       //    r-phi: diffusion + GEM smearing = 750 microns, assume resolution is 20% of that => 150 microns
       //    Z:  amplifier shaping time (RMS 32 ns, 48 ns) and drift vel of 3 cm/microsec gives smearing of 3 x (32+48/2 = 1.2 mm, assume resolution is 20% of that => 240 microns   
-      svtx_cells->setSmearRPhi(0.10);  // additional random displacement of cloud positions wrt hits to give expected cluster resolution of 150 microns for charge at membrane 
-      svtx_cells->setSmearZ(0.15);     // additional random displacement of cloud positions wrt hits to give expected cluster rsolution of 240 microns for charge at membrane
+      svtx_cells->setSmearRPhi(TPC_SmearRPhi);  // additional random displacement of cloud positions wrt hits to give expected cluster resolution of 150 microns for charge at membrane 
+      svtx_cells->setSmearZ(TPC_SmearZ);     // additional random displacement of cloud positions wrt hits to give expected cluster rsolution of 240 microns for charge at membrane
     }
   else
     {
@@ -302,17 +526,62 @@ void Svtx_Cells(int verbosity = 0)
     }
   svtx_cells->set_drift_velocity(TPCDriftVelocity);
   svtx_cells->setHalfLength( 105.5 );
-  svtx_cells->setElectronsPerKeV(28);
+  svtx_cells->setElectronsPerKeV(TPC_ElectronsPerKeV);
   svtx_cells->Verbosity(0);
 
   // The maps cell size is set when the detector is constructed because it is needed by the geometry object
   // The INTT ladder cell size is set in the detector construction code
+
   // set cylinder cell TPC cell sizes
-  for (int i=n_maps_layer + n_intt_layer;i<Max_si_layer;++i) {
-    svtx_cells->cellsize(i, tpc_cell_x, tpc_cell_y);
-    svtx_cells->set_timing_window(i, -35000.0, +35000.0);
-  }
-  
+  //======================
+
+  double tpc_timing_window = 105.5 / TPCDriftVelocity;  // half length in cm / Vd in cm/ns => ns
+
+  // inner layers
+  double radius_layer = inner_readout_radius + tpc_layer_thick_inner / 2.0;
+  int counter_layer = 0;
+  for(int i=n_maps_layer + n_intt_layer; i< n_maps_layer + n_intt_layer + n_tpc_layer_inner;i++)
+    {
+      // this calculates the radius at the middle of the layer
+      if(counter_layer > 0)
+	radius_layer +=  tpc_layer_thick_inner;
+      double tpc_cell_rphi = 2 * TMath::Pi() * radius_layer / (double) tpc_layer_rphi_count_inner;
+      svtx_cells->cellsize(i, tpc_cell_rphi, tpc_cell_z);
+      svtx_cells->set_timing_window(i, -tpc_timing_window, +tpc_timing_window);
+      cout << "TPC cells inner: layer " << i << " center radius " << radius_layer  << " tpc_cell_rphi " << tpc_cell_rphi << " tpc_cell_z " << tpc_cell_z << endl;  
+      counter_layer++;
+    }
+  radius_layer +=  tpc_layer_thick_inner / 2.0;
+
+  // mid layers
+  radius_layer += tpc_layer_thick_mid / 2.0;
+  counter_layer = 0;
+  for(int i=n_maps_layer + n_intt_layer + n_tpc_layer_inner; i< n_maps_layer + n_intt_layer + n_tpc_layer_inner + n_tpc_layer_mid;i++)
+    {
+      if(counter_layer > 0)
+	radius_layer += tpc_layer_thick_mid;
+      double tpc_cell_rphi = 2 * TMath::Pi() * radius_layer / (double)  tpc_layer_rphi_count_mid;
+      svtx_cells->cellsize(i, tpc_cell_rphi, tpc_cell_z);
+      svtx_cells->set_timing_window(i, -tpc_timing_window, +tpc_timing_window);
+      cout << "TPC cells mid: layer " << i << " center radius " << radius_layer  << " tpc_cell_rphi " << tpc_cell_rphi << " tpc_cell_z " << tpc_cell_z << endl;  
+      counter_layer++;
+    }
+  radius_layer +=  tpc_layer_thick_mid / 2.0;
+
+  // outer layers
+  radius_layer += tpc_layer_thick_outer/ 2.0;
+  counter_layer = 0;
+  for(int i=n_maps_layer + n_intt_layer + n_tpc_layer_inner + n_tpc_layer_mid; i< n_maps_layer + n_intt_layer + n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;i++)
+    {
+      if(counter_layer > 0)
+	radius_layer +=  tpc_layer_thick_outer;
+      double tpc_cell_rphi = 2 * TMath::Pi() * radius_layer / (double)  tpc_layer_rphi_count_outer;
+      svtx_cells->cellsize(i, tpc_cell_rphi, tpc_cell_z);
+      svtx_cells->set_timing_window(i, -tpc_timing_window, +tpc_timing_window);
+      cout << "TPC cells outer: layer " << i << " center radius " << radius_layer  << " tpc_cell_rphi " << tpc_cell_rphi << " tpc_cell_z " << tpc_cell_z << endl;  
+      counter_layer++;
+    }
+
   se->registerSubsystem(svtx_cells);
 
   return;
@@ -537,7 +806,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   eval = new SvtxEvaluator("SVTXEVALUATOR",  outputfile.c_str());
   eval->do_cluster_eval(true);
   eval->do_g4hit_eval(true);
-  eval->do_hit_eval(false);
+  eval->do_hit_eval(true);    // TKH likes to see the hits...includes the chamber physics...
   eval->do_gpoint_eval(false);
   eval->scan_for_embedded(false); // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(verbosity);
