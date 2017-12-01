@@ -1,3 +1,6 @@
+#include <iostream>
+using namespace std;
+
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
     const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
@@ -462,12 +465,25 @@ int Fun4All_G4_sPHENIX(
     // add random beam collisions following a collision diamond and rate from a HepMC stream
     Fun4AllHepMCPileupInputManager *pileup = new Fun4AllHepMCPileupInputManager("HepMCPileupInput");
     se->registerInputManager(pileup);
-    pileup->AddFile("/sphenix/sim/sim01/sHijing/sHijing_0-12fm.dat");  // HepMC events used in pile up collisions. You can add multiple files, and the file list will be reused.
+
+    const string pileupfile("/sphenix/sim/sim01/sHijing/sHijing_0-12fm.dat");
+    pileup->AddFile(pileupfile);  // HepMC events used in pile up collisions. You can add multiple files, and the file list will be reused.
     //pileup->set_vertex_distribution_width(100e-4,100e-4,30,5);//override collision smear in space time
     //pileup->set_vertex_distribution_mean(0,0,0,0);//override collision central position shift in space time
-    pileup->set_time_window(-35000.,+35000.); // override timing window in ns
-    //pileup->set_collision_rate(100e3); // override collisions rate in Hz
     pileup->set_collision_rate(pileup_collision_rate);
+
+    double time_window_minus = -35000;
+    double time_window_plus = 35000;
+
+    if (do_svtx)
+    {
+      // double TPCDriftVelocity = 6.0 / 1000.0; // cm/ns, which is loaded from G4_SVTX*.C macros
+      time_window_minus = -105.5 / TPCDriftVelocity;  // ns
+      time_window_plus = 105.5 / TPCDriftVelocity;    // ns;
+    }
+    pileup->set_time_window(time_window_minus, time_window_plus);  // override timing window in ns
+    cout << "Collision pileup enabled using file " << pileupfile << " with collision rate " << pileup_collision_rate
+         << " and time window " << time_window_minus << " to " << time_window_plus << endl;
   }
 
   if (do_DSTReader)
