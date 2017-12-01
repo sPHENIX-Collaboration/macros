@@ -24,7 +24,7 @@ double tpc_layer_thick_mid = 1.25;
 int tpc_layer_rphi_count_mid = 1536;
 
 int n_tpc_layer_outer = 16;
-double tpc_layer_thick_outer = 1.25;
+double tpc_layer_thick_outer = 1.125; // outer later reach from 60-78 cm (instead of 80 cm), that leads to radial thickness of 1.125 cm
 int tpc_layer_rphi_count_outer = 2304;
 
 int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
