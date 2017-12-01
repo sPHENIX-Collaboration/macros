@@ -90,6 +90,7 @@ void SvtxInit(int n_TPC_layers = 40, int verbosity = 0)
       // https://www.phenix.bnl.gov/WWW/p/draft/prakhar/tpc/HTML_Gas_Linear/Ne_CF4_IC4H10_95_3_2.html
     case TPC_Gas::Ne2K_100:
       {
+        if (verbosity)
 	cout << "Gas Choice:  TPC_Gas::Ne2K_100" << endl;
 	TPCDriftVelocity    = 3.2 / 1000.0; // cm/ns
 	TPC_Trans_Diffusion = 0.0065;    // cm/SQRT(cm)
@@ -101,6 +102,7 @@ void SvtxInit(int n_TPC_layers = 40, int verbosity = 0)
       }
     case TPC_Gas::Ne2K_400:
       {
+        if (verbosity)
 	cout << "Gas Choice:  TPC_Gas::Ne2K_400" << endl;
 	TPCDriftVelocity    = 5.5 / 1000.0; // cm/ns
 	TPC_Trans_Diffusion = 0.0120;    // cm/SQRT(cm)
@@ -113,6 +115,7 @@ void SvtxInit(int n_TPC_layers = 40, int verbosity = 0)
       // https://www.phenix.bnl.gov/WWW/p/draft/prakhar/tpc/HTML_Gas_Linear/Ne_CF4_90_10.html
     case TPC_Gas::NeCF4_100:
       {
+        if (verbosity)
 	cout << "Gas Choice:  TPC_Gas::NeCF4_100" << endl;
 	TPCDriftVelocity    = 4.0 / 1000.0; // cm/ns
 	TPC_Trans_Diffusion = 0.0045;    // cm/SQRT(cm)
@@ -124,6 +127,7 @@ void SvtxInit(int n_TPC_layers = 40, int verbosity = 0)
       }
     case TPC_Gas::NeCF4_300:
       {
+        if (verbosity)
 	cout << "Gas Choice:  TPC_Gas::NeCF4_300" << endl;
 	TPCDriftVelocity    = 7.0 / 1000.0; // cm/ns
 	TPC_Trans_Diffusion = 0.0052;    // cm/SQRT(cm)
@@ -135,6 +139,7 @@ void SvtxInit(int n_TPC_layers = 40, int verbosity = 0)
       }
     case TPC_Gas::NeCF4_400:
       {
+        if (verbosity)
 	cout << "Gas Choice:  TPC_Gas::NeCF4_400" << endl;
 	TPCDriftVelocity    = 8.0 / 1000.0; // cm/ns
 	TPC_Trans_Diffusion = 0.0060;    // cm/SQRT(cm)
@@ -146,6 +151,7 @@ void SvtxInit(int n_TPC_layers = 40, int verbosity = 0)
       }
     case TPC_Gas::ByHand:
       {
+        if (verbosity)
 	cout << "Gas Choice:  TPC_Gas::ByHand" << endl;
 	TPCDriftVelocity    = 6.0 / 1000.0; // cm/ns
 	TPC_Trans_Diffusion = 0.0130;    // cm/SQRT(cm)
@@ -158,6 +164,7 @@ void SvtxInit(int n_TPC_layers = 40, int verbosity = 0)
       }
     default:   // defaults to NeCF4_400
       {
+        if (verbosity)
 	cout << "Gas Choice Undefined...using TPC_Gas::NeCF4_400" << endl;
 	TPCDriftVelocity    = 8.0 / 1000.0; // cm/ns
 	TPC_Trans_Diffusion = 0.0060;    // cm/SQRT(cm)
@@ -336,7 +343,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   
   for(int ilayer=n_maps_layer + n_intt_layer;ilayer<(n_maps_layer + n_intt_layer + n_tpc_layer_inner);++ilayer) {
 
-    //if (verbosity)
+    if (verbosity)
         cout << "Create TPC gas layer " << ilayer  << " with inner radius " << radius  << " cm "
 	       << " thickness " << tpc_layer_thick_inner - 0.01 << " length " << cage_length << endl;
 
@@ -357,7 +364,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   for(int ilayer=n_maps_layer + n_intt_layer+n_tpc_layer_inner;ilayer<(n_maps_layer + n_intt_layer + n_tpc_layer_inner+n_tpc_layer_mid);++ilayer) {
 
-    //if (verbosity)
+    if (verbosity)
         cout << "Create TPC gas layer " << ilayer  << " with inner radius " << radius  << " cm "
 	       << " thickness " << tpc_layer_thick_mid - 0.01 << " length " << cage_length << endl;
 
@@ -378,6 +385,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   for(int ilayer=n_maps_layer + n_intt_layer+n_tpc_layer_inner+n_tpc_layer_mid;ilayer<(n_maps_layer + n_intt_layer + n_tpc_layer_inner+n_tpc_layer_mid+n_tpc_layer_outer);++ilayer) {
 
+    if (verbosity)
     cout << "Create TPC gas layer " << ilayer  << " with inner radius " << radius  << " cm "
 	 << " thickness " << tpc_layer_thick_outer - 0.01 << " length " << cage_length << endl;
 
@@ -431,7 +439,7 @@ void Svtx_Cells(int verbosity = 0)
   // SVTX cells
   //-----------
 
-  if (true)
+  if (verbosity)
     {
       cout << "  TPC Drift Velocity: " << TPCDriftVelocity << " cm/nsec" << endl;
       cout << "  TPC Transverse Diffusion: " << TPC_Trans_Diffusion << " cm/SQRT(cm)" << endl;
@@ -548,6 +556,7 @@ void Svtx_Cells(int verbosity = 0)
       double tpc_cell_rphi = 2 * TMath::Pi() * radius_layer / (double) tpc_layer_rphi_count_inner;
       svtx_cells->cellsize(i, tpc_cell_rphi, tpc_cell_z);
       svtx_cells->set_timing_window(i, -tpc_timing_window, +tpc_timing_window);
+      if (verbosity)
       cout << "TPC cells inner: layer " << i << " center radius " << radius_layer  << " tpc_cell_rphi " << tpc_cell_rphi << " tpc_cell_z " << tpc_cell_z << endl;  
       counter_layer++;
     }
@@ -563,6 +572,7 @@ void Svtx_Cells(int verbosity = 0)
       double tpc_cell_rphi = 2 * TMath::Pi() * radius_layer / (double)  tpc_layer_rphi_count_mid;
       svtx_cells->cellsize(i, tpc_cell_rphi, tpc_cell_z);
       svtx_cells->set_timing_window(i, -tpc_timing_window, +tpc_timing_window);
+      if (verbosity)
       cout << "TPC cells mid: layer " << i << " center radius " << radius_layer  << " tpc_cell_rphi " << tpc_cell_rphi << " tpc_cell_z " << tpc_cell_z << endl;  
       counter_layer++;
     }
@@ -578,6 +588,7 @@ void Svtx_Cells(int verbosity = 0)
       double tpc_cell_rphi = 2 * TMath::Pi() * radius_layer / (double)  tpc_layer_rphi_count_outer;
       svtx_cells->cellsize(i, tpc_cell_rphi, tpc_cell_z);
       svtx_cells->set_timing_window(i, -tpc_timing_window, +tpc_timing_window);
+      if (verbosity)
       cout << "TPC cells outer: layer " << i << " center radius " << radius_layer  << " tpc_cell_rphi " << tpc_cell_rphi << " tpc_cell_z " << tpc_cell_z << endl;  
       counter_layer++;
     }
@@ -806,7 +817,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   eval = new SvtxEvaluator("SVTXEVALUATOR",  outputfile.c_str());
   eval->do_cluster_eval(true);
   eval->do_g4hit_eval(true);
-  eval->do_hit_eval(true);    // TKH likes to see the hits...includes the chamber physics...
+  eval->do_hit_eval(false);    // enable to see the hits that includes the chamber physics...
   eval->do_gpoint_eval(false);
   eval->scan_for_embedded(false); // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(verbosity);
