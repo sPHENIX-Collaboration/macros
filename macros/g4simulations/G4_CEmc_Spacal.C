@@ -397,7 +397,7 @@ void CEMC_Clusters(int verbosity = 0)
   }
   else
   {
-    cout <<"CEMC_Clusters - unkonwn clusterizer setting!"<<endl;
+    cout <<"CEMC_Clusters - unknown clusterizer setting!"<<endl;
     exit(1);
   }
 
