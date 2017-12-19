@@ -383,14 +383,14 @@ void CEMC_Clusters(int verbosity = 0)
 
   if (Cemc_clusterizer == kCemcTemplateClusterizer)
   {
-    RawClusterBuilderv1 *ClusterBuilder = new RawClusterBuilderv1("EmcRawClusterBuilder");
+    RawClusterBuilderv1 *ClusterBuilder = new RawClusterBuilderv1("EmcRawClusterBuilderTemplate");
     ClusterBuilder->Detector("CEMC");
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem(ClusterBuilder);
   }
   else if (Cemc_clusterizer == kCemcGraphClusterizer)
   {
-    RawClusterBuilder *ClusterBuilder = new RawClusterBuilder("EmcRawClusterBuilder");
+    RawClusterBuilder *ClusterBuilder = new RawClusterBuilder("EmcRawClusterBuilderGraph");
     ClusterBuilder->Detector("CEMC");
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem(ClusterBuilder);

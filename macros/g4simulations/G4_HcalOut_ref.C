@@ -150,14 +150,14 @@ void HCALOuter_Clusters(int verbosity = 0) {
 
   if (HCalOut_clusterizer == kHCalOutTemplateClusterizer)
   {
-    RawClusterBuilderv1* ClusterBuilder = new RawClusterBuilderv1("HcalOutRawClusterBuilder");
+    RawClusterBuilderv1* ClusterBuilder = new RawClusterBuilderv1("HcalOutRawClusterBuilderTemplate");
     ClusterBuilder->Detector("HCALOUT");
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem( ClusterBuilder );
   }
   else if (HCalOut_clusterizer == kHCalOutGraphClusterizer)
   {
-    RawClusterBuilder* ClusterBuilder = new RawClusterBuilder("HcalOutRawClusterBuilder");
+    RawClusterBuilder* ClusterBuilder = new RawClusterBuilder("HcalOutRawClusterBuilderGraph");
     ClusterBuilder->Detector("HCALOUT");
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem( ClusterBuilder );

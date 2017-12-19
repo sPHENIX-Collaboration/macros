@@ -205,7 +205,7 @@ void HCALInner_Clusters(int verbosity = 0) {
   
   if (HCalIn_clusterizer == kHCalInTemplateClusterizer)
   {
-    RawClusterBuilderv1* ClusterBuilder = new RawClusterBuilderv1("HcalInRawClusterBuilder");
+    RawClusterBuilderv1* ClusterBuilder = new RawClusterBuilderv1("HcalInRawClusterBuilderTemplate");
     ClusterBuilder->Detector("HCALIN");
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem( ClusterBuilder );
@@ -213,7 +213,7 @@ void HCALInner_Clusters(int verbosity = 0) {
   }
   else if (HCalIn_clusterizer == kHCalInGraphClusterizer)
   {
-    RawClusterBuilder* ClusterBuilder = new RawClusterBuilder("HcalInRawClusterBuilder");
+    RawClusterBuilder* ClusterBuilder = new RawClusterBuilder("HcalInRawClusterBuilderGraph");
     ClusterBuilder->Detector("HCALIN");
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem( ClusterBuilder );
