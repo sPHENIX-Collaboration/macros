@@ -8,6 +8,18 @@ int Max_cemc_layer = 1;
 //   2D azimuthal projective SPACAL (slow)
 int Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal;
 
+enum enu_Cemc_clusterizer
+{
+  kCemcGraphClusterizer,
+
+  kCemcTemplateClusterizer
+};
+
+//! template clusterizer, RawClusterBuilderv1, as developed by Sasha Bazilevsky
+enu_Cemc_clusterizer Cemc_clusterizer = kCemcTemplateClusterizer;
+//! graph clusterizer, RawClusterBuilder
+//enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
+
 #include <iostream>
 
 // just a dummy parameter used by the tilted plate geom
@@ -369,10 +381,26 @@ void CEMC_Clusters(int verbosity = 0)
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  RawClusterBuilder *ClusterBuilder = new RawClusterBuilder("EmcRawClusterBuilder");
-  ClusterBuilder->Detector("CEMC");
-  ClusterBuilder->Verbosity(verbosity);
-  se->registerSubsystem(ClusterBuilder);
+  if (Cemc_clusterizer == kCemcTemplateClusterizer)
+  {
+    RawClusterBuilderv1 *ClusterBuilder = new RawClusterBuilderv1("EmcRawClusterBuilder");
+    ClusterBuilder->Detector("CEMC");
+    ClusterBuilder->Verbosity(verbosity);
+    se->registerSubsystem(ClusterBuilder);
+  }
+  else if (Cemc_clusterizer == kCemcGraphClusterizer)
+  {
+    RawClusterBuilder *ClusterBuilder = new RawClusterBuilder("EmcRawClusterBuilder");
+    ClusterBuilder->Detector("CEMC");
+    ClusterBuilder->Verbosity(verbosity);
+    se->registerSubsystem(ClusterBuilder);
+  }
+  else
+  {
+    cout <<"CEMC_Clusters - unkonwn clusterizer setting!"<<endl;
+    exit(1);
+  }
+
 
   RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
   clusterCorrection->GetCalibrationParameters().ReadFromFile("CEMC_RECALIB","xml",0,0,
