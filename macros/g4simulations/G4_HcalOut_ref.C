@@ -1,3 +1,17 @@
+
+
+enum enu_HCalOut_clusterizer
+{
+  kHCalOutGraphClusterizer,
+
+  kHCalOutTemplateClusterizer
+};
+
+//! template clusterizer, RawClusterBuilderv1, as developed by Sasha Bazilevsky
+enu_HCalOut_clusterizer HCalOut_clusterizer = kHCalOutTemplateClusterizer;
+//! graph clusterizer, RawClusterBuilder
+//enu_HCalOut_clusterizer HCalOut_clusterizer = kHCalOutGraphClusterizer;
+
 // Init is called by G4Setup.C
 void HCalOuterInit(){}
 
@@ -133,10 +147,27 @@ void HCALOuter_Clusters(int verbosity = 0) {
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
   
-  RawClusterBuilder* ClusterBuilder = new RawClusterBuilder("HcalOutRawClusterBuilder");
-  ClusterBuilder->Detector("HCALOUT");
-  ClusterBuilder->Verbosity(verbosity);
-  se->registerSubsystem( ClusterBuilder );
+
+  if (HCalOut_clusterizer == kHCalOutTemplateClusterizer)
+  {
+    RawClusterBuilderv1* ClusterBuilder = new RawClusterBuilderv1("HcalOutRawClusterBuilderTemplate");
+    ClusterBuilder->Detector("HCALOUT");
+    ClusterBuilder->Verbosity(verbosity);
+    se->registerSubsystem( ClusterBuilder );
+  }
+  else if (HCalOut_clusterizer == kHCalOutGraphClusterizer)
+  {
+    RawClusterBuilder* ClusterBuilder = new RawClusterBuilder("HcalOutRawClusterBuilderGraph");
+    ClusterBuilder->Detector("HCALOUT");
+    ClusterBuilder->Verbosity(verbosity);
+    se->registerSubsystem( ClusterBuilder );
+  }
+  else
+  {
+    cout <<"HCALOuter_Clusters - unknown clusterizer setting!"<<endl;
+    exit(1);
+  }
+
   
   return;
 }
