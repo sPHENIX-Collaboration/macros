@@ -7,9 +7,9 @@ enum enu_HCalOut_clusterizer
   kHCalOutTemplateClusterizer
 };
 
-//! template clusterizer, RawClusterBuilderv1, as developed by Sasha Bazilevsky
+//! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
 enu_HCalOut_clusterizer HCalOut_clusterizer = kHCalOutTemplateClusterizer;
-//! graph clusterizer, RawClusterBuilder
+//! graph clusterizer, RawClusterBuilderGraph
 //enu_HCalOut_clusterizer HCalOut_clusterizer = kHCalOutGraphClusterizer;
 
 // Init is called by G4Setup.C
@@ -103,8 +103,8 @@ void HCALOuter_Cells(int verbosity = 0) {
 
 void HCALOuter_Towers(int verbosity = 0) {
 
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
+  gSystem->Load("libg4calo.so");
+  gSystem->Load("libcalo_reco.so");
   Fun4AllServer *se = Fun4AllServer::instance();
   
   HcalRawTowerBuilder* TowerBuilder = new HcalRawTowerBuilder("HcalOutRawTowerBuilder");
@@ -142,22 +142,21 @@ void HCALOuter_Towers(int verbosity = 0) {
 }
 
 void HCALOuter_Clusters(int verbosity = 0) {
+  gSystem->Load("libcalo_reco.so");
 
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
   
 
   if (HCalOut_clusterizer == kHCalOutTemplateClusterizer)
   {
-    RawClusterBuilderv1* ClusterBuilder = new RawClusterBuilderv1("HcalOutRawClusterBuilderTemplate");
+    RawClusterBuilderTemplate* ClusterBuilder = new RawClusterBuilderTemplate("HcalOutRawClusterBuilderTemplate");
     ClusterBuilder->Detector("HCALOUT");
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem( ClusterBuilder );
   }
   else if (HCalOut_clusterizer == kHCalOutGraphClusterizer)
   {
-    RawClusterBuilder* ClusterBuilder = new RawClusterBuilder("HcalOutRawClusterBuilderGraph");
+    RawClusterBuilderGraph* ClusterBuilder = new RawClusterBuilderGraph("HcalOutRawClusterBuilderGraph");
     ClusterBuilder->Detector("HCALOUT");
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem( ClusterBuilder );

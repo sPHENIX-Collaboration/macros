@@ -15,9 +15,9 @@ enum enu_Cemc_clusterizer
   kCemcTemplateClusterizer
 };
 
-//! template clusterizer, RawClusterBuilderv1, as developed by Sasha Bazilevsky
+//! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
 enu_Cemc_clusterizer Cemc_clusterizer = kCemcTemplateClusterizer;
-//! graph clusterizer, RawClusterBuilder
+//! graph clusterizer, RawClusterBuilderGraph
 //enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
 
 #include <iostream>
@@ -297,8 +297,8 @@ void CEMC_Cells(int verbosity = 0)
 
 void CEMC_Towers(int verbosity = 0)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
+  gSystem->Load("libg4calo.so");
+  gSystem->Load("libcalo_reco.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   RawTowerBuilder *TowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
@@ -377,20 +377,19 @@ void CEMC_Towers(int verbosity = 0)
 
 void CEMC_Clusters(int verbosity = 0)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
+  gSystem->Load("libcalo_reco.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   if (Cemc_clusterizer == kCemcTemplateClusterizer)
   {
-    RawClusterBuilderv1 *ClusterBuilder = new RawClusterBuilderv1("EmcRawClusterBuilderTemplate");
+    RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("EmcRawClusterBuilderTemplate");
     ClusterBuilder->Detector("CEMC");
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem(ClusterBuilder);
   }
   else if (Cemc_clusterizer == kCemcGraphClusterizer)
   {
-    RawClusterBuilder *ClusterBuilder = new RawClusterBuilder("EmcRawClusterBuilderGraph");
+    RawClusterBuilderGraph *ClusterBuilder = new RawClusterBuilderGraph("EmcRawClusterBuilderGraph");
     ClusterBuilder->Detector("CEMC");
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem(ClusterBuilder);
