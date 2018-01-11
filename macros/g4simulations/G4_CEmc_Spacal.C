@@ -328,7 +328,7 @@ void CEMC_Towers(int verbosity = 0)
     return;
   }
 
-  static const double photoelectron_per_GeV = 500;  //500 photon per total GeV deposition
+  const double photoelectron_per_GeV = 500;  //500 photon per total GeV deposition
 
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
   TowerDigitizer->Detector("CEMC");
