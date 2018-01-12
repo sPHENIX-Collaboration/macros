@@ -148,7 +148,6 @@ int Fun4All_G4_EICDetector(
   gSystem->Load("libphhepmc.so");
   gSystem->Load("libg4testbench.so");
   gSystem->Load("libg4hough.so");
-  gSystem->Load("libcemc.so");
   gSystem->Load("libg4eval.so");
 
   // establish the geometry and reconstruction setup
