@@ -19,9 +19,16 @@ EGEM_Init()
 void
 EGEMSetup(PHG4Reco* g4Reco)
 {
-  make_GEM_station("EGEM_0", g4Reco, -32., -1.6, -3.4);
+  /* Careful with dimensions! If GEM station volumes overlap, e.g. with TPC volume, they will be
+   * drawn in event display but will NOT register any hits.
+   *
+   * Geometric constraints:
+   * TPC length = 211 cm --> from z = -105.5 to z = +105.5
+   */
+  make_GEM_station("EGEM_0", g4Reco, -32., -1.72, -3.4); // increase min eta from -1.6 to -1.72 to fit into barrel tracker geometry
   make_GEM_station("EGEM_1", g4Reco, -58., -2.1, -3.98); // reduce max eta from -4.0 to -3.98 to avoid overlap with volume S_AL_PIPE_5 (aluminum beam pipe)
-  make_GEM_station("EGEM_2", g4Reco, -101., -1.2, -4.5);
+  make_GEM_station("EGEM_2", g4Reco, -106., -1.2, -4.5); // move station from z = -101. to z= -106. because of increased TPC length
+
 }
 
 int
@@ -94,16 +101,13 @@ void EGEM_FastSim_Reco(int verbosity = 0) {
   kalman->set_phi_resolution(50E-4);
   kalman->set_r_resolution(1.);
 
-  kalman->set_mag_field_file_name("/phenix/upgrades/decadal/fieldmaps/fsPHENIX.2d.root");
-  kalman->set_mag_field_re_scaling_factor(1.);
-
   kalman->set_pat_rec_hit_finding_eff(1.);
   kalman->set_pat_rec_noise_prob(0.);
 
   std::string phg4hits_names[] = {"G4HIT_EGEM_0","G4HIT_EGEM_1","G4HIT_EGEM_2"};
   kalman->set_phg4hits_names(phg4hits_names, 3);
   kalman->set_sub_top_node_name("SVTX");
-  kalman->set_trackmap_out_name("SvtxTrackMapNegativeEta");
+  kalman->set_trackmap_out_name("SvtxTrackMap_FastSimEtaMinus");
 
   // Saved track states (projections)
   std::string state_names[] = {"EEMC"};

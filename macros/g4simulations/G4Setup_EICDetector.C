@@ -57,7 +57,7 @@ void G4Init(bool do_svtx = true,
 
   if (do_FGEM)
     {
-      gROOT->LoadMacro("G4_FGEM_fsPHENIX.C");
+      gROOT->LoadMacro("G4_FGEM_EIC.C");
       FGEM_Init();
     }
 
