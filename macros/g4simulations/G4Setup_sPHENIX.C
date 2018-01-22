@@ -67,6 +67,7 @@ int G4Setup(const int absorberactive = 0,
 	    const bool do_magnet = true,
 	    const bool do_hcalout = true,
 	    const bool do_pipe = true,
+//	    const bool do_plugdoor = true,
 	    const float magfield_rescale = 1.0) {
   
   //---------------
@@ -145,6 +146,42 @@ int G4Setup(const int absorberactive = 0,
   // HCALOUT
   
   if (do_hcalout) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
+
+
+
+
+  //----------------------------------------
+  // sPHENIX forward flux return(s)
+  // define via four cornors in the engineering drawing
+  const double z_1  = 330.81;
+  const double z_2  = 360.81;
+  const double r_1  = 30;
+  const double r_2  = 263.5;
+
+  PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
+  flux_return_plus->set_int_param("lengthviarapidity",0);
+  flux_return_minus->set_double_param("length",360.81 - 330.81);
+  flux_return_minus->set_double_param("radius",30);
+  flux_return_minus->set_double_param("place_z",(330.81 + 360.81)/2.);
+  flux_return_minus->set_double_param("thickness",263.5 - 30);
+  flux_return_plus->set_string_param("material","G4_Fe");
+  flux_return_plus->SetActive(false);
+  flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
+  flux_return_plus->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(flux_return_plus);
+
+  PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
+  flux_return_minus->set_int_param("lengthviarapidity",0);
+  flux_return_minus->set_double_param("length",360.81 - 330.81);
+  flux_return_minus->set_double_param("radius",30);
+  flux_return_minus->set_double_param("place_z",-(330.81 + 360.81)/2.);
+  flux_return_minus->set_double_param("thickness",263.5 - 30);
+  flux_return_minus->set_string_param("material","G4_Fe");
+  flux_return_minus->SetActive(false);
+  flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
+  flux_return_minus->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(flux_return_minus);
+
 
   //----------------------------------------
   // BLACKHOLE
