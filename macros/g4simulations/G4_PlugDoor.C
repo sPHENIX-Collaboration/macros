@@ -1,0 +1,41 @@
+
+void PlugDoorInit() {}
+void PlugDoor(PHG4Reco *g4Reco,
+              const int absorberactive = 0,
+              int verbosity = 0)
+{
+  //----------------------------------------
+  // sPHENIX forward flux return(s)
+  // define via four cornors in the engineering drawing
+  const double z_1 = z_1;
+  const double z_2 = z_2;
+  const double r_1 = r_1;
+  const double r_2 = r_2;
+  const string material("Steel_1006");
+
+  PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FLUXRET_ETA_PLUS", 0);
+  flux_return_plus->set_int_param("lengthviarapidity", 0);
+  flux_return_plus->set_double_param("length", z_2 - z_1);
+  flux_return_plus->set_double_param("radius", r_1);
+  flux_return_plus->set_double_param("place_z", (z_1 + z_2) / 2.);
+  flux_return_plus->set_double_param("thickness", r_2 - r_1);
+  flux_return_plus->set_string_param("material", material);
+  flux_return_plus->SetActive(absorberactive);
+//  flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
+  flux_return_plus->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(flux_return_plus);
+
+  PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FLUXRET_ETA_MINUS", 0);
+  flux_return_minus->set_int_param("lengthviarapidity", 0);
+  flux_return_minus->set_double_param("length", z_2 - z_1);
+  flux_return_minus->set_double_param("radius", r_1);
+  flux_return_minus->set_double_param("place_z", -(z_1 + z_2) / 2.);
+  flux_return_minus->set_double_param("thickness", r_2 - r_1);
+  flux_return_minus->set_string_param("material", material);
+  flux_return_minus->SetActive(absorberactive);
+//  flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
+  flux_return_minus->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(flux_return_minus);
+
+  return;
+}

@@ -82,6 +82,9 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_cluster = do_hcalout_twr && true;
   bool do_hcalout_eval = do_hcalout_cluster && true;
 
+  //! forward flux return plug door. Out of acceptance and off by default.
+  bool do_plugdoor = false;
+
   bool do_global = true;
   bool do_global_fastsim = true;
 
@@ -112,7 +115,7 @@ int Fun4All_G4_sPHENIX(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
-  G4Init(do_svtx, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, n_TPC_layers);
+  G4Init(do_svtx, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor, n_TPC_layers);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
@@ -296,7 +299,7 @@ int Fun4All_G4_sPHENIX(
     //---------------------
 
     G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-            do_svtx, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, magfield_rescale);
+            do_svtx, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, magfield_rescale);
   }
 
   //---------
