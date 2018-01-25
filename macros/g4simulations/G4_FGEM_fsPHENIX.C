@@ -276,9 +276,6 @@ void FGEM_FastSim_Reco(int verbosity = 0) {
   kalman->set_phi_resolution(50E-4);
   kalman->set_r_resolution(1.);
 
-  kalman->set_mag_field_file_name("/phenix/upgrades/decadal/fieldmaps/fsPHENIX.2d.root");
-  kalman->set_mag_field_re_scaling_factor(1.);
-
   kalman->set_pat_rec_hit_finding_eff(1.);
   kalman->set_pat_rec_noise_prob(0.);
 
