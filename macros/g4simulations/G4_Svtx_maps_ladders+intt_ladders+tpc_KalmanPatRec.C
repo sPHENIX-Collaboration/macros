@@ -551,51 +551,40 @@ void Svtx_Cells(int verbosity = 0)
   double tpc_timing_window = 105.5 / TPCDriftVelocity;  // half length in cm / Vd in cm/ns => ns
 
   // inner layers
-  double radius_layer = inner_readout_radius + tpc_layer_thick_inner / 2.0;
-  int counter_layer = 0;
+  double radius_layer = inner_readout_radius ;
   for (int i = n_maps_layer + n_intt_layer; i < n_maps_layer + n_intt_layer + n_tpc_layer_inner; i++)
   {
     // this calculates the radius at the middle of the layer
-    if (counter_layer > 0)
-      radius_layer += tpc_layer_thick_inner;
     double tpc_cell_rphi = 2 * TMath::Pi() * radius_layer / (double) tpc_layer_rphi_count_inner;
     svtx_cells->cellsize(i, tpc_cell_rphi, tpc_cell_z);
     svtx_cells->set_timing_window(i, -tpc_timing_window, +tpc_timing_window);
     if (verbosity)
       cout << "TPC cells inner: layer " << i << " center radius " << radius_layer << " tpc_cell_rphi " << tpc_cell_rphi << " tpc_cell_z " << tpc_cell_z << endl;
-    counter_layer++;
+    radius_layer += tpc_layer_thick_inner;
   }
-  radius_layer += tpc_layer_thick_inner / 2.0;
+
 
   // mid layers
-  radius_layer += tpc_layer_thick_mid / 2.0;
-  counter_layer = 0;
   for (int i = n_maps_layer + n_intt_layer + n_tpc_layer_inner; i < n_maps_layer + n_intt_layer + n_tpc_layer_inner + n_tpc_layer_mid; i++)
   {
-    if (counter_layer > 0)
-      radius_layer += tpc_layer_thick_mid;
     double tpc_cell_rphi = 2 * TMath::Pi() * radius_layer / (double) tpc_layer_rphi_count_mid;
     svtx_cells->cellsize(i, tpc_cell_rphi, tpc_cell_z);
     svtx_cells->set_timing_window(i, -tpc_timing_window, +tpc_timing_window);
     if (verbosity)
       cout << "TPC cells mid: layer " << i << " center radius " << radius_layer << " tpc_cell_rphi " << tpc_cell_rphi << " tpc_cell_z " << tpc_cell_z << endl;
-    counter_layer++;
+    radius_layer += tpc_layer_thick_mid;
   }
-  radius_layer += tpc_layer_thick_mid / 2.0;
 
   // outer layers
-  radius_layer += tpc_layer_thick_outer / 2.0;
-  counter_layer = 0;
   for (int i = n_maps_layer + n_intt_layer + n_tpc_layer_inner + n_tpc_layer_mid; i < n_maps_layer + n_intt_layer + n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer; i++)
   {
-    if (counter_layer > 0)
-      radius_layer += tpc_layer_thick_outer;
     double tpc_cell_rphi = 2 * TMath::Pi() * radius_layer / (double) tpc_layer_rphi_count_outer;
     svtx_cells->cellsize(i, tpc_cell_rphi, tpc_cell_z);
     svtx_cells->set_timing_window(i, -tpc_timing_window, +tpc_timing_window);
     if (verbosity)
       cout << "TPC cells outer: layer " << i << " center radius " << radius_layer << " tpc_cell_rphi " << tpc_cell_rphi << " tpc_cell_z " << tpc_cell_z << endl;
-    counter_layer++;
+
+    radius_layer += tpc_layer_thick_outer;
   }
 
   se->registerSubsystem(svtx_cells);
@@ -823,7 +812,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
   eval->do_cluster_eval(true);
   eval->do_g4hit_eval(true);
-  eval->do_hit_eval(false);  // enable to see the hits that includes the chamber physics...
+  eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
   eval->do_gpoint_eval(false);
   eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(verbosity);
