@@ -119,6 +119,18 @@ void Fun4All_TestBeam(int nEvents = 10000000,
 
   const int N_hodo = 8;
   // mapping based on SPHENIX-doc-121-v6
+//  1 2 3 4 5 6 7 8
+//  101 100 103 102 97  96  99  98
+//
+//9 109
+//10  108
+//11  111
+//12  110
+//13  105
+//14  104
+//15  107
+//16  106
+
   gunpack = new GenericUnpackPRDF("HODO_VERTICAL");
   gunpack->add_channel(first_packet_id, 101, 0);
   gunpack->add_channel(first_packet_id, 100, 1);
@@ -134,7 +146,7 @@ void Fun4All_TestBeam(int nEvents = 10000000,
   gunpack->add_channel(first_packet_id, 109, 0);
   gunpack->add_channel(first_packet_id, 108, 1);
   gunpack->add_channel(first_packet_id, 111, 2);
-  gunpack->add_channel(first_packet_id, 110, 3);  /// TODO: fix map here
+  gunpack->add_channel(first_packet_id, 110, 3);
   gunpack->add_channel(first_packet_id, 105, 4);
   gunpack->add_channel(first_packet_id, 104, 5);
   gunpack->add_channel(first_packet_id, 107, 6);
