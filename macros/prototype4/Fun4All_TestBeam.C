@@ -159,10 +159,9 @@ void Fun4All_TestBeam(int nEvents = 100,
   //
   calib = new CaloCalibration("HODO_VERTICAL");
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
-  // Martin find that even channel has negative polarity and odd channel has positive polarity
   for (int i = 0; i < N_hodo; ++i)
     calib->GetCalibrationParameters().set_double_param(
-        Form("calib_const_column0_row%d", i), ((i % 2 > 0) ? -1 : +1));
+        Form("calib_const_column0_row%d", i), 1 / 23.24);  // normalize to 1.0
   se->registerSubsystem(calib);
 
   calib = new CaloCalibration("HODO_HORIZONTAL");
@@ -170,7 +169,7 @@ void Fun4All_TestBeam(int nEvents = 100,
   // Martin find that even channel has negative polarity and odd channel has positive polarity
   for (int i = 0; i < N_hodo; ++i)
     calib->GetCalibrationParameters().set_double_param(
-        Form("calib_const_column0_row%d", i), ((i % 2 > 0) ? -1 : +1));
+        Form("calib_const_column0_row%d", i), 1 / 23.24);  // normalize to 1.0
   se->registerSubsystem(calib);
   //
   //  // ------------------- Other detectors -------------------
@@ -195,10 +194,10 @@ void Fun4All_TestBeam(int nEvents = 100,
   calib = new CaloCalibration("C2");
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", +1);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", -1);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row10", -1);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row11", +1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", 1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", 1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row10", 1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row11", 1);
   se->registerSubsystem(calib);
   //
   ////  John H. : should be 19, 20, 21 and the other channels are a litle permuted from  what I thought
@@ -235,10 +234,10 @@ void Fun4All_TestBeam(int nEvents = 100,
   calib = new CaloCalibration("TRIGGER_VETO");
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", -1. / 29.4155);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", +1. / 91);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row2", -1. / 31.3981);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row3", +1. / 1.43839e+02);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", 1. / 29.4155);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", 1. / 91);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row2", 1. / 31.3981);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row3", 1. / 1.43839e+02);
   se->registerSubsystem(calib);
   //
   //  const int N_TileMapper = 16;
