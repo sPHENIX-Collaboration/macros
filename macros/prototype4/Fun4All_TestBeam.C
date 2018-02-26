@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void Fun4All_TestBeam(int nEvents = 1000,
+void Fun4All_TestBeam(int nEvents = 10000000,
                       const char *input_file =
                           //                          "/sphenix/data/data03/phnxreco/sphenix/caladc/hcallab/ihcal_2018-01-15__08_00_58.prdf",
                       "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/led/led_00000254-0000.prdf",
@@ -86,13 +86,13 @@ void Fun4All_TestBeam(int nEvents = 1000,
                                                  string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
   se->registerSubsystem(calib);
 
-  calib = new CaloCalibration("HCALIN");
-  calib->set_calib_tower_node_prefix("CALIB_HG");
-  calib->set_raw_tower_node_prefix("RAW_HG");
-  calib->GetCalibrationParameters().set_name("hcalin_hg");
-  calib->GetCalibrationParameters().ReadFromFile("hcalin_hg", "xml", 0, 0,
-                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
-  se->registerSubsystem(calib);
+  //  calib = new CaloCalibration("HCALIN");
+  //  calib->set_calib_tower_node_prefix("CALIB_HG");
+  //  calib->set_raw_tower_node_prefix("RAW_HG");
+  //  calib->GetCalibrationParameters().set_name("hcalin_hg");
+  //  calib->GetCalibrationParameters().ReadFromFile("hcalin_hg", "xml", 0, 0,
+  //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
+  //  se->registerSubsystem(calib);
 
   calib = new CaloCalibration("HCALOUT");
   calib->set_calib_tower_node_prefix("CALIB_LG");
@@ -112,66 +112,78 @@ void Fun4All_TestBeam(int nEvents = 1000,
   //
   //  // ------------------- Hodoscpes -------------------
   //
-  //  const int first_packet_id = PROTOTYPE4_FEM::PACKET_ID; // 21101
+  const int first_packet_id = PROTOTYPE4_FEM::PACKET_ID;
   //  const int second_packet_id = 21102;
   //
-  //  GenericUnpackPRDF *gunpack = NULL;
+  GenericUnpackPRDF *gunpack = NULL;
+
+  const int N_hodo = 8;
+  // mapping based on SPHENIX-doc-121-v6
+  gunpack = new GenericUnpackPRDF("HODO_VERTICAL");
+  gunpack->add_channel(first_packet_id, 101, 0);
+  gunpack->add_channel(first_packet_id, 100, 1);
+  gunpack->add_channel(first_packet_id, 103, 2);
+  gunpack->add_channel(first_packet_id, 102, 3);
+  gunpack->add_channel(first_packet_id, 97, 4);
+  gunpack->add_channel(first_packet_id, 96, 5);
+  gunpack->add_channel(first_packet_id, 99, 6);
+  gunpack->add_channel(first_packet_id, 98, 7);
+  se->registerSubsystem(gunpack);
   //
-  //  const int N_hodo = 8;
+  gunpack = new GenericUnpackPRDF("HODO_HORIZONTAL");
+  gunpack->add_channel(first_packet_id, 109, 0);
+  gunpack->add_channel(first_packet_id, 108, 1);
+  gunpack->add_channel(first_packet_id, 111, 2);
+  gunpack->add_channel(first_packet_id, 110, 3);  /// TODO: fix map here
+  gunpack->add_channel(first_packet_id, 105, 4);
+  gunpack->add_channel(first_packet_id, 104, 5);
+  gunpack->add_channel(first_packet_id, 107, 6);
+  gunpack->add_channel(first_packet_id, 106, 7);
+  se->registerSubsystem(gunpack);
   //
-  //  gunpack = new GenericUnpackPRDF("HODO_VERTICAL");
-  //  for (int i = 0; i < N_hodo; ++i)
-  //    gunpack->add_channel(first_packet_id, 104 + i, i); // 24 Cerenkov 1
-  //  se->registerSubsystem(gunpack);
-  //
-  //  gunpack = new GenericUnpackPRDF("HODO_HORIZONTAL");
-  //  for (int i = 0; i < N_hodo; ++i)
-  //    gunpack->add_channel(first_packet_id, 96 + i, i); // 24 Cerenkov 1
-  //  se->registerSubsystem(gunpack);
-  //
-  //  calib = new CaloCalibration("HODO_VERTICAL");
-  //  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
-  //  // Martin find that even channel has negative polarity and odd channel has positive polarity
-  //  for (int i = 0; i < N_hodo; ++i)
-  //    calib->GetCalibrationParameters().set_double_param(
-  //        Form("calib_const_column0_row%d", i), ((i % 2 > 0) ? -1 : +1));
-  //  se->registerSubsystem(calib);
-  //
-  //  calib = new CaloCalibration("HODO_HORIZONTAL");
-  //  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
-  //  // Martin find that even channel has negative polarity and odd channel has positive polarity
-  //  for (int i = 0; i < N_hodo; ++i)
-  //    calib->GetCalibrationParameters().set_double_param(
-  //        Form("calib_const_column0_row%d", i), ((i % 2 > 0) ? -1 : +1));
-  //  se->registerSubsystem(calib);
+  calib = new CaloCalibration("HODO_VERTICAL");
+  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
+  // Martin find that even channel has negative polarity and odd channel has positive polarity
+  for (int i = 0; i < N_hodo; ++i)
+    calib->GetCalibrationParameters().set_double_param(
+        Form("calib_const_column0_row%d", i), ((i % 2 > 0) ? -1 : +1));
+  se->registerSubsystem(calib);
+
+  calib = new CaloCalibration("HODO_HORIZONTAL");
+  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
+  // Martin find that even channel has negative polarity and odd channel has positive polarity
+  for (int i = 0; i < N_hodo; ++i)
+    calib->GetCalibrationParameters().set_double_param(
+        Form("calib_const_column0_row%d", i), ((i % 2 > 0) ? -1 : +1));
+  se->registerSubsystem(calib);
   //
   //  // ------------------- Other detectors -------------------
   //
-  //  gunpack = new GenericUnpackPRDF("C1");
-  //// unpack->Verbosity(1);
-  //  gunpack->add_channel(second_packet_id, 24, 0); // 24 Cerenkov 1
-  //  se->registerSubsystem(gunpack);
+  // mapping based on SPHENIX-doc-121-v6
+  gunpack = new GenericUnpackPRDF("C1");
+  // unpack->Verbosity(1);
+  gunpack->add_channel(first_packet_id, 165, 0);  // 24 Cerenkov 1
+  se->registerSubsystem(gunpack);
   //
-  //  calib = new CaloCalibration("C1");
-  //  se->registerSubsystem(calib);
+  calib = new CaloCalibration("C1");
+  se->registerSubsystem(calib);
   //
-  //  // more info see https://wiki.bnl.gov/sPHENIX/index.php/T-1044#Cerenkov_Counters
-  //  gunpack = new GenericUnpackPRDF("C2");
-  //// unpack->Verbosity(1);
-  //  gunpack->add_channel(second_packet_id, 25, 0); //25 Cerenkov 2 Inner
-  //  gunpack->add_channel(second_packet_id, 26, 1); //26  Cerenkov 2 Outer
-  //  gunpack->add_channel(second_packet_id, 22, 10); //Channel 22 C2inner earlier copy added before run 2210
-  //  gunpack->add_channel(second_packet_id, 23, 11); //Channel 23 C2outer earlier copy added before run 2210
-  //  se->registerSubsystem(gunpack);
+  // mapping based on SPHENIX-doc-121-v6
+  gunpack = new GenericUnpackPRDF("C2");
+  // unpack->Verbosity(1);
+  gunpack->add_channel(first_packet_id, 166, 0);   // C2 inner fast
+  gunpack->add_channel(first_packet_id, 160, 1);   // C2 outer fast
+  gunpack->add_channel(first_packet_id, 167, 10);  // C2 inner slow
+  se->registerSubsystem(gunpack);
   //
-  //  calib = new CaloCalibration("C2");
-  //  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
-  //  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
-  //  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", +1);
-  //  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", -1);
-  //  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row10", -1);
-  //  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row11", +1);
-  //  se->registerSubsystem(calib);
+  calib = new CaloCalibration("C2");
+  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
+  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", +1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", -1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row10", -1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row11", +1);
+  se->registerSubsystem(calib);
   //
   ////  John H. : should be 19, 20, 21 and the other channels are a litle permuted from  what I thought
   //  gunpack = new GenericUnpackPRDF("HCAL_SCINT");
@@ -184,32 +196,34 @@ void Fun4All_TestBeam(int nEvents = 1000,
   //  calib = new CaloCalibration("HCAL_SCINT");
   //  se->registerSubsystem(calib);
   //
-  //  gunpack = new GenericUnpackPRDF("PbGL");
-  //// unpack->Verbosity(1);
-  //  gunpack->add_channel(second_packet_id, 27, 0); // 27  PbGl  From channel 2 of adjacent 612AM amplifier
-  //  se->registerSubsystem(gunpack);
+  // mapping based on SPHENIX-doc-121-v6
+  gunpack = new GenericUnpackPRDF("PbGL");
+  // unpack->Verbosity(1);
+  gunpack->add_channel(first_packet_id, 171, 0);  // PbGl (612AM-3)
+  se->registerSubsystem(gunpack);
+
+  calib = new CaloCalibration("PbGL");
+  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
+  se->registerSubsystem(calib);
   //
-  //  calib = new CaloCalibration("PbGL");
-  //  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
-  //  se->registerSubsystem(calib);
-  //
-  //  gunpack = new GenericUnpackPRDF("TRIGGER_VETO");
-  //// unpack->Verbosity(1);
-  //  gunpack->add_channel(second_packet_id, 28, 0); //  28  Bottom trigger veto
-  //  gunpack->add_channel(second_packet_id, 29, 1); //  29  Top trigger veto
-  //  gunpack->add_channel(second_packet_id, 30, 2); //  30  Left trigger veto
-  //  gunpack->add_channel(second_packet_id, 31, 3); //  31  Right trigger veto
-  //  se->registerSubsystem(gunpack);
-  //
-  //  // Calibrate the MIP peak to an relative energy of +1.0
-  //  calib = new CaloCalibration("TRIGGER_VETO");
-  //  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
-  //  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
-  //  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", -1./29.4155);
-  //  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", +1./91);
-  //  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row2", -1./31.3981);
-  //  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row3", +1./1.43839e+02);
-  //  se->registerSubsystem(calib);
+  // mapping based on SPHENIX-doc-121-v6
+  gunpack = new GenericUnpackPRDF("TRIGGER_VETO");
+  // unpack->Verbosity(1);
+  gunpack->add_channel(first_packet_id, 172, 0);  //  172 Counters  Bottom veto
+  gunpack->add_channel(first_packet_id, 173, 1);  //  173 Counters  Top veto
+  gunpack->add_channel(first_packet_id, 174, 2);  //  174 Counters  Right veto
+  gunpack->add_channel(first_packet_id, 175, 3);  //  175 Counters  Left Veto
+  se->registerSubsystem(gunpack);
+
+  // Calibrate the MIP peak to an relative energy of +1.0
+  calib = new CaloCalibration("TRIGGER_VETO");
+  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
+  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", -1. / 29.4155);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", +1. / 91);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row2", -1. / 31.3981);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row3", +1. / 1.43839e+02);
+  se->registerSubsystem(calib);
   //
   //  const int N_TileMapper = 16;
   //
@@ -221,15 +235,15 @@ void Fun4All_TestBeam(int nEvents = 1000,
   //  calib = new CaloCalibration("TILE_MAPPER");
   //  se->registerSubsystem(calib);
   //
-  //  //  https://wiki.bnl.gov/sPHENIX/index.php/2017_calorimeter_beam_test#Facility_Detector_ADC_Map
-  //  gunpack = new GenericUnpackPRDF("SC3");
-  //// unpack->Verbosity(1);
-  //  gunpack->add_channel(second_packet_id, 17, 0); // 17  SC3 From channel 3 of adjacent 612AM amplifier
-  //  se->registerSubsystem(gunpack);
+  // mapping based on SPHENIX-doc-121-v6
+  gunpack = new GenericUnpackPRDF("SC3");
+  // unpack->Verbosity(1);
+  gunpack->add_channel(first_packet_id, 169, 0);  // MT6SC3 (612AM-2)
+  se->registerSubsystem(gunpack);
   //
-  //  calib = new CaloCalibration("SC3");
-  //  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
-  //  se->registerSubsystem(calib);
+  calib = new CaloCalibration("SC3");
+  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
+  se->registerSubsystem(calib);
   //
   //  gunpack = new GenericUnpackPRDF("SC_MWPC4");
   //// unpack->Verbosity(1);
