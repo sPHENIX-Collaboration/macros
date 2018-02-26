@@ -2,11 +2,15 @@
 
 using namespace std;
 
-void Fun4All_TestBeam(int nEvents = 10000000,
-                      const char *input_file =
-                          //                          "/sphenix/data/data03/phnxreco/sphenix/caladc/hcallab/ihcal_2018-01-15__08_00_58.prdf",
-                      "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/led/led_00000254-0000.prdf",
-                      const char *output_file = "data/led_00000254.root")
+void Fun4All_TestBeam(int nEvents = 100,
+
+                      //                          "/sphenix/data/data03/phnxreco/sphenix/caladc/hcallab/ihcal_2018-01-15__08_00_58.prdf",
+                      //
+                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000332-0000.prdf",
+                      const char *output_file = "data/beam_00000332.root"
+                      //                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/led/led_00000254-0000.prdf",
+                      //                      const char *output_file = "data/led_00000254.root"//
+                      )
 {
   gSystem->Load("libfun4all");
   gSystem->Load("libPrototype4.so");
@@ -23,49 +27,49 @@ void Fun4All_TestBeam(int nEvents = 10000000,
 
   int i_offset = 0;
 
-  //  //    rcdaq_client create_device device_filenumbers_delete 9 911 "$HOME/beam_values.txt"
-  //  //  S:MTNRG  =  120   GeV
-  //  //  F:MT6SC1 =  11127     Cnts
-  //  //  F:MT6SC2 =  10585     Cnts
-  //  //  F:MT6SC3 =  10442     Cnts
-  //  //  F:MT6SC4 =  0         Cnts
-  //  //  F:MT6SC5 =  20251     Cnts
-  //  //  E:2CH    =  981.9 mm
-  //  //  E:2CV    =  93.17 mm
-  //  //  E:2CMT6T =  76.11 F
-  //  //  E:2CMT6H =  18.09 %Hum
-  //  //  F:MT5CP2 =  .0301 Psia
-  //  //  F:MT6CP2 =  .6905 Psia
-  //  i_offset = 0;
-  //  unpack_run->add_channel("beam_MTNRG_GeV", 911, i_offset++, 1e-4);
-  //  unpack_run->add_channel("beam_MT6SC1_Cnts", 911, i_offset++, 1e-4);
-  //  unpack_run->add_channel("beam_MT6SC2_Cnts", 911, i_offset++, 1e-4);
-  //  unpack_run->add_channel("beam_MT6SC3_Cnts", 911, i_offset++, 1e-4);
-  //  unpack_run->add_channel("beam_MT6SC4_Cnts", 911, i_offset++, 1e-4);
-  //  unpack_run->add_channel("beam_MT6SC5_Cnts", 911, i_offset++, 1e-4);
-  //  unpack_run->add_channel("beam_2CH_mm", 911, i_offset++, 1e-4);
-  //  unpack_run->add_channel("beam_2CV_mm", 911, i_offset++, 1e-4);
-  //  unpack_run->add_channel("beam_2CMT6T_F", 911, i_offset++, 1e-4);
-  //  unpack_run->add_channel("beam_2CMT6H_RH", 911, i_offset++, 1e-4);
-  //  unpack_run->add_channel("beam_MT5CP2_Psia", 911, i_offset++, 1e-4);
-  //  unpack_run->add_channel("beam_MT6CP2_Psia", 911, i_offset++, 1e-4);
-  //
-  ////  rcdaq_client create_device device_filenumbers_delete 9 984 "$HOME/DB_LOGGER_EMCAL_A0_values.txt"
-  //  unpack_run->add_channel("EMCAL_A0_HighGain", 984, 0, 1); // 1: pre-amp high gain, 0: nominal gain
-  //
-  //  //  rcdaq_client create_device device_filenumbers_delete 9 983 "$HOME/DB_LOGGER_EMCAL_GR0.txt"
-  //  unpack_run->add_channel("EMCAL_GR0_BiasOffset_Tower21", 983, 21-1, 1); // bias offset in mV for tower 21
-  //
-  //    // rcdaq_client create_device device_filenumbers_delete 9 982 "$HOME/DB_LOGGER_EMCAL_T0_values.txt"
-  //  unpack_run->add_channel("EMCAL_T0_Tower21", 982, 21-1, 1e-3); // temperature reading in C for tower 21
+  //    rcdaq_client create_device device_filenumbers_delete 9 911 "$HOME/beam_values.txt"
+  //  S:MTNRG  =  120   GeV
+  //  F:MT6SC1 =  11127     Cnts
+  //  F:MT6SC2 =  10585     Cnts
+  //  F:MT6SC3 =  10442     Cnts
+  //  F:MT6SC4 =  0         Cnts
+  //  F:MT6SC5 =  20251     Cnts
+  //  E:2CH    =  981.9 mm
+  //  E:2CV    =  93.17 mm
+  //  E:2CMT6T =  76.11 F
+  //  E:2CMT6H =  18.09 %Hum
+  //  F:MT5CP2 =  .0301 Psia
+  //  F:MT6CP2 =  .6905 Psia
+  i_offset = 0;
+  unpack_run->add_channel("beam_MTNRG_GeV", 911, i_offset++, 1e-4);
+  unpack_run->add_channel("beam_MT6SC1_Cnts", 911, i_offset++, 1e-4);
+  unpack_run->add_channel("beam_MT6SC2_Cnts", 911, i_offset++, 1e-4);
+  unpack_run->add_channel("beam_MT6SC3_Cnts", 911, i_offset++, 1e-4);
+  unpack_run->add_channel("beam_MT6SC4_Cnts", 911, i_offset++, 1e-4);
+  unpack_run->add_channel("beam_MT6SC5_Cnts", 911, i_offset++, 1e-4);
+  unpack_run->add_channel("beam_2CH_mm", 911, i_offset++, 1e-4);
+  unpack_run->add_channel("beam_2CV_mm", 911, i_offset++, 1e-4);
+  unpack_run->add_channel("beam_2CMT6T_F", 911, i_offset++, 1e-4);
+  unpack_run->add_channel("beam_2CMT6H_RH", 911, i_offset++, 1e-4);
+  unpack_run->add_channel("beam_MT5CP2_Psia", 911, i_offset++, 1e-4);
+  unpack_run->add_channel("beam_MT6CP2_Psia", 911, i_offset++, 1e-4);
+
+  //  rcdaq_client create_device device_filenumbers_delete 9 984 "$HOME/DB_LOGGER_EMCAL_A0_values.txt"
+  unpack_run->add_channel("EMCAL_A0_HighGain", 984, 0, 1);  // 1: pre-amp high gain, 0: nominal gain
+
+  //  rcdaq_client create_device device_filenumbers_delete 9 983 "$HOME/DB_LOGGER_EMCAL_GR0.txt"
+  unpack_run->add_channel("EMCAL_GR0_BiasOffset_Tower21", 983, 21 - 1, 1);  // bias offset in mV for tower 21
+
+  // rcdaq_client create_device device_filenumbers_delete 9 982 "$HOME/DB_LOGGER_EMCAL_T0_values.txt"
+  unpack_run->add_channel("EMCAL_T0_Tower21", 982, 21 - 1, 1e-3);  // temperature reading in C for tower 21
   //
   se->registerSubsystem(unpack_run);
   //
-  //  // ------------------- Temperature output -------------------
+  // ------------------- Temperature output -------------------
   //  TempInfoUnpackPRDF *unpack_temp = new TempInfoUnpackPRDF();
   //  unpack_temp->Verbosity(RunInfoUnpackPRDF::VERBOSITY_SOME);
   //  se->registerSubsystem(unpack_temp);
-  //
+
   // ------------------- HCal and EMcal -------------------
   SubsysReco *unpack = new CaloUnpackPRDF();
   //  unpack->Verbosity(1);
@@ -119,17 +123,17 @@ void Fun4All_TestBeam(int nEvents = 10000000,
 
   const int N_hodo = 8;
   // mapping based on SPHENIX-doc-121-v6
-//  1 2 3 4 5 6 7 8
-//  101 100 103 102 97  96  99  98
-//
-//9 109
-//10  108
-//11  111
-//12  110
-//13  105
-//14  104
-//15  107
-//16  106
+  //  1 2 3 4 5 6 7 8
+  //  101 100 103 102 97  96  99  98
+  //
+  //9 109
+  //10  108
+  //11  111
+  //12  110
+  //13  105
+  //14  104
+  //15  107
+  //16  106
 
   gunpack = new GenericUnpackPRDF("HODO_VERTICAL");
   gunpack->add_channel(first_packet_id, 101, 0);
@@ -273,7 +277,9 @@ void Fun4All_TestBeam(int nEvents = 10000000,
   //
   //  // -------------------  Event summary -------------------
   //
-  //  se->registerSubsystem(new EventInfoSummary());
+  //  EventInfoSummary * es = new EventInfoSummary();
+  //  es->Verbosity(EventInfoSummary::VERBOSITY_MORE);
+  //  se->registerSubsystem(es);
 
   // -------------------  Output -------------------
   //main DST output
@@ -285,13 +291,13 @@ void Fun4All_TestBeam(int nEvents = 10000000,
   Prototype4DSTReader *reader = new Prototype4DSTReader(
       string(output_file) + string("_DSTReader.root"));
 
-  //  reader->AddRunInfo("beam_MTNRG_GeV");
-  //  reader->AddRunInfo("beam_2CH_mm");
-  //  reader->AddRunInfo("beam_2CV_mm");
-  //  reader->AddRunInfo("EMCAL_A0_HighGain");
-  //  reader->AddRunInfo("EMCAL_GR0_BiasOffset_Tower21");
-  //  reader->AddRunInfo("EMCAL_T0_Tower21");
-  //  reader->AddRunInfo("EMCAL_Is_HighEta");
+  reader->AddRunInfo("beam_MTNRG_GeV");
+  reader->AddRunInfo("beam_2CH_mm");
+  reader->AddRunInfo("beam_2CV_mm");
+  reader->AddRunInfo("EMCAL_A0_HighGain");
+  reader->AddRunInfo("EMCAL_GR0_BiasOffset_Tower21");
+  reader->AddRunInfo("EMCAL_T0_Tower21");
+  reader->AddRunInfo("EMCAL_Is_HighEta");
 
   //  reader->AddEventInfo("beam_Is_In_Spill");
   //  reader->AddEventInfo("beam_SPILL_WARBLER_RMS");
@@ -300,43 +306,43 @@ void Fun4All_TestBeam(int nEvents = 10000000,
   //  reader->AddEventInfo("CALIB_LG_HCALOUT_Sum");
   //
   reader->AddTower("RAW_LG_HCALIN");
-  reader->AddTower("RAW_HG_HCALIN");
+  //  reader->AddTower("RAW_HG_HCALIN");
   reader->AddTower("RAW_LG_HCALOUT");
   reader->AddTower("RAW_HG_HCALOUT");
 
   reader->AddTower("CALIB_LG_HCALIN");
-  reader->AddTower("CALIB_HG_HCALIN");
+  //  reader->AddTower("CALIB_HG_HCALIN");
   reader->AddTower("CALIB_LG_HCALOUT");
   reader->AddTower("CALIB_HG_HCALOUT");
 
   reader->AddTower("RAW_CEMC");
   reader->AddTower("CALIB_CEMC");
   //
-  //  reader->AddTower("RAW_HODO_VERTICAL");
-  //  reader->AddTower("RAW_HODO_HORIZONTAL");
-  //  reader->AddTower("CALIB_HODO_VERTICAL");
-  //  reader->AddTower("CALIB_HODO_HORIZONTAL");
+  reader->AddTower("RAW_HODO_VERTICAL");
+  reader->AddTower("RAW_HODO_HORIZONTAL");
+  reader->AddTower("CALIB_HODO_VERTICAL");
+  reader->AddTower("CALIB_HODO_HORIZONTAL");
   //
-  //  reader->AddTower("RAW_C1");
-  //  reader->AddTower("CALIB_C1");
-  //
-  //  reader->AddTower("RAW_C2");
-  //  reader->AddTower("CALIB_C2");
+  reader->AddTower("RAW_C1");
+  reader->AddTower("CALIB_C1");
+
+  reader->AddTower("RAW_C2");
+  reader->AddTower("CALIB_C2");
   //
   //  reader->AddTower("RAW_HCAL_SCINT");
   //  reader->AddTower("CALIB_HCAL_SCINT");
   //
-  //  reader->AddTower("RAW_PbGL");
-  //  reader->AddTower("CALIB_PbGL");
+  reader->AddTower("RAW_PbGL");
+  reader->AddTower("CALIB_PbGL");
   //
-  //  reader->AddTower("RAW_TRIGGER_VETO");
-  //  reader->AddTower("CALIB_TRIGGER_VETO");
+  reader->AddTower("RAW_TRIGGER_VETO");
+  reader->AddTower("CALIB_TRIGGER_VETO");
   //
   //  reader->AddTower("RAW_TILE_MAPPER");
   //  reader->AddTower("CALIB_TILE_MAPPER");
   //
-  //  reader->AddTower("RAW_SC3");
-  //  reader->AddTower("CALIB_SC3");
+  reader->AddTower("RAW_SC3");
+  reader->AddTower("CALIB_SC3");
   //
   //  reader->AddTower("RAW_SC_MWPC4");
   //  reader->AddTower("CALIB_SC_MWPC4");
