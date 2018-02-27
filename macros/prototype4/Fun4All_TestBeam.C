@@ -2,12 +2,14 @@
 
 using namespace std;
 
-void Fun4All_TestBeam(int nEvents = 100,
+void Fun4All_TestBeam(int nEvents = 300,
 
                       //                          "/sphenix/data/data03/phnxreco/sphenix/caladc/hcallab/ihcal_2018-01-15__08_00_58.prdf",
                       //
-                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000332-0000.prdf",
-                      const char *output_file = "data/beam_00000332.root"
+//    const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000332-0000.prdf",
+//    const char *output_file = "data/beam_00000332.root"
+        const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000393-0000.prdf",
+        const char *output_file = "data/beam_00000393.root"
                       //                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/led/led_00000254-0000.prdf",
                       //                      const char *output_file = "data/led_00000254.root"//
                       )
@@ -161,7 +163,7 @@ void Fun4All_TestBeam(int nEvents = 100,
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
   for (int i = 0; i < N_hodo; ++i)
     calib->GetCalibrationParameters().set_double_param(
-        Form("calib_const_column0_row%d", i), 1 / 23.24);  // normalize to 1.0
+        Form("calib_const_column0_row%d", i), 1 / 1.38253e+02);  // normalize to 1.0
   se->registerSubsystem(calib);
 
   calib = new CaloCalibration("HODO_HORIZONTAL");
@@ -169,7 +171,7 @@ void Fun4All_TestBeam(int nEvents = 100,
   // Martin find that even channel has negative polarity and odd channel has positive polarity
   for (int i = 0; i < N_hodo; ++i)
     calib->GetCalibrationParameters().set_double_param(
-        Form("calib_const_column0_row%d", i), 1 / 23.24);  // normalize to 1.0
+        Form("calib_const_column0_row%d", i), 1 / 1.38253e+02);  // normalize to 1.0
   se->registerSubsystem(calib);
   //
   //  // ------------------- Other detectors -------------------
@@ -234,10 +236,10 @@ void Fun4All_TestBeam(int nEvents = 100,
   calib = new CaloCalibration("TRIGGER_VETO");
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", 1. / 29.4155);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", 1. / 91);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row2", 1. / 31.3981);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row3", 1. / 1.43839e+02);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", 1. / 3.17209e+02);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", 1. / 3.27850e+02);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row2", 1. / 4.51055e+02);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row3", 1. / 5.82206e+02);
   se->registerSubsystem(calib);
   //
   //  const int N_TileMapper = 16;
