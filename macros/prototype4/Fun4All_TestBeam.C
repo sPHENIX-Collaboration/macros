@@ -2,14 +2,14 @@
 
 using namespace std;
 
-void Fun4All_TestBeam(int nEvents = 300,
+void Fun4All_TestBeam(int nEvents = 100,
 
                       //                          "/sphenix/data/data03/phnxreco/sphenix/caladc/hcallab/ihcal_2018-01-15__08_00_58.prdf",
                       //
 //    const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000332-0000.prdf",
 //    const char *output_file = "data/beam_00000332.root"
-        const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000393-0000.prdf",
-        const char *output_file = "data/beam_00000393.root"
+        const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000402-0000.prdf",
+        const char *output_file = "data/beam_00000402.root"
                       //                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/led/led_00000254-0000.prdf",
                       //                      const char *output_file = "data/led_00000254.root"//
                       )
@@ -81,7 +81,7 @@ void Fun4All_TestBeam(int nEvents = 300,
 
   calib = new CaloCalibration("CEMC");
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8./3000);
-  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
+  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
 //  calib->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
 //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
   se->registerSubsystem(calib);
@@ -91,7 +91,7 @@ void Fun4All_TestBeam(int nEvents = 300,
   calib->set_raw_tower_node_prefix("RAW_LG");
   calib->GetCalibrationParameters().set_name("hcalin_lg");
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8./3000);
-  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
+  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
 //  calib->GetCalibrationParameters().ReadFromFile("hcalin_lg", "xml", 0, 0,
 //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
   se->registerSubsystem(calib);
@@ -109,7 +109,7 @@ void Fun4All_TestBeam(int nEvents = 300,
   calib->set_raw_tower_node_prefix("RAW_LG");
   calib->GetCalibrationParameters().set_name("hcalout_lg");
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8./3000);
-  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
+  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
 //  calib->GetCalibrationParameters().ReadFromFile("hcalout_lg", "xml", 0, 0,
 //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
   se->registerSubsystem(calib);
@@ -119,7 +119,7 @@ void Fun4All_TestBeam(int nEvents = 300,
   calib->set_raw_tower_node_prefix("RAW_HG");
   calib->GetCalibrationParameters().set_name("hcalout_hg");
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8./3000);
-  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
+  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
 //  calib->GetCalibrationParameters().ReadFromFile("hcalout_hg", "xml", 0, 0,
 //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
   se->registerSubsystem(calib);
