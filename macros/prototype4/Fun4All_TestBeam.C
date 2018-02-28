@@ -2,20 +2,23 @@
 
 using namespace std;
 
-void Fun4All_TestBeam(int nEvents = 100,
+void Fun4All_TestBeam(int nEvents = 10,
 
                       //                          "/sphenix/data/data03/phnxreco/sphenix/caladc/hcallab/ihcal_2018-01-15__08_00_58.prdf",
                       //
-//    const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000332-0000.prdf",
-//    const char *output_file = "data/beam_00000332.root"
-        const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000402-0000.prdf",
-        const char *output_file = "data/beam_00000402.root"
+                      //    const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000332-0000.prdf",
+                      //    const char *output_file = "data/beam_00000332.root"
+                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000499-0000.prdf",
+                      const char *output_file = "data/beam_00000499.root"
                       //                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/led/led_00000254-0000.prdf",
                       //                      const char *output_file = "data/led_00000254.root"//
                       )
 {
   gSystem->Load("libfun4all");
   gSystem->Load("libPrototype4.so");
+
+  const bool do_cemc = true;
+  const bool do_hcal = true;
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(Fun4AllServer::VERBOSITY_SOME);
@@ -73,56 +76,63 @@ void Fun4All_TestBeam(int nEvents = 100,
   //  se->registerSubsystem(unpack_temp);
 
   // ------------------- HCal and EMcal -------------------
-  SubsysReco *unpack = new CaloUnpackPRDF();
-  //  unpack->Verbosity(1);
-  se->registerSubsystem(unpack);
 
-  CaloCalibration *calib = NULL;
+  if (do_cemc)
+  {
+    SubsysReco *unpack = new CaloUnpackPRDF();
+    //  unpack->Verbosity(1);
+    se->registerSubsystem(unpack);
 
-  calib = new CaloCalibration("CEMC");
-  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8./3000);
-  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
-//  calib->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
-//                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
-  se->registerSubsystem(calib);
+    CaloCalibration *calib = NULL;
 
-  calib = new CaloCalibration("HCALIN");
-  calib->set_calib_tower_node_prefix("CALIB_LG");
-  calib->set_raw_tower_node_prefix("RAW_LG");
-  calib->GetCalibrationParameters().set_name("hcalin_lg");
-  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8./3000);
-  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
-//  calib->GetCalibrationParameters().ReadFromFile("hcalin_lg", "xml", 0, 0,
-//                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
-  se->registerSubsystem(calib);
+    calib = new CaloCalibration("CEMC");
+    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
+    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
+    //  calib->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
+    //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
+    se->registerSubsystem(calib);
+  }
 
-  //  calib = new CaloCalibration("HCALIN");
-  //  calib->set_calib_tower_node_prefix("CALIB_HG");
-  //  calib->set_raw_tower_node_prefix("RAW_HG");
-  //  calib->GetCalibrationParameters().set_name("hcalin_hg");
-  //  calib->GetCalibrationParameters().ReadFromFile("hcalin_hg", "xml", 0, 0,
-  //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
-  //  se->registerSubsystem(calib);
+  if (do_hcal)
+  {
+    calib = new CaloCalibration("HCALIN");
+    calib->set_calib_tower_node_prefix("CALIB_LG");
+    calib->set_raw_tower_node_prefix("RAW_LG");
+    calib->GetCalibrationParameters().set_name("hcalin_lg");
+    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
+    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
+    //  calib->GetCalibrationParameters().ReadFromFile("hcalin_lg", "xml", 0, 0,
+    //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
+    se->registerSubsystem(calib);
 
-  calib = new CaloCalibration("HCALOUT");
-  calib->set_calib_tower_node_prefix("CALIB_LG");
-  calib->set_raw_tower_node_prefix("RAW_LG");
-  calib->GetCalibrationParameters().set_name("hcalout_lg");
-  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8./3000);
-  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
-//  calib->GetCalibrationParameters().ReadFromFile("hcalout_lg", "xml", 0, 0,
-//                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
-  se->registerSubsystem(calib);
+    //  calib = new CaloCalibration("HCALIN");
+    //  calib->set_calib_tower_node_prefix("CALIB_HG");
+    //  calib->set_raw_tower_node_prefix("RAW_HG");
+    //  calib->GetCalibrationParameters().set_name("hcalin_hg");
+    //  calib->GetCalibrationParameters().ReadFromFile("hcalin_hg", "xml", 0, 0,
+    //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
+    //  se->registerSubsystem(calib);
 
-  calib = new CaloCalibration("HCALOUT");
-  calib->set_calib_tower_node_prefix("CALIB_HG");
-  calib->set_raw_tower_node_prefix("RAW_HG");
-  calib->GetCalibrationParameters().set_name("hcalout_hg");
-  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8./3000);
-  calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
-//  calib->GetCalibrationParameters().ReadFromFile("hcalout_hg", "xml", 0, 0,
-//                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
-  se->registerSubsystem(calib);
+    calib = new CaloCalibration("HCALOUT");
+    calib->set_calib_tower_node_prefix("CALIB_LG");
+    calib->set_raw_tower_node_prefix("RAW_LG");
+    calib->GetCalibrationParameters().set_name("hcalout_lg");
+    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
+    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
+    //  calib->GetCalibrationParameters().ReadFromFile("hcalout_lg", "xml", 0, 0,
+    //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
+    se->registerSubsystem(calib);
+
+    calib = new CaloCalibration("HCALOUT");
+    calib->set_calib_tower_node_prefix("CALIB_HG");
+    calib->set_raw_tower_node_prefix("RAW_HG");
+    calib->GetCalibrationParameters().set_name("hcalout_hg");
+    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
+    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
+    //  calib->GetCalibrationParameters().ReadFromFile("hcalout_hg", "xml", 0, 0,
+    //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
+    se->registerSubsystem(calib);
+  }
   //
   //  // ------------------- Hodoscpes -------------------
   //
@@ -269,6 +279,15 @@ void Fun4All_TestBeam(int nEvents = 100,
   calib = new CaloCalibration("SC3");
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
   se->registerSubsystem(calib);
+
+  gunpack = new GenericUnpackPRDF("FINGER_COUNTER");
+  // unpack->Verbosity(1);
+  gunpack->add_channel(first_packet_id, 168, 0);  // 168  Counters  Finger counter
+  se->registerSubsystem(gunpack);
+  //
+  calib = new CaloCalibration("FINGER_COUNTER");
+  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
+  se->registerSubsystem(calib);
   //
   //  gunpack = new GenericUnpackPRDF("SC_MWPC4");
   //// unpack->Verbosity(1);
@@ -314,18 +333,25 @@ void Fun4All_TestBeam(int nEvents = 100,
   //  reader->AddEventInfo("CALIB_LG_HCALIN_Sum");
   //  reader->AddEventInfo("CALIB_LG_HCALOUT_Sum");
   //
-  reader->AddTower("RAW_LG_HCALIN");
-  //  reader->AddTower("RAW_HG_HCALIN");
-  reader->AddTower("RAW_LG_HCALOUT");
-  reader->AddTower("RAW_HG_HCALOUT");
+  if (do_hcal)
+  {
+    reader->AddTower("RAW_LG_HCALIN");
+    //  reader->AddTower("RAW_HG_HCALIN");
+    reader->AddTower("RAW_LG_HCALOUT");
+    reader->AddTower("RAW_HG_HCALOUT");
 
-  reader->AddTower("CALIB_LG_HCALIN");
-  //  reader->AddTower("CALIB_HG_HCALIN");
-  reader->AddTower("CALIB_LG_HCALOUT");
-  reader->AddTower("CALIB_HG_HCALOUT");
+    reader->AddTower("CALIB_LG_HCALIN");
+    //  reader->AddTower("CALIB_HG_HCALIN");
+    reader->AddTower("CALIB_LG_HCALOUT");
+    reader->AddTower("CALIB_HG_HCALOUT");
+  }
 
-  reader->AddTower("RAW_CEMC");
-  reader->AddTower("CALIB_CEMC");
+  if (do_cemc)
+  {
+    reader->AddTower("RAW_CEMC");
+    reader->AddTower("CALIB_CEMC");
+  }
+
   //
   reader->AddTower("RAW_HODO_VERTICAL");
   reader->AddTower("RAW_HODO_HORIZONTAL");
@@ -352,6 +378,10 @@ void Fun4All_TestBeam(int nEvents = 100,
   //
   reader->AddTower("RAW_SC3");
   reader->AddTower("CALIB_SC3");
+
+  reader->AddTower("RAW_FINGER_COUNTER");
+  reader->AddTower("CALIB_FINGER_COUNTER");
+
   //
   //  reader->AddTower("RAW_SC_MWPC4");
   //  reader->AddTower("CALIB_SC_MWPC4");
