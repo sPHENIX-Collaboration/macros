@@ -5,8 +5,10 @@ int Fun4All_G4_Prototype2(int nEvents = 1)
   gSystem->Load("libg4detectors");
   gSystem->Load("libg4testbench");
   gSystem->Load("libg4histos");
-  gSystem->Load("libg4eval.so");
+  gSystem->Load("libg4eval");
   gSystem->Load("libqa_modules");
+  gSystem->Load("libg4calo");
+  gSystem->Load("libcalo_reco");
 
   bool cemc_on = true;
   bool cemc_cell = cemc_on && true;

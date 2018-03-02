@@ -5,6 +5,20 @@
 //true - Choose if you want Aluminum
 const bool inner_hcal_material_Al = false;
 
+
+enum enu_HCalIn_clusterizer
+{
+  kHCalInGraphClusterizer,
+
+  kHCalInTemplateClusterizer
+};
+
+//! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
+enu_HCalIn_clusterizer HCalIn_clusterizer = kHCalInTemplateClusterizer;
+//! graph clusterizer, RawClusterBuilderGraph
+//enu_HCalIn_clusterizer HCalIn_clusterizer = kHCalInGraphClusterizer;
+
+
 // Init is called by G4Setup.C
 void HCalInnerInit() {}
 
@@ -142,8 +156,8 @@ void HCALInner_Cells(int verbosity = 0) {
 
 void HCALInner_Towers(int verbosity = 0) {
 
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
+  gSystem->Load("libg4calo.so");
+  gSystem->Load("libcalo_reco.so");
   Fun4AllServer *se = Fun4AllServer::instance();
   
   HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalInRawTowerBuilder");
@@ -184,16 +198,31 @@ void HCALInner_Towers(int verbosity = 0) {
 }
 
 void HCALInner_Clusters(int verbosity = 0) {
+  gSystem->Load("libcalo_reco.so");
 
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
   
-  RawClusterBuilder* ClusterBuilder = new RawClusterBuilder("HcalInRawClusterBuilder");
-  ClusterBuilder->Detector("HCALIN");
-  ClusterBuilder->Verbosity(verbosity);
-  se->registerSubsystem( ClusterBuilder );
-  
+  if (HCalIn_clusterizer == kHCalInTemplateClusterizer)
+  {
+    RawClusterBuilderTemplate* ClusterBuilder = new RawClusterBuilderTemplate("HcalInRawClusterBuilderTemplate");
+    ClusterBuilder->Detector("HCALIN");
+    ClusterBuilder->Verbosity(verbosity);
+    se->registerSubsystem( ClusterBuilder );
+
+  }
+  else if (HCalIn_clusterizer == kHCalInGraphClusterizer)
+  {
+    RawClusterBuilderGraph* ClusterBuilder = new RawClusterBuilderGraph("HcalInRawClusterBuilderGraph");
+    ClusterBuilder->Detector("HCALIN");
+    ClusterBuilder->Verbosity(verbosity);
+    se->registerSubsystem( ClusterBuilder );
+
+  }
+  else
+  {
+    cout <<"HCalIn_Clusters - unknown clusterizer setting!"<<endl;
+    exit(1);
+  }
   return;
 }
 

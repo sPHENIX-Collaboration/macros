@@ -1,4 +1,4 @@
-int Fun4All_G4_Prototype3(int nEvents = 1)
+int Fun4All_G4_Prototype4(int nEvents = 1)
 {
 
   gSystem->Load("libfun4all");

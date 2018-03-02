@@ -57,7 +57,7 @@ void G4Init(bool do_svtx = true,
 
   if (do_FGEM)
     {
-      gROOT->LoadMacro("G4_FGEM_fsPHENIX.C");
+      gROOT->LoadMacro("G4_FGEM_EIC.C");
       FGEM_Init();
     }
 
@@ -138,6 +138,10 @@ int G4Setup(const int absorberactive = 0,
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
+
+  // read-in HepMC events to Geant4 if there is any
+  HepMCNodeReader *hr = new HepMCNodeReader();
+  se->registerSubsystem(hr);
 
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->set_rapidity_coverage(1.1); // according to drawings
