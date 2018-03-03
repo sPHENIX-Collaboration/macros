@@ -8,8 +8,6 @@ bool use_primary_vertex = false;
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
 const int n_intt_layer = 4;  // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
 
-bool use_zigzag_pads = true;  // set to false to revert to rectangular pads
-
 int n_tpc_layer_inner = 16;
 double tpc_layer_thick_inner = 1.25 / 2.0;
 int tpc_layer_rphi_count_inner = 1152;
@@ -81,7 +79,7 @@ double TPC_SmearZ;
 
 int Max_si_layer;
 
-void SvtxInit(int n_TPC_layers = 40, int verbosity = 0)
+void SvtxInit(int verbosity = 0)
 {
   Max_si_layer = n_maps_layer + n_intt_layer + n_gas_layer;
 
@@ -186,11 +184,11 @@ void SvtxInit(int n_TPC_layers = 40, int verbosity = 0)
   TPCADCClock = 53.0;                           // ns, corresponds to an ADC clock rate of 18.8 MHz
   TPCShapingRMSLead = 16.0;                     // ns, rising RMS equivalent of shaping amplifier for 40 ns SAMPA
   TPCShapingRMSTail = 24.0;                     // ns, falling RMS equivalent of shaping amplifier for 40 ns SAMPA
-                                                // TPCADCClock = 27.0;  // ns, corresponds to an ADC clock rate of 18.8 MHz * 2
   tpc_cell_z = TPCADCClock * TPCDriftVelocity;  // cm
 
   //  TKH does not understand the physical origin of these parameters.
   //  however, their impact seems quite small...
+  //  these are tuned to give 150 microns r-phi and 500 microns Z resolution in the outer TPC layers with the TPC setup used here
   TPC_SmearRPhi = 0.215;
   TPC_SmearZ = 0.20;
 }
@@ -335,8 +333,6 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   radius = inner_readout_radius;
 
   double outer_radius = 78.;
-  //int npoints = Max_si_layer - n_maps_layer - n_intt_layer;
-  //double delta_radius =  ( outer_radius - inner_readout_radius )/( (double)npoints );
 
   // Active layers of the TPC from 30-40 cm (inner layers)
 
@@ -477,14 +473,6 @@ void Svtx_Cells(int verbosity = 0)
     se->registerSubsystem(reco);
   }
 
-  // TPC cell sizes are defined at top of macro, this is for backward compatibility with old hits files
-  if (n_gas_layer == 60)
-  {
-    TPCDriftVelocity = 6.0 / 1000.0;  // cm/ns
-    tpc_cell_x = 0.12;
-    tpc_cell_y = 0.17;
-  }
-
   // Main switch for TPC distortion
   const bool do_tpc_distortion = true;
   PHG4TPCSpaceChargeDistortion* tpc_distortion = NULL;
@@ -510,29 +498,17 @@ void Svtx_Cells(int verbosity = 0)
   PHG4CylinderCellTPCReco* svtx_cells = new PHG4CylinderCellTPCReco(n_maps_layer + n_intt_layer);
   svtx_cells->Detector("SVTX");
   svtx_cells->setDistortion(tpc_distortion);
-  svtx_cells->setZigzags(use_zigzag_pads);  // set zigzag pads option on if true, use rectangular pads if false  (not required, defaults to true in code).
-  if (n_gas_layer != 60)
-  {
-    svtx_cells->setDiffusionT(TPC_Trans_Diffusion);
-    svtx_cells->setDiffusionL(TPC_Long_Diffusion);
-    svtx_cells->setSigmaT(TPC_SigmaT);
-
-    svtx_cells->setShapingRMSLead(TPCShapingRMSLead * TPCDriftVelocity);
-    svtx_cells->setShapingRMSTail(TPCShapingRMSTail * TPCDriftVelocity);
-    // Expected cluster resolutions:
-    //    r-phi: diffusion + GEM smearing = 750 microns, assume resolution is 20% of that => 150 microns
-    //    Z:  amplifier shaping time (RMS 32 ns, 48 ns) and drift vel of 3 cm/microsec gives smearing of 3 x (32+48/2 = 1.2 mm, assume resolution is 20% of that => 240 microns
-    svtx_cells->setSmearRPhi(TPC_SmearRPhi);  // additional random displacement of cloud positions wrt hits to give expected cluster resolution of 150 microns for charge at membrane
-    svtx_cells->setSmearZ(TPC_SmearZ);        // additional random displacement of cloud positions wrt hits to give expected cluster rsolution of 240 microns for charge at membrane
-  }
-  else
-  {
-    // 60 layer tune
-    svtx_cells->setDiffusionT(0.0120);
-    svtx_cells->setDiffusionL(0.0120);
-    svtx_cells->setSmearRPhi(0.09);  // additional smearing of cluster positions
-    svtx_cells->setSmearZ(0.06);     // additional smearing of cluster positions
-  }
+  //svtx_cells->setZigzags(true);  // set zigzag pads option on if true, use rectangular pads if false  (not required, defaults to true in code).
+  svtx_cells->setDiffusionT(TPC_Trans_Diffusion);
+  svtx_cells->setDiffusionL(TPC_Long_Diffusion);
+  svtx_cells->setSigmaT(TPC_SigmaT);  
+  svtx_cells->setShapingRMSLead(TPCShapingRMSLead * TPCDriftVelocity);
+  svtx_cells->setShapingRMSTail(TPCShapingRMSTail * TPCDriftVelocity);
+  // Expected cluster resolutions:
+  //     r-phi: diffusion + GEM smearing = 750 microns, assume resolution is 20% of that => 150 microns
+  //    Tune TPC_SmearRPhi and TPC_SmearZ to get 150 microns in the outer layers
+  svtx_cells->setSmearRPhi(TPC_SmearRPhi);  // additional random displacement of cloud positions wrt hits
+  svtx_cells->setSmearZ(TPC_SmearZ);        // additional random displacement of cloud positions wrt hits
   svtx_cells->set_drift_velocity(TPCDriftVelocity);
   svtx_cells->setHalfLength(105.5);
   svtx_cells->setElectronsPerKeV(TPC_ElectronsPerKeV);
@@ -706,22 +682,10 @@ void Svtx_Reco(int verbosity = 0)
   PHG4TPCClusterizer* tpcclusterizer = new PHG4TPCClusterizer();
   tpcclusterizer->Verbosity(0);
   tpcclusterizer->setRangeLayers(n_maps_layer + n_intt_layer, Max_si_layer);
-  if (n_gas_layer == 40)
-  {
-    // obsolete
-    tpcclusterizer->setEnergyCut(12 /*15 adc*/);
-    tpcclusterizer->setFitWindowSigmas(0.0160, 0.0160);  // should be changed when TPC cluster resolution changes
-    tpcclusterizer->setFitWindowMax(4 /*rphibins*/, 6 /*zbins*/);
-    tpcclusterizer->setFitEnergyThreshold(0.05 /*fraction*/);
-  }
-  else
-  {
-    // current
-    tpcclusterizer->setEnergyCut(15 /*adc*/);
-    tpcclusterizer->setFitWindowSigmas(0.0150, 0.0160);  // should be changed when TPC cluster resolution changes
-    tpcclusterizer->setFitWindowMax(5 /*rphibins*/, 5 /*zbins*/);
-    tpcclusterizer->setFitEnergyThreshold(0.05 /*fraction*/);
-  }
+  tpcclusterizer->setEnergyCut(15 /*adc*/);
+  tpcclusterizer->setFitWindowSigmas(0.0150, 0.0160);  // should be changed when TPC cluster resolution changes
+  tpcclusterizer->setFitWindowMax(5 /*rphibins*/, 5 /*zbins*/);
+  tpcclusterizer->setFitEnergyThreshold(0.05 /*fraction*/);
   se->registerSubsystem(tpcclusterizer);
 
   // This should be true for everything except testing!
