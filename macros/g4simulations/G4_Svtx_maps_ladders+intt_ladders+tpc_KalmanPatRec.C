@@ -1,5 +1,8 @@
 #include <vector>
 
+// ONLY if backward compatibility with hits files already generated with 8 inner TPC layers is needed, you can set this to "true"
+bool tpc_layers_40  = false;
+
 // if true, refit tracks with primary vertex included in track fit  - good for analysis of prompt tracks only
 // Adds second node to node tree, keeps original track node undisturbed
 // Adds second evaluator to process refitted tracks and outputs separate ntuples
@@ -289,7 +292,18 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     radius = intt_radius_max * 0.1;
   }
 
+  int verbosity = 1;
+
   // time projection chamber layers --------------------------------------------
+
+  // switch ONLY for backward compatibility with 40 layer hits files!
+  if (tpc_layers_40)
+    {
+      n_tpc_layer_inner = 8;
+      tpc_layer_thick_inner = 1.25;
+      tpc_layer_rphi_count_inner = 1152;
+      cout << "Using 8 inner_layers for backward comatibility" << endl;
+    }
 
   PHG4CylinderSubsystem* cyl;
 
