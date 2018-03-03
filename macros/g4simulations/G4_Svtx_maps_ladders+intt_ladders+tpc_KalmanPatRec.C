@@ -8,16 +8,11 @@ bool use_primary_vertex = false;
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
 const int n_intt_layer = 4;  // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
 
-int n_tpc_layer_inner = 8;
-double tpc_layer_thick_inner = 1.25;
-int tpc_layer_rphi_count_inner = 1920;
+bool use_zigzag_pads = true;  // set to false to revert to rectangular pads
 
-// make inner layers a factor of 2 thinner
-/*
-int n_tpc_layer_inner = 8 * 2;
+int n_tpc_layer_inner = 16;
 double tpc_layer_thick_inner = 1.25 / 2.0;
-int tpc_layer_rphi_count_inner = 1920 / 2;
-*/
+int tpc_layer_rphi_count_inner = 1152;
 
 int n_tpc_layer_mid = 16;
 double tpc_layer_thick_mid = 1.25;
@@ -196,8 +191,8 @@ void SvtxInit(int n_TPC_layers = 40, int verbosity = 0)
 
   //  TKH does not understand the physical origin of these parameters.
   //  however, their impact seems quite small...
-  TPC_SmearRPhi = 0.10;
-  TPC_SmearZ = 0.15;
+  TPC_SmearRPhi = 0.215;
+  TPC_SmearZ = 0.20;
 }
 
 double Svtx(PHG4Reco* g4Reco, double radius,
@@ -515,6 +510,7 @@ void Svtx_Cells(int verbosity = 0)
   PHG4CylinderCellTPCReco* svtx_cells = new PHG4CylinderCellTPCReco(n_maps_layer + n_intt_layer);
   svtx_cells->Detector("SVTX");
   svtx_cells->setDistortion(tpc_distortion);
+  svtx_cells->setZigzags(use_zigzag_pads);  // set zigzag pads option on if true, use rectangular pads if false  (not required, defaults to true in code).
   if (n_gas_layer != 60)
   {
     svtx_cells->setDiffusionT(TPC_Trans_Diffusion);
@@ -643,7 +639,7 @@ void Svtx_Reco(int verbosity = 0)
   // TPC layers
   for (int i = n_maps_layer + n_intt_layer; i < Max_si_layer; ++i)
   {
-    digi->set_adc_scale(i, 30000, 1.0);
+    digi->set_adc_scale(i, 90000, 1.0); // need to set this based on ADC dynamic range
   }
   se->registerSubsystem(digi);
 
@@ -712,6 +708,7 @@ void Svtx_Reco(int verbosity = 0)
   tpcclusterizer->setRangeLayers(n_maps_layer + n_intt_layer, Max_si_layer);
   if (n_gas_layer == 40)
   {
+    // obsolete
     tpcclusterizer->setEnergyCut(12 /*15 adc*/);
     tpcclusterizer->setFitWindowSigmas(0.0160, 0.0160);  // should be changed when TPC cluster resolution changes
     tpcclusterizer->setFitWindowMax(4 /*rphibins*/, 6 /*zbins*/);
@@ -719,10 +716,10 @@ void Svtx_Reco(int verbosity = 0)
   }
   else
   {
-    // 60 layer tune
+    // current
     tpcclusterizer->setEnergyCut(15 /*adc*/);
     tpcclusterizer->setFitWindowSigmas(0.0150, 0.0160);  // should be changed when TPC cluster resolution changes
-    tpcclusterizer->setFitWindowMax(4 /*rphibins*/, 3 /*zbins*/);
+    tpcclusterizer->setFitWindowMax(5 /*rphibins*/, 5 /*zbins*/);
     tpcclusterizer->setFitEnergyThreshold(0.05 /*fraction*/);
   }
   se->registerSubsystem(tpcclusterizer);
