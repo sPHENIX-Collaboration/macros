@@ -292,7 +292,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     radius = intt_radius_max * 0.1;
   }
 
-  int verbosity = 1;
+//  int verbosity = 1;
 
   // time projection chamber layers --------------------------------------------
 
