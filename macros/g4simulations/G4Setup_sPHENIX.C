@@ -9,8 +9,8 @@ void G4Init(const bool do_svtx = true,
 	    const bool do_magnet = true,
 	    const bool do_hcalout = true,
 	    const bool do_pipe = true,
-      const bool do_plugdoor = false,
-      const int n_TPC_layers = 40)
+	    const bool do_plugdoor = false
+	    )
   {
 
   // load detector/material macros and execute Init() function
@@ -23,7 +23,7 @@ void G4Init(const bool do_svtx = true,
   if (do_svtx)
     {
       gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
-      SvtxInit(n_TPC_layers);
+      SvtxInit();
     }
 
   if (do_pstof) 
