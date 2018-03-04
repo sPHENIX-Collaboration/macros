@@ -296,6 +296,7 @@ void Fun4All_TestBeam(int nEvents = 2000,
   //  TRIGGER_VETO[3] 135.541 624.076 132.313 284.532 240
 
   calib = new CaloCalibration("TRIGGER_VETO");
+  calib->SetFitType(CaloCalibration::kPowerLawExp);
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
   calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", 1. / 295.811);
