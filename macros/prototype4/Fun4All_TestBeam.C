@@ -2,14 +2,14 @@
 
 using namespace std;
 
-void Fun4All_TestBeam(int nEvents = 2000,
+void Fun4All_TestBeam(int nEvents = 1000,
 
                       //                          "/sphenix/data/data03/phnxreco/sphenix/caladc/hcallab/ihcal_2018-01-15__08_00_58.prdf",
                       //
                       //    const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000332-0000.prdf",
                       //    const char *output_file = "data/beam_00000332.root"
-                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000581-0000.prdf",
-                      const char *output_file = "data/beam_00000581.root"
+                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000406-0000.prdf",
+                      const char *output_file = "data/beam_00000406.root"
                       //                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/led/led_00000254-0000.prdf",
                       //                      const char *output_file = "data/led_00000254.root"//
                       )
@@ -88,7 +88,7 @@ void Fun4All_TestBeam(int nEvents = 2000,
     se->registerSubsystem(unpack);
 
     calib = new CaloCalibration("CEMC");
-    //          calib->Verbosity(1);
+//    calib->Verbosity(4);
     calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
     calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
     //  calib->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
@@ -235,6 +235,7 @@ void Fun4All_TestBeam(int nEvents = 2000,
   se->registerSubsystem(gunpack);
   //
   calib = new CaloCalibration("C1");
+  calib->SetFitType(CaloCalibration::kPeakSample);
   se->registerSubsystem(calib);
   //
   // mapping based on SPHENIX-doc-121-v6
@@ -246,6 +247,7 @@ void Fun4All_TestBeam(int nEvents = 2000,
   se->registerSubsystem(gunpack);
   //
   calib = new CaloCalibration("C2");
+  calib->SetFitType(CaloCalibration::kPeakSample);
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
   calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", 1);
@@ -296,7 +298,7 @@ void Fun4All_TestBeam(int nEvents = 2000,
   //  TRIGGER_VETO[3] 135.541 624.076 132.313 284.532 240
 
   calib = new CaloCalibration("TRIGGER_VETO");
-  calib->SetFitType(CaloCalibration::kPowerLawExp);
+  calib->SetFitType(CaloCalibration::kPeakSample);
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
   calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", 1. / 295.811);
@@ -305,15 +307,16 @@ void Fun4All_TestBeam(int nEvents = 2000,
   calib->GetCalibrationParameters().set_double_param("calib_const_column0_row3", 1. / 624.076);
   se->registerSubsystem(calib);
   //
-  //  const int N_TileMapper = 16;
+  const int N_TileMapper = 16;
   //
-  //  gunpack = new GenericUnpackPRDF("TILE_MAPPER");
-  //  for (int i = 0; i < N_TileMapper; ++i)
-  //    gunpack->add_channel(second_packet_id, 32 + i, i); // 24 Cerenkov 1
-  //  se->registerSubsystem(gunpack);
+  gunpack = new GenericUnpackPRDF("TILE_MAPPER");
+  for (int i = 0; i < N_TileMapper; ++i)
+    gunpack->add_channel(first_packet_id, 176 + i, i);  // 24 Cerenkov 1
+  se->registerSubsystem(gunpack);
   //
-  //  calib = new CaloCalibration("TILE_MAPPER");
-  //  se->registerSubsystem(calib);
+  calib = new CaloCalibration("TILE_MAPPER");
+  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
+  se->registerSubsystem(calib);
   //
   // mapping based on SPHENIX-doc-121-v6
   gunpack = new GenericUnpackPRDF("SC3");
@@ -364,13 +367,13 @@ void Fun4All_TestBeam(int nEvents = 2000,
   Prototype4DSTReader *reader = new Prototype4DSTReader(
       string(output_file) + string("_DSTReader.root"));
 
-  reader->AddRunInfo("beam_MTNRG_GeV");
-  reader->AddRunInfo("beam_2CH_mm");
-  reader->AddRunInfo("beam_2CV_mm");
-  reader->AddRunInfo("EMCAL_A0_HighGain");
-  reader->AddRunInfo("EMCAL_GR0_BiasOffset_Tower21");
-  reader->AddRunInfo("EMCAL_T0_Tower21");
-  reader->AddRunInfo("EMCAL_Is_HighEta");
+    reader->AddRunInfo("beam_MTNRG_GeV");
+    reader->AddRunInfo("beam_2CH_mm");
+    reader->AddRunInfo("beam_2CV_mm");
+    reader->AddRunInfo("EMCAL_A0_HighGain");
+    reader->AddRunInfo("EMCAL_GR0_BiasOffset_Tower21");
+    reader->AddRunInfo("EMCAL_T0_Tower21");
+    reader->AddRunInfo("EMCAL_Is_HighEta");
 
   //  reader->AddEventInfo("beam_Is_In_Spill");
   //  reader->AddEventInfo("beam_SPILL_WARBLER_RMS");
@@ -418,8 +421,8 @@ void Fun4All_TestBeam(int nEvents = 2000,
   reader->AddTower("RAW_TRIGGER_VETO");
   reader->AddTower("CALIB_TRIGGER_VETO");
   //
-  //  reader->AddTower("RAW_TILE_MAPPER");
-  //  reader->AddTower("CALIB_TILE_MAPPER");
+  reader->AddTower("RAW_TILE_MAPPER");
+  reader->AddTower("CALIB_TILE_MAPPER");
   //
   reader->AddTower("RAW_SC3");
   reader->AddTower("CALIB_SC3");
