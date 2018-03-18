@@ -88,7 +88,7 @@ void Fun4All_TestBeam(int nEvents = 1000,
     se->registerSubsystem(unpack);
 
     calib = new CaloCalibration("CEMC");
-//    calib->Verbosity(4);
+    //    calib->Verbosity(4);
     calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
     calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
     //  calib->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
@@ -98,11 +98,14 @@ void Fun4All_TestBeam(int nEvents = 1000,
 
   if (do_hcal)
   {
-    calib = new CaloCalibration("HCALIN");
+    const double cin_cali = 0.00297968;
+    const double cout_cali = 0.000215485
+
+        calib = new CaloCalibration("HCALIN");
     calib->set_calib_tower_node_prefix("CALIB_LG");
     calib->set_raw_tower_node_prefix("RAW_LG");
     calib->GetCalibrationParameters().set_name("hcalin_lg");
-    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
+    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cin_cali);  // leading order energy scale from Xu Sun
     calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
     //  calib->GetCalibrationParameters().ReadFromFile("hcalin_lg", "xml", 0, 0,
     //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
@@ -120,7 +123,7 @@ void Fun4All_TestBeam(int nEvents = 1000,
     calib->set_calib_tower_node_prefix("CALIB_LG");
     calib->set_raw_tower_node_prefix("RAW_LG");
     calib->GetCalibrationParameters().set_name("hcalout_lg");
-    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
+    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cout_cali);
     calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
     //  calib->GetCalibrationParameters().ReadFromFile("hcalout_lg", "xml", 0, 0,
     //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
@@ -130,7 +133,7 @@ void Fun4All_TestBeam(int nEvents = 1000,
     calib->set_calib_tower_node_prefix("CALIB_HG");
     calib->set_raw_tower_node_prefix("RAW_HG");
     calib->GetCalibrationParameters().set_name("hcalout_hg");
-    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
+    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cout_cali / 32);
     calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
     //  calib->GetCalibrationParameters().ReadFromFile("hcalout_hg", "xml", 0, 0,
     //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
@@ -367,13 +370,13 @@ void Fun4All_TestBeam(int nEvents = 1000,
   Prototype4DSTReader *reader = new Prototype4DSTReader(
       string(output_file) + string("_DSTReader.root"));
 
-    reader->AddRunInfo("beam_MTNRG_GeV");
-    reader->AddRunInfo("beam_2CH_mm");
-    reader->AddRunInfo("beam_2CV_mm");
-    reader->AddRunInfo("EMCAL_A0_HighGain");
-    reader->AddRunInfo("EMCAL_GR0_BiasOffset_Tower21");
-    reader->AddRunInfo("EMCAL_T0_Tower21");
-    reader->AddRunInfo("EMCAL_Is_HighEta");
+  reader->AddRunInfo("beam_MTNRG_GeV");
+  reader->AddRunInfo("beam_2CH_mm");
+  reader->AddRunInfo("beam_2CV_mm");
+  reader->AddRunInfo("EMCAL_A0_HighGain");
+  reader->AddRunInfo("EMCAL_GR0_BiasOffset_Tower21");
+  reader->AddRunInfo("EMCAL_T0_Tower21");
+  reader->AddRunInfo("EMCAL_Is_HighEta");
 
   //  reader->AddEventInfo("beam_Is_In_Spill");
   //  reader->AddEventInfo("beam_SPILL_WARBLER_RMS");
