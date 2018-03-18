@@ -100,13 +100,13 @@ void Fun4All_TestBeam(int nEvents = 1000,
   {
     // leading order energy scale from Xu Sun
     const double cin_cali = 0.00297968;
-    const double cout_cali = 0.000215485
+    const double cout_cali = 0.000215485;
 
-        calib = new CaloCalibration("HCALIN");
+    calib = new CaloCalibration("HCALIN");
     calib->set_calib_tower_node_prefix("CALIB_LG");
     calib->set_raw_tower_node_prefix("RAW_LG");
     calib->GetCalibrationParameters().set_name("hcalin_lg");
-    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cin_cali); 
+    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cin_cali);
     calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
     //  calib->GetCalibrationParameters().ReadFromFile("hcalin_lg", "xml", 0, 0,
     //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
