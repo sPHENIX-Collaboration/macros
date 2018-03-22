@@ -91,8 +91,8 @@ void Fun4All_TestBeam(int nEvents = 100,
   if (do_hcal)
   {
     // leading order energy scale from Xu Sun
-    const double cin_cali = 0.00297968;
-    const double cout_cali = 0.000215485;
+    const double cin_cali = 0.00270145;
+    const double cout_cali = 0.0065718;
 
     calib = new CaloCalibration("HCALIN");
     calib->set_calib_tower_node_prefix("CALIB_LG");
