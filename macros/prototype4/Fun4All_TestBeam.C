@@ -8,8 +8,8 @@ void Fun4All_TestBeam(int nEvents = 1000,
                       //
                       //    const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000332-0000.prdf",
                       //    const char *output_file = "data/beam_00000332.root"
-                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000406-0000.prdf",
-                      const char *output_file = "data/beam_00000406.root"
+                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000422-0000.prdf",
+                      const char *output_file = "data/beam_00000422.root"
                       //                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/led/led_00000254-0000.prdf",
                       //                      const char *output_file = "data/led_00000254.root"//
                       )
@@ -99,8 +99,8 @@ void Fun4All_TestBeam(int nEvents = 1000,
   if (do_hcal)
   {
     // leading order energy scale from Xu Sun
-    const double cin_cali = 0.00297968;
-    const double cout_cali = 0.000215485;
+    const double cin_cali = 0.00270145;
+    const double cout_cali = 0.0065718;
 
     calib = new CaloCalibration("HCALIN");
     calib->set_calib_tower_node_prefix("CALIB_LG");
