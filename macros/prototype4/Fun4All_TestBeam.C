@@ -2,17 +2,9 @@
 
 using namespace std;
 
-void Fun4All_TestBeam(int nEvents = 1000,
-
-                      //                          "/sphenix/data/data03/phnxreco/sphenix/caladc/hcallab/ihcal_2018-01-15__08_00_58.prdf",
-                      //
-                      //    const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000332-0000.prdf",
-                      //    const char *output_file = "data/beam_00000332.root"
-                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000422-0000.prdf",
-                      const char *output_file = "data/beam_00000422.root"
-                      //                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/led/led_00000254-0000.prdf",
-                      //                      const char *output_file = "data/led_00000254.root"//
-                      )
+void Fun4All_TestBeam(int nEvents = 100,
+                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000406-0000.prdf",
+                      const char *output_file = "data/beam_00000406.root")
 {
   gSystem->Load("libfun4all");
   gSystem->Load("libPrototype4.so");
@@ -89,10 +81,10 @@ void Fun4All_TestBeam(int nEvents = 1000,
 
     calib = new CaloCalibration("CEMC");
     //    calib->Verbosity(4);
-    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
-    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
-    //  calib->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
-    //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
+    //    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
+    //    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
+    calib->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
+                                                   string(getenv("CALIBRATIONROOT")) + string("/Prototype4/Calibration/"));  // calibration database
     se->registerSubsystem(calib);
   }
 
