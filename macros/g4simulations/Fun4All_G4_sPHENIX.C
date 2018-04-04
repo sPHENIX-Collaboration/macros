@@ -3,9 +3,9 @@ using namespace std;
 
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
-    const char *inputFile = "/sphenix/sim/sim01/sHijing/sHijing_9-11fm.dat",
+    const char *inputFile = "/sphenix/user/dvp/gen/QCD35/hepmc_QCD35GeV_R04jet50GeVeta0p6_seq00978.dat", // HepMC for jets to be embedded
     const char *outputFile = "G4sPHENIX.root",
-    const char *embed_input_file = "/sphenix/data/data02/review_2017-08-02/sHijing/fm_0-4.list")
+    const char *embed_input_file = "/phenix/u/jinhuang/links/sPHENIX_work/tmp/jet-production/test_production_dst.list")
 {
 
   //===============
@@ -32,7 +32,7 @@ int Fun4All_G4_sPHENIX(
   // Further choose to embed newly simulated events to a previous simulation. Not compatible with `readhits = true`
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/data/data02/review_2017-08-02/
-  const bool do_embedding = false;
+  const bool do_embedding = true;
 
   // Besides the above flags. One can further choose to further put in following particles in Geant4 simulation
   // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
@@ -49,52 +49,52 @@ int Fun4All_G4_sPHENIX(
   // What to run
   //======================
 
-  bool do_bbc = false;
+  bool do_bbc = true;
 
   bool do_pipe = true;
 
   bool do_svtx = true;
-  bool do_svtx_cell = do_svtx && false;
-  bool do_svtx_track = do_svtx_cell && true;
+  bool do_svtx_cell = do_svtx && true;
+  bool do_svtx_track = do_svtx_cell && true; // disabled. note: tracking reco takes time.
   bool do_svtx_eval = do_svtx_track && true;
 
   bool do_pstof = false;
 
   bool do_cemc = true;
-  bool do_cemc_cell = do_cemc && false;
+  bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
-  bool do_cemc_eval = do_cemc_cluster && true;
+  bool do_cemc_eval = do_cemc_cluster && false;
 
   bool do_hcalin = true;
-  bool do_hcalin_cell = do_hcalin && false;
+  bool do_hcalin_cell = do_hcalin && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
-  bool do_hcalin_eval = do_hcalin_cluster && true;
+  bool do_hcalin_eval = do_hcalin_cluster && false;
 
   bool do_magnet = true;
 
   bool do_hcalout = true;
-  bool do_hcalout_cell = do_hcalout && false;
+  bool do_hcalout_cell = do_hcalout && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
-  bool do_hcalout_eval = do_hcalout_cluster && true;
+  bool do_hcalout_eval = do_hcalout_cluster && false;
 
   //! forward flux return plug door. Out of acceptance and off by default.
   bool do_plugdoor = false;
 
-  bool do_global = false;
-  bool do_global_fastsim = false;
+  bool do_global = true;
+  bool do_global_fastsim = true;
 
   bool do_calotrigger = true && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
 
-  bool do_jet_reco = false;
+  bool do_jet_reco = true;
   bool do_jet_eval = do_jet_reco && true;
 
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
   // single particle / p+p-only simulations, or for p+Au / Au+Au
   // simulations which don't particularly care about jets)
-  bool do_HIjetreco = false && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
+  bool do_HIjetreco = true && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
 
   bool do_dst_compress = false;
 
@@ -444,15 +444,23 @@ int Fun4All_G4_sPHENIX(
     Fun4AllHepMCInputManager *in = new Fun4AllHepMCInputManager("HepMCInput_1");
     se->registerInputManager(in);
     se->fileopen(in->Name().c_str(), inputFile);
-    in->set_vertex_distribution_width(0,0,10,0);//optional collision smear in space, time
-    //in->set_vertex_distribution_mean(0,0,1,0);//optional collision central position shift in space, time
-    // //optional choice of vertex distribution function in space, time
-    in->set_vertex_distribution_function(PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Uniform,PHHepMCGenHelper::Uniform);
+    if (do_embedding)
+    {
+      in->set_reuse_vertex(0); // reuse vertex of subevent with embedding ID = 0 (AuAu collision)
+    }
+    else
+    {
+      // generate a new vertex
+      in->set_vertex_distribution_width(0,0,10,0);//optional collision smear in space, time
+      //in->set_vertex_distribution_mean(0,0,1,0);//optional collision central position shift in space, time
+      // //optional choice of vertex distribution function in space, time
+      in->set_vertex_distribution_function(PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Uniform,PHHepMCGenHelper::Uniform);
+   }
     //! embedding ID for the event
     //! positive ID is the embedded event of interest, e.g. jetty event from pythia
     //! negative IDs are backgrounds, .e.g out of time pile up collisions
     //! Usually, ID = 0 means the primary Au+Au collision background
-    in->set_embedding_id(0);
+    in->set_embedding_id(1);
   }
   else
   {
@@ -508,9 +516,9 @@ int Fun4All_G4_sPHENIX(
                 /*bool*/ do_hcalout_twr);
   }
 
-  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
-  if (do_dst_compress) DstCompress(out);
-    se->registerOutputManager(out);
+//  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+//  if (do_dst_compress) DstCompress(out);
+//    se->registerOutputManager(out);
 
   //-----------------
   // Event processing
