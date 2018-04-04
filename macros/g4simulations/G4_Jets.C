@@ -7,7 +7,9 @@ void Jet_Reco(int verbosity = 0) {
 
   // truth particle level jets
   JetReco *truthjetreco = new JetReco();
-  truthjetreco->add_input(new TruthJetInput(Jet::PARTICLE));
+  TruthJetInput * truth_input = new TruthJetInput(Jet::PARTICLE);
+  truth_input->add_embedding_flag(1); // use subevent with embedding ID = 1 only (p+p truth event)
+  truthjetreco->add_input(truth_input);
   truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2),"AntiKt_Truth_r02");
   truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3),"AntiKt_Truth_r03");
   truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.4),"AntiKt_Truth_r04");
@@ -54,20 +56,20 @@ void Jet_Reco(int verbosity = 0) {
   clusterjetreco->Verbosity(verbosity);
   se->registerSubsystem(clusterjetreco);
   
-  // track jets
-  JetReco *trackjetreco = new JetReco();
-  trackjetreco->add_input(new TrackJetInput(Jet::TRACK));
-  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2),"AntiKt_Track_r02");
-  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3),"AntiKt_Track_r03");
-  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.4),"AntiKt_Track_r04");
-  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.5),"AntiKt_Track_r05");
-  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.6),"AntiKt_Track_r06");
-  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.7),"AntiKt_Track_r07");
-  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.8),"AntiKt_Track_r08");
-  trackjetreco->set_algo_node("ANTIKT");
-  trackjetreco->set_input_node("TRACK");
-  trackjetreco->Verbosity(verbosity);
-  se->registerSubsystem(trackjetreco); 
+  // track jets - only enable if you have tracking
+//  JetReco *trackjetreco = new JetReco();
+//  trackjetreco->add_input(new TrackJetInput(Jet::TRACK));
+//  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2),"AntiKt_Track_r02");
+//  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3),"AntiKt_Track_r03");
+//  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.4),"AntiKt_Track_r04");
+//  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.5),"AntiKt_Track_r05");
+//  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.6),"AntiKt_Track_r06");
+//  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.7),"AntiKt_Track_r07");
+//  trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.8),"AntiKt_Track_r08");
+//  trackjetreco->set_algo_node("ANTIKT");
+//  trackjetreco->set_input_node("TRACK");
+//  trackjetreco->Verbosity(verbosity);
+//  se->registerSubsystem(trackjetreco);
 
   return; 
 }
