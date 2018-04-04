@@ -3,7 +3,7 @@
 //Inner HCal absorber material selector:
 //false - Default, absorber material is SS310
 //true - Choose if you want Aluminum
-const bool inner_hcal_material_Al = false;
+const bool inner_hcal_material_Al = true;
 
 
 enum enu_HCalIn_clusterizer
