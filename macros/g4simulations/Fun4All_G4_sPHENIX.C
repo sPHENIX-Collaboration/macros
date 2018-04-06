@@ -1,11 +1,19 @@
 #include <iostream>
 using namespace std;
 
+
+//! @brief main simulation macro for readback production result with CD-1 review reference configuration
+//! @param nEvents      Number of event to run
+//! @param inputFile    Input HepMC file for flag `bool readhepmc = true`. Please use it for signal event intput, e.g. pp photon jet
+//! @param outputFile   Base name of output files
+//! @param embed_input_file     Input from production of AuAu backgroud for embedding background (if do_embedding = true).
+//!                             Please make your own list for production output file selection from /sphenix/sim/sim01/cd1_review/sHijing/fm_0-4/ and /sphenix/sim/sim01/cd1_review/sHijing/fm_4-8/
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
-    const char *inputFile = "/sphenix/user/dvp/gen/QCD35/hepmc_QCD35GeV_R04jet50GeVeta0p6_seq00978.dat", // HepMC for jets to be embedded
+    const char *inputFile = "/sphenix/user/dvp/gen/QCD35/hepmc_QCD35GeV_R04jet50GeVeta0p6_seq00978.dat", // Example HepMC for jets to be embedded
     const char *outputFile = "G4sPHENIX.root",
-    const char *embed_input_file = "/phenix/u/jinhuang/links/sPHENIX_work/tmp/jet-production/test_production_dst.list")
+    const char *embed_input_file = "/sphenix/user/jinhuang/tmp/jet-production/production_verification_fm_4-8_dst.list" // Example list file
+        )
 {
 
   //===============
