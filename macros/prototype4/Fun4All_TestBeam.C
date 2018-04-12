@@ -2,23 +2,17 @@
 
 using namespace std;
 
-void Fun4All_TestBeam(int nEvents = 10,
-
-                      //                          "/sphenix/data/data03/phnxreco/sphenix/caladc/hcallab/ihcal_2018-01-15__08_00_58.prdf",
-                      //
-                      //    const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000332-0000.prdf",
-                      //    const char *output_file = "data/beam_00000332.root"
-                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000499-0000.prdf",
-                      const char *output_file = "data/beam_00000499.root"
-                      //                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/led/led_00000254-0000.prdf",
-                      //                      const char *output_file = "data/led_00000254.root"//
-                      )
+void Fun4All_TestBeam(int nEvents = 100,
+                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000406-0000.prdf",
+                      const char *output_file = "data/beam_00000406.root")
 {
   gSystem->Load("libfun4all");
   gSystem->Load("libPrototype4.so");
 
   const bool do_cemc = true;
   const bool do_hcal = true;
+  //  const bool do_cemc = false;
+  //  const bool do_hcal = false;
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(Fun4AllServer::VERBOSITY_SOME);
@@ -77,29 +71,34 @@ void Fun4All_TestBeam(int nEvents = 10,
 
   // ------------------- HCal and EMcal -------------------
 
+  CaloCalibration *calib = NULL;
+
   if (do_cemc)
   {
     SubsysReco *unpack = new CaloUnpackPRDF();
     //  unpack->Verbosity(1);
     se->registerSubsystem(unpack);
 
-    CaloCalibration *calib = NULL;
-
     calib = new CaloCalibration("CEMC");
-    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
-    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
-    //  calib->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
-    //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
+    //    calib->Verbosity(4);
+    //    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
+    //    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
+    calib->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
+                                                   string(getenv("CALIBRATIONROOT")) + string("/Prototype4/Calibration/"));  // calibration database
     se->registerSubsystem(calib);
   }
 
   if (do_hcal)
   {
+    // leading order energy scale from Xu Sun
+    const double cin_cali = 0.00270145;
+    const double cout_cali = 0.0065718;
+
     calib = new CaloCalibration("HCALIN");
     calib->set_calib_tower_node_prefix("CALIB_LG");
     calib->set_raw_tower_node_prefix("RAW_LG");
     calib->GetCalibrationParameters().set_name("hcalin_lg");
-    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
+    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cin_cali);
     calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
     //  calib->GetCalibrationParameters().ReadFromFile("hcalin_lg", "xml", 0, 0,
     //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
@@ -117,7 +116,7 @@ void Fun4All_TestBeam(int nEvents = 10,
     calib->set_calib_tower_node_prefix("CALIB_LG");
     calib->set_raw_tower_node_prefix("RAW_LG");
     calib->GetCalibrationParameters().set_name("hcalout_lg");
-    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
+    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cout_cali);
     calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
     //  calib->GetCalibrationParameters().ReadFromFile("hcalout_lg", "xml", 0, 0,
     //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
@@ -127,7 +126,7 @@ void Fun4All_TestBeam(int nEvents = 10,
     calib->set_calib_tower_node_prefix("CALIB_HG");
     calib->set_raw_tower_node_prefix("RAW_HG");
     calib->GetCalibrationParameters().set_name("hcalout_hg");
-    calib->GetCalibrationParameters().set_double_param("calib_const_scale", 8. / 3000);
+    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cout_cali / 32);
     calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
     //  calib->GetCalibrationParameters().ReadFromFile("hcalout_hg", "xml", 0, 0,
     //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
@@ -177,19 +176,50 @@ void Fun4All_TestBeam(int nEvents = 10,
   gunpack->add_channel(first_packet_id, 106, 7);
   se->registerSubsystem(gunpack);
   //
+
+  //  Nicole Lewis [7:12 PM]
+  //  added and commented on this Plain Text snippet: Run 545 MPV and Other Values
+  //  Collumns: Height, MPV, Sigma, chi2, NDF
+  //  Run 545
+  //  HODO_HORIZONTAL[0] 18.0525 319.879 83.4359 139.487 199
+  //  HODO_HORIZONTAL[1] 26.6811 262.209 65.1704 159.059 171
+  //  HODO_HORIZONTAL[2] 27.5885 296.343 61.0538 171.291 205
+  //  HODO_HORIZONTAL[3] 24.4132 299.135 72.4796 205.008 214
+  //  HODO_HORIZONTAL[4] 28.6331 290.498 66.9209 177.386 205
+  //  HODO_HORIZONTAL[5] 29.3528 263.781 61.5052 202.933 195
+  //  HODO_HORIZONTAL[6] 21.5175 336.446 78.8985 170.031 206
+  //  HODO_HORIZONTAL[7] 17.7948 336.247 91.8477 146.352 201
+  //  HODO_VERTICAL[0] 15.3648 238.473 94.6679 111.272 166
+  //  HODO_VERTICAL[1] 23.2368 225.202 54.8611 117.209 145
+  //  HODO_VERTICAL[2] 25.3442 209.827 66.168 134.383 171
+  //  HODO_VERTICAL[3] 36.8254 217.544 44.1445 122.811 167
+  //  HODO_VERTICAL[4] 38.0982 210.6   44.9922 160.269 165
+  //  HODO_VERTICAL[5] 38.1045 252.022 49.4073 165.239 200
+  //  HODO_VERTICAL[6] 42.1052 223.528 44.5291 113.343 171
+  //  HODO_VERTICAL[7] 31.1721 244.299 55.974 160.476 186
+
   calib = new CaloCalibration("HODO_VERTICAL");
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
-  for (int i = 0; i < N_hodo; ++i)
-    calib->GetCalibrationParameters().set_double_param(
-        Form("calib_const_column0_row%d", i), 1 / 1.38253e+02);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 0), 1 / 238.473);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 1), 1 / 225.202);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 2), 1 / 209.827);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 3), 1 / 217.544);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 4), 1 / 210.6);    // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 5), 1 / 252.022);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 6), 1 / 223.528);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 7), 1 / 244.299);  // normalize to 1.0
   se->registerSubsystem(calib);
 
   calib = new CaloCalibration("HODO_HORIZONTAL");
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
-  // Martin find that even channel has negative polarity and odd channel has positive polarity
-  for (int i = 0; i < N_hodo; ++i)
-    calib->GetCalibrationParameters().set_double_param(
-        Form("calib_const_column0_row%d", i), 1 / 1.38253e+02);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 0), 1 / 319.879);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 1), 1 / 262.209);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 2), 1 / 296.343);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 3), 1 / 299.135);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 4), 1 / 290.498);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 5), 1 / 263.781);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 6), 1 / 336.446);  // normalize to 1.0
+  calib->GetCalibrationParameters().set_double_param(Form("calib_const_column0_row%d", 7), 1 / 336.247);  // normalize to 1.0
   se->registerSubsystem(calib);
   //
   //  // ------------------- Other detectors -------------------
@@ -201,6 +231,7 @@ void Fun4All_TestBeam(int nEvents = 10,
   se->registerSubsystem(gunpack);
   //
   calib = new CaloCalibration("C1");
+  calib->SetFitType(CaloCalibration::kPeakSample);
   se->registerSubsystem(calib);
   //
   // mapping based on SPHENIX-doc-121-v6
@@ -212,6 +243,7 @@ void Fun4All_TestBeam(int nEvents = 10,
   se->registerSubsystem(gunpack);
   //
   calib = new CaloCalibration("C2");
+  calib->SetFitType(CaloCalibration::kPeakSample);
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
   calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", 1);
@@ -251,24 +283,36 @@ void Fun4All_TestBeam(int nEvents = 10,
   se->registerSubsystem(gunpack);
 
   // Calibrate the MIP peak to an relative energy of +1.0
+
+  //  Nicole Lewis [7:12 PM]
+  //  added and commented on this Plain Text snippet: Run 545 MPV and Other Values
+  //  Collumns: Height, MPV, Sigma, chi2, NDF
+  //  Run 545
+  //  TRIGGER_VETO[0] 501.958 295.811 51.6134 223.972 194
+  //  TRIGGER_VETO[1] 262.321 305.247 52.5851 138.403 158
+  //  TRIGGER_VETO[2] 238.726 451.48 99.6016 274.339 245
+  //  TRIGGER_VETO[3] 135.541 624.076 132.313 284.532 240
+
   calib = new CaloCalibration("TRIGGER_VETO");
+  calib->SetFitType(CaloCalibration::kPeakSample);
   calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
   calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 1);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", 1. / 3.17209e+02);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", 1. / 3.27850e+02);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row2", 1. / 4.51055e+02);
-  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row3", 1. / 5.82206e+02);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row0", 1. / 295.811);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row1", 1. / 305.247);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row2", 1. / 451.48);
+  calib->GetCalibrationParameters().set_double_param("calib_const_column0_row3", 1. / 624.076);
   se->registerSubsystem(calib);
   //
-  //  const int N_TileMapper = 16;
+  const int N_TileMapper = 16;
   //
-  //  gunpack = new GenericUnpackPRDF("TILE_MAPPER");
-  //  for (int i = 0; i < N_TileMapper; ++i)
-  //    gunpack->add_channel(second_packet_id, 32 + i, i); // 24 Cerenkov 1
-  //  se->registerSubsystem(gunpack);
+  gunpack = new GenericUnpackPRDF("TILE_MAPPER");
+  for (int i = 0; i < N_TileMapper; ++i)
+    gunpack->add_channel(first_packet_id, 176 + i, i);  // 24 Cerenkov 1
+  se->registerSubsystem(gunpack);
   //
-  //  calib = new CaloCalibration("TILE_MAPPER");
-  //  se->registerSubsystem(calib);
+  calib = new CaloCalibration("TILE_MAPPER");
+  calib->GetCalibrationParameters().set_double_param("calib_const_scale", 1);
+  se->registerSubsystem(calib);
   //
   // mapping based on SPHENIX-doc-121-v6
   gunpack = new GenericUnpackPRDF("SC3");
@@ -373,8 +417,8 @@ void Fun4All_TestBeam(int nEvents = 10,
   reader->AddTower("RAW_TRIGGER_VETO");
   reader->AddTower("CALIB_TRIGGER_VETO");
   //
-  //  reader->AddTower("RAW_TILE_MAPPER");
-  //  reader->AddTower("CALIB_TILE_MAPPER");
+  reader->AddTower("RAW_TILE_MAPPER");
+  reader->AddTower("CALIB_TILE_MAPPER");
   //
   reader->AddTower("RAW_SC3");
   reader->AddTower("CALIB_SC3");
