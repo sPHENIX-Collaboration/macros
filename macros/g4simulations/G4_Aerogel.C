@@ -15,37 +15,19 @@ AerogelInit()
 }
 
 void
-AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
-    const double min_eta = 1.1 // 1.45
+AerogelSetup(PHG4Reco* g4Reco, const int detectorSetup = 0, //1: full setup; 0:skeleton 
+    const int mRICHsystemSetup = 8 //-1: single module
+                                   //0: build hemi-spherical wall
+                                   //>0: mRICH wall as sector. "subsystemSetup" becomes num. of sector (max is 8)
     )
 {
+  PHG4mRICHSubsystem *mRICH = new PHG4mRICHSubsystem("mRICH",0);
+  mRICH->set_int_param("detectorSetup",detectorSetup);
+  mRICH->set_int_param("subsystemSetup",mRICHsystemSetup);
+  mRICH->UseCalibFiles(PHG4DetectorSubsystem::xml);
+  mRICH->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/Prototype4/Geometry/") );
+  mRICH->OverlapCheck(overlapcheck);
 
-  PHG4SectorSubsystem *ag;
-  ag = new PHG4SectorSubsystem("Aerogel");
-
-  ag->get_geometry().set_normal_polar_angle(
-      (PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta)
-          + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
-//  ag->get_geometry().set_normal_polar_angle(0);
-  ag->get_geometry().set_normal_start(
-      280 * PHG4Sector::Sector_Geometry::Unit_cm()); // 307
-  ag->get_geometry().set_min_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(1.9));
-  ag->get_geometry().set_max_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta));
-  ag->get_geometry().set_min_polar_edge(
-      PHG4Sector::Sector_Geometry::FlatEdge());
-  ag->get_geometry().set_material("G4_AIR");
-  ag->get_geometry().set_N_Sector(N_Sector);
-  ag->OverlapCheck(overlapcheck);
-
-  // Aerogel dimensions ins cm
-  double radiator_length = 2.;
-  double expansion_length = 10.;
-
-  ag->get_geometry().AddLayers_AeroGel_ePHENIX( radiator_length * PHG4Sector::Sector_Geometry::Unit_cm(),
-						expansion_length * PHG4Sector::Sector_Geometry::Unit_cm() );
-  g4Reco->registerSubsystem(ag);
-
+  g4Reco->registerSubsystem(mRICH);
 }
 
