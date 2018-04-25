@@ -25,7 +25,7 @@ AerogelSetup(PHG4Reco* g4Reco, const int detectorSetup = 0, //1: full setup; 0:s
   mRICH->set_int_param("detectorSetup",detectorSetup);
   mRICH->set_int_param("subsystemSetup",mRICHsystemSetup);
   mRICH->UseCalibFiles(PHG4DetectorSubsystem::xml);
-  mRICH->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/Prototype4/Geometry/") );
+  mRICH->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/mRICH/Geometry/") );
   mRICH->OverlapCheck(overlapcheck);
 
   g4Reco->registerSubsystem(mRICH);
