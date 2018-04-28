@@ -9,8 +9,8 @@ using namespace std;
 //! @param embed_input_file     Input from production of AuAu backgroud for embedding background (if do_embedding = true).
 //!                             Please make your own list for production output file selection from /sphenix/sim/sim01/cd1_review/sHijing/fm_0-4/ and /sphenix/sim/sim01/cd1_review/sHijing/fm_4-8/
 int Fun4All_G4_sPHENIX(
-    const int nEvents = 1,
-    const char *inputFile = "/sphenix/user/dvp/gen/QCD35/hepmc_QCD35GeV_R04jet50GeVeta0p6_seq00978.dat", // Example HepMC for jets to be embedded
+    const int nEvents = 10,
+    const char *inputFile = "/sphenix/sim/sim01/cd1_review/single_particle/fieldmap/G4Hits_sPHENIX_e-_eta0.30_16GeV-0003.root", // Example HepMC for jets to be embedded
     const char *outputFile = "G4sPHENIX.root",
     const char *embed_input_file = "/sphenix/user/jinhuang/tmp/jet-production/production_verification_fm_4-8_dst.list" // Example list file
         )
@@ -27,10 +27,10 @@ int Fun4All_G4_sPHENIX(
   //
   // In case reading production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
-  const bool readhits = false;
+  const bool readhits = true;
   // Or:
   // read files in HepMC format (typically output from event generators like hijing or pythia)
-  const bool readhepmc = true;  // read HepMC files
+  const bool readhepmc = false;  // read HepMC files
   // Or:
   // Use pythia
   const bool runpythia8 = false;
@@ -40,7 +40,7 @@ int Fun4All_G4_sPHENIX(
   // Further choose to embed newly simulated events to a previous simulation. Not compatible with `readhits = true`
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/data/data02/review_2017-08-02/
-  const bool do_embedding = true;
+  const bool do_embedding = false;
 
   // Besides the above flags. One can further choose to further put in following particles in Geant4 simulation
   // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
@@ -63,7 +63,7 @@ int Fun4All_G4_sPHENIX(
 
   bool do_svtx = true;
   bool do_svtx_cell = do_svtx && true;
-  bool do_svtx_track = do_svtx_cell && false; // disabled. note: tracking reco takes time.
+  bool do_svtx_track = do_svtx_cell && true; // disabled. note: tracking reco takes time.
   bool do_svtx_eval = do_svtx_track && true;
 
   bool do_pstof = false;
@@ -72,7 +72,7 @@ int Fun4All_G4_sPHENIX(
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
-  bool do_cemc_eval = do_cemc_cluster && false;
+  bool do_cemc_eval = do_cemc_cluster && true;
 
   bool do_hcalin = true;
   bool do_hcalin_cell = do_hcalin && true;
@@ -134,7 +134,7 @@ int Fun4All_G4_sPHENIX(
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0);
+  se->Verbosity(1);
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
