@@ -78,7 +78,7 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalin_cell = do_hcalin && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
-  bool do_hcalin_eval = do_hcalin_cluster && false;
+  bool do_hcalin_eval = do_hcalin_cluster && true;
 
   bool do_magnet = true;
 
@@ -86,7 +86,7 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_cell = do_hcalout && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
-  bool do_hcalout_eval = do_hcalout_cluster && false;
+  bool do_hcalout_eval = do_hcalout_cluster && true;
 
   //! forward flux return plug door. Out of acceptance and off by default.
   bool do_plugdoor = false;
