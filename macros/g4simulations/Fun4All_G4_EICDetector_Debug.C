@@ -57,7 +57,7 @@ int Fun4All_G4_EICDetector_Debug(
 
   bool do_pipe = true;
 
-  bool do_svtx = false;
+  bool do_svtx = true;
   bool do_svtx_cell = do_svtx && true;
   bool do_svtx_track = do_svtx_cell && true;
   bool do_svtx_eval = do_svtx_track && true;
@@ -85,17 +85,17 @@ int Fun4All_G4_EICDetector_Debug(
   bool do_hcalout_eval = do_hcalout_cluster && true;
 
   // EICDetector geometry - barrel
-  bool do_DIRC = false;
+  bool do_DIRC = true;
 
   // EICDetector geometry - 'hadron' direction
   bool do_FGEM = true;
   bool do_FGEM_track = do_FGEM &&  true;
 
-  bool do_RICH = false;
-  bool do_Aerogel = false;
+  bool do_RICH = true;
+  bool do_Aerogel = true;
 
-  bool do_FEMC = false;
-  bool do_FEMC_cell = do_FEMC && true;
+  bool do_FEMC = true;
+  bool do_FEMC_cell = do_FEMC && false;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
   bool do_FEMC_eval = do_FEMC_cluster && true;
@@ -111,7 +111,7 @@ int Fun4All_G4_EICDetector_Debug(
   bool do_EGEM_track = do_EGEM &&  true;
 
   bool do_EEMC = false;
-  bool do_EEMC_cell = do_EEMC && true;
+  bool do_EEMC_cell = do_EEMC && false;
   bool do_EEMC_twr = do_EEMC_cell && true;
   bool do_EEMC_cluster = do_EEMC_twr && true;
   bool do_EEMC_eval = do_EEMC_cluster && true;
