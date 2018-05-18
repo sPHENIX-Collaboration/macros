@@ -25,10 +25,11 @@ EGEMSetup(PHG4Reco* g4Reco)
    * Geometric constraints:
    * TPC length = 211 cm --> from z = -105.5 to z = +105.5
    */
-  make_GEM_station("EGEM_0", g4Reco,  -19.00, -0.94, -1.95);
-  make_GEM_station("EGEM_1", g4Reco,  -60.00, -1.95, -3.08);
-  make_GEM_station("EGEM_2", g4Reco, -134.35, -1.31, -3.89);
-  make_GEM_station("EGEM_3", g4Reco, -150.00, -1.40, -4.00);
+  float thickness=3.;
+  make_GEM_station("EGEM_0", g4Reco,  -19.00 + 0.5*thickness, -0.94, -1.95);
+  make_GEM_station("EGEM_1", g4Reco,  -60.00 + 0.5*thickness, -1.95, -3.08);
+  make_GEM_station("EGEM_2", g4Reco, -135.5 + 0.5*thickness, -1.31, -3.89);
+  make_GEM_station("EGEM_3", g4Reco, -158.8 + 0.5*thickness, -1.40, -4.00);
 
 }
 
@@ -59,6 +60,8 @@ make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
   PHG4SectorSubsystem *gem;
   gem = new PHG4SectorSubsystem(name.c_str());
 
+  gem->get_geometry().set_normal_polar_a(polar_angle);
+
   gem->get_geometry().set_normal_polar_angle(polar_angle);
   gem->get_geometry().set_normal_start(
                                        zpos * PHG4Sector::Sector_Geometry::Unit_cm());
@@ -72,6 +75,8 @@ make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
 
   gem->get_geometry().AddLayers_DriftVol_COMPASS();
   gem->get_geometry().AddLayers_HBD_GEM();
+
+  cout << "GEM total thickness: " << gem->get_geometry().get_total_thickness() << endl;
   g4Reco->registerSubsystem(gem);
 
 }
