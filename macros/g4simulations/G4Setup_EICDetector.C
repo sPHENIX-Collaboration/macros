@@ -28,7 +28,8 @@ void G4Init(bool do_svtx = true,
     }
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
+      //gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
+      gROOT->LoadMacro("G4_Tracking_EIC.C"); 
       SvtxInit(n_TPC_layers);
     }
 
@@ -239,18 +240,6 @@ int G4Setup(const int absorberactive = 0,
     AerogelSetup(g4Reco);
 
   // sPHENIX forward flux return(s)
-  PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
-  flux_return_plus->set_int_param("lengthviarapidity",0);
-  flux_return_plus->set_double_param("length",10.2);
-  flux_return_plus->set_double_param("radius",2.1);
-  flux_return_plus->set_double_param("thickness",263.5-5.0);
-  flux_return_plus->set_double_param("place_z",335.9);
-  flux_return_plus->set_string_param("material","G4_Fe");
-  flux_return_plus->SetActive(false);
-  flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
-  flux_return_plus->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(flux_return_plus);
-
   PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
   flux_return_minus->set_int_param("lengthviarapidity",0);
   flux_return_minus->set_double_param("length",10.2);
