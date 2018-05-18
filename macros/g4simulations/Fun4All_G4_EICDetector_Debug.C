@@ -88,9 +88,6 @@ int Fun4All_G4_EICDetector_Debug(
   bool do_DIRC = true;
 
   // EICDetector geometry - 'hadron' direction
-  bool do_FGEM = true;
-  bool do_FGEM_track = do_FGEM &&  true;
-
   bool do_RICH = true;
   bool do_Aerogel = true;
 
@@ -107,9 +104,6 @@ int Fun4All_G4_EICDetector_Debug(
   bool do_FHCAL_eval = do_FHCAL_cluster && true;
 
   // EICDetector geometry - 'electron' direction
-  bool do_EGEM = true;
-  bool do_EGEM_track = do_EGEM &&  true;
-
   bool do_EEMC = false;
   bool do_EEMC_cell = do_EEMC && false;
   bool do_EEMC_twr = do_EEMC_cell && true;
@@ -152,7 +146,7 @@ int Fun4All_G4_EICDetector_Debug(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_EICDetector.C");
-  G4Init(do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_EGEM,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,n_TPC_layers);
+  G4Init(do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,n_TPC_layers);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
@@ -361,7 +355,7 @@ int Fun4All_G4_EICDetector_Debug(
 
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
               do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,
-              do_FGEM,do_EGEM,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,
+              do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,
               magfield_rescale);
 
     }
@@ -432,18 +426,6 @@ int Fun4All_G4_EICDetector_Debug(
   //--------------
 
   if (do_svtx_track) Svtx_Reco();
-
-  //--------------
-  // FGEM tracking
-  //--------------
-
-  if(do_FGEM_track) FGEM_FastSim_Reco();
-
-  //--------------
-  // EGEM tracking
-  //--------------
-
-  if(do_EGEM_track) EGEM_FastSim_Reco();
 
   //-----------------
   // Global Vertexing
@@ -555,8 +537,6 @@ int Fun4All_G4_EICDetector_Debug(
                                /*bool*/ do_hcalin_twr ,
                                /*bool*/ do_magnet  ,
                                /*bool*/ do_hcalout_twr,
-                               /*bool*/ do_FGEM,
-                               /*bool*/ do_EGEM,
                                /*bool*/ do_FHCAL,
                                /*bool*/ do_FHCAL_twr,
                                /*bool*/ do_FEMC,

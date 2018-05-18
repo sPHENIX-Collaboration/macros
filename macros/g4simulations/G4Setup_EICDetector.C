@@ -8,8 +8,6 @@ void G4Init(bool do_svtx = true,
             bool do_magnet = true,
             bool do_hcalout = true,
             bool do_pipe = true,
-            bool do_FGEM = true,
-            bool do_EGEM = true,
             bool do_FEMC = true,
             bool do_FHCAL = true,
             bool do_EEMC = true,
@@ -54,18 +52,6 @@ void G4Init(bool do_svtx = true,
     {
       gROOT->LoadMacro("G4_HcalOut_ref.C");
       HCalOuterInit();
-    }
-
-  if (do_FGEM)
-    {
-      gROOT->LoadMacro("G4_FGEM_EIC.C");
-      FGEM_Init();
-    }
-
-  if (do_EGEM)
-    {
-      gROOT->LoadMacro("G4_EGEM_EIC.C");
-      EGEM_Init();
     }
 
   if (do_FEMC)
@@ -117,8 +103,6 @@ int G4Setup(const int absorberactive = 0,
             const bool do_magnet = true,
             const bool do_hcalout = true,
             const bool do_pipe = true,
-            const bool do_FGEM = true,
-            const bool do_EGEM = true,
             const bool do_FEMC = false,
             const bool do_FHCAL = false,
             const bool do_EEMC = true,
@@ -199,15 +183,6 @@ int G4Setup(const int absorberactive = 0,
   // HCALOUT
 
   if (do_hcalout) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
-
-  //----------------------------------------
-  // Forward tracking
-
-  if ( do_FGEM )
-    FGEMSetup(g4Reco);
-
-  if ( do_EGEM )
-    EGEMSetup(g4Reco);
 
   //----------------------------------------
   // FEMC
