@@ -19,7 +19,6 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
           const double min_eta = 1.245 //
           )
 {
-
   const double tilt = .1;
 
   string name;
@@ -28,15 +27,15 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   double zpos;
   PHG4SectorSubsystem *gem;
 
-  make_GEM_station("FGEM_0", g4Reco, 19.00, 0.94, 2.73, N_Sector);
-  make_GEM_station("FGEM_1", g4Reco, 68.00, 2.07, 4.00, N_Sector);
+  make_GEM_station("FGEM_0", g4Reco, 17.5, 0.94, 2.73, N_Sector);
+  make_GEM_station("FGEM_1", g4Reco, 66.5, 2.07, 4.00, N_Sector);
 
   ///////////////////////////////////////////////////////////////////////////
 
   name = "FGEM_2";
   etamax = 4;
   etamin = min_eta;
-  zpos = 126.00;
+  zpos = 134.0;
 
   gem = new PHG4SectorSubsystem(name.c_str());
 
@@ -61,7 +60,7 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   name = "FGEM_3";
   etamax = 4;
   etamin = min_eta;
-  zpos = 161.35;
+  zpos = 161.0;
   gem = new PHG4SectorSubsystem(name.c_str());
 
   gem->SuperDetector(name);
@@ -115,7 +114,7 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   name = "FGEM_4";
   etamax = 4;
   etamin = min_eta;
-  zpos = 271.35;
+  zpos = 275.0;
   gem = new PHG4SectorSubsystem(name.c_str());
 
   gem->SuperDetector(name);

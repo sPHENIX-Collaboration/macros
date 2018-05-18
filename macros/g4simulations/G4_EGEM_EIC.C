@@ -27,10 +27,9 @@ EGEMSetup(PHG4Reco* g4Reco)
    */
   float thickness=3.;
   make_GEM_station("EGEM_0", g4Reco,  -19.00 + 0.5*thickness, -0.94, -1.95);
-  make_GEM_station("EGEM_1", g4Reco,  -60.00 + 0.5*thickness, -1.95, -3.08);
-  make_GEM_station("EGEM_2", g4Reco, -135.5 + 0.5*thickness, -1.31, -3.89);
-  make_GEM_station("EGEM_3", g4Reco, -158.8 + 0.5*thickness, -1.40, -4.00);
-
+  make_GEM_station("EGEM_1", g4Reco,  -68.00 + 0.5*thickness, -2.07, -3.21);
+  make_GEM_station("EGEM_2", g4Reco, -135.5 + 0.5*thickness, -1.4, -3.9);
+  make_GEM_station("EGEM_3", g4Reco, -158.8 + 0.5*thickness, -1.5, -4.00);
 }
 
 int
