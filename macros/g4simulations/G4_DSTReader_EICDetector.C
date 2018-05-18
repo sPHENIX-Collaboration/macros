@@ -125,6 +125,7 @@ G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
           ana->AddNode("EGEM_0");
           ana->AddNode("EGEM_1");
           ana->AddNode("EGEM_2");
+          ana->AddNode("EGEM_3");
         }
 
       ana->AddNode("BH_1");

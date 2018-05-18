@@ -16,7 +16,7 @@ FGEM_Init()
 
 void
 FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
-          const double min_eta = 1.45 //
+          const double min_eta = 1.245 //
           )
 {
 
@@ -28,15 +28,15 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   double zpos;
   PHG4SectorSubsystem *gem;
 
-  make_GEM_station("FGEM_0", g4Reco, 17, 1.01, 2.7, N_Sector);
-  make_GEM_station("FGEM_1", g4Reco, 62, 2.15, 4.0, N_Sector);
+  make_GEM_station("FGEM_0", g4Reco, 19.00, 0.94, 2.73, N_Sector);
+  make_GEM_station("FGEM_1", g4Reco, 68.00, 2.07, 4.00, N_Sector);
 
   ///////////////////////////////////////////////////////////////////////////
 
   name = "FGEM_2";
   etamax = 4;
   etamin = min_eta;
-  zpos = 1.2e2;
+  zpos = 126.00;
 
   gem = new PHG4SectorSubsystem(name.c_str());
 
@@ -61,7 +61,7 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   name = "FGEM_3";
   etamax = 4;
   etamin = min_eta;
-  zpos = 1.6e2;
+  zpos = 161.35;
   gem = new PHG4SectorSubsystem(name.c_str());
 
   gem->SuperDetector(name);
@@ -115,7 +115,7 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   name = "FGEM_4";
   etamax = 4;
   etamin = min_eta;
-  zpos = 2.75e2;
+  zpos = 271.35;
   gem = new PHG4SectorSubsystem(name.c_str());
 
   gem->SuperDetector(name);
@@ -283,8 +283,8 @@ void FGEM_FastSim_Reco(int verbosity = 0) {
   kalman->set_trackmap_out_name("SvtxTrackMap_FastSimEtaPlus");
 
   // Saved track states (projections)
-  std::string state_names[] = {"FEMC","FHCAL"};
-  kalman->set_state_names(state_names, 2);
+  //  std::string state_names[] = {"FEMC","FHCAL"};
+  //  kalman->set_state_names(state_names, 2);
 
   kalman->set_fit_alg_name("KalmanFitterRefTrack");//
   kalman->set_primary_assumption_pid(13);
