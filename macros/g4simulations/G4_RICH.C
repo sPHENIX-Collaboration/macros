@@ -24,7 +24,7 @@ RICHInit()
 void
 RICHSetup(PHG4Reco* g4Reco, //
 	  const int N_RICH_Sector = 8, //
-	  const double min_eta = 1.45, //
+	  const double min_eta = 1.3, //
 	  const double R_mirror_ref = 195, //cm
 	  const double z_shift = 75, // cm
 	  const double R_shift = 18.5 // cm
