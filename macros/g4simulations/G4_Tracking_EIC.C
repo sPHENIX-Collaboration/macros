@@ -65,7 +65,7 @@ void Tracking_Reco(int verbosity = 0)
   kalman->set_pat_rec_noise_prob(0.);
 
   std::string phg4hits_names[] = {"G4HIT_SVTX","G4HIT_MAPS","G4HIT_EGEM_0","G4HIT_EGEM_1","G4HIT_EGEM_2","G4HIT_EGEM_3","G4HIT_FGEM_0","G4HIT_FGEM_1","G4HIT_FGEM_2","G4HIT_FGEM_3","G4HIT_FGEM_4"};
-  kalman->set_phg4hits_names(phg4hits_names, 10);
+  kalman->set_phg4hits_names(phg4hits_names, 11);
   kalman->set_sub_top_node_name("SVTX");
   kalman->set_trackmap_out_name("SvtxTrackMap");
 
