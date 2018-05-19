@@ -88,14 +88,11 @@ int Fun4All_G4_EICDetector(
   bool do_DIRC = true;
 
   // EICDetector geometry - 'hadron' direction
-  bool do_FGEM = true;
-  bool do_FGEM_track = do_FGEM &&  true;
-
   bool do_RICH = true;
   bool do_Aerogel = true;
 
   bool do_FEMC = true;
-  bool do_FEMC_cell = do_FEMC && true;
+  bool do_FEMC_cell = do_FEMC && false;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
   bool do_FEMC_eval = do_FEMC_cluster && true;
@@ -107,11 +104,8 @@ int Fun4All_G4_EICDetector(
   bool do_FHCAL_eval = do_FHCAL_cluster && true;
 
   // EICDetector geometry - 'electron' direction
-  bool do_EGEM = true;
-  bool do_EGEM_track = do_EGEM &&  true;
-
-  bool do_EEMC = true;
-  bool do_EEMC_cell = do_EEMC && true;
+  bool do_EEMC = false;
+  bool do_EEMC_cell = do_EEMC && false;
   bool do_EEMC_twr = do_EEMC_cell && true;
   bool do_EEMC_cluster = do_EEMC_twr && true;
   bool do_EEMC_eval = do_EEMC_cluster && true;
@@ -152,7 +146,7 @@ int Fun4All_G4_EICDetector(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_EICDetector.C");
-  G4Init(do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_EGEM,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,n_TPC_layers);
+  G4Init(do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,n_TPC_layers);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
@@ -295,10 +289,10 @@ int Fun4All_G4_EICDetector(
       // gun->AddParticle("geantino",1.8121,0.253,0.);
       // se->registerSubsystem(gun);
       PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
-      pgen->set_name("e-");
+      pgen->set_name("mu-");
       pgen->set_z_range(0,0);
-      pgen->set_eta_range(0.01,0.01);
-      pgen->set_mom_range(10,10);
+      pgen->set_eta_range(-4.0,0.0);
+      pgen->set_mom_range(30,30);
       pgen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi());
       se->registerSubsystem(pgen);
     }
@@ -360,7 +354,7 @@ int Fun4All_G4_EICDetector(
 
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
               do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,
-              do_FGEM,do_EGEM,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,
+              do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,
               magfield_rescale);
 
     }
@@ -431,18 +425,6 @@ int Fun4All_G4_EICDetector(
   //--------------
 
   if (do_svtx_track) Svtx_Reco();
-
-  //--------------
-  // FGEM tracking
-  //--------------
-
-  if(do_FGEM_track) FGEM_FastSim_Reco();
-
-  //--------------
-  // EGEM tracking
-  //--------------
-
-  if(do_EGEM_track) EGEM_FastSim_Reco();
 
   //-----------------
   // Global Vertexing
@@ -554,8 +536,6 @@ int Fun4All_G4_EICDetector(
                                /*bool*/ do_hcalin_twr ,
                                /*bool*/ do_magnet  ,
                                /*bool*/ do_hcalout_twr,
-                               /*bool*/ do_FGEM,
-                               /*bool*/ do_EGEM,
                                /*bool*/ do_FHCAL,
                                /*bool*/ do_FHCAL_twr,
                                /*bool*/ do_FEMC,
