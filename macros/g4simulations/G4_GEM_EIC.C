@@ -1,6 +1,18 @@
 using namespace std;
 
 void
+EGEM_Init()
+{
+
+}
+
+void
+FGEM_Init()
+{
+
+}
+
+void
 EGEMSetup(PHG4Reco* g4Reco)
 {
   /* Careful with dimensions! If GEM station volumes overlap, e.g. with TPC volume, they will be
