@@ -91,7 +91,7 @@ int Fun4All_G4_EICDetector_Debug(
   bool do_RICH = true;
   bool do_Aerogel = true;
 
-  bool do_FEMC = true;
+  bool do_FEMC = false;
   bool do_FEMC_cell = do_FEMC && false;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;

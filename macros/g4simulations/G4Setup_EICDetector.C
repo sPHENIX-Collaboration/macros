@@ -28,7 +28,7 @@ void G4Init(bool do_svtx = true,
     {
       //gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
       gROOT->LoadMacro("G4_Tracking_EIC.C"); 
-      SvtxInit(n_TPC_layers);
+      TrackingInit(n_TPC_layers);
     }
 
   if (do_cemc)
@@ -161,7 +161,7 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // SVTX
-  if (do_svtx) radius = Svtx(g4Reco, radius, absorberactive);
+  if (do_svtx) radius = Tracking(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // CEMC
