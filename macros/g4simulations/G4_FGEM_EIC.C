@@ -114,7 +114,7 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   name = "FGEM_4";
   etamax = 4;
   etamin = min_eta;
-  zpos = 275.0;
+  zpos = 271.0 + 4.0; // needs offset w.r.t. AutoCAD drawing to not overlap with RICH- why?
   gem = new PHG4SectorSubsystem(name.c_str());
 
   gem->SuperDetector(name);
