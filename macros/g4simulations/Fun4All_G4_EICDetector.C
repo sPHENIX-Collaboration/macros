@@ -53,7 +53,7 @@ int Fun4All_G4_EICDetector(
   //======================
 
   // sPHENIX barrel
-  bool do_bbc = true;
+  bool do_bbc = false;
 
   bool do_pipe = true;
 
@@ -92,7 +92,7 @@ int Fun4All_G4_EICDetector(
   bool do_Aerogel = true;
 
   bool do_FEMC = true;
-  bool do_FEMC_cell = do_FEMC && false;
+  bool do_FEMC_cell = do_FEMC && true;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
   bool do_FEMC_eval = do_FEMC_cluster && true;
@@ -104,8 +104,8 @@ int Fun4All_G4_EICDetector(
   bool do_FHCAL_eval = do_FHCAL_cluster && true;
 
   // EICDetector geometry - 'electron' direction
-  bool do_EEMC = false;
-  bool do_EEMC_cell = do_EEMC && false;
+  bool do_EEMC = true;
+  bool do_EEMC_cell = do_EEMC && true;
   bool do_EEMC_twr = do_EEMC_cell && true;
   bool do_EEMC_cluster = do_EEMC_twr && true;
   bool do_EEMC_eval = do_EEMC_cluster && true;
