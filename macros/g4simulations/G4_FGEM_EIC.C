@@ -60,7 +60,7 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   name = "FGEM_3";
   etamax = 4;
   etamin = min_eta;
-  zpos = 161.0;
+  zpos = 157.0;
   gem = new PHG4SectorSubsystem(name.c_str());
 
   gem->SuperDetector(name);
