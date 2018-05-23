@@ -39,7 +39,7 @@ void G4Init(bool do_svtx = true,
 
   if (do_hcalin)
     {
-      gROOT->LoadMacro("G4_HcalIn_ref.C");
+      gROOT->LoadMacro("G4_HcalIn_EIC.C");
       HCalInnerInit();
     }
 
