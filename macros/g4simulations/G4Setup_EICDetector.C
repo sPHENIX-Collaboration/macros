@@ -8,15 +8,13 @@ void G4Init(bool do_svtx = true,
             bool do_magnet = true,
             bool do_hcalout = true,
             bool do_pipe = true,
-            bool do_FGEM = true,
-            bool do_EGEM = true,
+            bool do_plugdoor = true,
             bool do_FEMC = true,
             bool do_FHCAL = true,
             bool do_EEMC = true,
             bool do_DIRC = true,
             bool do_RICH = true,
-            bool do_Aerogel = true,
-            int n_TPC_layers = 40)
+            bool do_Aerogel = true)
 {
 
   // load detector/material macros and execute Init() function
@@ -26,10 +24,18 @@ void G4Init(bool do_svtx = true,
       gROOT->LoadMacro("G4_Pipe.C");
       PipeInit();
     }
+
+  if (do_plugdoor)
+    {
+      gROOT->LoadMacro("G4_PlugDoor_EIC.C");
+      PlugDoorInit();
+    }
+
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
-      SvtxInit(n_TPC_layers);
+      //gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
+      gROOT->LoadMacro("G4_Tracking_EIC.C"); 
+      TrackingInit();
     }
 
   if (do_cemc)
@@ -40,7 +46,7 @@ void G4Init(bool do_svtx = true,
 
   if (do_hcalin)
     {
-      gROOT->LoadMacro("G4_HcalIn_ref.C");
+      gROOT->LoadMacro("G4_HcalIn_EIC.C");
       HCalInnerInit();
     }
 
@@ -53,18 +59,6 @@ void G4Init(bool do_svtx = true,
     {
       gROOT->LoadMacro("G4_HcalOut_ref.C");
       HCalOuterInit();
-    }
-
-  if (do_FGEM)
-    {
-      gROOT->LoadMacro("G4_FGEM_EIC.C");
-      FGEM_Init();
-    }
-
-  if (do_EGEM)
-    {
-      gROOT->LoadMacro("G4_EGEM_EIC.C");
-      EGEM_Init();
     }
 
   if (do_FEMC)
@@ -116,8 +110,7 @@ int G4Setup(const int absorberactive = 0,
             const bool do_magnet = true,
             const bool do_hcalout = true,
             const bool do_pipe = true,
-            const bool do_FGEM = true,
-            const bool do_EGEM = true,
+            const bool do_plugdoor = true,
             const bool do_FEMC = false,
             const bool do_FHCAL = false,
             const bool do_EEMC = true,
@@ -176,7 +169,7 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // SVTX
-  if (do_svtx) radius = Svtx(g4Reco, radius, absorberactive);
+  if (do_svtx) radius = Tracking(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // CEMC
@@ -198,15 +191,6 @@ int G4Setup(const int absorberactive = 0,
   // HCALOUT
 
   if (do_hcalout) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
-
-  //----------------------------------------
-  // Forward tracking
-
-  if ( do_FGEM )
-    FGEMSetup(g4Reco);
-
-  if ( do_EGEM )
-    EGEMSetup(g4Reco);
 
   //----------------------------------------
   // FEMC
@@ -238,30 +222,9 @@ int G4Setup(const int absorberactive = 0,
   if ( do_Aerogel )
     AerogelSetup(g4Reco);
 
-  // sPHENIX forward flux return(s)
-  PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
-  flux_return_plus->set_int_param("lengthviarapidity",0);
-  flux_return_plus->set_double_param("length",10.2);
-  flux_return_plus->set_double_param("radius",2.1);
-  flux_return_plus->set_double_param("thickness",263.5-5.0);
-  flux_return_plus->set_double_param("place_z",335.9);
-  flux_return_plus->set_string_param("material","G4_Fe");
-  flux_return_plus->SetActive(false);
-  flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
-  flux_return_plus->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(flux_return_plus);
-
-  PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
-  flux_return_minus->set_int_param("lengthviarapidity",0);
-  flux_return_minus->set_double_param("length",10.2);
-  flux_return_minus->set_double_param("radius",90.0);
-  flux_return_minus->set_double_param("place_z",-335.9);
-  flux_return_minus->set_double_param("thickness",263.5-5.0 - (90-2.1));
-  flux_return_minus->set_string_param("material","G4_Fe");
-  flux_return_minus->SetActive(false);
-  flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
-  flux_return_minus->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(flux_return_minus);
+  //----------------------------------------
+  // sPHENIX forward flux return door
+  if (do_plugdoor) PlugDoor(g4Reco, absorberactive);
 
   //----------------------------------------
   // BLACKHOLE
