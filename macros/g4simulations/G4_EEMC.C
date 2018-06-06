@@ -1,5 +1,5 @@
 using namespace std;
-const int use_projective_geometry = 1;
+const int use_projective_geometry = 0;
 void
 EEMCInit()
 {
