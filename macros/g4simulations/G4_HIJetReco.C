@@ -42,7 +42,7 @@ void HIJetReco(int verbosity = 0) {
   DetermineTowerBackground *dtb = new DetermineTowerBackground();
   dtb->SetBackgroundOutputName("TowerBackground_Sub1");
   dtb->SetSeedType( 0 );
-  dtb->set_seed_jet_D( 3 );
+  dtb->SetSeedJetD( 3 );
   dtb->Verbosity( verbosity );
   se->registerSubsystem( dtb );
 
@@ -53,7 +53,7 @@ void HIJetReco(int verbosity = 0) {
   DetermineTowerBackground *dtb2 = new DetermineTowerBackground();
   dtb2->SetBackgroundOutputName("TowerBackground_Sub2");
   dtb2->SetSeedType( 1 );
-  dtb2->set_seed_jet_pt( 7 );
+  dtb2->SetSeedJetPt( 7 );
   dtb2->Verbosity( verbosity );
   se->registerSubsystem( dtb2 );
   
