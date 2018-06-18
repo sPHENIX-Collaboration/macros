@@ -14,11 +14,15 @@ AerogelInit()
 
 }
 
+//-1: single module
+// 0: build h-side sectors and e-side wall
+// 1: build h-side sectors
+// 2: build e-side wall
+// 3: build h-side wall
+// 4: build h-side wall and e-side wall
 void
 AerogelSetup(PHG4Reco* g4Reco, const int detectorSetup = 0, //1: full setup; 0:skeleton 
-    const int mRICHsystemSetup = 8 //-1: single module
-                                   //0: build hemi-spherical wall
-                                   //>0: mRICH wall as sector. "subsystemSetup" becomes num. of sector (max is 8)
+    const int mRICHsystemSetup = 0 
     )
 {
   PHG4mRICHSubsystem *mRICH = new PHG4mRICHSubsystem("mRICH",0);
