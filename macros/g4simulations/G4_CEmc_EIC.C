@@ -1,27 +1,24 @@
 
 double cemcdepth = 9; 
-//tungs to scint width ratio must be ~10:1 
-//for approx 2% sampling fraction
+//tungs to scint width ratio of ~10:1 
+//corresponds to approx 2% sampling fraction
 
-//18 radiation lengths
-double scint_width = 0.049;
-double tungs_width = 0.49;
+//18 radiation lengths for 40 layers
+double scint_width = 0.05;
+double tungs_width = 0.245;
 
-//fits in 95-104cm but only 15 X_0
-//double scint_width = 0.041;
-//double tungs_width = 0.41;
 
 
 int min_cemc_layer = 1;
-int max_cemc_layer = 21;
+int max_cemc_layer = 41;
 
-double topradius = 104; //cm
+double topradius = 106.8; //cm
 double bottomradius = 95; //cm
 double negrapidity = -1.4;
 double posrapidity = 1.1;
 //this is default set to -1.4<eta<1.1
 //if the user changes these, the z position of the 
-//calorimeter must be changed in the function CEmc 
+//calorimeter must be changed in the function CEmc(...)
 
 enum enu_Cemc_clusterizer
 {
@@ -114,9 +111,8 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
       cemc->SuperDetector("ABSORBER_CEMC");
       if(absorberactive)
 	cemc->SetActive();
-      bool ov1 = cemc->OverlapCheck(overlapcheck);
-      if(ov1)
-	cout<<"THERE IS AN OVERLAP IN THE SHASHLIK EMC:SPACAL_W_EPOXY"<<endl;
+      cemc->OverlapCheck(overlapcheck);
+    
       g4Reco->registerSubsystem(cemc);
       
       radius += tungs_width;
@@ -137,11 +133,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
       cemc->SuperDetector("CEMC");
      
       cemc->SetActive();
-      bool ov2 = cemc->OverlapCheck(overlapcheck);
-
-      if(ov2)
-	cout<<"THERE IS AN OVERLAP IN THE SHASHLIK EMC:PMMA"<<endl;
-
+      cemc->OverlapCheck(overlapcheck);
       g4Reco->registerSubsystem(cemc);
       
       radius += scint_width;
@@ -217,8 +209,8 @@ void CEMC_Towers(int verbosity = 0)
   se->registerSubsystem(CemcTowerBuilder);
   
   const double photoelectron_per_GeV = 500;  //500 photon per total GeV deposition
-  //just set a 2% sampling fraction - already tuned by tungs/scint width ratio
-  double sampling_fraction = 2e-02; 
+  //just set a 4% sampling fraction - already tuned by tungs/scint width ratio
+  double sampling_fraction = 4e-02; 
   RawTowerDigitizer *CemcTowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
   CemcTowerDigitizer->Detector("CEMC");
   CemcTowerDigitizer->Verbosity(verbosity);
