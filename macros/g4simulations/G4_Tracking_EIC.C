@@ -69,7 +69,7 @@ void Tracking_Reco(int verbosity = 0)
 		    PHG4TrackFastSim::Vertical_Plane,PHG4TrackFastSim::Vertical_Plane,
 		    PHG4TrackFastSim::Vertical_Plane,PHG4TrackFastSim::Vertical_Plane,
 		    PHG4TrackFastSim::Vertical_Plane };
-  float rad[] = {1e4,  1e4,  100,  100,  100,  100,  100,  100,  100,  100,  100};
+  float rad[] = {5.0,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100};
   float phi[] = {5.0,  150,  100,  100,  100,  100,  100,  100,  100,  100,  100};
   float lon[] = {5.0,  200,  100,  100,  100,  100,  100,  100,  100,  100,  100};
   for(int i=0; i!=11; ++i) { // from um to cm
