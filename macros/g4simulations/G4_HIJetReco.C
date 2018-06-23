@@ -47,6 +47,7 @@ void HIJetReco(int verbosity = 0) {
   se->registerSubsystem( dtb );
 
   CopyAndSubtractJets *casj = new CopyAndSubtractJets();
+  casj->SetFlowModulation( false );
   casj->Verbosity( verbosity );
   se->registerSubsystem( casj );
 
@@ -58,6 +59,7 @@ void HIJetReco(int verbosity = 0) {
   se->registerSubsystem( dtb2 );
   
   SubtractTowers *st = new SubtractTowers();
+  st->SetFlowModulation( false );
   st->Verbosity( verbosity );
   se->registerSubsystem( st );
 
