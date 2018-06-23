@@ -23,6 +23,8 @@ FEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 {
 
   gSystem->Load("libg4detectors.so");
+  gSystem->Load("libg4calo.so");
+  gSystem->Load("libcalo_reco.so");
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
