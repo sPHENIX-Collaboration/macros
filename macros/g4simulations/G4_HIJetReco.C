@@ -1,4 +1,4 @@
-void HIJetReco(int verbosity = 0) {
+void HIJetReco(int verbosity = 0, bool do_flow = false ) {
   
   //---------------
   // Load libraries
@@ -41,25 +41,27 @@ void HIJetReco(int verbosity = 0) {
 
   DetermineTowerBackground *dtb = new DetermineTowerBackground();
   dtb->SetBackgroundOutputName("TowerBackground_Sub1");
+  dtb->SetFlow( do_flow );
   dtb->SetSeedType( 0 );
   dtb->SetSeedJetD( 3 );
   dtb->Verbosity( verbosity );
   se->registerSubsystem( dtb );
 
   CopyAndSubtractJets *casj = new CopyAndSubtractJets();
-  casj->SetFlowModulation( false );
+  casj->SetFlowModulation( do_flow );
   casj->Verbosity( verbosity );
   se->registerSubsystem( casj );
 
   DetermineTowerBackground *dtb2 = new DetermineTowerBackground();
   dtb2->SetBackgroundOutputName("TowerBackground_Sub2");
+  dtb2->SetFlow( do_flow );
   dtb2->SetSeedType( 1 );
   dtb2->SetSeedJetPt( 7 );
   dtb2->Verbosity( verbosity );
   se->registerSubsystem( dtb2 );
   
   SubtractTowers *st = new SubtractTowers();
-  st->SetFlowModulation( false );
+  st->SetFlowModulation( do_flow );
   st->Verbosity( verbosity );
   se->registerSubsystem( st );
 
