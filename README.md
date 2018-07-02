@@ -7,7 +7,7 @@ This is the standard macros respository for [sPHENIX collaboration](https://www.
 
 Please follow [SPHENIX software day-1 checklist](https://wiki.bnl.gov/sPHENIX/index.php/SPHENIX_software_day-1_checklist) to get started.
 
-== Check out macro repository ==
+# Check out macro repository
 
 Download the newest macro repository from GitHub:
 
