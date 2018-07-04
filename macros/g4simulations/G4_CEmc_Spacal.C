@@ -228,7 +228,7 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings,
     cemc->Verbosity(0);
 
     cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
-    cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2017ProjTilted/"));
+    cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2018ProjTilted/"));
     cemc->set_double_param("radius", radius);            // overwrite minimal radius
     cemc->set_double_param("thickness", cemcthickness);  // overwrite thickness
 
