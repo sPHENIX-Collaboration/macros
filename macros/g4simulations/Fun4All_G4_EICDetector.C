@@ -57,7 +57,7 @@ int Fun4All_G4_EICDetector(
   bool do_svtx = true;
   bool do_svtx_cell = do_svtx && true;
   bool do_svtx_track = do_svtx_cell && true;
-  bool do_svtx_eval = do_svtx_track && true;
+  bool do_svtx_eval = do_svtx_track && false; // in order to use this evaluation, please build this analysis module analysis/blob/master/Tracking/FastTrackingEval/
 
   bool do_pstof = false;
 
@@ -111,7 +111,7 @@ int Fun4All_G4_EICDetector(
 
   // Other options
   bool do_global = true;
-  bool do_global_fastsim = false;
+  bool do_global_fastsim = true;
 
   bool do_calotrigger = false && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
 
@@ -425,7 +425,7 @@ int Fun4All_G4_EICDetector(
   // SVTX tracking
   //--------------
 
-  if (do_svtx_track) Svtx_Reco();
+  if (do_svtx_track) Tracking_Reco();
 
   //-----------------
   // Global Vertexing
@@ -478,7 +478,7 @@ int Fun4All_G4_EICDetector(
   // Simulation evaluation
   //----------------------
 
-  if (do_svtx_eval) Svtx_Eval(string(outputFile) + "_g4svtx_eval.root");
+  if (do_svtx_eval) Fast_Tracking_Eval(string(outputFile) + "_g4svtx_eval.root");
 
   if (do_cemc_eval) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
 
