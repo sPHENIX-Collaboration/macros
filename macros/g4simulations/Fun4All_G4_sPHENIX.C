@@ -116,8 +116,8 @@ int Fun4All_G4_sPHENIX(
   G4Init(do_svtx, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
-  //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
-  const string magfield = "/phenix/upgrades/decadal/fieldmaps/sPHENIX.2d.root";  // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
+  //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
+  const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root"); // default map from the calibration database
   const float magfield_rescale = -1.4 / 1.5;                                     // scale the map to a 1.4 T field
 
   //---------------
