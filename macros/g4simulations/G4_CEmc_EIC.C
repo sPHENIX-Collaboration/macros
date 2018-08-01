@@ -12,9 +12,9 @@ int max_cemc_layer = 41;
 
 double topradius = 106.8; // cm
 double bottomradius = 95; // cm
-double negrapidity = -1.4;
-double posrapidity = 1.1;
-// this is default set to -1.4<eta<1.1
+double negrapidity = -1.5;
+double posrapidity = 1.24;
+// this is default set to -1.5<eta<1.24 for 2018 Letter of Intent
 // if the user changes these, the z position of the
 // calorimeter must be changed in the function CEmc(...)
 
@@ -86,7 +86,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     cemc->set_int_param("lengthviarapidity", 0);
 
     // starts centered around IP
-    // shift backwards 30 cm for total 340 cm length to cover -1.4<eta<1.1
+    // shift backwards 30 cm for total 370 cm length to cover -1.5<eta<1.24
     cemc->set_double_param("place_z", -30);
     cemc->SuperDetector("ABSORBER_CEMC");
     if (absorberactive)
