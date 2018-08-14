@@ -320,10 +320,10 @@ double Svtx(PHG4Reco* g4Reco, double radius,
       // some suggested values of nladder when changing laddertype from default configuration:
       //      laddertype 0 in layer 2, nladder = 52
       //      laddertype 1 in layer 0, nladder = 22 
-      //===========================================================================
-      // example of optional re-configuration of INTT - make sure that n_intt_layer is set to the correct value above
-      //===========================================================================
-      // Two outer layers, laddertype 0 then 1
+      //=============================================================================
+      // example of optional re-configuration of INTT - make sure that "n_intt_layer" is set to the correct value above
+      //=============================================================================
+      // Two outer layers, laddertype 0 then 1 (set n_intt_layer = 2 at top of macro)
       laddertype[0] = 0;    laddertype[1] = 1; 
       nladder[0] = 52;       nladder[1] = 42;
       sensor_radius_inner[0] = 10.835;    sensor_radius_inner[1] = 12.676; 
@@ -749,10 +749,13 @@ void Svtx_Reco(int verbosity = 0)
   // Reduced by 2 relative to the cylinder cell maps macro. I found this necessary to get full efficiency
   // Many hits in the present simulation are single cell hits, so it is not clear why the cluster threshold should be higher than the cell threshold
   clusterizer->set_threshold(0.1);  // fraction of a mip
-  // no Z clustering for INTT layers (only)
+
+  // no Z clustering for INTT type 1 layers (we DO want Z clustering for type 0 layers)
+  // turning off phi clustering for type 0 layers is not necessary, there is only one strip per sensor in phi
   for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
   {
-    clusterizer->set_z_clustering(i, false);
+    if(laddertype[i-n_maps_layer] == 1)
+      clusterizer->set_z_clustering(i, false);
   }
 
   se->registerSubsystem(clusterizer);
