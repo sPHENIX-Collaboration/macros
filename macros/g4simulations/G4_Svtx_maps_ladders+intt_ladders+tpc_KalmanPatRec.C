@@ -9,7 +9,14 @@ bool tpc_layers_40  = false;
 bool use_primary_vertex = false;
 
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
+
+// default setup for the INTT - configuration can be redone later if desired, but n_intt_layer has to be correctly set here!
 const int n_intt_layer = 4;  // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
+// default layer configuration
+int laddertype[4] = {0, 1, 1, 1};  // default
+int nladder[4] = {34, 30, 36, 42};  // default
+double sensor_radius_inner[4] = {6.876, 8.987, 10.835, 12.676};  // inner staggered radius for layer default
+double sensor_radius_outer[4] = {7.462, 9.545, 11.361, 13.179};  // outer staggered radius for layer  default
 
 int n_tpc_layer_inner = 16;
 double tpc_layer_thick_inner = 1.25 / 2.0;
@@ -197,101 +204,158 @@ double Svtx(PHG4Reco* g4Reco, double radius,
             int verbosity = 0)
 {
   if (n_maps_layer > 0)
-  {
-    bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
-
-    /*
-	The numbers used in the macro below are from the xml file dump of ITS.gdml
-	As a sanity check, I got numbers  from Walt Sondheim's drawings, sent by email June 20, 2017:
-	OD of Be beam pipe is 41.53 mm, ID is 40 mm
-	Layer 0: radius 23.44 mm to sensor center, tilt from normal to radial vector:  17.37 degrees (0.303 rad), spacing btw sensor centers: 30 deg, arc spacing 12.27 mm
-	Layer 1: radius 31.54 mm to sensor center, ttilt from normal to radial vector:  17.53 degrees (0.306 rad), spacing btw sensor centers: 22.5 deg, arc spacing 12.38 mm
-	Layer 2: radius 39.29 to sensor center, tilt from normal to radial vector: 17.02 degrees (0.297 rad), spacing btw sensor centers: 18.0 deg, arc spacing 12.34 mm
-	These are in reasonable agreement with the numbers I extracted from the gdml file, which are what we use below.
-	These use a spacing in arc length of 12.37 mm and a tilt of 0.304 for all of the first three layers
-      */
-
-    // MAPS inner barrel layers
-    //======================================================
-
-    double maps_layer_radius[3] = {23.4, 31.5, 39.3};  // mm  - precise numbers from ITS.gdml
-    //double maps_layer_radius[3] = {24.9, 33.0, 40.8};   // mm  - precise numbers from ITS.gdml + 1.5 mm for greater clearance from beam pipe
-
-    // type 1 = inner barrel stave, 2 = middle barrel stave, 3 = outer barrel stave
-    // we use only type 0 here
-    int stave_type[3] = {0, 0, 0};
-    int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX MVTX
-    double phi_tilt[3] = {0.304, 0.304, 0.304};  // radians, from the gdml file, 0.304 radians is 17.4 degrees
-
-    for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
     {
-      if (verbosity)
-        cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
-             << " pixel size 30 x 30 microns "
-             << " active pixel thickness 0.0018 microns" << endl;
-
-      PHG4MapsSubsystem* lyr = new PHG4MapsSubsystem("MAPS", ilayer, stave_type[ilayer]);
-      lyr->Verbosity(verbosity);
-
-      lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
-      lyr->set_int_param("N_staves", staves_in_layer[ilayer]);                   // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
-
-      // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
-      lyr->set_double_param("pixel_x", 0.0030);          // pitch in cm
-      lyr->set_double_param("pixel_z", 0.0030);          // length in cm
-      lyr->set_double_param("pixel_thickness", 0.0018);  // thickness in cm
-      lyr->set_double_param("phitilt", phi_tilt[ilayer]);
-
-      lyr->set_int_param("active", 1);
-      lyr->OverlapCheck(maps_overlapcheck);
-
-      lyr->set_string_param("stave_geometry_file",
-                            string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/ALICE_ITS_tgeo.gdml"));
-
-      g4Reco->registerSubsystem(lyr);
-
-      radius = maps_layer_radius[ilayer];
+      bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
+      
+      // MAPS inner barrel layers
+      //======================================================
+      
+      bool new_MVTX = false;
+      if(new_MVTX)
+	{
+	  double maps_layer_radius[3] = {24.61, 32.59, 39.88}; // mm - numbers from Walt 6 Aug 2018
+	  
+	  // D. McGlinchey 6Aug2018 - type no longer is used, included here because I was too lazy to remove it from the code
+	  int stave_type[3] = {0, 0, 0};
+	  int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX MVTX
+	  double phi_tilt[3] = {0.300, 0.305, 0.300}; // radians - numbers from Walt 6 Aug 2018
+	  
+	  for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
+	    {
+	      if (verbosity)
+		cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
+		     << " pixel size 30 x 30 microns "
+		     << " active pixel thickness 0.0018 microns" << endl;
+	      
+	      PHG4MapsSubsystem* lyr = new PHG4MapsSubsystem("MAPS", ilayer, stave_type[ilayer]);
+	      lyr->Verbosity(verbosity);
+	      
+	      lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
+	      lyr->set_int_param("N_staves", staves_in_layer[ilayer]);       // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
+	      
+	      // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
+	      lyr->set_double_param("pixel_x", 0.0030);          // pitch in cm
+	      lyr->set_double_param("pixel_z", 0.0030);          // length in cm
+	      lyr->set_double_param("pixel_thickness", 0.0018);  // thickness in cm
+	      lyr->set_double_param("phitilt", phi_tilt[ilayer]);
+	      
+	      lyr->set_int_param("active", 1);
+	      lyr->OverlapCheck(maps_overlapcheck);
+	      
+	      lyr->set_string_param("stave_geometry_file", "/phenix/hhj3/dcm07e/sPHENIX/macros/macros/g4simulations/mvtx_stave_v01.gdml");
+	      
+	      g4Reco->registerSubsystem(lyr);
+	      
+	      radius = maps_layer_radius[ilayer];
+	    }
+	}
+      else
+	{
+	  double maps_layer_radius[3] = {23.4, 31.5, 39.3};  // mm  - precise numbers from ITS.gdml
+	  //double maps_layer_radius[3] = {24.9, 33.0, 40.8};   // mm  - precise numbers from ITS.gdml + 1.5 mm for greater clearance from beam pipe
+	  
+	  // type 1 = inner barrel stave, 2 = middle barrel stave, 3 = outer barrel stave
+	  // we use only type 0 here
+	  int stave_type[3] = {0, 0, 0};
+	  int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX MVTX
+	  double phi_tilt[3] = {0.304, 0.304, 0.304};  // radians, from the gdml file, 0.304 radians is 17.4 degrees
+	  
+	  for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
+	    {
+	      if (verbosity)
+		cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
+		     << " pixel size 30 x 30 microns "
+		     << " active pixel thickness 0.0018 microns" << endl;
+	      
+	      PHG4MapsSubsystem* lyr = new PHG4MapsSubsystem("MAPS", ilayer, stave_type[ilayer]);
+	      lyr->Verbosity(verbosity);
+	      
+	      lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
+	      lyr->set_int_param("N_staves", staves_in_layer[ilayer]);    // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
+	      
+	      // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
+	      lyr->set_double_param("pixel_x", 0.0030);          // pitch in cm
+	      lyr->set_double_param("pixel_z", 0.0030);          // length in cm
+	      lyr->set_double_param("pixel_thickness", 0.0018);  // thickness in cm
+	      lyr->set_double_param("phitilt", phi_tilt[ilayer]);
+	      
+	      lyr->set_int_param("active", 1);
+	      lyr->OverlapCheck(maps_overlapcheck);
+	      
+	      lyr->set_string_param("stave_geometry_file",
+				    string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/ALICE_ITS_tgeo.gdml"));
+	      
+	      g4Reco->registerSubsystem(lyr);
+	      
+	      radius = maps_layer_radius[ilayer];
+	    }
+	}
     }
-  }
-
+  
   if (n_intt_layer > 0)
-  {
-    //-------------------
-    // INTT ladders
-    //-------------------
-
-    bool intt_overlapcheck = false;  // set to true if you want to check for overlaps
-
-    // instantiate the Silicon tracker subsystem and register it
-    // We make one instance of PHG4TrackerSubsystem for all four layers of tracker
-    // dimensions are in mm, angles are in radians
-
-    // PHG4SiliconTrackerSubsystem creates the detetor layer using PHG4SiliconTrackerDetector
-    // and instantiates the appropriate PHG4SteppingAction
-    const double intt_radius_max = 140.;  // including stagger radius (mm)
-
-    // The length of vpair is used to determine the number of layers
-    std::vector<std::pair<int, int>> vpair;  // (sphxlayer, inttlayer)
-    for (int i = 0; i < n_intt_layer; i++)
     {
-      // We want the sPHENIX layer numbers for the INTT to be from n_maps_layer to n_maps_layer+n_intt_layer - 1
-      vpair.push_back(std::make_pair(n_maps_layer + i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
-      if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
+      //-------------------
+      // INTT ladders
+      //-------------------
+      
+      bool intt_overlapcheck = false;  // set to true if you want to check for overlaps
+      
+      // instantiate the Silicon tracker subsystem and register it
+      // We make one instance of PHG4TrackerSubsystem for all four layers of tracker
+      // dimensions are in mm, angles are in radians
+      
+      // PHG4SiliconTrackerSubsystem creates the detetor layer using PHG4SiliconTrackerDetector
+      // and instantiates the appropriate PHG4SteppingAction
+      const double intt_radius_max = 140.;  // including stagger radius (mm)
+      
+      // The length of vpair is used to determine the number of layers
+      std::vector<std::pair<int, int>> vpair;  // (sphxlayer, inttlayer)
+      for (int i = 0; i < n_intt_layer; i++)
+	{
+	  // We want the sPHENIX layer numbers for the INTT to be from n_maps_layer to n_maps_layer+n_intt_layer - 1
+	  vpair.push_back(std::make_pair(n_maps_layer + i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
+	  if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
+	}
+      /*
+      // some suggested values of nladder when changing laddertype from default configuration:
+      //      laddertype 0 in layer 2, nladder = 52
+      //      laddertype 1 in layer 0, nladder = 22 
+      //===========================================================================
+      // example of optional re-configuration of INTT - make sure that n_intt_layer is set to the correct value above
+      //===========================================================================
+      // Two outer layers, laddertype 0 then 1
+      laddertype[0] = 0;    laddertype[1] = 1; 
+      nladder[0] = 52;       nladder[1] = 42;
+      sensor_radius_inner[0] = 10.835;    sensor_radius_inner[1] = 12.676; 
+      sensor_radius_outer[0] = 11.361;    sensor_radius_outer[1] = 13.179; 
+      //=================================================
+      */
+      // This is a temporary workaround using an alternative constructor for problem with parameter class not updating doubles 
+      PHG4SiliconTrackerSubsystem* sitrack = new PHG4SiliconTrackerSubsystem(sensor_radius_inner, sensor_radius_outer, "SILICON_TRACKER", vpair);
+      //PHG4SiliconTrackerSubsystem* sitrack = new PHG4SiliconTrackerSubsystem("SILICON_TRACKER", vpair);
+      sitrack->Verbosity(verbosity);
+      sitrack->SetActive(1);
+      sitrack->OverlapCheck(intt_overlapcheck);
+      g4Reco->registerSubsystem(sitrack);
+      
+      // Update the laddertype and ladder spacing configuration
+      for(int i=0;i<n_intt_layer;i++)
+	{
+	  sitrack->set_int_param(i, "laddertype", laddertype[i]);
+	  sitrack->set_int_param(i, "nladder", nladder[i]);
+	  // These are set above in the constructor for now, due to a problem with the parameter class
+	  //sitrack->set_double_param(i,"sensor_radius_inner", sensor_radius_inner[i]*10.0);  // expecting mm
+	  //sitrack->set_double_param(i,"sensor_radius_outer", sensor_radius_outer[i]*10.0);
+	}
+      
+      // outer radius marker (translation back to cm)
+      radius = intt_radius_max * 0.1;
     }
-    PHG4SiliconTrackerSubsystem* sitrack = new PHG4SiliconTrackerSubsystem("SILICON_TRACKER", vpair);
-    sitrack->Verbosity(verbosity);
-    sitrack->SetActive(1);
-    sitrack->OverlapCheck(intt_overlapcheck);
-    g4Reco->registerSubsystem(sitrack);
-
-    // outer radius marker (translation back to cm)
-    radius = intt_radius_max * 0.1;
-  }
-
-//  int verbosity = 1;
-
+  
+  //  int verbosity = 1;
+  
   // time projection chamber layers --------------------------------------------
-
+  
   // switch ONLY for backward compatibility with 40 layer hits files!
   if (tpc_layers_40)
     {
