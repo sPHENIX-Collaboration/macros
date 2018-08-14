@@ -239,8 +239,8 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 	  lyr->set_int_param("active", 1);
 	  lyr->OverlapCheck(maps_overlapcheck);
 	  
-	  lyr->set_string_param("stave_geometry_file", "/phenix/hhj3/dcm07e/sPHENIX/macros/macros/g4simulations/mvtx_stave_v01.gdml");
-	  //lyr->set_string_param("stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v01.gdml "));
+	  //lyr->set_string_param("stave_geometry_file", "/phenix/hhj3/dcm07e/sPHENIX/macros/macros/g4simulations/mvtx_stave_v01.gdml");
+	  lyr->set_string_param("stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v01.gdml"));
 
 	  g4Reco->registerSubsystem(lyr);
 	  
