@@ -778,6 +778,27 @@ void Svtx_Reco(int verbosity = 0)
 
     PHG4KalmanPatRec* kalman_pat_rec = new PHG4KalmanPatRec("PHG4KalmanPatRec", n_maps_layer, n_intt_layer, n_gas_layer);
     kalman_pat_rec->Verbosity(0);
+    
+    for(int i = 0;i<n_intt_layer;i++)
+      {
+	if(laddertype[i] == 0)
+	  {
+	    // strip length is along phi
+	    kalman_pat_rec->set_max_search_win_theta_intt(i, 0.010);
+	    kalman_pat_rec->set_min_search_win_theta_intt(i, 0.00);
+	    kalman_pat_rec->set_max_search_win_phi_intt(i, 0.20);
+	    kalman_pat_rec->set_min_search_win_phi_intt(i, 0.20);
+	  }
+	else
+	  {
+	    // strip length is along theta
+	    kalman_pat_rec->set_max_search_win_theta_intt(i, 0.200);
+	    kalman_pat_rec->set_min_search_win_theta_intt(i, 0.200);
+	    kalman_pat_rec->set_max_search_win_phi_intt(i, 0.0050);
+	    kalman_pat_rec->set_min_search_win_phi_intt(i, 0.000);
+	  }
+      }
+    
     se->registerSubsystem(kalman_pat_rec);
   }
   else
