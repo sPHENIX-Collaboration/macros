@@ -210,46 +210,48 @@ double Svtx(PHG4Reco* g4Reco, double radius,
       // MAPS inner barrel layers
       //======================================================
       
-      bool new_MVTX = false;
-      if(new_MVTX)
+      //bool new_MVTX = true;
+      //if(new_MVTX)
+      //{
+      double maps_layer_radius[3] = {24.61, 32.59, 39.88}; // mm - numbers from Walt 6 Aug 2018
+      
+      // D. McGlinchey 6Aug2018 - type no longer is used, included here because I was too lazy to remove it from the code
+      int stave_type[3] = {0, 0, 0};
+      int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX MVTX
+      double phi_tilt[3] = {0.300, 0.305, 0.300}; // radians - numbers from Walt 6 Aug 2018
+      
+      for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
 	{
-	  double maps_layer_radius[3] = {24.61, 32.59, 39.88}; // mm - numbers from Walt 6 Aug 2018
+	  if (verbosity)
+	    cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
+		 << " pixel size 30 x 30 microns "
+		 << " active pixel thickness 0.0018 microns" << endl;
 	  
-	  // D. McGlinchey 6Aug2018 - type no longer is used, included here because I was too lazy to remove it from the code
-	  int stave_type[3] = {0, 0, 0};
-	  int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX MVTX
-	  double phi_tilt[3] = {0.300, 0.305, 0.300}; // radians - numbers from Walt 6 Aug 2018
+	  PHG4MapsSubsystem* lyr = new PHG4MapsSubsystem("MAPS", ilayer, stave_type[ilayer]);
+	  lyr->Verbosity(verbosity);
 	  
-	  for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
-	    {
-	      if (verbosity)
-		cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
-		     << " pixel size 30 x 30 microns "
-		     << " active pixel thickness 0.0018 microns" << endl;
-	      
-	      PHG4MapsSubsystem* lyr = new PHG4MapsSubsystem("MAPS", ilayer, stave_type[ilayer]);
-	      lyr->Verbosity(verbosity);
-	      
-	      lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
-	      lyr->set_int_param("N_staves", staves_in_layer[ilayer]);       // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
-	      
-	      // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
-	      lyr->set_double_param("pixel_x", 0.0030);          // pitch in cm
-	      lyr->set_double_param("pixel_z", 0.0030);          // length in cm
-	      lyr->set_double_param("pixel_thickness", 0.0018);  // thickness in cm
-	      lyr->set_double_param("phitilt", phi_tilt[ilayer]);
-	      
-	      lyr->set_int_param("active", 1);
-	      lyr->OverlapCheck(maps_overlapcheck);
-	      
-	      lyr->set_string_param("stave_geometry_file", "/phenix/hhj3/dcm07e/sPHENIX/macros/macros/g4simulations/mvtx_stave_v01.gdml");
-	      
-	      g4Reco->registerSubsystem(lyr);
-	      
-	      radius = maps_layer_radius[ilayer];
-	    }
+	  lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
+	  lyr->set_int_param("N_staves", staves_in_layer[ilayer]);       // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
+	  
+	  // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
+	  lyr->set_double_param("pixel_x", 0.0030);          // pitch in cm
+	  lyr->set_double_param("pixel_z", 0.0030);          // length in cm
+	  lyr->set_double_param("pixel_thickness", 0.0018);  // thickness in cm
+	  lyr->set_double_param("phitilt", phi_tilt[ilayer]);
+	  
+	  lyr->set_int_param("active", 1);
+	  lyr->OverlapCheck(maps_overlapcheck);
+	  
+	  //lyr->set_string_param("stave_geometry_file", "/phenix/hhj3/dcm07e/sPHENIX/macros/macros/g4simulations/mvtx_stave_v01.gdml");
+	  lyr->set_string_param("stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v01.gdml "));
+
+	  g4Reco->registerSubsystem(lyr);
+	  
+	  radius = maps_layer_radius[ilayer];
 	}
-      else
+      //}
+      /*
+	else
 	{
 	  double maps_layer_radius[3] = {23.4, 31.5, 39.3};  // mm  - precise numbers from ITS.gdml
 	  //double maps_layer_radius[3] = {24.9, 33.0, 40.8};   // mm  - precise numbers from ITS.gdml + 1.5 mm for greater clearance from beam pipe
@@ -290,6 +292,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 	      radius = maps_layer_radius[ilayer];
 	    }
 	}
+      */
     }
   
   if (n_intt_layer > 0)
