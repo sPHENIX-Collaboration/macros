@@ -10,13 +10,59 @@ bool use_primary_vertex = false;
 
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
 
-// default setup for the INTT - configuration can be redone later if desired, but n_intt_layer has to be correctly set here!
-const int n_intt_layer = 4;  // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
+// default setup for the INTT - please don't change this. The configuration can be redone later in the nacro if desired
+int n_intt_layer = 4;  
 // default layer configuration
 int laddertype[4] = {0, 1, 1, 1};  // default
 int nladder[4] = {34, 30, 36, 42};  // default
 double sensor_radius_inner[4] = {6.876, 8.987, 10.835, 12.676};  // inner staggered radius for layer default
 double sensor_radius_outer[4] = {7.462, 9.545, 11.361, 13.179};  // outer staggered radius for layer  default
+
+// Optionally reconfigure the INTT
+//========================================================================
+// example re-configurations of INTT - uncomment one to get the reconfiguration
+// n_intt must be 0-4, setting it to zero will remove the INTT completely,  otherwise it gives you n layers
+//========================================================================
+/*
+// Four layers, laddertypes 1-1-0-1
+n_intt_layer = 4;
+laddertype[0] = 1;    laddertype[1] = 1;  laddertype[2] = 0; laddertype[3] = 1; 
+nladder[0] = 22;       nladder[1] = 30;  nladder[2] = 52;  nladder[3] = 42;
+sensor_radius_inner[0] = 6.876; sensor_radius_inner[1] = 8.987; sensor_radius_inner[2] = 10.835;    sensor_radius_inner[3] = 12.676; 
+sensor_radius_outer[0] = 7.462; sensor_radius_outer[1] = 9.545; sensor_radius_outer[2] = 11.361;    sensor_radius_outer[3] = 13.179; 
+*/
+/*
+// Three outer layers, laddertypes 1-0-1 
+n_intt_layer = 3;
+laddertype[0] = 1;    laddertype[1] = 0;  laddertype[2] = 1;
+nladder[0] = 30;  nladder[1] = 52;  nladder[2] = 42;
+sensor_radius_inner[0] = 8.987; sensor_radius_inner[1] = 10.835;    sensor_radius_inner[2] = 12.676; 
+sensor_radius_outer[0] = 9.545; sensor_radius_outer[1] = 11.361;    sensor_radius_outer[2] = 13.179; 
+*/
+/*
+// Three outer layers, laddertypes 1-1-1 
+n_intt_layer = 3;
+laddertype[0] = 1;    laddertype[1] = 1;  laddertype[2] = 1;
+nladder[0] = 30;  nladder[1] = 36;  nladder[2] = 42;
+sensor_radius_inner[0] = 8.987; sensor_radius_inner[1] = 10.835;    sensor_radius_inner[2] = 12.676; 
+sensor_radius_outer[0] = 9.545; sensor_radius_outer[1] = 11.361;    sensor_radius_outer[2] = 13.179; 
+*/
+/*
+// Two outer layers, laddertype 0-1
+n_intt_layer = 2;
+laddertype[0] = 0;    laddertype[1] = 1; 
+nladder[0] = 52;       nladder[1] = 42;
+sensor_radius_inner[0] = 10.835;    sensor_radius_inner[1] = 12.676; 
+sensor_radius_outer[0] = 11.361;    sensor_radius_outer[1] = 13.179; 
+*/
+/*
+// Two outer layers, laddertype 1-1
+n_intt_layer = 2;
+laddertype[0] = 1;    laddertype[1] = 1; 
+nladder[0] = 36;       nladder[1] = 42;
+sensor_radius_inner[0] = 10.835;    sensor_radius_inner[1] = 12.676; 
+sensor_radius_outer[0] = 11.361;    sensor_radius_outer[1] = 13.179; 
+*/
 
 int n_tpc_layer_inner = 16;
 double tpc_layer_thick_inner = 1.25 / 2.0;
@@ -272,20 +318,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 	  vpair.push_back(std::make_pair(n_maps_layer + i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
 	  if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
 	}
-      /*
-      // some suggested values of nladder when changing laddertype from default configuration:
-      //      laddertype 0 in layer 2, nladder = 52
-      //      laddertype 1 in layer 0, nladder = 22 
-      //=============================================================================
-      // example of optional re-configuration of INTT - make sure that "n_intt_layer" is set to the correct value above
-      //=============================================================================
-      // Two outer layers, laddertype 0 then 1 (set n_intt_layer = 2 at top of macro)
-      laddertype[0] = 0;    laddertype[1] = 1; 
-      nladder[0] = 52;       nladder[1] = 42;
-      sensor_radius_inner[0] = 10.835;    sensor_radius_inner[1] = 12.676; 
-      sensor_radius_outer[0] = 11.361;    sensor_radius_outer[1] = 13.179; 
-      //=================================================
-      */
+      
       // This is a temporary workaround using an alternative constructor for problem with parameter class not updating doubles 
       PHG4SiliconTrackerSubsystem* sitrack = new PHG4SiliconTrackerSubsystem(sensor_radius_inner, sensor_radius_outer, "SILICON_TRACKER", vpair);
       //PHG4SiliconTrackerSubsystem* sitrack = new PHG4SiliconTrackerSubsystem("SILICON_TRACKER", vpair);
@@ -489,7 +522,7 @@ void Svtx_Cells(int verbosity = 0)
     maps_cells->Verbosity(verbosity);
     for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
     {
-      maps_cells->set_timing_window(ilayer, -2000, 2000);
+      maps_cells->set_timing_window(ilayer, -5000, 5000);
     }
     se->registerSubsystem(maps_cells);
   }
