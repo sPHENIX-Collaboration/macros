@@ -655,6 +655,19 @@ void Svtx_Reco(int verbosity = 0)
   if (n_intt_layer > 0)
   {
     // INTT
+
+    // Load pre-defined deadmaps
+    PHG4SvtxDeadMapLoader* deadMapINTT = new PHG4SvtxDeadMapLoader("SILICON_TRACKER");
+    for (int i = 0; i < n_intt_layer; i++)
+    {
+      string DeadMapConfigName = Form("LadderType%d_RndSeed%d/", laddertype[i], i);
+      string DeadMapPath =
+          string(getenv("CALIBRATIONROOT")) +
+          string("/Tracking/INTT/DeadMap_4Percent/") + DeadMapConfigName;
+      deadMapINTT->deadMapPath(n_maps_layer + i, DeadMapPath);
+    }
+    se->registerSubsystem(deadMapINTT);
+
     std::vector<double> userrange;  // 3-bit ADC threshold relative to the mip_e at each layer.
     // these should be used for the INTT
     userrange.push_back(0.05);
@@ -673,6 +686,8 @@ void Svtx_Reco(int verbosity = 0)
       digiintt->set_adc_scale(n_maps_layer + i, userrange);
     }
     se->registerSubsystem(digiintt);
+
+    digiintt->Verbosity(1);
   }
 
   // TPC layers use the Svtx digitizer
