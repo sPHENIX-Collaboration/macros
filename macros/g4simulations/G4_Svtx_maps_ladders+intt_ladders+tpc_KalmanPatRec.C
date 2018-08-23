@@ -687,7 +687,7 @@ void Svtx_Reco(int verbosity = 0)
     }
     se->registerSubsystem(digiintt);
 
-    digiintt->Verbosity(1);
+//    digiintt->Verbosity(1);
   }
 
   // TPC layers use the Svtx digitizer
