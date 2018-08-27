@@ -5,8 +5,10 @@ int Fun4All_G4_Prototype2(int nEvents = 1)
   gSystem->Load("libg4detectors");
   gSystem->Load("libg4testbench");
   gSystem->Load("libg4histos");
-  gSystem->Load("libg4eval.so");
+  gSystem->Load("libg4eval");
   gSystem->Load("libqa_modules");
+  gSystem->Load("libg4calo");
+  gSystem->Load("libcalo_reco");
 
   bool cemc_on = true;
   bool cemc_cell = cemc_on && true;
@@ -207,7 +209,7 @@ int Fun4All_G4_Prototype2(int nEvents = 1)
     {
       PHG4FullProjSpacalCellReco *cemc_cells = new PHG4FullProjSpacalCellReco("CEMCCYLCELLRECO");
       cemc_cells->Detector("CEMC");
-      cemc_cells->set_timing_window_defaults(0.,60.);
+      cemc_cells->set_timing_window(0.,60.);
       cemc_cells->get_light_collection_model().load_data_file(
 							      string(getenv("CALIBRATIONROOT")) + string("/CEMC/LightCollection/Prototype2Module.xml"),
 							      "data_grid_light_guide_efficiency","data_grid_fiber_trans");

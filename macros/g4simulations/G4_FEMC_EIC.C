@@ -68,7 +68,7 @@ void FEMC_Towers(int verbosity = 0) {
   TowerDigitizer2->Detector("FEMC");
   TowerDigitizer2->TowerType(2);
   TowerDigitizer2->Verbosity(verbosity);
-  TowerDigitizer2->set_digi_algorithm(RawTowerDigitizer::kNo_digitalization);
+  TowerDigitizer2->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem( TowerDigitizer2 );
 
   // PbSc towers
@@ -93,6 +93,19 @@ void FEMC_Clusters(int verbosity = 0) {
   ClusterBuilder->Detector("FEMC");
   ClusterBuilder->Verbosity(verbosity);
   se->registerSubsystem( ClusterBuilder );
+
+  return;
+}
+
+void FEMC_Eval(std::string outputfile, int verbosity = 0)
+{
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libg4eval.so");
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  CaloEvaluator *eval = new CaloEvaluator("FEMCEVALUATOR", "FEMC", outputfile.c_str());
+  eval->Verbosity(verbosity);
+  se->registerSubsystem(eval);
 
   return;
 }

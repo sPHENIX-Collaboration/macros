@@ -6,6 +6,9 @@ int Fun4All_G4_fsPHENIX(
            const char * embed_input_file = "/sphenix/sim/sim01/production/2016-07-12/sHijing/spacal2d/G4Hits_sPHENIX_sHijing-0-4.4fm.list"
 		       )
 {
+  // Set the number of TPC layer
+  const int n_TPC_layers = 40;  // use 60 for backward compatibility only
+
   //===============
   // Input options
   //===============
@@ -37,55 +40,53 @@ int Fun4All_G4_fsPHENIX(
   bool do_pipe = true;
   
   bool do_svtx = true;
-  bool do_svtx_cell = false;
-  bool do_svtx_track = false;
-  bool do_svtx_eval = false;
+  bool do_svtx_cell = do_svtx && true;
+  bool do_svtx_track = do_svtx_cell && true;
+  bool do_svtx_eval = do_svtx_track && false;
 
-  bool do_preshower = false;
-  
   bool do_cemc = true;
-  bool do_cemc_cell = true;
-  bool do_cemc_twr = true;
-  bool do_cemc_cluster = true;
-  bool do_cemc_eval = false;
+  bool do_cemc_cell = do_cemc && true;
+  bool do_cemc_twr = do_cemc_cell && true;
+  bool do_cemc_cluster = do_cemc_twr && true;
+  bool do_cemc_eval = do_cemc_cluster && false;
 
   bool do_hcalin = true;
-  bool do_hcalin_cell = true;
-  bool do_hcalin_twr = true;
-  bool do_hcalin_cluster = true;
-  bool do_hcalin_eval = false;
+  bool do_hcalin_cell = do_hcalin && true;
+  bool do_hcalin_twr = do_hcalin_cell && true;
+  bool do_hcalin_cluster = do_hcalin_twr && true;
+  bool do_hcalin_eval = do_hcalin_cluster && false;
 
   bool do_magnet = true;
-  
+
   bool do_hcalout = true;
-  bool do_hcalout_cell = true;
-  bool do_hcalout_twr = true;
-  bool do_hcalout_cluster = true;
-  bool do_hcalout_eval = false;
-  
+  bool do_hcalout_cell = do_hcalout && true;
+  bool do_hcalout_twr = do_hcalout_cell && true;
+  bool do_hcalout_cluster = do_hcalout_twr && true;
+  bool do_hcalout_eval = do_hcalout_cluster && false;
+
   bool do_global = true;
   bool do_global_fastsim = false;
-  
+
   bool do_jet_reco = false;
-  bool do_jet_eval = false; 
+  bool do_jet_eval = do_jet_reco && true;
 
   bool do_fwd_jet_reco = true;
-  bool do_fwd_jet_eval = true;
+  bool do_fwd_jet_eval = do_fwd_jet_reco && true;
 
   // fsPHENIX geometry
 
   bool do_FGEM = true;
-  bool do_FGEM_track =true;
+  bool do_FGEM_track = do_FGEM &&  true;
 
-  bool do_FEMC = true; 
-  bool do_FEMC_cell = true; 
-  bool do_FEMC_twr = true;  
-  bool do_FEMC_cluster = true; 
+  bool do_FEMC = true;
+  bool do_FEMC_cell = do_FEMC && true;
+  bool do_FEMC_twr = do_FEMC_cell && true;
+  bool do_FEMC_cluster = do_FEMC_twr && true;
 
-  bool do_FHCAL = true; 
-  bool do_FHCAL_cell = true; 
-  bool do_FHCAL_twr = true; 
-  bool do_FHCAL_cluster = true; 
+  bool do_FHCAL = true;
+  bool do_FHCAL_cell = do_FHCAL && true;
+  bool do_FHCAL_twr = do_FHCAL_cell && true;
+  bool do_FHCAL_cluster = do_FHCAL_twr && true;
 
   bool do_dst_compress = false;
   
@@ -100,16 +101,15 @@ int Fun4All_G4_fsPHENIX(
   gSystem->Load("libphhepmc.so");
   gSystem->Load("libg4testbench.so");
   gSystem->Load("libg4hough.so");
-  gSystem->Load("libcemc.so");
   gSystem->Load("libg4eval.so");
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_fsPHENIX.C");
-  G4Init(do_svtx,do_preshower,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_FEMC,do_FHCAL);
+  G4Init(do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_FEMC,do_FHCAL,n_TPC_layers);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
-  //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
-  const string magfield = "/phenix/upgrades/decadal/fieldmaps/fsPHENIX.2d.root"; // fsPHENIX field map by Cesar Luiz da Silva <slash@rcf.rhic.bnl.gov>, sPHENIX + piston
+  //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
+  const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root"); // default map from the calibration database
   const float magfield_rescale = 1.0; // already adjusted to 1.4T central field
 
   //---------------
@@ -147,10 +147,7 @@ int Fun4All_G4_fsPHENIX(
     }
   else if (readhepmc)
     {
-      // this module is needed to read the HepMC records into our G4 sims
-      // but only if you read HepMC input files
-      HepMCNodeReader *hr = new HepMCNodeReader();
-      se->registerSubsystem(hr);
+    // action is performed in later stage at the input manager level
     }
   else if (runpythia8)
     {
@@ -160,9 +157,6 @@ int Fun4All_G4_fsPHENIX(
       // see coresoftware/generators/PHPythia8 for example config
       pythia8->set_config_file("phpythia8.cfg"); 
       se->registerSubsystem(pythia8);
-
-      HepMCNodeReader *hr = new HepMCNodeReader();
-      se->registerSubsystem(hr);
     }
   else if (runpythia6)
     {
@@ -171,9 +165,6 @@ int Fun4All_G4_fsPHENIX(
       PHPythia6 *pythia6 = new PHPythia6();
       pythia6->set_config_file("phpythia6.cfg");
       se->registerSubsystem(pythia6);
-
-      HepMCNodeReader *hr = new HepMCNodeReader();
-      se->registerSubsystem(hr);
     }
   else
     {
@@ -211,7 +202,7 @@ int Fun4All_G4_fsPHENIX(
       //---------------------
 
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-	      do_svtx, do_preshower, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
+	      do_svtx, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
 	      do_FGEM, do_FEMC, do_FHCAL,
 	      magfield_rescale);
       
@@ -373,7 +364,6 @@ int Fun4All_G4_fsPHENIX(
       G4DSTreader_fsPHENIX( outputFile, //
           /*int*/ absorberactive ,
           /*bool*/ do_svtx ,
-          /*bool*/ do_preshower ,
           /*bool*/ do_cemc ,
           /*bool*/ do_hcalin ,
           /*bool*/ do_magnet ,

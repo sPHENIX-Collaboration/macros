@@ -23,8 +23,8 @@ double
 DIRCSetup(PHG4Reco* g4Reco)
 {
   const double radiator_R = 83.65;
-  const double length = 470;
-  const double z_shift = -115;
+  const double length = 400;
+  const double z_shift = -75; //115
   const double z_start = z_shift + length / 2.;
   const double z_end = z_shift - length / 2.;
 

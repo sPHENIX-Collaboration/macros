@@ -3,15 +3,15 @@ double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
 bool overlapcheck = false; // set to true if you want to check for overlaps
 
 void G4Init(bool do_svtx = true,
-	    bool do_preshower = false,
 	    bool do_cemc = true,
 	    bool do_hcalin = true,
 	    bool do_magnet = true,
 	    bool do_hcalout = true,
-      bool do_pipe = true,
-      bool do_FGEM = true,
+            bool do_pipe = true,
+            bool do_FGEM = true,
 	    bool do_FEMC = true,
-	    bool do_FHCAL = true) {
+	    bool do_FHCAL = true,
+            int n_TPC_layers = 40) {
 
   // load detector/material macros and execute Init() function
 
@@ -22,16 +22,8 @@ void G4Init(bool do_svtx = true,
     }
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx.C");
-      //gROOT->LoadMacro("G4_Svtx_ladders.C"); // testing
-      //gROOT->LoadMacro("G4_Svtx_ITS.C");     // testing
-      SvtxInit();
-    }
-
-  if (do_preshower) 
-    {
-      gROOT->LoadMacro("G4_PreShower.C");
-      PreShowerInit();
+      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
+      SvtxInit(n_TPC_layers);
     }
 
   if (do_cemc)
@@ -81,7 +73,6 @@ int G4Setup(const int absorberactive = 0,
 	    const string &field ="1.5",
 	    const EDecayType decayType = TPythia6Decayer::kAll,
 	    const bool do_svtx = true,
-	    const bool do_preshower = false,
 	    const bool do_cemc = true,
 	    const bool do_hcalin = true,
 	    const bool do_magnet = true,
@@ -105,10 +96,17 @@ int G4Setup(const int absorberactive = 0,
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
+  // read-in HepMC events to Geant4 if there is any
+  HepMCNodeReader *hr = new HepMCNodeReader();
+  se->registerSubsystem(hr);
+
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->save_DST_geometry(true); //Save geometry from Geant4 to DST
   g4Reco->set_rapidity_coverage(1.1); // according to drawings
-
+// uncomment to set QGSP_BERT_HP physics list for productions 
+// (default is QGSP_BERT for speed)
+  //  g4Reco->SetPhysicsList("QGSP_BERT_HP"); 
+ 
   if (decayType != TPythia6Decayer::kAll) {
     g4Reco->set_force_decay(decayType);
   }
@@ -137,11 +135,6 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // SVTX
   if (do_svtx) radius = Svtx(g4Reco, radius, absorberactive);
-
-  //----------------------------------------
-  // PRESHOWER
-  
-  if (do_preshower) radius = PreShower(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // CEMC

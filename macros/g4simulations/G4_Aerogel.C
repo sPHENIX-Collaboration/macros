@@ -16,7 +16,7 @@ AerogelInit()
 
 void
 AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
-    const double min_eta = 1.1 // 1.45
+    const double min_eta = 1.242
     )
 {
 
@@ -30,7 +30,7 @@ AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   ag->get_geometry().set_normal_start(
       280 * PHG4Sector::Sector_Geometry::Unit_cm()); // 307
   ag->get_geometry().set_min_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(1.9));
+      PHG4Sector::Sector_Geometry::eta_to_polar_angle(1.85));
   ag->get_geometry().set_max_polar_angle(
       PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta));
   ag->get_geometry().set_min_polar_edge(
@@ -41,7 +41,7 @@ AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
 
   // Aerogel dimensions ins cm
   double radiator_length = 2.;
-  double expansion_length = 10.;
+  double expansion_length = 18.;// 10.;
 
   ag->get_geometry().AddLayers_AeroGel_ePHENIX( radiator_length * PHG4Sector::Sector_Geometry::Unit_cm(),
 						expansion_length * PHG4Sector::Sector_Geometry::Unit_cm() );

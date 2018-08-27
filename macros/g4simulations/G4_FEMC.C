@@ -23,6 +23,8 @@ FEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 {
 
   gSystem->Load("libg4detectors.so");
+  gSystem->Load("libg4calo.so");
+  gSystem->Load("libcalo_reco.so");
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
@@ -70,7 +72,7 @@ void FEMC_Towers(int verbosity = 0) {
   TowerDigitizer1->Detector("FEMC");
   TowerDigitizer1->TowerType(1); 
   TowerDigitizer1->Verbosity(verbosity);
-  TowerDigitizer1->set_digi_algorithm(RawTowerDigitizer::kNo_digitalization);
+  TowerDigitizer1->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem( TowerDigitizer1 );
 
   // PbSc towers
@@ -78,7 +80,7 @@ void FEMC_Towers(int verbosity = 0) {
   TowerDigitizer2->Detector("FEMC");
   TowerDigitizer2->TowerType(2); 
   TowerDigitizer2->Verbosity(verbosity);
-  TowerDigitizer2->set_digi_algorithm(RawTowerDigitizer::kNo_digitalization);
+  TowerDigitizer2->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem( TowerDigitizer2 );
 
   // PbW crystals
@@ -115,5 +117,18 @@ void FEMC_Clusters(int verbosity = 0) {
   ClusterBuilder->set_threshold_energy(0.100);  
   se->registerSubsystem( ClusterBuilder );
   
+  return;
+}
+
+void FEMC_Eval(std::string outputfile, int verbosity = 0)
+{
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libg4eval.so");
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  CaloEvaluator *eval = new CaloEvaluator("FEMCEVALUATOR", "FEMC", outputfile.c_str());
+  eval->Verbosity(verbosity);
+  se->registerSubsystem(eval);
+
   return;
 }

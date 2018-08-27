@@ -14,7 +14,6 @@ void
 G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
                          int absorberactive = 1, //
                          bool do_svtx = true, //
-                         bool do_preshower = false, //
                          bool do_cemc = true, //
                          bool do_hcalin = true, //
                          bool do_magnet = true, //
@@ -23,8 +22,6 @@ G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
                          bool do_hcalin_twr = true, //
                          bool do_magnet = true, //
                          bool do_hcalout_twr = true, //
-                         bool do_FGEM = true, //
-                         bool do_EGEM = true, //
                          bool do_FHCAL = true, //
                          bool do_FHCAL_twr = true, //
                          bool do_FEMC = true, //
@@ -58,6 +55,15 @@ G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
       if (do_svtx)
         {
           ana->AddNode("SVTX");
+          ana->AddNode("EGEM_0");
+          ana->AddNode("EGEM_1");
+          ana->AddNode("EGEM_2");
+          ana->AddNode("EGEM_3");
+          ana->AddNode("FGEM_0");
+          ana->AddNode("FGEM_1");
+          ana->AddNode("FGEM_2");
+          ana->AddNode("FGEM_3");
+          ana->AddNode("FGEM_4");
         }
 
       if (do_cemc)
@@ -110,22 +116,6 @@ G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
           ana->AddNode("EEMC");
           if (absorberactive)
             ana->AddNode("ABSORBER_EEMC");
-        }
-
-      if (do_FGEM)
-        {
-          ana->AddNode("FGEM_0");
-          ana->AddNode("FGEM_1");
-          ana->AddNode("FGEM_2");
-          ana->AddNode("FGEM_3");
-          ana->AddNode("FGEM_4");
-        }
-
-      if (do_EGEM)
-        {
-          ana->AddNode("EGEM_0");
-          ana->AddNode("EGEM_1");
-          ana->AddNode("EGEM_2");
         }
 
       ana->AddNode("BH_1");

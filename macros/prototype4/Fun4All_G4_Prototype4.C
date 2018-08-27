@@ -1,4 +1,4 @@
-int Fun4All_G4_Prototype3(int nEvents = 1)
+int Fun4All_G4_Prototype4(int nEvents = 1)
 {
 
   gSystem->Load("libfun4all");
@@ -16,6 +16,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   bool cemc_digi = cemc_twr && true;
   bool cemc_twrcal = cemc_digi && true;
   bool ihcal_on = true;
+  bool ihcal_al = false;
   bool ihcal_cell = ihcal_on && false;
   bool ihcal_twr = ihcal_cell && false;
   bool ihcal_digi = ihcal_twr && false;
@@ -118,11 +119,20 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   //----------------------------------------
   if (ihcal_on)
     {
-      PHG4Prototype2InnerHcalSubsystem *innerhcal = new PHG4Prototype2InnerHcalSubsystem("HCalIn");
+      PHG4Prototype3InnerHcalSubsystem *innerhcal = new PHG4Prototype3InnerHcalSubsystem("HCalIn");
       innerhcal->set_int_param("hi_eta",1);
       innerhcal->set_double_param("place_x",add_place_x);
       innerhcal->set_double_param("place_z",144);
-      innerhcal->SetActive();
+      if (ihcal_al)
+      {
+	innerhcal->set_int_param("scintillators",0);
+	innerhcal->SetActive(0);
+	innerhcal->set_string_param("material","Al4046");
+      }
+      else
+      {
+	innerhcal->SetActive();
+      }
       innerhcal->SetAbsorberActive();
       innerhcal->SetAbsorberTruth(1);
       innerhcal->OverlapCheck(true);

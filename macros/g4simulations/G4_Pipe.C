@@ -34,7 +34,7 @@ double Pipe(PHG4Reco* g4Reco,
   if (absorberactive)  cyl->SetActive();
   g4Reco->registerSubsystem( cyl );
   
-  PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("BE_PIPE", 1);
+  cyl = new PHG4CylinderSubsystem("BE_PIPE", 1);
   cyl->set_double_param("radius",be_pipe_radius);
   cyl->set_int_param("lengthviarapidity",0);
   cyl->set_double_param("length",be_pipe_length);

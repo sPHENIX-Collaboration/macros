@@ -2,13 +2,15 @@
 double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
 bool overlapcheck = false; // set to true if you want to check for overlaps
 
-void G4Init(bool do_svtx = true,
-	    bool do_preshower = false,
-	    bool do_cemc = true,
-	    bool do_hcalin = true,
-	    bool do_magnet = true,
-	    bool do_hcalout = true,
-	    bool do_pipe = true)
+void G4Init(const bool do_svtx = true,
+      const bool do_pstof = true,
+	    const bool do_cemc = true,
+	    const bool do_hcalin = true,
+	    const bool do_magnet = true,
+	    const bool do_hcalout = true,
+	    const bool do_pipe = true,
+	    const bool do_plugdoor = false
+	    )
   {
 
   // load detector/material macros and execute Init() function
@@ -20,22 +22,14 @@ void G4Init(bool do_svtx = true,
     }  
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx.C");                 // default MIE projections
-      //gROOT->LoadMacro("G4_Svtx_maps+IT+tpc.C"); // Reference design for 2016 tracking review
-      //gROOT->LoadMacro("G4_Svtx_pixels+strips.C"); // testing
-      //gROOT->LoadMacro("G4_Svtx_pixels+tpc.C");    // testing
-      //gROOT->LoadMacro("G4_Svtx_maps+strips.C");   // testing
-      //gROOT->LoadMacro("G4_Svtx_maps+tpc.C");      // testing
-      //gROOT->LoadMacro("G4_Svtx_maps_7layers.C");  // testing
-      //gROOT->LoadMacro("G4_Svtx_maps_5layers.C");  // testing
-      //gROOT->LoadMacro("G4_Svtx_ladders.C");       // testing (new geometries)
+      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
       SvtxInit();
     }
 
-  if (do_preshower) 
+  if (do_pstof) 
     {
-      gROOT->LoadMacro("G4_PreShower.C");
-      PreShowerInit();
+      gROOT->LoadMacro("G4_PSTOF.C");
+      PSTOFInit();
     }
 
   if (do_cemc)
@@ -61,6 +55,11 @@ void G4Init(bool do_svtx = true,
       HCalOuterInit();
     }
 
+  if (do_pipe)
+    {
+      gROOT->LoadMacro("G4_PlugDoor.C");
+      PlugDoorInit();
+    }
 }
 
 
@@ -68,12 +67,14 @@ int G4Setup(const int absorberactive = 0,
 	    const string &field ="1.5",
 	    const EDecayType decayType = TPythia6Decayer::kAll,
 	    const bool do_svtx = true,
-	    const bool do_preshower = false,
+	    const bool do_pstof = true,
 	    const bool do_cemc = true,
 	    const bool do_hcalin = true,
 	    const bool do_magnet = true,
 	    const bool do_hcalout = true,
-	    const bool do_pipe = true,
+      const bool do_pipe = true,
+      const bool do_plugdoor = false,
+//	    const bool do_plugdoor = true,
 	    const float magfield_rescale = 1.0) {
   
   //---------------
@@ -89,8 +90,15 @@ int G4Setup(const int absorberactive = 0,
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
+  // read-in HepMC events to Geant4 if there is any
+  HepMCNodeReader *hr = new HepMCNodeReader();
+  se->registerSubsystem(hr);
+
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->set_rapidity_coverage(1.1); // according to drawings
+// uncomment to set QGSP_BERT_HP physics list for productions 
+// (default is QGSP_BERT for speed)
+  //  g4Reco->SetPhysicsList("QGSP_BERT_HP"); 
   if (decayType != TPythia6Decayer::kAll) {
     g4Reco->set_force_decay(decayType);
   }
@@ -121,9 +129,9 @@ int G4Setup(const int absorberactive = 0,
   if (do_svtx) radius = Svtx(g4Reco, radius, absorberactive);
 
   //----------------------------------------
-  // PRESHOWER
+  // PSTOF
   
-  if (do_preshower) radius = PreShower(g4Reco, radius, absorberactive);
+  if (do_pstof) radius = PSTOF(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // CEMC
@@ -145,6 +153,10 @@ int G4Setup(const int absorberactive = 0,
   // HCALOUT
   
   if (do_hcalout) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
+
+  //----------------------------------------
+  // sPHENIX forward flux return door
+  if (do_plugdoor) PlugDoor(g4Reco, absorberactive);
 
   //----------------------------------------
   // BLACKHOLE
