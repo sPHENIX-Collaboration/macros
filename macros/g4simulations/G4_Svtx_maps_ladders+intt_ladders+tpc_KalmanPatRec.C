@@ -13,7 +13,10 @@ const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX com
 // default setup for the INTT - please don't change this. The configuration can be redone later in the nacro if desired
 int n_intt_layer = 4;  
 // default layer configuration
-int laddertype[4] = {0, 1, 1, 1};  // default
+int laddertype[4] = {PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
+		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
+		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
+		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI};  // default
 int nladder[4] = {34, 30, 36, 42};  // default
 double sensor_radius_inner[4] = {6.876, 8.987, 10.835, 12.676};  // inner staggered radius for layer default
 double sensor_radius_outer[4] = {7.462, 9.545, 11.361, 13.179};  // outer staggered radius for layer  default
@@ -319,9 +322,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 	  if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
 	}
       
-      // This is a temporary workaround using an alternative constructor for problem with parameter class not updating doubles 
-      PHG4SiliconTrackerSubsystem* sitrack = new PHG4SiliconTrackerSubsystem(sensor_radius_inner, sensor_radius_outer, "SILICON_TRACKER", vpair);
-      //PHG4SiliconTrackerSubsystem* sitrack = new PHG4SiliconTrackerSubsystem("SILICON_TRACKER", vpair);
+      PHG4SiliconTrackerSubsystem* sitrack = new PHG4SiliconTrackerSubsystem("SILICON_TRACKER", vpair);
       sitrack->Verbosity(verbosity);
       sitrack->SetActive(1);
       sitrack->OverlapCheck(intt_overlapcheck);
