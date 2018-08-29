@@ -771,7 +771,7 @@ void Svtx_Reco(int verbosity = 0)
     
     for(int i = 0;i<n_intt_layer;i++)
       {
-	if(laddertype[i] == 0)
+	if(laddertype[i] == PHG4SiliconTrackerDefs::SEGMENTATION_Z)
 	  {
 	    // strip length is along phi
 	    kalman_pat_rec->set_max_search_win_theta_intt(i, 0.010);
