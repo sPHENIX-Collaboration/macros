@@ -29,7 +29,8 @@ double sensor_radius_outer[4] = {7.462, 9.545, 11.361, 13.179};  // outer stagge
 /*
 // Four layers, laddertypes 1-1-0-1
 n_intt_layer = 4;
-laddertype[0] = 1;    laddertype[1] = 1;  laddertype[2] = 0; laddertype[3] = 1; 
+laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;    laddertype[1] =   PHG4SiliconTrackerDefs::SEGMENTATION_PHI;  
+laddertype[2] =  PHG4SiliconTrackerDefs::SEGMENTATION_Z; laddertype[3] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI; 
 nladder[0] = 22;       nladder[1] = 30;  nladder[2] = 52;  nladder[3] = 42;
 sensor_radius_inner[0] = 6.876; sensor_radius_inner[1] = 8.987; sensor_radius_inner[2] = 10.835;    sensor_radius_inner[3] = 12.676; 
 sensor_radius_outer[0] = 7.462; sensor_radius_outer[1] = 9.545; sensor_radius_outer[2] = 11.361;    sensor_radius_outer[3] = 13.179; 
@@ -37,7 +38,8 @@ sensor_radius_outer[0] = 7.462; sensor_radius_outer[1] = 9.545; sensor_radius_ou
 /*
 // Three outer layers, laddertypes 1-0-1 
 n_intt_layer = 3;
-laddertype[0] = 1;    laddertype[1] = 0;  laddertype[2] = 1;
+laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;    laddertype[1] =  PHG4SiliconTrackerDefs::SEGMENTATION_Z;  
+laddertype[2] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
 nladder[0] = 30;  nladder[1] = 52;  nladder[2] = 42;
 sensor_radius_inner[0] = 8.987; sensor_radius_inner[1] = 10.835;    sensor_radius_inner[2] = 12.676; 
 sensor_radius_outer[0] = 9.545; sensor_radius_outer[1] = 11.361;    sensor_radius_outer[2] = 13.179; 
@@ -45,7 +47,8 @@ sensor_radius_outer[0] = 9.545; sensor_radius_outer[1] = 11.361;    sensor_radiu
 /*
 // Three outer layers, laddertypes 1-1-1 
 n_intt_layer = 3;
-laddertype[0] = 1;    laddertype[1] = 1;  laddertype[2] = 1;
+laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;    laddertype[1] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;  
+laddertype[2] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
 nladder[0] = 30;  nladder[1] = 36;  nladder[2] = 42;
 sensor_radius_inner[0] = 8.987; sensor_radius_inner[1] = 10.835;    sensor_radius_inner[2] = 12.676; 
 sensor_radius_outer[0] = 9.545; sensor_radius_outer[1] = 11.361;    sensor_radius_outer[2] = 13.179; 
@@ -53,7 +56,7 @@ sensor_radius_outer[0] = 9.545; sensor_radius_outer[1] = 11.361;    sensor_radiu
 /*
 // Two outer layers, laddertype 0-1
 n_intt_layer = 2;
-laddertype[0] = 0;    laddertype[1] = 1; 
+laddertype[0] = PHG4SiliconTrackerDefs::SEGMENTATION_Z;    laddertype[1] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI; 
 nladder[0] = 52;       nladder[1] = 42;
 sensor_radius_inner[0] = 10.835;    sensor_radius_inner[1] = 12.676; 
 sensor_radius_outer[0] = 11.361;    sensor_radius_outer[1] = 13.179; 
@@ -61,7 +64,7 @@ sensor_radius_outer[0] = 11.361;    sensor_radius_outer[1] = 13.179;
 /*
 // Two outer layers, laddertype 1-1
 n_intt_layer = 2;
-laddertype[0] = 1;    laddertype[1] = 1; 
+laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;    laddertype[1] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI; 
 nladder[0] = 36;       nladder[1] = 42;
 sensor_radius_inner[0] = 10.835;    sensor_radius_inner[1] = 12.676; 
 sensor_radius_outer[0] = 11.361;    sensor_radius_outer[1] = 13.179; 
@@ -333,9 +336,8 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 	{
 	  sitrack->set_int_param(i, "laddertype", laddertype[i]);
 	  sitrack->set_int_param(i, "nladder", nladder[i]);
-	  // These are set above in the constructor for now, due to a problem with the parameter class
-	  //sitrack->set_double_param(i,"sensor_radius_inner", sensor_radius_inner[i]*10.0);  // expecting mm
-	  //sitrack->set_double_param(i,"sensor_radius_outer", sensor_radius_outer[i]*10.0);
+	  sitrack->set_double_param(i,"sensor_radius_inner", sensor_radius_inner[i]);  // expecting cm
+	  sitrack->set_double_param(i,"sensor_radius_outer", sensor_radius_outer[i]);
 	}
       
       // outer radius marker (translation back to cm)
@@ -861,7 +863,8 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   //----------------
 
   SvtxEvaluator* eval;
-  eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
+  //eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
+  eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str(), "SvtxTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
   eval->do_cluster_eval(true);
   eval->do_g4hit_eval(true);
   eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
@@ -875,7 +878,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
     // make a second evaluator that records tracks fitted with primary vertex included
     // good for analysis of prompt tracks, particularly if MVTX is not present
     SvtxEvaluator* evalp;
-    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap");
+    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
     evalp->do_cluster_eval(true);
     evalp->do_g4hit_eval(true);
     evalp->do_hit_eval(false);
