@@ -61,14 +61,14 @@ nladder[0] = 52;       nladder[1] = 42;
 sensor_radius_inner[0] = 10.835;    sensor_radius_inner[1] = 12.676; 
 sensor_radius_outer[0] = 11.361;    sensor_radius_outer[1] = 13.179; 
 */
-
+/*
 // Two outer layers, laddertype 1-1
 n_intt_layer = 2;
 laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;    laddertype[1] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI; 
 nladder[0] = 36;       nladder[1] = 42;
 sensor_radius_inner[0] = 10.835;    sensor_radius_inner[1] = 12.676; 
 sensor_radius_outer[0] = 11.361;    sensor_radius_outer[1] = 13.179; 
-
+*/
 
 int n_tpc_layer_inner = 16;
 double tpc_layer_thick_inner = 1.25 / 2.0;
@@ -878,7 +878,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
     // make a second evaluator that records tracks fitted with primary vertex included
     // good for analysis of prompt tracks, particularly if MVTX is not present
     SvtxEvaluator* evalp;
-    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap");
+    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
     evalp->do_cluster_eval(true);
     evalp->do_g4hit_eval(true);
     evalp->do_hit_eval(false);
