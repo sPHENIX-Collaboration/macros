@@ -228,7 +228,7 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings,
     cemc->Verbosity(0);
 
     cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
-    cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2017ProjTilted/"));
+    cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2018ProjTilted/"));
     cemc->set_double_param("radius", radius);            // overwrite minimal radius
     cemc->set_double_param("thickness", cemcthickness);  // overwrite thickness
 
@@ -402,14 +402,15 @@ void CEMC_Clusters(int verbosity = 0)
 
 
   RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
-
-    clusterCorrection->Get_eclus_CalibrationParameters().ReadFromFile("CEMC_RECALIB","xml",0,0,
+ 
+  clusterCorrection->Get_eclus_CalibrationParameters().ReadFromFile("CEMC_RECALIB","xml",0,0,
 							//raw location
-							string(getenv("CALIBRATIONROOT"))+string("/CEMC/PositionRecalibration/"));
+							string(getenv("CALIBRATIONROOT"))+string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+				        
   clusterCorrection->Get_ecore_CalibrationParameters().ReadFromFile("CEMC_ECORE_RECALIB","xml",0,0,
 						       //raw location
-						       string(getenv("CALIBRATIONROOT"))+string("/CEMC/PositionRecalibration"));
-
+								    string(getenv("CALIBRATIONROOT"))+string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+				        
   clusterCorrection->Verbosity(verbosity);
   se->registerSubsystem(clusterCorrection);
 

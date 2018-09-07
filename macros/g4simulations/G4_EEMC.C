@@ -1,5 +1,5 @@
 using namespace std;
-
+const int use_projective_geometry = 0;
 void
 EEMCInit()
 {
@@ -24,17 +24,29 @@ EEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
   gSystem->Load("libg4detectors.so");
 
-  /** Use dedicated EEMC module */
+    /** Use dedicated EEMC module */
   PHG4CrystalCalorimeterSubsystem *eemc = new PHG4CrystalCalorimeterSubsystem("EEMC");
 
   /* path to central copy of calibrations repositry */
   ostringstream mapping_eemc;
 
   /* Use non-projective geometry */
-  mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v005.txt";
-  cout << mapping_eemc.str() << endl;
+  if(!use_projective_geometry)
+    {
+      mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v005.txt";
+      eemc->SetTowerMappingFile( mapping_eemc.str() );
+    }
 
-  eemc->SetTowerMappingFile( mapping_eemc.str() );
+   /* use projective geometry */
+  else
+    {
+      ostringstream mapping_eemc_4x4construct;
+  
+      mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/crystals_v005.txt";
+      mapping_eemc_4x4construct << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/4_by_4_construction_v005.txt";
+  eemc->SetProjectiveGeometry ( mapping_eemc.str() , mapping_eemc_4x4construct.str() );
+    }
+
   eemc->OverlapCheck(overlapcheck);
 
   if (absorberactive)  eemc->SetAbsorberActive();
