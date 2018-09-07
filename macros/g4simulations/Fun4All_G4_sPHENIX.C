@@ -53,28 +53,28 @@ int Fun4All_G4_sPHENIX(
 
   bool do_pipe = true;
 
-  bool do_svtx = true;
-  bool do_svtx_cell = do_svtx && true;
-  bool do_svtx_track = do_svtx_cell && true;
-  bool do_svtx_eval = do_svtx_track && true;
+  bool do_tracking = true;
+  bool do_tracking_cell = do_tracking && true;
+  bool do_tracking_track = do_tracking_cell && true;
+  bool do_tracking_eval = do_tracking_track && true;
 
   bool do_pstof = false;
 
-  bool do_cemc = true;
+  bool do_cemc = false;
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
 
-  bool do_hcalin = true;
+  bool do_hcalin = false;
   bool do_hcalin_cell = do_hcalin && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
   bool do_hcalin_eval = do_hcalin_cluster && true;
 
-  bool do_magnet = true;
+  bool do_magnet = false;
 
-  bool do_hcalout = true;
+  bool do_hcalout = false;
   bool do_hcalout_cell = do_hcalout && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
@@ -88,7 +88,7 @@ int Fun4All_G4_sPHENIX(
 
   bool do_calotrigger = true && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
 
-  bool do_jet_reco = true;
+  bool do_jet_reco = false;
   bool do_jet_eval = do_jet_reco && true;
 
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
@@ -113,7 +113,7 @@ int Fun4All_G4_sPHENIX(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
-  G4Init(do_svtx, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor);
+  G4Init(do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // if like float -> solenoidal field in T, if string use as fieldmap name (including path)
@@ -192,7 +192,7 @@ int Fun4All_G4_sPHENIX(
     {
       // toss low multiplicity dummy events
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-      gen->add_particles("pi-", 2);  // mu+,e+,proton,pi+,Upsilon
+      gen->add_particles("pi-", 1);  // mu+,e+,proton,pi+,Upsilon
       //gen->add_particles("pi+",100); // 100 pion option
       if (readhepmc || do_embedding || runpythia8 || runpythia6)
       {
@@ -297,7 +297,7 @@ int Fun4All_G4_sPHENIX(
     //---------------------
 
     G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-            do_svtx, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, magfield_rescale);
+            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, magfield_rescale);
   }
 
   //---------
@@ -314,7 +314,7 @@ int Fun4All_G4_sPHENIX(
   // Detector Division
   //------------------
 
-  if (do_svtx_cell) Svtx_Cells();
+  if (do_tracking_cell) Tracking_Cells();
 
   if (do_cemc_cell) CEMC_Cells();
 
@@ -345,7 +345,7 @@ int Fun4All_G4_sPHENIX(
   // SVTX tracking
   //--------------
 
-  if (do_svtx_track) Svtx_Reco();
+  if (do_tracking_track) Tracking_Reco();
 
   //-----------------
   // Global Vertexing
@@ -393,7 +393,7 @@ int Fun4All_G4_sPHENIX(
   // Simulation evaluation
   //----------------------
 
-  if (do_svtx_eval) Svtx_Eval(string(outputFile) + "_g4svtx_eval.root");
+  if (do_tracking_eval) Tracking_Eval(string(outputFile) + "_g4svtx_eval.root");
 
   if (do_cemc_eval) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
 
@@ -477,7 +477,7 @@ int Fun4All_G4_sPHENIX(
     double time_window_minus = -35000;
     double time_window_plus = 35000;
 
-    if (do_svtx)
+    if (do_tracking)
     {
       // double TPCDriftVelocity = 6.0 / 1000.0; // cm/ns, which is loaded from G4_SVTX*.C macros
       time_window_minus = -105.5 / TPCDriftVelocity;  // ns
@@ -495,7 +495,7 @@ int Fun4All_G4_sPHENIX(
 
     G4DSTreader(outputFile,  //
                 /*int*/ absorberactive,
-                /*bool*/ do_svtx,
+                /*bool*/ do_tracking,
                 /*bool*/ do_pstof,
                 /*bool*/ do_cemc,
                 /*bool*/ do_hcalin,
