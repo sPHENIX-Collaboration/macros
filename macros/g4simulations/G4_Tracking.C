@@ -9,43 +9,71 @@ bool tpc_layers_40  = false;
 bool use_primary_vertex = false;
 
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
-const int n_intt_layer = 4;  // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
+
+// default setup for the INTT - please don't change this. The configuration can be redone later in the nacro if desired
+int n_intt_layer = 4;  
+int laddertype[4] = {PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
+		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
+		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
+		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI};  // default
+int nladder[4] = {34, 30, 36, 42};  // default  - note these have to be changed if laddertype changes for the layer
+double sensor_radius_inner[4] = {6.876, 8.987, 10.835, 12.676};  // inner staggered radius for layer default
+double sensor_radius_outer[4] = {7.462, 9.545, 11.361, 13.179};  // outer staggered radius for layer  default
+
+// Optionally reconfigure the INTT
+//========================================================================
+// example re-configurations of INTT - uncomment one to get the reconfiguration
+// n_intt must be 0-4, setting it to zero will remove the INTT completely,  otherwise it gives you n layers
+//========================================================================
+/*
+// Four layers, laddertypes 1-1-0-1
+n_intt_layer = 4;
+laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;    laddertype[1] =   PHG4SiliconTrackerDefs::SEGMENTATION_PHI;  
+laddertype[2] =  PHG4SiliconTrackerDefs::SEGMENTATION_Z; laddertype[3] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI; 
+nladder[0] = 22;       nladder[1] = 30;  nladder[2] = 52;  nladder[3] = 42;
+sensor_radius_inner[0] = 6.876; sensor_radius_inner[1] = 8.987; sensor_radius_inner[2] = 10.835;    sensor_radius_inner[3] = 12.676; 
+sensor_radius_outer[0] = 7.462; sensor_radius_outer[1] = 9.545; sensor_radius_outer[2] = 11.361;    sensor_radius_outer[3] = 13.179; 
+*/
+/*
+// Three outer layers, laddertypes 1-0-1 
+n_intt_layer = 3;
+laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;    laddertype[1] =  PHG4SiliconTrackerDefs::SEGMENTATION_Z;  
+laddertype[2] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+nladder[0] = 30;  nladder[1] = 52;  nladder[2] = 42;
+sensor_radius_inner[0] = 8.987; sensor_radius_inner[1] = 10.835;    sensor_radius_inner[2] = 12.676; 
+sensor_radius_outer[0] = 9.545; sensor_radius_outer[1] = 11.361;    sensor_radius_outer[2] = 13.179; 
+*/
+/*
+// Three outer layers, laddertypes 1-1-1 
+n_intt_layer = 3;
+laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;    laddertype[1] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;  
+laddertype[2] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+nladder[0] = 30;  nladder[1] = 36;  nladder[2] = 42;
+sensor_radius_inner[0] = 8.987; sensor_radius_inner[1] = 10.835;    sensor_radius_inner[2] = 12.676; 
+sensor_radius_outer[0] = 9.545; sensor_radius_outer[1] = 11.361;    sensor_radius_outer[2] = 13.179; 
+*/
+/*
+// Two outer layers, laddertype 0-1
+n_intt_layer = 2;
+laddertype[0] = PHG4SiliconTrackerDefs::SEGMENTATION_Z;    laddertype[1] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI; 
+nladder[0] = 52;       nladder[1] = 42;
+sensor_radius_inner[0] = 10.835;    sensor_radius_inner[1] = 12.676; 
+sensor_radius_outer[0] = 11.361;    sensor_radius_outer[1] = 13.179; 
+*/
+/*
+// Two outer layers, laddertype 1-1
+n_intt_layer = 2;
+laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;    laddertype[1] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI; 
+nladder[0] = 36;       nladder[1] = 42;
+sensor_radius_inner[0] = 10.835;    sensor_radius_inner[1] = 12.676; 
+sensor_radius_outer[0] = 11.361;    sensor_radius_outer[1] = 13.179; 
+*/
 
 int n_tpc_layer_inner = 16;
-double tpc_layer_thick_inner = 1.25 / 2.0;
 int tpc_layer_rphi_count_inner = 1152;
-
 int n_tpc_layer_mid = 16;
-double tpc_layer_thick_mid = 1.25;
-int tpc_layer_rphi_count_mid = 1536;
-
 int n_tpc_layer_outer = 16;
-double tpc_layer_thick_outer = 1.125; // outer later reach from 60-78 cm (instead of 80 cm), that leads to radial thickness of 1.125 cm
-int tpc_layer_rphi_count_outer = 2304;
-
 int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
-
-//double inner_cage_radius = 20.;
-//double inner_readout_radius = 30.;
-
-/*
-// TPC gas parameters
-//==============================================
-
-// Data on gasses @20 C and 760 Torr from the following source:
-// http://www.slac.stanford.edu/pubs/icfa/summer98/paper3/paper3.pdf
-double Ne_dEdx = 1.56;    // keV/cm
-double CF4_dEdx = 7.00;   // keV/cm
-double iBut_dEdx = 5.93;  // keV/cm
-
-double Ne_NPrimary = 12;    // Number/cm
-double CF4_NPrimary = 51;   // Number/cm
-double iBut_NPrimary = 84;  // Number/cm
-
-double Ne_NTotal = 43;     // Number/cm
-double CF4_NTotal = 100;   // Number/cm
-double iBut_NTotal = 195;  // Number/cm
-*/
 
 // TPC Performance Parameter (applies extra smear to mimic the avalanche):
 double TPC_SigmaT = 0.03;  // 0.03 means 300 microns...Prakhar Garg Simulation...desire measurement...
@@ -112,104 +140,98 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 {
   // create the three tracker subsystems 
 
-  // MVTX
-  //=======
   if (n_maps_layer > 0)
-  {
-    bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
-
-    /*
-	The numbers used in the macro below are from the xml file dump of ITS.gdml
-	As a sanity check, I got numbers  from Walt Sondheim's drawings, sent by email June 20, 2017:
-	OD of Be beam pipe is 41.53 mm, ID is 40 mm
-	Layer 0: radius 23.44 mm to sensor center, tilt from normal to radial vector:  17.37 degrees (0.303 rad), spacing btw sensor centers: 30 deg, arc spacing 12.27 mm
-	Layer 1: radius 31.54 mm to sensor center, ttilt from normal to radial vector:  17.53 degrees (0.306 rad), spacing btw sensor centers: 22.5 deg, arc spacing 12.38 mm
-	Layer 2: radius 39.29 to sensor center, tilt from normal to radial vector: 17.02 degrees (0.297 rad), spacing btw sensor centers: 18.0 deg, arc spacing 12.34 mm
-	These are in reasonable agreement with the numbers I extracted from the gdml file, which are what we use below.
-	These use a spacing in arc length of 12.37 mm and a tilt of 0.304 for all of the first three layers
-      */
-
-    // MAPS inner barrel layers
-    //======================================================
-
-    double maps_layer_radius[3] = {23.4, 31.5, 39.3};  // mm  - precise numbers from ITS.gdml
-    //double maps_layer_radius[3] = {24.9, 33.0, 40.8};   // mm  - precise numbers from ITS.gdml + 1.5 mm for greater clearance from beam pipe
-
-    // type 1 = inner barrel stave, 2 = middle barrel stave, 3 = outer barrel stave
-    // we use only type 0 here
-    int stave_type[3] = {0, 0, 0};
-    int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX MVTX
-    double phi_tilt[3] = {0.304, 0.304, 0.304};  // radians, from the gdml file, 0.304 radians is 17.4 degrees
-
-    for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
     {
-      if (verbosity)
-        cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
-             << " pixel size 30 x 30 microns "
-             << " active pixel thickness 0.0018 microns" << endl;
+      bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
+      
+      // MAPS inner barrel layers
+      //======================================================
+      
+      double maps_layer_radius[3] = {24.61, 32.59, 39.88}; // mm - numbers from Walt 6 Aug 2018
+      
+      // D. McGlinchey 6Aug2018 - type no longer is used, included here because I was too lazy to remove it from the code
+      int stave_type[3] = {0, 0, 0};
+      int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX MVTX
+      double phi_tilt[3] = {0.300, 0.305, 0.300}; // radians - numbers from Walt 6 Aug 2018
+      
+      for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
+	{
+	  if (verbosity)
+	    cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
+		 << " pixel size 30 x 30 microns "
+		 << " active pixel thickness 0.0018 microns" << endl;
+	  
+	  PHG4MapsSubsystem* lyr = new PHG4MapsSubsystem("MAPS", ilayer, stave_type[ilayer]);
+	  lyr->Verbosity(verbosity);
+	  
+	  lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
+	  lyr->set_int_param("N_staves", staves_in_layer[ilayer]);       // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
+	  
+	  // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
+	  lyr->set_double_param("pixel_x", 0.0030);          // pitch in cm
+	  lyr->set_double_param("pixel_z", 0.0030);          // length in cm
+	  lyr->set_double_param("pixel_thickness", 0.0018);  // thickness in cm
+	  lyr->set_double_param("phitilt", phi_tilt[ilayer]);
+	  
+	  lyr->set_int_param("active", 1);
+	  lyr->OverlapCheck(maps_overlapcheck);
+	  
+	  //lyr->set_string_param("stave_geometry_file", "/phenix/hhj3/dcm07e/sPHENIX/macros/macros/g4simulations/mvtx_stave_v01.gdml");
+	  lyr->set_string_param("stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v01.gdml"));
 
-      PHG4MapsSubsystem* lyr = new PHG4MapsSubsystem("MAPS", ilayer, stave_type[ilayer]);
-      lyr->Verbosity(verbosity);
-
-      lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
-      lyr->set_int_param("N_staves", staves_in_layer[ilayer]);                   // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number
-
-      // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
-      lyr->set_double_param("pixel_x", 0.0030);          // pitch in cm
-      lyr->set_double_param("pixel_z", 0.0030);          // length in cm
-      lyr->set_double_param("pixel_thickness", 0.0018);  // thickness in cm
-      lyr->set_double_param("phitilt", phi_tilt[ilayer]);
-
-      lyr->set_int_param("active", 1);
-      lyr->OverlapCheck(maps_overlapcheck);
-
-      lyr->set_string_param("stave_geometry_file",
-                            string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/ALICE_ITS_tgeo.gdml"));
-
-      g4Reco->registerSubsystem(lyr);
-
-      radius = maps_layer_radius[ilayer];
+	  g4Reco->registerSubsystem(lyr);
+	  
+	  radius = maps_layer_radius[ilayer];
+	}
     }
-  }
 
-  // INTT
-  //=====
   if (n_intt_layer > 0)
-  {
-    //-------------------
-    // INTT ladders
-    //-------------------
-
-    bool intt_overlapcheck = false;  // set to true if you want to check for overlaps
-
-    // instantiate the Silicon tracker subsystem and register it
-    // We make one instance of PHG4TrackerSubsystem for all four layers of tracker
-    // dimensions are in mm, angles are in radians
-
-    // PHG4SiliconTrackerSubsystem creates the detetor layer using PHG4SiliconTrackerDetector
-    // and instantiates the appropriate PHG4SteppingAction
-    const double intt_radius_max = 140.;  // including stagger radius (mm)
-
-    // The length of vpair is used to determine the number of layers
-    std::vector<std::pair<int, int>> vpair;  // (sphxlayer, inttlayer)
-    for (int i = 0; i < n_intt_layer; i++)
     {
-      // We want the sPHENIX layer numbers for the INTT to be from n_maps_layer to n_maps_layer+n_intt_layer - 1
-      vpair.push_back(std::make_pair(n_maps_layer + i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
-      if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
+      //-------------------
+      // INTT ladders
+      //-------------------
+      
+      bool intt_overlapcheck = false;  // set to true if you want to check for overlaps
+      
+      // instantiate the Silicon tracker subsystem and register it
+      // We make one instance of PHG4TrackerSubsystem for all four layers of tracker
+      // dimensions are in mm, angles are in radians
+      
+      // PHG4SiliconTrackerSubsystem creates the detetor layer using PHG4SiliconTrackerDetector
+      // and instantiates the appropriate PHG4SteppingAction
+      const double intt_radius_max = 140.;  // including stagger radius (mm)
+      
+      // The length of vpair is used to determine the number of layers
+      std::vector<std::pair<int, int>> vpair;  // (sphxlayer, inttlayer)
+      for (int i = 0; i < n_intt_layer; i++)
+	{
+	  // We want the sPHENIX layer numbers for the INTT to be from n_maps_layer to n_maps_layer+n_intt_layer - 1
+	  vpair.push_back(std::make_pair(n_maps_layer + i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
+	  if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
+	}
+      
+      PHG4SiliconTrackerSubsystem* sitrack = new PHG4SiliconTrackerSubsystem("SILICON_TRACKER", vpair);
+      sitrack->Verbosity(verbosity);
+      sitrack->SetActive(1);
+      sitrack->OverlapCheck(intt_overlapcheck);
+      g4Reco->registerSubsystem(sitrack);
+      
+      // Update the laddertype and ladder spacing configuration
+      for(int i=0;i<n_intt_layer;i++)
+	{
+	  sitrack->set_int_param(i, "laddertype", laddertype[i]);
+	  sitrack->set_int_param(i, "nladder", nladder[i]);
+	  sitrack->set_double_param(i,"sensor_radius_inner", sensor_radius_inner[i]);  // expecting cm
+	  sitrack->set_double_param(i,"sensor_radius_outer", sensor_radius_outer[i]);
+	}
+      
+      // outer radius marker (translation back to cm)
+      radius = intt_radius_max * 0.1;
     }
-    PHG4SiliconTrackerSubsystem* sitrack = new PHG4SiliconTrackerSubsystem("SILICON_TRACKER", vpair);
-    sitrack->Verbosity(verbosity);
-    sitrack->SetActive(1);
-    sitrack->OverlapCheck(intt_overlapcheck);
-    g4Reco->registerSubsystem(sitrack);
-
-    // outer radius marker (translation back to cm)
-    radius = intt_radius_max * 0.1;
-  }
 
   // The TPC - always present!
   //================================
+
   gSystem->Load("libg4tpc.so");
 
   PHG4TPCSubsystem *tpc = new PHG4TPCSubsystem("TPC");
@@ -307,16 +329,6 @@ void Tracking_Cells(int verbosity = 0)
   PHG4TPCSpaceChargeDistortion* tpc_distortion = NULL;
   if (do_tpc_distortion)
   {
-    /*
-    if (inner_cage_radius != 20. && inner_cage_radius != 30.)
-    {
-      cout << "Svtx_Cells - Fatal Error - TPC distortion required that "
-              "inner_cage_radius is either 20 or 30 cm."
-           << endl;
-      exit(3);
-    }
-    */
-
     string TPC_distortion_file =
         string(getenv("CALIBRATIONROOT")) +
         Form("/Tracking/TPC/SpaceChargeDistortion/TPCCAGE_20_78_211_2.root");
@@ -326,33 +338,8 @@ void Tracking_Cells(int verbosity = 0)
     //tpc_distortion -> setPrecision(0.001); // option to over write default  factors      // default is 0.001
   }
 
-  // TPC cells
-  //========
-  // Move this to new code
-  /*
-  PHG4CylinderCellTPCReco* svtx_cells = new PHG4CylinderCellTPCReco(n_maps_layer + n_intt_layer);
-  svtx_cells->Detector("SVTX");
-  svtx_cells->setDistortion(tpc_distortion);
-  //svtx_cells->setZigzags(true);  // set zigzag pads option on if true, use rectangular pads if false  (not required, defaults to true in code).
-  svtx_cells->setDiffusionT(TPC_Trans_Diffusion);
-  svtx_cells->setDiffusionL(TPC_Long_Diffusion);
-  svtx_cells->setSigmaT(TPC_SigmaT);  
-  svtx_cells->setShapingRMSLead(TPCShapingRMSLead * TPCDriftVelocity);
-  svtx_cells->setShapingRMSTail(TPCShapingRMSTail * TPCDriftVelocity);
-  // Expected cluster resolutions:
-  //     r-phi: diffusion + GEM smearing = 750 microns, assume resolution is 20% of that => 150 microns
-  //    Tune TPC_SmearRPhi and TPC_SmearZ to get 150 microns in the outer layers
-  svtx_cells->setSmearRPhi(TPC_SmearRPhi);  // additional random displacement of cloud positions wrt hits
-  svtx_cells->setSmearZ(TPC_SmearZ);        // additional random displacement of cloud positions wrt hits
-  svtx_cells->set_drift_velocity(TPCDriftVelocity);
-  svtx_cells->setHalfLength(105.5);
-  svtx_cells->setElectronsPerKeV(TPC_ElectronsPerKeV);
-  svtx_cells->Verbosity(0);
-  */
-
   // Set TPC gas transport parameters for primary ionization
   //========================================
-
   // These default to NeCF4-400 as follows:
   //set_default_double_param("diffusion_long",0.015); // cm/SQRT(cm)
   //set_default_double_param("diffusion_trans",0.006); // cm/SQRT(cm)
@@ -364,24 +351,21 @@ void Tracking_Cells(int verbosity = 0)
   //set_default_double_param("max_time",14000.); // ns
 
   // setup TPC readout for filling cells
-  //========================
+  // g4tpc/PHG4TPCElectronDrift uses
+  // g4tpc/PHG4TPCPadPlaneReadout
+  //=========================
 
-  //Fun4AllServer *se = Fun4AllServer::instance();
   PHG4TPCElectronDrift *edrift = new PHG4TPCElectronDrift();
   edrift->Detector("TPC");
   PHG4TPCPadPlane *padplane = new PHG4TPCPadPlaneReadout();
   edrift->registerPadPlane(padplane);
   se->registerSubsystem(edrift);
 
-  // We may want to reconfigure the inner layers, use the defaults for the mid and outer readout layers
-
-  padplane->set_int_param("ntpc_layers_inner",16); 
-  padplane->set_int_param("ntpc_minlayer_inner",7); 
-  padplane->set_int_param("ntpc_phibins_inner",1152); 
-  //set_int_param("ntpc_layers_mid",16); 
-  //set_int_param("ntpc_phibins_mid",1536); 
-  //set_int_param("ntpc_layers_outer",16); 
-  //set_int_param("ntpc_phibins_outer",2304);   
+  // The pad plane readout default is set in PHG4TPCPadPlaneReadout
+  // We may want to change the number of inner layers here
+  padplane->set_int_param("ntpc_layers_inner",n_tpc_layer_inner); 
+  padplane->set_int_param("ntpc_minlayer_inner",n_maps_layer+n_intt_layer); 
+  padplane->set_int_param("ntpc_phibins_inner",tpc_layer_rphi_count_inner); 
 
   return;
 }
@@ -498,11 +482,23 @@ void Tracking_Reco(int verbosity = 0)
   // Reduced by 2 relative to the cylinder cell maps macro. I found this necessary to get full efficiency
   // Many hits in the present simulation are single cell hits, so it is not clear why the cluster threshold should be higher than the cell threshold
   clusterizer->set_threshold(0.1);  // fraction of a mip
+
+  // no Z clustering for INTT type 1 layers (we DO want Z clustering for type 0 layers)
+  // turning off phi clustering for type 0 layers is not necessary, there is only one strip per sensor in phi
+  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
+  {
+    if(laddertype[i-n_maps_layer] == PHG4SiliconTrackerDefs::SEGMENTATION_PHI)
+      clusterizer->set_z_clustering(i, false);
+  }
+
+
+  /*
   // no Z clustering for INTT layers (only)
   for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
   {
     clusterizer->set_z_clustering(i, false);
   }
+  */
 
   se->registerSubsystem(clusterizer);
 
@@ -526,6 +522,27 @@ void Tracking_Reco(int verbosity = 0)
 
     PHG4KalmanPatRec* kalman_pat_rec = new PHG4KalmanPatRec("PHG4KalmanPatRec", n_maps_layer, n_intt_layer, n_gas_layer);
     kalman_pat_rec->Verbosity(0);
+    
+    for(int i = 0;i<n_intt_layer;i++)
+      {
+	if(laddertype[i] == PHG4SiliconTrackerDefs::SEGMENTATION_Z)
+	  {
+	    // strip length is along phi
+	    kalman_pat_rec->set_max_search_win_theta_intt(i, 0.010);
+	    kalman_pat_rec->set_min_search_win_theta_intt(i, 0.00);
+	    kalman_pat_rec->set_max_search_win_phi_intt(i, 0.20);
+	    kalman_pat_rec->set_min_search_win_phi_intt(i, 0.20);
+	  }
+	else
+	  {
+	    // strip length is along theta
+	    kalman_pat_rec->set_max_search_win_theta_intt(i, 0.200);
+	    kalman_pat_rec->set_min_search_win_theta_intt(i, 0.200);
+	    kalman_pat_rec->set_max_search_win_phi_intt(i, 0.0050);
+	    kalman_pat_rec->set_min_search_win_phi_intt(i, 0.000);
+	  }
+      }
+    
     se->registerSubsystem(kalman_pat_rec);
   }
   else
@@ -598,7 +615,8 @@ void Tracking_Eval(std::string outputfile, int verbosity = 0)
   //----------------
 
   SvtxEvaluator* eval;
-  eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
+  //eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
+  eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str(), "SvtxTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
   eval->do_cluster_eval(true);
   eval->do_g4hit_eval(true);
   eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
@@ -612,8 +630,8 @@ void Tracking_Eval(std::string outputfile, int verbosity = 0)
     // make a second evaluator that records tracks fitted with primary vertex included
     // good for analysis of prompt tracks, particularly if MVTX is not present
     SvtxEvaluator* evalp;
-    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap");
-    evalp->do_cluster_eval(true);
+    //evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap");
+    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);    evalp->do_cluster_eval(true);
     evalp->do_g4hit_eval(true);
     evalp->do_hit_eval(false);
     evalp->do_gpoint_eval(false);
