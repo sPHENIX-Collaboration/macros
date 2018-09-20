@@ -23,7 +23,7 @@ int laddertype[8] = {PHG4SiliconTrackerDefs::SEGMENTATION_Z,
 		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI};  // default
 int nladder[8] = {17,  17, 15, 15, 18, 18, 21, 21};  // default
 double sensor_radius[8] = {6.876, 7.462, 8.987, 9.545, 10.835, 11.361, 12.676, 13.179};  // radius of center of sensor for layer default
-// offsetphi is in deg
+// offsetphi is in deg, every other layer offset by one half of the phi spacing between ladders
 double offsetphi[8] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3], 0.0, 0.5 * 360.0 / nladder[5], 0.0, 0.5 * 360.0 / nladder[7]};
 
 // Optionally reconfigure the INTT
@@ -31,7 +31,7 @@ double offsetphi[8] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladde
 // example re-configuration of INTT - uncomment to get the reconfiguration
 // n_intt must be 0-8, setting it to zero will remove the INTT completely,  otherwise it gives you n layers
 //========================================================================
-
+/*
 // Four layers, laddertypes 0-0-1-1
 n_intt_layer = 4;
 //
@@ -44,7 +44,7 @@ laddertype[2] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;  laddertype[3] =  PHG
 nladder[2] = 18;  nladder[3] = 20;
 sensor_radius[2] = 10.835; sensor_radius[3] = 12.10; 
 offsetphi[2] = 0.0;   offsetphi[3] = 0.5 * 360.0 / nladder[3];
-
+*/
 /*
 // single layer for testing
 n_intt_layer = 1;
