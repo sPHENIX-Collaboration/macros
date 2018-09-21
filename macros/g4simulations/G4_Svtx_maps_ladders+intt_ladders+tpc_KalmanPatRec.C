@@ -28,9 +28,25 @@ double offsetphi[8] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladde
 
 // Optionally reconfigure the INTT
 //========================================================================
-// example re-configuration of INTT - uncomment to get the reconfiguration
+// example re-configurations of INTT - uncomment to get the reconfiguration
 // n_intt must be 0-8, setting it to zero will remove the INTT completely,  otherwise it gives you n layers
 //========================================================================
+
+/*
+// Four layers, laddertypes 0-0-1-1
+n_intt_layer = 4;
+//
+laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_Z;    laddertype[1] =   PHG4SiliconTrackerDefs::SEGMENTATION_Z;  
+nladder[0] = 17;       nladder[1] = 17;  
+sensor_radius[0] = 6.876; sensor_radius[1] = 7.462; 
+offsetphi[0] = 0.0;   offsetphi[1] = 0.5 * 360.0 / nladder[1];
+//
+laddertype[2] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;  laddertype[3] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI; 
+nladder[2] = 21;  nladder[3] = 21;
+sensor_radius[2] = 12.676; sensor_radius[3] = 13.179; 
+offsetphi[2] = 0.0;   offsetphi[3] = 0.5 * 360.0 / nladder[3];
+*/
+
 /*
 // Four layers, laddertypes 0-0-1-1
 n_intt_layer = 4;
@@ -42,9 +58,10 @@ offsetphi[0] = 0.0;   offsetphi[1] = 0.5 * 360.0 / nladder[1];
 //
 laddertype[2] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;  laddertype[3] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI; 
 nladder[2] = 18;  nladder[3] = 18;
-sensor_radius[2] = 12.676; sensor_radius[3] = 13.179; 
+sensor_radius[2] = 10.835; sensor_radius[3] = 11.361; 
 offsetphi[2] = 0.0;   offsetphi[3] = 0.5 * 360.0 / nladder[3];
 */
+
 /*
 // single layer for testing
 n_intt_layer = 1;
