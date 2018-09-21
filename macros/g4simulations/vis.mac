@@ -33,8 +33,8 @@
 /vis/viewer/addCutawayPlane 0 0 0 m 0 0 0
 # our world is 4x4 meters, the detector is about 1m across
 # zooming by 4 makes it fill the display
-/vis/viewer/zoom  30
-/vis/viewer/panTo 4 0 cm
+/vis/viewer/zoom  20
+/vis/viewer/panTo 8 0 cm
 #
 # Use this open statement instead to get a HepRep version 1 file
 # suitable for viewing in WIRED.

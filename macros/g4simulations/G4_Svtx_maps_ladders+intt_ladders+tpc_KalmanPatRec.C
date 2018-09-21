@@ -23,7 +23,7 @@ int laddertype[8] = {PHG4SiliconTrackerDefs::SEGMENTATION_Z,
 		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI};  // default
 int nladder[8] = {17,  17, 15, 15, 18, 18, 21, 21};  // default
 double sensor_radius[8] = {6.876, 7.462, 8.987, 9.545, 10.835, 11.361, 12.676, 13.179};  // radius of center of sensor for layer default
-// offsetphi is in deg, every other layer offset by one half of the phi spacing between ladders
+// offsetphi is in deg, every other layer is offset by one half of the phi spacing between ladders
 double offsetphi[8] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3], 0.0, 0.5 * 360.0 / nladder[5], 0.0, 0.5 * 360.0 / nladder[7]};
 
 // Optionally reconfigure the INTT
@@ -36,13 +36,13 @@ double offsetphi[8] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladde
 n_intt_layer = 4;
 //
 laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_Z;    laddertype[1] =   PHG4SiliconTrackerDefs::SEGMENTATION_Z;  
-nladder[0] = 17;       nladder[1] = 19;  
-sensor_radius[0] = 6.876; sensor_radius[1] = 7.65; 
+nladder[0] = 17;       nladder[1] = 17;  
+sensor_radius[0] = 6.876; sensor_radius[1] = 7.462; 
 offsetphi[0] = 0.0;   offsetphi[1] = 0.5 * 360.0 / nladder[1];
 //
 laddertype[2] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;  laddertype[3] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI; 
-nladder[2] = 18;  nladder[3] = 20;
-sensor_radius[2] = 10.835; sensor_radius[3] = 12.10; 
+nladder[2] = 18;  nladder[3] = 18;
+sensor_radius[2] = 12.676; sensor_radius[3] = 13.179; 
 offsetphi[2] = 0.0;   offsetphi[3] = 0.5 * 360.0 / nladder[3];
 */
 /*
