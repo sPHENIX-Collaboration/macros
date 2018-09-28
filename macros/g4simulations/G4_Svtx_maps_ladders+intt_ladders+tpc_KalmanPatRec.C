@@ -752,8 +752,8 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4SiliconTrackerDigitiz
   // INTT
   for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
   {
-    thresholds->set_threshold(i, 0.1);
-    thresholds->set_use_thickness_mip(i, true);
+    thresholds->set_threshold(i, -1); // disable threshold as threshold is applied in FPHX digitization stage
+//    thresholds->set_use_thickness_mip(i, true);
   }
 
   se->registerSubsystem(thresholds);
