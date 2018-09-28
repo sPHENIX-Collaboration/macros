@@ -660,10 +660,30 @@ void Svtx_Reco(int verbosity = 0)
     // INTT
     // these should be used for the INTT
     /*
-     *
-     *
-     *
-     *
+How threshold are calculated based on default FPHX settings
+
+Four part information goes to the threshold calculation:
+
+1. In 320 um thick silicon, the MIP e-h pair for a nominally indenting tracking is 3.87 MeV/cm * 320 um / 3.62 eV/e-h = 3.4e4 e-h pairs
+2. From DOI: 10.1016/j.nima.2014.04.017, FPHX integrator amplifier gain is 100mV / fC. That translate MIP voltage to 550 mV.
+3. From [FPHX Final Design Document](https://www.phenix.bnl.gov/WWW/fvtx/DetectorHardware/FPHX/FPHX2_June2009Revision.doc), the reference voltage and DAC0-7 threshold setting for 8-ADC thresholds, as in Table 2 - Register Addresses and Defaults
+4, From [FPHX Final Design Document](https://www.phenix.bnl.gov/WWW/fvtx/DetectorHardware/FPHX/FPHX2_June2009Revision.doc) section Front-end Program Bits, the formula to translate DAC setting to comparitor voltages.
+
+The result threshold table based on FPHX default value is as following
+
+| FPHX Register Address | Name            | Default value | Voltage (mV) | Fraction to MIP |
+|-----------------------|-----------------|---------------|--------------|-----------------|
+| 3                     | Vref            | 1             | 210          | 3.84E-01        |
+| 4                     | Threshold DAC 0 | 8             | 242          | 4.42E-01        |
+| 5                     | Threshold DAC 1 | 16            | 274          | 5.01E-01        |
+| 6                     | Threshold DAC 2 | 32            | 338          | 6.18E-01        |
+| 7                     | Threshold DAC 3 | 48            | 402          | 7.34E-01        |
+| 8                     | Threshold DAC 4 | 80            | 530          | 9.68E-01        |
+| 9                     | Threshold DAC 5 | 112           | 658          | 1.20E+00        |
+| 10                    | Threshold DAC 6 | 144           | 786          | 1.44E+00        |
+| 11                    | Threshold DAC 7 | 176           | 914          | 1.67E+00        |
+
+DAC0-7 threshold as fraction to MIP voltage are set to PHG4SiliconTrackerDigitizer::set_adc_scale as 3-bit ADC threshold as fractions to MIP energy deposition.
      */
     std::vector<double> userrange;  // 3-bit ADC threshold relative to the mip_e at each layer.
     userrange.push_back(0.442122900516796);
