@@ -658,16 +658,22 @@ void Svtx_Reco(int verbosity = 0)
   if (n_intt_layer > 0)
   {
     // INTT
-    std::vector<double> userrange;  // 3-bit ADC threshold relative to the mip_e at each layer.
     // these should be used for the INTT
-    userrange.push_back(0.05);
-    userrange.push_back(0.10);
-    userrange.push_back(0.15);
-    userrange.push_back(0.20);
-    userrange.push_back(0.25);
-    userrange.push_back(0.30);
-    userrange.push_back(0.35);
-    userrange.push_back(0.40);
+    /*
+     *
+     *
+     *
+     *
+     */
+    std::vector<double> userrange;  // 3-bit ADC threshold relative to the mip_e at each layer.
+    userrange.push_back(0.442122900516796);
+    userrange.push_back(0.500585432816538);
+    userrange.push_back(0.617510497416021);
+    userrange.push_back(0.734435562015504);
+    userrange.push_back(0.968285691214471);
+    userrange.push_back(1.20213582041344);
+    userrange.push_back(1.4359859496124);
+    userrange.push_back(1.66983607881137);
 
     PHG4SiliconTrackerDigitizer* digiintt = new PHG4SiliconTrackerDigitizer();
     digiintt->Verbosity(verbosity);
