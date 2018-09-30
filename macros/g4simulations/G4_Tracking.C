@@ -68,6 +68,14 @@ nladder[0] = 36;       nladder[1] = 42;
 sensor_radius_inner[0] = 10.835;    sensor_radius_inner[1] = 12.676; 
 sensor_radius_outer[0] = 11.361;    sensor_radius_outer[1] = 13.179; 
 */
+/*
+// Two middle layers, laddertype 1-1
+n_intt_layer = 2;
+laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;    laddertype[1] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI; 
+nladder[0] = 30;       nladder[1] = 36;
+sensor_radius_inner[0] = 8.987;    sensor_radius_inner[1] = 10.835; 
+sensor_radius_outer[0] = 9.545;    sensor_radius_outer[1] = 11.361; 
+*/
 
 int n_tpc_layer_inner = 16;
 int tpc_layer_rphi_count_inner = 1152;
@@ -75,63 +83,11 @@ int n_tpc_layer_mid = 16;
 int n_tpc_layer_outer = 16;
 int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
 
-// TPC Performance Parameter (applies extra smear to mimic the avalanche):
-double TPC_SigmaT = 0.03;  // 0.03 means 300 microns...Prakhar Garg Simulation...desire measurement...
-
-// to be overwritten...
-double TPCDriftVelocity;
-double TPC_Trans_Diffusion;
-double TPC_Long_Diffusion;
-double TPC_dEdx;
-double TPC_NPri;
-double TPC_NTot;
-double TPC_ElectronsPerKeV;
-
-// TPC readout shaping time and ADC clock parameters
-// these set the Z size of the TPC cells
-// These need to be set in the init since some of them require the drift velocity...
-//=======================================
-double TPCADCClock;
-double TPCShapingRMSLead;
-double TPCShapingRMSTail;
-double tpc_cell_z;
-double TPC_SmearRPhi;
-double TPC_SmearZ;
-
 int Max_si_layer;
 
 void TrackingInit(int verbosity = 0)
 {
   Max_si_layer = n_maps_layer + n_intt_layer + n_gas_layer;
-
-  /*
-  if (verbosity)
-    cout << "Gas Choice:  TPC_Gas::NeCF4_400" << endl;
-  TPCDriftVelocity = 8.0 / 1000.0;  // cm/ns
-  TPC_Trans_Diffusion = 0.0060;     // cm/SQRT(cm)
-  TPC_Long_Diffusion = 0.0150;      // cm/SQRT(cm)
-  TPC_dEdx = 0.90 * Ne_dEdx + 0.10 * CF4_dEdx;
-  TPC_NPri = 0.90 * Ne_NPrimary + 0.10 * CF4_NPrimary;
-  TPC_NTot = 0.90 * Ne_NTotal + 0.10 * CF4_NTotal;
-
-  TPC_ElectronsPerKeV = TPC_NTot / TPC_dEdx;
-
-  // TPC readout shaping time and ADC clock parameters
-  // these set the Z size of the TPC cells
-  //=======================================
-  // TPCShapingRMSLead = 32.0;  // ns, rising RMS equivalent of shaping amplifier for 80 ns SAMPA
-  // TPCShapingRMSTail = 48.0;  // ns, falling RMS equivalent of shaping amplifier for 80 ns SAMPA
-  TPCADCClock = 53.0;                           // ns, corresponds to an ADC clock rate of 18.8 MHz
-  TPCShapingRMSLead = 16.0;                     // ns, rising RMS equivalent of shaping amplifier for 40 ns SAMPA
-  TPCShapingRMSTail = 24.0;                     // ns, falling RMS equivalent of shaping amplifier for 40 ns SAMPA
-  tpc_cell_z = TPCADCClock * TPCDriftVelocity;  // cm
-
-  //  TKH does not understand the physical origin of these parameters.
-  //  however, their impact seems quite small...
-  //  these are tuned to give 150 microns r-phi and 500 microns Z resolution in the outer TPC layers with the TPC setup used here
-  TPC_SmearRPhi = 0.215;
-  TPC_SmearZ = 0.20;
-  */
 }
 
 double Tracking(PHG4Reco* g4Reco, double radius,
@@ -176,7 +132,6 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 	  lyr->set_int_param("active", 1);
 	  lyr->OverlapCheck(maps_overlapcheck);
 	  
-	  //lyr->set_string_param("stave_geometry_file", "/phenix/hhj3/dcm07e/sPHENIX/macros/macros/g4simulations/mvtx_stave_v01.gdml");
 	  lyr->set_string_param("stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v01.gdml"));
 
 	  g4Reco->registerSubsystem(lyr);
@@ -275,28 +230,6 @@ void Tracking_Cells(int verbosity = 0)
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  //-----------
-  // SVTX cells
-  //-----------
-
-  if (verbosity)
-  {
-    cout << "  TPC Drift Velocity: " << TPCDriftVelocity << " cm/nsec" << endl;
-    cout << "  TPC Transverse Diffusion: " << TPC_Trans_Diffusion << " cm/SQRT(cm)" << endl;
-    cout << "  TPC Longitudinal Diffusion: " << TPC_Long_Diffusion << " cm/SQRT(cm)" << endl;
-    cout << "  TPC dE/dx: " << TPC_dEdx << " keV/cm" << endl;
-    cout << "  TPC N Primary: " << TPC_NPri << " electrons/cm" << endl;
-    cout << "  TPC N Total: " << TPC_NTot << " electrons/cm" << endl;
-    cout << "  TPC Electrons Per keV: " << TPC_ElectronsPerKeV << " electrons/keV" << endl;
-    cout << "  TPC ADC Clock: " << TPCADCClock << " nsec" << endl;
-    cout << "  TPC ADC Rate: " << 1000.0 / TPCADCClock << " MHZ" << endl;
-    cout << "  TPC Shaping Lead: " << TPCShapingRMSLead << " nsec" << endl;
-    cout << "  TPC Shaping Tail: " << TPCShapingRMSTail << " nsec" << endl;
-    cout << "  TPC z cell " << tpc_cell_z << " cm" << endl;
-    cout << "  TPC Smear R-Phi " << TPC_SmearRPhi << " cm" << endl;
-    cout << "  TPC Smear Z " << TPC_SmearZ << " cm" << endl;
-  }
-
   // MVTX cells
   //=========
 
@@ -338,18 +271,7 @@ void Tracking_Cells(int verbosity = 0)
     //tpc_distortion -> setPrecision(0.001); // option to over write default  factors      // default is 0.001
   }
 
-  // Set TPC gas transport parameters for primary ionization
-  //========================================
-  // These default to NeCF4-400 as follows:
-  //set_default_double_param("diffusion_long",0.015); // cm/SQRT(cm)
-  //set_default_double_param("diffusion_trans",0.006); // cm/SQRT(cm)
-  //set_default_double_param("drift_velocity",8.0 / 1000.0); // cm/ns
-  //set_default_double_param("electrons_per_gev",TPC_ElectronsPerKeV*1000000.);
-  //set_default_double_param("min_active_radius",30.); // cm
-  //set_default_double_param("max_active_radius",75.); // cm
-  //set_default_double_param("min_time",0.); // ns
-  //set_default_double_param("max_time",14000.); // ns
-
+  //=========================
   // setup TPC readout for filling cells
   // g4tpc/PHG4TPCElectronDrift uses
   // g4tpc/PHG4TPCPadPlaneReadout
@@ -357,12 +279,17 @@ void Tracking_Cells(int verbosity = 0)
 
   PHG4TPCElectronDrift *edrift = new PHG4TPCElectronDrift();
   edrift->Detector("TPC");
+  // fudge factors to get 150 microns and 500 microns cluster resolution, respectively
+  // defaults are 0.10 and 0.15, they can be changed here to get a different resolution
+  edrift->set_double_param("added_smear_trans",0.11);
+  edrift->set_double_param("added_smear_long",0.15);
   PHG4TPCPadPlane *padplane = new PHG4TPCPadPlaneReadout();
   edrift->registerPadPlane(padplane);
   se->registerSubsystem(edrift);
 
   // The pad plane readout default is set in PHG4TPCPadPlaneReadout
   // We may want to change the number of inner layers here
+  padplane->set_int_param("tpc_minlayer_inner",n_maps_layer+n_intt_layer);   // sPHENIX layer number of first TPC readout layer
   padplane->set_int_param("ntpc_layers_inner",n_tpc_layer_inner); 
   padplane->set_int_param("ntpc_minlayer_inner",n_maps_layer+n_intt_layer); 
   padplane->set_int_param("ntpc_phibins_inner",tpc_layer_rphi_count_inner); 
@@ -490,16 +417,6 @@ void Tracking_Reco(int verbosity = 0)
     if(laddertype[i-n_maps_layer] == PHG4SiliconTrackerDefs::SEGMENTATION_PHI)
       clusterizer->set_z_clustering(i, false);
   }
-
-
-  /*
-  // no Z clustering for INTT layers (only)
-  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
-  {
-    clusterizer->set_z_clustering(i, false);
-  }
-  */
-
   se->registerSubsystem(clusterizer);
 
   // For the TPC
@@ -508,7 +425,7 @@ void Tracking_Reco(int verbosity = 0)
   tpcclusterizer->Verbosity(0);
   tpcclusterizer->setRangeLayers(n_maps_layer + n_intt_layer, Max_si_layer);
   tpcclusterizer->setEnergyCut(15 /*adc*/);
-  tpcclusterizer->setFitWindowSigmas(0.0150, 0.0160);  // should be changed when TPC cluster resolution changes
+  tpcclusterizer->setFitWindowSigmas(0.0150, 0.10);  // should be changed when TPC cluster resolution changes
   tpcclusterizer->setFitWindowMax(5 /*rphibins*/, 5 /*zbins*/);
   se->registerSubsystem(tpcclusterizer);
 
@@ -615,7 +532,6 @@ void Tracking_Eval(std::string outputfile, int verbosity = 0)
   //----------------
 
   SvtxEvaluator* eval;
-  //eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
   eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str(), "SvtxTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
   eval->do_cluster_eval(true);
   eval->do_g4hit_eval(true);
@@ -630,7 +546,6 @@ void Tracking_Eval(std::string outputfile, int verbosity = 0)
     // make a second evaluator that records tracks fitted with primary vertex included
     // good for analysis of prompt tracks, particularly if MVTX is not present
     SvtxEvaluator* evalp;
-    //evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap");
     evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);    evalp->do_cluster_eval(true);
     evalp->do_g4hit_eval(true);
     evalp->do_hit_eval(false);
@@ -639,9 +554,6 @@ void Tracking_Eval(std::string outputfile, int verbosity = 0)
     evalp->Verbosity(0);
     se->registerSubsystem(evalp);
   }
-
-  // MomentumEvaluator* eval = new MomentumEvaluator(outputfile.c_str(),0.2,0.4,Max_si_layer,2,Max_si_layer-4,10.,80.);
-  // se->registerSubsystem( eval );
 
   return;
 }
