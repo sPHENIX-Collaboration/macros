@@ -279,16 +279,17 @@ void Tracking_Cells(int verbosity = 0)
 
   PHG4TPCElectronDrift *edrift = new PHG4TPCElectronDrift();
   edrift->Detector("TPC");
-  // fudge factors to get 150 microns and 500 microns cluster resolution, respectively
-  // defaults are 0.10 and 0.15, they can be changed here to get a different resolution
-  edrift->set_double_param("added_smear_trans",0.11);
+  // fudge factors to get drphi 150 microns (in mid and outer TPC) and dz 500 microns cluster resolution
+  // They represent effects not due to ideal gas properties and ideal readout plane behavior 
+  // defaults are 0.12 and 0.15, they can be changed here to get a different resolution
+  edrift->set_double_param("added_smear_trans",0.12);
   edrift->set_double_param("added_smear_long",0.15);
   PHG4TPCPadPlane *padplane = new PHG4TPCPadPlaneReadout();
   edrift->registerPadPlane(padplane);
   se->registerSubsystem(edrift);
 
   // The pad plane readout default is set in PHG4TPCPadPlaneReadout
-  // We may want to change the number of inner layers here
+  // We may want to change the number of inner layers, and can do that here
   padplane->set_int_param("tpc_minlayer_inner",n_maps_layer+n_intt_layer);   // sPHENIX layer number of first TPC readout layer
   padplane->set_int_param("ntpc_layers_inner",n_tpc_layer_inner); 
   padplane->set_int_param("ntpc_minlayer_inner",n_maps_layer+n_intt_layer); 
