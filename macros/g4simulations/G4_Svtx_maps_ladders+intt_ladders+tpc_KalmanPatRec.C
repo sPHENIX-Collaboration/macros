@@ -282,7 +282,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 	  lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
 	  lyr->set_int_param("N_staves", staves_in_layer[ilayer]);       // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
 	  
-	  // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
+	  // The cell size is used only during pixelization of sensor hits, but it is convenient to set it now because the geometry object needs it
 	  lyr->set_double_param("pixel_x", 0.0030);          // pitch in cm
 	  lyr->set_double_param("pixel_z", 0.0030);          // length in cm
 	  lyr->set_double_param("pixel_thickness", 0.0018);  // thickness in cm
@@ -807,7 +807,8 @@ void Svtx_Reco(int verbosity = 0)
   //---------------------
 
   PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
-  kalman->Verbosity(0);
+  kalman->Verbosity(5);
+  kalman->set_do_eval(true);
   if (use_primary_vertex)
     kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
   se->registerSubsystem(kalman);
