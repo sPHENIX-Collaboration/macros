@@ -36,9 +36,9 @@ int Fun4All_G4_sPHENIX(
 
   // Besides the above flags. One can further choose to further put in following particles in Geant4 simulation
   // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
-  const bool particles = true && !readhits;
+  const bool particles = false && !readhits;
   // or gun/ very simple single particle gun generator
-  const bool usegun = false && !readhits;
+  const bool usegun = true && !readhits;
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
   const bool upsilons = false && !readhits;
   // Event pile up simulation with collision rate in Hz MB collisions.
@@ -222,8 +222,8 @@ int Fun4All_G4_sPHENIX(
     if (usegun)
     {
       PHG4ParticleGun *gun = new PHG4ParticleGun();
-      //  gun->set_name("anti_proton");
-      gun->set_name("geantino");
+      gun->set_name("electron");
+      //gun->set_name("geantino");
       gun->set_vtx(0, 0, 0);
       gun->set_mom(10, 0, 0.01);
       // gun->AddParticle("geantino",1.7776,-0.4335,0.);
@@ -232,10 +232,15 @@ int Fun4All_G4_sPHENIX(
       // gun->AddParticle("geantino",1.8121,0.253,0.);
       //	  se->registerSubsystem(gun);
       PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
-      pgen->set_name("geantino");
+      //pgen->set_name("geantino");
+      //pgen->set_z_range(0, 0);
+      //pgen->set_eta_range(0.01, 0.01);
+      //pgen->set_mom_range(10, 10);
+      //pgen->set_phi_range(5.3 / 180. * TMath::Pi(), 5.7 / 180. * TMath::Pi());
+      pgen->set_name("e-");
       pgen->set_z_range(0, 0);
-      pgen->set_eta_range(0.01, 0.01);
-      pgen->set_mom_range(10, 10);
+      pgen->set_eta_range(-0.3, 0.3);
+      pgen->set_mom_range(0.5, 1.5);
       pgen->set_phi_range(5.3 / 180. * TMath::Pi(), 5.7 / 180. * TMath::Pi());
       se->registerSubsystem(pgen);
     }
