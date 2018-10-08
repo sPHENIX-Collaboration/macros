@@ -251,7 +251,9 @@ void Tracking_Cells(int verbosity = 0)
   {
     // INTT cells
     PHG4SiliconTrackerCellReco* reco = new PHG4SiliconTrackerCellReco("SILICON_TRACKER");
-    // The timing windows are hard-coded in the INTT ladder model
+    // The timing windows are hard-coded in the INTT ladder model, they can be overridden here
+    //reco->set_double_param("tmax",80.0);
+    //reco->set_double_param("tmin",-20.0);
     reco->Verbosity(verbosity);
     se->registerSubsystem(reco);
   }
