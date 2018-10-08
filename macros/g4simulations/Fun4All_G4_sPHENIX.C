@@ -124,6 +124,12 @@ int Fun4All_G4_sPHENIX(
   // Fun4All server
   //---------------
 
+  bool display_on = false;
+  if(display_on)
+    {
+      gROOT->LoadMacro("DisplayOn.C");
+    }
+
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
   // just if we set some flags somewhere in this macro
@@ -525,11 +531,21 @@ int Fun4All_G4_sPHENIX(
     return;
   }
 
+  if(display_on)
+    {
+      DisplayOn();
+      // prevent macro from finishing so can see display
+      int i;
+      cout << "***** Enter any integer to proceed" << endl;
+      cin >> i;
+    }
+
   se->run(nEvents);
 
   //-----
   // Exit
   //-----
+
 
   se->End();
   std::cout << "All done" << std::endl;
