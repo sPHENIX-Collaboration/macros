@@ -10,7 +10,7 @@ bool use_primary_vertex = false;
 
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
 
-// default setup for the INTT - please don't change this. The configuration can be redone later in the nacro if desired
+// default setup for the INTT - please don't change this. The configuration can be redone later in the macro if desired
 int n_intt_layer = 8;  
 // default layer configuration
 int laddertype[8] = {PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
