@@ -32,7 +32,7 @@ double offsetphi[8] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladde
 // n_intt must be 0-8, setting it to zero will remove the INTT completely,  otherwise it gives you n layers
 // To get hermetic coverage, need to configure these layers in pairs with the same nladder values!
 //========================================================================
-/*
+
 // Four layers, laddertypes 0-0-1-1
 n_intt_layer = 4;
 //
@@ -45,7 +45,7 @@ laddertype[2] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;  laddertype[3] =  PHG
 nladder[2] = 21;  nladder[3] = 21;
 sensor_radius[2] = 12.676; sensor_radius[3] = 13.179; 
 offsetphi[2] = 0.0;   offsetphi[3] = 0.5 * 360.0 / nladder[3];
-*/
+
 /*
 // Four layers, laddertypes 0-0-1-1
 n_intt_layer = 4;
@@ -287,8 +287,7 @@ void Tracking_Cells(int verbosity = 0)
   // We may want to change the number of inner layers, and can do that here
   padplane->set_int_param("tpc_minlayer_inner",n_maps_layer+n_intt_layer);   // sPHENIX layer number of first TPC readout layer
   padplane->set_int_param("ntpc_layers_inner",n_tpc_layer_inner); 
-  padplane->set_int_param("ntpc_minlayer_inner",n_maps_layer+n_intt_layer); 
-  padplane->set_int_param("ntpc_phibins_inner",tpc_layer_rphi_count_inner); 
+   padplane->set_int_param("ntpc_phibins_inner",tpc_layer_rphi_count_inner); 
 
   return;
 }
