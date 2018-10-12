@@ -2,7 +2,7 @@
 double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
 bool overlapcheck = false; // set to true if you want to check for overlaps
 
-void G4Init(const bool do_svtx = true,
+void G4Init(const bool do_tracking = true,
       const bool do_pstof = true,
 	    const bool do_cemc = true,
 	    const bool do_hcalin = true,
@@ -20,10 +20,10 @@ void G4Init(const bool do_svtx = true,
       gROOT->LoadMacro("G4_Pipe.C");
       PipeInit();
     }  
-  if (do_svtx)
+  if (do_tracking)
     {
-      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
-      SvtxInit();
+      gROOT->LoadMacro("G4_Tracking.C"); 
+      TrackingInit();
     }
 
   if (do_pstof) 
@@ -66,7 +66,7 @@ void G4Init(const bool do_svtx = true,
 int G4Setup(const int absorberactive = 0,
 	    const string &field ="1.5",
 	    const EDecayType decayType = TPythia6Decayer::kAll,
-	    const bool do_svtx = true,
+	    const bool do_tracking = true,
 	    const bool do_pstof = true,
 	    const bool do_cemc = true,
 	    const bool do_hcalin = true,
@@ -125,8 +125,8 @@ int G4Setup(const int absorberactive = 0,
   if (do_pipe) radius = Pipe(g4Reco, radius, absorberactive);
   
   //----------------------------------------
-  // SVTX
-  if (do_svtx) radius = Svtx(g4Reco, radius, absorberactive);
+  // TRACKING
+  if (do_tracking) radius = Tracking(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // PSTOF
