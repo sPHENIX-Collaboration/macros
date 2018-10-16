@@ -92,7 +92,11 @@ void G4Init(const bool do_tracking = true,
 
 int G4Setup(const int absorberactive = 0,
 	    const string &field ="1.5",
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 	    const EDecayType decayType = EDecayType::kAll,
+#else
+	    const EDecayType decayType = TPythia6Decayer::kAll,
+#endif
 	    const bool do_tracking = true,
 	    const bool do_pstof = true,
 	    const bool do_cemc = true,
@@ -126,7 +130,12 @@ int G4Setup(const int absorberactive = 0,
 // uncomment to set QGSP_BERT_HP physics list for productions 
 // (default is QGSP_BERT for speed)
   //  g4Reco->SetPhysicsList("QGSP_BERT_HP"); 
-  if (decayType != EDecayType::kAll) {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+  if (decayType != EDecayType::kAll) 
+#else
+  if (decayType != TPythia6Decayer::kAll) 
+#endif
+  {
     g4Reco->set_force_decay(decayType);
   }
   
