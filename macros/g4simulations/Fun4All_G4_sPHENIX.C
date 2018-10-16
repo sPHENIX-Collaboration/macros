@@ -1,4 +1,35 @@
-#include <iostream>
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/SubsysReco.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllDummyInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllNoSyncDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <g4main/PHG4ParticleGeneratorBase.h>
+#include <g4main/PHG4ParticleGenerator.h>
+#include <g4main/PHG4SimpleEventGenerator.h>
+#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
+#include <g4main/PHG4ParticleGun.h>
+#include <g4main/HepMCNodeReader.h>
+#include <g4detectors/PHG4DetectorSubsystem.h>
+#include <phpythia6/PHPythia6.h>
+#include <phpythia8/PHPythia8.h>
+#include "G4Setup_sPHENIX.C"
+#include "G4_Bbc.C"
+#include "G4_Global.C"
+#include "G4_CaloTrigger.C"
+#include "G4_Jets.C"
+#include "G4_HIJetReco.C"
+#include "G4_DSTReader.C"
+#include "DisplayOn.C"
+R__LOAD_LIBRARY(libfun4all.so)
+R__LOAD_LIBRARY(libg4testbench.so)
+R__LOAD_LIBRARY(libPHPythia6.so)
+R__LOAD_LIBRARY(libPHPythia8.so)
+#endif
+
 using namespace std;
 
 int Fun4All_G4_sPHENIX(
@@ -53,7 +84,7 @@ int Fun4All_G4_sPHENIX(
 
   bool do_pipe = true;
 
-  bool do_tracking = true;
+  bool do_tracking = false;
   bool do_tracking_cell = do_tracking && true;
   bool do_tracking_track = do_tracking_cell && true;
   bool do_tracking_eval = do_tracking_track && true;
@@ -257,10 +288,6 @@ int Fun4All_G4_sPHENIX(
       {
         vgen->set_reuse_existing_vertex(true);
       }
-      else
-      {
-        vgen->set_vtx_zrange(-10.0, +10.0);
-      }
 
       // Note: this rapidity range completely fills the acceptance of eta = +/- 1 unit
       vgen->set_rapidity_range(-1.0, +1.0);
@@ -301,7 +328,7 @@ int Fun4All_G4_sPHENIX(
     // Detector description
     //---------------------
 
-    G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
+    G4Setup(absorberactive, magfield, EDecayType::kAll,
             do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, magfield_rescale);
   }
 
@@ -484,7 +511,7 @@ int Fun4All_G4_sPHENIX(
 
     if (do_tracking)
     {
-      // double TPCDriftVelocity = 6.0 / 1000.0; // cm/ns, which is loaded from G4_SVTX*.C macros
+      double TPCDriftVelocity = 6.0 / 1000.0; // cm/ns, which is loaded from G4_SVTX*.C macros
       time_window_minus = -105.5 / TPCDriftVelocity;  // ns
       time_window_plus = 105.5 / TPCDriftVelocity;    // ns;
     }
@@ -508,7 +535,7 @@ int Fun4All_G4_sPHENIX(
                 /*bool*/ do_hcalout,
                 /*bool*/ do_cemc_twr,
                 /*bool*/ do_hcalin_twr,
-                /*bool*/ do_magnet,
+//                /*bool*/ do_magnet, // duplicate
                 /*bool*/ do_hcalout_twr);
   }
 
@@ -521,14 +548,14 @@ int Fun4All_G4_sPHENIX(
   //-----------------
   if (nEvents < 0)
   {
-    return;
+    return 0;
   }
   // if we run the particle generator and use 0 it'll run forever
   if (nEvents == 0 && !readhits && !readhepmc)
   {
     cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
     cout << "it will run forever, so I just return without running anything" << endl;
-    return;
+    return 0;
   }
 
   if(display_on)
@@ -551,4 +578,5 @@ int Fun4All_G4_sPHENIX(
   std::cout << "All done" << std::endl;
   delete se;
   gSystem->Exit(0);
+  return 0;
 }

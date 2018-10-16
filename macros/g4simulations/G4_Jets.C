@@ -1,3 +1,8 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <g4jets/JetReco.h>
+R__LOAD_LIBRARY(libg4jets.so)
+#endif
 
 void Jet_Reco(int verbosity = 0) {
 

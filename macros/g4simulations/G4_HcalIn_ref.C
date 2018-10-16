@@ -1,3 +1,11 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <g4detectors/PHG4InnerHcalSubsystem.h>
+#include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4eval/CaloEvaluator.h>
+void HCalInner_SupportRing(PHG4Reco* g4Reco,
+			   const int absorberactive = 0);
+#endif
 //Inner HCal construction macro
 
 //Inner HCal absorber material selector:
@@ -105,7 +113,6 @@ void HCalInner_SupportRing(PHG4Reco* g4Reco,
   const double dz = 25. / 10.;
   const double innerradius = 116.;
   const double maxradius = 178.0 - 0.001; // avoid touching the outer HCal envelop volumne
-
   const double z_rings[] =
     { -z_ring2, -z_ring1, z_ring1, z_ring2, 0, 0, 0, 0 };
 

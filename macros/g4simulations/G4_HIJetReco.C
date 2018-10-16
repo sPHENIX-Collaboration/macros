@@ -1,3 +1,16 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <g4jets/JetReco.h>
+#include <g4jets/TruthJetInput.h>
+#include <jetbackground/RetowerCEMC.h>
+#include <jetbackground/CopyAndSubtractJets.h>
+#include <jetbackground/DetermineTowerBackground.h>
+#include <jetbackground/SubtractTowers.h>
+#include <jetbackground/FastJetAlgoSub.h>
+R__LOAD_LIBRARY(libg4jets.so)
+R__LOAD_LIBRARY(libjetbackground.so)
+#endif
+
 void HIJetReco(int verbosity = 0, bool do_flow = false ) {
   
   //---------------
@@ -65,7 +78,7 @@ void HIJetReco(int verbosity = 0, bool do_flow = false ) {
   st->Verbosity( verbosity );
   se->registerSubsystem( st );
 
-  JetReco *towerjetreco = new JetReco();
+  towerjetreco = new JetReco();
   towerjetreco->add_input(new TowerJetInput(Jet::CEMC_TOWER_SUB1));
   towerjetreco->add_input(new TowerJetInput(Jet::HCALIN_TOWER_SUB1));
   towerjetreco->add_input(new TowerJetInput(Jet::HCALOUT_TOWER_SUB1));

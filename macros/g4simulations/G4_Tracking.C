@@ -1,4 +1,32 @@
-#include <vector>
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+//static int no_overlapp = 1;
+#include <g4detectors/PHG4MapsCellReco.h>
+#include <g4detectors/PHG4MapsSubsystem.h>
+#include <g4detectors/PHG4SiliconTrackerCellReco.h>
+#include <g4detectors/PHG4SiliconTrackerDefs.h>
+#include <g4detectors/PHG4SiliconTrackerSubsystem.h>
+#include <g4detectors/PHG4TPCSpaceChargeDistortion.h>
+#include <g4eval/SvtxEvaluator.h>
+#include <g4hough/PHG4GenFitTrackProjection.h>
+#include <g4hough/PHG4KalmanPatRec.h>
+#include <g4hough/PHG4SiliconTrackerDigitizer.h>
+#include <g4hough/PHG4SvtxClusterizer.h>
+#include <g4hough/PHG4SvtxDeadArea.h>
+#include <g4hough/PHG4SvtxDigitizer.h>
+#include <g4hough/PHG4SvtxThresholds.h>
+#include <g4hough/PHG4TPCClusterizer.h>
+#include <g4hough/PHG4TrackKalmanFitter.h>
+#include <g4hough/PHG4TruthPatRec.h>
+#include <g4tpc/PHG4TPCElectronDrift.h>
+#include <g4tpc/PHG4TPCPadPlane.h>
+#include <g4tpc/PHG4TPCPadPlaneReadout.h>
+#include <g4tpc/PHG4TPCSubsystem.h>
+R__LOAD_LIBRARY(libg4tpc.so)
+R__LOAD_LIBRARY(libg4hough.so)
+R__LOAD_LIBRARY(libg4eval.so)
+//bool overlapcheck = false;
+#endif
 
 // ONLY if backward compatibility with hits files already generated with 8 inner TPC layers is needed, you can set this to "true"
 bool tpc_layers_40  = false;
@@ -34,6 +62,7 @@ double offsetphi[8] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladde
 //========================================================================
 
 // Four layers, laddertypes 0-0-1-1
+/*
 n_intt_layer = 4;
 //
 laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_Z;    laddertype[1] =   PHG4SiliconTrackerDefs::SEGMENTATION_Z;  
@@ -45,7 +74,7 @@ laddertype[2] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;  laddertype[3] =  PHG
 nladder[2] = 21;  nladder[3] = 21;
 sensor_radius[2] = 12.676; sensor_radius[3] = 13.179; 
 offsetphi[2] = 0.0;   offsetphi[3] = 0.5 * 360.0 / nladder[3];
-
+*/
 /*
 // Four layers, laddertypes 0-0-1-1
 n_intt_layer = 4;
@@ -495,15 +524,15 @@ void Tracking_Reco(int verbosity = 0)
   return;
 }
 
-void G4_Svtx_Reco()
-{
-  cout << "\033[31;1m"
-       << "Warning: G4_Svtx_Reco() was moved to G4_Svtx.C and renamed to Svtx_Reco(), please update macros"
-       << "\033[0m" << endl;
-  Svtx_Reco();
+// void G4_Svtx_Reco()
+// {
+//   cout << "\033[31;1m"
+//        << "Warning: G4_Svtx_Reco() was moved to G4_Svtx.C and renamed to Svtx_Reco(), please update macros"
+//        << "\033[0m" << endl;
+//   Svtx_Reco();
 
-  return;
-}
+//   return;
+// }
 
 void Tracking_Eval(std::string outputfile, int verbosity = 0)
 {

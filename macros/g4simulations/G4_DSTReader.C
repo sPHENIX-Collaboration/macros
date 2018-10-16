@@ -1,3 +1,9 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <g4eval/PHG4DSTReader.h>
+R__LOAD_LIBRARY(libg4eval.so)
+#endif
+
 //////////////////////////////////////////////////////////////////
 /*!
  \file G4_DSTReader.C
@@ -21,7 +27,7 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
     bool do_hcalout = true, //
     bool do_cemc_twr = true, //
     bool do_hcalin_twr = true, //
-    bool do_magnet = true, //
+//    bool do_magnet = true, // duplicate needs to be fixed
     bool do_hcalout_twr = true //
     )
 {

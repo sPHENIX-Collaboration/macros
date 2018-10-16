@@ -1,3 +1,8 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <g4main/PHG4Reco.h>
+#endif
+
 // stupid macro to turn on the geant4 display
 // we ask Fun4All for a pointer to PHG4Reco
 // using the ApplyCommand will start up the
