@@ -328,8 +328,13 @@ int Fun4All_G4_sPHENIX(
     // Detector description
     //---------------------
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
     G4Setup(absorberactive, magfield, EDecayType::kAll,
             do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, magfield_rescale);
+#else
+    G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
+            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, magfield_rescale);
+#endif
   }
 
   //---------
