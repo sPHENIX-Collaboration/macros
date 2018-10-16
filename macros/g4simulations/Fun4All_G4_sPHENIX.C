@@ -3,8 +3,9 @@ using namespace std;
 
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
-    const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
+    const int layout = 0,
     const char *outputFile = "G4sPHENIX.root",
+    const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
     const char *embed_input_file = "/sphenix/data/data02/review_2017-08-02/sHijing/fm_0-4.list")
 {
 
@@ -60,21 +61,25 @@ int Fun4All_G4_sPHENIX(
 
   bool do_pstof = false;
 
-  bool do_cemc = true;
+  bool do_cemc = false;
+//  bool do_cemc = true;
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
 
-  bool do_hcalin = true;
+  bool do_hcalin = false;
+//  bool do_hcalin = true;
   bool do_hcalin_cell = do_hcalin && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
   bool do_hcalin_eval = do_hcalin_cluster && true;
 
-  bool do_magnet = true;
+  bool do_magnet = false;
+//  bool do_magnet = true;
 
-  bool do_hcalout = true;
+  bool do_hcalout = false;
+//  bool do_hcalout = true;
   bool do_hcalout_cell = do_hcalout && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
@@ -114,6 +119,9 @@ int Fun4All_G4_sPHENIX(
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
   G4Init(do_svtx, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor);
+
+  // now that you have loaded G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C, change the INTT layout to be as specified
+  SetINTTLayout(layout);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -228,8 +236,8 @@ int Fun4All_G4_sPHENIX(
     if (usegun)
     {
       PHG4ParticleGun *gun = new PHG4ParticleGun();
-      gun->set_name("electron");
-      //gun->set_name("geantino");
+      //  gun->set_name("anti_proton");
+      gun->set_name("geantino");
       gun->set_vtx(0, 0, 0);
       gun->set_mom(10, 0, 0.01);
       // gun->AddParticle("geantino",1.7776,-0.4335,0.);
@@ -238,16 +246,11 @@ int Fun4All_G4_sPHENIX(
       // gun->AddParticle("geantino",1.8121,0.253,0.);
       //	  se->registerSubsystem(gun);
       PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
-      //pgen->set_name("geantino");
-      //pgen->set_z_range(0, 0);
-      //pgen->set_eta_range(0.01, 0.01);
-      //pgen->set_mom_range(10, 10);
-      //pgen->set_phi_range(5.3 / 180. * TMath::Pi(), 5.7 / 180. * TMath::Pi());
-      pgen->set_name("e-");
+      pgen->set_name("pi+");
       pgen->set_z_range(0, 0);
-      pgen->set_eta_range(-0.3, 0.3);
-      pgen->set_mom_range(0.5, 1.5);
-      pgen->set_phi_range(5.3 / 180. * TMath::Pi(), 5.7 / 180. * TMath::Pi());
+      pgen->set_eta_range(0.1, 0.1);
+      pgen->set_mom_range(0.5, 1); // 500 MeV to 1 GeV
+      pgen->set_phi_range(5 / 180. * TMath::Pi(), 35 / 180. * TMath::Pi());
       se->registerSubsystem(pgen);
     }
 
