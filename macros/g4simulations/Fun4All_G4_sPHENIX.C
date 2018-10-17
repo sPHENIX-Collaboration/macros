@@ -516,7 +516,7 @@ int Fun4All_G4_sPHENIX(
 
     if (do_tracking)
     {
-      double TPCDriftVelocity = 6.0 / 1000.0; // cm/ns, which is loaded from G4_SVTX*.C macros
+      double TPCDriftVelocity = 6.0 / 1000.0; // cm/ns
       time_window_minus = -105.5 / TPCDriftVelocity;  // ns
       time_window_plus = 105.5 / TPCDriftVelocity;    // ns;
     }
@@ -540,7 +540,6 @@ int Fun4All_G4_sPHENIX(
                 /*bool*/ do_hcalout,
                 /*bool*/ do_cemc_twr,
                 /*bool*/ do_hcalin_twr,
-//                /*bool*/ do_magnet, // duplicate
                 /*bool*/ do_hcalout_twr);
   }
 

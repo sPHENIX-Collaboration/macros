@@ -27,7 +27,6 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
     bool do_hcalout = true, //
     bool do_cemc_twr = true, //
     bool do_hcalin_twr = true, //
-//    bool do_magnet = true, // duplicate needs to be fixed
     bool do_hcalout_twr = true //
     )
 {
