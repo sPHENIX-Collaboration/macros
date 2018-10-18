@@ -1,8 +1,17 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include <g4detectors/PHG4InnerHcalSubsystem.h>
+#include "GlobalVariables.C"
+#include <caloreco/RawClusterBuilderGraph.h>
+#include <caloreco/RawClusterBuilderTemplate.h>
+#include <caloreco/RawTowerCalibration.h>
+#include <fun4all/Fun4AllServer.h>
+#include <g4calo/HcalRawTowerBuilder.h>
+#include <g4calo/RawTowerDigitizer.h>
 #include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4detectors/PHG4InnerHcalSubsystem.h>
+#include <g4detectors/PHG4HcalCellReco.h>
 #include <g4eval/CaloEvaluator.h>
+#include <g4main/PHG4Reco.h>
 void HCalInner_SupportRing(PHG4Reco* g4Reco,
 			   const int absorberactive = 0);
 #endif
@@ -13,6 +22,7 @@ void HCalInner_SupportRing(PHG4Reco* g4Reco,
 //true - Choose if you want Aluminum
 const bool inner_hcal_material_Al = false;
 
+static int inner_hcal_eic = 0;
 
 enum enu_HCalIn_clusterizer
 {
@@ -28,7 +38,13 @@ enu_HCalIn_clusterizer HCalIn_clusterizer = kHCalInTemplateClusterizer;
 
 
 // Init is called by G4Setup.C
-void HCalInnerInit() {}
+void HCalInnerInit(const int iflag = 0) 
+{
+  if (iflag == 1)
+  {
+    inner_hcal_eic = 1;
+  }
+}
 
 double HCalInner(PHG4Reco* g4Reco,
 		 double radius,
@@ -111,15 +127,21 @@ void HCalInner_SupportRing(PHG4Reco* g4Reco,
   const double z_ring1 = (2025 + 2050) / 2. / 10.;
   const double z_ring2 = (2150 + 2175) / 2. / 10.;
   const double dz = 25. / 10.;
-  const double innerradius = 116.;
+  const double innerradius_sphenix = 116.;
+  const double innerradius_ephenix_hadronside = 138.;
   const double maxradius = 178.0 - 0.001; // avoid touching the outer HCal envelop volumne
   const double z_rings[] =
-    { -z_ring2, -z_ring1, z_ring1, z_ring2, 0, 0, 0, 0 };
+    { -z_ring2, -z_ring1, z_ring1, z_ring2 };
 
   PHG4CylinderSubsystem *cyl;
 
   for (int i = 0; i < 4; i++)
     {
+      double innerradius = innerradius_sphenix;
+      if ( z_rings[i] > 0 && inner_hcal_eic == 1)
+      {
+        innerradius = innerradius_ephenix_hadronside;
+      }
       cyl = new PHG4CylinderSubsystem("HCALIN_SPT_N1", i);
       cyl->set_double_param("place_z",z_rings[i]);
       cyl->SuperDetector("HCALIN_SPT");
