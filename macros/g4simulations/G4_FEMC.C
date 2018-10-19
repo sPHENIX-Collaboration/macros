@@ -10,6 +10,10 @@
 #include <g4detectors/PHG4ForwardEcalSubsystem.h>
 #include <g4eval/CaloEvaluator.h>
 #include <g4main/PHG4Reco.h>
+R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libg4calo.so)
+R__LOAD_LIBRARY(libg4detectors.so)
+R__LOAD_LIBRARY(libg4eval.so)
 #endif
 
 void
