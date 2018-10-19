@@ -1,3 +1,17 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include <fun4all/Fun4AllServer.h>
+#include <g4calo/RawTowerBuilderByHitIndex.h>
+#include <g4calo/RawTowerDigitizer.h>
+#include <caloreco/RawClusterBuilderFwd.h>
+#include <caloreco/RawTowerCalibration.h>
+#include <g4detectors/PHG4CrystalCalorimeterSubsystem.h>
+#include <g4detectors/PHG4ForwardCalCellReco.h>
+#include <g4eval/CaloEvaluator.h>
+#include <g4main/PHG4Reco.h>
+#endif
+
 using namespace std;
 const int use_projective_geometry = 0;
 void
@@ -49,7 +63,7 @@ EEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
   eemc->OverlapCheck(overlapcheck);
 
-  if (absorberactive)  eemc->SetAbsorberActive();
+//  if (absorberactive)  eemc->SetAbsorberActive();
 
   /* register Ecal module */
   g4Reco->registerSubsystem( eemc );
