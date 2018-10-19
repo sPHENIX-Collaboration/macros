@@ -3,7 +3,7 @@
 #include "GlobalVariables.C"
 #include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4main/PHG4Reco.h>
-//static int overlapp_margin = 1;
+R__LOAD_LIBRARY(libg4detectors.so)
 #endif
 
 void PipeInit() {}
