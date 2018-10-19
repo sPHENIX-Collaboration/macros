@@ -32,6 +32,7 @@ R__LOAD_LIBRARY(libPHPythia8.so)
 
 using namespace std;
 
+
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
     const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
@@ -584,3 +585,8 @@ int Fun4All_G4_sPHENIX(
   gSystem->Exit(0);
   return 0;
 }
+
+
+// This function is only used to test if we can load this as root6 macro
+// without running into unresolved libraries and include files
+void RunFFALoadTest() {}
