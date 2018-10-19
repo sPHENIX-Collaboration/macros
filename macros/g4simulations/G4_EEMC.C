@@ -63,6 +63,7 @@ EEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
   eemc->OverlapCheck(overlapcheck);
 
+// SetAbsorberActive method not implemented
 //  if (absorberactive)  eemc->SetAbsorberActive();
 
   /* register Ecal module */
