@@ -1,6 +1,9 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <g4jets/FastJetAlgo.h>
 #include <g4jets/JetReco.h>
+#include <g4jets/TowerJetInput.h>
 #include <g4jets/TruthJetInput.h>
 #include <jetbackground/RetowerCEMC.h>
 #include <jetbackground/CopyAndSubtractJets.h>
