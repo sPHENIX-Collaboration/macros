@@ -1,5 +1,6 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
 #include <g4main/PHG4Reco.h>
 #endif
 
