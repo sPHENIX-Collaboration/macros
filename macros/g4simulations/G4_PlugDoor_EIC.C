@@ -3,6 +3,7 @@
 #include "GlobalVariables.C"
 #include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4main/PHG4Reco.h>
+R__LOAD_LIBRARY(libg4detectors.so)
 #endif
 
 void PlugDoorInit() {}
