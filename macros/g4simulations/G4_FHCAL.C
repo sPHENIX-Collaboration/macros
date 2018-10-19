@@ -1,3 +1,17 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include <fun4all/Fun4AllServer.h>
+#include <g4calo/RawTowerBuilderByHitIndex.h>
+#include <g4calo/RawTowerDigitizer.h>
+#include <caloreco/RawClusterBuilderFwd.h>
+#include <caloreco/RawTowerCalibration.h>
+#include <g4detectors/PHG4ForwardCalCellReco.h>
+#include <g4detectors/PHG4ForwardHcalSubsystem.h>
+#include <g4eval/CaloEvaluator.h>
+#include <g4main/PHG4Reco.h>
+#endif
+
 using namespace std;
 
 void
