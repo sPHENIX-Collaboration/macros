@@ -1,7 +1,16 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include <caloreco/RawClusterBuilderGraph.h>
+#include <caloreco/RawClusterBuilderTemplate.h>
+#include <caloreco/RawTowerCalibration.h>
+#include <fun4all/Fun4AllServer.h>
+#include <g4calo/HcalRawTowerBuilder.h>
+#include <g4calo/RawTowerDigitizer.h>
 #include <g4detectors/PHG4OuterHcalSubsystem.h>
+#include <g4detectors/PHG4HcalCellReco.h>
 #include <g4eval/CaloEvaluator.h>
+#include <g4main/PHG4Reco.h>
 #endif
 
 enum enu_HCalOut_clusterizer
