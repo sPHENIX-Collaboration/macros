@@ -1,17 +1,5 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-// put all declarations which are used in included macros here
-static bool overlapcheck = false;
-static double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
-#include <g4eval/PHG4DstCompressReco.h>
-#include <fun4all/Fun4AllServer.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllDstOutputManager.h>
-#include <g4decayer/EDecayType.hh>
-#include <g4detectors/PHG4CylinderSubsystem.h>
-#include <g4main/PHG4TruthSubsystem.h>
-#include <g4main/PHG4Reco.h>
-#include <phfield/PHFieldConfig.h>
 #include "G4_Pipe.C"
 #include "G4_Tracking.C"
 #include "G4_PSTOF.C"
@@ -21,6 +9,17 @@ static double no_overlapp = 0.0001; // added to radii to avoid overlapping volum
 #include "G4_HcalOut_ref.C"
 #include "G4_PlugDoor.C"
 
+#include <g4eval/PHG4DstCompressReco.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <g4decayer/EDecayType.hh>
+#include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4main/PHG4TruthSubsystem.h>
+#include <g4main/PHG4Reco.h>
+#include <phfield/PHFieldConfig.h>
+#include <g4main/HepMCNodeReader.h>
+class SubsysReco;
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 #else
