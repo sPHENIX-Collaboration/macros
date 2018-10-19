@@ -1,6 +1,10 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <g4eval/SvtxEvaluator.h>
 #include <g4hough/PHG4TrackFastSim.h>
+class SubsysReco;
+R__LOAD_LIBRARY(libg4eval.so)
 #endif
 
 #include <vector>
