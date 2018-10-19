@@ -1,3 +1,4 @@
+//Inner HCal reconstruction macro
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 #include "GlobalVariables.C"
@@ -14,8 +15,11 @@
 #include <g4main/PHG4Reco.h>
 void HCalInner_SupportRing(PHG4Reco* g4Reco,
 			   const int absorberactive = 0);
+R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libg4calo.so)
+R__LOAD_LIBRARY(libg4detectors.so)
+R__LOAD_LIBRARY(libg4eval.so)
 #endif
-//Inner HCal construction macro
 
 //Inner HCal absorber material selector:
 //false - Default, absorber material is SS310
