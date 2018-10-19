@@ -1,13 +1,20 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include <g4detectors/PHG4CylinderGeom_Spacalv1.h>
-#include <g4detectors/PHG4SpacalSubsystem.h>
-#include <g4calo/RawTowerBuilder.h>
-#include <g4calo/RawTowerDigitizer.h>
+#include "GlobalVariables.C"
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
 #include <caloreco/RawClusterBuilderGraph.h>
 #include <caloreco/RawClusterPositionCorrection.h>
+#include <fun4all/Fun4AllServer.h>
+#include <g4detectors/PHG4CylinderCellReco.h>
+#include <g4detectors/PHG4CylinderGeom_Spacalv1.h>
+#include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4detectors/PHG4FullProjSpacalCellReco.h>
+#include <g4detectors/PHG4SpacalSubsystem.h>
+#include <g4calo/RawTowerBuilder.h>
+#include <g4calo/RawTowerDigitizer.h>
+#include <g4eval/CaloEvaluator.h>
+#include <g4main/PHG4Reco.h>
 double
 CEmc_1DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings, const int absorberactive = 0);
 double
