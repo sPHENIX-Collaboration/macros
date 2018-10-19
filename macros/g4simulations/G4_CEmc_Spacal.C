@@ -22,6 +22,8 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings,
                         const int absorberactive = 0);
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
+R__LOAD_LIBRARY(libg4detectors.so)
+R__LOAD_LIBRARY(libg4eval.so)
 #endif
 int Min_cemc_layer = 1;
 int Max_cemc_layer = 1;
