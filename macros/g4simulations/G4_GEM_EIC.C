@@ -6,6 +6,7 @@
 int make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
                  double etamax,  const int N_Sector = 8);
 void AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem);
+R__LOAD_LIBRARY(libg4detectors.so)
 #endif
 
 void
