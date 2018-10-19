@@ -1,6 +1,7 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-//static int no_overlapp = 1;
+#include "GlobalVariables.C"
+#include <fun4all/Fun4AllServer.h>
 #include <g4detectors/PHG4MapsCellReco.h>
 #include <g4detectors/PHG4MapsSubsystem.h>
 #include <g4detectors/PHG4SiliconTrackerCellReco.h>
@@ -18,6 +19,7 @@
 #include <g4hough/PHG4TPCClusterizer.h>
 #include <g4hough/PHG4TrackKalmanFitter.h>
 #include <g4hough/PHG4TruthPatRec.h>
+#include <g4main/PHG4Reco.h>
 #include <g4tpc/PHG4TPCElectronDrift.h>
 #include <g4tpc/PHG4TPCPadPlane.h>
 #include <g4tpc/PHG4TPCPadPlaneReadout.h>
@@ -25,7 +27,6 @@
 R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libg4hough.so)
 R__LOAD_LIBRARY(libg4eval.so)
-//bool overlapcheck = false;
 #endif
 
 // ONLY if backward compatibility with hits files already generated with 8 inner TPC layers is needed, you can set this to "true"
@@ -523,16 +524,6 @@ void Tracking_Reco(int verbosity = 0)
 
   return;
 }
-
-// void G4_Svtx_Reco()
-// {
-//   cout << "\033[31;1m"
-//        << "Warning: G4_Svtx_Reco() was moved to G4_Svtx.C and renamed to Svtx_Reco(), please update macros"
-//        << "\033[0m" << endl;
-//   Svtx_Reco();
-
-//   return;
-// }
 
 void Tracking_Eval(std::string outputfile, int verbosity = 0)
 {
