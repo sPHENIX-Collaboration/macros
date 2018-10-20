@@ -9,7 +9,10 @@
 #include <g4jets/TruthJetInput.h>
 #include <g4eval/JetEvaluator.h>
 R__LOAD_LIBRARY(libg4jets.so)
+R__LOAD_LIBRARY(libg4eval.so)
 #endif
+
+void JetInit() {}
 
 void Jet_Reco(int verbosity = 0) {
 
