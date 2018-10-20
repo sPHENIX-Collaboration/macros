@@ -27,6 +27,9 @@ bool overlapcheck = false; // set to true if you want to check for overlaps
 double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
 #endif
 
+// This function is only used to test if we can load this as root6 macro
+// without running into unresolved libraries and include files
+void RunLoadTest() {}
 
 void G4Init(const bool do_tracking = true,
       const bool do_pstof = true,
