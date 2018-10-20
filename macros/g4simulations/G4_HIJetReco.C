@@ -14,6 +14,8 @@ R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libjetbackground.so)
 #endif
 
+void HIJetRecoInit() {}
+
 void HIJetReco(int verbosity = 0, bool do_flow = false ) {
   
   //---------------
