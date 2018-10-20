@@ -5,6 +5,8 @@
 R__LOAD_LIBRARY(libcalotrigger.so)
 #endif
 
+void CaloTriggerInit() {}
+
 void CaloTrigger_Sim(int verbosity = 0) {
   
   //---------------
