@@ -17,6 +17,8 @@ R__LOAD_LIBRARY(libg4eval.so)
 
 #include <string>
 
+void G4DSTreaderInit() {}
+
 void
 G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
     int absorberactive = 1, //
