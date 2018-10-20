@@ -282,6 +282,7 @@ blackhole->set_double_param("radius",radius + 10); // add 10 cm
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
   se->registerSubsystem( g4Reco );
+  return 0;
 }
 
 
