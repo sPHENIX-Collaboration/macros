@@ -1,3 +1,22 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include <fun4all/Fun4AllServer.h>
+#include <g4detectors/PHG4SectorSubsystem.h>
+#include <g4detectors/PHG4SiliconTrackerSubsystem.h>
+#include <g4hough/PHG4SiliconTrackerDigitizer.h>
+#include <g4hough/PHG4TrackFastSim.h>
+#include <g4eval/SvtxEvaluator.h>
+#include <g4main/PHG4Reco.h>
+R__LOAD_LIBRARY(libg4detectors.so)
+R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libg4hough.so)
+int
+make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
+		 double etamax,  const int N_Sector = 8);
+void
+AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem);
+#endif
 // $Id: G4_FGEM_fsPHENIX.C,v 1.2 2014/01/22 01:44:13 jinhuang Exp $                                                                                             
 
 /*!
@@ -247,7 +266,7 @@ make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
   g4Reco->registerSubsystem(gem);
-
+  return 0;
 }
 
 void FGEM_FastSim_Reco(int verbosity = 0) {

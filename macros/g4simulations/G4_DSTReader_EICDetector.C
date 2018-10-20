@@ -1,3 +1,10 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <g4eval/PHG4DSTReader.h>
+R__LOAD_LIBRARY(libg4eval.so)
+#endif
+
 //////////////////////////////////////////////////////////////////
 /*!
   \file G4_DSTReader.C
@@ -10,6 +17,7 @@
 
 #include <string>
 
+void G4DSTreader_EICDetectorInit() {}
 void
 G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
                          int absorberactive = 1, //
@@ -20,7 +28,6 @@ G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
                          bool do_hcalout = true, //
                          bool do_cemc_twr = true, //
                          bool do_hcalin_twr = true, //
-                         bool do_magnet = true, //
                          bool do_hcalout_twr = true, //
                          bool do_FHCAL = true, //
                          bool do_FHCAL_twr = true, //
