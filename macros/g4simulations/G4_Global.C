@@ -6,6 +6,8 @@
 R__LOAD_LIBRARY(libg4vertex.so)
 #endif
 
+void GlobalInit() {}
+
 void Global_Reco(int verbosity = 0) {
   
   //---------------
