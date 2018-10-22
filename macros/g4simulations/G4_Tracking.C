@@ -407,12 +407,7 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4SiliconTrackerDigitiz
     // Note the non-use of set_using_thickness here, this is so that the shortest dimension of the cell sets the mip energy loss
     thresholds->set_threshold(i, -1);
   }
-  // INTT
-  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
-  {
-    thresholds->set_threshold(i, 0.1);
-    thresholds->set_use_thickness_mip(i, true);
-  }
+  // INTT: Does not need PHG4SvtxThresholds as the new digitizer handle the zero-suppression threshold with in ASIC
 
   se->registerSubsystem(thresholds);
 
