@@ -331,7 +331,6 @@ Four part information goes to the threshold calculation:
 The result threshold table based on FPHX default value is as following
 | FPHX Register Address | Name            | Default value | Voltage - Vref (mV) | To electrons based on calibration | Electrons | Fraction to MIP |
 |-----------------------|-----------------|---------------|---------------------|-----------------------------------|-----------|-----------------|
-| 3                     | Vref            | 1             | 210                 | 16406                             |           | 3.84E-01        |
 | 4                     | Threshold DAC 0 | 8             | 32                  | 2500                              | 2000      | 5.85E-02        |
 | 5                     | Threshold DAC 1 | 16            | 64                  | 5000                              | 4000      | 1.17E-01        |
 | 6                     | Threshold DAC 2 | 32            | 128                 | 10000                             | 8000      | 2.34E-01        |
@@ -340,7 +339,6 @@ The result threshold table based on FPHX default value is as following
 | 9                     | Threshold DAC 5 | 112           | 448                 | 35000                             | 28000     | 8.18E-01        |
 | 10                    | Threshold DAC 6 | 144           | 576                 | 45000                             | 36000     | 1.05E+00        |
 | 11                    | Threshold DAC 7 | 176           | 704                 | 55000                             | 44000     | 1.29E+00        |
-You can now import Markdown table code directly using File/Paste table data... dialog.
 DAC0-7 threshold as fraction to MIP voltage are set to PHG4SiliconTrackerDigitizer::set_adc_scale as 3-bit ADC threshold as fractions to MIP energy deposition.
      */
     std::vector<double> userrange;  // 3-bit ADC threshold relative to the mip_e at each layer.
