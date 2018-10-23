@@ -14,8 +14,11 @@
 #include <g4main/PHG4ParticleGun.h>
 #include <g4main/HepMCNodeReader.h>
 #include <g4detectors/PHG4DetectorSubsystem.h>
+#include <phool/recoConsts.h>
 #include <phpythia6/PHPythia6.h>
 #include <phpythia8/PHPythia8.h>
+#include <phhepmc/Fun4AllHepMCPileupInputManager.h>
+#include <phhepmc/Fun4AllHepMCInputManager.h>
 #include "G4Setup_sPHENIX.C"
 #include "G4_Bbc.C"
 #include "G4_Global.C"
@@ -26,6 +29,7 @@
 #include "DisplayOn.C"
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
+R__LOAD_LIBRARY(libphhepmc.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
 #endif
