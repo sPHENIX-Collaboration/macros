@@ -2,7 +2,7 @@ Universe	= vanilla
 Notification	= Complete
 Executable	= run_macro.sh
 # Executable	= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/jobs/run_macro.sh #absolute path to shell script
-Arguments	= $(n_events) $(i) $(z_width) $(eta_min) $(eta_max) $(pt_min) $(pt_max) $(phi_min) $(phi_max) $(path) $(config)
+Arguments	= $(n_events) $(i) $(z_width) $(eta_min) $(eta_max) $(pt_min) $(pt_max) $(phi_min) $(phi_max) $(particle) $(path) $(config)
 Requirements	= (CPU_Experiment == "phenix") 
 # && (CPU_Speed >= 1)
 Rank		= CPU_Speed

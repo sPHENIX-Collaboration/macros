@@ -21,6 +21,7 @@
 
 config=0
 n_events=400
+particle=pi+ # particle being thrown: pi+, mu+, e-
 data=sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/data_gen
 parent=mom_scan # parent directory
 
@@ -56,8 +57,8 @@ do
     pt_min="$pt"
     pt_max="$pt"
 
-    # directory=pi+_pt"$pt_min"-"$pt_max"GeV_phi"$phi_min"-"$phi_max"d_z-"$z_width"-"$z_width"cm_eta"$eta_min"-"$eta_max"
-    directory=pi+_pt"$pt_min"GeV_phi"$phi_min"-"$phi_max"d_z"$z_width"cm_eta"$eta_min"-"$eta_max"
+    # directory="$particle"_pt"$pt_min"-"$pt_max"GeV_phi"$phi_min"-"$phi_max"d_z-"$z_width"-"$z_width"cm_eta"$eta_min"-"$eta_max"
+    directory="$particle"_pt"$pt_min"GeV_phi"$phi_min"-"$phi_max"d_z"$z_width"cm_eta"$eta_min"-"$eta_max"
 
     # check to see if there is a directory for this data set; create one if there isn't
     if [ ! -d /"$data"/"$parent" ]; then
@@ -69,7 +70,7 @@ do
     fi
 
     # syntax: Fun4All_G4_sPHENIX(#_events,INTT_layout,output_file_name)
-    root.exe Fun4All_G4_sPHENIX.C"("$n_events","$i","$z_width","$eta_min","$eta_max","$pt_min","$pt_max","$phi_min","$phi_max","\"/"$data"/"$parent"/"$directory"/G4_sPHENIX_"$config".root\"")"
+    root.exe Fun4All_G4_sPHENIX.C"("$n_events","$i","$z_width","$eta_min","$eta_max","$pt_min","$pt_max","$phi_min","$phi_max","\"$particle\"","\"/"$data"/"$parent"/"$directory"/G4_sPHENIX_"$config".root\"")"
 
     # the output file is automatically named PHG4TrackKalmanFitter_eval.root
     # this file name is set in coresoftware/simulation/g4simulation/g4hough/PHG4TrackKalmanFitter.C

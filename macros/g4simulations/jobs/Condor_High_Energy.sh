@@ -21,6 +21,7 @@
 
 config=0
 n_events=70
+particle=pi+ # particle being thrown: pi+, mu+, e-
 data=sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/data_gen # must be absolute path, no slashes at beginning or end
 parent=high_energy # parent directory
 
@@ -56,8 +57,8 @@ do
     phi_min="$phi"
     phi_max="$phi"
 
-    # directory=pi+_pt"$pt_min"-"$pt_max"GeV_phi"$phi_min"-"$phi_max"d_z-"$z_width"-"$z_width"cm_eta"$eta_min"-"$eta_max"
-    directory=pi+_pt"$pt_min"GeV_phi"$phi_min"d_z"$z_width"cm_eta"$eta_max"
+    # directory="$particle"_pt"$pt_min"-"$pt_max"GeV_phi"$phi_min"-"$phi_max"d_z-"$z_width"-"$z_width"cm_eta"$eta_min"-"$eta_max"
+    directory="$particle"_pt"$pt_min"GeV_phi"$phi_min"d_z"$z_width"cm_eta"$eta_max"
 
     # check to see if there is a directory for this data set; create one if there isn't
     if [ ! -d /"$data"/"$parent" ]; then
@@ -70,7 +71,7 @@ do
 
     path="$data"/"$parent"/"$directory"
 
-    condor_submit simple_job.job n_events=$n_events i=$i z_width=$z_width eta_min=$eta_min eta_max=$eta_max pt_min=$pt_min pt_max=$pt_max phi_min=$phi_min phi_max=$phi_max path=$path config=$config
+    condor_submit simple_job.job n_events=$n_events i=$i z_width=$z_width eta_min=$eta_min eta_max=$eta_max pt_min=$pt_min pt_max=$pt_max phi_min=$phi_min phi_max=$phi_max particle=$particle path=$path config=$config
   done
 done
 
