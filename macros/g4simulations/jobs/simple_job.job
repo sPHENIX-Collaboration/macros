@@ -1,0 +1,29 @@
+Universe	= vanilla
+Notification	= Complete
+Executable	= run_macro.sh
+# Executable	= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/jobs/run_macro.sh #absolute path to shell script
+Arguments	= $(n_events) $(i) $(z_width) $(eta_min) $(eta_max) $(pt_min) $(pt_max) $(phi_min) $(phi_max) $(path) $(config)
+Requirements	= (CPU_Experiment == "phenix") 
+# && (CPU_Speed >= 1)
+Rank		= CPU_Speed
+Image_Size	= 200M
+Priority	= +20
+GetEnv		= True
+
+# Used to give jobs a directory with respect to file input and output.
+# Initialdir	= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/
+
+Output		= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/jobs/log/$(Cluster).out
+Error		= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/jobs/log/$(Cluster).err
+Log		= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/jobs/log/$(Cluster).log
+Notify_user	= mitay@mit.edu
++Experiment	= "phenix"
++Job_Type	= "cas"
+
+should_transfer_files	= YES
+when_to_transfer_output	= ON_EXIT
+
+# Prevent evicted jobs from holding up submission of other jobs.
+PeriodicHold = (NumJobStarts>=3 && JobStatus==1)
+
+Queue
