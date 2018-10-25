@@ -60,21 +60,21 @@ int Fun4All_G4_sPHENIX(
 
   bool do_pstof = false;
 
-  bool do_cemc = true;
+  bool do_cemc = false;
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
 
-  bool do_hcalin = true;
+  bool do_hcalin = false;
   bool do_hcalin_cell = do_hcalin && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
   bool do_hcalin_eval = do_hcalin_cluster && true;
 
-  bool do_magnet = true;
+  bool do_magnet = false;
 
-  bool do_hcalout = true;
+  bool do_hcalout = false;
   bool do_hcalout_cell = do_hcalout && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;

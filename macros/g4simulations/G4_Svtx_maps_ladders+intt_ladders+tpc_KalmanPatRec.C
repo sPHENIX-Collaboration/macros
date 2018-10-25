@@ -807,7 +807,7 @@ void Svtx_Reco(int verbosity = 0)
   //---------------------
   // Kalman Filter
   //---------------------
-
+  printf("here\n");
   PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
   kalman->Verbosity(5);
   kalman->set_do_eval(true);

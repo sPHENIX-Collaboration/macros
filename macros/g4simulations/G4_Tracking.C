@@ -471,7 +471,8 @@ void Tracking_Reco(int verbosity = 0)
   //---------------------
 
   PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
-  kalman->Verbosity(0);
+  kalman->Verbosity(1);
+   kalman->set_do_eval(true);
   if (use_primary_vertex)
     kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
   se->registerSubsystem(kalman);
