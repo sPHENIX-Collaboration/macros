@@ -320,16 +320,36 @@ void Tracking_Reco(int verbosity = 0)
   if (n_intt_layer > 0)
   {
     // INTT
-    std::vector<double> userrange;  // 3-bit ADC threshold relative to the mip_e at each layer.
     // these should be used for the INTT
-    userrange.push_back(0.05);
-    userrange.push_back(0.10);
-    userrange.push_back(0.15);
-    userrange.push_back(0.20);
-    userrange.push_back(0.25);
-    userrange.push_back(0.30);
-    userrange.push_back(0.35);
-    userrange.push_back(0.40);
+    /*
+How threshold are calculated based on default FPHX settings
+Four part information goes to the threshold calculation:
+1. In 320 um thick silicon, the MIP e-h pair for a nominally indenting tracking is 3.87 MeV/cm * 320 um / 3.62 eV/e-h = 3.4e4 e-h pairs
+2. From DOI: 10.1016/j.nima.2014.04.017, FPHX integrator amplifier gain is 100mV / fC. That translate MIP voltage to 550 mV.
+3. From [FPHX Final Design Document](https://www.phenix.bnl.gov/WWW/fvtx/DetectorHardware/FPHX/FPHX2_June2009Revision.doc), the DAC0-7 setting for 8-ADC thresholds above the V_ref, as in Table 2 - Register Addresses and Defaults
+4, From [FPHX Final Design Document](https://www.phenix.bnl.gov/WWW/fvtx/DetectorHardware/FPHX/FPHX2_June2009Revision.doc) section Front-end Program Bits, the formula to translate DAC setting to comparitor voltages.
+The result threshold table based on FPHX default value is as following
+| FPHX Register Address | Name            | Default value | Voltage - Vref (mV) | To electrons based on calibration | Electrons | Fraction to MIP |
+|-----------------------|-----------------|---------------|---------------------|-----------------------------------|-----------|-----------------|
+| 4                     | Threshold DAC 0 | 8             | 32                  | 2500                              | 2000      | 5.85E-02        |
+| 5                     | Threshold DAC 1 | 16            | 64                  | 5000                              | 4000      | 1.17E-01        |
+| 6                     | Threshold DAC 2 | 32            | 128                 | 10000                             | 8000      | 2.34E-01        |
+| 7                     | Threshold DAC 3 | 48            | 192                 | 15000                             | 12000     | 3.51E-01        |
+| 8                     | Threshold DAC 4 | 80            | 320                 | 25000                             | 20000     | 5.85E-01        |
+| 9                     | Threshold DAC 5 | 112           | 448                 | 35000                             | 28000     | 8.18E-01        |
+| 10                    | Threshold DAC 6 | 144           | 576                 | 45000                             | 36000     | 1.05E+00        |
+| 11                    | Threshold DAC 7 | 176           | 704                 | 55000                             | 44000     | 1.29E+00        |
+DAC0-7 threshold as fraction to MIP voltage are set to PHG4SiliconTrackerDigitizer::set_adc_scale as 3-bit ADC threshold as fractions to MIP energy deposition.
+     */
+    std::vector<double> userrange;  // 3-bit ADC threshold relative to the mip_e at each layer.
+    userrange.push_back(0.0584625322997416);
+    userrange.push_back(0.116925064599483);
+    userrange.push_back(0.233850129198966);
+    userrange.push_back(0.35077519379845);
+    userrange.push_back(0.584625322997416);
+    userrange.push_back(0.818475452196383);
+    userrange.push_back(1.05232558139535);
+    userrange.push_back(1.28617571059432);
 
     PHG4SiliconTrackerDigitizer* digiintt = new PHG4SiliconTrackerDigitizer();
     digiintt->Verbosity(verbosity);
@@ -383,14 +403,9 @@ void Tracking_Reco(int verbosity = 0)
   {
     // reduced by x2.5 when going from cylinder maps with 50 microns thickness to actual maps with 18 microns thickness
     // Note the non-use of set_using_thickness here, this is so that the shortest dimension of the cell sets the mip energy loss
-    thresholds->set_threshold(i, 0.1);
+    thresholds->set_threshold(i, -1);
   }
-  // INTT
-  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
-  {
-    thresholds->set_threshold(i, 0.1);
-    thresholds->set_use_thickness_mip(i, true);
-  }
+  // INTT: Does not need PHG4SvtxThresholds as the new digitizer handle the zero-suppression threshold with in ASIC
 
   se->registerSubsystem(thresholds);
 
