@@ -143,19 +143,6 @@ double TPC_SmearZ;
 
 int Max_si_layer;
 
-int laddertype[8] = {PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
-		     PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI};  // default
-int nladder[8] = {17,  17, 15, 15, 18, 18, 21, 21};  // default
-double sensor_radius[8] = {6.876, 7.462, 8.987, 9.545, 10.835, 11.361, 12.676, 13.179};  // radius of center of sensor for layer default
-// offsetphi is in deg, every other layer is offset by one half of the phi spacing between ladders
-double offsetphi[8] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3], 0.0, 0.5 * 360.0 / nladder[5], 0.0, 0.5 * 360.0 / nladder[7]};
-
 void SetINTTLayout(int layout = 0)
 {
   switch (layout)
@@ -414,7 +401,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 	  lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
 	  lyr->set_int_param("N_staves", staves_in_layer[ilayer]);       // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
 	  
-	  // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
+	  // The cell size is used only during pixelization of sensor hits, but it is convenient to set it now because the geometry object needs it
 	  lyr->set_double_param("pixel_x", 0.0030);          // pitch in cm
 	  lyr->set_double_param("pixel_z", 0.0030);          // length in cm
 	  lyr->set_double_param("pixel_thickness", 0.0018);  // thickness in cm
@@ -937,7 +924,7 @@ void Svtx_Reco(int verbosity = 0)
   //---------------------
   // Kalman Filter
   //---------------------
-
+  printf("here\n");
   PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
   kalman->Verbosity(0);
   kalman->set_do_eval(true);
