@@ -4,10 +4,19 @@ using namespace std;
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
     const int layout = 0,
+    const double z_width = 0,
+    const double eta_min = 0.1,
+    const double eta_max = 0.1,
+    const double pt_min = 0.5,
+    const double pt_max = 1,
+    const double phi_min = 5,  // in degrees
+    const double phi_max = 35, // in degrees
     const char *outputFile = "G4sPHENIX.root",
     const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
     const char *embed_input_file = "/sphenix/data/data02/review_2017-08-02/sHijing/fm_0-4.list")
 {
+
+gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macros:/direct/star+u/rcorliss/sphenix/macros/macros/g4simulations:");
 
   //===============
   // Input options
@@ -37,9 +46,9 @@ int Fun4All_G4_sPHENIX(
 
   // Besides the above flags. One can further choose to further put in following particles in Geant4 simulation
   // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
-  const bool particles = false && !readhits;
+  const bool particles = true && !readhits;
   // or gun/ very simple single particle gun generator
-  const bool usegun = true && !readhits;
+  const bool usegun = false && !readhits;
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
   const bool upsilons = false && !readhits;
   // Event pile up simulation with collision rate in Hz MB collisions.
@@ -61,7 +70,7 @@ int Fun4All_G4_sPHENIX(
 
   bool do_pstof = false;
 
-  bool do_cemc = false;
+   bool do_cemc = false;
 //  bool do_cemc = true;
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
@@ -93,7 +102,7 @@ int Fun4All_G4_sPHENIX(
 
   bool do_calotrigger = true && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
 
-  bool do_jet_reco = true;
+  bool do_jet_reco = false;//true;
   bool do_jet_eval = do_jet_reco && true;
 
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
@@ -206,7 +215,7 @@ int Fun4All_G4_sPHENIX(
     {
       // toss low multiplicity dummy events
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-      gen->add_particles("pi-", 1);  // mu+,e+,proton,pi+,Upsilon
+      gen->add_particles("pi+", 1);  // mu+,e+,proton,pi-,Upsilon
       //gen->add_particles("pi+",100); // 100 pion option
       if (readhepmc || do_embedding || runpythia8 || runpythia6)
       {
@@ -219,13 +228,13 @@ int Fun4All_G4_sPHENIX(
                                               PHG4SimpleEventGenerator::Uniform,
                                               PHG4SimpleEventGenerator::Uniform);
         gen->set_vertex_distribution_mean(0.0, 0.0, 0.0);
-        gen->set_vertex_distribution_width(0.0, 0.0, 5.0);
+        gen->set_vertex_distribution_width(0.0, 0.0, z_width);
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0, 0.0);
-      gen->set_eta_range(-1.0, 1.0);
-      gen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi());
-      gen->set_pt_range(0.1, 20.0);
+      gen->set_eta_range(eta_min, eta_max);
+      gen->set_phi_range(phi_min / 180. * TMath::Pi(), phi_max / 180. * TMath::Pi());
+      gen->set_pt_range(pt_min, pt_max);
       gen->Embed(2);
       gen->Verbosity(0);
 
@@ -246,10 +255,10 @@ int Fun4All_G4_sPHENIX(
       //	  se->registerSubsystem(gun);
       PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
       pgen->set_name("pi+");
-      pgen->set_z_range(0, 0);
-      pgen->set_eta_range(0.1, 0.1);
-      pgen->set_mom_range(0.5, 1); // 500 MeV to 1 GeV
-      pgen->set_phi_range(5 / 180. * TMath::Pi(), 35 / 180. * TMath::Pi());
+      pgen->set_z_range(-z_width, z_width);
+      pgen->set_eta_range(eta_min, eta_max);
+      pgen->set_mom_range(mom_min, mom_max);
+      pgen->set_phi_range(phi_min / 180. * TMath::Pi(), phi_max / 180. * TMath::Pi());
       se->registerSubsystem(pgen);
     }
 
