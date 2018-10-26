@@ -22,7 +22,8 @@
 config=0
 n_events=400
 particle=pi+ # particle being thrown: pi+, mu+, e-
-data=sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/data_gen # must be absolute path, no slashes at beginning or end
+data=direct/star+u/rcorliss/sphenix/macros/macros/g4simulations/data_gen #ross's path
+#data=sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/data_gen # must be absolute path, no slashes at beginning or end
 parent=mom_scan # parent directory
 
 # verified correct layout by looking at truth particle data in ntp_hit
@@ -37,7 +38,7 @@ phi_min=-180
 phi_max=180
 
 # go through different momenta
-for pt in 0.5 0.6 0.7 0.8 0.9 1
+for pt in 0.5 0.6 0.7 0.8 0.9 1.0
 do
   # go through every INTT configuration
   for i in 0 1 2 3 4 5 6 7

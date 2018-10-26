@@ -22,7 +22,8 @@
 config=0
 n_events=70
 particle=pi+ # particle being thrown: pi+, mu+, e-
-data=sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/data_gen # must be absolute path, no slashes at beginning or end
+data=direct/star+u/rcorliss/sphenix/macros/macros/g4simulations/data_gen #ross's path
+#data=sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/data_gen # must be absolute path, no slashes at beginning or end
 parent=high_energy # parent directory
 
 # verified correct layout by looking at truth particle data in ntp_hit

@@ -13,10 +13,10 @@ GetEnv		= True
 # Used to give jobs a directory with respect to file input and output.
 # Initialdir	= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/
 
-Output		= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/jobs/log/$(Cluster).out
-Error		= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/jobs/log/$(Cluster).err
-Log		= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/jobs/log/$(Cluster).log
-Notify_user	= mitay@mit.edu
+Output		= /direct/star+u/rcorliss/sphenix/macros/macros/g4simulations/jobs/log/$(Cluster).out
+Error		= /direct/star+u/rcorliss/sphenix/macros/macros/g4simulations/jobs/log/$(Cluster).err
+Log		= /direct/star+u/rcorliss/sphenix/macros/macros/g4simulations/jobs/log/$(Cluster).log
+Notify_user	= rcorliss@mit.edu
 +Experiment	= "phenix"
 +Job_Type	= "cas"
 
