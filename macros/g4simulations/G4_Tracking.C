@@ -29,6 +29,8 @@ R__LOAD_LIBRARY(libg4hough.so)
 R__LOAD_LIBRARY(libg4eval.so)
 #endif
 
+#include <map>
+
 // ONLY if backward compatibility with hits files already generated with 8 inner TPC layers is needed, you can set this to "true"
 bool tpc_layers_40  = false;
 
