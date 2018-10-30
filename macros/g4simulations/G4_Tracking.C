@@ -174,6 +174,19 @@ void SetINTTLayout(int layout = 0)
       n_intt_layer = 0;
       break;
     }
+    case 8:	// Two outer layers, laddertypes 1-1 pushed out as far as possible
+    {
+      n_intt_layer = 4;
+      laddertype[0] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+      laddertype[1] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+      laddertype[2] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+      laddertype[3] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+      nladder[0] = 21;	nladder[2] = 25;
+      nladder[1] = 21;	nladder[3] = 25;
+      sensor_radius[0] = 12.676;	  sensor_radius[1] = 13.179;
+      sensor_radius[2] = 15.1183;	  sensor_radius[3] = 15.6;
+      break;
+    }
     default:	// Four layers, laddertypes 0-1-1-1
     {
       n_intt_layer = 8;

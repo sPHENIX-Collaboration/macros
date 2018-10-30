@@ -1,23 +1,24 @@
 #!/bin/bash
 
 # Author: Molly Taylor
-# Date: 10/15/18
+# Date: 10/29/18
 # Goal: iterate though different INTT configurations and generate Kalman extrapolation uncertainties.
 
 # SCAN THROUGH MOMENTA
 # eta = -1.2 to 1.2
 # all phi
 # z = 0 cm
-# pt = 500 MeV, 600 MeV, 700 MeV, 800 MeV, 900 MeV, 1000 MeV
+# pt = 500 MeV, 600 MeV, 700 MeV, 800 MeV, 900 MeV, 1 GeV, 2 GeV, 3 GeV
 
-# layout 0 = four (eight) layers, laddertypes 0-1-1-1
-# layout 1 = four (eight) layers, laddertypes 1-1-0-1
-# layout 2 = three (six) outer layers, laddertypes 1-0-1
-# layout 3 = three (six) outer layers, laddertypes 1-1-1
-# layout 4 = two (four) outer layers, laddertypes 0-1
-# layout 5 = two (four) outer layers, laddertypes 1-1
-# layout 5 = one (two) outer layers, laddertype 1
-# layout 6 = no outer layers
+# layout 0 = four (eight) layers, laddertypes z-p-p-p
+# layout 1 = four (eight) layers, laddertypes p-p-z-p
+# layout 2 = three (six) outer layers, laddertypes p-z-p
+# layout 3 = three (six) outer layers, laddertypes p-p-p
+# layout 4 = two (four) outer layers, laddertypes z-p
+# layout 5 = two (four) outer layers, laddertypes p-p
+# layout 6 = one (two) outer layers, laddertype p
+# layout 7 = no outer layers
+# layout 8 = two (four) outer layers at 13 cm and 15 cm, laddertypes p-p
 
 config=0
 n_events=5000
@@ -37,21 +38,22 @@ phi_min=-180
 phi_max=180
 
 # go through different momenta
-for pt in 0.5 0.6 0.7 0.8 0.9 1.0 2.5 5.0
+for pt in 0.5 0.6 0.7 0.8 0.9 1.0 2.0 3.0
 do
   # go through every INTT configuration
-  for i in 0 1 2 3 4 5 6 7
+  for i in 0 1 2 3 4 5 6 7 8
   do
     case $i in
-      0) config=0111 ;;
-      1) config=1101 ;;
-      2) config=101  ;;
-      3) config=111  ;;
-      4) config=01   ;;
-      5) config=11   ;;
-      6) config=1    ;;
-      7) config=n    ;;
-      *) config=x    ;;
+      0) config=zppp ;;
+      1) config=ppzp ;;
+      2) config=0pzp ;;
+      3) config=0ppp ;;
+      4) config=00zp ;;
+      5) config=00pp ;;
+      6) config=000p ;;
+      7) config=0000 ;;
+      8) config=00pp_out ;;
+      *) config=xxxx ;;
     esac
 
     pt_min="$pt"
@@ -71,14 +73,9 @@ do
 
     path="$data"/"$parent"/"$directory"
 
-#    for j in {1..5}
-#    do
-      condor_submit simple_job.job n_events=$n_events i=$i z_width=$z_width eta_min=$eta_min eta_max=$eta_max pt_min=$pt_min pt_max=$pt_max phi_min=$phi_min phi_max=$phi_max particle=$particle path=$path config=$config
+    condor_submit simple_job.job n_events=$n_events i=$i z_width=$z_width eta_min=$eta_min eta_max=$eta_max pt_min=$pt_min pt_max=$pt_max phi_min=$phi_min phi_max=$phi_max particle=$particle path=$path config=$config
 
-#      condor_submit simple_job.job n_events=$n_events i=$i z_width=$z_width eta_min=$eta_min eta_max=$eta_max pt_min=$pt_min pt_max=$pt_max phi_min=$phi_min phi_max=$phi_max particle=$particle path=$path config=$config_$j
-
-      #echo condor_submit simple_job.job n_events=$n_events i=$i z_width=$z_width eta_min=$eta_min eta_max=$eta_max pt_min=$pt_min pt_max=$pt_max phi_min=$phi_min phi_max=$phi_max particle=$particle path=$path config=$config
-#    done
+    #echo condor_submit simple_job.job n_events=$n_events i=$i z_width=$z_width eta_min=$eta_min eta_max=$eta_max pt_min=$pt_min pt_max=$pt_max phi_min=$phi_min phi_max=$phi_max particle=$particle path=$path config=$config
   done
 done
 
