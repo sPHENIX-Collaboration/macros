@@ -481,6 +481,8 @@ int Fun4All_G4_sPHENIX(
     se->registerInputManager(pileup);
 
     const string pileupfile("/sphenix/sim/sim01/sHijing/sHijing_0-12fm.dat");
+		//background files for p+p pileup sim
+		//const string pileupfile("/gpfs/mnt/gpfs04/sphenix/user/shlim/04.InnerTrackerTaskForce/01.PythiaGen/list_pythia8_mb.dat");
     pileup->AddFile(pileupfile);  // HepMC events used in pile up collisions. You can add multiple files, and the file list will be reused.
     //pileup->set_vertex_distribution_width(100e-4,100e-4,30,5);//override collision smear in space time
     //pileup->set_vertex_distribution_mean(0,0,0,0);//override collision central position shift in space time
@@ -492,6 +494,9 @@ int Fun4All_G4_sPHENIX(
     if (do_tracking)
     {
       // double TPCDriftVelocity = 6.0 / 1000.0; // cm/ns, which is loaded from G4_SVTX*.C macros
+			PHG4TPCElectronDrift *dr = (PHG4TPCElectronDrift *)se->getSubsysReco("PHG4TPCElectronDrift");
+			assert(dr);
+			double TPCDriftVelocity = dr->get_double_param("drift_velocity");
       time_window_minus = -105.5 / TPCDriftVelocity;  // ns
       time_window_plus = 105.5 / TPCDriftVelocity;    // ns;
     }
