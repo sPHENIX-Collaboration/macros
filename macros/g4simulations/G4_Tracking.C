@@ -349,6 +349,20 @@ void Tracking_Reco(int verbosity = 0)
 
   if (n_intt_layer > 0)
   {
+
+    // Load pre-defined deadmaps
+    PHG4SvtxDeadMapLoader* deadMapINTT = new PHG4SvtxDeadMapLoader("SILICON_TRACKER");
+    for (int i = 0; i < n_intt_layer; i++)
+    {
+      const int database_strip_type = (laddertype[i] == PHG4SiliconTrackerDefs::SEGMENTATION_Z) ? 0 : 1;
+      string DeadMapConfigName = Form("LadderType%d_RndSeed%d/", database_strip_type, i);
+      string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_4Percent/"); //4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
+//      string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_8Percent/"); // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
+      DeadMapPath +=  DeadMapConfigName;
+      deadMapINTT->deadMapPath(n_maps_layer + i, DeadMapPath);
+    }
+    se->registerSubsystem(deadMapINTT);
+
     // INTT
     // these should be used for the INTT
     /*
