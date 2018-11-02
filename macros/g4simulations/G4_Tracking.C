@@ -32,7 +32,7 @@ R__LOAD_LIBRARY(libg4eval.so)
 #include <vector>
 // define INTTLADDER8, INTTLADDER6, INTTLADDER4_ZP or INTTLADDER4_PP, INTTLADDER0 to get 8, 6, 4 or 0 layers
 // one and only one of these has to be defined, because #elseif does not seem to work properly in the interpreter
-#define INTTLADDER0
+#define INTTLADDER4_PP
 
 
 // ONLY if backward compatibility with hits files already generated with 8 inner TPC layers is needed, you can set this to "true"
