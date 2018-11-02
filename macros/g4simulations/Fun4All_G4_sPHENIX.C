@@ -493,10 +493,9 @@ int Fun4All_G4_sPHENIX(
 
     if (do_tracking)
     {
-      // double TPCDriftVelocity = 6.0 / 1000.0; // cm/ns, which is loaded from G4_SVTX*.C macros
-			PHG4TPCElectronDrift *dr = (PHG4TPCElectronDrift *)se->getSubsysReco("PHG4TPCElectronDrift");
-			assert(dr);
-			double TPCDriftVelocity = dr->get_double_param("drift_velocity");
+      PHG4TPCElectronDrift *dr = (PHG4TPCElectronDrift *)se->getSubsysReco("PHG4TPCElectronDrift");
+      assert(dr);
+      double TPCDriftVelocity = dr->get_double_param("drift_velocity");
       time_window_minus = -105.5 / TPCDriftVelocity;  // ns
       time_window_plus = 105.5 / TPCDriftVelocity;    // ns;
     }
