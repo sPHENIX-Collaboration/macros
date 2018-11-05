@@ -418,23 +418,24 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4SiliconTrackerDigitiz
 
   //-------------------------------------
   // Apply Live Area Inefficiency to Hits
+  // This is obsolete, please use PHG4SvtxDeadMapLoader instead for pre-defined deadmap
   //-------------------------------------
   // defaults to 1.0 (fully active)
 
-  PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
-
-  for (int i = 0; i < n_maps_layer; i++)
-  {
-    deadarea->Verbosity(verbosity);
-    //deadarea->set_hit_efficiency(i,0.99);
-    deadarea->set_hit_efficiency(i, 1.0);
-  }
-  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
-  {
-    //deadarea->set_hit_efficiency(i,0.99);
-    deadarea->set_hit_efficiency(i, 1.0);
-  }
-  se->registerSubsystem(deadarea);
+//  PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
+//
+//  for (int i = 0; i < n_maps_layer; i++)
+//  {
+//    deadarea->Verbosity(verbosity);
+//    //deadarea->set_hit_efficiency(i,0.99);
+//    deadarea->set_hit_efficiency(i, 1.0);
+//  }
+//  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
+//  {
+//    //deadarea->set_hit_efficiency(i,0.99);
+//    deadarea->set_hit_efficiency(i, 1.0);
+//  }
+//  se->registerSubsystem(deadarea);
 
   //-----------------------------
   // Apply MIP thresholds to Hits
