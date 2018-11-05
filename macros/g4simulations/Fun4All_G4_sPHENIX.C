@@ -41,6 +41,7 @@ int Fun4All_G4_sPHENIX(
   const bool usegun = false && !readhits;
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
   const bool upsilons = false && !readhits;
+  const int num_upsilons_per_event = 1;  // can set more than 1 upsilon per event, each has a unique embed flag
   // Event pile up simulation with collision rate in Hz MB collisions.
   // Note please follow up the macro to verify the settings for beam parameters
   const double pileup_collision_rate = 0;  // 100e3 for 100kHz nominal AuAu collision rate.
@@ -248,50 +249,56 @@ int Fun4All_G4_sPHENIX(
     // If "readhepMC" is also set, the Upsilons will be embedded in Hijing events, if 'particles" is set, the Upsilons will be embedded in whatever particles are thrown
     if (upsilons)
     {
-      // run upsilons for momentum, dca performance, alone or embedded in Hijing
-
-      PHG4ParticleGeneratorVectorMeson *vgen = new PHG4ParticleGeneratorVectorMeson();
-      vgen->add_decay_particles("e+", "e-", 0);  // i = decay id
-      // event vertex
-      if (readhepmc || do_embedding || particles || runpythia8 || runpythia6)
-      {
-        vgen->set_reuse_existing_vertex(true);
-      }
-      else
-      {
-        vgen->set_vtx_zrange(-10.0, +10.0);
-      }
-
-      // Note: this rapidity range completely fills the acceptance of eta = +/- 1 unit
-      vgen->set_rapidity_range(-1.0, +1.0);
-      vgen->set_pt_range(0.0, 10.0);
-
-      int istate = 1;
-
-      if (istate == 1)
-      {
-        // Upsilon(1S)
-        vgen->set_mass(9.46);
-        vgen->set_width(54.02e-6);
-      }
-      else if (istate == 2)
-      {
-        // Upsilon(2S)
-        vgen->set_mass(10.0233);
-        vgen->set_width(31.98e-6);
-      }
-      else
-      {
-        // Upsilon(3S)
-        vgen->set_mass(10.3552);
-        vgen->set_width(20.32e-6);
-      }
-
-      vgen->Verbosity(0);
-      vgen->Embed(3);
-      se->registerSubsystem(vgen);
-
-      cout << "Upsilon generator for istate = " << istate << " created and registered " << endl;
+     // run upsilons for momentum, dca performance, alone or embedded in Hijing
+      for(int iups = 0; iups < num_upsilons_per_event;iups++)
+	{
+	  PHG4ParticleGeneratorVectorMeson *vgen = new PHG4ParticleGeneratorVectorMeson();
+	  vgen->add_decay_particles("e+", "e-", 0);  // i = decay id
+	  // event vertex
+	  if (readhepmc || do_embedding || particles || runpythia8 || runpythia6 || iups > 0)
+	    {
+	      vgen->set_reuse_existing_vertex(true);
+	    }
+	  else
+	    {
+	      vgen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
+						    PHG4SimpleEventGenerator::Uniform,
+						    PHG4SimpleEventGenerator::Uniform);
+	      vgen->set_vertex_distribution_mean(0.0, 0.0, 0.0);
+	      vgen->set_vertex_distribution_width(0.0, 0.0, 5.0); 
+	    }
+	  
+	  // Note: this rapidity range completely fills the acceptance of eta = +/- 1 unit
+	  vgen->set_rapidity_range(-1.0, +1.0);
+	  vgen->set_pt_range(0.0, 10.0);
+	  
+	  int istate = 1;
+	  
+	  if (istate == 1)
+	    {
+	      // Upsilon(1S)
+	      vgen->set_mass(9.46);
+	      vgen->set_width(54.02e-6);
+	    }
+	  else if (istate == 2)
+	    {
+	      // Upsilon(2S)
+	      vgen->set_mass(10.0233);
+	      vgen->set_width(31.98e-6);
+	    }
+	  else
+	    {
+	      // Upsilon(3S)
+	      vgen->set_mass(10.3552);
+	      vgen->set_width(20.32e-6);
+	    }
+	  
+	  vgen->Verbosity(0);
+	  vgen->Embed(iups+3);  // unique gembed for each upsilon
+	  se->registerSubsystem(vgen);
+	  
+	  cout << "Upsilon generator for istate = " << istate << " created and registered " << endl;
+	}
     }
   }
 
@@ -474,6 +481,8 @@ int Fun4All_G4_sPHENIX(
     se->registerInputManager(pileup);
 
     const string pileupfile("/sphenix/sim/sim01/sHijing/sHijing_0-12fm.dat");
+    //background files for p+p pileup sim
+    //const string pileupfile("/gpfs/mnt/gpfs04/sphenix/user/shlim/04.InnerTrackerTaskForce/01.PythiaGen/list_pythia8_mb.dat");
     pileup->AddFile(pileupfile);  // HepMC events used in pile up collisions. You can add multiple files, and the file list will be reused.
     //pileup->set_vertex_distribution_width(100e-4,100e-4,30,5);//override collision smear in space time
     //pileup->set_vertex_distribution_mean(0,0,0,0);//override collision central position shift in space time
@@ -484,7 +493,10 @@ int Fun4All_G4_sPHENIX(
 
     if (do_tracking)
     {
-      // double TPCDriftVelocity = 6.0 / 1000.0; // cm/ns, which is loaded from G4_SVTX*.C macros
+      // This gets the default drift velocity only! 
+      PHG4TPCElectronDrift *dr = (PHG4TPCElectronDrift *)se->getSubsysReco("PHG4TPCElectronDrift");
+      assert(dr);
+      double TPCDriftVelocity = dr->get_double_param("drift_velocity");
       time_window_minus = -105.5 / TPCDriftVelocity;  // ns
       time_window_plus = 105.5 / TPCDriftVelocity;    // ns;
     }

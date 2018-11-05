@@ -30,6 +30,10 @@ R__LOAD_LIBRARY(libg4eval.so)
 #endif
 
 #include <vector>
+// define INTTLADDER8, INTTLADDER6, INTTLADDER4_ZP or INTTLADDER4_PP, INTTLADDER0 to get 8, 6, 4 or 0 layers
+// one and only one of these has to be defined, because #elseif does not seem to work properly in the interpreter
+#define INTTLADDER4_PP
+
 
 // ONLY if backward compatibility with hits files already generated with 8 inner TPC layers is needed, you can set this to "true"
 bool tpc_layers_40  = false;
@@ -41,7 +45,8 @@ bool use_primary_vertex = false;
 
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
 
-// default setup for the INTT - please don't change this. The configuration can be redone later in the macro if desired
+// Configure the INTT layers
+// offsetphi is in deg, every other layer is offset by one half of the phi spacing between ladders
 #ifdef INTTLADDER8
 int n_intt_layer = 8;  
 // default layer configuration
@@ -55,50 +60,43 @@ int laddertype[8] = {PHG4SiliconTrackerDefs::SEGMENTATION_Z,
 		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI};  // default
 int nladder[8] = {17,  17, 15, 15, 18, 18, 21, 21};  // default
 double sensor_radius[8] = {6.876, 7.462, 8.987, 9.545, 10.835, 11.361, 12.676, 13.179};  // radius of center of sensor for layer default
-// offsetphi is in deg, every other layer is offset by one half of the phi spacing between ladders
 double offsetphi[8] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3], 0.0, 0.5 * 360.0 / nladder[5], 0.0, 0.5 * 360.0 / nladder[7]};
-#else
-// Optionally reconfigure the INTT
-//========================================================================
-// example re-configurations of INTT - uncomment to get the reconfiguration
-// n_intt must be 0-8, setting it to zero will remove the INTT completely,  otherwise it gives you n layers
-// To get hermetic coverage, need to configure these layers in pairs with the same nladder values!
-//========================================================================
-
-// Four layers, laddertypes 0-0-1-1
-int n_intt_layer = 4;
-//
-int laddertype[4] = {PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
-		     PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI};
-int nladder[4] = {17,17, 21,21};  
-double sensor_radius[4] = {6.876, 7.462, 12.676, 13.179};
-double offsetphi[4] = {0., 0.5 * 360.0 / nladder[1], 0., 0.5 * 360.0 / nladder[3]};
 #endif
-/*
-// Four layers, laddertypes 0-0-1-1
-n_intt_layer = 4;
-//
-laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_Z;    laddertype[1] =   PHG4SiliconTrackerDefs::SEGMENTATION_Z;  
-nladder[0] = 17;       nladder[1] = 17;  
-sensor_radius[0] = 6.876; sensor_radius[1] = 7.462; 
-offsetphi[0] = 0.0;   offsetphi[1] = 0.5 * 360.0 / nladder[1];
-//
-laddertype[2] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;  laddertype[3] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI; 
-nladder[2] = 18;  nladder[3] = 18;
-sensor_radius[2] = 10.835; sensor_radius[3] = 11.361; 
-offsetphi[2] = 0.0;   offsetphi[3] = 0.5 * 360.0 / nladder[3];
-*/
-/*
-// single layer for testing
-n_intt_layer = 1;
-//
-laddertype[0] =  PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-nladder[0] = 15;       
-sensor_radius[0] = 8.987;
-offsetphi[0] = 12.0; 
-*/
+#ifdef INTTLADDER6
+int n_intt_layer = 6;
+int laddertype[6] = {PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
+		       PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
+		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
+		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
+		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
+		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI };
+int nladder[6] = {17,  17, 15, 15, 18, 18}; 
+double sensor_radius[6] = {6.876, 7.462, 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
+double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3], 0.0, 0.5 * 360.0 / nladder[5]};
+#endif
+#ifdef INTTLADDER4_ZP
+int n_intt_layer = 4;
+int laddertype[4] = {PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
+		       PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
+		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
+		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI};
+int nladder[4] = {17,  17, 18, 18}; 
+double sensor_radius[6] = {6.876, 7.462, 10.835, 11.361};  // radius of center of sensor for layer default
+double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3]};
+#endif
+#ifdef INTTLADDER4_PP
+int n_intt_layer = 4;
+int laddertype[4] = {PHG4SiliconTrackerDefs::SEGMENTATION_PHI, 
+		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI, 
+		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
+		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI};
+int nladder[4] = {15,  15, 18, 18}; 
+double sensor_radius[6] = { 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
+double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3]};
+#endif
+#ifdef INTTLADDER0
+int n_intt_layer = 0;
+#endif
 
 int n_tpc_layer_inner = 16;
 int tpc_layer_rphi_count_inner = 1152;
@@ -135,7 +133,7 @@ double Tracking(PHG4Reco* g4Reco, double radius,
       
       for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
 	{
-	  if (verbosity)
+if (verbosity)
 	    cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
 		 << " pixel size 30 x 30 microns "
 		 << " active pixel thickness 0.0018 microns" << endl;
@@ -156,13 +154,13 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 	  lyr->OverlapCheck(maps_overlapcheck);
 	  
 	  lyr->set_string_param("stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v01.gdml"));
-
+	  
 	  g4Reco->registerSubsystem(lyr);
 	  
 	  radius = maps_layer_radius[ilayer];
 	}
     }
-
+  
   if (n_intt_layer > 0)
     {
       //-------------------
@@ -194,9 +192,12 @@ double Tracking(PHG4Reco* g4Reco, double radius,
       sitrack->OverlapCheck(intt_overlapcheck);
       g4Reco->registerSubsystem(sitrack);
       
-      // Update the laddertype and ladder spacing configuration
+      // Set the laddertype and ladder spacing configuration
+      cout << "INTT has " << n_intt_layer << " layers with layer setup:" << endl;
       for(int i=0;i<n_intt_layer;i++)
 	{
+	  cout << " INTT layer " << i << " laddertype " << laddertype[i] << " nladders " << nladder[i] 
+	       << " sensor radius " << sensor_radius[i] << " offsetphi " << offsetphi[i] << endl; 
 	  sitrack->set_int_param(i, "laddertype", laddertype[i]);
 	  sitrack->set_int_param(i, "nladder", nladder[i]);
 	  sitrack->set_double_param(i,"sensor_radius", sensor_radius[i]);  // expecting cm
