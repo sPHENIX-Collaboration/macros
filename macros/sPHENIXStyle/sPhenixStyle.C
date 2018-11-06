@@ -19,6 +19,7 @@ void SetsPhenixStyle ()
 
 TStyle* sPhenixStyle() 
 {
+  printf("loading sPHENIX style!\n");
   TStyle *sphenixStyle = new TStyle("sPHENIX","sPHENIX style");
 
   // use plain black on white colors
