@@ -174,7 +174,7 @@ void SetINTTLayout(int layout = 0)
       n_intt_layer = 0;
       break;
     }
-    case 8:	// Two outer layers, laddertypes 1-1 pushed out as far as possible
+    case 8:	// Two outer layers, laddertypes 1-1 pushed out as far as possiblef
     {
       n_intt_layer = 4;
       laddertype[0] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
@@ -616,7 +616,7 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4SiliconTrackerDigitiz
   //---------------------
 
   PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
-  kalman->Verbosity(0);
+  kalman->Verbosity(10);
   kalman->set_do_eval(true);
   if (use_primary_vertex)
     kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true

@@ -22,7 +22,8 @@
 
 config=0
 n_events=5000
-particle=pi+ # particle being thrown: pi+, mu+, e-
+particle=pi- # particle being thrown: pi+, mu+, e-
+#data=~/Documents/latest/macros/macros/g4simulations/data_gen
 data=/gpfs/mnt/gpfs04/sphenix/user/mitay/data # must be absolute path, no slash at end
 parent=mom_scan # parent directory
 
@@ -41,7 +42,7 @@ phi_max=180
 for pt in 0.5 0.6 0.7 0.8 0.9 1.0 2.0 3.0
 do
   # go through every INTT configuration
-  for i in 0 1 2 3 4 5 6 7 8
+  for i in 2
   do
     case $i in
       0) config=zppp ;;
@@ -61,6 +62,8 @@ do
 
     # directory="$particle"_pt"$pt_min"-"$pt_max"GeV_phi"$phi_min"-"$phi_max"d_z-"$z_width"-"$z_width"cm_eta"$eta_min"-"$eta_max"
     directory="$particle"_pt"$pt_min"GeV_phi"$phi_min"-"$phi_max"d_z"$z_width"cm_eta"$eta_min"-"$eta_max"
+    # directory="$particle"_pt"$pt_min"-"$pt_max"GeV_phi"$phi_min"-"$phi_max"d_z"$z_width"cm_eta"$eta_min"-"$eta_max"
+
 
     # check to see if there is a directory for this data set; create one if there isn't
     if [ ! -d "$data"/"$parent" ]; then

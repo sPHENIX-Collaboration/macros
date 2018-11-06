@@ -5,7 +5,7 @@ Executable	= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/jobs/
 Arguments	= $(n_events) $(i) $(z_width) $(eta_min) $(eta_max) $(pt_min) $(pt_max) $(phi_min) $(phi_max) $(particle) $(path) $(config)
 Requirements	= (CPU_Experiment == "phenix") && (CPU_Speed >= 1)
 Rank		= CPU_Speed
-Image_Size	= 200M
+Image_Size	= 625M
 Priority	= +20
 GetEnv		= True
 

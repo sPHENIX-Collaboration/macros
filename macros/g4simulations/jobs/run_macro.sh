@@ -6,6 +6,6 @@
 root.exe /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/Fun4All_G4_sPHENIX.C"("$1","$2","$3","$4","$5","$6","$7","$8","$9","\"${10}\"","\"G4_sPHENIX_${12}.root\"")"
 
 echo ${11}/G4_sPHENIX_${12}.root
-mv G4_sPHENIX_${12}.root_g4svtx_eval.root ${11}/G4_sPHENIX_${12}.root_g4svtxeval.root
+mv G4_sPHENIX_${12}.root_g4svtx_eval.root ${11}/G4_sPHENIX_${12}.root_g4svtx_eval.root
 mv PHG4TrackKalmanFitter_eval.root ${11}/G4_sPHENIX_${12}.root_g4kalman_eval.root
 exit
