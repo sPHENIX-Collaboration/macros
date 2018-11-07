@@ -1,3 +1,18 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <g4jets/ClusterJetInput.h>
+#include <g4jets/FastJetAlgo.h>
+#include <g4jets/JetReco.h>
+#include <g4jets/TowerJetInput.h>
+#include <g4jets/TrackJetInput.h>
+#include <g4jets/TruthJetInput.h>
+#include <g4eval/JetEvaluator.h>
+R__LOAD_LIBRARY(libg4jets.so)
+R__LOAD_LIBRARY(libg4eval.so)
+#endif
+
+void JetInit() {}
 
 void Jet_Reco(int verbosity = 0) {
 
@@ -6,7 +21,7 @@ void Jet_Reco(int verbosity = 0) {
   Fun4AllServer *se = Fun4AllServer::instance();
 
   // truth particle level jets
-  JetReco *truthjetreco = new JetReco();
+  JetReco *truthjetreco = new JetReco("TRUTHJETRECO");
   truthjetreco->add_input(new TruthJetInput(Jet::PARTICLE));
   truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2),"AntiKt_Truth_r02");
   truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3),"AntiKt_Truth_r03");
@@ -21,7 +36,7 @@ void Jet_Reco(int verbosity = 0) {
   se->registerSubsystem(truthjetreco);
 
   // tower jets
-  JetReco *towerjetreco = new JetReco();
+  JetReco *towerjetreco = new JetReco("TOWERJETRECO");
   towerjetreco->add_input(new TowerJetInput(Jet::CEMC_TOWER));
   towerjetreco->add_input(new TowerJetInput(Jet::HCALIN_TOWER));
   towerjetreco->add_input(new TowerJetInput(Jet::HCALOUT_TOWER));
@@ -38,7 +53,7 @@ void Jet_Reco(int verbosity = 0) {
   se->registerSubsystem(towerjetreco);
 
   // cluster jets
-  JetReco *clusterjetreco = new JetReco();
+  JetReco *clusterjetreco = new JetReco("CLUSTERJETRECO");
   clusterjetreco->add_input(new ClusterJetInput(Jet::CEMC_CLUSTER));
   clusterjetreco->add_input(new ClusterJetInput(Jet::HCALIN_CLUSTER));
   clusterjetreco->add_input(new ClusterJetInput(Jet::HCALOUT_CLUSTER));
@@ -55,7 +70,7 @@ void Jet_Reco(int verbosity = 0) {
   se->registerSubsystem(clusterjetreco);
   
   // track jets
-  JetReco *trackjetreco = new JetReco();
+  JetReco *trackjetreco = new JetReco("TRACKJETRECO");
   trackjetreco->add_input(new TrackJetInput(Jet::TRACK));
   trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2),"AntiKt_Track_r02");
   trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3),"AntiKt_Track_r03");
