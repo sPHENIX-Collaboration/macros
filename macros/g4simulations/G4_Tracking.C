@@ -43,7 +43,7 @@ enum enu_INTTDeadMapType
 };
 
 // Choose INTT deadmap here
-enu_INTTDeadMapType INTTDeadMapOption = kINTT4PercentDeadMap;
+enu_INTTDeadMapType INTTDeadMapOption = kINTTNoDeadMap;
 
 // ONLY if backward compatibility with hits files already generated with 8 inner TPC layers is needed, you can set this to "true"
 bool tpc_layers_40  = false;
