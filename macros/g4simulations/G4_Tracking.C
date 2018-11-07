@@ -34,6 +34,16 @@ R__LOAD_LIBRARY(libg4eval.so)
 // one and only one of these has to be defined, because #elseif does not seem to work properly in the interpreter
 #define INTTLADDER4_PP
 
+// Dead map options for INTT
+enum enu_INTTDeadMapType
+{
+  kINTTNoDeadMap = 0,       // All channel in INTT is alive
+  kINTT4PercentDeadMap = 4, // 4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
+  kINTT8PercentDeadMap = 8  // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
+};
+
+// Choose INTT deadmap here
+enu_INTTDeadMapType INTTDeadMapOption = kINTT4PercentDeadMap;
 
 // ONLY if backward compatibility with hits files already generated with 8 inner TPC layers is needed, you can set this to "true"
 bool tpc_layers_40  = false;
@@ -351,18 +361,41 @@ void Tracking_Reco(int verbosity = 0)
   if (n_intt_layer > 0)
   {
 
-    // Load pre-defined deadmaps
-    PHG4SvtxDeadMapLoader* deadMapINTT = new PHG4SvtxDeadMapLoader("SILICON_TRACKER");
-    for (int i = 0; i < n_intt_layer; i++)
+    if (INTTDeadMapOption != kINTTNoDeadMap)
     {
-      const int database_strip_type = (laddertype[i] == PHG4SiliconTrackerDefs::SEGMENTATION_Z) ? 0 : 1;
-      string DeadMapConfigName = Form("LadderType%d_RndSeed%d/", database_strip_type, i);
-      string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_4Percent/"); //4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
-//      string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_8Percent/"); // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
-      DeadMapPath +=  DeadMapConfigName;
-      deadMapINTT->deadMapPath(n_maps_layer + i, DeadMapPath);
+      // Load pre-defined deadmaps
+      PHG4SvtxDeadMapLoader* deadMapINTT = new PHG4SvtxDeadMapLoader("SILICON_TRACKER");
+      for (int i = 0; i < n_intt_layer; i++)
+      {
+        const int database_strip_type = (laddertype[i] == PHG4SiliconTrackerDefs::SEGMENTATION_Z) ? 0 : 1;
+        string DeadMapConfigName = Form("LadderType%d_RndSeed%d/", database_strip_type, i);
+
+
+        if (INTTDeadMapOption == kINTT4PercentDeadMap)
+        {
+
+          string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_4Percent/"); //4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
+          DeadMapPath +=  DeadMapConfigName;
+          deadMapINTT->deadMapPath(n_maps_layer + i, DeadMapPath);
+
+        }
+        else if (INTTDeadMapOption == kINTT8PercentDeadMap)
+        {
+
+          string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_8Percent/"); // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
+          DeadMapPath +=  DeadMapConfigName;
+          deadMapINTT->deadMapPath(n_maps_layer + i, DeadMapPath);
+
+        }
+        else
+        {
+          cout <<"Tracking_Reco - fatal error - invalid INTTDeadMapOption = "<<INTTDeadMapOption<<endl;
+          exit(1);
+        }
+      }
+//      deadMapINTT -> Verbosity(1);
+      se->registerSubsystem(deadMapINTT);
     }
-    se->registerSubsystem(deadMapINTT);
 
     // INTT
     // these should be used for the INTT
