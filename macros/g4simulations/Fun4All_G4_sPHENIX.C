@@ -1,5 +1,41 @@
-#include <iostream>
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/SubsysReco.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllDummyInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllNoSyncDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <g4main/PHG4ParticleGeneratorBase.h>
+#include <g4main/PHG4ParticleGenerator.h>
+#include <g4main/PHG4SimpleEventGenerator.h>
+#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
+#include <g4main/PHG4ParticleGun.h>
+#include <g4main/HepMCNodeReader.h>
+#include <g4detectors/PHG4DetectorSubsystem.h>
+#include <phool/recoConsts.h>
+#include <phpythia6/PHPythia6.h>
+#include <phpythia8/PHPythia8.h>
+#include <phhepmc/Fun4AllHepMCPileupInputManager.h>
+#include <phhepmc/Fun4AllHepMCInputManager.h>
+#include "G4Setup_sPHENIX.C"
+#include "G4_Bbc.C"
+#include "G4_Global.C"
+#include "G4_CaloTrigger.C"
+#include "G4_Jets.C"
+#include "G4_HIJetReco.C"
+#include "G4_DSTReader.C"
+#include "DisplayOn.C"
+R__LOAD_LIBRARY(libfun4all.so)
+R__LOAD_LIBRARY(libg4testbench.so)
+R__LOAD_LIBRARY(libphhepmc.so)
+R__LOAD_LIBRARY(libPHPythia6.so)
+R__LOAD_LIBRARY(libPHPythia8.so)
+#endif
+
 using namespace std;
+
 
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
@@ -249,56 +285,49 @@ int Fun4All_G4_sPHENIX(
     // If "readhepMC" is also set, the Upsilons will be embedded in Hijing events, if 'particles" is set, the Upsilons will be embedded in whatever particles are thrown
     if (upsilons)
     {
-     // run upsilons for momentum, dca performance, alone or embedded in Hijing
+      // run upsilons for momentum, dca performance, alone or embedded in Hijing
+
       for(int iups = 0; iups < num_upsilons_per_event;iups++)
+      {
+	PHG4ParticleGeneratorVectorMeson *vgen = new PHG4ParticleGeneratorVectorMeson();
+	vgen->add_decay_particles("e+", "e-", 0);  // i = decay id
+	// event vertex
+	if (readhepmc || do_embedding || particles || runpythia8 || runpythia6)
 	{
-	  PHG4ParticleGeneratorVectorMeson *vgen = new PHG4ParticleGeneratorVectorMeson();
-	  vgen->add_decay_particles("e+", "e-", 0);  // i = decay id
-	  // event vertex
-	  if (readhepmc || do_embedding || particles || runpythia8 || runpythia6 || iups > 0)
-	    {
-	      vgen->set_reuse_existing_vertex(true);
-	    }
-	  else
-	    {
-	      vgen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
-						    PHG4SimpleEventGenerator::Uniform,
-						    PHG4SimpleEventGenerator::Uniform);
-	      vgen->set_vertex_distribution_mean(0.0, 0.0, 0.0);
-	      vgen->set_vertex_distribution_width(0.0, 0.0, 5.0); 
-	    }
-	  
-	  // Note: this rapidity range completely fills the acceptance of eta = +/- 1 unit
-	  vgen->set_rapidity_range(-1.0, +1.0);
-	  vgen->set_pt_range(0.0, 10.0);
-	  
-	  int istate = 1;
-	  
-	  if (istate == 1)
-	    {
-	      // Upsilon(1S)
-	      vgen->set_mass(9.46);
-	      vgen->set_width(54.02e-6);
-	    }
-	  else if (istate == 2)
-	    {
-	      // Upsilon(2S)
-	      vgen->set_mass(10.0233);
-	      vgen->set_width(31.98e-6);
-	    }
-	  else
-	    {
-	      // Upsilon(3S)
-	      vgen->set_mass(10.3552);
-	      vgen->set_width(20.32e-6);
-	    }
-	  
-	  vgen->Verbosity(0);
-	  vgen->Embed(iups+3);  // unique gembed for each upsilon
-	  se->registerSubsystem(vgen);
-	  
-	  cout << "Upsilon generator for istate = " << istate << " created and registered " << endl;
+	  vgen->set_reuse_existing_vertex(true);
 	}
+
+	// Note: this rapidity range completely fills the acceptance of eta = +/- 1 unit
+	vgen->set_rapidity_range(-1.0, +1.0);
+	vgen->set_pt_range(0.0, 10.0);
+
+	int istate = 1;
+
+	if (istate == 1)
+	{
+	  // Upsilon(1S)
+	  vgen->set_mass(9.46);
+	  vgen->set_width(54.02e-6);
+	}
+	else if (istate == 2)
+	{
+	  // Upsilon(2S)
+	  vgen->set_mass(10.0233);
+	  vgen->set_width(31.98e-6);
+	}
+	else
+	{
+	  // Upsilon(3S)
+	  vgen->set_mass(10.3552);
+	  vgen->set_width(20.32e-6);
+	}
+
+	vgen->Verbosity(0);
+	vgen->Embed(3);
+	se->registerSubsystem(vgen);
+
+	cout << "Upsilon generator for istate = " << istate << " created and registered " << endl;
+      }
     }
   }
 
@@ -308,8 +337,13 @@ int Fun4All_G4_sPHENIX(
     // Detector description
     //---------------------
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+    G4Setup(absorberactive, magfield, EDecayType::kAll,
+            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, magfield_rescale);
+#else
     G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
             do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, magfield_rescale);
+#endif
   }
 
   //---------
@@ -520,7 +554,6 @@ int Fun4All_G4_sPHENIX(
                 /*bool*/ do_hcalout,
                 /*bool*/ do_cemc_twr,
                 /*bool*/ do_hcalin_twr,
-                /*bool*/ do_magnet,
                 /*bool*/ do_hcalout_twr);
   }
 
@@ -533,14 +566,14 @@ int Fun4All_G4_sPHENIX(
   //-----------------
   if (nEvents < 0)
   {
-    return;
+    return 0;
   }
   // if we run the particle generator and use 0 it'll run forever
   if (nEvents == 0 && !readhits && !readhepmc)
   {
     cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
     cout << "it will run forever, so I just return without running anything" << endl;
-    return;
+    return 0;
   }
 
   if(display_on)
@@ -563,4 +596,10 @@ int Fun4All_G4_sPHENIX(
   std::cout << "All done" << std::endl;
   delete se;
   gSystem->Exit(0);
+  return 0;
 }
+
+
+// This function is only used to test if we can load this as root6 macro
+// without running into unresolved libraries and include files
+void RunFFALoadTest() {}
