@@ -660,6 +660,19 @@ void Svtx_Reco(int verbosity = 0)
   if (n_intt_layer > 0)
   {
     // INTT
+
+    // Load pre-defined deadmaps
+    PHG4SvtxDeadMapLoader* deadMapINTT = new PHG4SvtxDeadMapLoader("SILICON_TRACKER");
+    for (int i = 0; i < n_intt_layer; i++)
+    {
+      string DeadMapConfigName = Form("LadderType%d_RndSeed%d/", laddertype[i], i);
+      string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_4Percent/"); //4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
+//      string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_8Percent/"); // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
+      DeadMapPath +=  DeadMapConfigName;
+      deadMapINTT->deadMapPath(n_maps_layer + i, DeadMapPath);
+    }
+    se->registerSubsystem(deadMapINTT);
+
     std::vector<double> userrange;  // 3-bit ADC threshold relative to the mip_e at each layer.
     // these should be used for the INTT
     userrange.push_back(0.05);
@@ -678,6 +691,8 @@ void Svtx_Reco(int verbosity = 0)
       digiintt->set_adc_scale(n_maps_layer + i, userrange);
     }
     se->registerSubsystem(digiintt);
+
+//    digiintt->Verbosity(1);
   }
 
   // TPC layers use the Svtx digitizer
@@ -693,23 +708,24 @@ void Svtx_Reco(int verbosity = 0)
   
   //-------------------------------------
   // Apply Live Area Inefficiency to Hits
+  // This is obsolete, please use PHG4SvtxDeadMapLoader instead for pre-defined deadmap
   //-------------------------------------
   // defaults to 1.0 (fully active)
 
-  PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
-
-  for (int i = 0; i < n_maps_layer; i++)
-  {
-    deadarea->Verbosity(verbosity);
-    //deadarea->set_hit_efficiency(i,0.99);
-    deadarea->set_hit_efficiency(i, 1.0);
-  }
-  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
-  {
-    //deadarea->set_hit_efficiency(i,0.99);
-    deadarea->set_hit_efficiency(i, 1.0);
-  }
-  se->registerSubsystem(deadarea);
+//  PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
+//
+//  for (int i = 0; i < n_maps_layer; i++)
+//  {
+//    deadarea->Verbosity(verbosity);
+//    //deadarea->set_hit_efficiency(i,0.99);
+//    deadarea->set_hit_efficiency(i, 1.0);
+//  }
+//  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
+//  {
+//    //deadarea->set_hit_efficiency(i,0.99);
+//    deadarea->set_hit_efficiency(i, 1.0);
+//  }
+//  se->registerSubsystem(deadarea);
 
   //-----------------------------
   // Apply MIP thresholds to Hits
