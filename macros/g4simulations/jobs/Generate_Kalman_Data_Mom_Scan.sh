@@ -20,9 +20,9 @@
 # layout 6 = no outer layers
 
 config=0
-n_events=400
-particle=pi+ # particle being thrown: pi+, mu+, e-
-data=sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/data_gen
+n_events=500
+particle=mu- # particle being thrown: pi+, mu+, e-
+data=/sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/data_gen
 parent=mom_scan # parent directory
 
 # verified correct layout by looking at truth particle data in ntp_hit
@@ -37,21 +37,22 @@ phi_min=-180
 phi_max=180
 
 # go through different momenta
-for pt in 2 4 6 8 #0.5 0.6 0.7 0.8 0.9 1
+for pt in 0.5
 do
   # go through every INTT configuration
-  for i in {0..7}
+  for i in 0
   do
     case $i in
-      0) config=0111 ;;
-      1) config=1101 ;;
-      2) config=101  ;;
-      3) config=111  ;;
-      4) config=01   ;;
-      5) config=11   ;;
-      6) config=1    ;;
-      7) config=n    ;;
-      *) config=x    ;;
+      0) config=zppp ;;
+      1) config=ppzp ;;
+      2) config=0pzp ;;
+      3) config=0ppp ;;
+      4) config=00zp ;;
+      5) config=00pp ;;
+      6) config=000p ;;
+      7) config=0000 ;;
+      8) config=00pp_out ;;
+      *) config=xxxx ;;
     esac
 
     pt_min="$pt"
@@ -61,22 +62,22 @@ do
     directory="$particle"_pt"$pt_min"GeV_phi"$phi_min"-"$phi_max"d_z"$z_width"cm_eta"$eta_min"-"$eta_max"
 
     # check to see if there is a directory for this data set; create one if there isn't
-    if [ ! -d /"$data"/"$parent" ]; then
-      mkdir /"$data"/"$parent"
+    if [ ! -d "$data"/"$parent" ]; then
+      mkdir "$data"/"$parent"
     fi
 
-    if [ ! -d /"$data"/"$parent"/"$directory" ]; then
-      mkdir /"$data"/"$parent"/"$directory"
+    if [ ! -d "$data"/"$parent"/"$directory" ]; then
+      mkdir "$data"/"$parent"/"$directory"
     fi
 
     # syntax: Fun4All_G4_sPHENIX(#_events,INTT_layout,output_file_name)
-    root.exe Fun4All_G4_sPHENIX.C"("$n_events","$i","$z_width","$eta_min","$eta_max","$pt_min","$pt_max","$phi_min","$phi_max","\"$particle\"","\"/"$data"/"$parent"/"$directory"/G4_sPHENIX_"$config".root\"")"
+    root.exe ../Fun4All_G4_sPHENIX.C"("$n_events","$i","$z_width","$eta_min","$eta_max","$pt_min","$pt_max","$phi_min","$phi_max","\"$particle\"","\""$data"/"$parent"/"$directory"/G4_sPHENIX_"$config".root\"")"
 
     # the output file is automatically named PHG4TrackKalmanFitter_eval.root
     # this file name is set in coresoftware/simulation/g4simulation/g4hough/PHG4TrackKalmanFitter.C
     # in order to change it, the library must be recompiled
     # thus we must move and rename each file after it is generated so it will not be overwritten
-    mv PHG4TrackKalmanFitter_eval.root /"$data"/"$parent"/"$directory"/G4_sPHENIX_"$config".root_g4kalman_eval.root
+    mv PHG4TrackKalmanFitter_eval.root "$data"/"$parent"/"$directory"/G4_sPHENIX_"$config".root_g4kalman_eval.root
   done
 done
 

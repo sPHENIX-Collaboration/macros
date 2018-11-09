@@ -1,22 +1,23 @@
 Universe	= vanilla
-Notification	= Complete
-Executable	= run_macro.sh
-# Executable	= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/jobs/run_macro.sh #absolute path to shell script
+# Notification	= Complete
+# Executable	= run_macro.sh
+# Executable	= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/jobs/run_macro.sh
+Executable	= /direct/star+u/rcorliss/sphenix/macros/macros/g4simulations/jobs/run_macro.sh
 Arguments	= $(n_events) $(i) $(z_width) $(eta_min) $(eta_max) $(pt_min) $(pt_max) $(phi_min) $(phi_max) $(particle) $(path) $(config)
-Requirements	= (CPU_Experiment == "phenix") 
-# && (CPU_Speed >= 1)
+Requirements	= (CPU_Experiment == "phenix") && (CPU_Speed >= 1)
 Rank		= CPU_Speed
-Image_Size	= 200M
+Image_Size	= 625M
 Priority	= +20
 GetEnv		= True
 
 # Used to give jobs a directory with respect to file input and output.
 # Initialdir	= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/
 
-Output		= /direct/star+u/rcorliss/sphenix/macros/macros/g4simulations/jobs/log/$(Cluster).out
-Error		= /direct/star+u/rcorliss/sphenix/macros/macros/g4simulations/jobs/log/$(Cluster).err
-Log		= /direct/star+u/rcorliss/sphenix/macros/macros/g4simulations/jobs/log/$(Cluster).log
-Notify_user	= rcorliss@mit.edu
+Output		= /gpfs/mnt/gpfs04/sphenix/user/rcorliss/log/$(Cluster).out
+Error		= /gpfs/mnt/gpfs04/sphenix/user/rcorliss/log/$(Cluster).err
+Log		= /gpfs/mnt/gpfs04/sphenix/user/rcorliss/log/$(Cluster).log
+# Notify_user	= mitay@mit.edu
+
 +Experiment	= "phenix"
 +Job_Type	= "cas"
 
