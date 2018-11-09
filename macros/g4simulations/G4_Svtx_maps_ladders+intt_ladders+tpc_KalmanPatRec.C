@@ -586,7 +586,7 @@ void Svtx_Cells(int verbosity = 0)
     string TPC_distortion_file =
         string(getenv("CALIBRATIONROOT")) +
         Form("/Tracking/TPC/SpaceChargeDistortion/TPCCAGE_20_78_211_2.root");
-    PHG4TPCSpaceChargeDistortion* tpc_distortion =
+    tpc_distortion =
         new PHG4TPCSpaceChargeDistortion(TPC_distortion_file);
     //tpc_distortion -> setAccuracy(0); // option to over write default  factors
     //tpc_distortion -> setPrecision(0.001); // option to over write default  factors      // default is 0.001
