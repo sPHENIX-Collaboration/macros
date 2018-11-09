@@ -20,7 +20,7 @@
 # layout 6 = no outer layers
 
 config=0
-n_events=400
+n_events=5000
 particle=pi+ # particle being thrown: pi+, mu+, e-
 data=direct/star+u/rcorliss/sphenix/macros/macros/g4simulations/data_gen #ross's path
 #data=sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/data_gen # must be absolute path, no slashes at beginning or end
