@@ -1,3 +1,15 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <g4jets/FastJetAlgo.h>
+#include <g4jets/JetReco.h>
+#include <g4jets/TowerJetInput.h>
+#include <g4eval/JetEvaluator.h>
+R__LOAD_LIBRARY(libg4jets.so)
+R__LOAD_LIBRARY(libg4eval.so)
+#endif
+
+void Jet_FwdRecoInit() {}
 
 void Jet_FwdReco(int verbosity = 0) {
 
