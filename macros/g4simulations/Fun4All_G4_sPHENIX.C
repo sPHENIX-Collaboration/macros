@@ -73,7 +73,7 @@ int Fun4All_G4_sPHENIX(
 
   bool do_pstof = false;
 
-  bool cemc = false;
+  bool do_cemc = false;
 //  bool do_cemc = true;
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
