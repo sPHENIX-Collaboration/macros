@@ -1,4 +1,13 @@
-using namespace std;
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include <g4detectors/PHG4SectorSubsystem.h>
+#include <g4main/PHG4Reco.h>
+int make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
+                 double etamax,  const int N_Sector = 8);
+void AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem);
+R__LOAD_LIBRARY(libg4detectors.so)
+#endif
 
 void
 EGEM_Init()
@@ -258,5 +267,5 @@ make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
   g4Reco->registerSubsystem(gem);
-
+  return 0;
 }
