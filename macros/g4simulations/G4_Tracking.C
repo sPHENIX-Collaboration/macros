@@ -2,21 +2,20 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 #include "GlobalVariables.C"
 #include <fun4all/Fun4AllServer.h>
-#include <g4detectors/PHG4MapsCellReco.h>
-#include <g4detectors/PHG4MapsSubsystem.h>
-#include <g4detectors/PHG4SiliconTrackerCellReco.h>
-#include <g4detectors/PHG4SiliconTrackerDefs.h>
-#include <g4detectors/PHG4SiliconTrackerSubsystem.h>
+#include <g4mvtx/PHG4MVTXCellReco.h>
+#include <g4mvtx/PHG4MVTXSubsystem.h>
+#include <g4intt/PHG4INTTCellReco.h>
+#include <g4intt/PHG4INTTDefs.h>
+#include <g4intt/PHG4INTTSubsystem.h>
+#include <g4intt/PHG4INTTDigitizer.h>
 #include <g4detectors/PHG4TPCSpaceChargeDistortion.h>
 #include <g4eval/SvtxEvaluator.h>
 #include <g4hough/PHG4GenFitTrackProjection.h>
 #include <g4hough/PHG4KalmanPatRec.h>
-#include <g4hough/PHG4SiliconTrackerDigitizer.h>
 #include <g4hough/PHG4SvtxClusterizer.h>
 #include <g4hough/PHG4SvtxDeadArea.h>
 #include <g4hough/PHG4SvtxDigitizer.h>
 #include <g4hough/PHG4SvtxThresholds.h>
-#include <g4hough/PHG4TPCClusterizer.h>
 #include <g4hough/PHG4TrackKalmanFitter.h>
 #include <g4hough/PHG4TruthPatRec.h>
 #include <g4main/PHG4Reco.h>
@@ -24,7 +23,11 @@
 #include <g4tpc/PHG4TPCPadPlane.h>
 #include <g4tpc/PHG4TPCPadPlaneReadout.h>
 #include <g4tpc/PHG4TPCSubsystem.h>
+#include <g4tpc/PHG4TPCDigitizer.h>
+#include <tpc/TPCClusterizer.h>
 R__LOAD_LIBRARY(libg4tpc.so)
+R__LOAD_LIBRARY(libg4intt.so)
+R__LOAD_LIBRARY(libg4mvtx.so)
 R__LOAD_LIBRARY(libg4hough.so)
 R__LOAD_LIBRARY(libg4eval.so)
 #endif
@@ -60,46 +63,46 @@ const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX com
 #ifdef INTTLADDER8
 int n_intt_layer = 8;  
 // default layer configuration
-int laddertype[8] = {PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
-		     PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		     PHG4SiliconTrackerDefs::SEGMENTATION_PHI};  // default
+int laddertype[8] = {PHG4INTTDefs::SEGMENTATION_Z, 
+		     PHG4INTTDefs::SEGMENTATION_Z, 
+		     PHG4INTTDefs::SEGMENTATION_PHI,
+		     PHG4INTTDefs::SEGMENTATION_PHI,
+		     PHG4INTTDefs::SEGMENTATION_PHI,
+		     PHG4INTTDefs::SEGMENTATION_PHI,
+		     PHG4INTTDefs::SEGMENTATION_PHI,
+		     PHG4INTTDefs::SEGMENTATION_PHI};  // default
 int nladder[8] = {17,  17, 15, 15, 18, 18, 21, 21};  // default
 double sensor_radius[8] = {6.876, 7.462, 8.987, 9.545, 10.835, 11.361, 12.676, 13.179};  // radius of center of sensor for layer default
 double offsetphi[8] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3], 0.0, 0.5 * 360.0 / nladder[5], 0.0, 0.5 * 360.0 / nladder[7]};
 #endif
 #ifdef INTTLADDER6
 int n_intt_layer = 6;
-int laddertype[6] = {PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
-		       PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
-		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI };
+int laddertype[6] = {PHG4INTTDefs::SEGMENTATION_Z, 
+		       PHG4INTTDefs::SEGMENTATION_Z, 
+		       PHG4INTTDefs::SEGMENTATION_PHI,
+		       PHG4INTTDefs::SEGMENTATION_PHI,
+		       PHG4INTTDefs::SEGMENTATION_PHI,
+		       PHG4INTTDefs::SEGMENTATION_PHI };
 int nladder[6] = {17,  17, 15, 15, 18, 18}; 
 double sensor_radius[6] = {6.876, 7.462, 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
 double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3], 0.0, 0.5 * 360.0 / nladder[5]};
 #endif
 #ifdef INTTLADDER4_ZP
 int n_intt_layer = 4;
-int laddertype[4] = {PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
-		       PHG4SiliconTrackerDefs::SEGMENTATION_Z, 
-		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI};
+int laddertype[4] = {PHG4INTTDefs::SEGMENTATION_Z, 
+		       PHG4INTTDefs::SEGMENTATION_Z, 
+		       PHG4INTTDefs::SEGMENTATION_PHI,
+		       PHG4INTTDefs::SEGMENTATION_PHI};
 int nladder[4] = {17,  17, 18, 18}; 
 double sensor_radius[6] = {6.876, 7.462, 10.835, 11.361};  // radius of center of sensor for layer default
 double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3]};
 #endif
 #ifdef INTTLADDER4_PP
 int n_intt_layer = 4;
-int laddertype[4] = {PHG4SiliconTrackerDefs::SEGMENTATION_PHI, 
-		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI, 
-		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI,
-		       PHG4SiliconTrackerDefs::SEGMENTATION_PHI};
+int laddertype[4] = {PHG4INTTDefs::SEGMENTATION_PHI, 
+		       PHG4INTTDefs::SEGMENTATION_PHI, 
+		       PHG4INTTDefs::SEGMENTATION_PHI,
+		       PHG4INTTDefs::SEGMENTATION_PHI};
 int nladder[4] = {15,  15, 18, 18}; 
 double sensor_radius[6] = { 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
 double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3]};
@@ -143,12 +146,12 @@ double Tracking(PHG4Reco* g4Reco, double radius,
       
       for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
 	{
-if (verbosity)
+	  if (verbosity)
 	    cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
 		 << " pixel size 30 x 30 microns "
 		 << " active pixel thickness 0.0018 microns" << endl;
 	  
-	  PHG4MapsSubsystem* lyr = new PHG4MapsSubsystem("MAPS", ilayer, stave_type[ilayer]);
+	  PHG4MVTXSubsystem* lyr = new PHG4MVTXSubsystem("MVTX", ilayer, stave_type[ilayer]);
 	  lyr->Verbosity(verbosity);
 	  
 	  lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
@@ -179,11 +182,11 @@ if (verbosity)
       
       bool intt_overlapcheck = false;  // set to true if you want to check for overlaps
       
-      // instantiate the Silicon tracker subsystem and register it
-      // We make one instance of PHG4TrackerSubsystem for all four layers of tracker
+      // instantiate the INTT subsystem and register it
+      // We make one instance of PHG4INTTSubsystem for all four layers of tracker
       // dimensions are in mm, angles are in radians
       
-      // PHG4SiliconTrackerSubsystem creates the detetor layer using PHG4SiliconTrackerDetector
+      // PHG4INTTSubsystem creates the detetor layer using PHG4INTTDetector
       // and instantiates the appropriate PHG4SteppingAction
       const double intt_radius_max = 140.;  // including stagger radius (mm)
       
@@ -196,7 +199,7 @@ if (verbosity)
 	  if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
 	}
       
-      PHG4SiliconTrackerSubsystem* sitrack = new PHG4SiliconTrackerSubsystem("SILICON_TRACKER", vpair);
+      PHG4INTTSubsystem* sitrack = new PHG4INTTSubsystem("INTT", vpair);
       sitrack->Verbosity(verbosity);
       sitrack->SetActive(1);
       sitrack->OverlapCheck(intt_overlapcheck);
@@ -257,6 +260,10 @@ void Tracking_Cells(int verbosity = 0)
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4detectors.so");
   gSystem->Load("libg4tpc.so");
+  gSystem->Load("libg4mvtx.so");
+  gSystem->Load("libtpc.so");
+  gSystem->Load("libintt.so");
+
 
   //---------------
   // Fun4All server
@@ -270,7 +277,7 @@ void Tracking_Cells(int verbosity = 0)
   if (n_maps_layer > 0)
   {
     // MAPS cells
-    PHG4MapsCellReco* maps_cells = new PHG4MapsCellReco("MAPS");
+    PHG4MVTXCellReco* maps_cells = new PHG4MVTXCellReco("MVTX");
     maps_cells->Verbosity(verbosity);
     for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
     {
@@ -284,7 +291,7 @@ void Tracking_Cells(int verbosity = 0)
   if (n_intt_layer > 0)
   {
     // INTT cells
-    PHG4SiliconTrackerCellReco* reco = new PHG4SiliconTrackerCellReco("SILICON_TRACKER");
+    PHG4INTTCellReco* reco = new PHG4INTTCellReco("INTT");
     // The timing windows are hard-coded in the INTT ladder model, they can be overridden here
     //reco->set_double_param("tmax",80.0);
     //reco->set_double_param("tmin",-20.0);
@@ -351,12 +358,15 @@ void Tracking_Reco(int verbosity = 0)
   //----------------------------------
   // Digitize the cell energy into ADC
   //----------------------------------
-  PHG4SvtxDigitizer* digi = new PHG4SvtxDigitizer();
-  digi->Verbosity(0);
+
+  // MVTX
+  PHG4SvtxDigitizer* digimvtx = new PHG4SvtxDigitizer();
+  digimvtx->Verbosity(0);
   for (int i = 0; i < n_maps_layer; ++i)
   {
-    digi->set_adc_scale(i, 255, 0.4e-6);  // reduced by a factor of 2.5 when going from maps thickess of 50 microns to 18 microns
+    digimvtx->set_adc_scale(i, 255, 0.4e-6);  // reduced by a factor of 2.5 when going from maps thickess of 50 microns to 18 microns
   }
+  se->registerSubsystem(digimvtx);
 
   if (n_intt_layer > 0)
   {
@@ -364,10 +374,10 @@ void Tracking_Reco(int verbosity = 0)
     if (INTTDeadMapOption != kINTTNoDeadMap)
     {
       // Load pre-defined deadmaps
-      PHG4SvtxDeadMapLoader* deadMapINTT = new PHG4SvtxDeadMapLoader("SILICON_TRACKER");
+      PHG4SvtxDeadMapLoader* deadMapINTT = new PHG4SvtxDeadMapLoader("INTT");
       for (int i = 0; i < n_intt_layer; i++)
       {
-        const int database_strip_type = (laddertype[i] == PHG4SiliconTrackerDefs::SEGMENTATION_Z) ? 0 : 1;
+        const int database_strip_type = (laddertype[i] == PHG4INTTDefs::SEGMENTATION_Z) ? 0 : 1;
         string DeadMapConfigName = Form("LadderType%d_RndSeed%d/", database_strip_type, i);
 
 
@@ -417,7 +427,7 @@ The result threshold table based on FPHX default value is as following
 | 9                     | Threshold DAC 5 | 112           | 448                 | 35000                             | 28000     | 8.18E-01        |
 | 10                    | Threshold DAC 6 | 144           | 576                 | 45000                             | 36000     | 1.05E+00        |
 | 11                    | Threshold DAC 7 | 176           | 704                 | 55000                             | 44000     | 1.29E+00        |
-DAC0-7 threshold as fraction to MIP voltage are set to PHG4SiliconTrackerDigitizer::set_adc_scale as 3-bit ADC threshold as fractions to MIP energy deposition.
+DAC0-7 threshold as fraction to MIP voltage are set to PHG4INTTDigitizer::set_adc_scale as 3-bit ADC threshold as fractions to MIP energy deposition.
      */
     std::vector<double> userrange;  // 3-bit ADC threshold relative to the mip_e at each layer.
     userrange.push_back(0.0584625322997416);
@@ -429,7 +439,7 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4SiliconTrackerDigitiz
     userrange.push_back(1.05232558139535);
     userrange.push_back(1.28617571059432);
 
-    PHG4SiliconTrackerDigitizer* digiintt = new PHG4SiliconTrackerDigitizer();
+    PHG4INTTDigitizer* digiintt = new PHG4INTTDigitizer();
     digiintt->Verbosity(verbosity);
     for (int i = 0; i < n_intt_layer; i++)
     {
@@ -438,16 +448,17 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4SiliconTrackerDigitiz
     se->registerSubsystem(digiintt);
   }
 
- // TPC layers use the Svtx digitizer
-  digi->SetTPCMinLayer(n_maps_layer + n_intt_layer);
+  // TPC
+  PHG4TPCDigitizer* digitpc = new PHG4TPCDigitizer();
+  digitpc->SetTPCMinLayer(n_maps_layer + n_intt_layer);
   double ENC = 670.0;  // standard
-  digi->SetENC(ENC);  
+  digitpc->SetENC(ENC);  
   double ADC_threshold = 4.0*ENC; 
-  digi->SetADCThreshold(ADC_threshold);  // 4 * ENC seems OK
+  digitpc->SetADCThreshold(ADC_threshold);  // 4 * ENC seems OK
     cout << " TPC digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold 
        << " maps+INTT layers set to " << n_maps_layer + n_intt_layer << endl;
  
-  se->registerSubsystem(digi);
+  se->registerSubsystem(digitpc);
 
   //-------------------------------------
   // Apply Live Area Inefficiency to Hits
@@ -492,25 +503,29 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4SiliconTrackerDigitiz
   // Cluster Hits
   //-------------
 
-  // For the silicon layers
-  PHG4SvtxClusterizer* clusterizer = new PHG4SvtxClusterizer("PHG4SvtxClusterizer", 0, n_maps_layer + n_intt_layer - 1);
-  clusterizer->Verbosity(verbosity);
+  // For the MVTX layers
+  PHG4SvtxClusterizer* mvtxclusterizer = new PHG4SvtxClusterizer("PHG4SvtxClusterizer", 0, n_maps_layer - 1);
+  mvtxclusterizer->Verbosity(verbosity);
   // Reduced by 2 relative to the cylinder cell maps macro. I found this necessary to get full efficiency
   // Many hits in the present simulation are single cell hits, so it is not clear why the cluster threshold should be higher than the cell threshold
-  clusterizer->set_threshold(0.1);  // fraction of a mip
+  mvtxclusterizer->set_threshold(0.1);  // fraction of a mip
+  se->registerSubsystem(mvtxclusterizer);
 
+  // For the INTT layers 
+  INTTClusterizer* inttclusterizer = new INTTClusterizer("INTTClusterizer", n_maps_layer, n_maps_layer + n_intt_layer - 1);
+  inttclusterizer->Verbosity(verbosity);
   // no Z clustering for INTT type 1 layers (we DO want Z clustering for type 0 layers)
   // turning off phi clustering for type 0 layers is not necessary, there is only one strip per sensor in phi
   for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
   {
-    if(laddertype[i-n_maps_layer] == PHG4SiliconTrackerDefs::SEGMENTATION_PHI)
-      clusterizer->set_z_clustering(i, false);
+    if(laddertype[i-n_maps_layer] == PHG4INTTDefs::SEGMENTATION_PHI)
+      inttclusterizer->set_z_clustering(i, false);
   }
-  se->registerSubsystem(clusterizer);
+  se->registerSubsystem(inttclusterizer);
 
   // For the TPC
   
-  PHG4TPCClusterizer* tpcclusterizer = new PHG4TPCClusterizer();
+  TPCClusterizer* tpcclusterizer = new TPCClusterizer();
   tpcclusterizer->Verbosity(0);
   tpcclusterizer->setRangeLayers(n_maps_layer + n_intt_layer, Max_si_layer);
   tpcclusterizer->setEnergyCut(15 /*adc*/);
@@ -531,7 +546,7 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4SiliconTrackerDigitiz
     
     for(int i = 0;i<n_intt_layer;i++)
       {
-	if(laddertype[i] == PHG4SiliconTrackerDefs::SEGMENTATION_Z)
+	if(laddertype[i] == PHG4INTTDefs::SEGMENTATION_Z)
 	  {
 	    // strip length is along phi
 	    kalman_pat_rec->set_max_search_win_theta_intt(i, 0.010);
