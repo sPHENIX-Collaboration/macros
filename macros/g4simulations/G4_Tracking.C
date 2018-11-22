@@ -2,19 +2,14 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 #include "GlobalVariables.C"
 #include <fun4all/Fun4AllServer.h>
-#include <g4mvtx/PHG4MVTXCellReco.h>
-#include <g4mvtx/PHG4MVTXSubsystem.h>
 #include <g4intt/PHG4INTTCellReco.h>
 #include <g4intt/PHG4INTTDefs.h>
 #include <g4intt/PHG4INTTSubsystem.h>
-#include <g4intt/PHG4INTTDigitizer.h>
 #include <g4detectors/PHG4TPCSpaceChargeDistortion.h>
 #include <g4eval/SvtxEvaluator.h>
 #include <g4hough/PHG4GenFitTrackProjection.h>
 #include <g4hough/PHG4KalmanPatRec.h>
-#include <g4hough/PHG4SvtxClusterizer.h>
 #include <g4hough/PHG4SvtxDeadArea.h>
-#include <g4hough/PHG4SvtxDigitizer.h>
 #include <g4hough/PHG4SvtxThresholds.h>
 #include <g4hough/PHG4TrackKalmanFitter.h>
 #include <g4hough/PHG4TruthPatRec.h>
@@ -23,7 +18,13 @@
 #include <g4tpc/PHG4TPCPadPlane.h>
 #include <g4tpc/PHG4TPCPadPlaneReadout.h>
 #include <g4tpc/PHG4TPCSubsystem.h>
+#include <g4mvtx/PHG4MVTXCellReco.h>
+#include <g4mvtx/PHG4MVTXSubsystem.h>
+#include <g4mvtx/PHG4MVTXDigitizer.h>
+#include <g4intt/PHG4INTTDigitizer.h>
 #include <g4tpc/PHG4TPCDigitizer.h>
+#include <mvtx/MVTXClusterizer.h>
+#include <intt/INTTClusterizer.h>
 #include <tpc/TPCClusterizer.h>
 R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libg4intt.so)
@@ -263,6 +264,7 @@ void Tracking_Cells(int verbosity = 0)
   gSystem->Load("libg4mvtx.so");
   gSystem->Load("libtpc.so");
   gSystem->Load("libintt.so");
+  gSystem->Load("libmvtx.so");
 
 
   //---------------
@@ -360,7 +362,7 @@ void Tracking_Reco(int verbosity = 0)
   //----------------------------------
 
   // MVTX
-  PHG4SvtxDigitizer* digimvtx = new PHG4SvtxDigitizer();
+  PHG4MVTXDigitizer* digimvtx = new PHG4MVTXDigitizer();
   digimvtx->Verbosity(0);
   for (int i = 0; i < n_maps_layer; ++i)
   {
@@ -504,7 +506,8 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4INTTDigitizer::set_ad
   //-------------
 
   // For the MVTX layers
-  PHG4SvtxClusterizer* mvtxclusterizer = new PHG4SvtxClusterizer("PHG4SvtxClusterizer", 0, n_maps_layer - 1);
+  //PHG4SvtxClusterizer* mvtxclusterizer = new PHG4SvtxClusterizer("PHG4SvtxClusterizer", 0, n_maps_layer - 1);
+  MVTXClusterizer* mvtxclusterizer = new MVTXClusterizer("MVTXClusterizer", 0, n_maps_layer - 1);
   mvtxclusterizer->Verbosity(verbosity);
   // Reduced by 2 relative to the cylinder cell maps macro. I found this necessary to get full efficiency
   // Many hits in the present simulation are single cell hits, so it is not clear why the cluster threshold should be higher than the cell threshold
