@@ -1,3 +1,21 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include <caloreco/RawClusterBuilderGraph.h>
+#include <caloreco/RawClusterBuilderTemplate.h>
+#include <caloreco/RawTowerCalibration.h>
+#include <fun4all/Fun4AllServer.h>
+#include <g4calo/RawTowerBuilder.h>
+#include <g4calo/RawTowerDigitizer.h>
+#include <g4detectors/PHG4CylinderCellReco.h>
+#include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4eval/CaloEvaluator.h>
+#include <g4main/PHG4Reco.h>
+R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libg4calo.so)
+R__LOAD_LIBRARY(libg4detectors.so)
+R__LOAD_LIBRARY(libg4eval.so)
+#endif
 
 double cemcdepth = 9;
 // tungs to scint width ratio of ~10:1
@@ -138,6 +156,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     cemc_cyl->SetActive();
   cemc_cyl->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(cemc_cyl);
+  return radius;
 }
 
 void CEMC_Cells(int verbosity = 0) {

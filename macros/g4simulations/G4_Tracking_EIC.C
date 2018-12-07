@@ -1,3 +1,12 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <g4eval/SvtxEvaluator.h>
+#include <g4hough/PHG4TrackFastSim.h>
+class SubsysReco;
+R__LOAD_LIBRARY(libg4eval.so)
+#endif
+
 #include <vector>
 
 #include "G4_GEM_EIC.C"
@@ -28,7 +37,7 @@ double Tracking(PHG4Reco* g4Reco, double radius,
   /* Place central tracking detectors */
   Svtx(g4Reco, radius);
 
-  return;
+  return radius;
 }
 
 void Tracking_Reco(int verbosity = 0)
@@ -63,7 +72,7 @@ void Tracking_Reco(int verbosity = 0)
   //kalman->set_pat_rec_hit_finding_eff(1.);
   //kalman->set_pat_rec_noise_prob(0.);
   std::string phg4hits_names[] = {"G4HIT_SVTX","G4HIT_MAPS","G4HIT_EGEM_0","G4HIT_EGEM_1","G4HIT_EGEM_2","G4HIT_EGEM_3","G4HIT_FGEM_0","G4HIT_FGEM_1","G4HIT_FGEM_2","G4HIT_FGEM_3","G4HIT_FGEM_4"};
-  int dettypes[] = {PHG4TrackFastSim::Cylinder,PHG4TrackFastSim::Cylinder,
+  const PHG4TrackFastSim::DETECTOR_TYPE dettypes[] = {PHG4TrackFastSim::Cylinder,PHG4TrackFastSim::Cylinder,
 		    PHG4TrackFastSim::Vertical_Plane,PHG4TrackFastSim::Vertical_Plane,
 		    PHG4TrackFastSim::Vertical_Plane,PHG4TrackFastSim::Vertical_Plane,
 		    PHG4TrackFastSim::Vertical_Plane,PHG4TrackFastSim::Vertical_Plane,
@@ -133,6 +142,8 @@ void Tracking_Eval(std::string outputfile, int verbosity = 0)
   // se->registerSubsystem( eval );
 
 }
+// this uses a library which is not in our build
+/*
 void Fast_Tracking_Eval(std::string outputfile, int verbosity = 0)
 {
   gSystem->Load("libFastTrackingEval.so");
@@ -145,3 +156,4 @@ void Fast_Tracking_Eval(std::string outputfile, int verbosity = 0)
 
   return;
 }
+*/

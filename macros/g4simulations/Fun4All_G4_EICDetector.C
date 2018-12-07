@@ -1,3 +1,44 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/SubsysReco.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllDummyInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllNoSyncDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <g4main/PHG4ParticleGeneratorBase.h>
+#include <g4main/PHG4ParticleGenerator.h>
+#include <g4main/PHG4SimpleEventGenerator.h>
+#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
+#include <g4main/PHG4ParticleGun.h>
+#include <g4main/HepMCNodeReader.h>
+#include <g4detectors/PHG4DetectorSubsystem.h>
+#include <g4eval/PHG4DSTReader.h>
+#include <phhepmc/Fun4AllHepMCInputManager.h>
+#include <phool/recoConsts.h>
+#include <phpythia6/PHPythia6.h>
+#include <phpythia8/PHPythia8.h>
+#include <phsartre/PHSartre.h>
+#include <phsartre/PHSartreParticleTrigger.h>
+#include "G4Setup_EICDetector.C"
+#include "G4_Bbc.C"
+#include "G4_Global.C"
+#include "G4_CaloTrigger.C"
+#include "G4_Jets.C"
+#include "G4_HIJetReco.C"
+#include "G4_FwdJets.C"
+#include "G4_DSTReader_EICDetector.C"
+#include "DisplayOn.C"
+R__LOAD_LIBRARY(libfun4all.so)
+R__LOAD_LIBRARY(libg4testbench.so)
+R__LOAD_LIBRARY(libPHPythia6.so)
+R__LOAD_LIBRARY(libPHPythia8.so)
+#endif
+
+using namespace std;
+
 int Fun4All_G4_EICDetector(
                            const int nEvents = 1,
                            const char * inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
@@ -213,6 +254,7 @@ int Fun4All_G4_EICDetector(
       pythia6->set_config_file("phpythia6_ep.cfg");
       se->registerSubsystem(pythia6);
     }
+/*
   else if (runhepgen)
     {
       gSystem->Load("libsHEPGen.so");
@@ -225,6 +267,7 @@ int Fun4All_G4_EICDetector(
       hepgen->set_momentum_hadron(250);
       se->registerSubsystem(hepgen);
     }
+*/
   else if (runsartre)
     {
       // see coresoftware/generators/PHSartre/README for setup instructions
@@ -310,10 +353,6 @@ int Fun4All_G4_EICDetector(
         {
           vgen->set_reuse_existing_vertex(true);
         }
-      else
-        {
-          vgen->set_vtx_zrange(-10.0, +10.0);
-        }
 
       // Note: this rapidity range completely fills the acceptance of eta = +/- 1 unit
       vgen->set_rapidity_range(-1.0, +1.0);
@@ -353,10 +392,17 @@ int Fun4All_G4_EICDetector(
       // Detector description
       //---------------------
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+      G4Setup(absorberactive, magfield, EDecayType::kAll,
+              do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_plugdoor,
+              do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,
+              magfield_rescale);
+#else
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
               do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_plugdoor,
               do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,
               magfield_rescale);
+#endif
 
     }
 
@@ -477,8 +523,9 @@ int Fun4All_G4_EICDetector(
   //----------------------
   // Simulation evaluation
   //----------------------
-
-  if (do_svtx_eval) Fast_Tracking_Eval(string(outputFile) + "_g4svtx_eval.root");
+// commented out because
+// Fast_Tracking_Eval function uses a library which is not part of our build
+//  if (do_svtx_eval) Fast_Tracking_Eval(string(outputFile) + "_g4svtx_eval.root");
 
   if (do_cemc_eval) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
 
@@ -535,7 +582,6 @@ int Fun4All_G4_EICDetector(
                                /*bool*/ do_hcalout ,
                                /*bool*/ do_cemc_twr ,
                                /*bool*/ do_hcalin_twr ,
-                               /*bool*/ do_magnet  ,
                                /*bool*/ do_hcalout_twr,
                                /*bool*/ do_FHCAL,
                                /*bool*/ do_FHCAL_twr,
@@ -555,14 +601,14 @@ int Fun4All_G4_EICDetector(
   //-----------------
   if (nEvents < 0)
     {
-      return;
+      return 0;
     }
   // if we run the particle generator and use 0 it'll run forever
   if (nEvents == 0 && !readhits && !readhepmc)
     {
       cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
       cout << "it will run forever, so I just return without running anything" << endl;
-      return;
+      return 0;
     }
 
   se->run(nEvents);
@@ -575,4 +621,9 @@ int Fun4All_G4_EICDetector(
   std::cout << "All done" << std::endl;
   delete se;
   gSystem->Exit(0);
+  return 0;
 }
+
+// This function is only used to test if we can load this as root6 macro
+// without running into unresolved libraries and include files
+void RunFFALoadTest() {}

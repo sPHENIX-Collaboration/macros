@@ -1,3 +1,31 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include <fun4all/Fun4AllServer.h>
+#include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4detectors/PHG4CylinderCellTPCReco.h>
+#include <g4detectors/PHG4MapsCellReco.h>
+#include <g4detectors/PHG4MapsSubsystem.h>
+#include <g4detectors/PHG4SiliconTrackerCellReco.h>
+#include <g4detectors/PHG4SiliconTrackerDefs.h>
+#include <g4detectors/PHG4SiliconTrackerSubsystem.h>
+#include <g4detectors/PHG4TPCSpaceChargeDistortion.h>
+#include <g4eval/SvtxEvaluator.h>
+#include <g4hough/PHG4GenFitTrackProjection.h>
+#include <g4hough/PHG4KalmanPatRec.h>
+#include <g4hough/PHG4SiliconTrackerDigitizer.h>
+#include <g4hough/PHG4SvtxClusterizer.h>
+#include <g4hough/PHG4SvtxDeadArea.h>
+#include <g4hough/PHG4SvtxDigitizer.h>
+#include <g4hough/PHG4SvtxThresholds.h>
+#include <g4hough/PHG4TPCClusterizer.h>
+#include <g4hough/PHG4TrackKalmanFitter.h>
+#include <g4hough/PHG4TruthPatRec.h>
+#include <g4main/PHG4Reco.h>
+R__LOAD_LIBRARY(libg4hough.so)
+R__LOAD_LIBRARY(libg4eval.so)
+#endif
+
 #include <vector>
 
 // ONLY if backward compatibility with hits files already generated with 8 inner TPC layers is needed, you can set this to "true"
@@ -655,6 +683,7 @@ void Svtx_Cells(int verbosity = 0)
     PHG4SiliconTrackerCellReco* reco = new PHG4SiliconTrackerCellReco("SILICON_TRACKER");
     // The timing windows are hard-coded in the INTT ladder model
     reco->Verbosity(verbosity);
+    reco->checkenergy(1);
     se->registerSubsystem(reco);
   }
 
@@ -674,7 +703,7 @@ void Svtx_Cells(int verbosity = 0)
     string TPC_distortion_file =
         string(getenv("CALIBRATIONROOT")) +
         Form("/Tracking/TPC/SpaceChargeDistortion/TPCCAGE_20_78_211_2.root");
-    PHG4TPCSpaceChargeDistortion* tpc_distortion =
+    tpc_distortion =
         new PHG4TPCSpaceChargeDistortion(TPC_distortion_file);
     //tpc_distortion -> setAccuracy(0); // option to over write default  factors
     //tpc_distortion -> setPrecision(0.001); // option to over write default  factors      // default is 0.001
@@ -777,6 +806,19 @@ void Svtx_Reco(int verbosity = 0)
   if (n_intt_layer > 0)
   {
     // INTT
+
+    // Load pre-defined deadmaps
+    PHG4SvtxDeadMapLoader* deadMapINTT = new PHG4SvtxDeadMapLoader("SILICON_TRACKER");
+    for (int i = 0; i < n_intt_layer; i++)
+    {
+      string DeadMapConfigName = Form("LadderType%d_RndSeed%d/", laddertype[i], i);
+      string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_4Percent/"); //4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
+//      string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_8Percent/"); // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
+      DeadMapPath +=  DeadMapConfigName;
+      deadMapINTT->deadMapPath(n_maps_layer + i, DeadMapPath);
+    }
+//    se->registerSubsystem(deadMapINTT);
+
     std::vector<double> userrange;  // 3-bit ADC threshold relative to the mip_e at each layer.
     // these should be used for the INTT
     userrange.push_back(0.05);
@@ -795,6 +837,8 @@ void Svtx_Reco(int verbosity = 0)
       digiintt->set_adc_scale(n_maps_layer + i, userrange);
     }
     se->registerSubsystem(digiintt);
+
+//    digiintt->Verbosity(1);
   }
 
   // TPC layers use the Svtx digitizer
@@ -810,23 +854,24 @@ void Svtx_Reco(int verbosity = 0)
   
   //-------------------------------------
   // Apply Live Area Inefficiency to Hits
+  // This is obsolete, please use PHG4SvtxDeadMapLoader instead for pre-defined deadmap
   //-------------------------------------
   // defaults to 1.0 (fully active)
 
-  PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
-
-  for (int i = 0; i < n_maps_layer; i++)
-  {
-    deadarea->Verbosity(verbosity);
-    //deadarea->set_hit_efficiency(i,0.99);
-    deadarea->set_hit_efficiency(i, 1.0);
-  }
-  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
-  {
-    //deadarea->set_hit_efficiency(i,0.99);
-    deadarea->set_hit_efficiency(i, 1.0);
-  }
-  se->registerSubsystem(deadarea);
+//  PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
+//
+//  for (int i = 0; i < n_maps_layer; i++)
+//  {
+//    deadarea->Verbosity(verbosity);
+//    //deadarea->set_hit_efficiency(i,0.99);
+//    deadarea->set_hit_efficiency(i, 1.0);
+//  }
+//  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
+//  {
+//    //deadarea->set_hit_efficiency(i,0.99);
+//    deadarea->set_hit_efficiency(i, 1.0);
+//  }
+//  se->registerSubsystem(deadarea);
 
   //-----------------------------
   // Apply MIP thresholds to Hits

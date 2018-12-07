@@ -12,7 +12,7 @@
   h1.Draw("e1same");
 
   TLegend leg(.55,.70,.85,.93);
-  leg.AddEntry("","#it{#bf{sPHENIX}} Preliminary","");
+  leg.AddEntry("","#it{#bf{sPHENIX}} Simulation","");
   leg.AddEntry("","Au+Au #sqrt{s_{NN}}=200 GeV","");
   leg.AddEntry(&h1,"Data","LP");
   leg.AddEntry(&h2,"MC","F");

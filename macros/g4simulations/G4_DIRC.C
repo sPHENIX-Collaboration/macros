@@ -1,3 +1,11 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4detectors/PHG4SectorSubsystem.h>
+#include <g4main/PHG4Reco.h>
+R__LOAD_LIBRARY(libg4detectors.so)
+#endif
 // $Id: G4_DIRC.C,v 1.3 2013/10/09 01:08:17 jinhuang Exp $
 
 /*!
