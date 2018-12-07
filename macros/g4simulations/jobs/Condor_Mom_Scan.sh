@@ -21,10 +21,18 @@
 # layout 8 = two (four) outer layers at 13 cm and 15 cm, laddertypes p-p
 
 config=0
+<<<<<<< HEAD
 n_events=500
 particle=pi+ # particle being thrown: pi+, mu+, e-
 data=direct/star+u/rcorliss/sphenix/macros/macros/g4simulations/data_gen #ross's path
 #data=sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/data_gen # must be absolute path, no slashes at beginning or end
+=======
+n_events=5000
+particle=pi- # particle being thrown: pi+, mu+, e-
+#data=~/Documents/latest/macros/macros/g4simulations/data_gen
+data=/gpfs/mnt/gpfs04/sphenix/user/rcorliss/data # must be absolute path, no slash at end
+
+>>>>>>> ab1fc6ee958cb827bd84d2f3de6276f38198c5cd
 parent=mom_scan # parent directory
 
 # verified correct layout by looking at truth particle data in ntp_hit
@@ -40,7 +48,11 @@ phi_max=180
 
 # go through different momenta
 
+<<<<<<< HEAD
 for set in 1 2 3 4 5 6 7 8 9
+=======
+for pt in 0.5 0.6 0.7 0.8 0.9 1.0 2.0 3.0
+>>>>>>> ab1fc6ee958cb827bd84d2f3de6276f38198c5cd
 
 do
   # go through every INTT configuration

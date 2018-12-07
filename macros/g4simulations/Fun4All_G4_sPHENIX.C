@@ -53,8 +53,10 @@ int Fun4All_G4_sPHENIX(
     const char *embed_input_file = "/sphenix/data/data02/review_2017-08-02/sHijing/fm_0-4.list")
 {
   
-  gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macros:/sphenix/u/mitay/Documents/latest/macros/macros/g4simulations:");
+  //  gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macros:/sphenix/u/mitay/Documents/latest/macros/macros/g4simulations:");
 
+
+gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macros:/direct/star+u/rcorliss/sphenix/macros/macros/g4simulations:");
 
   //===============
   // Input options
@@ -110,6 +112,7 @@ int Fun4All_G4_sPHENIX(
   bool do_pstof = false;
 
   bool do_cemc = false;
+
 //  bool do_cemc = true;
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
@@ -129,6 +132,7 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout = false;
 //  bool do_hcalout = true;
 
+
   bool do_hcalout_cell = do_hcalout && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
@@ -144,6 +148,7 @@ int Fun4All_G4_sPHENIX(
 
   bool do_jet_reco = false;
 //  bool do_jet_reco = true;
+
   bool do_jet_eval = do_jet_reco && true;
 
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for

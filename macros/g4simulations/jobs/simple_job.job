@@ -1,7 +1,8 @@
 Universe	= vanilla
 # Notification	= Complete
 # Executable	= run_macro.sh
-Executable	= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/jobs/run_macro.sh
+# Executable	= /sphenix/u/mitay/Documents/latest/macros/macros/g4simulations/jobs/run_macro.sh
+Executable	= /direct/star+u/rcorliss/sphenix/macros/macros/g4simulations/jobs/run_macro.sh
 Arguments	= $(n_events) $(i) $(z_width) $(eta_min) $(eta_max) $(pt_min) $(pt_max) $(phi_min) $(phi_max) $(particle) $(path) $(config)
 Requirements	= (CPU_Experiment == "phenix") && (CPU_Speed >= 1)
 Rank		= CPU_Speed
@@ -16,6 +17,10 @@ Output		= /gpfs/mnt/gpfs04/sphenix/user/rcorliss/log/$(Cluster).out
 Error		= /gpfs/mnt/gpfs04/sphenix/user/rcorliss/log/$(Cluster).err
 Log		= /gpfs/mnt/gpfs04/sphenix/user/rcorliss/log/$(Cluster).log
 # Notify_user	= mitay@mit.edu
+<<<<<<< HEAD
+=======
+
+>>>>>>> ab1fc6ee958cb827bd84d2f3de6276f38198c5cd
 +Experiment	= "phenix"
 +Job_Type	= "cas"
 
