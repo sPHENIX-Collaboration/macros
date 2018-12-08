@@ -1,18 +1,3 @@
-Skip to content
- 
-Search or jump to…
-
-Pull requests
-Issues
-Marketplace
-Explore
- @blackcathj Sign out
-15
-4 45 sPHENIX-Collaboration/macros
- Code  Issues 1  Pull requests 2  Projects 0  Wiki  Insights  Settings
-macros/macros/g4simulations/vis.mac 
-Newer           Older
- 100644  83 lines (82 sloc)  2.89 KB
 # $Id: vis.mac,v 1.4 2010/04/14 18:32:59 lindenle Exp $
 #
 # Macro file for the initialization phase of "exampleN03.cc"
@@ -44,11 +29,12 @@ Newer           Older
 /vis/open OGLSX 1200x900-0+0
 # increase display limit for more complex detectors
 /vis/ogl/set/displayListLimit 500000
-/vis/viewer/set/viewpointThetaPhi 240 -10
-/vis/viewer/addCutawayPlane 0 0 0 m 1 0 0
+/vis/viewer/set/viewpointThetaPhi 0 0
+/vis/viewer/addCutawayPlane 0 0 0 m 0 0 0
 # our world is 4x4 meters, the detector is about 1m across
 # zooming by 4 makes it fill the display
-/vis/viewer/zoom 1.5
+/vis/viewer/zoom  30
+/vis/viewer/panTo 4 0 cm
 #
 # Use this open statement instead to get a HepRep version 1 file
 # suitable for viewing in WIRED.
@@ -95,16 +81,3 @@ Newer           Older
 # The first file will contain just detector geometry.
 # The second file will contain the detector plus one event.
 # The third file will contain the detector plus ten events.
-© 2018 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Help
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
-Press h to open a hovercard with more details.
