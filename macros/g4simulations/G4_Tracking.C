@@ -283,7 +283,8 @@ void Tracking_Cells(int verbosity = 0)
     maps_cells->Verbosity(verbosity);
     for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
     {
-      maps_cells->set_timing_window(ilayer, -2000, 2000);
+      // override the default timing window for this layer - default is +/- 5000 ns
+      maps_cells->set_timing_window(ilayer, -5000, 5000);
     }
     se->registerSubsystem(maps_cells);
   }
