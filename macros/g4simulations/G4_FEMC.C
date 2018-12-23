@@ -148,7 +148,7 @@ void FEMC_Towers(int verbosity = 0) {
   TowerCalibration3->TowerType(3);
   TowerCalibration3->Verbosity(verbosity);
   TowerCalibration3->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration3->set_calib_const_GeV_ADC(1.0/0.03084);  // sampling fraction = 0.03084 
+  TowerCalibration3->set_calib_const_GeV_ADC(1.0/0.030);  // sampling fraction = 0.030 
   TowerCalibration3->set_pedstal_ADC(0);
   se->registerSubsystem( TowerCalibration3 );
 
@@ -157,7 +157,7 @@ void FEMC_Towers(int verbosity = 0) {
   TowerCalibration4->TowerType(4);
   TowerCalibration4->Verbosity(verbosity);
   TowerCalibration4->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration4->set_calib_const_GeV_ADC(1.0/0.03084);  // sampling fraction = 0.03084
+  TowerCalibration4->set_calib_const_GeV_ADC(1.0/0.030);  // sampling fraction = 0.030
   TowerCalibration4->set_pedstal_ADC(0);
   se->registerSubsystem( TowerCalibration4 );
 
@@ -166,7 +166,7 @@ void FEMC_Towers(int verbosity = 0) {
   TowerCalibration5->TowerType(5);
   TowerCalibration5->Verbosity(verbosity);
   TowerCalibration5->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration5->set_calib_const_GeV_ADC(1.0/0.03084);  // sampling fraction = 0.03084
+  TowerCalibration5->set_calib_const_GeV_ADC(1.0/0.030);  // sampling fraction = 0.030
   TowerCalibration5->set_pedstal_ADC(0);
   se->registerSubsystem( TowerCalibration5 );
 
