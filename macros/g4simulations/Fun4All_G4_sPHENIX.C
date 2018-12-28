@@ -39,7 +39,7 @@ using namespace std;
 
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
-    const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
+    const char *inputFile = "",
     const char *outputFile = "G4sPHENIX.root",
     const char *embed_input_file = "/sphenix/data/data02/review_2017-08-02/sHijing/fm_0-4.list")
 {
@@ -168,7 +168,7 @@ int Fun4All_G4_sPHENIX(
     }
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0);
+  se->Verbosity(01);
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
@@ -235,7 +235,7 @@ int Fun4All_G4_sPHENIX(
     {
       // toss low multiplicity dummy events
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-      gen->add_particles("pi-", 1);  // mu+,e+,proton,pi+,Upsilon
+      gen->add_particles("e-", 1);  // mu+,e+,proton,pi+,Upsilon
       //gen->add_particles("pi+",100); // 100 pion option
       if (readhepmc || do_embedding || runpythia8 || runpythia6)
       {
@@ -248,13 +248,13 @@ int Fun4All_G4_sPHENIX(
                                               PHG4SimpleEventGenerator::Uniform,
                                               PHG4SimpleEventGenerator::Uniform);
         gen->set_vertex_distribution_mean(0.0, 0.0, 0.0);
-        gen->set_vertex_distribution_width(0.0, 0.0, 5.0);
+        gen->set_vertex_distribution_width(0.0, 0.0, 10.0);
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0, 0.0);
       gen->set_eta_range(-1.0, 1.0);
       gen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi());
-      gen->set_pt_range(0.1, 20.0);
+      gen->set_pt_range(4, 4.0);
       gen->Embed(2);
       gen->Verbosity(0);
 
@@ -561,6 +561,50 @@ int Fun4All_G4_sPHENIX(
   // if (do_dst_compress) DstCompress(out);
   //  se->registerOutputManager(out);
 
+  {
+    assert(gSystem->Load("libqa_modules") >= 0);
+
+    if (do_cemc)
+      se->registerSubsystem(new QAG4SimulationCalorimeter("CEMC"));
+    if (do_hcalin)
+      se->registerSubsystem(new QAG4SimulationCalorimeter("HCALIN"));
+    if (do_hcalout)
+      se->registerSubsystem(new QAG4SimulationCalorimeter("HCALOUT"));
+
+    if (do_tracking && do_cemc && do_hcalin && do_hcalout)
+    {
+      QAG4SimulationCalorimeterSum *calo_qa =
+          new QAG4SimulationCalorimeterSum();
+      //    calo_qa->Verbosity(10);
+      se->registerSubsystem(calo_qa);
+    }
+
+    if (do_jet_reco)
+    {
+      QAG4SimulationJet *calo_jet7 = new QAG4SimulationJet(
+          "AntiKt_Truth_r07");
+      calo_jet7->add_reco_jet("AntiKt_Tower_r07");
+      calo_jet7->add_reco_jet("AntiKt_Cluster_r07");
+      calo_jet7->add_reco_jet("AntiKt_Track_r07");
+      //    calo_jet7->Verbosity(20);
+      se->registerSubsystem(calo_jet7);
+
+      QAG4SimulationJet *calo_jet7 = new QAG4SimulationJet(
+          "AntiKt_Truth_r04");
+      calo_jet7->add_reco_jet("AntiKt_Tower_r04");
+      calo_jet7->add_reco_jet("AntiKt_Cluster_r04");
+      calo_jet7->add_reco_jet("AntiKt_Track_r04");
+      se->registerSubsystem(calo_jet7);
+
+      QAG4SimulationJet *calo_jet7 = new QAG4SimulationJet(
+          "AntiKt_Truth_r02");
+      calo_jet7->add_reco_jet("AntiKt_Tower_r02");
+      calo_jet7->add_reco_jet("AntiKt_Cluster_r02");
+      calo_jet7->add_reco_jet("AntiKt_Track_r02");
+      se->registerSubsystem(calo_jet7);
+    }
+  }
+
   //-----------------
   // Event processing
   //-----------------
@@ -586,6 +630,11 @@ int Fun4All_G4_sPHENIX(
     }
 
   se->run(nEvents);
+
+  {
+    gSystem->Load("libqa_modules");
+    QAHistManagerDef::saveQARootFile(string(outputFile) + "_qa.root");
+  }
 
   //-----
   // Exit
