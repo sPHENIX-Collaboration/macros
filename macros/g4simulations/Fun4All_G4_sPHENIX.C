@@ -39,7 +39,8 @@ using namespace std;
 
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
-    const char *inputFile = "",
+    const char *inputFile = "e-",
+    const double inputpT = 4,
     const char *outputFile = "G4sPHENIX.root",
     const char *embed_input_file = "/sphenix/data/data02/review_2017-08-02/sHijing/fm_0-4.list")
 {
@@ -235,7 +236,7 @@ int Fun4All_G4_sPHENIX(
     {
       // toss low multiplicity dummy events
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-      gen->add_particles("e-", 1);  // mu+,e+,proton,pi+,Upsilon
+      gen->add_particles(inputFile, 1);  // mu+,e+,proton,pi+,Upsilon
       //gen->add_particles("pi+",100); // 100 pion option
       if (readhepmc || do_embedding || runpythia8 || runpythia6)
       {
@@ -254,7 +255,7 @@ int Fun4All_G4_sPHENIX(
       gen->set_vertex_size_parameters(0.0, 0.0);
       gen->set_eta_range(-1.0, 1.0);
       gen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi());
-      gen->set_pt_range(4, 4.0);
+      gen->set_pt_range(inputpT, inputpT);
       gen->Embed(2);
       gen->Verbosity(0);
 
