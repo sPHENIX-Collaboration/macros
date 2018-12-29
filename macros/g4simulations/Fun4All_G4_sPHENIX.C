@@ -102,7 +102,7 @@ int Fun4All_G4_sPHENIX(
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
-  bool do_cemc_eval = do_cemc_cluster && true;
+  bool do_cemc_eval = do_cemc_cluster && false;
 
   bool do_hcalin = true;
   bool do_hcalin_cell = do_hcalin && true;
