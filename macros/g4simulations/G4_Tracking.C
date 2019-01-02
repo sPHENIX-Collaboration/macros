@@ -30,6 +30,7 @@ R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
 R__LOAD_LIBRARY(libg4hough.so)
+R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libg4eval.so)
 #endif
 
@@ -351,6 +352,7 @@ void Tracking_Reco(int verbosity = 0)
 
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4hough.so");
+	gSystem->Load("libtrack_reco.so");
 
   //---------------
   // Fun4All server
@@ -538,120 +540,135 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4INTTDigitizer::set_ad
   se->registerSubsystem(tpcclusterizer);
 
   // This should be true for everything except testing!
-  const bool use_kalman_pat_rec = true;
-  if (use_kalman_pat_rec)
-  {
-    //---------------------
-    // PHG4KalmanPatRec
-    //---------------------
+	const bool use_track_prop = true;
+	if (use_track_prop)
+	{
+		//---------------------
+		// PHG4KalmanPatRec
+		//---------------------
 
-    PHG4KalmanPatRec* kalman_pat_rec = new PHG4KalmanPatRec("PHG4KalmanPatRec", n_maps_layer, n_intt_layer, n_gas_layer);
-    kalman_pat_rec->Verbosity(0);
-    
-    for(int i = 0;i<n_intt_layer;i++)
-      {
-	if(laddertype[i] == PHG4INTTDefs::SEGMENTATION_Z)
-	  {
-	    // strip length is along phi
-	    kalman_pat_rec->set_max_search_win_theta_intt(i, 0.010);
-	    kalman_pat_rec->set_min_search_win_theta_intt(i, 0.00);
-	    kalman_pat_rec->set_max_search_win_phi_intt(i, 0.20);
-	    kalman_pat_rec->set_min_search_win_phi_intt(i, 0.20);
-	  }
+		PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
+		init_vtx->Verbosity(0);
+		se->registerSubsystem(init_vtx);
+
+		PHTrackSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer);
+		track_seed->Verbosity(2);
+		se->registerSubsystem(track_seed);
+
+		//PHTrackPropagating* track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", n_maps_layer, n_intt_layer, n_gas_layer);
+		PHGenFitTrkProp* track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", n_maps_layer, n_intt_layer, n_gas_layer);
+		track_prop->Verbosity(10);
+		se->registerSubsystem(track_prop);
+
+		//PHG4KalmanPatRec* track_prop = new PHG4KalmanPatRec("PHG4KalmanPatRec", n_maps_layer, n_intt_layer, n_gas_layer);
+		//track_prop->Verbosity(0);
+		//se->registerSubsystem(track_prop);
+
+		for(int i = 0;i<n_intt_layer;i++)
+		{
+			if(laddertype[i] == PHG4INTTDefs::SEGMENTATION_Z)
+			{
+				// strip length is along phi
+				track_prop->set_max_search_win_theta_intt(i, 0.010);
+				track_prop->set_min_search_win_theta_intt(i, 0.00);
+				track_prop->set_max_search_win_phi_intt(i, 0.20);
+				track_prop->set_min_search_win_phi_intt(i, 0.20);
+			}
+			else
+			{
+				// strip length is along theta
+				track_prop->set_max_search_win_theta_intt(i, 0.200);
+				track_prop->set_min_search_win_theta_intt(i, 0.200);
+				track_prop->set_max_search_win_phi_intt(i, 0.0050);
+				track_prop->set_min_search_win_phi_intt(i, 0.000);
+			}
+		}
+
+	}
 	else
-	  {
-	    // strip length is along theta
-	    kalman_pat_rec->set_max_search_win_theta_intt(i, 0.200);
-	    kalman_pat_rec->set_min_search_win_theta_intt(i, 0.200);
-	    kalman_pat_rec->set_max_search_win_phi_intt(i, 0.0050);
-	    kalman_pat_rec->set_min_search_win_phi_intt(i, 0.000);
-	  }
-      }
-    
-    se->registerSubsystem(kalman_pat_rec);
-  }
-  else
-  {
-    //---------------------
-    // Truth Pattern Recognition
-    //---------------------
-    PHG4TruthPatRec* pat_rec = new PHG4TruthPatRec();
-    se->registerSubsystem(pat_rec);
-  }
+	{
+		//---------------------
+		// Truth Pattern Recognition
+		//---------------------
+		PHG4TruthPatRec* pat_rec = new PHG4TruthPatRec();
+		se->registerSubsystem(pat_rec);
+	}
 
-  //---------------------
-  // Kalman Filter
-  //---------------------
+	//---------------------
+	// Kalman Filter
+	//---------------------
 
-  PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
-  kalman->Verbosity(0);
-  if (use_primary_vertex)
-    kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
-  se->registerSubsystem(kalman);
+	//PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
+	PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
+	kalman->Verbosity(100);
+	if (use_primary_vertex)
+		kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
+	se->registerSubsystem(kalman);
 
-  //------------------
-  // Track Projections
-  //------------------
-  PHG4GenFitTrackProjection* projection = new PHG4GenFitTrackProjection();
-  projection->Verbosity(verbosity);
-  se->registerSubsystem(projection);
+	//------------------
+	// Track Projections
+	//------------------
+	PHG4GenFitTrackProjection* projection = new PHG4GenFitTrackProjection();
+	projection->Verbosity(verbosity);
+	se->registerSubsystem(projection);
 
-  /*  
-  //----------------------
-  // Beam Spot Calculation
-  //----------------------
-  PHG4SvtxBeamSpotReco* beamspot = new PHG4SvtxBeamSpotReco();
-  beamspot->Verbosity(verbosity);
-  se->registerSubsystem( beamspot );
-  */
+	/*  
+	//----------------------
+	// Beam Spot Calculation
+	//----------------------
+	PHG4SvtxBeamSpotReco* beamspot = new PHG4SvtxBeamSpotReco();
+	beamspot->Verbosity(verbosity);
+	se->registerSubsystem( beamspot );
+	*/
 
-  return;
+	return;
 }
 
 void Tracking_Eval(std::string outputfile, int verbosity = 0)
 {
-  //---------------
-  // Load libraries
-  //---------------
+	//---------------
+	// Load libraries
+	//---------------
 
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4hough.so");
-  gSystem->Load("libg4eval.so");
+	gSystem->Load("libfun4all.so");
+	gSystem->Load("libg4detectors.so");
+	gSystem->Load("libg4hough.so");
+	gSystem->Load("libtrack_reco.so");
+	gSystem->Load("libg4eval.so");
 
-  //---------------
-  // Fun4All server
-  //---------------
+	//---------------
+	// Fun4All server
+	//---------------
 
-  Fun4AllServer* se = Fun4AllServer::instance();
+	Fun4AllServer* se = Fun4AllServer::instance();
 
-  //----------------
-  // Tracking evaluation
-  //----------------
+	//----------------
+	// Tracking evaluation
+	//----------------
 
-  SvtxEvaluator* eval;
-  eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str(), "SvtxTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
-  eval->do_cluster_eval(true);
-  eval->do_g4hit_eval(true);
-  eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
-  eval->do_gpoint_eval(false);
-  eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
-  eval->Verbosity(0);
-  se->registerSubsystem(eval);
+	SvtxEvaluator* eval;
+	eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str(), "SvtxTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
+	eval->do_cluster_eval(true);
+	eval->do_g4hit_eval(true);
+	eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
+	eval->do_gpoint_eval(false);
+	eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
+	eval->Verbosity(0);
+	se->registerSubsystem(eval);
 
-  if (use_primary_vertex)
-  {
-    // make a second evaluator that records tracks fitted with primary vertex included
-    // good for analysis of prompt tracks, particularly if MVTX is not present
-    SvtxEvaluator* evalp;
-    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);    evalp->do_cluster_eval(true);
-    evalp->do_g4hit_eval(true);
-    evalp->do_hit_eval(false);
-    evalp->do_gpoint_eval(false);
-    evalp->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
-    evalp->Verbosity(0);
-    se->registerSubsystem(evalp);
-  }
+	if (use_primary_vertex)
+	{
+		// make a second evaluator that records tracks fitted with primary vertex included
+		// good for analysis of prompt tracks, particularly if MVTX is not present
+		SvtxEvaluator* evalp;
+		evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);    evalp->do_cluster_eval(true);
+		evalp->do_g4hit_eval(true);
+		evalp->do_hit_eval(false);
+		evalp->do_gpoint_eval(false);
+		evalp->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
+		evalp->Verbosity(0);
+		se->registerSubsystem(evalp);
+	}
 
-  return;
+	return;
 }
