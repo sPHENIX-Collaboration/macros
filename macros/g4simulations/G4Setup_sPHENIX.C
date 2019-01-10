@@ -9,19 +9,20 @@
 #include "G4_HcalOut_ref.C"
 #include "G4_PlugDoor.C"
 
-#include <g4eval/PHG4DstCompressReco.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <g4decayer/EDecayType.hh>
 #include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4main/HepMCNodeReader.h>
+#include <g4eval/PHG4DstCompressReco.h>
 #include <g4main/PHG4TruthSubsystem.h>
 #include <g4main/PHG4Reco.h>
 #include <phfield/PHFieldConfig.h>
-#include <g4main/HepMCNodeReader.h>
 class SubsysReco;
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
+R__LOAD_LIBRARY(libphg4hit.so)
 #else
 bool overlapcheck = false; // set to true if you want to check for overlaps
 double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes

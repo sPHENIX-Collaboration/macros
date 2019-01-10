@@ -5,7 +5,6 @@
 #include <g4intt/PHG4INTTCellReco.h>
 #include <g4intt/PHG4INTTDefs.h>
 #include <g4intt/PHG4INTTSubsystem.h>
-#include <g4detectors/PHG4TPCSpaceChargeDistortion.h>
 #include <g4eval/SvtxEvaluator.h>
 #include <g4hough/PHG4GenFitTrackProjection.h>
 #include <g4hough/PHG4KalmanPatRec.h>
@@ -17,6 +16,7 @@
 #include <g4tpc/PHG4TPCElectronDrift.h>
 #include <g4tpc/PHG4TPCPadPlane.h>
 #include <g4tpc/PHG4TPCPadPlaneReadout.h>
+#include <g4tpc/PHG4TPCSpaceChargeDistortion.h>
 #include <g4tpc/PHG4TPCSubsystem.h>
 #include <g4mvtx/PHG4MVTXCellReco.h>
 #include <g4mvtx/PHG4MVTXSubsystem.h>
@@ -30,8 +30,11 @@ R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
 R__LOAD_LIBRARY(libg4hough.so)
-R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libintt.so)
+R__LOAD_LIBRARY(libmvtx.so)
+R__LOAD_LIBRARY(libtpc.so)
+R__LOAD_LIBRARY(libtrack_reco.so)
 #endif
 
 #include <vector>
@@ -376,6 +379,7 @@ void Tracking_Reco(int verbosity = 0)
   if (n_intt_layer > 0)
   {
 
+#ifdef SVTXDEADMAP
     if (INTTDeadMapOption != kINTTNoDeadMap)
     {
       // Load pre-defined deadmaps
@@ -411,6 +415,7 @@ void Tracking_Reco(int verbosity = 0)
 //      deadMapINTT -> Verbosity(1);
       se->registerSubsystem(deadMapINTT);
     }
+#endif // SVTXDEADMAP
 
     // INTT
     // these should be used for the INTT
