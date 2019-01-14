@@ -16,7 +16,7 @@ R__LOAD_LIBRARY(libjetbackground.so)
 
 void HIJetRecoInit() {}
 
-void HIJetReco(int verbosity = 0, bool do_flow = false ) {
+void HIJetReco(int verbosity = 0, bool do_flow = false, bool do_CS = false ) {
   
   //---------------
   // Load libraries
@@ -83,7 +83,7 @@ void HIJetReco(int verbosity = 0, bool do_flow = false ) {
   st->Verbosity( verbosity );
   se->registerSubsystem( st );
 
-  towerjetreco = new JetReco();
+  JetReco *towerjetreco = new JetReco();
   towerjetreco->add_input(new TowerJetInput(Jet::CEMC_TOWER_SUB1));
   towerjetreco->add_input(new TowerJetInput(Jet::HCALIN_TOWER_SUB1));
   towerjetreco->add_input(new TowerJetInput(Jet::HCALOUT_TOWER_SUB1));
@@ -95,6 +95,31 @@ void HIJetReco(int verbosity = 0, bool do_flow = false ) {
   towerjetreco->set_input_node("TOWER");
   towerjetreco->Verbosity( verbosity );
   se->registerSubsystem(towerjetreco);
+
+  if ( do_CS ) {
+
+    SubtractTowersCS *stCS = new SubtractTowersCS();
+    stCS->SetFlowModulation( do_flow );
+    stCS->SetAlpha( 1 );
+    stCS->SetDeltaRmax( 0.3 );
+    stCS->Verbosity( verbosity );
+    se->registerSubsystem( stCS );
+
+    JetReco *towerjetrecoCS = new JetReco();
+    towerjetrecoCS->add_input(new TowerJetInput(Jet::CEMC_TOWER_SUB1CS));
+    towerjetrecoCS->add_input(new TowerJetInput(Jet::HCALIN_TOWER_SUB1CS));
+    towerjetrecoCS->add_input(new TowerJetInput(Jet::HCALOUT_TOWER_SUB1CS));
+    // note that CS can use the regular FastJetAlgo without extra modifications for negative-E inputs
+    towerjetrecoCS->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2,verbosity),"AntiKt_Tower_r02_Sub1CS");
+    towerjetrecoCS->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3,verbosity),"AntiKt_Tower_r03_Sub1CS");
+    towerjetrecoCS->add_algo(new FastJetAlgo(Jet::ANTIKT,0.4,verbosity),"AntiKt_Tower_r04_Sub1CS");
+    towerjetrecoCS->add_algo(new FastJetAlgo(Jet::ANTIKT,0.5,verbosity),"AntiKt_Tower_r05_Sub1CS");
+    towerjetrecoCS->set_algo_node("ANTIKT");
+    towerjetrecoCS->set_input_node("TOWER");
+    towerjetrecoCS->Verbosity( verbosity );
+    se->registerSubsystem( towerjetrecoCS );
+    
+  }
 
   return;
 

@@ -16,6 +16,7 @@ R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 #endif
 
+
 void
 FEMCInit()
 {
@@ -51,7 +52,7 @@ FEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
   // fsPHENIX ECAL
   femc->SetfsPHENIXDetector(); 
-  mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v002.txt";
+  mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v003.txt";
 
   cout << mapping_femc.str() << endl;
 
@@ -74,7 +75,7 @@ void FEMC_Towers(int verbosity = 0) {
 
   // fsPHENIX ECAL
   mapping_femc << getenv("CALIBRATIONROOT") <<
-   	"/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v002.txt";
+   	"/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v003.txt";
 
   RawTowerBuilderByHitIndex* tower_FEMC = new RawTowerBuilderByHitIndex("TowerBuilder_FEMC");
   tower_FEMC->Detector("FEMC");
@@ -84,40 +85,90 @@ void FEMC_Towers(int verbosity = 0) {
   se->registerSubsystem(tower_FEMC);
 
   // PbW crystals
-  RawTowerDigitizer *TowerDigitizer1 = new RawTowerDigitizer("FEMCRawTowerDigitizer1");
-  TowerDigitizer1->Detector("FEMC");
-  TowerDigitizer1->TowerType(1); 
-  TowerDigitizer1->Verbosity(verbosity);
-  TowerDigitizer1->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
-  se->registerSubsystem( TowerDigitizer1 );
+  //RawTowerDigitizer *TowerDigitizer1 = new RawTowerDigitizer("FEMCRawTowerDigitizer1");
+  //TowerDigitizer1->Detector("FEMC");
+  //TowerDigitizer1->TowerType(1); 
+  //TowerDigitizer1->Verbosity(verbosity);
+  //TowerDigitizer1->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
+  //se->registerSubsystem( TowerDigitizer1 );
 
   // PbSc towers
-  RawTowerDigitizer *TowerDigitizer2 = new RawTowerDigitizer("FEMCRawTowerDigitizer2");
-  TowerDigitizer2->Detector("FEMC");
-  TowerDigitizer2->TowerType(2); 
-  TowerDigitizer2->Verbosity(verbosity);
-  TowerDigitizer2->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
-  se->registerSubsystem( TowerDigitizer2 );
+  //RawTowerDigitizer *TowerDigitizer2 = new RawTowerDigitizer("FEMCRawTowerDigitizer2");
+  //TowerDigitizer2->Detector("FEMC");
+  //TowerDigitizer2->TowerType(2); 
+  //TowerDigitizer2->Verbosity(verbosity);
+  //TowerDigitizer2->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
+  //se->registerSubsystem( TowerDigitizer2 );
+
+  // E864 towers (three types for three sizes)
+  RawTowerDigitizer *TowerDigitizer3 = new RawTowerDigitizer("FEMCRawTowerDigitizer3");
+  TowerDigitizer3->Detector("FEMC");
+  TowerDigitizer3->TowerType(3); 
+  TowerDigitizer3->Verbosity(verbosity);
+  TowerDigitizer3->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
+  se->registerSubsystem( TowerDigitizer3 );
+
+  RawTowerDigitizer *TowerDigitizer4 = new RawTowerDigitizer("FEMCRawTowerDigitizer4");
+  TowerDigitizer4->Detector("FEMC");
+  TowerDigitizer4->TowerType(4); 
+  TowerDigitizer4->Verbosity(verbosity);
+  TowerDigitizer4->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
+  se->registerSubsystem( TowerDigitizer4 );
+
+  RawTowerDigitizer *TowerDigitizer5 = new RawTowerDigitizer("FEMCRawTowerDigitizer5");
+  TowerDigitizer5->Detector("FEMC");
+  TowerDigitizer5->TowerType(5); 
+  TowerDigitizer5->Verbosity(verbosity);
+  TowerDigitizer5->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
+  se->registerSubsystem( TowerDigitizer5 );
 
   // PbW crystals
-  RawTowerCalibration *TowerCalibration1 = new RawTowerCalibration("FEMCRawTowerCalibration1");
-  TowerCalibration1->Detector("FEMC");
-  TowerCalibration1->TowerType(1);
-  TowerCalibration1->Verbosity(verbosity);
-  TowerCalibration1->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration1->set_calib_const_GeV_ADC(1.0);  // sampling fraction = 1.0
-  TowerCalibration1->set_pedstal_ADC(0);
-  se->registerSubsystem( TowerCalibration1 );
+  //RawTowerCalibration *TowerCalibration1 = new RawTowerCalibration("FEMCRawTowerCalibration1");
+  //TowerCalibration1->Detector("FEMC");
+  //TowerCalibration1->TowerType(1);
+  //TowerCalibration1->Verbosity(verbosity);
+  //TowerCalibration1->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+  //TowerCalibration1->set_calib_const_GeV_ADC(1.0);  // sampling fraction = 1.0
+  //TowerCalibration1->set_pedstal_ADC(0);
+  //se->registerSubsystem( TowerCalibration1 );
 
   // PbSc towers
-  RawTowerCalibration *TowerCalibration2 = new RawTowerCalibration("FEMCRawTowerCalibration2");
-  TowerCalibration2->Detector("FEMC");
-  TowerCalibration2->TowerType(2);
-  TowerCalibration2->Verbosity(verbosity);
-  TowerCalibration2->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration2->set_calib_const_GeV_ADC(1.0/0.249);  // sampling fraction = 0.249 for e-
-  TowerCalibration2->set_pedstal_ADC(0);
-  se->registerSubsystem( TowerCalibration2 );
+  //RawTowerCalibration *TowerCalibration2 = new RawTowerCalibration("FEMCRawTowerCalibration2");
+  //TowerCalibration2->Detector("FEMC");
+  //TowerCalibration2->TowerType(2);
+  //TowerCalibration2->Verbosity(verbosity);
+  //TowerCalibration2->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+  //TowerCalibration2->set_calib_const_GeV_ADC(1.0/0.249);  // sampling fraction = 0.249 for e-
+  //TowerCalibration2->set_pedstal_ADC(0);
+  //se->registerSubsystem( TowerCalibration2 );
+
+  // E864 towers (three types for three sizes)
+  RawTowerCalibration *TowerCalibration3 = new RawTowerCalibration("FEMCRawTowerCalibration3");
+  TowerCalibration3->Detector("FEMC");
+  TowerCalibration3->TowerType(3);
+  TowerCalibration3->Verbosity(verbosity);
+  TowerCalibration3->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration3->set_calib_const_GeV_ADC(1.0/0.030);  // sampling fraction = 0.030 
+  TowerCalibration3->set_pedstal_ADC(0);
+  se->registerSubsystem( TowerCalibration3 );
+
+  RawTowerCalibration *TowerCalibration4 = new RawTowerCalibration("FEMCRawTowerCalibration4");
+  TowerCalibration4->Detector("FEMC");
+  TowerCalibration4->TowerType(4);
+  TowerCalibration4->Verbosity(verbosity);
+  TowerCalibration4->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration4->set_calib_const_GeV_ADC(1.0/0.030);  // sampling fraction = 0.030
+  TowerCalibration4->set_pedstal_ADC(0);
+  se->registerSubsystem( TowerCalibration4 );
+
+  RawTowerCalibration *TowerCalibration5 = new RawTowerCalibration("FEMCRawTowerCalibration5");
+  TowerCalibration5->Detector("FEMC");
+  TowerCalibration5->TowerType(5);
+  TowerCalibration5->Verbosity(verbosity);
+  TowerCalibration5->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration5->set_calib_const_GeV_ADC(1.0/0.030);  // sampling fraction = 0.030
+  TowerCalibration5->set_pedstal_ADC(0);
+  se->registerSubsystem( TowerCalibration5 );
 
 }
 
@@ -130,7 +181,7 @@ void FEMC_Clusters(int verbosity = 0) {
   RawClusterBuilderFwd* ClusterBuilder = new RawClusterBuilderFwd("FEMCRawClusterBuilderFwd");
   ClusterBuilder->Detector("FEMC");
   ClusterBuilder->Verbosity(verbosity);
-  ClusterBuilder->set_threshold_energy(0.100);  
+  ClusterBuilder->set_threshold_energy(0.010);  
   se->registerSubsystem( ClusterBuilder );
   
   return;

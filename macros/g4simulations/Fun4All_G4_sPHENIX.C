@@ -237,7 +237,7 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
 
       PHPythia8 *pythia8 = new PHPythia8();
       // see coresoftware/generators/PHPythia8 for example config
-      pythia8->set_config_file("phpythia8.cfg");
+      pythia8->set_config_file("phpythia8.cfg"); // example configure files : https://github.com/sPHENIX-Collaboration/coresoftware/tree/master/generators/PHPythia8
       if (readhepmc)
         pythia8->set_reuse_vertex(0);  // reuse vertex of subevent with embedding ID of 0
       // pythia8->set_vertex_distribution_width(0,0,10,0); // additional vertex smearing if needed, more vertex options available
@@ -249,7 +249,7 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
       gSystem->Load("libPHPythia6.so");
 
       PHPythia6 *pythia6 = new PHPythia6();
-      pythia6->set_config_file("phpythia6.cfg");
+      pythia6->set_config_file("phpythia6.cfg"); // example configure files : https://github.com/sPHENIX-Collaboration/coresoftware/tree/master/generators/PHPythia6
       if (readhepmc)
         pythia6->set_reuse_vertex(0);  // reuse vertex of subevent with embedding ID of 0
       // pythia6->set_vertex_distribution_width(0,0,10,0); // additional vertex smearing if needed, more vertex options available
