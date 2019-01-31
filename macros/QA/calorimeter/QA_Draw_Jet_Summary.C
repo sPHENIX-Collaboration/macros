@@ -19,7 +19,6 @@
 #include <map>
 
 //some common style files
-#include "SaveCanvas.C"
 #include "SetOKStyle.C"
 #include "QA_Draw_Utility.C"
 #include "QA_Draw_Jet_TruthMatching.C"

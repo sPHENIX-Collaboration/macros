@@ -18,7 +18,6 @@
 #include <cassert>
 
 //some common style files
-#include "SaveCanvas.C"
 #include "SetOKStyle.C"
 #include "QA_Draw_Utility.C"
 using namespace std;
