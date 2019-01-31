@@ -17,6 +17,108 @@
 #include <TLine.h>
 #include <TTree.h>
 #include <cassert>
+#include <TList.h>
+#include <TClass.h>
+#include <TCanvas.h>
+#include <TPad.h>
+#include <TString.h>
+#include <TDirectory.h>
+#include <TStyle.h>
+#include <TObject.h>
+#include <TH1F.h>
+
+#include <iostream>
+
+using namespace std;
+
+//! Service function to SaveCanvas()
+void
+SavePad(TPad * p)
+{
+  if (!p)
+    return;
+
+  TList * l = p->GetListOfPrimitives();
+//  l->Print();
+
+  TIter next(l);
+  TObject *obj = NULL;
+  while ((obj = next()))
+    {
+
+      if (obj->IsA()->GetBaseClassOffset(TClass::GetClass("TPad")) >= 0)
+        {
+          if ((TPad *) obj != p)
+            SavePad((TPad *) obj);
+        }
+      else if (obj->IsA()->GetBaseClassOffset(TClass::GetClass("TH1")) >= 0)
+        {
+          cout << "Save TH1 " << obj->GetName() << endl;
+          obj->Clone()->Write(obj->GetName(), TObject::kOverwrite);
+        }
+      else if (obj->IsA()->GetBaseClassOffset(TClass::GetClass("TF1")) >= 0)
+        {
+          cout << "Save TF1 " << obj->GetName() << endl;
+          obj->Clone()->Write(obj->GetName(), TObject::kOverwrite);
+        }
+      else if (obj->IsA()->GetBaseClassOffset(TClass::GetClass("TGraph")) >= 0)
+        {
+          cout << "Save TGraph " << obj->GetName() << endl;
+          obj->Clone()->Write(obj->GetName(), TObject::kOverwrite);
+        }
+    }
+}
+
+//! Save canvas to multiple formats
+/*!
+ *  @param[in] c    pointer to the canvas
+ *  @param[in] name Base of the file name. The default is the name of the cavas
+ *  @param[in] bEPS true = save .eps and .pdf format too.
+ */
+void
+SaveCanvas(TCanvas * c, TString name = "", Bool_t bEPS = kTRUE)
+{
+  if (name.Length() == 0)
+    name = c->GetName();
+
+  c->Print(name + ".png");
+
+  TDirectory * oldd = gDirectory;
+
+  TString rootfilename;
+
+  c->Print(rootfilename = name + ".root");
+
+  TFile f(rootfilename, "update");
+
+  SavePad(c);
+
+  f.Close();
+
+  oldd->cd();
+
+  if (bEPS)
+    {
+//      c->Print(name + ".pdf");
+
+      float x = 20;
+      float y = 20;
+      gStyle->GetPaperSize(x, y);
+
+      gStyle->SetPaperSize(c->GetWindowWidth() / 72 * 2.54,
+          c->GetWindowHeight() / 72 * 2.54);
+//      c->Print(name + ".eps");
+      c->Print(name + ".svg");
+      gSystem->Exec("rsvg-convert -f pdf -o "+name + ".pdf " + name + ".svg");
+      gSystem->Exec("rm -fv " +  name + ".svg");
+
+      gStyle->SetPaperSize(x, y);
+    }
+  //      c->Print(name+".C");
+}
+
+
+
 
 //! Draw 1D histogram along with its reference as shade
 //! @param[in] draw_href_error whether to draw error band for reference plot. Otherwise, it is a filled histogram (default)
