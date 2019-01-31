@@ -2,9 +2,7 @@
 #ifndef SetOKStyle_C
 #define SetOKStyle_C
 
-
-void
-SetOKStyle()
+void SetOKStyle()
 {
   TStyle* OKStyle = new TStyle("OKStyle", "OK Default Style");
 
@@ -86,8 +84,8 @@ SetOKStyle()
   OKStyle->SetOptStat(1);
 
   //marker settings
-// 	OKStyle->SetMarkerStyle(8);
-// 	OKStyle->SetMarkerSize(0.7);
+  // 	OKStyle->SetMarkerStyle(8);
+  // 	OKStyle->SetMarkerSize(0.7);
 
   // Fonts
   OKStyle->SetStatFont(42);
