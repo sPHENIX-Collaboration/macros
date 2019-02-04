@@ -1,3 +1,9 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <g4bbc/BbcVertexFastSimReco.h>
+R__LOAD_LIBRARY(libg4bbc.so)
+#endif
 
 void BbcInit() {}
 

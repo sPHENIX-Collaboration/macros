@@ -1,3 +1,34 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/SubsysReco.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllDummyInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllNoSyncDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <g4main/PHG4ParticleGeneratorBase.h>
+#include <g4main/PHG4ParticleGenerator.h>
+#include <g4main/PHG4SimpleEventGenerator.h>
+#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
+#include <g4main/PHG4ParticleGun.h>
+#include <g4main/HepMCNodeReader.h>
+#include <g4detectors/PHG4DetectorSubsystem.h>
+#include <phpythia6/PHPythia6.h>
+#include <phpythia8/PHPythia8.h>
+#include "G4Setup_fsPHENIX.C"
+#include "G4_Bbc.C"
+#include "G4_Global.C"
+#include "G4_CaloTrigger.C"
+#include "G4_Jets.C"
+#include "G4_FwdJets.C"
+#include "G4_DSTReader_fsPHENIX.C"
+R__LOAD_LIBRARY(libfun4all.so)
+R__LOAD_LIBRARY(libg4testbench.so)
+R__LOAD_LIBRARY(libPHPythia6.so)
+R__LOAD_LIBRARY(libPHPythia8.so)
+#endif
 
 int Fun4All_G4_fsPHENIX(
 		       const int nEvents = 2,
@@ -201,11 +232,17 @@ int Fun4All_G4_fsPHENIX(
       // Detector description
       //---------------------
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+      G4Setup(absorberactive, magfield, EDecayType::kAll,
+	      do_svtx, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
+	      do_FGEM, do_FEMC, do_FHCAL,
+	      magfield_rescale);
+#else
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
 	      do_svtx, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
 	      do_FGEM, do_FEMC, do_FHCAL,
 	      magfield_rescale);
-      
+#endif
     }
 
   //---------
@@ -370,7 +407,6 @@ int Fun4All_G4_fsPHENIX(
           /*bool*/ do_hcalout ,
           /*bool*/ do_cemc_twr ,
           /*bool*/ do_hcalin_twr ,
-          /*bool*/ do_magnet  ,
 	  /*bool*/ do_hcalout_twr,
     /*bool*/ do_FGEM,
 	  /*bool*/ do_FHCAL,
@@ -388,7 +424,7 @@ int Fun4All_G4_fsPHENIX(
     {
       cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
       cout << "it will run forever, so I just return without running anything" << endl;
-      return;
+      return 0;
     }
 
   if (nEvents < 0)
@@ -426,8 +462,9 @@ int Fun4All_G4_fsPHENIX(
       std::cout << "All done" << std::endl;
       delete se;
       gSystem->Exit(0);
+      return 0;
     }
-
+    return 0;
 }
 
 
@@ -438,3 +475,5 @@ G4Cmd(const char * cmd)
   PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
   g4->ApplyCommand(cmd);
 }
+
+void RunFFALoadTest() {}

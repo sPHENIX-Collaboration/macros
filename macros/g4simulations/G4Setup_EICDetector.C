@@ -1,6 +1,37 @@
-
-double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include "G4_Pipe.C"
+#include "G4_Tracking_EIC.C"
+#include "G4_PSTOF.C"
+#include "G4_CEmc_EIC.C"
+#include "G4_HcalIn_ref.C"
+#include "G4_Magnet.C"
+#include "G4_HcalOut_ref.C"
+#include "G4_PlugDoor_EIC.C"
+#include "G4_FEMC.C"
+#include "G4_FHCAL.C"
+#include "G4_EEMC.C"
+#include "G4_DIRC.C"
+#include "G4_RICH.C"
+#include "G4_Aerogel.C"
+#include <g4eval/PHG4DstCompressReco.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <g4decayer/EDecayType.hh>
+#include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4main/PHG4TruthSubsystem.h>
+#include <g4main/HepMCNodeReader.h>
+#include <g4main/PHG4Reco.h>
+#include <phfield/PHFieldConfig.h>
+R__LOAD_LIBRARY(libg4decayer.so)
+R__LOAD_LIBRARY(libg4detectors.so)
+#else
 bool overlapcheck = false; // set to true if you want to check for overlaps
+double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
+#endif
+void RunLoadTest() {}
 
 void G4Init(bool do_svtx = true,
             bool do_cemc = true,
@@ -30,14 +61,12 @@ void G4Init(bool do_svtx = true,
       gROOT->LoadMacro("G4_PlugDoor_EIC.C");
       PlugDoorInit();
     }
-
   if (do_svtx)
     {
       //gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
       gROOT->LoadMacro("G4_Tracking_EIC.C"); 
       TrackingInit();
     }
-
   if (do_cemc)
     {
       gROOT->LoadMacro("G4_CEmc_EIC.C");
@@ -46,8 +75,8 @@ void G4Init(bool do_svtx = true,
 
   if (do_hcalin)
     {
-      gROOT->LoadMacro("G4_HcalIn_EIC.C");
-      HCalInnerInit();
+      gROOT->LoadMacro("G4_HcalIn_ref.C");
+      HCalInnerInit(1);
     }
 
   if (do_magnet)
@@ -103,7 +132,11 @@ void G4Init(bool do_svtx = true,
 
 int G4Setup(const int absorberactive = 0,
             const string &field ="1.5",
-            const EDecayType decayType = TPythia6Decayer::kAll,
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+	    const EDecayType decayType = EDecayType::kAll,
+#else
+	    const EDecayType decayType = TPythia6Decayer::kAll,
+#endif
             const bool do_svtx = true,
             const bool do_cemc = true,
             const bool do_hcalin = true,
@@ -142,7 +175,12 @@ int G4Setup(const int absorberactive = 0,
 // (default is QGSP_BERT for speed)
   //  g4Reco->SetPhysicsList("QGSP_BERT_HP"); 
  
-  if (decayType != TPythia6Decayer::kAll) {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+  if (decayType != EDecayType::kAll) 
+#else
+  if (decayType != TPythia6Decayer::kAll) 
+#endif
+  {
     g4Reco->set_force_decay(decayType);
   }
 
@@ -152,9 +190,9 @@ int G4Setup(const int absorberactive = 0,
   if (stringline.fail()) { // conversion to double fails -> we have a string
 
     if (field.find("sPHENIX.root") != string::npos) {
-      g4Reco->set_field_map(field, 1);
+      g4Reco->set_field_map(field, PHFieldConfig::Field3DCartesian);
     } else {
-      g4Reco->set_field_map(field, 2);
+      g4Reco->set_field_map(field, PHFieldConfig::kField2D);
     }
   } else {
     g4Reco->set_field(fieldstrength); // use const soleniodal field
@@ -169,7 +207,7 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // SVTX
-  if (do_svtx) radius = Tracking(g4Reco, radius, absorberactive);
+   if (do_svtx) radius = Tracking(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // CEMC
@@ -271,6 +309,7 @@ int G4Setup(const int absorberactive = 0,
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
   se->registerSubsystem( g4Reco );
+  return 0;
 }
 
 

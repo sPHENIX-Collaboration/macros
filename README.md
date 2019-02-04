@@ -5,7 +5,7 @@ This is the standard macros respository for [sPHENIX collaboration](https://www.
 
 # Get started
 
-Please follow [SPHENIX software day-1 checklist](https://wiki.bnl.gov/sPHENIX/index.php/SPHENIX_software_day-1_checklist) to get started.
+Please follow [SPHENIX software day-1 checklist](https://wiki.bnl.gov/sPHENIX/index.php/SPHENIX_software_day-1_checklist) to get started on [RHIC computing facility at BNL](https://www.racf.bnl.gov/), or follow the [sPHENIX container setup](https://github.com/sPHENIX-Collaboration/Singularity) for your own computing environment.
 
 # Check out macro repository
 
@@ -55,4 +55,5 @@ root [] .x Fun4All_G4_sPHENIX.C(10) // run 10 events
 Now you are able to run the whole sPHENIX simulation + reconstruction chain. Many next-step topics are listed in the [software](https://wiki.bnl.gov/sPHENIX/index.php/Software) page. And specifically, to use the simulation for your study, a few thing you might want to try:
 
 * Checkout the [evaluator Ntuples](https://wiki.bnl.gov/sPHENIX/index.php/Tracking) output from your 10 events for a generic look of the reconstructed data.
+* Run [sPHENIX software tutorials](https://github.com/sPHENIX-Collaboration/tutorials).
 * [Write your analysis module for more dedicated analysis](https://wiki.bnl.gov/sPHENIX/index.php/Example_of_using_DST_nodes), for which the module produced the evaluator NTuple ([CaloEvaluator](https://www.phenix.bnl.gov/WWW/sPHENIX/doxygen/html/dd/d59/classCaloEvaluator.html), [JetEvaluator](https://www.phenix.bnl.gov/WWW/sPHENIX/doxygen/html/d1/df4/classJetEvaluator.html), [SvtxEvaluator](https://www.phenix.bnl.gov/WWW/sPHENIX/doxygen/html/d6/d11/classSvtxEvaluator.html)) can usually serve as good examples.
