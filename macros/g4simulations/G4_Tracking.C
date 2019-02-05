@@ -138,12 +138,16 @@ double Tracking(PHG4Reco* g4Reco, double radius,
       // MAPS inner barrel layers
       //======================================================
       
-      double maps_layer_radius[3] = {24.61, 32.59, 39.88}; // mm - numbers from Walt 6 Aug 2018
-      
+      // Y. Corrales Morales 4Feb2019
+      // New MVTX configuration to give 2.0 mm clearance from sPHENIX beam-pipe (Walt 3 Jan 2018)
+      //TODO: Add function to estimate stave tilt angle from values given by Walt (Rmin, Rmid, Rmax and sensor width)
+      //TODO: Add default values in PHG4MVTXSubsystem or PHG4MVTXDetector 
+      double maps_layer_radius[3] = {25.69, 33.735, 41.475}; // mm - numbers from Walt 3 Jan 2019 (Rmid)
+      double phi_tilt[3] = {0.295, 0.303, 0.298};  // radians - numbers calculated from values given by Walt 3 Jan 2019
+
       // D. McGlinchey 6Aug2018 - type no longer is used, included here because I was too lazy to remove it from the code
       int stave_type[3] = {0, 0, 0};
       int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX MVTX
-      double phi_tilt[3] = {0.300, 0.305, 0.300}; // radians - numbers from Walt 6 Aug 2018
       
       for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
 	{
