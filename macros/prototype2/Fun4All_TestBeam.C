@@ -1,13 +1,20 @@
-#include <string>
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllPrdfInputManager.h>
 
-using namespace std;
+#include <phool/recoConsts.h>
+#include <prototype2/RunInfoUnpackPRDF.h>
+
+R__LOAD_LIBRARY(libPrototype2.so)
+#endif
 
 void
 Fun4All_TestBeam(int nEvents = 100,
     const char *input_file = "/sphenix/data/data01/t1044-2016a/fnal/beam/beam_00002609-0000.prdf",
     const char *output_file = "beam_00002609.root")
 {
-  gSystem->Load("libfun4all");
   gSystem->Load("libPrototype2.so");
 
   Fun4AllServer *se = Fun4AllServer::instance();
