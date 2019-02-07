@@ -1,31 +1,50 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 #include "GlobalVariables.C"
+
 #include <fun4all/Fun4AllServer.h>
+
 #include <g4intt/PHG4INTTCellReco.h>
 #include <g4intt/PHG4INTTDefs.h>
 #include <g4intt/PHG4INTTSubsystem.h>
+
 #include <g4eval/SvtxEvaluator.h>
+
 #include <g4hough/PHG4GenFitTrackProjection.h>
 #include <g4hough/PHG4KalmanPatRec.h>
 #include <g4hough/PHG4SvtxDeadArea.h>
 #include <g4hough/PHG4SvtxThresholds.h>
 #include <g4hough/PHG4TrackKalmanFitter.h>
 #include <g4hough/PHG4TruthPatRec.h>
+
 #include <g4main/PHG4Reco.h>
+
 #include <g4tpc/PHG4TPCElectronDrift.h>
 #include <g4tpc/PHG4TPCPadPlane.h>
 #include <g4tpc/PHG4TPCPadPlaneReadout.h>
 #include <g4tpc/PHG4TPCSpaceChargeDistortion.h>
 #include <g4tpc/PHG4TPCSubsystem.h>
+
 #include <g4mvtx/PHG4MVTXCellReco.h>
 #include <g4mvtx/PHG4MVTXSubsystem.h>
 #include <g4mvtx/PHG4MVTXDigitizer.h>
+
 #include <g4intt/PHG4INTTDigitizer.h>
+
 #include <g4tpc/PHG4TPCDigitizer.h>
-#include <mvtx/MVTXClusterizer.h>
+
 #include <intt/INTTClusterizer.h>
+
+#include <mvtx/MVTXClusterizer.h>
+
 #include <tpc/TPCClusterizer.h>
+
+#include <trackreco/PHGenFitTrkFitter.h>
+#include <trackreco/PHGenFitTrkProp.h>
+#include <trackreco/PHHoughSeeding.h>
+#include <trackreco/PHInitVertexing.h>
+#include <trackreco/PHTrackSeeding.h>
+#include <trackreco/PHTruthVertexing.h>
 R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
