@@ -8,8 +8,9 @@
 #include <jetbackground/RetowerCEMC.h>
 #include <jetbackground/CopyAndSubtractJets.h>
 #include <jetbackground/DetermineTowerBackground.h>
-#include <jetbackground/SubtractTowers.h>
 #include <jetbackground/FastJetAlgoSub.h>
+#include <jetbackground/SubtractTowers.h>
+#include <jetbackground/SubtractTowersCS.h>
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libjetbackground.so)
 #endif
