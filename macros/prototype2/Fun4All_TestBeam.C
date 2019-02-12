@@ -231,8 +231,7 @@ Fun4All_TestBeam(int nEvents = 100,
 
   // -------------------  Output -------------------
   //main DST output
-  Fun4AllDstOutputManager *out_Manager = new Fun4AllDstOutputManager("DSTOUT",
-      output_file);
+  Fun4AllOutputManager *out_Manager = new Fun4AllDstOutputManager("DSTOUT",output_file);
   se->registerOutputManager(out_Manager);
 
   //alternatively, fast check on DST using DST Reader:
