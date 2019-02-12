@@ -5,7 +5,14 @@
 #include <fun4all/Fun4AllPrdfInputManager.h>
 
 #include <phool/recoConsts.h>
+
+#include <prototype2/CaloCalibration.h>
+#include <prototype2/CaloUnpackPRDF.h>
+#include <prototype2/GenericUnpackPRDF.h>
+#include <prototype2/PROTOTYPE2_FEM.h>
+#include <prototype2/Prototype2DSTReader.h>
 #include <prototype2/RunInfoUnpackPRDF.h>
+#include <prototype2/TempInfoUnpackPRDF.h>
 
 R__LOAD_LIBRARY(libPrototype2.so)
 #endif
@@ -77,9 +84,7 @@ Fun4All_TestBeam(int nEvents = 100,
 // unpack->Verbosity(1);
   se->registerSubsystem(unpack);
 
-  CaloCalibration * calib = NULL;
-
-  calib = new CaloCalibration("CEMC");
+  CaloCalibration *calib = new CaloCalibration("CEMC");
   calib->GetCalibrationParameters().ReadFromFile("CEMC","xml",0,0,
       string(getenv("CALIBRATIONROOT")) + string("/Prototype2/Calibration/")); // calibration database
   se->registerSubsystem(calib);
@@ -121,11 +126,9 @@ Fun4All_TestBeam(int nEvents = 100,
   const int first_packet_id = PROTOTYPE2_FEM::PACKET_ID; // 21101
   const int second_packet_id = 21102;
 
-  GenericUnpackPRDF *gunpack = NULL;
-
   const int N_hodo = 8;
 
-  gunpack = new GenericUnpackPRDF("HODO_VERTICAL");
+  GenericUnpackPRDF *gunpack = new GenericUnpackPRDF("HODO_VERTICAL");
   for (int i = 0; i < N_hodo; ++i)
     gunpack->add_channel(first_packet_id, 104 + i, i); // 24 Cerenkov 1
   se->registerSubsystem(gunpack);
