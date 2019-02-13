@@ -52,7 +52,7 @@ FEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
   // fsPHENIX ECAL
   femc->SetfsPHENIXDetector(); 
-  mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v003.txt";
+  mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
 
   cout << mapping_femc.str() << endl;
 
@@ -75,7 +75,7 @@ void FEMC_Towers(int verbosity = 0) {
 
   // fsPHENIX ECAL
   mapping_femc << getenv("CALIBRATIONROOT") <<
-   	"/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v003.txt";
+   	"/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
 
   RawTowerBuilderByHitIndex* tower_FEMC = new RawTowerBuilderByHitIndex("TowerBuilder_FEMC");
   tower_FEMC->Detector("FEMC");
@@ -121,6 +121,13 @@ void FEMC_Towers(int verbosity = 0) {
   TowerDigitizer5->Verbosity(verbosity);
   TowerDigitizer5->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem( TowerDigitizer5 );
+
+  RawTowerDigitizer *TowerDigitizer6 = new RawTowerDigitizer("FEMCRawTowerDigitizer6");
+  TowerDigitizer6->Detector("FEMC");
+  TowerDigitizer6->TowerType(6); 
+  TowerDigitizer6->Verbosity(verbosity);
+  TowerDigitizer6->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
+  se->registerSubsystem( TowerDigitizer6 );
 
   // PbW crystals
   //RawTowerCalibration *TowerCalibration1 = new RawTowerCalibration("FEMCRawTowerCalibration1");
@@ -170,6 +177,15 @@ void FEMC_Towers(int verbosity = 0) {
   TowerCalibration5->set_pedstal_ADC(0);
   se->registerSubsystem( TowerCalibration5 );
 
+  RawTowerCalibration *TowerCalibration6 = new RawTowerCalibration("FEMCRawTowerCalibration6");
+  TowerCalibration6->Detector("FEMC");
+  TowerCalibration6->TowerType(6);
+  TowerCalibration6->Verbosity(verbosity);
+  TowerCalibration6->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration6->set_calib_const_GeV_ADC(1.0/0.030);  // sampling fraction = 0.030
+  TowerCalibration6->set_pedstal_ADC(0);
+  se->registerSubsystem( TowerCalibration6 );
+
 }
 
 void FEMC_Clusters(int verbosity = 0) {
@@ -196,6 +212,7 @@ void FEMC_Eval(std::string outputfile, int verbosity = 0)
   CaloEvaluator *eval = new CaloEvaluator("FEMCEVALUATOR", "FEMC", outputfile.c_str());
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
+
 
   return;
 }
