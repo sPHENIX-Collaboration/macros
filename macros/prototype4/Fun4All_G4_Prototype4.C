@@ -619,7 +619,7 @@ int Fun4All_G4_Prototype4(int nEvents = 1)
 
   if (dstoutput)
     {
-      Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT","G4Prototype3New.root");
+      Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT","G4Prototype4New.root");
       se->registerOutputManager(out);
     }
 
