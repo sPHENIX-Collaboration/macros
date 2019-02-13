@@ -1,10 +1,26 @@
-#include <string>
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllPrdfInputManager.h>
 
-using namespace std;
+#include <phool/recoConsts.h>
+
+#include <prototype4/CaloCalibration.h>
+#include <prototype4/CaloUnpackPRDF.h>
+#include <prototype4/EventInfoSummary.h>
+#include <prototype4/GenericUnpackPRDF.h>
+#include <prototype4/PROTOTYPE4_FEM.h>
+#include <prototype4/Prototype4DSTReader.h>
+#include <prototype4/RunInfoUnpackPRDF.h>
+#include <prototype4/TempInfoUnpackPRDF.h>
+
+R__LOAD_LIBRARY(libPrototype4.so)
+#endif
 
 void Fun4All_TestBeam(int nEvents = 100,
-                      const char *input_file = "/sphenix/data/data03//phnxreco/sphenix/t1044/fnal/beam/beam_00000406-0000.prdf",
-                      const char *output_file = "data/beam_00000406.root")
+                      const char *input_file = "/sphenix/data/data02/sphenix/t1044/fnal/beam/beam_00000406-0000.prdf",
+                      const char *output_file = "beam_00000406.root")
 {
   gSystem->Load("libfun4all");
   gSystem->Load("libPrototype4.so");
