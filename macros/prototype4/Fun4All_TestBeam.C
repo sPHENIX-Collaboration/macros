@@ -114,10 +114,10 @@ void Fun4All_TestBeam(int nEvents = 100,
     calib->set_calib_tower_node_prefix("CALIB_LG");
     calib->set_raw_tower_node_prefix("RAW_LG");
     calib->GetCalibrationParameters().set_name("hcalin_lg");
-    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cin_cali);
-    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
-    //  calib->GetCalibrationParameters().ReadFromFile("hcalin_lg", "xml", 0, 0,
-    //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
+//    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cin_cali);
+//    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
+      calib->GetCalibrationParameters().ReadFromFile("hcalin_lg", "xml", 0, 0,
+                                                     string(getenv("CALIBRATIONROOT")) + string("/Prototype4/Calibration/"));  // calibration database
     se->registerSubsystem(calib);
 
     //  calib = new CaloCalibration("HCALIN");
@@ -125,27 +125,27 @@ void Fun4All_TestBeam(int nEvents = 100,
     //  calib->set_raw_tower_node_prefix("RAW_HG");
     //  calib->GetCalibrationParameters().set_name("hcalin_hg");
     //  calib->GetCalibrationParameters().ReadFromFile("hcalin_hg", "xml", 0, 0,
-    //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
+    //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype4/Calibration/"));  // calibration database
     //  se->registerSubsystem(calib);
 
     calib = new CaloCalibration("HCALOUT");
     calib->set_calib_tower_node_prefix("CALIB_LG");
     calib->set_raw_tower_node_prefix("RAW_LG");
     calib->GetCalibrationParameters().set_name("hcalout_lg");
-    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cout_cali);
-    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
-    //  calib->GetCalibrationParameters().ReadFromFile("hcalout_lg", "xml", 0, 0,
-    //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
+//    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cout_cali);
+//    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
+      calib->GetCalibrationParameters().ReadFromFile("hcalout_lg", "xml", 0, 0,
+                                                     string(getenv("CALIBRATIONROOT")) + string("/Prototype4/Calibration/"));  // calibration database
     se->registerSubsystem(calib);
 
     calib = new CaloCalibration("HCALOUT");
     calib->set_calib_tower_node_prefix("CALIB_HG");
     calib->set_raw_tower_node_prefix("RAW_HG");
     calib->GetCalibrationParameters().set_name("hcalout_hg");
-    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cout_cali / 32);
-    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
-    //  calib->GetCalibrationParameters().ReadFromFile("hcalout_hg", "xml", 0, 0,
-    //                                                 string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/"));  // calibration database
+//    calib->GetCalibrationParameters().set_double_param("calib_const_scale", cout_cali / 32);
+//    calib->GetCalibrationParameters().set_int_param("use_chan_calibration", 0);
+      calib->GetCalibrationParameters().ReadFromFile("hcalout_hg", "xml", 0, 0,
+                                                     string(getenv("CALIBRATIONROOT")) + string("/Prototype4/Calibration/"));  // calibration database
     se->registerSubsystem(calib);
   }
   //
