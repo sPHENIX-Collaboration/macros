@@ -290,6 +290,8 @@ void Tracking_Cells(int verbosity = 0)
       // override the default timing window for this layer - default is +/- 5000 ns
       maps_cells->set_timing_window(ilayer, -5000, 5000);
     }
+    //maps_cells->set_diffusion_width(22e-04);  // maximum diffusion width - sigma in cm - default is 22 microns
+
     se->registerSubsystem(maps_cells);
   }
 
@@ -342,7 +344,7 @@ void Tracking_Cells(int verbosity = 0)
   // We may want to change the number of inner layers, and can do that here
   padplane->set_int_param("tpc_minlayer_inner",n_maps_layer+n_intt_layer);   // sPHENIX layer number of first TPC readout layer
   padplane->set_int_param("ntpc_layers_inner",n_tpc_layer_inner); 
-   padplane->set_int_param("ntpc_phibins_inner",tpc_layer_rphi_count_inner); 
+  padplane->set_int_param("ntpc_phibins_inner",tpc_layer_rphi_count_inner); 
 
   return;
 }
@@ -369,10 +371,9 @@ void Tracking_Reco(int verbosity = 0)
   // MVTX
   PHG4MVTXDigitizer* digimvtx = new PHG4MVTXDigitizer();
   digimvtx->Verbosity(0);
-  for (int i = 0; i < n_maps_layer; ++i)
-  {
-    digimvtx->set_adc_scale(i, 255, 0.4e-6);  // reduced by a factor of 2.5 when going from maps thickess of 50 microns to 18 microns
-  }
+
+  // energy deposit in 25 microns = 9.6 KeV = 1000 electrons collected after recombination
+  //digimvtx->set_adc_scale(0.95e-6);  // default set in code is 0.95e-06, which is 99 electrons
   se->registerSubsystem(digimvtx);
 
   if (n_intt_layer > 0)
@@ -491,7 +492,7 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4INTTDigitizer::set_ad
   //-----------------------------
   // Apply MIP thresholds to Hits
   //-----------------------------
-
+  /*
   PHG4SvtxThresholds* thresholds = new PHG4SvtxThresholds();
   thresholds->Verbosity(verbosity);
 
@@ -505,6 +506,7 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4INTTDigitizer::set_ad
   // INTT: Does not need PHG4SvtxThresholds as the new digitizer handle the zero-suppression threshold with in ASIC
 
   se->registerSubsystem(thresholds);
+  */
 
   //-------------
   // Cluster Hits
@@ -516,7 +518,7 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4INTTDigitizer::set_ad
   mvtxclusterizer->Verbosity(verbosity);
   // Reduced by 2 relative to the cylinder cell maps macro. I found this necessary to get full efficiency
   // Many hits in the present simulation are single cell hits, so it is not clear why the cluster threshold should be higher than the cell threshold
-  mvtxclusterizer->set_threshold(0.1);  // fraction of a mip
+  mvtxclusterizer->set_threshold(0.0);  // fraction of a mip
   se->registerSubsystem(mvtxclusterizer);
 
   // For the INTT layers 
