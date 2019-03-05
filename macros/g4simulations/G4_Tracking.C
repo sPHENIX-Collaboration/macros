@@ -470,6 +470,7 @@ DAC0-7 threshold as fraction to MIP voltage are set to PHG4INTTDigitizer::set_ad
 
     PHG4INTTDigitizer* digiintt = new PHG4INTTDigitizer();
     digiintt->Verbosity(verbosity);
+    digiintt->Detector("INTT");
     for (int i = 0; i < n_intt_layer; i++)
     {
       digiintt->set_adc_scale(n_maps_layer + i, userrange);
