@@ -147,6 +147,12 @@ int Fun4All_G4_fsPHENIX(
   // Fun4All server
   //---------------
 
+  bool display_on = false;
+  if(display_on)
+    {
+      gROOT->LoadMacro("DisplayOn.C");
+    }
+
   Fun4AllServer *se = Fun4AllServer::instance();
 //  se->Verbosity(0); // uncomment for batch production running with minimal output messages
   se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
@@ -260,7 +266,7 @@ int Fun4All_G4_fsPHENIX(
   // Detector Division
   //------------------
 
-  if (do_svtx_cell) Svtx_Cells();
+  if (do_svtx_cell) Tracking_Cells();
 
   if (do_cemc_cell) CEMC_Cells();
 
@@ -300,7 +306,7 @@ int Fun4All_G4_fsPHENIX(
   // SVTX tracking
   //--------------
 
-  if (do_svtx_track) Svtx_Reco();
+  if (do_svtx_track) Tracking_Reco();
 
   //--------------
   // FGEM tracking
@@ -343,7 +349,7 @@ int Fun4All_G4_fsPHENIX(
   // Simulation evaluation
   //----------------------
 
-  if (do_svtx_eval) Svtx_Eval("g4svtx_eval.root");
+  if (do_svtx_eval) Tracking_Eval("g4svtx_eval.root");
 
   if (do_cemc_eval) CEMC_Eval("g4cemc_eval.root");
 
@@ -420,51 +426,42 @@ int Fun4All_G4_fsPHENIX(
   //if (do_dst_compress) DstCompress(out);
   //se->registerOutputManager(out);
 
-  if (nEvents == 0 && !readhits && !readhepmc)
-    {
-      cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
-      cout << "it will run forever, so I just return without running anything" << endl;
-      return 0;
-    }
-
+  //-----------------
+  // Event processing
+  //-----------------
   if (nEvents < 0)
-    {
-      PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
-      g4->ApplyCommand("/control/execute vis.mac");
-      //g4->StartGui();
-      se->run(1);
-
-      se->End();
-      std::cout << "All done" << std::endl;
-
-
-      std::cout << "==== Useful display commands ==" << std::endl;
-      cout << "draw axis: " << endl;
-      cout << " G4Cmd(\"/vis/scene/add/axes 0 0 0 50 cm\")" << endl;
-      cout << "zoom" << endl;
-      cout << " G4Cmd(\"/vis/viewer/zoom 1\")" << endl;
-      cout << "viewpoint:" << endl;
-      cout << " G4Cmd(\"/vis/viewer/set/viewpointThetaPhi 0 0\")" << endl;
-      cout << "panTo:" << endl;
-      cout << " G4Cmd(\"/vis/viewer/panTo 0 0 cm\")" << endl;
-      cout << "print to eps:" << endl;
-      cout << " G4Cmd(\"/vis/ogl/printEPS\")" << endl;
-      cout << "set background color:" << endl;
-      cout << " G4Cmd(\"/vis/viewer/set/background white\")" << endl;
-      std::cout << "===============================" << std::endl;
-    }
-  else
-    {
-
-      se->run(nEvents);
-
-      se->End();
-      std::cout << "All done" << std::endl;
-      delete se;
-      gSystem->Exit(0);
-      return 0;
-    }
+  {
     return 0;
+  }
+  // if we run the particle generator and use 0 it'll run forever
+  if (nEvents == 0 && !readhits && !readhepmc)
+  {
+    cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
+    cout << "it will run forever, so I just return without running anything" << endl;
+    return 0;
+  }
+
+  if(display_on)
+    {
+      DisplayOn();
+      // prevent macro from finishing so can see display
+      int i;
+      cout << "***** Enter any integer to proceed" << endl;
+      cin >> i;
+    }
+
+  se->run(nEvents);
+
+  //-----
+  // Exit
+  //-----
+
+
+  se->End();
+  std::cout << "All done" << std::endl;
+  delete se;
+  gSystem->Exit(0);
+  return 0;
 }
 
 
