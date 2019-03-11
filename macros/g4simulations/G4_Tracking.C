@@ -5,7 +5,6 @@
 #include <g4intt/PHG4INTTCellReco.h>
 #include <g4intt/PHG4INTTDefs.h>
 #include <g4intt/PHG4INTTSubsystem.h>
-#include <g4detectors/PHG4TPCSpaceChargeDistortion.h>
 #include <g4eval/SvtxEvaluator.h>
 #include <g4hough/PHG4GenFitTrackProjection.h>
 #include <g4hough/PHG4KalmanPatRec.h>
@@ -17,6 +16,7 @@
 #include <g4tpc/PHG4TPCElectronDrift.h>
 #include <g4tpc/PHG4TPCPadPlane.h>
 #include <g4tpc/PHG4TPCPadPlaneReadout.h>
+#include <g4tpc/PHG4TPCSpaceChargeDistortion.h>
 #include <g4tpc/PHG4TPCSubsystem.h>
 #include <g4mvtx/PHG4MVTXCellReco.h>
 #include <g4mvtx/PHG4MVTXSubsystem.h>
@@ -26,11 +26,14 @@
 #include <mvtx/MVTXClusterizer.h>
 #include <intt/INTTClusterizer.h>
 #include <tpc/TPCClusterizer.h>
-R__LOAD_LIBRARY(libg4tpc.so)
+R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libg4hough.so)
 R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
-R__LOAD_LIBRARY(libg4hough.so)
-R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libg4tpc.so)
+R__LOAD_LIBRARY(libintt.so)
+R__LOAD_LIBRARY(libmvtx.so)
+R__LOAD_LIBRARY(libtpc.so)
 #endif
 
 #include <vector>
@@ -376,9 +379,10 @@ void Tracking_Reco(int verbosity = 0)
   //digimvtx->set_adc_scale(0.95e-6);  // default set in code is 0.95e-06, which is 99 electrons
   se->registerSubsystem(digimvtx);
 
+
   if (n_intt_layer > 0)
   {
-
+#ifdef PHG4SVTXDEADMAPLOADER
     if (INTTDeadMapOption != kINTTNoDeadMap)
     {
       // Load pre-defined deadmaps
@@ -414,6 +418,7 @@ void Tracking_Reco(int verbosity = 0)
 //      deadMapINTT -> Verbosity(1);
       se->registerSubsystem(deadMapINTT);
     }
+#endif // PHG4SVTXDEADMAPLOADER
 
     // INTT
     // these should be used for the INTT
