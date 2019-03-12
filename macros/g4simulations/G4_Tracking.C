@@ -29,15 +29,26 @@
 #include <intt/InttClusterizer.h>
 #include <tpc/TPCClusterizer.h>
 #include <tpc/TpcClusterizer.h>
+#include <trackreco/PHGenFitTrkFitter.h>
+#include <trackreco/PHGenFitTrkProp.h>
+#include <trackreco/PHHoughSeeding.h>
+#include <trackreco/PHInitVertexing.h>
+#include <trackreco/PHTrackSeeding.h>
+#include <trackreco/PHTruthVertexing.h>
+R__LOAD_LIBRARY(libintt.so)
+R__LOAD_LIBRARY(libmvtx.so)
+R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
 R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libg4hough.so)
 R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libtrack_reco.so)
 #endif
 
 #include <vector>
 
+// set to run the code that produces the old containers through clustering
 bool old_containers = true;
 
 // define INTTLADDER8, INTTLADDER6, INTTLADDER4_ZP or INTTLADDER4_PP, INTTLADDER0 to get 8, 6, 4 or 0 layers
@@ -272,7 +283,7 @@ void Tracking_Cells(int verbosity = 0)
   gSystem->Load("libg4tpc.so");
   gSystem->Load("libtpc.so");
   gSystem->Load("libintt.so");
-
+ 
 
   //---------------
   // Fun4All server
@@ -388,7 +399,9 @@ void Tracking_Reco(int verbosity = 0)
   //---------------
 
   gSystem->Load("libfun4all.so");
+gSystem->Load("libtrack_reco.so");
   gSystem->Load("libg4hough.so");
+  
 
   //---------------
   // Fun4All server
@@ -633,67 +646,145 @@ void Tracking_Reco(int verbosity = 0)
       se->registerSubsystem(tpcclusterizer_old);
     }
 
-  if(!old_containers)
-    return;
+  // Old tracking in g4hough using old containers
+  bool old_tracking = false;
+  if(old_tracking)
+    {
+      // This should be true for everything except testing!
+      const bool use_kalman_pat_rec = true;
+      if (use_kalman_pat_rec)
+	{
+	  //---------------------
+	  // PHG4KalmanPatRec
+	  //---------------------
+	  
+	  PHG4KalmanPatRec* kalman_pat_rec = new PHG4KalmanPatRec("PHG4KalmanPatRec", n_maps_layer, n_intt_layer, n_gas_layer);
+	  kalman_pat_rec->Verbosity(30);
+	  
+	  for(int i = 0;i<n_intt_layer;i++)
+	    {
+	      if(laddertype[i] == PHG4INTTDefs::SEGMENTATION_Z)
+		{
+		  // strip length is along phi
+		  kalman_pat_rec->set_max_search_win_theta_intt(i, 0.010);
+		  kalman_pat_rec->set_min_search_win_theta_intt(i, 0.00);
+		  kalman_pat_rec->set_max_search_win_phi_intt(i, 0.20);
+		  kalman_pat_rec->set_min_search_win_phi_intt(i, 0.20);
+		}
+	      else
+		{
+		  // strip length is along theta
+		  kalman_pat_rec->set_max_search_win_theta_intt(i, 0.200);
+		  kalman_pat_rec->set_min_search_win_theta_intt(i, 0.200);
+		  kalman_pat_rec->set_max_search_win_phi_intt(i, 0.0050);
+		  kalman_pat_rec->set_min_search_win_phi_intt(i, 0.000);
+		}
+	    }
+	  
+	  se->registerSubsystem(kalman_pat_rec);
+	}
+      else
+	{
+	  //---------------------
+	  // Truth Pattern Recognition
+	  //---------------------
+	  PHG4TruthPatRec* pat_rec = new PHG4TruthPatRec();
+	  se->registerSubsystem(pat_rec);
+	}
+      
+      //---------------------
+      // Kalman Filter
+      //---------------------
+      
+      PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
+      kalman->Verbosity(0);
+      if (use_primary_vertex)
+	kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
+      se->registerSubsystem(kalman);
+      
+      //------------------
+      // Track Projections
+      //------------------
+      PHG4GenFitTrackProjection* projection = new PHG4GenFitTrackProjection();
+      projection->Verbosity(verbosity);
+      se->registerSubsystem(projection);
+    }
 
-  // This should be true for everything except testing!
-  const bool use_kalman_pat_rec = true;
-  if (use_kalman_pat_rec)
-  {
-    //---------------------
-    // PHG4KalmanPatRec
-    //---------------------
 
-    PHG4KalmanPatRec* kalman_pat_rec = new PHG4KalmanPatRec("PHG4KalmanPatRec", n_maps_layer, n_intt_layer, n_gas_layer);
-    kalman_pat_rec->Verbosity(0);
+  // new containers will be implemented here      
+  //==============================
+
+  if(!old_tracking)
+    {
+      // This should be true for everything except testing!
+      const bool use_track_prop = true;      
+      if (use_track_prop)
+	{
+	  //---------------------
+	  // PHG4KalmanPatRec
+	  //---------------------
+	  
+	  // new clus
+
+	  PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
+	  init_vtx->Verbosity(0);
+	  se->registerSubsystem(init_vtx);
+	  
+	  PHTrackSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer);
+	  track_seed->Verbosity(50);
+	  se->registerSubsystem(track_seed);
+	  
+	  PHGenFitTrkProp* track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", n_maps_layer, n_intt_layer, n_gas_layer);
+	  track_prop->Verbosity(50);
+	  se->registerSubsystem(track_prop);
+	  
+	  for(int i = 0;i<n_intt_layer;i++)
+	    {
+	      if(laddertype[i] == PHG4INTTDefs::SEGMENTATION_Z)
+		{
+		  // strip length is along phi
+		  track_prop->set_max_search_win_theta_intt(i, 0.010);
+		  track_prop->set_min_search_win_theta_intt(i, 0.00);
+		  track_prop->set_max_search_win_phi_intt(i, 0.20);
+		  track_prop->set_min_search_win_phi_intt(i, 0.20);
+		}
+	      else
+		{
+		  // strip length is along theta
+		  track_prop->set_max_search_win_theta_intt(i, 0.200);
+		  track_prop->set_min_search_win_theta_intt(i, 0.200);
+		  track_prop->set_max_search_win_phi_intt(i, 0.0050);
+		  track_prop->set_min_search_win_phi_intt(i, 0.000);
+		}
+	    }
+	}
+      else
+	{
+	  //---------------------
+	  // Truth Pattern Recognition
+	  //---------------------
+	  PHG4TruthPatRec* pat_rec = new PHG4TruthPatRec();
+	  se->registerSubsystem(pat_rec);
+	}
     
-    for(int i = 0;i<n_intt_layer;i++)
-      {
-	if(laddertype[i] == PHG4INTTDefs::SEGMENTATION_Z)
-	  {
-	    // strip length is along phi
-	    kalman_pat_rec->set_max_search_win_theta_intt(i, 0.010);
-	    kalman_pat_rec->set_min_search_win_theta_intt(i, 0.00);
-	    kalman_pat_rec->set_max_search_win_phi_intt(i, 0.20);
-	    kalman_pat_rec->set_min_search_win_phi_intt(i, 0.20);
-	  }
-	else
-	  {
-	    // strip length is along theta
-	    kalman_pat_rec->set_max_search_win_theta_intt(i, 0.200);
-	    kalman_pat_rec->set_min_search_win_theta_intt(i, 0.200);
-	    kalman_pat_rec->set_max_search_win_phi_intt(i, 0.0050);
-	    kalman_pat_rec->set_min_search_win_phi_intt(i, 0.000);
-	  }
-      }
-    
-    se->registerSubsystem(kalman_pat_rec);
-  }
-  else
-  {
-    //---------------------
-    // Truth Pattern Recognition
-    //---------------------
-    PHG4TruthPatRec* pat_rec = new PHG4TruthPatRec();
-    se->registerSubsystem(pat_rec);
-  }
 
-  //---------------------
-  // Kalman Filter
-  //---------------------
-
-  PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
-  kalman->Verbosity(0);
-  if (use_primary_vertex)
-    kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
-  se->registerSubsystem(kalman);
-
-  //------------------
-  // Track Projections
-  //------------------
-  PHG4GenFitTrackProjection* projection = new PHG4GenFitTrackProjection();
-  projection->Verbosity(verbosity);
-  se->registerSubsystem(projection);
+      //---------------------
+      // Kalman Filter
+      //---------------------
+      
+      PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
+      kalman->Verbosity(100);
+      if (use_primary_vertex)
+	kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
+      se->registerSubsystem(kalman);
+      
+      //------------------
+      // Track Projections
+      //------------------
+      PHG4GenFitTrackProjection* projection = new PHG4GenFitTrackProjection();
+      projection->Verbosity(verbosity);
+      se->registerSubsystem(projection);
+    }
 
   /*  
   //----------------------
@@ -703,9 +794,10 @@ void Tracking_Reco(int verbosity = 0)
   beamspot->Verbosity(verbosity);
   se->registerSubsystem( beamspot );
   */
-
+  
   return;
 }
+
 
 void Tracking_Eval(std::string outputfile, int verbosity = 0)
 {
@@ -728,6 +820,12 @@ void Tracking_Eval(std::string outputfile, int verbosity = 0)
   // Tracking evaluation
   //----------------
 
+  TrkrEvaluator* trkreval;
+  trkreval = new TrkrEvaluator("TrkrEvaluator", "TrkrEval.root", n_maps_layer, n_intt_layer, n_gas_layer);
+  trkreval->do_cluster_eval(true);
+  se->registerSubsystem(trkreval);
+
+
   if(old_containers)
     { 
       SvtxEvaluator* eval;
@@ -740,11 +838,6 @@ void Tracking_Eval(std::string outputfile, int verbosity = 0)
       eval->Verbosity(0);
       se->registerSubsystem(eval);
     }
-
-  TrkrEvaluator* trkreval;
-  trkreval = new TrkrEvaluator("TrkrEvaluator", "TrkrEval.root", n_maps_layer, n_intt_layer, n_gas_layer);
-  trkreval->do_cluster_eval(true);
-  se->registerSubsystem(trkreval);
 
 
   if (use_primary_vertex)
