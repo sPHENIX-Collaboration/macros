@@ -108,6 +108,7 @@ int Fun4All_G4_fsPHENIX(
 
   bool do_FGEM = true;
   bool do_FGEM_track = do_FGEM &&  true;
+  bool do_FGEM_eval = do_FGEM_track &&  true;
 
   bool do_FEMC = true;
   bool do_FEMC_cell = do_FEMC && true;
@@ -141,7 +142,7 @@ int Fun4All_G4_fsPHENIX(
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root"); // default map from the calibration database
-  const float magfield_rescale = 1.0; // already adjusted to 1.4T central field
+  const float magfield_rescale = -1.4/1.5; // make consistent with Fun4All_G4_sPHENIX()
 
   //---------------
   // Fun4All server
@@ -360,6 +361,8 @@ int Fun4All_G4_fsPHENIX(
   if (do_jet_eval) Jet_Eval("g4jet_eval.root");
 
   if (do_fwd_jet_eval) Jet_FwdEval("g4fwdjet_eval.root");
+
+  if (do_FGEM_eval) FGEM_FastSim_Reco("g4fwdjet_eval.root");
 
   //-------------- 
   // IO management

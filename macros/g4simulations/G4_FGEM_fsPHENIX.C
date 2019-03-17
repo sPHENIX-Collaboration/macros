@@ -269,14 +269,14 @@ make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
   return 0;
 }
 
-void FGEM_FastSim_Reco(int verbosity = 0) {
-
+void FGEM_FastSim_Reco(int verbosity = 0)
+{
   //---------------
   // Load libraries
   //---------------
 
   gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4hough.so");
+  gSystem->Load("libg4trackfastsim.so");
 
   //---------------
   // Fun4All server
@@ -284,34 +284,111 @@ void FGEM_FastSim_Reco(int verbosity = 0) {
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  PHG4TrackFastSim* kalman = new PHG4TrackFastSim("PHG4TrackFastSim");
-  kalman->Verbosity(0);
+  PHG4TrackFastSim *kalman = new PHG4TrackFastSim("PHG4TrackFastSim");
+  kalman->Verbosity(verbosity);
 
   kalman->set_use_vertex_in_fitting(true);
   kalman->set_vertex_xy_resolution(50E-4);
   kalman->set_vertex_z_resolution(50E-4);
 
-  kalman->set_detector_type(PHG4TrackFastSim::Vertical_Plane); // Vertical_Plane, Cylinder
-  kalman->set_phi_resolution(50E-4);
-  kalman->set_r_resolution(1.);
-
-  kalman->set_pat_rec_hit_finding_eff(1.);
-  kalman->set_pat_rec_noise_prob(0.);
-
-  std::string phg4hits_names[] = {"G4HIT_FGEM_0","G4HIT_FGEM_1","G4HIT_FGEM_2","G4HIT_FGEM_3","G4HIT_FGEM_4"};
-  kalman->set_phg4hits_names(phg4hits_names, 5);
   kalman->set_sub_top_node_name("SVTX");
   kalman->set_trackmap_out_name("SvtxTrackMap");
 
-  // Saved track states (projections)
-  std::string state_names[] = {"FEMC","FHCAL"};
-  kalman->set_state_names(state_names, 2);
-
-  kalman->set_fit_alg_name("KalmanFitterRefTrack");//
+  kalman->set_fit_alg_name("KalmanFitterRefTrack");  //
   kalman->set_primary_assumption_pid(13);
   kalman->set_do_evt_display(false);
 
-  se->registerSubsystem(kalman);
+  // MAPS
+  kalman->add_phg4hits(
+      "G4HIT_MAPS",                //      const std::string& phg4hitsNames,
+      PHG4TrackFastSim::Cylinder,  //      const DETECTOR_TYPE phg4dettype,
+      5e-4,                        //      const float radres,
+      5e-4,                        //      const float phires,
+      5e-4,                        //      const float lonres,
+      1,                           //      const float eff,
+      0                            //      const float noise
+  );
 
+  // GEM0, 70um azimuthal resolution, 1cm radial strips
+  kalman->add_phg4hits(
+      "G4HIT_FGEM_0",                    //      const std::string& phg4hitsNames,
+      PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
+      1. / sqrt(12),                     //      const float radres,
+      70 - 4,                            //      const float phires,
+      100e-4,                            //      const float lonres,
+      1,                                 //      const float eff,
+      0                                  //      const float noise
+  );
+  // GEM1, 70um azimuthal resolution, 1cm radial strips
+  kalman->add_phg4hits(
+      "G4HIT_FGEM_1",                    //      const std::string& phg4hitsNames,
+      PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
+      1. / sqrt(12),                     //      const float radres,
+      70 - 4,                            //      const float phires,
+      100e-4,                            //      const float lonres,
+      1,                                 //      const float eff,
+      0                                  //      const float noise
+  );
+
+  // TPC
+  kalman->add_phg4hits(
+      "G4HIT_TPC",                 //      const std::string& phg4hitsNames,
+      PHG4TrackFastSim::Cylinder,  //      const DETECTOR_TYPE phg4dettype,
+      1,                           //      const float radres,
+      200e-4,                      //      const float phires,
+      500e-4,                      //      const float lonres,
+      1,                           //      const float eff,
+      0                            //      const float noise
+  );
+
+  // GEM2, 70um azimuthal resolution, 1cm radial strips
+  kalman->add_phg4hits(
+      "G4HIT_FGEM_2",                    //      const std::string& phg4hitsNames,
+      PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
+      1. / sqrt(12),                     //      const float radres,
+      70 - 4,                            //      const float phires,
+      100e-4,                            //      const float lonres,
+      1,                                 //      const float eff,
+      0                                  //      const float noise
+  );
+  // GEM3, 70um azimuthal resolution, 1cm radial strips
+  kalman->add_phg4hits(
+      "G4HIT_FGEM_3",                    //      const std::string& phg4hitsNames,
+      PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
+      1. / sqrt(12),                     //      const float radres,
+      70 - 4,                            //      const float phires,
+      100e-4,                            //      const float lonres,
+      1,                                 //      const float eff,
+      0                                  //      const float noise
+  );
+  // GEM4, 70um azimuthal resolution, 1cm radial strips
+  kalman->add_phg4hits(
+      "G4HIT_FGEM_4",                    //      const std::string& phg4hitsNames,
+      PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
+      1. / sqrt(12),                     //      const float radres,
+      70 - 4,                            //      const float phires,
+      100e-4,                            //      const float lonres,
+      1,                                 //      const float eff,
+      0                                  //      const float noise
+  );
+
+  // Saved track states (projections)
+  kalman->add_state_name("FEMC");
+  kalman->add_state_name("FHCAL");
+
+  se->registerSubsystem(kalman);
 }
 
+void Fast_Tracking_Eval(std::string outputfile, int verbosity = 0)
+{
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libg4trackfastsim.so");
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  PHG4TrackFastSimEval *fast_sim_eval = new PHG4TrackFastSimEval("FastTrackingEval");
+  fast_sim_eval->set_filename(outputfile.c_str());
+  se->registerSubsystem(fast_sim_eval);
+
+  return;
+}
