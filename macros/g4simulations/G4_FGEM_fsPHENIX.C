@@ -300,7 +300,7 @@ void FGEM_FastSim_Reco(int verbosity = 0)
 
   // MAPS
   kalman->add_phg4hits(
-      "G4HIT_MAPS",                //      const std::string& phg4hitsNames,
+      "G4HIT_MVTX",                //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Cylinder,  //      const DETECTOR_TYPE phg4dettype,
       5e-4,                        //      const float radres,
       5e-4,                        //      const float phires,
@@ -379,7 +379,7 @@ void FGEM_FastSim_Reco(int verbosity = 0)
   se->registerSubsystem(kalman);
 }
 
-void Fast_Tracking_Eval(std::string outputfile, int verbosity = 0)
+void FGEM_FastSim_Eval(std::string outputfile, int verbosity = 0)
 {
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4trackfastsim.so");
