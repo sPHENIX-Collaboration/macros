@@ -1,23 +1,21 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include "GlobalVariables.C"
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 00, 0)
 #include <fun4all/Fun4AllServer.h>
 #include <g4detectors/PHG4SectorSubsystem.h>
 #include <g4detectors/PHG4SiliconTrackerSubsystem.h>
+#include <g4eval/SvtxEvaluator.h>
 #include <g4hough/PHG4SiliconTrackerDigitizer.h>
 #include <g4hough/PHG4TrackFastSim.h>
-#include <g4eval/SvtxEvaluator.h>
 #include <g4main/PHG4Reco.h>
+#include "GlobalVariables.C"
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4hough.so)
-int
-make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
-		 double etamax,  const int N_Sector = 8);
-void
-AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem);
+int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
+                     double etamax, const int N_Sector = 8);
+void AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem);
 #endif
-// $Id: G4_FGEM_fsPHENIX.C,v 1.2 2014/01/22 01:44:13 jinhuang Exp $                                                                                             
+// $Id: G4_FGEM_fsPHENIX.C,v 1.2 2014/01/22 01:44:13 jinhuang Exp $
 
 /*!
  * \file G4_FGEM_fsPHENIX.C
@@ -29,18 +27,14 @@ AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem);
 
 using namespace std;
 
-void
-FGEM_Init()
+void FGEM_Init()
 {
-
 }
 
-void
-FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
-    const double min_eta = 1.45 //
-    )
+void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
+               const double min_eta = 1.45                //
+)
 {
-
   const double tilt = .1;
 
   string name;
@@ -105,15 +99,10 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   gem = new PHG4SectorSubsystem(name + "_LowerEta");
   gem->SuperDetector(name);
 
-  zpos = zpos
-      - (zpos * sin(tilt)
-          + zpos * cos(tilt)
-              * tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(2) - tilt))
-          * sin(tilt);
+  zpos = zpos - (zpos * sin(tilt) + zpos * cos(tilt) * tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(2) - tilt)) * sin(tilt);
 
   gem->get_geometry().set_normal_polar_angle(
-      (PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta)
-          + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
+      (PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta) + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
   gem->get_geometry().set_normal_start(
       zpos * PHG4Sector::Sector_Geometry::Unit_cm(),
       PHG4Sector::Sector_Geometry::eta_to_polar_angle(2));
@@ -156,18 +145,13 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   gem->get_geometry().AddLayers_HBD_GEM();
   g4Reco->registerSubsystem(gem);
 
-  zpos = zpos
-      - (zpos * sin(tilt)
-          + zpos * cos(tilt)
-              * tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(2) - tilt))
-          * sin(tilt);
+  zpos = zpos - (zpos * sin(tilt) + zpos * cos(tilt) * tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(2) - tilt)) * sin(tilt);
 
   gem = new PHG4SectorSubsystem(name + "_LowerEta");
   gem->SuperDetector(name);
 
   gem->get_geometry().set_normal_polar_angle(
-      (PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta)
-          + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
+      (PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta) + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
   gem->get_geometry().set_normal_start(
       zpos * PHG4Sector::Sector_Geometry::Unit_cm(),
       PHG4Sector::Sector_Geometry::eta_to_polar_angle(2));
@@ -186,12 +170,10 @@ FGEMSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
   g4Reco->registerSubsystem(gem);
 
   ///////////////////////////////////////////////////////////////////////////
-
 }
 
 //! Add drift layers to mini TPC
-void
-AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem)
+void AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem)
 {
   assert(gem);
 
@@ -199,49 +181,45 @@ AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem)
   const double mm = .1 * cm;
   const double um = 1e-3 * mm;
 
-//  const int N_Layers = 70; // used for mini-drift TPC timing digitalization
-  const int N_Layers = 1; // simplified setup
+  //  const int N_Layers = 70; // used for mini-drift TPC timing digitalization
+  const int N_Layers = 1;  // simplified setup
   const double thickness = 2 * cm;
 
   gem->get_geometry().AddLayer("EntranceWindow", "G4_MYLAR", 25 * um, false,
-      100);
+                               100);
   gem->get_geometry().AddLayer("Cathode", "G4_GRAPHITE", 10 * um, false, 100);
 
   for (int d = 1; d <= N_Layers; d++)
-    {
-      stringstream s;
-      s << "DriftLayer_";
-      s << d;
+  {
+    stringstream s;
+    s << "DriftLayer_";
+    s << d;
 
-      gem->get_geometry().AddLayer(s.str(), "G4_METHANE", thickness / N_Layers,
-          true);
-
-    }
+    gem->get_geometry().AddLayer(s.str(), "G4_METHANE", thickness / N_Layers,
+                                 true);
+  }
 }
 
-int
-make_GEM_station(string name, PHG4Reco* g4Reco, double zpos, double etamin,
-    double etamax,  const int N_Sector = 8)
+int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
+                     double etamax, const int N_Sector = 8)
 {
-
-//  cout
-//      << "make_GEM_station - GEM construction with PHG4SectorSubsystem - make_GEM_station_EdgeReadout  of "
-//      << name << endl;
+  //  cout
+  //      << "make_GEM_station - GEM construction with PHG4SectorSubsystem - make_GEM_station_EdgeReadout  of "
+  //      << name << endl;
 
   double polar_angle = 0;
 
   if (zpos < 0)
-    {
-      zpos = -zpos;
-      polar_angle = TMath::Pi();
-
-    }
+  {
+    zpos = -zpos;
+    polar_angle = TMath::Pi();
+  }
   if (etamax < etamin)
-    {
-      double t = etamax;
-      etamax = etamin;
-      etamin = t;
-    }
+  {
+    double t = etamax;
+    etamax = etamin;
+    etamin = t;
+  }
 
   PHG4SectorSubsystem *gem;
   gem = new PHG4SectorSubsystem(name.c_str());
@@ -298,7 +276,7 @@ void FGEM_FastSim_Reco(int verbosity = 0)
   kalman->set_primary_assumption_pid(13);
   kalman->set_do_evt_display(false);
 
-  // MAPS
+  //   MAPS in MVTX detector
   kalman->add_phg4hits(
       "G4HIT_MVTX",                //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Cylinder,  //      const DETECTOR_TYPE phg4dettype,
@@ -314,7 +292,7 @@ void FGEM_FastSim_Reco(int verbosity = 0)
       "G4HIT_FGEM_0",                    //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
       1. / sqrt(12),                     //      const float radres,
-      70 - 4,                            //      const float phires,
+      70e-4,                             //      const float phires,
       100e-4,                            //      const float lonres,
       1,                                 //      const float eff,
       0                                  //      const float noise
@@ -346,7 +324,7 @@ void FGEM_FastSim_Reco(int verbosity = 0)
       "G4HIT_FGEM_2",                    //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
       1. / sqrt(12),                     //      const float radres,
-      70 - 4,                            //      const float phires,
+      70e-4,                             //      const float phires,
       100e-4,                            //      const float lonres,
       1,                                 //      const float eff,
       0                                  //      const float noise
@@ -356,7 +334,7 @@ void FGEM_FastSim_Reco(int verbosity = 0)
       "G4HIT_FGEM_3",                    //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
       1. / sqrt(12),                     //      const float radres,
-      70 - 4,                            //      const float phires,
+      70e-4,                             //      const float phires,
       100e-4,                            //      const float lonres,
       1,                                 //      const float eff,
       0                                  //      const float noise
@@ -366,7 +344,7 @@ void FGEM_FastSim_Reco(int verbosity = 0)
       "G4HIT_FGEM_4",                    //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
       1. / sqrt(12),                     //      const float radres,
-      70 - 4,                            //      const float phires,
+      70e-4,                             //      const float phires,
       100e-4,                            //      const float lonres,
       1,                                 //      const float eff,
       0                                  //      const float noise
