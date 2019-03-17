@@ -235,11 +235,13 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // piston magnet
-  make_piston("magpiston", g4Reco);
+//  make_piston("magpiston", g4Reco);
 
   //----------------------------------------
   // BLACKHOLE
-  
+  // minimal space for forward instrumentation
+  if (radius<270) radius = 270;
+
   // swallow all particles coming out of the backend of sPHENIX
   PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
 blackhole->set_double_param("radius",radius + 10); // add 10 cm
