@@ -272,11 +272,6 @@ void FGEM_FastSim_Reco(int verbosity = 0)
   kalman->set_sub_top_node_name("SVTX");
   kalman->set_trackmap_out_name("SvtxTrackMap");
 
-//  kalman->set_fit_alg_name("KalmanFitterRefTrack");  //
-  kalman->set_fit_alg_name("DafRef");  //
-  kalman->set_primary_assumption_pid(13);
-  kalman->set_do_evt_display(false);
-
   //   MAPS in MVTX detector
   kalman->add_phg4hits(
       "G4HIT_MVTX",                //      const std::string& phg4hitsNames,
