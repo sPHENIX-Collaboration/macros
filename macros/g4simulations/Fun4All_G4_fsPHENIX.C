@@ -15,8 +15,11 @@
 #include <g4main/PHG4ParticleGun.h>
 #include <g4main/HepMCNodeReader.h>
 #include <g4detectors/PHG4DetectorSubsystem.h>
+#include <phhepmc/Fun4AllHepMCInputManager.h>
+#include <phool/recoConsts.h>
 #include <phpythia6/PHPythia6.h>
 #include <phpythia8/PHPythia8.h>
+#include "DisplayOn.C"
 #include "G4Setup_fsPHENIX.C"
 #include "G4_Bbc.C"
 #include "G4_Global.C"
