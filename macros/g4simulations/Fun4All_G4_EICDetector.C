@@ -14,6 +14,7 @@
 #include <g4main/PHG4ParticleGeneratorVectorMeson.h>
 #include <g4main/PHG4ParticleGun.h>
 #include <g4main/HepMCNodeReader.h>
+#include <g4main/ReadEICFiles.h>
 #include <g4detectors/PHG4DetectorSubsystem.h>
 #include <g4eval/PHG4DSTReader.h>
 #include <phhepmc/Fun4AllHepMCInputManager.h>

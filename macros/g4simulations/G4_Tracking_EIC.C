@@ -2,9 +2,11 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6, 00, 0)
 #include <fun4all/Fun4AllServer.h>
 #include <g4eval/SvtxEvaluator.h>
-#include <g4hough/PHG4TrackFastSim.h>
+#include <g4trackfastsim/PHG4TrackFastSim.h>
+#include <g4trackfastsim/PHG4TrackFastSimEval.h>
 class SubsysReco;
 R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libg4trackfastsim.so)
 #endif
 
 #include <vector>
