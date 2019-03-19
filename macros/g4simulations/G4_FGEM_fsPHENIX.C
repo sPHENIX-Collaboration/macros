@@ -2,15 +2,14 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6, 00, 0)
 #include <fun4all/Fun4AllServer.h>
 #include <g4detectors/PHG4SectorSubsystem.h>
-#include <g4detectors/PHG4SiliconTrackerSubsystem.h>
 #include <g4eval/SvtxEvaluator.h>
-#include <g4hough/PHG4SiliconTrackerDigitizer.h>
-#include <g4hough/PHG4TrackFastSim.h>
 #include <g4main/PHG4Reco.h>
+#include <g4trackfastsim/PHG4TrackFastSim.h>
+#include <g4trackfastsim/PHG4TrackFastSimEval.h>
 #include "GlobalVariables.C"
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
-R__LOAD_LIBRARY(libg4hough.so)
+R__LOAD_LIBRARY(libg4trackfastsim.so)
 int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
                      double etamax, const int N_Sector = 8);
 void AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem);

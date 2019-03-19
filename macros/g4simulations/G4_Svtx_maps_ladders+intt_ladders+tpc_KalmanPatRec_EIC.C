@@ -3,25 +3,14 @@
 #include "GlobalVariables.C"
 #include <fun4all/Fun4AllServer.h>
 #include <g4detectors/PHG4CylinderSubsystem.h>
-#include <g4detectors/PHG4CylinderCellTPCReco.h>
-#include <g4detectors/PHG4MapsCellReco.h>
-#include <g4detectors/PHG4MapsSubsystem.h>
-#include <g4detectors/PHG4SiliconTrackerCellReco.h>
-#include <g4detectors/PHG4SiliconTrackerDefs.h>
-#include <g4detectors/PHG4SiliconTrackerSubsystem.h>
-#include <g4detectors/PHG4TPCSpaceChargeDistortion.h>
 #include <g4eval/SvtxEvaluator.h>
 #include <g4hough/PHG4GenFitTrackProjection.h>
 #include <g4hough/PHG4KalmanPatRec.h>
-#include <g4hough/PHG4SiliconTrackerDigitizer.h>
-#include <g4hough/PHG4SvtxClusterizer.h>
-#include <g4hough/PHG4SvtxDeadArea.h>
-#include <g4hough/PHG4SvtxDigitizer.h>
-#include <g4hough/PHG4SvtxThresholds.h>
-#include <g4hough/PHG4TPCClusterizer.h>
 #include <g4hough/PHG4TrackKalmanFitter.h>
 #include <g4hough/PHG4TruthPatRec.h>
 #include <g4main/PHG4Reco.h>
+#include <g4mvtx/PHG4MVTXSubsystem.h>
+#include <g4tpc/PHG4TPCSpaceChargeDistortion.h>
 R__LOAD_LIBRARY(libg4hough.so)
 R__LOAD_LIBRARY(libg4eval.so)
 #endif
@@ -119,7 +108,6 @@ double TPC_SmearZ;
 int Max_si_layer;
 
 void SvtxInit(int verbosity = 0)
-{
 {
   Max_si_layer = n_maps_layer + n_intt_layer + n_gas_layer;
 
@@ -459,13 +447,6 @@ void Svtx_Reco(int verbosity = 0)
   //---------------
 
   Fun4AllServer* se = Fun4AllServer::instance();
-
-  return;
-}
-
-
-  // MomentumEvaluator* eval = new MomentumEvaluator(outputfile.c_str(),0.2,0.4,Max_si_layer,2,Max_si_layer-4,10.,80.);
-  // se->registerSubsystem( eval );
 
   return;
 }
