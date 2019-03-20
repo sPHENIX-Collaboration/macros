@@ -1,4 +1,8 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <qa_modules/QAG4SimulationCalorimeter.h>
+#include <qa_modules/QAG4SimulationCalorimeterSum.h>
+#include <qa_modules/QAG4SimulationJet.h>
+#include <qa_modules/QAHistManager.h>
 #include <fun4all/SubsysReco.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
