@@ -1,3 +1,21 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include <fun4all/Fun4AllServer.h>
+#include <g4calo/RawTowerBuilderByHitIndex.h>
+#include <g4calo/RawTowerDigitizer.h>
+#include <caloreco/RawClusterBuilderFwd.h>
+#include <caloreco/RawTowerCalibration.h>
+#include <g4detectors/PHG4ForwardCalCellReco.h>
+#include <g4detectors/PHG4ForwardHcalSubsystem.h>
+#include <g4eval/CaloEvaluator.h>
+#include <g4main/PHG4Reco.h>
+R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libg4calo.so)
+R__LOAD_LIBRARY(libg4detectors.so)
+R__LOAD_LIBRARY(libg4eval.so)
+#endif
+
 using namespace std;
 
 void
@@ -49,7 +67,8 @@ FHCALSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 void FHCAL_Towers(int verbosity = 0) {
 
   gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
+  gSystem->Load("libg4calo.so");
+  gSystem->Load("libcalo_reco.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_fhcal;

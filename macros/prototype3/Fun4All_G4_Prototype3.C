@@ -1,4 +1,51 @@
-int Fun4All_G4_Prototype3(int nEvents = 1)
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <caloreco/RawTowerCalibration.h>
+
+#include <fun4all/SubsysReco.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllDummyInputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllServer.h>
+
+#include <g4calo/Prototype2RawTowerBuilder.h>
+#include <g4calo/RawTowerBuilder.h>
+#include <g4calo/RawTowerDigitizer.h>
+
+#include <g4detectors/PHG4BlockSubsystem.h>
+#include <g4detectors/PHG4FullProjSpacalCellReco.h>
+#include <g4detectors/PHG4Prototype2HcalCellReco.h>
+#include <g4detectors/PHG4Prototype2InnerHcalSubsystem.h>
+#include <g4detectors/PHG4Prototype2OuterHcalSubsystem.h>
+#include <g4detectors/PHG4SpacalPrototypeSubsystem.h>
+
+#include <g4eval/PHG4DSTReader.h>
+
+#include <g4histos/G4HitNtuple.h>
+
+#include <g4main/PHG4ParticleGun.h>
+#include <g4main/PHG4Reco.h>
+#include <g4main/PHG4ParticleGenerator.h>
+#include <g4main/PHG4SimpleEventGenerator.h>
+#include <g4main/PHG4TruthSubsystem.h>
+
+#include <phool/recoConsts.h>
+
+#include <qa_modules/QAHistManagerDef.h>
+#include <qa_modules/QAG4SimulationCalorimeter.h>
+
+R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libfun4all.so)
+R__LOAD_LIBRARY(libg4calo.so)
+R__LOAD_LIBRARY(libg4detectors.so)
+R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libg4histos.so)
+R__LOAD_LIBRARY(libg4testbench.so)
+R__LOAD_LIBRARY(libqa_modules.so)
+
+#endif
+
+void Fun4All_G4_Prototype3(int nEvents = 1)
 {
 
   gSystem->Load("libfun4all");
@@ -66,8 +113,8 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   //pgen->set_name(particle);
   pgen->set_vtx(0, 0, 0);
   //pgen->set_vtx(0, ypos, 0);
-  double angle = theta*TMath::Pi()/180.;
-  double eta = -1.*TMath::Log(TMath::Tan(angle/2.));
+  angle = theta*TMath::Pi()/180.;
+  eta = -1.*TMath::Log(TMath::Tan(angle/2.));
   pgen->set_eta_range(0.2*eta, 1.8*eta);
   //pgen->set_phi_range(-0.001, 0.001); // 1mrad angular diverpgence
   //pgen->set_phi_range(-0.5/180.*TMath::Pi(), 0.5/180.*TMath::Pi());
@@ -82,7 +129,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   gun->set_name("geantino");
   //  gun->set_name("proton");
   gun->set_vtx(0, 0, 0);
-  double angle = theta*TMath::Pi()/180.;
+  angle = theta*TMath::Pi()/180.;
   gun->set_mom(sin(angle),0.,cos(angle));
 //  se->registerSubsystem(gun);
 
@@ -326,13 +373,13 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
 
   if (ohcal_cell)
     {
-      hccell = new PHG4Prototype2HcalCellReco("HCALoutCellReco");
+      PHG4Prototype2HcalCellReco *hccell = new PHG4Prototype2HcalCellReco("HCALoutCellReco");
       hccell->Detector("HCALOUT");
       se->registerSubsystem(hccell);
     }
   if (ohcal_twr)
     {
-      hcaltwr = new Prototype2RawTowerBuilder("HCALoutRawTowerBuilder");
+      Prototype2RawTowerBuilder *hcaltwr = new Prototype2RawTowerBuilder("HCALoutRawTowerBuilder");
       hcaltwr->Detector("HCALOUT");
       hcaltwr->set_sim_tower_node_prefix("SIM");
       se->registerSubsystem(hcaltwr);
@@ -571,7 +618,7 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
   se->registerInputManager( in );
   if (nEvents <= 0)
     {
-      return 0;
+      return;
     }
   se->run(nEvents);
 
@@ -582,7 +629,5 @@ int Fun4All_G4_Prototype3(int nEvents = 1)
 
   //   std::cout << "All done" << std::endl;
   delete se;
-  //   return 0;
   gSystem->Exit(0);
-
 }

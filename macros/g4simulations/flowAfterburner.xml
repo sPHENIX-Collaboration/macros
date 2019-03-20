@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<FLOWAFTERBURNER>
+  <RANDOM>
+    <SEED>11793</SEED>
+  </RANDOM>
+  <INPUT>sHijing.dat</INPUT>
+  <OUTPUT>flowAfterburner.dat</OUTPUT>
+  <CUTS>
+    <MINETA>-1.0</MINETA>
+    <MAXETA>1.0</MAXETA>
+    <MINPT>0.0</MAXPT>
+  </CUTS>
+  <ALGORITHM>JJNEW</ALGORITHM>
+</FLOWAFTERBURNER>

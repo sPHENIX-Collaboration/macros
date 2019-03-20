@@ -1,12 +1,27 @@
-#include <string>
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllPrdfInputManager.h>
 
-using namespace std;
+#include <phool/recoConsts.h>
+
+#include <prototype3/CaloCalibration.h>
+#include <prototype3/CaloUnpackPRDF.h>
+#include <prototype3/EventInfoSummary.h>
+#include <prototype3/GenericUnpackPRDF.h>
+#include <prototype3/PROTOTYPE3_FEM.h>
+#include <prototype3/Prototype3DSTReader.h>
+#include <prototype3/RunInfoUnpackPRDF.h>
+#include <prototype3/TempInfoUnpackPRDF.h>
+
+R__LOAD_LIBRARY(libPrototype3.so)
+#endif
 
 void
 Fun4All_TestBeam(int nEvents = 1000,
-    const char *input_file =
-        "/gpfs/mnt/gpfs02/sphenix/data/data01/t1044-2016a/fnal/beam/beam_00003310-0000.prdf",
-    const char *output_file = "data/beam_00003310.root")
+    const char *input_file = "/sphenix/data/data01/t1044-2016a/fnal/beam/beam_00003310-0000.prdf",
+    const char *output_file = "beam_00003310.root")
 {
   gSystem->Load("libfun4all");
   gSystem->Load("libPrototype3.so");
@@ -71,9 +86,8 @@ Fun4All_TestBeam(int nEvents = 1000,
 // unpack->Verbosity(1);
   se->registerSubsystem(unpack);
 
-  CaloCalibration * calib = NULL;
 
-  calib = new CaloCalibration("CEMC");
+  CaloCalibration *calib = new CaloCalibration("CEMC");
   calib->GetCalibrationParameters().ReadFromFile("CEMC","xml",0,0,
       string(getenv("CALIBRATIONROOT")) + string("/Prototype3/Calibration/")); // calibration database
   se->registerSubsystem(calib);
@@ -115,11 +129,9 @@ Fun4All_TestBeam(int nEvents = 1000,
   const int first_packet_id = PROTOTYPE3_FEM::PACKET_ID; // 21101
   const int second_packet_id = 21102;
 
-  GenericUnpackPRDF *gunpack = NULL;
-
   const int N_hodo = 8;
 
-  gunpack = new GenericUnpackPRDF("HODO_VERTICAL");
+  GenericUnpackPRDF *gunpack = new GenericUnpackPRDF("HODO_VERTICAL");
   for (int i = 0; i < N_hodo; ++i)
     gunpack->add_channel(first_packet_id, 104 + i, i); // 24 Cerenkov 1
   se->registerSubsystem(gunpack);

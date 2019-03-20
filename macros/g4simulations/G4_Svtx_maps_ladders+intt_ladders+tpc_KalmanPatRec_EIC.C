@@ -1,3 +1,21 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include <fun4all/Fun4AllServer.h>
+#include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4eval/SvtxEvaluator.h>
+#include <g4hough/PHG4GenFitTrackProjection.h>
+#include <g4hough/PHG4KalmanPatRec.h>
+#include <g4hough/PHG4TrackKalmanFitter.h>
+#include <g4hough/PHG4TruthPatRec.h>
+#include <g4main/PHG4Reco.h>
+#include <g4mvtx/PHG4MVTXSubsystem.h>
+#include <g4tpc/PHG4TPCSpaceChargeDistortion.h>
+R__LOAD_LIBRARY(libg4hough.so)
+R__LOAD_LIBRARY(libg4eval.so)
+#endif
+
+
 #include <vector>
 
 // ONLY if backward compatibility with hits files already generated with 8 inner TPC layers is needed, you can set this to "true"
@@ -9,10 +27,17 @@ bool tpc_layers_40  = false;
 bool use_primary_vertex = false;
 
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
-const int n_intt_layer = 0;  // must be 0-4, setting this to zero will remove the INTT completely, n < 4 gives you the first n layers
+
+// default setup for the INTT - please don't change this. The configuration can be redone later in the nacro if desired
+int n_intt_layer = 0;  
+// default layer configuration
+int laddertype[4] = {0, 1, 1, 1};  // default
+int nladder[4] = {34, 30, 36, 42};  // default
+double sensor_radius_inner[4] = {6.876, 8.987, 10.835, 12.676};  // inner staggered radius for layer default
+double sensor_radius_outer[4] = {7.462, 9.545, 11.361, 13.179};  // outer staggered radius for layer  default
 
 int n_tpc_layer_inner = 16;
-double tpc_layer_thick_inner = 1.25 / 2.0;
+double tpc_layer_thick_inner = 1.25; // EIC- recover default inner radius of TPC vol.
 int tpc_layer_rphi_count_inner = 1152;
 
 int n_tpc_layer_mid = 16;
@@ -182,18 +207,14 @@ void SvtxInit(int verbosity = 0)
   // TPC readout shaping time and ADC clock parameters
   // these set the Z size of the TPC cells
   //=======================================
-  // TPCShapingRMSLead = 32.0;  // ns, rising RMS equivalent of shaping amplifier for 80 ns SAMPA
-  // TPCShapingRMSTail = 48.0;  // ns, falling RMS equivalent of shaping amplifier for 80 ns SAMPA
+  TPCShapingRMSLead = 32.0;  // ns, rising RMS equivalent of shaping amplifier for 80 ns SAMPA
+  TPCShapingRMSTail = 48.0;  // ns, falling RMS equivalent of shaping amplifier for 80 ns SAMPA
   TPCADCClock = 53.0;                           // ns, corresponds to an ADC clock rate of 18.8 MHz
-  TPCShapingRMSLead = 16.0;                     // ns, rising RMS equivalent of shaping amplifier for 40 ns SAMPA
-  TPCShapingRMSTail = 24.0;                     // ns, falling RMS equivalent of shaping amplifier for 40 ns SAMPA
   tpc_cell_z = TPCADCClock * TPCDriftVelocity;  // cm
 
-  //  TKH does not understand the physical origin of these parameters.
-  //  however, their impact seems quite small...
-  //  these are tuned to give 150 microns r-phi and 500 microns Z resolution in the outer TPC layers with the TPC setup used here
-  TPC_SmearRPhi = 0.215;
-  TPC_SmearZ = 0.20;
+   //  these are fudge parameters, tuned to give average of 150 microns r-phi and 500 microns Z resolution in the outer TPC layers with the TPC setup used here and 80 ns SAMPA peaking time
+  TPC_SmearRPhi = 0.25;
+  TPC_SmearZ = 0.15;
 }
 
 double Svtx(PHG4Reco* g4Reco, double radius,
@@ -201,101 +222,59 @@ double Svtx(PHG4Reco* g4Reco, double radius,
             int verbosity = 0)
 {
   if (n_maps_layer > 0)
-  {
-    bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
-
-    /*
-	The numbers used in the macro below are from the xml file dump of ITS.gdml
-	As a sanity check, I got numbers  from Walt Sondheim's drawings, sent by email June 20, 2017:
-	OD of Be beam pipe is 41.53 mm, ID is 40 mm
-	Layer 0: radius 23.44 mm to sensor center, tilt from normal to radial vector:  17.37 degrees (0.303 rad), spacing btw sensor centers: 30 deg, arc spacing 12.27 mm
-	Layer 1: radius 31.54 mm to sensor center, ttilt from normal to radial vector:  17.53 degrees (0.306 rad), spacing btw sensor centers: 22.5 deg, arc spacing 12.38 mm
-	Layer 2: radius 39.29 to sensor center, tilt from normal to radial vector: 17.02 degrees (0.297 rad), spacing btw sensor centers: 18.0 deg, arc spacing 12.34 mm
-	These are in reasonable agreement with the numbers I extracted from the gdml file, which are what we use below.
-	These use a spacing in arc length of 12.37 mm and a tilt of 0.304 for all of the first three layers
-      */
-
-    // MAPS inner barrel layers
-    //======================================================
-
-    double maps_layer_radius[3] = {23.4, 31.5, 39.3};  // mm  - precise numbers from ITS.gdml
-    //double maps_layer_radius[3] = {24.9, 33.0, 40.8};   // mm  - precise numbers from ITS.gdml + 1.5 mm for greater clearance from beam pipe
-
-    // type 1 = inner barrel stave, 2 = middle barrel stave, 3 = outer barrel stave
-    // we use only type 0 here
-    int stave_type[3] = {0, 0, 0};
-    int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX MVTX
-    double phi_tilt[3] = {0.304, 0.304, 0.304};  // radians, from the gdml file, 0.304 radians is 17.4 degrees
-
-    for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
     {
-      if (verbosity)
-        cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
-             << " pixel size 30 x 30 microns "
-             << " active pixel thickness 0.0018 microns" << endl;
+      bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
+      
+      // MAPS inner barrel layers
+      //======================================================
+      
+      // Y. Corrales Morales 4Feb2019
+      // New MVTX configuration to give 2.0 mm clearance from sPHENIX beam-pipe (Walt 3 Jan 2018)
+      //TODO: Add function to estimate stave tilt angle from values given by Walt (Rmin, Rmid, Rmax and sensor width)
+      //TODO: Add default values in PHG4MVTXSubsystem or PHG4MVTXDetector
+      double maps_layer_radius[3] = {25.69, 33.735, 41.475}; // mm - numbers from Walt 3 Jan 2019 (Rmid)
+      double phi_tilt[3] = {0.295, 0.303, 0.298};  // radians - numbers calculated from values given by Walt 3 Jan 2019
 
-      PHG4MapsSubsystem* lyr = new PHG4MapsSubsystem("MAPS", ilayer, stave_type[ilayer]);
-      lyr->Verbosity(verbosity);
+      // D. McGlinchey 6Aug2018 - type no longer is used, included here because I was too lazy to remove it from the code
+      int stave_type[3] = {0, 0, 0};
+      int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX MVTX
+      
+      for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
+	{
+	  if (verbosity)
+	    cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
+		 << " pixel size 30 x 30 microns "
+		 << " active pixel thickness 0.0018 microns" << endl;
+	  
+	  PHG4MVTXSubsystem* lyr = new PHG4MVTXSubsystem("MVTX", ilayer, stave_type[ilayer]);
+	  lyr->Verbosity(verbosity);
+	  
+	  lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
+	  lyr->set_int_param("N_staves", staves_in_layer[ilayer]);       // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
+	  
+	  // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
+	  lyr->set_double_param("pixel_x", 0.0030);          // pitch in cm
+	  lyr->set_double_param("pixel_z", 0.0030);          // length in cm
+	  lyr->set_double_param("pixel_thickness", 0.0018);  // thickness in cm
+	  lyr->set_double_param("phitilt", phi_tilt[ilayer]);
+	  
+	  lyr->set_int_param("active", 1);
+	  lyr->OverlapCheck(maps_overlapcheck);
+	  
+	  lyr->set_string_param("stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v01.gdml"));
 
-      lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
-      lyr->set_int_param("N_staves", staves_in_layer[ilayer]);                   // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
-
-      // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
-      lyr->set_double_param("pixel_x", 0.0030);          // pitch in cm
-      lyr->set_double_param("pixel_z", 0.0030);          // length in cm
-      lyr->set_double_param("pixel_thickness", 0.0018);  // thickness in cm
-      lyr->set_double_param("phitilt", phi_tilt[ilayer]);
-
-      lyr->set_int_param("active", 1);
-      lyr->OverlapCheck(maps_overlapcheck);
-
-      lyr->set_string_param("stave_geometry_file",
-                            string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/ALICE_ITS_tgeo.gdml"));
-
-      g4Reco->registerSubsystem(lyr);
-
-      radius = maps_layer_radius[ilayer];
+	  g4Reco->registerSubsystem(lyr);
+	  
+	  radius = maps_layer_radius[ilayer];
+	}
     }
-  }
-
-  if (n_intt_layer > 0)
-  {
-    //-------------------
-    // INTT ladders
-    //-------------------
-
-    bool intt_overlapcheck = false;  // set to true if you want to check for overlaps
-
-    // instantiate the Silicon tracker subsystem and register it
-    // We make one instance of PHG4TrackerSubsystem for all four layers of tracker
-    // dimensions are in mm, angles are in radians
-
-    // PHG4SiliconTrackerSubsystem creates the detetor layer using PHG4SiliconTrackerDetector
-    // and instantiates the appropriate PHG4SteppingAction
-    const double intt_radius_max = 140.;  // including stagger radius (mm)
-
-    // The length of vpair is used to determine the number of layers
-    std::vector<std::pair<int, int>> vpair;  // (sphxlayer, inttlayer)
-    for (int i = 0; i < n_intt_layer; i++)
-    {
-      // We want the sPHENIX layer numbers for the INTT to be from n_maps_layer to n_maps_layer+n_intt_layer - 1
-      vpair.push_back(std::make_pair(n_maps_layer + i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
-      if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
-    }
-    PHG4SiliconTrackerSubsystem* sitrack = new PHG4SiliconTrackerSubsystem("SILICON_TRACKER", vpair);
-    sitrack->Verbosity(verbosity);
-    sitrack->SetActive(1);
-    sitrack->OverlapCheck(intt_overlapcheck);
-    g4Reco->registerSubsystem(sitrack);
-
-    // outer radius marker (translation back to cm)
-    radius = intt_radius_max * 0.1;
-  }
-
-//  int verbosity = 1;
-
+  
+  assert (n_intt_layer == 0);
+  
+  //  int verbosity = 1;
+  
   // time projection chamber layers --------------------------------------------
-
+  
   // switch ONLY for backward compatibility with 40 layer hits files!
   if (tpc_layers_40)
     {
@@ -326,25 +305,25 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   radius += cage_thickness;
 
-  double inner_readout_radius = 30.;
-  if (inner_readout_radius < radius) inner_readout_radius = radius;
-
+  double inner_readout_radius = radius;
+//  if (inner_readout_radius < radius) inner_readout_radius = radius;
+//
   string tpcgas = "sPHENIX_TPC_Gas";  //  Ne(90%) CF4(10%) - defined in g4main/PHG4Reco.cc
-
-  // Layer of inert TPC gas from 20-30 cm
-  if (inner_readout_radius - radius > 0)
-  {
-    cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_maps_layer + n_intt_layer + 1);
-    cyl->set_double_param("radius", radius);
-    cyl->set_int_param("lengthviarapidity", 0);
-    cyl->set_double_param("length", cage_length);
-    cyl->set_string_param("material", tpcgas.c_str());
-    cyl->set_double_param("thickness", inner_readout_radius - radius);
-    cyl->SuperDetector("SVTXSUPPORT");
-    g4Reco->registerSubsystem(cyl);
-  }
-
-  radius = inner_readout_radius;
+//
+//  // Layer of inert TPC gas from 20-30 cm
+//  if (inner_readout_radius - radius > 0)
+//  {
+//    cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_maps_layer + n_intt_layer + 1);
+//    cyl->set_double_param("radius", radius);
+//    cyl->set_int_param("lengthviarapidity", 0);
+//    cyl->set_double_param("length", cage_length);
+//    cyl->set_string_param("material", tpcgas.c_str());
+//    cyl->set_double_param("thickness", inner_readout_radius - radius);
+//    cyl->SuperDetector("SVTXSUPPORT");
+//    g4Reco->registerSubsystem(cyl);
+//  }
+//
+//  radius = inner_readout_radius;
 
   double outer_radius = 78.;
 
@@ -426,6 +405,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   return radius;
 }
 
+// Central detector cell reco is disabled as EIC setup use the fast tracking sim for now
 void Svtx_Cells(int verbosity = 0)
 {
   // runs the cellularization of the energy deposits (g4hits)
@@ -448,136 +428,11 @@ void Svtx_Cells(int verbosity = 0)
   // SVTX cells
   //-----------
 
-  if (verbosity)
-  {
-    cout << "  TPC Drift Velocity: " << TPCDriftVelocity << " cm/nsec" << endl;
-    cout << "  TPC Transverse Diffusion: " << TPC_Trans_Diffusion << " cm/SQRT(cm)" << endl;
-    cout << "  TPC Longitudinal Diffusion: " << TPC_Long_Diffusion << " cm/SQRT(cm)" << endl;
-    cout << "  TPC dE/dx: " << TPC_dEdx << " keV/cm" << endl;
-    cout << "  TPC N Primary: " << TPC_NPri << " electrons/cm" << endl;
-    cout << "  TPC N Total: " << TPC_NTot << " electrons/cm" << endl;
-    cout << "  TPC Electrons Per keV: " << TPC_ElectronsPerKeV << " electrons/keV" << endl;
-    cout << "  TPC ADC Clock: " << TPCADCClock << " nsec" << endl;
-    cout << "  TPC ADC Rate: " << 1000.0 / TPCADCClock << " MHZ" << endl;
-    cout << "  TPC Shaping Lead: " << TPCShapingRMSLead << " nsec" << endl;
-    cout << "  TPC Shaping Tail: " << TPCShapingRMSTail << " nsec" << endl;
-    cout << "  TPC z cell " << tpc_cell_z << " cm" << endl;
-    cout << "  TPC Smear R-Phi " << TPC_SmearRPhi << " cm" << endl;
-    cout << "  TPC Smear Z " << TPC_SmearZ << " cm" << endl;
-  }
-
-  if (n_maps_layer > 0)
-  {
-    // MAPS cells
-    PHG4MapsCellReco* maps_cells = new PHG4MapsCellReco("MAPS");
-    maps_cells->Verbosity(verbosity);
-    for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
-    {
-      maps_cells->set_timing_window(ilayer, -2000, 2000);
-    }
-    se->registerSubsystem(maps_cells);
-  }
-
-  if (n_intt_layer > 0)
-  {
-    // INTT cells
-    PHG4SiliconTrackerCellReco* reco = new PHG4SiliconTrackerCellReco("SILICON_TRACKER");
-    // The timing windows are hard-coded in the INTT ladder model
-    reco->Verbosity(verbosity);
-    se->registerSubsystem(reco);
-  }
-
-  // Main switch for TPC distortion
-  const bool do_tpc_distortion = true;
-  PHG4TPCSpaceChargeDistortion* tpc_distortion = NULL;
-  if (do_tpc_distortion)
-  {
-    if (inner_cage_radius != 20. && inner_cage_radius != 30.)
-    {
-      cout << "Svtx_Cells - Fatal Error - TPC distortion required that "
-              "inner_cage_radius is either 20 or 30 cm."
-           << endl;
-      exit(3);
-    }
-
-    string TPC_distortion_file =
-        string(getenv("CALIBRATIONROOT")) +
-        Form("/Tracking/TPC/SpaceChargeDistortion/TPCCAGE_20_78_211_2.root");
-    PHG4TPCSpaceChargeDistortion* tpc_distortion =
-        new PHG4TPCSpaceChargeDistortion(TPC_distortion_file);
-    //tpc_distortion -> setAccuracy(0); // option to over write default  factors
-    //tpc_distortion -> setPrecision(0.001); // option to over write default  factors      // default is 0.001
-  }
-
-  PHG4CylinderCellTPCReco* svtx_cells = new PHG4CylinderCellTPCReco(n_maps_layer + n_intt_layer);
-  svtx_cells->Detector("SVTX");
-  svtx_cells->setDistortion(tpc_distortion);
-  //svtx_cells->setZigzags(true);  // set zigzag pads option on if true, use rectangular pads if false  (not required, defaults to true in code).
-  svtx_cells->setDiffusionT(TPC_Trans_Diffusion);
-  svtx_cells->setDiffusionL(TPC_Long_Diffusion);
-  svtx_cells->setSigmaT(TPC_SigmaT);  
-  svtx_cells->setShapingRMSLead(TPCShapingRMSLead * TPCDriftVelocity);
-  svtx_cells->setShapingRMSTail(TPCShapingRMSTail * TPCDriftVelocity);
-  // Expected cluster resolutions:
-  //     r-phi: diffusion + GEM smearing = 750 microns, assume resolution is 20% of that => 150 microns
-  //    Tune TPC_SmearRPhi and TPC_SmearZ to get 150 microns in the outer layers
-  svtx_cells->setSmearRPhi(TPC_SmearRPhi);  // additional random displacement of cloud positions wrt hits
-  svtx_cells->setSmearZ(TPC_SmearZ);        // additional random displacement of cloud positions wrt hits
-  svtx_cells->set_drift_velocity(TPCDriftVelocity);
-  svtx_cells->setHalfLength(105.5);
-  svtx_cells->setElectronsPerKeV(TPC_ElectronsPerKeV);
-  svtx_cells->Verbosity(0);
-
-  // The maps cell size is set when the detector is constructed because it is needed by the geometry object
-  // The INTT ladder cell size is set in the detector construction code
-
-  // set cylinder cell TPC cell sizes
-  //======================
-
-  double tpc_timing_window = 105.5 / TPCDriftVelocity;  // half length in cm / Vd in cm/ns => ns
-
-  // inner layers
-  double radius_layer = inner_readout_radius ;
-  for (int i = n_maps_layer + n_intt_layer; i < n_maps_layer + n_intt_layer + n_tpc_layer_inner; i++)
-  {
-    // this calculates the radius at the middle of the layer
-    double tpc_cell_rphi = 2 * TMath::Pi() * radius_layer / (double) tpc_layer_rphi_count_inner;
-    svtx_cells->cellsize(i, tpc_cell_rphi, tpc_cell_z);
-    svtx_cells->set_timing_window(i, -tpc_timing_window, +tpc_timing_window);
-    if (verbosity)
-      cout << "TPC cells inner: layer " << i << " center radius " << radius_layer << " tpc_cell_rphi " << tpc_cell_rphi << " tpc_cell_z " << tpc_cell_z << endl;
-    radius_layer += tpc_layer_thick_inner;
-  }
-
-
-  // mid layers
-  for (int i = n_maps_layer + n_intt_layer + n_tpc_layer_inner; i < n_maps_layer + n_intt_layer + n_tpc_layer_inner + n_tpc_layer_mid; i++)
-  {
-    double tpc_cell_rphi = 2 * TMath::Pi() * radius_layer / (double) tpc_layer_rphi_count_mid;
-    svtx_cells->cellsize(i, tpc_cell_rphi, tpc_cell_z);
-    svtx_cells->set_timing_window(i, -tpc_timing_window, +tpc_timing_window);
-    if (verbosity)
-      cout << "TPC cells mid: layer " << i << " center radius " << radius_layer << " tpc_cell_rphi " << tpc_cell_rphi << " tpc_cell_z " << tpc_cell_z << endl;
-    radius_layer += tpc_layer_thick_mid;
-  }
-
-  // outer layers
-  for (int i = n_maps_layer + n_intt_layer + n_tpc_layer_inner + n_tpc_layer_mid; i < n_maps_layer + n_intt_layer + n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer; i++)
-  {
-    double tpc_cell_rphi = 2 * TMath::Pi() * radius_layer / (double) tpc_layer_rphi_count_outer;
-    svtx_cells->cellsize(i, tpc_cell_rphi, tpc_cell_z);
-    svtx_cells->set_timing_window(i, -tpc_timing_window, +tpc_timing_window);
-    if (verbosity)
-      cout << "TPC cells outer: layer " << i << " center radius " << radius_layer << " tpc_cell_rphi " << tpc_cell_rphi << " tpc_cell_z " << tpc_cell_z << endl;
-
-    radius_layer += tpc_layer_thick_outer;
-  }
-
-  se->registerSubsystem(svtx_cells);
 
   return;
 }
 
+// Central detector  reco is disabled as EIC setup use the fast tracking sim for now
 void Svtx_Reco(int verbosity = 0)
 {
   //---------------
@@ -592,224 +447,6 @@ void Svtx_Reco(int verbosity = 0)
   //---------------
 
   Fun4AllServer* se = Fun4AllServer::instance();
-
-  //----------------------------------
-  // Digitize the cell energy into ADC
-  //----------------------------------
-  PHG4SvtxDigitizer* digi = new PHG4SvtxDigitizer();
-  digi->Verbosity(0);
-  for (int i = 0; i < n_maps_layer; ++i)
-  {
-    digi->set_adc_scale(i, 255, 0.4e-6);  // reduced by a factor of 2.5 when going from maps thickess of 50 microns to 18 microns
-  }
-
-  if (n_intt_layer > 0)
-  {
-    // INTT
-    std::vector<double> userrange;  // 3-bit ADC threshold relative to the mip_e at each layer.
-    // these should be used for the INTT
-    userrange.push_back(0.05);
-    userrange.push_back(0.10);
-    userrange.push_back(0.15);
-    userrange.push_back(0.20);
-    userrange.push_back(0.25);
-    userrange.push_back(0.30);
-    userrange.push_back(0.35);
-    userrange.push_back(0.40);
-
-    PHG4SiliconTrackerDigitizer* digiintt = new PHG4SiliconTrackerDigitizer();
-    digiintt->Verbosity(verbosity);
-    for (int i = 0; i < n_intt_layer; i++)
-    {
-      digiintt->set_adc_scale(n_maps_layer + i, userrange);
-    }
-    se->registerSubsystem(digiintt);
-  }
-
-  // TPC layers
-  for (int i = n_maps_layer + n_intt_layer; i < Max_si_layer; ++i)
-  {
-    digi->set_adc_scale(i, 90000, 1.0); // need to set this based on ADC dynamic range
-  }
-  se->registerSubsystem(digi);
-
-  //-------------------------------------
-  // Apply Live Area Inefficiency to Hits
-  //-------------------------------------
-  // defaults to 1.0 (fully active)
-
-  PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
-
-  for (int i = 0; i < n_maps_layer; i++)
-  {
-    deadarea->Verbosity(verbosity);
-    //deadarea->set_hit_efficiency(i,0.99);
-    deadarea->set_hit_efficiency(i, 1.0);
-  }
-  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
-  {
-    //deadarea->set_hit_efficiency(i,0.99);
-    deadarea->set_hit_efficiency(i, 1.0);
-  }
-  se->registerSubsystem(deadarea);
-
-  //-----------------------------
-  // Apply MIP thresholds to Hits
-  //-----------------------------
-
-  PHG4SvtxThresholds* thresholds = new PHG4SvtxThresholds();
-  thresholds->Verbosity(verbosity);
-
-  // maps
-  for (int i = 0; i < n_maps_layer; i++)
-  {
-    // reduced by x2.5 when going from cylinder maps with 50 microns thickness to actual maps with 18 microns thickness
-    // Note the non-use of set_using_thickness here, this is so that the shortest dimension of the cell sets the mip energy loss
-    thresholds->set_threshold(i, 0.1);
-  }
-  // INTT
-  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
-  {
-    thresholds->set_threshold(i, 0.1);
-    thresholds->set_use_thickness_mip(i, true);
-  }
-
-  se->registerSubsystem(thresholds);
-
-  //-------------
-  // Cluster Hits
-  //-------------
-
-  PHG4SvtxClusterizer* clusterizer = new PHG4SvtxClusterizer("PHG4SvtxClusterizer", 0, n_maps_layer + n_intt_layer - 1);
-  clusterizer->Verbosity(verbosity);
-  // Reduced by 2 relative to the cylinder cell maps macro. I found this necessary to get full efficiency
-  // Many hits in the present simulation are single cell hits, so it is not clear why the cluster threshold should be higher than the cell threshold
-  clusterizer->set_threshold(0.1);  // fraction of a mip
-  // no Z clustering for INTT layers (only)
-  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
-  {
-    clusterizer->set_z_clustering(i, false);
-  }
-
-  se->registerSubsystem(clusterizer);
-
-  PHG4TPCClusterizer* tpcclusterizer = new PHG4TPCClusterizer();
-  tpcclusterizer->Verbosity(0);
-  tpcclusterizer->setRangeLayers(n_maps_layer + n_intt_layer, Max_si_layer);
-  tpcclusterizer->setEnergyCut(15 /*adc*/);
-  tpcclusterizer->setFitWindowSigmas(0.0150, 0.0160);  // should be changed when TPC cluster resolution changes
-  tpcclusterizer->setFitWindowMax(5 /*rphibins*/, 5 /*zbins*/);
-  tpcclusterizer->setFitEnergyThreshold(0.05 /*fraction*/);
-  se->registerSubsystem(tpcclusterizer);
-
-  // This should be true for everything except testing!
-  const bool use_kalman_pat_rec = true;
-  if (use_kalman_pat_rec)
-  {
-    //---------------------
-    // PHG4KalmanPatRec
-    //---------------------
-
-    PHG4KalmanPatRec* kalman_pat_rec = new PHG4KalmanPatRec("PHG4KalmanPatRec", n_maps_layer, n_intt_layer, n_gas_layer);
-    kalman_pat_rec->Verbosity(0);
-    se->registerSubsystem(kalman_pat_rec);
-  }
-  else
-  {
-    //---------------------
-    // Truth Pattern Recognition
-    //---------------------
-    PHG4TruthPatRec* pat_rec = new PHG4TruthPatRec();
-    se->registerSubsystem(pat_rec);
-  }
-
-  //---------------------
-  // Kalman Filter
-  //---------------------
-
-  PHG4TrackKalmanFitter* kalman = new PHG4TrackKalmanFitter();
-  kalman->Verbosity(0);
-  if (use_primary_vertex)
-    kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
-  se->registerSubsystem(kalman);
-
-  //------------------
-  // Track Projections
-  //------------------
-  PHG4GenFitTrackProjection* projection = new PHG4GenFitTrackProjection();
-  projection->Verbosity(verbosity);
-  se->registerSubsystem(projection);
-
-  /*  
-  //----------------------
-  // Beam Spot Calculation
-  //----------------------
-  PHG4SvtxBeamSpotReco* beamspot = new PHG4SvtxBeamSpotReco();
-  beamspot->Verbosity(verbosity);
-  se->registerSubsystem( beamspot );
-  */
-
-  return;
-}
-
-void G4_Svtx_Reco()
-{
-  cout << "\033[31;1m"
-       << "Warning: G4_Svtx_Reco() was moved to G4_Svtx.C and renamed to Svtx_Reco(), please update macros"
-       << "\033[0m" << endl;
-  Svtx_Reco();
-
-  return;
-}
-
-void Svtx_Eval(std::string outputfile, int verbosity = 0)
-{
-  //---------------
-  // Load libraries
-  //---------------
-
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4hough.so");
-  gSystem->Load("libg4eval.so");
-
-  //---------------
-  // Fun4All server
-  //---------------
-
-  Fun4AllServer* se = Fun4AllServer::instance();
-
-  //----------------
-  // SVTX evaluation
-  //----------------
-
-  SvtxEvaluator* eval;
-  eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str());
-  eval->do_cluster_eval(true);
-  eval->do_g4hit_eval(true);
-  eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
-  eval->do_gpoint_eval(false);
-  eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
-  eval->Verbosity(verbosity);
-  se->registerSubsystem(eval);
-
-  if (use_primary_vertex)
-  {
-    // make a second evaluator that records tracks fitted with primary vertex included
-    // good for analysis of prompt tracks, particularly if MVTX is not present
-    SvtxEvaluator* evalp;
-    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap");
-    evalp->do_cluster_eval(true);
-    evalp->do_g4hit_eval(true);
-    evalp->do_hit_eval(false);
-    evalp->do_gpoint_eval(false);
-    evalp->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
-    evalp->Verbosity(0);
-    se->registerSubsystem(evalp);
-  }
-
-  // MomentumEvaluator* eval = new MomentumEvaluator(outputfile.c_str(),0.2,0.4,Max_si_layer,2,Max_si_layer-4,10.,80.);
-  // se->registerSubsystem( eval );
 
   return;
 }
