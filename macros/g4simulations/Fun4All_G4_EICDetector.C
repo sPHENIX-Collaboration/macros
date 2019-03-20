@@ -14,6 +14,7 @@
 #include <g4main/PHG4ParticleGeneratorVectorMeson.h>
 #include <g4main/PHG4ParticleGun.h>
 #include <g4main/HepMCNodeReader.h>
+#include <g4main/ReadEICFiles.h>
 #include <g4detectors/PHG4DetectorSubsystem.h>
 #include <g4eval/PHG4DSTReader.h>
 #include <phhepmc/Fun4AllHepMCInputManager.h>
@@ -80,9 +81,9 @@ int Fun4All_G4_EICDetector(
 
   // Besides the above flags. One can further choose to further put in following particles in Geant4 simulation
   // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
-  const bool particles = false && !readhits;
+  const bool particles = true && !readhits;
   // or gun/ very simple single particle gun generator
-  const bool usegun = true && !readhits;
+  const bool usegun = false && !readhits;
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
   const bool upsilons = false && !readhits;
 
@@ -91,14 +92,14 @@ int Fun4All_G4_EICDetector(
   //======================
 
   // sPHENIX barrel
-  bool do_bbc = false;
+  bool do_bbc = true;
 
   bool do_pipe = true;
 
-  bool do_svtx = true;
-  bool do_svtx_cell = do_svtx && true;
-  bool do_svtx_track = do_svtx_cell && true;
-  bool do_svtx_eval = do_svtx_track && false; // in order to use this evaluation, please build this analysis module analysis/blob/master/Tracking/FastTrackingEval/
+  bool do_tracking = true;
+  bool do_tracking_cell = do_tracking && true;
+  bool do_tracking_track = do_tracking_cell && true;
+  bool do_tracking_eval = do_tracking_track && true; // in order to use this evaluation, please build this analysis module analysis/blob/master/Tracking/FastTrackingEval/
 
   bool do_pstof = false;
 
@@ -188,7 +189,7 @@ int Fun4All_G4_EICDetector(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_EICDetector.C");
-  G4Init(do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_plugdoor,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel);
+  G4Init(do_tracking,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_plugdoor,do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -200,7 +201,7 @@ int Fun4All_G4_EICDetector(
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0); // uncomment for batch production running with minimal output messages
+//  se->Verbosity(01); // uncomment for batch production running with minimal output messages
   // se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
 
   // just if we set some flags somewhere in this macro
@@ -311,7 +312,7 @@ int Fun4All_G4_EICDetector(
         }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0, 0.0);
-      gen->set_eta_range(-1.0, 1.0);
+      gen->set_eta_range(-3, 3);
       gen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi());
       //gen->set_pt_range(0.1, 50.0);
       gen->set_pt_range(0.1, 20.0);
@@ -394,12 +395,12 @@ int Fun4All_G4_EICDetector(
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
       G4Setup(absorberactive, magfield, EDecayType::kAll,
-              do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_plugdoor,
+              do_tracking,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_plugdoor,
               do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,
               magfield_rescale);
 #else
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-              do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_plugdoor,
+              do_tracking,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_plugdoor,
               do_FEMC,do_FHCAL,do_EEMC,do_DIRC,do_RICH,do_Aerogel,
               magfield_rescale);
 #endif
@@ -421,7 +422,7 @@ int Fun4All_G4_EICDetector(
   // Detector Division
   //------------------
 
-  if (do_svtx_cell) Svtx_Cells();
+  if (do_tracking_cell) Svtx_Cells();
 
   if (do_cemc_cell) CEMC_Cells();
 
@@ -471,7 +472,7 @@ int Fun4All_G4_EICDetector(
   // SVTX tracking
   //--------------
 
-  if (do_svtx_track) Tracking_Reco();
+  if (do_tracking_track) Tracking_Reco();
 
   //-----------------
   // Global Vertexing
@@ -523,9 +524,7 @@ int Fun4All_G4_EICDetector(
   //----------------------
   // Simulation evaluation
   //----------------------
-// commented out because
-// Fast_Tracking_Eval function uses a library which is not part of our build
-//  if (do_svtx_eval) Fast_Tracking_Eval(string(outputFile) + "_g4svtx_eval.root");
+  if (do_tracking_eval) Tracking_Eval(string(outputFile) + "_g4tracking_eval.root");
 
   if (do_cemc_eval) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
 
@@ -575,7 +574,7 @@ int Fun4All_G4_EICDetector(
 
       G4DSTreader_EICDetector( outputFile, //
                                /*int*/ absorberactive ,
-                               /*bool*/ do_svtx ,
+                               /*bool*/ do_tracking ,
                                /*bool*/ do_cemc ,
                                /*bool*/ do_hcalin ,
                                /*bool*/ do_magnet ,

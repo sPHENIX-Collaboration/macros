@@ -1,30 +1,44 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 #include <caloreco/RawTowerCalibration.h>
+
 #include <fun4all/SubsysReco.h>
-#include <fun4all/Fun4AllServer.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllDummyInputManager.h>
-#include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllDummyInputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllServer.h>
+
+#include <g4calo/Prototype2RawTowerBuilder.h>
+#include <g4calo/RawTowerBuilder.h>
+#include <g4calo/RawTowerDigitizer.h>
+
 #include <g4detectors/PHG4BlockSubsystem.h>
-#include <g4detectors/PHG4DetectorSubsystem.h>
+#include <g4detectors/PHG4FullProjSpacalCellReco.h>
 #include <g4detectors/PHG4Prototype2HcalCellReco.h>
+#include <g4detectors/PHG4Prototype3InnerHcalSubsystem.h>
 #include <g4detectors/PHG4Prototype2OuterHcalSubsystem.h>
 #include <g4detectors/PHG4SpacalPrototypeSubsystem.h>
+
+#include <g4eval/PHG4DSTReader.h>
+
 #include <g4histos/G4HitNtuple.h>
-#include <g4main/PHG4ParticleGeneratorBase.h>
-#include <g4main/PHG4ParticleGenerator.h>
+
 #include <g4main/PHG4ParticleGun.h>
-#include <g4main/PHG4SimpleEventGenerator.h>
 #include <g4main/PHG4Reco.h>
+#include <g4main/PHG4ParticleGenerator.h>
+#include <g4main/PHG4SimpleEventGenerator.h>
 #include <g4main/PHG4TruthSubsystem.h>
+
 #include <phool/recoConsts.h>
-#include <qa_modules/QAG4SimulationCalorimeter.h>
+
 #include <qa_modules/QAHistManagerDef.h>
+#include <qa_modules/QAG4SimulationCalorimeter.h>
+
+R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4calo.so)
-R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4detectors.so)
+R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4histos.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libqa_modules.so)
@@ -605,7 +619,7 @@ int Fun4All_G4_Prototype4(int nEvents = 1)
 
   if (dstoutput)
     {
-      Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT","G4Prototype3New.root");
+      Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT","G4Prototype4New.root");
       se->registerOutputManager(out);
     }
 
