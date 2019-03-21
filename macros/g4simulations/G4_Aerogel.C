@@ -1,7 +1,7 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 #include "GlobalVariables.C"
-#include <g4detectors/PHG4SectorSubsystem.h>
+#include <g4detectors/PHG4mRICHSubsystem.h>
 #include <g4main/PHG4Reco.h>
 R__LOAD_LIBRARY(libg4detectors.so)
 #endif
