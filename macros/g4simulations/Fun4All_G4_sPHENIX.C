@@ -36,6 +36,7 @@ R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libphhepmc.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
+R__LOAD_LIBRARY(libqa_modules.so)
 #endif
 
 using namespace std;
@@ -152,6 +153,7 @@ int Fun4All_G4_sPHENIX(
   gSystem->Load("libg4testbench.so");
   gSystem->Load("libg4hough.so");
   gSystem->Load("libg4eval.so");
+  gSystem->Load("libqa_modules")
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
@@ -566,8 +568,8 @@ int Fun4All_G4_sPHENIX(
   // if (do_dst_compress) DstCompress(out);
   //  se->registerOutputManager(out);
 
+  // QA parts
   {
-    assert(gSystem->Load("libqa_modules") >= 0);
 
     if (do_cemc)
       se->registerSubsystem(new QAG4SimulationCalorimeter("CEMC"));
