@@ -1,5 +1,5 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 00, 0)
 #include "GlobalVariables.C"
 
 #include <fun4all/Fun4AllServer.h>
@@ -51,7 +51,7 @@ R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libtpc.so)
-  R__LOAD_LIBRARY(libtrack_reco.so)
+R__LOAD_LIBRARY(libtrack_reco.so)
 #endif
 
 #include <vector>
@@ -62,16 +62,16 @@ R__LOAD_LIBRARY(libtpc.so)
 // Dead map options for INTT
 enum enu_INTTDeadMapType
 {
-  kINTTNoDeadMap = 0,       // All channel in INTT is alive
-  kINTT4PercentDeadMap = 4, // 4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
-  kINTT8PercentDeadMap = 8  // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
+  kINTTNoDeadMap = 0,        // All channel in INTT is alive
+  kINTT4PercentDeadMap = 4,  // 4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
+  kINTT8PercentDeadMap = 8   // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
 };
 
 // Choose INTT deadmap here
 enu_INTTDeadMapType INTTDeadMapOption = kINTTNoDeadMap;
 
 // ONLY if backward compatibility with hits files already generated with 8 inner TPC layers is needed, you can set this to "true"
-bool tpc_layers_40  = false;
+bool tpc_layers_40 = false;
 
 // if true, refit tracks with primary vertex included in track fit  - good for analysis of prompt tracks only
 // Adds second node to node tree, keeps original track node undisturbed
@@ -83,51 +83,51 @@ const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX com
 // Configure the INTT layers
 // offsetphi is in deg, every other layer is offset by one half of the phi spacing between ladders
 #ifdef INTTLADDER8
-int n_intt_layer = 8;  
+int n_intt_layer = 8;
 // default layer configuration
-int laddertype[8] = {PHG4INTTDefs::SEGMENTATION_Z, 
-		     PHG4INTTDefs::SEGMENTATION_Z, 
-		     PHG4INTTDefs::SEGMENTATION_PHI,
-		     PHG4INTTDefs::SEGMENTATION_PHI,
-		     PHG4INTTDefs::SEGMENTATION_PHI,
-		     PHG4INTTDefs::SEGMENTATION_PHI,
-		     PHG4INTTDefs::SEGMENTATION_PHI,
-		     PHG4INTTDefs::SEGMENTATION_PHI};  // default
-int nladder[8] = {17,  17, 15, 15, 18, 18, 21, 21};  // default
+int laddertype[8] = {PHG4INTTDefs::SEGMENTATION_Z,
+                     PHG4INTTDefs::SEGMENTATION_Z,
+                     PHG4INTTDefs::SEGMENTATION_PHI,
+                     PHG4INTTDefs::SEGMENTATION_PHI,
+                     PHG4INTTDefs::SEGMENTATION_PHI,
+                     PHG4INTTDefs::SEGMENTATION_PHI,
+                     PHG4INTTDefs::SEGMENTATION_PHI,
+                     PHG4INTTDefs::SEGMENTATION_PHI};                                    // default
+int nladder[8] = {17, 17, 15, 15, 18, 18, 21, 21};                                       // default
 double sensor_radius[8] = {6.876, 7.462, 8.987, 9.545, 10.835, 11.361, 12.676, 13.179};  // radius of center of sensor for layer default
-double offsetphi[8] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3], 0.0, 0.5 * 360.0 / nladder[5], 0.0, 0.5 * 360.0 / nladder[7]};
+double offsetphi[8] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3], 0.0, 0.5 * 360.0 / nladder[5], 0.0, 0.5 * 360.0 / nladder[7]};
 #endif
 #ifdef INTTLADDER6
 int n_intt_layer = 6;
-int laddertype[6] = {PHG4INTTDefs::SEGMENTATION_Z, 
-		     PHG4INTTDefs::SEGMENTATION_Z, 
-		     PHG4INTTDefs::SEGMENTATION_PHI,
-		     PHG4INTTDefs::SEGMENTATION_PHI,
-		     PHG4INTTDefs::SEGMENTATION_PHI,
-		     PHG4INTTDefs::SEGMENTATION_PHI };
-int nladder[6] = {17,  17, 15, 15, 18, 18}; 
+int laddertype[6] = {PHG4INTTDefs::SEGMENTATION_Z,
+                     PHG4INTTDefs::SEGMENTATION_Z,
+                     PHG4INTTDefs::SEGMENTATION_PHI,
+                     PHG4INTTDefs::SEGMENTATION_PHI,
+                     PHG4INTTDefs::SEGMENTATION_PHI,
+                     PHG4INTTDefs::SEGMENTATION_PHI};
+int nladder[6] = {17, 17, 15, 15, 18, 18};
 double sensor_radius[6] = {6.876, 7.462, 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
-double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3], 0.0, 0.5 * 360.0 / nladder[5]};
+double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3], 0.0, 0.5 * 360.0 / nladder[5]};
 #endif
 #ifdef INTTLADDER4_ZP
 int n_intt_layer = 4;
-int laddertype[4] = {PHG4INTTDefs::SEGMENTATION_Z, 
-		     PHG4INTTDefs::SEGMENTATION_Z, 
-		     PHG4INTTDefs::SEGMENTATION_PHI,
-		     PHG4INTTDefs::SEGMENTATION_PHI};
-int nladder[4] = {17,  17, 18, 18}; 
+int laddertype[4] = {PHG4INTTDefs::SEGMENTATION_Z,
+                     PHG4INTTDefs::SEGMENTATION_Z,
+                     PHG4INTTDefs::SEGMENTATION_PHI,
+                     PHG4INTTDefs::SEGMENTATION_PHI};
+int nladder[4] = {17, 17, 18, 18};
 double sensor_radius[6] = {6.876, 7.462, 10.835, 11.361};  // radius of center of sensor for layer default
-double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3]};
+double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
 #endif
 #ifdef INTTLADDER4_PP
 int n_intt_layer = 4;
-int laddertype[4] = {PHG4INTTDefs::SEGMENTATION_PHI, 
-		     PHG4INTTDefs::SEGMENTATION_PHI, 
-		     PHG4INTTDefs::SEGMENTATION_PHI,
-		     PHG4INTTDefs::SEGMENTATION_PHI};
-int nladder[4] = {15,  15, 18, 18}; 
-double sensor_radius[6] = { 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
-double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3]};
+int laddertype[4] = {PHG4INTTDefs::SEGMENTATION_PHI,
+                     PHG4INTTDefs::SEGMENTATION_PHI,
+                     PHG4INTTDefs::SEGMENTATION_PHI,
+                     PHG4INTTDefs::SEGMENTATION_PHI};
+int nladder[4] = {15, 15, 18, 18};
+double sensor_radius[6] = {8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
+double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
 #endif
 #ifdef INTTLADDER0
 int n_intt_layer = 0;
@@ -147,75 +147,75 @@ void TrackingInit(int verbosity = 0)
 }
 
 double Tracking(PHG4Reco* g4Reco, double radius,
-		const int absorberactive = 0,
-		int verbosity = 0)
+                const int absorberactive = 0,
+                int verbosity = 0)
 {
-  // create the three tracker subsystems 
+  // create the three tracker subsystems
 
   if (n_maps_layer > 0)
   {
     bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
-      
+
     // MAPS inner barrel layers
     //======================================================
-      
+
     // Y. Corrales Morales 4Feb2019
     // New MVTX configuration to give 2.0 mm clearance from sPHENIX beam-pipe (Walt 3 Jan 2018)
     //TODO: Add function to estimate stave tilt angle from values given by Walt (Rmin, Rmid, Rmax and sensor width)
-    //TODO: Add default values in PHG4MVTXSubsystem or PHG4MVTXDetector 
-    double maps_layer_radius[3] = {25.69, 33.735, 41.475}; // mm - numbers from Walt 3 Jan 2019 (Rmid)
-    double phi_tilt[3] = {0.295, 0.303, 0.298};  // radians - numbers calculated from values given by Walt 3 Jan 2019
+    //TODO: Add default values in PHG4MVTXSubsystem or PHG4MVTXDetector
+    double maps_layer_radius[3] = {25.69, 33.735, 41.475};  // mm - numbers from Walt 3 Jan 2019 (Rmid)
+    double phi_tilt[3] = {0.295, 0.303, 0.298};             // radians - numbers calculated from values given by Walt 3 Jan 2019
 
     // D. McGlinchey 6Aug2018 - type no longer is used, included here because I was too lazy to remove it from the code
     int stave_type[3] = {0, 0, 0};
-    int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX MVTX
-      
+    int staves_in_layer[3] = {12, 16, 20};  // Number of staves per layer in sPHENIX MVTX
+
     for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
     {
       if (verbosity)
-	cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
-	     << " pixel size 30 x 30 microns "
-	     << " active pixel thickness 0.0018 microns" << endl;
-	  
+        cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
+             << " pixel size 30 x 30 microns "
+             << " active pixel thickness 0.0018 microns" << endl;
+
       PHG4MVTXSubsystem* lyr = new PHG4MVTXSubsystem("MVTX", ilayer, stave_type[ilayer]);
       lyr->Verbosity(verbosity);
-	  
+
       lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
-      lyr->set_int_param("N_staves", staves_in_layer[ilayer]);       // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
-	  
+      lyr->set_int_param("N_staves", staves_in_layer[ilayer]);                   // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
+
       // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
       lyr->set_double_param("pixel_x", 0.0030);          // pitch in cm
       lyr->set_double_param("pixel_z", 0.0030);          // length in cm
       lyr->set_double_param("pixel_thickness", 0.0018);  // thickness in cm
       lyr->set_double_param("phitilt", phi_tilt[ilayer]);
-	  
+
       lyr->set_int_param("active", 1);
       lyr->OverlapCheck(maps_overlapcheck);
-	  
+
       lyr->set_string_param("stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v01.gdml"));
-	  
+
       g4Reco->registerSubsystem(lyr);
-	  
+
       radius = maps_layer_radius[ilayer];
     }
   }
-  
+
   if (n_intt_layer > 0)
   {
     //-------------------
     // INTT ladders
     //-------------------
-      
+
     bool intt_overlapcheck = false;  // set to true if you want to check for overlaps
-      
+
     // instantiate the INTT subsystem and register it
     // We make one instance of PHG4INTTSubsystem for all four layers of tracker
     // dimensions are in mm, angles are in radians
-      
+
     // PHG4INTTSubsystem creates the detetor layer using PHG4INTTDetector
     // and instantiates the appropriate PHG4SteppingAction
     const double intt_radius_max = 140.;  // including stagger radius (mm)
-      
+
     // The length of vpair is used to determine the number of layers
     std::vector<std::pair<int, int>> vpair;  // (sphxlayer, inttlayer)
     for (int i = 0; i < n_intt_layer; i++)
@@ -224,25 +224,25 @@ double Tracking(PHG4Reco* g4Reco, double radius,
       vpair.push_back(std::make_pair(n_maps_layer + i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
       if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
     }
-      
+
     PHG4INTTSubsystem* sitrack = new PHG4INTTSubsystem("INTT", vpair);
     sitrack->Verbosity(verbosity);
     sitrack->SetActive(1);
     sitrack->OverlapCheck(intt_overlapcheck);
     g4Reco->registerSubsystem(sitrack);
-      
+
     // Set the laddertype and ladder spacing configuration
     cout << "INTT has " << n_intt_layer << " layers with layer setup:" << endl;
-    for(int i=0;i<n_intt_layer;i++)
+    for (int i = 0; i < n_intt_layer; i++)
     {
-      cout << " INTT layer " << i << " laddertype " << laddertype[i] << " nladders " << nladder[i] 
-	   << " sensor radius " << sensor_radius[i] << " offsetphi " << offsetphi[i] << endl; 
+      cout << " INTT layer " << i << " laddertype " << laddertype[i] << " nladders " << nladder[i]
+           << " sensor radius " << sensor_radius[i] << " offsetphi " << offsetphi[i] << endl;
       sitrack->set_int_param(i, "laddertype", laddertype[i]);
       sitrack->set_int_param(i, "nladder", nladder[i]);
-      sitrack->set_double_param(i,"sensor_radius", sensor_radius[i]);  // expecting cm
-      sitrack->set_double_param(i,"offsetphi",offsetphi[i]);  // expecting degrees
+      sitrack->set_double_param(i, "sensor_radius", sensor_radius[i]);  // expecting cm
+      sitrack->set_double_param(i, "offsetphi", offsetphi[i]);          // expecting degrees
     }
-      
+
     // outer radius marker (translation back to cm)
     radius = intt_radius_max * 0.1;
   }
@@ -252,26 +252,25 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 
   gSystem->Load("libg4tpc.so");
 
-  PHG4TPCSubsystem *tpc = new PHG4TPCSubsystem("TPC");
+  PHG4TPCSubsystem* tpc = new PHG4TPCSubsystem("TPC");
   tpc->SetActive();
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);
   // By default uses "sPHENIX_TPC_Gas", defined in PHG4Reco. That is 90:10 Ne:C4
 
-  if (absorberactive)  
+  if (absorberactive)
   {
     tpc->SetAbsorberActive();
   }
   tpc->OverlapCheck(overlapcheck);
 
-  g4Reco->registerSubsystem( tpc );  
+  g4Reco->registerSubsystem(tpc);
 
-  radius = 77.+1.17;
-  
+  radius = 77. + 1.17;
 
   radius += no_overlapp;
-  
-  return radius; 
+
+  return radius;
 }
 
 void Tracking_Cells(int verbosity = 0)
@@ -290,7 +289,6 @@ void Tracking_Cells(int verbosity = 0)
   gSystem->Load("libtpc.so");
   gSystem->Load("libintt.so");
   gSystem->Load("libmvtx.so");
-
 
   //---------------
   // Fun4All server
@@ -336,10 +334,10 @@ void Tracking_Cells(int verbosity = 0)
   if (do_tpc_distortion)
   {
     string TPC_distortion_file =
-      string(getenv("CALIBRATIONROOT")) +
-      Form("/Tracking/TPC/SpaceChargeDistortion/TPCCAGE_20_78_211_2.root");
+        string(getenv("CALIBRATIONROOT")) +
+        Form("/Tracking/TPC/SpaceChargeDistortion/TPCCAGE_20_78_211_2.root");
     tpc_distortion =
-      new PHG4TPCSpaceChargeDistortion(TPC_distortion_file);
+        new PHG4TPCSpaceChargeDistortion(TPC_distortion_file);
     //tpc_distortion -> setAccuracy(0); // option to over write default  factors
     //tpc_distortion -> setPrecision(0.001); // option to over write default  factors      // default is 0.001
   }
@@ -350,22 +348,22 @@ void Tracking_Cells(int verbosity = 0)
   // g4tpc/PHG4TPCPadPlaneReadout
   //=========================
 
-  PHG4TPCElectronDrift *edrift = new PHG4TPCElectronDrift();
+  PHG4TPCElectronDrift* edrift = new PHG4TPCElectronDrift();
   edrift->Detector("TPC");
   // fudge factors to get drphi 150 microns (in mid and outer TPC) and dz 500 microns cluster resolution
-  // They represent effects not due to ideal gas properties and ideal readout plane behavior 
+  // They represent effects not due to ideal gas properties and ideal readout plane behavior
   // defaults are 0.12 and 0.15, they can be changed here to get a different resolution
-  edrift->set_double_param("added_smear_trans",0.12);
-  edrift->set_double_param("added_smear_long",0.15);
-  PHG4TPCPadPlane *padplane = new PHG4TPCPadPlaneReadout();
+  edrift->set_double_param("added_smear_trans", 0.12);
+  edrift->set_double_param("added_smear_long", 0.15);
+  PHG4TPCPadPlane* padplane = new PHG4TPCPadPlaneReadout();
   edrift->registerPadPlane(padplane);
   se->registerSubsystem(edrift);
 
   // The pad plane readout default is set in PHG4TPCPadPlaneReadout
   // We may want to change the number of inner layers, and can do that here
-  padplane->set_int_param("tpc_minlayer_inner",n_maps_layer+n_intt_layer);   // sPHENIX layer number of first TPC readout layer
-  padplane->set_int_param("ntpc_layers_inner",n_tpc_layer_inner); 
-  padplane->set_int_param("ntpc_phibins_inner",tpc_layer_rphi_count_inner); 
+  padplane->set_int_param("tpc_minlayer_inner", n_maps_layer + n_intt_layer);  // sPHENIX layer number of first TPC readout layer
+  padplane->set_int_param("ntpc_layers_inner", n_tpc_layer_inner);
+  padplane->set_int_param("ntpc_phibins_inner", tpc_layer_rphi_count_inner);
 
   return;
 }
@@ -400,7 +398,6 @@ void Tracking_Reco(int verbosity = 0)
 
   if (n_intt_layer > 0)
   {
-
 #ifdef SVTXDEADMAP
     if (INTTDeadMapOption != kINTTNoDeadMap)
     {
@@ -411,33 +408,28 @@ void Tracking_Reco(int verbosity = 0)
         const int database_strip_type = (laddertype[i] == PHG4INTTDefs::SEGMENTATION_Z) ? 0 : 1;
         string DeadMapConfigName = Form("LadderType%d_RndSeed%d/", database_strip_type, i);
 
-
         if (INTTDeadMapOption == kINTT4PercentDeadMap)
         {
-
-          string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_4Percent/"); //4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
-          DeadMapPath +=  DeadMapConfigName;
+          string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_4Percent/");  //4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
+          DeadMapPath += DeadMapConfigName;
           deadMapINTT->deadMapPath(n_maps_layer + i, DeadMapPath);
-
         }
         else if (INTTDeadMapOption == kINTT8PercentDeadMap)
         {
-
-          string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_8Percent/"); // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
-          DeadMapPath +=  DeadMapConfigName;
+          string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_8Percent/");  // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
+          DeadMapPath += DeadMapConfigName;
           deadMapINTT->deadMapPath(n_maps_layer + i, DeadMapPath);
-
         }
         else
         {
-          cout <<"Tracking_Reco - fatal error - invalid INTTDeadMapOption = "<<INTTDeadMapOption<<endl;
+          cout << "Tracking_Reco - fatal error - invalid INTTDeadMapOption = " << INTTDeadMapOption << endl;
           exit(1);
         }
       }
-      deadMapINTT -> Verbosity(1);
+      deadMapINTT->Verbosity(1);
       se->registerSubsystem(deadMapINTT);
     }
-#endif // SVTXDEADMAP
+#endif  // SVTXDEADMAP
 
     // INTT
     // these should be used for the INTT
@@ -485,12 +477,12 @@ void Tracking_Reco(int verbosity = 0)
   PHG4TPCDigitizer* digitpc = new PHG4TPCDigitizer();
   digitpc->SetTPCMinLayer(n_maps_layer + n_intt_layer);
   double ENC = 670.0;  // standard
-  digitpc->SetENC(ENC);  
-  double ADC_threshold = 4.0*ENC; 
+  digitpc->SetENC(ENC);
+  double ADC_threshold = 4.0 * ENC;
   digitpc->SetADCThreshold(ADC_threshold);  // 4 * ENC seems OK
-  cout << " TPC digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold 
+  cout << " TPC digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
        << " maps+INTT layers set to " << n_maps_layer + n_intt_layer << endl;
- 
+
   se->registerSubsystem(digitpc);
 
   //-------------------------------------
@@ -499,20 +491,20 @@ void Tracking_Reco(int verbosity = 0)
   //-------------------------------------
   // defaults to 1.0 (fully active)
 
-//  PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
-//
-//  for (int i = 0; i < n_maps_layer; i++)
-//  {
-//    deadarea->Verbosity(verbosity);
-//    //deadarea->set_hit_efficiency(i,0.99);
-//    deadarea->set_hit_efficiency(i, 1.0);
-//  }
-//  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
-//  {
-//    //deadarea->set_hit_efficiency(i,0.99);
-//    deadarea->set_hit_efficiency(i, 1.0);
-//  }
-//  se->registerSubsystem(deadarea);
+  //  PHG4SvtxDeadArea* deadarea = new PHG4SvtxDeadArea();
+  //
+  //  for (int i = 0; i < n_maps_layer; i++)
+  //  {
+  //    deadarea->Verbosity(verbosity);
+  //    //deadarea->set_hit_efficiency(i,0.99);
+  //    deadarea->set_hit_efficiency(i, 1.0);
+  //  }
+  //  for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
+  //  {
+  //    //deadarea->set_hit_efficiency(i,0.99);
+  //    deadarea->set_hit_efficiency(i, 1.0);
+  //  }
+  //  se->registerSubsystem(deadarea);
 
   //-----------------------------
   // Apply MIP thresholds to Hits
@@ -545,20 +537,20 @@ void Tracking_Reco(int verbosity = 0)
   mvtxclusterizer->set_threshold(0.0);  // fraction of a mip
   se->registerSubsystem(mvtxclusterizer);
 
-  // For the INTT layers 
+  // For the INTT layers
   INTTClusterizer* inttclusterizer = new INTTClusterizer("INTTClusterizer", n_maps_layer, n_maps_layer + n_intt_layer - 1);
   inttclusterizer->Verbosity(verbosity);
   // no Z clustering for INTT type 1 layers (we DO want Z clustering for type 0 layers)
   // turning off phi clustering for type 0 layers is not necessary, there is only one strip per sensor in phi
   for (int i = n_maps_layer; i < n_maps_layer + n_intt_layer; i++)
   {
-    if(laddertype[i-n_maps_layer] == PHG4INTTDefs::SEGMENTATION_PHI)
+    if (laddertype[i - n_maps_layer] == PHG4INTTDefs::SEGMENTATION_PHI)
       inttclusterizer->set_z_clustering(i, false);
   }
   se->registerSubsystem(inttclusterizer);
 
   // For the TPC
-  
+
   TPCClusterizer* tpcclusterizer = new TPCClusterizer();
   tpcclusterizer->Verbosity(verbosity);
   tpcclusterizer->setRangeLayers(n_maps_layer + n_intt_layer, Max_si_layer);
@@ -575,7 +567,7 @@ void Tracking_Reco(int verbosity = 0)
     // PHG4KalmanPatRec
     //---------------------
 
-    PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
+    PHInitVertexing* init_vtx = new PHTruthVertexing("PHTruthVertexing");
     init_vtx->Verbosity(verbosity);
     se->registerSubsystem(init_vtx);
 
@@ -587,26 +579,25 @@ void Tracking_Reco(int verbosity = 0)
     track_prop->Verbosity(verbosity);
     se->registerSubsystem(track_prop);
 
-    for(int i = 0;i<n_intt_layer;i++)
+    for (int i = 0; i < n_intt_layer; i++)
     {
-      if(laddertype[i] == PHG4INTTDefs::SEGMENTATION_Z)
+      if (laddertype[i] == PHG4INTTDefs::SEGMENTATION_Z)
       {
-	// strip length is along phi
-	track_prop->set_max_search_win_theta_intt(i, 0.010);
-	track_prop->set_min_search_win_theta_intt(i, 0.00);
-	track_prop->set_max_search_win_phi_intt(i, 0.20);
-	track_prop->set_min_search_win_phi_intt(i, 0.20);
+        // strip length is along phi
+        track_prop->set_max_search_win_theta_intt(i, 0.010);
+        track_prop->set_min_search_win_theta_intt(i, 0.00);
+        track_prop->set_max_search_win_phi_intt(i, 0.20);
+        track_prop->set_min_search_win_phi_intt(i, 0.20);
       }
       else
       {
-	// strip length is along theta
-	track_prop->set_max_search_win_theta_intt(i, 0.200);
-	track_prop->set_min_search_win_theta_intt(i, 0.200);
-	track_prop->set_max_search_win_phi_intt(i, 0.0050);
-	track_prop->set_min_search_win_phi_intt(i, 0.000);
+        // strip length is along theta
+        track_prop->set_max_search_win_theta_intt(i, 0.200);
+        track_prop->set_min_search_win_theta_intt(i, 0.200);
+        track_prop->set_max_search_win_phi_intt(i, 0.0050);
+        track_prop->set_min_search_win_phi_intt(i, 0.000);
       }
     }
-
   }
   else
   {
@@ -683,7 +674,8 @@ void Tracking_Eval(std::string outputfile, int verbosity = 0)
     // make a second evaluator that records tracks fitted with primary vertex included
     // good for analysis of prompt tracks, particularly if MVTX is not present
     SvtxEvaluator* evalp;
-    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);    evalp->do_cluster_eval(true);
+    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
+    evalp->do_cluster_eval(true);
     evalp->do_g4hit_eval(true);
     evalp->do_hit_eval(false);
     evalp->do_gpoint_eval(false);
