@@ -594,19 +594,19 @@ int Fun4All_G4_sPHENIX(
       //    calo_jet7->Verbosity(20);
       se->registerSubsystem(calo_jet7);
 
-      QAG4SimulationJet *calo_jet7 = new QAG4SimulationJet(
+      QAG4SimulationJet *calo_jet4 = new QAG4SimulationJet(
           "AntiKt_Truth_r04");
-      calo_jet7->add_reco_jet("AntiKt_Tower_r04");
-      calo_jet7->add_reco_jet("AntiKt_Cluster_r04");
-      calo_jet7->add_reco_jet("AntiKt_Track_r04");
-      se->registerSubsystem(calo_jet7);
+      calo_jet4->add_reco_jet("AntiKt_Tower_r04");
+      calo_jet4->add_reco_jet("AntiKt_Cluster_r04");
+      calo_jet4->add_reco_jet("AntiKt_Track_r04");
+      se->registerSubsystem(calo_jet4);
 
-      QAG4SimulationJet *calo_jet7 = new QAG4SimulationJet(
+      QAG4SimulationJet *calo_jet2 = new QAG4SimulationJet(
           "AntiKt_Truth_r02");
-      calo_jet7->add_reco_jet("AntiKt_Tower_r02");
-      calo_jet7->add_reco_jet("AntiKt_Cluster_r02");
-      calo_jet7->add_reco_jet("AntiKt_Track_r02");
-      se->registerSubsystem(calo_jet7);
+      calo_jet2->add_reco_jet("AntiKt_Tower_r02");
+      calo_jet2->add_reco_jet("AntiKt_Cluster_r02");
+      calo_jet2->add_reco_jet("AntiKt_Track_r02");
+      se->registerSubsystem(calo_jet2);
     }
   }
 
