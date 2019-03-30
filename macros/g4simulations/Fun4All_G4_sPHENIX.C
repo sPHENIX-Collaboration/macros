@@ -638,8 +638,8 @@ int Fun4All_G4_sPHENIX(
 
   se->run(nEvents);
 
+  // QA outputs
   {
-    gSystem->Load("libqa_modules");
     QAHistManagerDef::saveQARootFile(string(outputFile) + "_qa.root");
   }
 
