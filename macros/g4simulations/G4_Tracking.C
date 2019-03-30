@@ -392,7 +392,7 @@ void Tracking_Reco(int verbosity = 0)
 
   // MVTX
   PHG4MVTXDigitizer* digimvtx = new PHG4MVTXDigitizer();
-  digimvtx->Verbosity(0);
+  digimvtx->Verbosity(verbosity);
 
   // energy deposit in 25 microns = 9.6 KeV = 1000 electrons collected after recombination
   //digimvtx->set_adc_scale(0.95e-6);  // default set in code is 0.95e-06, which is 99 electrons
@@ -434,7 +434,7 @@ void Tracking_Reco(int verbosity = 0)
           exit(1);
         }
       }
-//      deadMapINTT -> Verbosity(1);
+      deadMapINTT -> Verbosity(1);
       se->registerSubsystem(deadMapINTT);
     }
 #endif // SVTXDEADMAP
@@ -560,7 +560,7 @@ void Tracking_Reco(int verbosity = 0)
   // For the TPC
   
   TPCClusterizer* tpcclusterizer = new TPCClusterizer();
-  tpcclusterizer->Verbosity(0);
+  tpcclusterizer->Verbosity(verbosity);
   tpcclusterizer->setRangeLayers(n_maps_layer + n_intt_layer, Max_si_layer);
   tpcclusterizer->setEnergyCut(15 /*adc*/);
   tpcclusterizer->setFitWindowSigmas(0.0150, 0.10);  // should be changed when TPC cluster resolution changes
@@ -576,15 +576,15 @@ void Tracking_Reco(int verbosity = 0)
     //---------------------
 
     PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
-    init_vtx->Verbosity(0);
+    init_vtx->Verbosity(verbosity);
     se->registerSubsystem(init_vtx);
 
     PHTrackSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer);
-    track_seed->Verbosity(2);
+    track_seed->Verbosity(verbosity);
     se->registerSubsystem(track_seed);
 
     PHGenFitTrkProp* track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", n_maps_layer, n_intt_layer, n_gas_layer);
-    track_prop->Verbosity(10);
+    track_prop->Verbosity(verbosity);
     se->registerSubsystem(track_prop);
 
     for(int i = 0;i<n_intt_layer;i++)
@@ -622,7 +622,7 @@ void Tracking_Reco(int verbosity = 0)
   //---------------------
 
   PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
-  kalman->Verbosity(100);
+  kalman->Verbosity(verbosity);
   if (use_primary_vertex)
     kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
   se->registerSubsystem(kalman);
@@ -675,7 +675,7 @@ void Tracking_Eval(std::string outputfile, int verbosity = 0)
   eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
   eval->do_gpoint_eval(false);
   eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
-  eval->Verbosity(0);
+  eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
   if (use_primary_vertex)
@@ -688,7 +688,7 @@ void Tracking_Eval(std::string outputfile, int verbosity = 0)
     evalp->do_hit_eval(false);
     evalp->do_gpoint_eval(false);
     evalp->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
-    evalp->Verbosity(0);
+    evalp->Verbosity(verbosity);
     se->registerSubsystem(evalp);
   }
 
