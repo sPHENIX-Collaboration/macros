@@ -16,8 +16,9 @@
 #include <cmath>
 
 //some common style files
+#include "../../sPHENIXStyle/sPhenixStyle.C"
 #include "QA_Draw_Utility.C"
-#include "SetOKStyle.C"
+
 using namespace std;
 
 void QA_Draw_HCALIN_TowerCluster(
@@ -26,9 +27,7 @@ void QA_Draw_HCALIN_TowerCluster(
     const char *qa_file_name_ref =
         "/phenix/u/jinhuang/links/ePHENIX_work/sPHENIX_work/production_analysis_updates/spacal1d/fieldmap/G4Hits_sPHENIX_pi+_eta0.30_32GeV-0000.root_qa.root")
 {
-  SetOKStyle();
-  gStyle->SetOptStat(0);
-  gStyle->SetOptFit(1111);
+  SetsPhenixStyle();
   TVirtualFitter::SetDefaultFitter("Minuit2");
 
   TFile *qa_file_new = new TFile(qa_file_name_new);
@@ -62,7 +61,7 @@ void QA_Draw_HCALIN_TowerCluster(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           "h_QAG4Sim_HCALIN_Tower_1x1", "TH1F");
       assert(h_ref);
 
@@ -91,7 +90,7 @@ void QA_Draw_HCALIN_TowerCluster(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           "h_QAG4Sim_HCALIN_Tower_3x3", "TH1F");
       assert(h_ref);
 
@@ -122,7 +121,7 @@ void QA_Draw_HCALIN_TowerCluster(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           "h_QAG4Sim_HCALIN_Tower_1x1_max", "TH1F");
       assert(h_ref);
 
@@ -154,7 +153,7 @@ void QA_Draw_HCALIN_TowerCluster(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           "h_QAG4Sim_HCALIN_Tower_4x4_max", "TH1F");
       assert(h_ref);
 
@@ -281,7 +280,7 @@ void QA_Draw_HCALIN_TowerCluster(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           "h_QAG4Sim_HCALIN_Cluster_BestMatchERatio", "TH1F");
       assert(h_ref);
 
@@ -296,6 +295,6 @@ void QA_Draw_HCALIN_TowerCluster(
     DrawReference(h_new, h_ref);
   }
 
-  PutInputFileName(c1, .04, qa_file_name_new, qa_file_name_ref);
+//  PutInputFileName(c1, .04, qa_file_name_new, qa_file_name_ref);
   SaveCanvas(c1, TString(qa_file_name_new) + TString(c1->GetName()), true);
 }

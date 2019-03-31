@@ -18,8 +18,9 @@
 #include <vector>
 
 //some common style files
+#include "../../sPHENIXStyle/sPhenixStyle.C"
 #include "QA_Draw_Utility.C"
-#include "SetOKStyle.C"
+
 using namespace std;
 
 void QA_Draw_Calorimeter_Sum_TrackProj(
@@ -32,9 +33,7 @@ void QA_Draw_Calorimeter_Sum_TrackProj(
 //    const char * qa_file_name_ref =
 //        "data/G4Hits_sPHENIX_e-_eta0_24GeV-0000.root_qa.root")
 {
-  SetOKStyle();
-  gStyle->SetOptStat(0);
-  gStyle->SetOptFit(1111);
+  SetsPhenixStyle();
   TVirtualFitter::SetDefaultFitter("Minuit2");
 
   TFile *qa_file_new = new TFile(qa_file_name_new);
@@ -123,7 +122,7 @@ void QA_Draw_Calorimeter_Sum_TrackProj(
       TH1 *h_ref = NULL;
       if (h_QAG4Sim_CalorimeterSum_TrackProj_Ref)
       {
-        TH1 *h_ref = h_QAG4Sim_CalorimeterSum_TrackProj_Ref->ProjectionX(h_QAG4Sim_CalorimeterSum_TrackProj->GetName() + TString("_px_ref"));
+        h_ref = h_QAG4Sim_CalorimeterSum_TrackProj_Ref->ProjectionX(h_QAG4Sim_CalorimeterSum_TrackProj->GetName() + TString("_px_ref"));
 
         h_ref->Scale(1. / Ntrack_ref);
       }
@@ -147,7 +146,7 @@ void QA_Draw_Calorimeter_Sum_TrackProj(
       TH1 *h_ref = NULL;
       if (h_QAG4Sim_CalorimeterSum_TrackProj_Ref)
       {
-        TH1 *h_ref = h_QAG4Sim_CalorimeterSum_TrackProj_Ref->ProjectionY(h_QAG4Sim_CalorimeterSum_TrackProj->GetName() + TString("_py_ref"));
+        h_ref = h_QAG4Sim_CalorimeterSum_TrackProj_Ref->ProjectionY(h_QAG4Sim_CalorimeterSum_TrackProj->GetName() + TString("_py_ref"));
 
         h_ref->Scale(1. / Ntrack_ref);
       }
@@ -159,7 +158,7 @@ void QA_Draw_Calorimeter_Sum_TrackProj(
     }
   }
 
-  PutInputFileName(c1, .03, qa_file_name_new, qa_file_name_ref);
+//  PutInputFileName(c1, .03, qa_file_name_new, qa_file_name_ref);
 
   SaveCanvas(c1, TString(qa_file_name_new) + TString(c1->GetName()), true);
 }
