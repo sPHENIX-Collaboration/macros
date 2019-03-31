@@ -16,8 +16,9 @@
 #include <cmath>
 
 //some common style files
+#include "../../sPHENIXStyle/sPhenixStyle.C"
 #include "QA_Draw_Utility.C"
-#include "SetOKStyle.C"
+
 using namespace std;
 
 void QA_Draw_Calorimeter_Sum_Cluster(
@@ -30,9 +31,7 @@ void QA_Draw_Calorimeter_Sum_Cluster(
 //    const char * qa_file_name_ref =
 //        "data/G4Hits_sPHENIX_e-_eta0_24GeV-0000.root_qa.root")
 {
-  SetOKStyle();
-  gStyle->SetOptStat(0);
-  gStyle->SetOptFit(1111);
+  SetsPhenixStyle();
   TVirtualFitter::SetDefaultFitter("Minuit2");
 
   TFile *qa_file_new = new TFile(qa_file_name_new);
@@ -119,7 +118,7 @@ void QA_Draw_Calorimeter_Sum_Cluster(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           "h_QAG4Sim_CalorimeterSum_Cluster_Ratio_CEMC_HCALIN", "TH1F");
       assert(h_ref);
 
@@ -148,7 +147,7 @@ void QA_Draw_Calorimeter_Sum_Cluster(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           "h_QAG4Sim_CalorimeterSum_Cluster_Ratio_CEMC_HCALIN_HCALOUT",
           "TH1F");
       assert(h_ref);
@@ -178,7 +177,7 @@ void QA_Draw_Calorimeter_Sum_Cluster(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           "h_QAG4Sim_CalorimeterSum_Cluster_EP", "TH1F");
       assert(h_ref);
 
@@ -192,6 +191,6 @@ void QA_Draw_Calorimeter_Sum_Cluster(
     DrawReference(h_new, h_ref);
   }
 
-  PutInputFileName(c1, .04, qa_file_name_new, qa_file_name_ref);
+//  PutInputFileName(c1, .04, qa_file_name_new, qa_file_name_ref);
   SaveCanvas(c1, TString(qa_file_name_new) + TString(c1->GetName()), true);
 }

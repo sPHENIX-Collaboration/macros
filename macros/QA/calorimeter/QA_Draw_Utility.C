@@ -15,14 +15,21 @@
 #include <TClass.h>
 #include <TDirectory.h>
 #include <TFile.h>
+#include <TSystem.h>
+
+#include <TGraphErrors.h>
 #include <TH1F.h>
-#include <TLine.h>
 #include <TList.h>
 #include <TObject.h>
-#include <TPad.h>
 #include <TString.h>
 #include <TStyle.h>
 #include <TTree.h>
+
+#include <TLegend.h>
+#include <TLegendEntry.h>
+#include <TLine.h>
+#include <TPad.h>
+
 #include <cassert>
 #include <cmath>
 
@@ -115,13 +122,13 @@ void SaveCanvas(TCanvas *c, TString name = "", Bool_t bEPS = kTRUE)
 
 //! Draw 1D histogram along with its reference as shade
 //! @param[in] draw_href_error whether to draw error band for reference plot. Otherwise, it is a filled histogram (default)
-void DrawReference(TH1 *hnew, TH1 *href, bool draw_href_error = false)
+double DrawReference(TH1 *hnew, TH1 *href, bool draw_href_error = false)
 {
   hnew->SetLineColor(kBlue + 3);
   hnew->SetMarkerColor(kBlue + 3);
-  hnew->SetLineWidth(2);
+  //  hnew->SetLineWidth(2);
   hnew->SetMarkerStyle(kFullCircle);
-  hnew->SetMarkerSize(1);
+  //  hnew->SetMarkerSize(1);
 
   if (href)
   {
@@ -131,7 +138,7 @@ void DrawReference(TH1 *hnew, TH1 *href, bool draw_href_error = false)
       href->SetFillColor(kGreen + 1);
       href->SetLineStyle(kSolid);
       href->SetMarkerColor(kGreen + 1);
-      href->SetLineWidth(2);
+      //      href->SetLineWidth(2);
       href->SetMarkerStyle(kDot);
       href->SetMarkerSize(0);
     }
@@ -149,6 +156,8 @@ void DrawReference(TH1 *hnew, TH1 *href, bool draw_href_error = false)
 
   hnew->Draw();  // set scale
 
+  double ks_test = NAN;
+
   if (href)
   {
     if (draw_href_error)
@@ -161,7 +170,41 @@ void DrawReference(TH1 *hnew, TH1 *href, bool draw_href_error = false)
     else
       href->Draw("HIST same");
     hnew->Draw("same");  // over lay data points
+
+    ks_test = hnew->KolmogorovTest(href, "D");
   }
+
+  // ---------------------------------
+  // now, make summary header
+  // ---------------------------------
+  if (href)
+  {
+    gPad->SetTopMargin(.14);
+    TLegend *legend = new TLegend(0, .93, 0, 1, hnew->GetTitle(), "NB NDC");
+    legend->Draw();
+    legend = new TLegend(0, .86, .3, .93, NULL, "NB NDC");
+    legend->AddEntry(href, Form("Reference"), "f");
+    legend->Draw();
+    legend = new TLegend(0.3, .86, 1, .93, NULL, "NB NDC");
+    TLegendEntry *le = legend->AddEntry(hnew, Form("New: KS-Test P=%.3f", ks_test), "lpe");
+    if (ks_test>=1)
+      le->SetTextColor(kBlue+1);
+    else if (ks_test>=.2)
+      le->SetTextColor(kGreen+2);
+    else if (ks_test>=.05)
+      le->SetTextColor(kYellow+1);
+    else
+      le->SetTextColor(kRed+1);
+    legend->Draw();
+  }
+  else
+  {
+    gPad->SetTopMargin(.7);
+    TLegend *legend = new TLegend(0, .93, 0, 1, hnew->GetTitle(), "NB NDC");
+    legend->Draw();
+  }
+
+  return ks_test;
 }
 
 //! Draw 1D TGraph along with its reference as shade

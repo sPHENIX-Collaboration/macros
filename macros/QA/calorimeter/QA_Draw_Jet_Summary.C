@@ -20,8 +20,8 @@
 
 //some common style files
 #include "QA_Draw_Jet_TruthMatching.C"
+//#include "../../sPHENIXStyle/sPhenixStyle.C"
 #include "QA_Draw_Utility.C"
-#include "SetOKStyle.C"
 using namespace std;
 
 void QA_Draw_Jet_Summary(const char *jet_family = "AntiKt_Tower",
@@ -34,10 +34,7 @@ void QA_Draw_Jet_Summary(const char *jet_family = "AntiKt_Tower",
   const double min_Et = 10;
   const double max_Et = 80;
 
-  // style sets
-  SetOKStyle();
-  gStyle->SetOptStat(0);
-  gStyle->SetOptFit(1111);
+  SetsPhenixStyle();
   TVirtualFitter::SetDefaultFitter("Minuit2");
 
   // file IO
@@ -118,7 +115,7 @@ void QA_Draw_Jet_Summary(const char *jet_family = "AntiKt_Tower",
   TH1 *h_frame =
       p->DrawFrame(min_Et, -.1, max_Et, .1,
                    TString(jet_family) + " #phi Reconstruction;E_{T, Truth} (GeV);#phi_{Reco} - #phi_{Truth} (rad)");
-  h_frame->GetYaxis()->SetTitleOffset(1.01);
+  //  h_frame->GetYaxis()->SetTitleOffset(1.01);
   TLine *l = new TLine(min_Et, 0, max_Et, 0);
   l->Draw();
   p->SetGridx(0);
@@ -157,7 +154,7 @@ void QA_Draw_Jet_Summary(const char *jet_family = "AntiKt_Tower",
   h_frame =
       p->DrawFrame(min_Et, -.1, max_Et, .1,
                    TString(jet_family) + " #eta Reconstruction;E_{T, Truth} (GeV);#eta_{Reco} - #eta_{Truth}");
-  h_frame->GetYaxis()->SetTitleOffset(1.01);
+  //  h_frame->GetYaxis()->SetTitleOffset(1.01);
   l = new TLine(min_Et, 0, max_Et, 0);
   l->Draw();
   p->SetGridx(0);
@@ -195,7 +192,7 @@ void QA_Draw_Jet_Summary(const char *jet_family = "AntiKt_Tower",
 
   h_frame = p->DrawFrame(min_Et, 0, max_Et, 2,
                          TString(jet_family) + " Jet Energy Reconstruction;E_{Truth} (GeV);E_{Reco} / E_{Truth}");
-  h_frame->GetYaxis()->SetTitleOffset(1.01);
+  //  h_frame->GetYaxis()->SetTitleOffset(1.01);
   l = new TLine(min_Et, 1, max_Et, 1);
   l->Draw();
   p->SetGridx(0);
@@ -234,7 +231,7 @@ void QA_Draw_Jet_Summary(const char *jet_family = "AntiKt_Tower",
   h_frame =
       p->DrawFrame(min_Et, 0, max_Et, 2,
                    TString(jet_family) + " Jet E_{T} Reconstruction;E_{T, Truth} (GeV);E_{T, Reco} / E_{T, Truth}");
-  h_frame->GetYaxis()->SetTitleOffset(1.01);
+  //  h_frame->GetYaxis()->SetTitleOffset(1.01);
   l = new TLine(min_Et, 1, max_Et, 1);
   l->Draw();
   p->SetGridx(0);
@@ -272,7 +269,7 @@ void QA_Draw_Jet_Summary(const char *jet_family = "AntiKt_Tower",
 
   h_frame = p->DrawFrame(min_Et, 0, max_Et, 1.2,
                          TString(jet_family) + " Reco Efficiency;E_{T, Truth} (GeV);Reco efficiency");
-  h_frame->GetYaxis()->SetTitleOffset(1.01);
+  //  h_frame->GetYaxis()->SetTitleOffset(1.01);
   l = new TLine(min_Et, 1, max_Et, 1);
   l->Draw();
   p->SetGridx(0);
@@ -310,7 +307,7 @@ void QA_Draw_Jet_Summary(const char *jet_family = "AntiKt_Tower",
 
   h_frame = p->DrawFrame(min_Et, 0, max_Et, 1.2,
                          TString(jet_family) + " Reconstruction Purity;E_{T, Reco} (GeV);Reconstruction Purity");
-  h_frame->GetYaxis()->SetTitleOffset(1.01);
+  //  h_frame->GetYaxis()->SetTitleOffset(1.01);
   l = new TLine(min_Et, 1, max_Et, 1);
   l->Draw();
   p->SetGridx(0);
@@ -341,6 +338,6 @@ void QA_Draw_Jet_Summary(const char *jet_family = "AntiKt_Tower",
   }
   legend->Draw();
 
-  PutInputFileName(c1, .03, qa_file_name_new, qa_file_name_ref);
+  //  PutInputFileName(c1, .03, qa_file_name_new, qa_file_name_ref);
   SaveCanvas(c1, TString(qa_file_name_new) + TString(c1->GetName()), true);
 }

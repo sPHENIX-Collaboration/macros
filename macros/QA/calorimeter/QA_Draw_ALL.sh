@@ -27,7 +27,7 @@ set macros = (\
 	QA_Draw_HCALIN_TowerCluster.C \
 	QA_Draw_HCALOUT_G4Hit.C \
 	QA_Draw_HCALOUT_TowerCluster.C \
-	QA_Draw_Sum_Cluster.C \
+	QA_Draw_Calorimeter_Sum_Cluster.C \
 	QA_Draw_Calorimeter_Sum_TrackProj.C \
 	QA_Draw_Calorimeter_Sum_TrackProjEP.C \
 );

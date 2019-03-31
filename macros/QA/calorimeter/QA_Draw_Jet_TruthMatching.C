@@ -18,8 +18,8 @@
 #include <vector>
 
 //some common style files
+#include "../../sPHENIXStyle/sPhenixStyle.C"
 #include "QA_Draw_Utility.C"
-#include "SetOKStyle.C"
 using namespace std;
 
 vector<TGraphErrors *>
@@ -34,9 +34,7 @@ QA_Draw_Jet_TruthMatching(const char *jet =
   const double min_Et = 10;
   const double max_Et = 80;
 
-  SetOKStyle();
-  gStyle->SetOptStat(0);
-  gStyle->SetOptFit(1111);
+  SetsPhenixStyle();
   TVirtualFitter::SetDefaultFitter("Minuit2");
 
   TFile *qa_file_new = new TFile(qa_file_name_new);
@@ -229,7 +227,7 @@ QA_Draw_Jet_TruthMatching(const char *jet =
           TString(jet) + "_Matching_Count_Truth_Et" + "_Matched", 3, 3);  // unique match
       assert(h_norm);
       assert(h_pass);
-      h_ratio_ref = GetBinominalRatio(h_pass, h_norm, true);
+      h_ratio_ref = GetBinominalRatio(h_pass, h_norm);
     }
 
     DrawReference(h_ratio, h_ratio_ref, true);
@@ -278,7 +276,7 @@ QA_Draw_Jet_TruthMatching(const char *jet =
           TString(jet) + "_Matching_Count_Reco_Et" + "_Matched", 3, 3);  // unique match
       assert(h_norm);
       assert(h_pass);
-      h_ratio_ref = GetBinominalRatio(h_pass, h_norm, true);
+      h_ratio_ref = GetBinominalRatio(h_pass, h_norm);
     }
 
     DrawReference(h_ratio, h_ratio_ref, true);
@@ -289,7 +287,7 @@ QA_Draw_Jet_TruthMatching(const char *jet =
   l = new TLine(min_Et, 1, max_Et, 1);
   l->Draw();
 
-  PutInputFileName(c1, .04, qa_file_name_new, qa_file_name_ref);
+//  PutInputFileName(c1, .04, qa_file_name_new, qa_file_name_ref);
   SaveCanvas(c1, TString(qa_file_name_new) + TString(c1->GetName()), true);
 
   return resolution_collections;
