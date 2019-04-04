@@ -1,14 +1,27 @@
-#include <string>
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllPrdfInputManager.h>
 
-using namespace std;
+#include <phool/recoConsts.h>
+
+#include <prototype2/CaloCalibration.h>
+#include <prototype2/CaloUnpackPRDF.h>
+#include <prototype2/GenericUnpackPRDF.h>
+#include <prototype2/PROTOTYPE2_FEM.h>
+#include <prototype2/Prototype2DSTReader.h>
+#include <prototype2/RunInfoUnpackPRDF.h>
+#include <prototype2/TempInfoUnpackPRDF.h>
+
+R__LOAD_LIBRARY(libPrototype2.so)
+#endif
 
 void
 Fun4All_TestBeam(int nEvents = 100,
-    const char *input_file =
-        "/gpfs/mnt/gpfs02/sphenix/data/data01/t1044-2016a/fnal/beam/beam_00002609-0000.prdf",
-    const char *output_file = "data/beam_00002609.root")
+    const char *input_file = "/sphenix/data/data01/t1044-2016a/fnal/beam/beam_00002609-0000.prdf",
+    const char *output_file = "beam_00002609.root")
 {
-  gSystem->Load("libfun4all");
   gSystem->Load("libPrototype2.so");
 
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -71,9 +84,7 @@ Fun4All_TestBeam(int nEvents = 100,
 // unpack->Verbosity(1);
   se->registerSubsystem(unpack);
 
-  CaloCalibration * calib = NULL;
-
-  calib = new CaloCalibration("CEMC");
+  CaloCalibration *calib = new CaloCalibration("CEMC");
   calib->GetCalibrationParameters().ReadFromFile("CEMC","xml",0,0,
       string(getenv("CALIBRATIONROOT")) + string("/Prototype2/Calibration/")); // calibration database
   se->registerSubsystem(calib);
@@ -115,11 +126,9 @@ Fun4All_TestBeam(int nEvents = 100,
   const int first_packet_id = PROTOTYPE2_FEM::PACKET_ID; // 21101
   const int second_packet_id = 21102;
 
-  GenericUnpackPRDF *gunpack = NULL;
-
   const int N_hodo = 8;
 
-  gunpack = new GenericUnpackPRDF("HODO_VERTICAL");
+  GenericUnpackPRDF *gunpack = new GenericUnpackPRDF("HODO_VERTICAL");
   for (int i = 0; i < N_hodo; ++i)
     gunpack->add_channel(first_packet_id, 104 + i, i); // 24 Cerenkov 1
   se->registerSubsystem(gunpack);
@@ -222,8 +231,7 @@ Fun4All_TestBeam(int nEvents = 100,
 
   // -------------------  Output -------------------
   //main DST output
-  Fun4AllDstOutputManager *out_Manager = new Fun4AllDstOutputManager("DSTOUT",
-      output_file);
+  Fun4AllOutputManager *out_Manager = new Fun4AllDstOutputManager("DSTOUT",output_file);
   se->registerOutputManager(out_Manager);
 
   //alternatively, fast check on DST using DST Reader:

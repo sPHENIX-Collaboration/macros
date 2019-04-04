@@ -15,8 +15,11 @@
 #include <g4main/PHG4ParticleGun.h>
 #include <g4main/HepMCNodeReader.h>
 #include <g4detectors/PHG4DetectorSubsystem.h>
+#include <phhepmc/Fun4AllHepMCInputManager.h>
+#include <phool/recoConsts.h>
 #include <phpythia6/PHPythia6.h>
 #include <phpythia8/PHPythia8.h>
+#include "DisplayOn.C"
 #include "G4Setup_fsPHENIX.C"
 #include "G4_Bbc.C"
 #include "G4_Global.C"
@@ -70,11 +73,13 @@ int Fun4All_G4_fsPHENIX(
   
   bool do_pipe = true;
   
-  bool do_svtx = true;
-  bool do_svtx_cell = do_svtx && true;
-  bool do_svtx_track = do_svtx_cell && true;
-  bool do_svtx_eval = do_svtx_track && false;
+  // central tracking
+  bool do_tracking = true;
+  bool do_tracking_cell = do_tracking && true;
+  bool do_tracking_track = do_tracking_cell && true;
+  bool do_tracking_eval = do_tracking_track && true;
 
+  // central calorimeters, which is a detailed simulation and slow to run
   bool do_cemc = true;
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
@@ -108,6 +113,7 @@ int Fun4All_G4_fsPHENIX(
 
   bool do_FGEM = true;
   bool do_FGEM_track = do_FGEM &&  true;
+  bool do_FGEM_eval = do_FGEM_track &&  true;
 
   bool do_FEMC = true;
   bool do_FEMC_cell = do_FEMC && true;
@@ -136,20 +142,26 @@ int Fun4All_G4_fsPHENIX(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_fsPHENIX.C");
-  G4Init(do_svtx,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_FEMC,do_FHCAL,n_TPC_layers);
+  G4Init(do_tracking,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_FEMC,do_FHCAL,n_TPC_layers);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root"); // default map from the calibration database
-  const float magfield_rescale = 1.0; // already adjusted to 1.4T central field
+  const float magfield_rescale = -1.4/1.5; // make consistent with Fun4All_G4_sPHENIX()
 
   //---------------
   // Fun4All server
   //---------------
 
+  bool display_on = false;
+  if(display_on)
+    {
+      gROOT->LoadMacro("DisplayOn.C");
+    }
+
   Fun4AllServer *se = Fun4AllServer::instance();
 //  se->Verbosity(0); // uncomment for batch production running with minimal output messages
-  se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
+//  se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
@@ -160,7 +172,7 @@ int Fun4All_G4_fsPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  // rc->set_IntFlag("RANDOMSEED", 12345);
+//   rc->set_IntFlag("RANDOMSEED", 12345);
 
   //-----------------
   // Event generation
@@ -234,12 +246,12 @@ int Fun4All_G4_fsPHENIX(
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
       G4Setup(absorberactive, magfield, EDecayType::kAll,
-	      do_svtx, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
+	      do_tracking, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
 	      do_FGEM, do_FEMC, do_FHCAL,
 	      magfield_rescale);
 #else
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-	      do_svtx, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
+	      do_tracking, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
 	      do_FGEM, do_FEMC, do_FHCAL,
 	      magfield_rescale);
 #endif
@@ -260,7 +272,7 @@ int Fun4All_G4_fsPHENIX(
   // Detector Division
   //------------------
 
-  if (do_svtx_cell) Svtx_Cells();
+  if (do_tracking_cell) Tracking_Cells();
 
   if (do_cemc_cell) CEMC_Cells();
 
@@ -300,7 +312,7 @@ int Fun4All_G4_fsPHENIX(
   // SVTX tracking
   //--------------
 
-  if (do_svtx_track) Svtx_Reco();
+  if (do_tracking_track) Tracking_Reco();
 
   //--------------
   // FGEM tracking
@@ -343,7 +355,7 @@ int Fun4All_G4_fsPHENIX(
   // Simulation evaluation
   //----------------------
 
-  if (do_svtx_eval) Svtx_Eval("g4svtx_eval.root");
+  if (do_tracking_eval) Tracking_Eval("g4tracking_eval.root");
 
   if (do_cemc_eval) CEMC_Eval("g4cemc_eval.root");
 
@@ -354,6 +366,8 @@ int Fun4All_G4_fsPHENIX(
   if (do_jet_eval) Jet_Eval("g4jet_eval.root");
 
   if (do_fwd_jet_eval) Jet_FwdEval("g4fwdjet_eval.root");
+
+  if (do_FGEM_eval) FGEM_FastSim_Eval("g4tracking_fgem_eval.root");
 
   //-------------- 
   // IO management
@@ -400,7 +414,7 @@ int Fun4All_G4_fsPHENIX(
 
       G4DSTreader_fsPHENIX( outputFile, //
           /*int*/ absorberactive ,
-          /*bool*/ do_svtx ,
+          /*bool*/ do_tracking ,
           /*bool*/ do_cemc ,
           /*bool*/ do_hcalin ,
           /*bool*/ do_magnet ,
@@ -420,51 +434,42 @@ int Fun4All_G4_fsPHENIX(
   //if (do_dst_compress) DstCompress(out);
   //se->registerOutputManager(out);
 
-  if (nEvents == 0 && !readhits && !readhepmc)
-    {
-      cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
-      cout << "it will run forever, so I just return without running anything" << endl;
-      return 0;
-    }
-
+  //-----------------
+  // Event processing
+  //-----------------
   if (nEvents < 0)
-    {
-      PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
-      g4->ApplyCommand("/control/execute vis.mac");
-      //g4->StartGui();
-      se->run(1);
-
-      se->End();
-      std::cout << "All done" << std::endl;
-
-
-      std::cout << "==== Useful display commands ==" << std::endl;
-      cout << "draw axis: " << endl;
-      cout << " G4Cmd(\"/vis/scene/add/axes 0 0 0 50 cm\")" << endl;
-      cout << "zoom" << endl;
-      cout << " G4Cmd(\"/vis/viewer/zoom 1\")" << endl;
-      cout << "viewpoint:" << endl;
-      cout << " G4Cmd(\"/vis/viewer/set/viewpointThetaPhi 0 0\")" << endl;
-      cout << "panTo:" << endl;
-      cout << " G4Cmd(\"/vis/viewer/panTo 0 0 cm\")" << endl;
-      cout << "print to eps:" << endl;
-      cout << " G4Cmd(\"/vis/ogl/printEPS\")" << endl;
-      cout << "set background color:" << endl;
-      cout << " G4Cmd(\"/vis/viewer/set/background white\")" << endl;
-      std::cout << "===============================" << std::endl;
-    }
-  else
-    {
-
-      se->run(nEvents);
-
-      se->End();
-      std::cout << "All done" << std::endl;
-      delete se;
-      gSystem->Exit(0);
-      return 0;
-    }
+  {
     return 0;
+  }
+  // if we run the particle generator and use 0 it'll run forever
+  if (nEvents == 0 && !readhits && !readhepmc)
+  {
+    cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
+    cout << "it will run forever, so I just return without running anything" << endl;
+    return 0;
+  }
+
+  if(display_on)
+    {
+      DisplayOn();
+      // prevent macro from finishing so can see display
+      int i;
+      cout << "***** Enter any integer to proceed" << endl;
+      cin >> i;
+    }
+
+  se->run(nEvents);
+
+  //-----
+  // Exit
+  //-----
+
+
+  se->End();
+  std::cout << "All done" << std::endl;
+  delete se;
+  gSystem->Exit(0);
+  return 0;
 }
 
 

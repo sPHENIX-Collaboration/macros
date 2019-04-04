@@ -2,7 +2,7 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 #include "GlobalVariables.C"
 #include "G4_Pipe.C"
-#include "G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"
+#include "G4_Tracking.C"
 #include "G4_CEmc_Spacal.C"
 #include "G4_HcalIn_ref.C"
 #include "G4_Magnet.C"
@@ -47,8 +47,8 @@ void G4Init(bool do_svtx = true,
     }
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
-      SvtxInit(n_TPC_layers);
+      gROOT->LoadMacro("G4_Tracking.C");
+      TrackingInit(n_TPC_layers);
     }
 
   if (do_cemc)
@@ -167,7 +167,7 @@ int G4Setup(const int absorberactive = 0,
   
   //----------------------------------------
   // SVTX
-  if (do_svtx) radius = Svtx(g4Reco, radius, absorberactive);
+  if (do_svtx) radius = Tracking(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // CEMC
@@ -208,7 +208,7 @@ int G4Setup(const int absorberactive = 0,
   if ( do_FHCAL )
     FHCALSetup(g4Reco, absorberactive);
 
-  // sPHENIX forward flux return(s)
+  // sPHENIX forward flux return(s) with reduced thickness
   PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
   flux_return_plus->set_int_param("lengthviarapidity",0);
   flux_return_plus->set_double_param("length",10.2);
@@ -235,11 +235,13 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // piston magnet
-  make_piston("magpiston", g4Reco);
+//  make_piston("magpiston", g4Reco);
 
   //----------------------------------------
   // BLACKHOLE
-  
+  // minimal space for forward instrumentation
+  if (radius<270) radius = 270;
+
   // swallow all particles coming out of the backend of sPHENIX
   PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
 blackhole->set_double_param("radius",radius + 10); // add 10 cm

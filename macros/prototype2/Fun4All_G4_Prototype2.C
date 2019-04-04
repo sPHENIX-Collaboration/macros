@@ -1,3 +1,49 @@
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <caloreco/RawTowerCalibration.h>
+
+#include <fun4all/SubsysReco.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllDummyInputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllServer.h>
+
+#include <g4calo/Prototype2RawTowerBuilder.h>
+#include <g4calo/RawTowerBuilder.h>
+#include <g4calo/RawTowerDigitizer.h>
+
+#include <g4detectors/PHG4BlockSubsystem.h>
+#include <g4detectors/PHG4FullProjSpacalCellReco.h>
+#include <g4detectors/PHG4Prototype2HcalCellReco.h>
+#include <g4detectors/PHG4Prototype2InnerHcalSubsystem.h>
+#include <g4detectors/PHG4Prototype2OuterHcalSubsystem.h>
+#include <g4detectors/PHG4SpacalPrototypeSubsystem.h>
+
+#include <g4eval/PHG4DSTReader.h>
+
+#include <g4histos/G4HitNtuple.h>
+
+#include <g4main/PHG4ParticleGun.h>
+#include <g4main/PHG4Reco.h>
+#include <g4main/PHG4SimpleEventGenerator.h>
+#include <g4main/PHG4TruthSubsystem.h>
+
+#include <phool/recoConsts.h>
+
+#include <qa_modules/QAHistManagerDef.h>
+#include <qa_modules/QAG4SimulationCalorimeter.h>
+
+R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libfun4all.so)
+R__LOAD_LIBRARY(libg4calo.so)
+R__LOAD_LIBRARY(libg4detectors.so)
+R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libg4histos.so)
+R__LOAD_LIBRARY(libg4testbench.so)
+R__LOAD_LIBRARY(libqa_modules.so)
+
+#endif
+
 int Fun4All_G4_Prototype2(int nEvents = 1)
 {
 
@@ -79,8 +125,7 @@ int Fun4All_G4_Prototype2(int nEvents = 1)
   //----------------------------------------
   if (cemc_on)
     {
-      PHG4SpacalPrototypeSubsystem *cemc;
-      cemc = new PHG4SpacalPrototypeSubsystem("CEMC");
+      PHG4SpacalPrototypeSubsystem *cemc = new PHG4SpacalPrototypeSubsystem("CEMC");
       cemc->SetActive();
       cemc->SuperDetector("CEMC");
       cemc->SetAbsorberActive();
@@ -224,12 +269,14 @@ int Fun4All_G4_Prototype2(int nEvents = 1)
       se->registerSubsystem(TowerBuilder);
     }
 
+// these parameters are used in multiple modules
+  const double ADC_per_photoelectron_LG = 0.24; // From Sean Stoll, Mar 29
+  const double ADC_per_photoelectron_HG = 3.8; // From Sean Stoll, Mar 29
+  const double photoelectron_per_GeV = 500; //500 photon per total GeV deposition
+
   if (cemc_digi)
     {
       const double sampling_fraction = 0.0233369; //  +/-   8.22211e-05  from 15 Degree indenting 8 GeV electron showers
-      const double photoelectron_per_GeV = 500; //500 photon per total GeV deposition
-      const double ADC_per_photoelectron_HG = 3.8; // From Sean Stoll, Mar 29
-      const double ADC_per_photoelectron_LG = 0.24; // From Sean Stoll, Mar 29
 
       // low gains
       RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizerLG");
@@ -524,8 +571,8 @@ int Fun4All_G4_Prototype2(int nEvents = 1)
 
   //   std::cout << "All done" << std::endl;
   delete se;
-  //   return 0;
   gSystem->Exit(0);
+  return 0;
 
 }
 
