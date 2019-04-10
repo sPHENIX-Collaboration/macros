@@ -597,7 +597,7 @@ void Tracking_Reco(int verbosity = 0)
 }
 
 
- void Tracking_Eval(std::string outputfile1, string outputfile2, int verbosity = 0)
+ void Tracking_Eval(std::string outputfile,  int verbosity = 0)
 {
   //---------------
   // Load libraries
@@ -621,7 +621,7 @@ void Tracking_Reco(int verbosity = 0)
   //----------------
 
   TrkrEvaluator* trkreval;
-  trkreval = new TrkrEvaluator("TrkrEvaluator", outputfile2.c_str(), "SvtxTrackMap",n_maps_layer, n_intt_layer, n_gas_layer);
+  trkreval = new TrkrEvaluator("TrkrEvaluator", outputfile.c_str(), "SvtxTrackMap",n_maps_layer, n_intt_layer, n_gas_layer);
   bool embed_scan = true;
   trkreval->scan_for_embedded(embed_scan);
   trkreval->Verbosity(0);
@@ -630,7 +630,7 @@ void Tracking_Reco(int verbosity = 0)
   if (use_primary_vertex)
   {
     TrkrEvaluator* trkrevalp;
-    trkrevalp = new TrkrEvaluator("TrkrEvaluator", string(outputfile2.c_str())+"_primary_eval.root","PrimaryTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
+    trkrevalp = new TrkrEvaluator("TrkrEvaluator", string(outputfile.c_str())+"_primary_eval.root","PrimaryTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
     trkrevalp->scan_for_embedded(embed_scan);
     trkrevalp->Verbosity(0);
     se->registerSubsystem(trkrevalp);
