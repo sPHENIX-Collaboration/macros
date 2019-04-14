@@ -150,6 +150,7 @@ double Tracking(PHG4Reco* g4Reco, double radius,
                 int verbosity = 0)
 {
   // create the three tracker subsystems
+  gSystem->Load("libg4mvtx.so");
 
   if (n_maps_layer > 0)
   {
