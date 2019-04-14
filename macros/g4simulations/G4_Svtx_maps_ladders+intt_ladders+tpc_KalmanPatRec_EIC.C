@@ -13,6 +13,7 @@
 #include <g4tpc/PHG4TPCSpaceChargeDistortion.h>
 R__LOAD_LIBRARY(libg4hough.so)
 R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libg4mvtx.so)
 #endif
 
 
