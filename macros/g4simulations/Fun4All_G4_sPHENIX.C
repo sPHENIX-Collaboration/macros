@@ -153,12 +153,8 @@ int Fun4All_G4_sPHENIX(
   gSystem->Load("libg4testbench.so");
   gSystem->Load("libg4hough.so");
   gSystem->Load("libg4eval.so");
-<<<<<<< HEAD
-  gSystem->Load("libqa_modules");
-
-=======
   gSystem->Load("libg4intt.so");
->>>>>>> e0d0ef93a357df199334f27b92198feddc4ca805
+  gSystem->Load("libqa_modules");
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
   G4Init(do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor);
