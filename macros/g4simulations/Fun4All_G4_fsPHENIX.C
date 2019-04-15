@@ -139,7 +139,7 @@ int Fun4All_G4_fsPHENIX(
   gSystem->Load("libg4testbench.so");
   gSystem->Load("libg4hough.so");
   gSystem->Load("libg4eval.so");
-
+  gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_fsPHENIX.C");
   G4Init(do_tracking,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_FEMC,do_FHCAL,n_TPC_layers);
