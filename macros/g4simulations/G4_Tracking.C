@@ -5,6 +5,7 @@
 #include <fun4all/Fun4AllServer.h>
 
 #include <g4eval/TrkrEvaluator.h>
+#include <g4eval/SvtxEvaluator.h>
 
 #include <g4intt/PHG4INTTDefs.h>
 #include <g4intt/PHG4InttDigitizer.h>
@@ -621,20 +622,29 @@ void Tracking_Reco(int verbosity = 0)
   // Tracking evaluation
   //----------------
 
-  TrkrEvaluator* trkreval;
-  trkreval = new TrkrEvaluator("TrkrEvaluator", outputfile.c_str(), "SvtxTrackMap",n_maps_layer, n_intt_layer, n_gas_layer);
-  bool embed_scan = true;
-  trkreval->scan_for_embedded(embed_scan);
-  trkreval->Verbosity(0);
-  se->registerSubsystem(trkreval);
+  SvtxEvaluator* eval;
+  eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str(), "SvtxTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
+  eval->do_cluster_eval(true);
+  eval->do_g4hit_eval(true);
+  eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
+  eval->do_gpoint_eval(false);
+  eval->do_eval_light(true);
+  eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
+  eval->Verbosity(0);
+  se->registerSubsystem(eval);
 
   if (use_primary_vertex)
   {
-    TrkrEvaluator* trkrevalp;
-    trkrevalp = new TrkrEvaluator("TrkrEvaluator", string(outputfile.c_str())+"_primary_eval.root","PrimaryTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
-    trkrevalp->scan_for_embedded(embed_scan);
-    trkrevalp->Verbosity(0);
-    se->registerSubsystem(trkrevalp);
+    // make a second evaluator that records tracks fitted with primary vertex included
+    // good for analysis of prompt tracks, particularly if MVTX is not present
+    SvtxEvaluator* evalp;
+    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);    evalp->do_cluster_eval(true);
+    evalp->do_g4hit_eval(true);
+    evalp->do_hit_eval(false);
+    evalp->do_gpoint_eval(false);
+    evalp->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
+    evalp->Verbosity(0);
+    se->registerSubsystem(evalp);
   }
 
   return;
