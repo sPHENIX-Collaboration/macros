@@ -13,6 +13,7 @@
 #include <g4tpc/PHG4TPCSpaceChargeDistortion.h>
 R__LOAD_LIBRARY(libg4hough.so)
 R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libg4mvtx.so)
 #endif
 
 
@@ -221,6 +222,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
             const int absorberactive = 0,
             int verbosity = 0)
 {
+  gSystem->Load("libg4mvtx.so");
   if (n_maps_layer > 0)
     {
       bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
