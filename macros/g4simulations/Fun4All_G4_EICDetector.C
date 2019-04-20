@@ -591,9 +591,9 @@ int Fun4All_G4_EICDetector(
                                );
     }
 
-  //Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
   //if (do_dst_compress) DstCompress(out);
-  //se->registerOutputManager(out);
+  se->registerOutputManager(out);
 
   //-----------------
   // Event processing
