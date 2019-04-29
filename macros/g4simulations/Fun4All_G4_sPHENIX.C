@@ -186,7 +186,7 @@ int Fun4All_G4_sPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  rc->set_IntFlag("RANDOMSEED", TString(outputFile).Hash()+200);
+  rc->set_IntFlag("RANDOMSEED", TString(outputFile).Hash());
 
   //-----------------
   // Event generation
