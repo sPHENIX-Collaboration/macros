@@ -9,6 +9,7 @@
 #include <g4hough/PHG4TrackKalmanFitter.h>
 #include <g4hough/PHG4TruthPatRec.h>
 #include <g4main/PHG4Reco.h>
+#include <g4mvtx/PHG4MVTXDefs.h>
 #include <g4mvtx/PHG4MVTXSubsystem.h>
 #include <g4tpc/PHG4TPCSpaceChargeDistortion.h>
 R__LOAD_LIBRARY(libg4hough.so)
@@ -30,7 +31,7 @@ bool use_primary_vertex = false;
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
 
 // default setup for the INTT - please don't change this. The configuration can be redone later in the nacro if desired
-int n_intt_layer = 0;  
+int n_intt_layer = 0;
 // default layer configuration
 int laddertype[4] = {0, 1, 1, 1};  // default
 int nladder[4] = {34, 30, 36, 42};  // default
@@ -224,59 +225,56 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 {
   gSystem->Load("libg4mvtx.so");
   if (n_maps_layer > 0)
+  {
+    bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
+
+    // MAPS inner barrel layers
+    //======================================================
+
+    // Y. Corrales Morales 4Feb2019
+    // New MVTX configuration to give 2.0 mm clearance from sPHENIX beam-pipe (Walt 3 Jan 2018)
+    //TODO: Add function to estimate stave tilt angle from values given by Walt (Rmin, Rmid, Rmax and sensor width)
+    //TODO: Add default values in PHG4MVTXSubsystem or PHG4MVTXDetector
+    double maps_layer_radius[3] = {25.69, 33.735, 41.475};  // mm - numbers from Walt 3 Jan 2019 (Rmid)
+    double phi_tilt[3] = {0.295, 0.303, 0.298};             // radians - numbers calculated from values given by Walt 3 Jan 2019
+
+    // D. McGlinchey 6Aug2018 - type no longer is used, included here because I was too lazy to remove it from the code
+    // Y. Corrales Morales - removed, no longer used in the code
+    // int stave_type[3] = {0, 0, 0};
+    int staves_in_layer[3] = {12, 16, 20};  // Number of staves per layer in sPHENIX MVTX
+
+    PHG4MVTXSubsystem* mvtx = new PHG4MVTXSubsystem("MVTX");
+    mvtx->Verbosity(verbosity);
+
+    for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
     {
-      bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
-      
-      // MAPS inner barrel layers
-      //======================================================
-      
-      // Y. Corrales Morales 4Feb2019
-      // New MVTX configuration to give 2.0 mm clearance from sPHENIX beam-pipe (Walt 3 Jan 2018)
-      //TODO: Add function to estimate stave tilt angle from values given by Walt (Rmin, Rmid, Rmax and sensor width)
-      //TODO: Add default values in PHG4MVTXSubsystem or PHG4MVTXDetector
-      double maps_layer_radius[3] = {25.69, 33.735, 41.475}; // mm - numbers from Walt 3 Jan 2019 (Rmid)
-      double phi_tilt[3] = {0.295, 0.303, 0.298};  // radians - numbers calculated from values given by Walt 3 Jan 2019
+      if (verbosity)
+        cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, "
+             << " pixel size 30 x 30 microns "
+             << " active pixel thickness 0.0018 microns" << endl;
+      mvtx->set_double_param(ilayer,"layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
+      mvtx->set_int_param(ilayer, "N_staves", staves_in_layer[ilayer]);                   // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
 
-      // D. McGlinchey 6Aug2018 - type no longer is used, included here because I was too lazy to remove it from the code
-      int stave_type[3] = {0, 0, 0};
-      int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX MVTX
-      
-      for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
-	{
-	  if (verbosity)
-	    cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, stave type " << stave_type[ilayer]
-		 << " pixel size 30 x 30 microns "
-		 << " active pixel thickness 0.0018 microns" << endl;
-	  
-	  PHG4MVTXSubsystem* lyr = new PHG4MVTXSubsystem("MVTX", ilayer, stave_type[ilayer]);
-	  lyr->Verbosity(verbosity);
-	  
-	  lyr->set_double_param("layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
-	  lyr->set_int_param("N_staves", staves_in_layer[ilayer]);       // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
-	  
-	  // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
-	  lyr->set_double_param("pixel_x", 0.0030);          // pitch in cm
-	  lyr->set_double_param("pixel_z", 0.0030);          // length in cm
-	  lyr->set_double_param("pixel_thickness", 0.0018);  // thickness in cm
-	  lyr->set_double_param("phitilt", phi_tilt[ilayer]);
-	  
-	  lyr->set_int_param("active", 1);
-	  lyr->OverlapCheck(maps_overlapcheck);
-	  
-	  lyr->set_string_param("stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v01.gdml"));
+      mvtx->set_double_param(ilayer,"phitilt", phi_tilt[ilayer]);
 
-	  g4Reco->registerSubsystem(lyr);
-	  
-	  radius = maps_layer_radius[ilayer];
-	}
+      radius = maps_layer_radius[ilayer];
     }
-  
+    mvtx->set_string_param(PHG4MVTXDefs::GLOBAL ,"stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v01.gdml"));
+    // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
+    mvtx->set_double_param(PHG4MVTXDefs::ALPIDE_SEGMENTATION, "pixel_x", 0.0030);          // pitch in cm
+    mvtx->set_double_param(PHG4MVTXDefs::ALPIDE_SEGMENTATION, "pixel_z", 0.0030);          // length in cm
+    mvtx->set_double_param(PHG4MVTXDefs::ALPIDE_SEGMENTATION, "pixel_thickness", 0.0018);  // thickness in cm
+    mvtx->SetActive(1);
+    mvtx->OverlapCheck(maps_overlapcheck);
+    g4Reco->registerSubsystem(mvtx);
+  }
+
   assert (n_intt_layer == 0);
-  
+
   //  int verbosity = 1;
-  
+
   // time projection chamber layers --------------------------------------------
-  
+
   // switch ONLY for backward compatibility with 40 layer hits files!
   if (tpc_layers_40)
     {
