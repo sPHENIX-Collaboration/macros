@@ -189,7 +189,7 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 
       radius = maps_layer_radius[ilayer];
     }
-    mvtx->set_string_param(PHG4MVTXDefs::GLOBAL ,"stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v01.gdml"));
+    mvtx->set_string_param(PHG4MVTXDefs::GLOBAL ,"stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v02.gdml"));
     // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
     mvtx->set_double_param(PHG4MVTXDefs::ALPIDE_SEGMENTATION, "pixel_x", 0.0030);          // pitch in cm
     mvtx->set_double_param(PHG4MVTXDefs::ALPIDE_SEGMENTATION, "pixel_z", 0.0030);          // length in cm
