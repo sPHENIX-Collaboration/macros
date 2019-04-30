@@ -24,7 +24,6 @@
 #include <g4tpc/PHG4TpcElectronDrift.h>
 #include <g4tpc/PHG4TPCPadPlane.h>
 #include <g4tpc/PHG4TPCPadPlaneReadout.h>
-#include <g4tpc/PHG4TPCSpaceChargeDistortion.h>
 #include <g4tpc/PHG4TPCSubsystem.h>
 
 #include <intt/InttClusterizer.h>
@@ -326,21 +325,6 @@ void Tracking_Cells(int verbosity = 0)
     //reco->set_double_param("tmin",-20.0);
     reco->Verbosity(verbosity);
     se->registerSubsystem(reco);
-  }
-
-  // Set up TPC distortion calculation
-  //========================
-  const bool do_tpc_distortion = true;
-  PHG4TPCSpaceChargeDistortion* tpc_distortion = NULL;
-  if (do_tpc_distortion)
-  {
-    string TPC_distortion_file =
-        string(getenv("CALIBRATIONROOT")) +
-        Form("/Tracking/TPC/SpaceChargeDistortion/TPCCAGE_20_78_211_2.root");
-    tpc_distortion =
-        new PHG4TPCSpaceChargeDistortion(TPC_distortion_file);
-    //tpc_distortion -> setAccuracy(0); // option to over write default  factors
-    //tpc_distortion -> setPrecision(0.001); // option to over write default  factors      // default is 0.001
   }
 
   //=========================
