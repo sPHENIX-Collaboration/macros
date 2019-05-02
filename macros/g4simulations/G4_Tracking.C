@@ -16,7 +16,7 @@
 #include <g4main/PHG4Reco.h>
 
 #include <g4mvtx/PHG4MVTXDefs.h>
-#include <g4mvtx/PHG4MvtxDigitizer.h>
+#include <g4mvtx/PHG4MVTXDigitizer.h>
 #include <g4mvtx/PHG4MVTXSubsystem.h>
 #include <g4mvtx/PHG4MVTXHitReco.h>
 
@@ -376,7 +376,7 @@ void Tracking_Reco(int verbosity = 0)
 
   // MVTX
   //======
-  PHG4MvtxDigitizer* digimvtx = new PHG4MvtxDigitizer();
+  PHG4MVTXDigitizer* digimvtx = new PHG4MVTXDigitizer();
   digimvtx->Verbosity(0);
   // energy deposit in 25 microns = 9.6 KeV = 1000 electrons collected after recombination
   //digimvtx->set_adc_scale(0.95e-6);  // default set in code is 0.95e-06, which is 99 electrons
