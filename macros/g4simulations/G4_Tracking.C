@@ -8,7 +8,7 @@
 #include <g4eval/SvtxEvaluator.h>
 
 #include <g4intt/PHG4INTTDefs.h>
-#include <g4intt/PHG4InttDigitizer.h>
+#include <g4intt/PHG4INTTDigitizer.h>
 #include <g4intt/PHG4INTTSubsystem.h>
 #include <g4intt/PHG4INTTHitReco.h>
 #include <g4intt/PHG4INTTDefs.h>
@@ -20,8 +20,8 @@
 #include <g4mvtx/PHG4MVTXSubsystem.h>
 #include <g4mvtx/PHG4MVTXHitReco.h>
 
-#include <g4tpc/PHG4TpcDigitizer.h>
-#include <g4tpc/PHG4TpcElectronDrift.h>
+#include <g4tpc/PHG4TPCDigitizer.h>
+#include <g4tpc/PHG4TPCElectronDrift.h>
 #include <g4tpc/PHG4TPCPadPlane.h>
 #include <g4tpc/PHG4TPCPadPlaneReadout.h>
 #include <g4tpc/PHG4TPCSubsystem.h>
@@ -249,7 +249,6 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 
   // The TPC - always present!
   //================================
-
   gSystem->Load("libg4tpc.so");
 
   PHG4TPCSubsystem* tpc = new PHG4TPCSubsystem("TPC");
@@ -335,7 +334,7 @@ void Tracking_Cells(int verbosity = 0)
 
   PHG4TPCPadPlane *padplane = new PHG4TPCPadPlaneReadout();
 
-  PHG4TpcElectronDrift *edrift = new PHG4TpcElectronDrift();
+  PHG4TPCElectronDrift *edrift = new PHG4TPCElectronDrift();
   edrift->Detector("TPC");
   // fudge factors to get drphi 150 microns (in mid and outer TPC) and dz 500 microns cluster resolution
   // They represent effects not due to ideal gas properties and ideal readout plane behavior
@@ -457,7 +456,7 @@ void Tracking_Reco(int verbosity = 0)
       userrange.push_back(1.28617571059432);
 
       // new containers
-      PHG4InttDigitizer* digiintt = new PHG4InttDigitizer();
+      PHG4INTTDigitizer* digiintt = new PHG4INTTDigitizer();
       digiintt->Verbosity(verbosity);
       for (int i = 0; i < n_intt_layer; i++)
 	{
@@ -468,7 +467,7 @@ void Tracking_Reco(int verbosity = 0)
 
   // TPC
   //====
-  PHG4TpcDigitizer* digitpc = new PHG4TpcDigitizer();
+  PHG4TPCDigitizer* digitpc = new PHG4TPCDigitizer();
   digitpc->SetTPCMinLayer(n_maps_layer + n_intt_layer);
   double ENC = 670.0;  // standard
   digitpc->SetENC(ENC);
