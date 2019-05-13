@@ -4,11 +4,11 @@
 This is the standard macros respository for [sPHENIX collaboration](https://www.sphenix.bnl.gov/). Following is the 10-min tutorial on using the sPHENIX macros from [this wiki link](https://wiki.bnl.gov/sPHENIX/index.php/Tutorial/sPHENIX_simulation).
 
 [![Build Status](https://web.racf.bnl.gov/jenkins-sphenix/buildStatus/icon?job=sPHENIX/sPHENIX_CoreSoftware_MasterBranch)](https://web.racf.bnl.gov/jenkins-sphenix/job/sPHENIX/job/sPHENIX_CoreSoftware_MasterBranch/)
+[![Doxygen](https://img.shields.io/badge/code%20reference-Doxygen-green.svg)](https://www.phenix.bnl.gov/WWW/sPHENIX/doxygen/html/)
 [![Open Issues](https://img.shields.io/github/issues/sPHENIX-Collaboration/macros.svg)](https://github.com/sPHENIX-Collaboration/macros/issues)
 [![Open Pull Request](https://img.shields.io/github/issues-pr/sPHENIX-Collaboration/macros.svg)](https://github.com/sPHENIX-Collaboration/macros/pulls)
 [![Monthly Commits](https://img.shields.io/github/commit-activity/m/sPHENIX-Collaboration/macros.svg)](https://github.com/sPHENIX-Collaboration/macros/commits/master)
 [![Last Commit](https://img.shields.io/github/last-commit/sPHENIX-Collaboration/macros.svg)](https://github.com/sPHENIX-Collaboration/macros/commits/master)
-[![Download size](https://img.shields.io/github/languages/code-size/sPHENIX-Collaboration/macros.svg)](https://github.com/sPHENIX-Collaboration/macros/archive/master.zip)
 
 # Get started
 
