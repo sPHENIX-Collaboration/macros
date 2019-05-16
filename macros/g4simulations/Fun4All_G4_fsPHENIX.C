@@ -128,7 +128,7 @@ int Fun4All_G4_fsPHENIX(
   bool do_dst_compress = false;
   
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  bool do_DSTReader = true;
+  bool do_DSTReader = false;
   //---------------
   // Load libraries
   //---------------
