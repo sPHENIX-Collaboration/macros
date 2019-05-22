@@ -20,11 +20,11 @@
 #include <g4mvtx/PHG4MvtxSubsystem.h>
 #include <g4mvtx/PHG4MvtxHitReco.h>
 
-#include <g4tpc/PHG4TPCDigitizer.h>
-#include <g4tpc/PHG4TPCElectronDrift.h>
-#include <g4tpc/PHG4TPCPadPlane.h>
-#include <g4tpc/PHG4TPCPadPlaneReadout.h>
-#include <g4tpc/PHG4TPCSubsystem.h>
+#include <g4tpc/PHG4TpcDigitizer.h>
+#include <g4tpc/PHG4TpcElectronDrift.h>
+#include <g4tpc/PHG4TpcPadPlane.h>
+#include <g4tpc/PHG4TpcPadPlaneReadout.h>
+#include <g4tpc/PHG4TpcSubsystem.h>
 
 #include <intt/InttClusterizer.h>
 #include <mvtx/MvtxClusterizer.h>
@@ -247,11 +247,11 @@ double Tracking(PHG4Reco* g4Reco, double radius,
   }
 
 
-  // The TPC - always present!
+  // The Tpc - always present!
   //================================
   gSystem->Load("libg4tpc.so");
 
-  PHG4TPCSubsystem* tpc = new PHG4TPCSubsystem("TPC");
+  PHG4TpcSubsystem* tpc = new PHG4TpcSubsystem("TPC");
   tpc->SetActive();
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);
@@ -327,16 +327,16 @@ void Tracking_Cells(int verbosity = 0)
   }
 
   //=========================
-  // setup TPC readout for filling cells
-  // g4tpc/PHG4TPCElectronDrift uses
-  // g4tpc/PHG4TPCPadPlaneReadout
+  // setup Tpc readout for filling cells
+  // g4tpc/PHG4TpcElectronDrift uses
+  // g4tpc/PHG4TpcPadPlaneReadout
   //=========================
 
-  PHG4TPCPadPlane *padplane = new PHG4TPCPadPlaneReadout();
+  PHG4TpcPadPlane *padplane = new PHG4TpcPadPlaneReadout();
 
-  PHG4TPCElectronDrift *edrift = new PHG4TPCElectronDrift();
+  PHG4TpcElectronDrift *edrift = new PHG4TpcElectronDrift();
   edrift->Detector("TPC");
-  // fudge factors to get drphi 150 microns (in mid and outer TPC) and dz 500 microns cluster resolution
+  // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
   // They represent effects not due to ideal gas properties and ideal readout plane behavior
   // defaults are 0.12 and 0.15, they can be changed here to get a different resolution
   edrift->set_double_param("added_smear_trans",0.12);
@@ -344,9 +344,9 @@ void Tracking_Cells(int verbosity = 0)
   edrift->registerPadPlane(padplane);
   se->registerSubsystem(edrift);
 
-  // The pad plane readout default is set in PHG4TPCPadPlaneReadout
+  // The pad plane readout default is set in PHG4TpcPadPlaneReadout
   // We may want to change the number of inner layers, and can do that here
-  padplane->set_int_param("tpc_minlayer_inner", n_maps_layer + n_intt_layer);  // sPHENIX layer number of first TPC readout layer
+  padplane->set_int_param("tpc_minlayer_inner", n_maps_layer + n_intt_layer);  // sPHENIX layer number of first Tpc readout layer
   padplane->set_int_param("ntpc_layers_inner", n_tpc_layer_inner);
   padplane->set_int_param("ntpc_phibins_inner", tpc_layer_rphi_count_inner);
 
@@ -465,16 +465,16 @@ void Tracking_Reco(int verbosity = 0)
       se->registerSubsystem(digiintt);
     }
 
-  // TPC
+  // Tpc
   //====
-  PHG4TPCDigitizer* digitpc = new PHG4TPCDigitizer();
-  digitpc->SetTPCMinLayer(n_maps_layer + n_intt_layer);
+  PHG4TpcDigitizer* digitpc = new PHG4TpcDigitizer();
+  digitpc->SetTpcMinLayer(n_maps_layer + n_intt_layer);
   double ENC = 670.0;  // standard
   digitpc->SetENC(ENC);
   double ADC_threshold = 4.0 * ENC;
   digitpc->SetADCThreshold(ADC_threshold);  // 4 * ENC seems OK
 
-  cout << " TPC digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
+  cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
        << " maps+Intt layers set to " << n_maps_layer + n_intt_layer << endl;
 
   se->registerSubsystem(digitpc);
@@ -502,7 +502,7 @@ void Tracking_Reco(int verbosity = 0)
   }
   se->registerSubsystem(inttclusterizer);
 
-  // For the TPC
+  // For the Tpc
   //==========
   TpcClusterizer* tpcclusterizer = new TpcClusterizer();
   tpcclusterizer->Verbosity(0);
