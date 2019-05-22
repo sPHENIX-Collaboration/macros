@@ -36,6 +36,7 @@
 #include <trackreco/PHInitVertexing.h>
 #include <trackreco/PHTrackSeeding.h>
 #include <trackreco/PHTruthVertexing.h>
+#include <trackreco/PHTruthTrackSeeding.h>
 // still needed
 #include <g4hough/PHG4TruthPatRec.h>
 #include <g4hough/PHG4GenFitTrackProjection.h>
@@ -51,6 +52,8 @@ R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 #endif
+
+//#include </phenix/u/frawley/git/install/include/trackreco/PHTruthTrackSeeding.h>
 
 #include <vector>
 
@@ -508,18 +511,21 @@ void Tracking_Reco(int verbosity = 0)
   tpcclusterizer->Verbosity(0);
   se->registerSubsystem(tpcclusterizer);
 
+
   // This should be true for everything except testing!
-  const bool use_track_prop = true;
+  //const bool use_track_prop = true;
+  const bool use_track_prop = false;
   if (use_track_prop)
     {
       //---------------------
       // PHG4KalmanPatRec
       //---------------------
 
+      // for now we cheat to get the vertex for the full track reconstruction case
       PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
       init_vtx->Verbosity(0);
-      se->registerSubsystem(init_vtx);
-
+      se->registerSubsystem(init_vtx);     
+      
       PHTrackSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer);
       track_seed->Verbosity(0);
       se->registerSubsystem(track_seed);
@@ -553,7 +559,13 @@ void Tracking_Reco(int verbosity = 0)
       //---------------------
       // Truth Pattern Recognition
       //---------------------
-      PHG4TruthPatRec* pat_rec = new PHG4TruthPatRec();
+
+      PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
+      init_vtx->Verbosity(0);
+      se->registerSubsystem(init_vtx);     
+
+      PHTruthTrackSeeding* pat_rec = new PHTruthTrackSeeding(); 
+      pat_rec->Verbosity(0);
       se->registerSubsystem(pat_rec);
     }
 
