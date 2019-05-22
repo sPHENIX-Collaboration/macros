@@ -9,8 +9,8 @@
 #include <g4hough/PHG4TrackKalmanFitter.h>
 #include <g4hough/PHG4TruthPatRec.h>
 #include <g4main/PHG4Reco.h>
-#include <g4mvtx/PHG4MVTXDefs.h>
-#include <g4mvtx/PHG4MVTXSubsystem.h>
+#include <g4mvtx/PHG4MvtxDefs.h>
+#include <g4mvtx/PHG4MvtxSubsystem.h>
 #include <g4tpc/PHG4TPCSpaceChargeDistortion.h>
 R__LOAD_LIBRARY(libg4hough.so)
 R__LOAD_LIBRARY(libg4eval.so)
@@ -28,7 +28,7 @@ bool tpc_layers_40  = false;
 // Adds second evaluator to process refitted tracks and outputs separate ntuples
 bool use_primary_vertex = false;
 
-const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
+const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
 
 // default setup for the INTT - please don't change this. The configuration can be redone later in the nacro if desired
 int n_intt_layer = 0;
@@ -232,18 +232,18 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     //======================================================
 
     // Y. Corrales Morales 4Feb2019
-    // New MVTX configuration to give 2.0 mm clearance from sPHENIX beam-pipe (Walt 3 Jan 2018)
+    // New Mvtx configuration to give 2.0 mm clearance from sPHENIX beam-pipe (Walt 3 Jan 2018)
     //TODO: Add function to estimate stave tilt angle from values given by Walt (Rmin, Rmid, Rmax and sensor width)
-    //TODO: Add default values in PHG4MVTXSubsystem or PHG4MVTXDetector
+    //TODO: Add default values in PHG4MvtxSubsystem or PHG4MvtxDetector
     double maps_layer_radius[3] = {25.69, 33.735, 41.475};  // mm - numbers from Walt 3 Jan 2019 (Rmid)
     double phi_tilt[3] = {0.295, 0.303, 0.298};             // radians - numbers calculated from values given by Walt 3 Jan 2019
 
     // D. McGlinchey 6Aug2018 - type no longer is used, included here because I was too lazy to remove it from the code
     // Y. Corrales Morales - removed, no longer used in the code
     // int stave_type[3] = {0, 0, 0};
-    int staves_in_layer[3] = {12, 16, 20};  // Number of staves per layer in sPHENIX MVTX
+    int staves_in_layer[3] = {12, 16, 20};  // Number of staves per layer in sPHENIX Mvtx
 
-    PHG4MVTXSubsystem* mvtx = new PHG4MVTXSubsystem("MVTX");
+    PHG4MvtxSubsystem* mvtx = new PHG4MvtxSubsystem("MVTX");
     mvtx->Verbosity(verbosity);
 
     for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
@@ -259,11 +259,11 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
       radius = maps_layer_radius[ilayer];
     }
-    mvtx->set_string_param(PHG4MVTXDefs::GLOBAL ,"stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v02.gdml"));
+    mvtx->set_string_param(PHG4MvtxDefs::GLOBAL ,"stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v02.gdml"));
     // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
-    mvtx->set_double_param(PHG4MVTXDefs::ALPIDE_SEGMENTATION, "pixel_x", 0.0030);          // pitch in cm
-    mvtx->set_double_param(PHG4MVTXDefs::ALPIDE_SEGMENTATION, "pixel_z", 0.0030);          // length in cm
-    mvtx->set_double_param(PHG4MVTXDefs::ALPIDE_SEGMENTATION, "pixel_thickness", 0.0018);  // thickness in cm
+    mvtx->set_double_param(PHG4MvtxDefs::ALPIDE_SEGMENTATION, "pixel_x", 0.0030);          // pitch in cm
+    mvtx->set_double_param(PHG4MvtxDefs::ALPIDE_SEGMENTATION, "pixel_z", 0.0030);          // length in cm
+    mvtx->set_double_param(PHG4MvtxDefs::ALPIDE_SEGMENTATION, "pixel_thickness", 0.0018);  // thickness in cm
     mvtx->SetActive(1);
     mvtx->OverlapCheck(maps_overlapcheck);
     g4Reco->registerSubsystem(mvtx);
