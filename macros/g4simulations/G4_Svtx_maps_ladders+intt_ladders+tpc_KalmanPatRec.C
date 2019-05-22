@@ -36,7 +36,7 @@ bool tpc_layers_40  = false;
 // Adds second evaluator to process refitted tracks and outputs separate ntuples
 bool use_primary_vertex = false;
 
-const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes MVTX completely, n < 3 gives the first n layers
+const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
 
 // default setup for the INTT - please don't change this. The configuration can be redone later in the macro if desired
 int n_intt_layer = 8;  
@@ -296,7 +296,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
       
       // D. McGlinchey 6Aug2018 - type no longer is used, included here because I was too lazy to remove it from the code
       int stave_type[3] = {0, 0, 0};
-      int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX MVTX
+      int staves_in_layer[3] = {12, 16, 20};       // Number of staves per layer in sPHENIX Mvtx
       double phi_tilt[3] = {0.300, 0.305, 0.300}; // radians - numbers from Walt 6 Aug 2018
       
       for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
@@ -923,7 +923,7 @@ void Svtx_Eval(std::string outputfile, int verbosity = 0)
   if (use_primary_vertex)
   {
     // make a second evaluator that records tracks fitted with primary vertex included
-    // good for analysis of prompt tracks, particularly if MVTX is not present
+    // good for analysis of prompt tracks, particularly if Mvtx is not present
     SvtxEvaluator* evalp;
     evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
     evalp->do_cluster_eval(true);
