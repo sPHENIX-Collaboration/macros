@@ -36,8 +36,9 @@
 #include <trackreco/PHInitVertexing.h>
 #include <trackreco/PHTrackSeeding.h>
 #include <trackreco/PHTruthVertexing.h>
+#include <trackreco/PHTruthTrackSeeding.h>
+
 // still needed
-#include <g4hough/PHG4TruthPatRec.h>
 #include <g4hough/PHG4GenFitTrackProjection.h>
 
 #include <trackbase/TrkrHitTruthAssoc.h>
@@ -51,6 +52,7 @@ R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 #endif
+
 
 #include <vector>
 
@@ -508,22 +510,29 @@ void Tracking_Reco(int verbosity = 0)
   tpcclusterizer->Verbosity(0);
   se->registerSubsystem(tpcclusterizer);
 
-  // This should be true for everything except testing!
+  //-------------
+  // Tracking
+  //------------
+
+  // This should be true for everything except testing wirh truth track seeding!
   const bool use_track_prop = true;
   if (use_track_prop)
     {
-      //---------------------
-      // PHG4KalmanPatRec
-      //---------------------
+      //--------------------------------------------------
+      // Normal track seeding and propagation
+      //--------------------------------------------------
 
+      // for now, we cheat to get the initial vertex for the full track reconstruction case
       PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
       init_vtx->Verbosity(0);
-      se->registerSubsystem(init_vtx);
-
+      se->registerSubsystem(init_vtx);     
+      
+      // find seed tracks using a subset of TPC layers
       PHTrackSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer);
       track_seed->Verbosity(0);
       se->registerSubsystem(track_seed);
 
+      // Find all clusters associated with each seed track
       PHGenFitTrkProp* track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", n_maps_layer, n_intt_layer, n_gas_layer);
       track_prop->Verbosity(0);
       se->registerSubsystem(track_prop);
@@ -550,16 +559,23 @@ void Tracking_Reco(int verbosity = 0)
     }
   else
     {
-      //---------------------
-      // Truth Pattern Recognition
-      //---------------------
-      PHG4TruthPatRec* pat_rec = new PHG4TruthPatRec();
+      //--------------------------------------------------
+      // Track finding using truth information
+      //--------------------------------------------------
+
+      PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
+      init_vtx->Verbosity(0);
+      se->registerSubsystem(init_vtx);     
+
+      // For each truth particle, create a track and associate clusters with it using truth information
+      PHTruthTrackSeeding* pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeeding"); 
+      pat_rec->Verbosity(0);
       se->registerSubsystem(pat_rec);
     }
 
-  //---------------------
-  // Kalman Filter
-  //---------------------
+  //------------------------------------------------
+  // Fitting of tracks using Kalman Filter
+  //------------------------------------------------
 
   PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
   kalman->Verbosity(verbosity);
@@ -610,7 +626,7 @@ void Tracking_Reco(int verbosity = 0)
   eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
   eval->do_gpoint_eval(false);
   eval->do_eval_light(true);
-  eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
+  eval->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(0);
   se->registerSubsystem(eval);
 
