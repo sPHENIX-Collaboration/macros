@@ -11,7 +11,7 @@
 #include <g4main/PHG4Reco.h>
 #include <g4mvtx/PHG4MvtxDefs.h>
 #include <g4mvtx/PHG4MvtxSubsystem.h>
-#include <g4tpc/PHG4TPCSpaceChargeDistortion.h>
+#include <g4tpc/PHG4TpcSpaceChargeDistortion.h>
 R__LOAD_LIBRARY(libg4hough.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
