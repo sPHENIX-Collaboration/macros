@@ -320,7 +320,7 @@ void Tracking_Cells(int verbosity = 0)
   if (n_intt_layer > 0)
   {
     // new storage containers
-    PHG4InttHitReco* reco = new PHG4InttHitReco("INTT");
+    PHG4InttHitReco* reco = new PHG4InttHitReco();
     // The timing windows are hard-coded in the INTT ladder model, they can be overridden here
     //reco->set_double_param("tmax",80.0);
     //reco->set_double_param("tmin",-20.0);
