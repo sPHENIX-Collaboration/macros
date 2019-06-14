@@ -238,43 +238,53 @@ int Fun4All_G4_Prototype4(int nEvents = 1)
   if (bh_on)
     { 
       // BLACKHOLE, box surrounding the prototype to check for leakage
-      PHG4BlockSubsystem *bh[5];
+      PHG4BlockSubsystem *bh[6];
       // surrounding outer hcal
       // top
       bh[0] = new PHG4BlockSubsystem("bh1",1);
-      bh[0]->set_double_param("size_x",270.);
-      bh[0]->set_double_param("size_y",0.01);
-      bh[0]->set_double_param("size_z",165.);
-      bh[0]->set_double_param("place_x",270./2.);
-      bh[0]->set_double_param("place_y",125./2.);
+      bh[0]->set_double_param("size_x",310.);
+      bh[0]->set_double_param("size_y",1.0);
+      bh[0]->set_double_param("size_z",350.);
+      bh[0]->set_double_param("place_x",145.);
+      bh[0]->set_double_param("place_y",63.);
+      bh[0]->set_double_param("place_z",165.);
       // bottom
       bh[1] = new PHG4BlockSubsystem("bh2",2);
-      bh[1]->set_double_param("size_x",270.);
-      bh[1]->set_double_param("size_y",0.01);
-      bh[1]->set_double_param("size_z",165.);
-      bh[1]->set_double_param("place_x",270./2.);
-      bh[1]->set_double_param("place_y",-125./2.);
+      bh[1]->set_double_param("size_x",310.);
+      bh[1]->set_double_param("size_y",1.0);
+      bh[1]->set_double_param("size_z",350.);
+      bh[1]->set_double_param("place_x",145.);
+      bh[1]->set_double_param("place_y",-63.);
+      bh[1]->set_double_param("place_z",165.);
       // right side
       bh[2] = new PHG4BlockSubsystem("bh3",3);
-      bh[2]->set_double_param("size_x",200.);
+      bh[2]->set_double_param("size_x",310.);
       bh[2]->set_double_param("size_y",125.);
-      bh[2]->set_double_param("size_z",0.01);
-      bh[2]->set_double_param("place_x",200./2.);
-      bh[2]->set_double_param("place_z",165./2.);
+      bh[2]->set_double_param("size_z",1.0);
+      bh[2]->set_double_param("place_x",145.);
+      bh[2]->set_double_param("place_z",340.5);
       // left side
       bh[3] = new PHG4BlockSubsystem("bh4",4);
-      bh[3]->set_double_param("size_x",270.);
+      bh[3]->set_double_param("size_x",310.);
       bh[3]->set_double_param("size_y",125.);
-      bh[3]->set_double_param("size_z",0.01);
-      bh[3]->set_double_param("place_x",270./2.);
-      bh[3]->set_double_param("place_z",-165./2.);
+      bh[3]->set_double_param("size_z",1.0);
+      bh[3]->set_double_param("place_x",145.);
+      bh[3]->set_double_param("place_z",-10.5);
       // back
       bh[4] = new PHG4BlockSubsystem("bh5",5);
-      bh[4]->set_double_param("size_x",0.01);
+      bh[4]->set_double_param("size_x",1.0);
       bh[4]->set_double_param("size_y",125.);
-      bh[4]->set_double_param("size_z",165.);
-      bh[4]->set_double_param("place_x",270.);
-      for (int i=0; i<5; i++)
+      bh[4]->set_double_param("size_z",350.);
+      bh[4]->set_double_param("place_x",300.);
+      bh[4]->set_double_param("place_z",165.);
+      // front
+      bh[5] = new PHG4BlockSubsystem("bh6",6);
+      bh[5]->set_double_param("size_x",1.0);
+      bh[5]->set_double_param("size_y",125.);
+      bh[5]->set_double_param("size_z",350.);
+      bh[5]->set_double_param("place_x",-10.0);
+      bh[5]->set_double_param("place_z",165.);
+      for (int i=0; i<6; i++)
 	{
 	  bh[i]->BlackHole();
 	  bh[i]->SetActive();
