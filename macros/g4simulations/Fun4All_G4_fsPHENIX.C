@@ -137,7 +137,6 @@ int Fun4All_G4_fsPHENIX(
   gSystem->Load("libg4detectors.so");
   gSystem->Load("libphhepmc.so");
   gSystem->Load("libg4testbench.so");
-  gSystem->Load("libg4hough.so");
   gSystem->Load("libg4eval.so");
   gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup

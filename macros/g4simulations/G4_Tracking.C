@@ -37,15 +37,12 @@
 #include <trackreco/PHTrackSeeding.h>
 #include <trackreco/PHTruthVertexing.h>
 #include <trackreco/PHTruthTrackSeeding.h>
-
-// still needed
-#include <g4hough/PHG4GenFitTrackProjection.h>
+#include <trackreco/PHGenFitTrackProjection.h>
 
 #include <trackbase/TrkrHitTruthAssoc.h>
 R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
-R__LOAD_LIBRARY(libg4hough.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libmvtx.so)
@@ -362,7 +359,6 @@ void Tracking_Reco(int verbosity = 0)
   //---------------
 
   gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4hough.so");
   gSystem->Load("libtrack_reco.so");
 
   //---------------
@@ -588,7 +584,7 @@ void Tracking_Reco(int verbosity = 0)
   //------------------
   // Track Projections
   //------------------
-  PHG4GenFitTrackProjection* projection = new PHG4GenFitTrackProjection();
+  PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
   projection->Verbosity(verbosity);
   se->registerSubsystem(projection);
 
@@ -605,7 +601,6 @@ void Tracking_Reco(int verbosity = 0)
   gSystem->Load("libg4eval.so");
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4hough.so");
   gSystem->Load("libtrack_reco.so");
 
 
