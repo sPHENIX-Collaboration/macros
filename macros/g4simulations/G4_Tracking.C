@@ -584,7 +584,7 @@ void Tracking_Reco(int verbosity = 0)
   //------------------
   // Track Projections
   //------------------
- PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
+  PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
   projection->Verbosity(verbosity);
   se->registerSubsystem(projection);
 
