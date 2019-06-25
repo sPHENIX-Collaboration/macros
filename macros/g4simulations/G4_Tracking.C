@@ -524,7 +524,9 @@ void Tracking_Reco(int verbosity = 0)
       se->registerSubsystem(init_vtx);     
       
       // find seed tracks using a subset of TPC layers
-      PHTrackSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer);
+      int min_layers = 4;
+      int nlayers_seeds = 12;
+      PHHoughSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer, nlayers_seeds, min_layers);
       track_seed->Verbosity(0);
       se->registerSubsystem(track_seed);
 
