@@ -15,7 +15,7 @@ R__LOAD_LIBRARY(libg4trackfastsim.so)
 
 // load the version of central travker macro with cylindrical approximation of the TPC
 // This is required for fast tracking to properly count hits in TPC
-//#include "G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec_EIC.C"
+#include "G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec_EIC.C"
 
 void TrackingInit(int verbosity = 0)
 {
@@ -26,7 +26,7 @@ void TrackingInit(int verbosity = 0)
   FGEM_Init();
 
   /* central detectors */
-//  SvtxInit();
+  SvtxInit();
 }
 
 double Tracking(PHG4Reco *g4Reco, double radius,
@@ -40,7 +40,7 @@ double Tracking(PHG4Reco *g4Reco, double radius,
   FGEMSetup(g4Reco);
 
   /* Place central tracking detectors */
-//  Svtx(g4Reco, radius);
+  Svtx(g4Reco, radius);
 
   return radius;
 }
