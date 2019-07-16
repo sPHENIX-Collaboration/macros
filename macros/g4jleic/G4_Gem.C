@@ -28,35 +28,33 @@ double Gem(PHG4Reco* g4Reco,
   {
     double irad = gem_inner_radius + 1. + 0.5*ilayer;
     double orad = gem_outer_radius - 25. + 2.*ilayer;
-  cyl = new PHG4CylinderSubsystem("GemHadron", ilayer);
-  cyl->set_double_param("radius",irad);
-  cyl->set_string_param("material","G4_Al");
-  cyl->set_double_param("thickness",orad-irad);
-  cyl->set_int_param("lengthviarapidity",0);
-  cyl->set_double_param("length", size_z);
-  double place_z = 340./2. + shift_z + 5. + 3.*ilayer;
-  cyl->set_double_param("place_z",place_z);
-  cout << "place_z H layer " << ilayer << ": " << place_z << endl;
-  cyl->SetActive();
-  cyl->SuperDetector("GEMHADRON");
-  g4Reco->registerSubsystem( cyl );
+    cyl = new PHG4CylinderSubsystem("GemHadron", ilayer);
+    cyl->set_double_param("radius",irad);
+    cyl->set_string_param("material","G4_CARBON_DIOXIDE");
+    cyl->set_double_param("thickness",orad-irad);
+    cyl->set_int_param("lengthviarapidity",0);
+    cyl->set_double_param("length", size_z);
+    double place_z = 340./2. + shift_z + 5. + 3.*ilayer;
+    cyl->set_double_param("place_z",place_z);
+    cyl->SetActive();
+    cyl->SuperDetector("GEMHADRON");
+    g4Reco->registerSubsystem( cyl );
   }
   for (int ilayer=0; ilayer<8; ilayer++)
   {
     double irad = gem_inner_radius + 1. + 0.5*ilayer;
     double orad = gem_outer_radius - 25. + 2.*ilayer;
-  cyl = new PHG4CylinderSubsystem("GEMELECTRON", ilayer);
-  cyl->set_double_param("radius",gem_inner_radius);
-  cyl->set_string_param("material","G4_Al");
-  cyl->set_double_param("thickness",orad - irad);
-  cyl->set_int_param("lengthviarapidity",0);
-  cyl->set_double_param("length", size_z);
-  double place_z =  -340./2. + shift_z -5. - 3.*ilayer;
-  cyl->set_double_param("place_z",place_z);
-  cout << "place_z E layer " << ilayer << ": " << place_z << " orad: " << orad <<  endl;
-  cyl->SetActive();
-  cyl->SuperDetector("GEMELECTRON");
-  g4Reco->registerSubsystem( cyl );
+    cyl = new PHG4CylinderSubsystem("GEMELECTRON", ilayer);
+    cyl->set_double_param("radius",gem_inner_radius);
+    cyl->set_string_param("material","G4_CARBON_DIOXIDE");
+    cyl->set_double_param("thickness",orad - irad);
+    cyl->set_int_param("lengthviarapidity",0);
+    cyl->set_double_param("length", size_z);
+    double place_z =  -340./2. + shift_z -5. - 3.*ilayer;
+    cyl->set_double_param("place_z",place_z);
+    cyl->SetActive();
+    cyl->SuperDetector("GEMELECTRON");
+    g4Reco->registerSubsystem( cyl );
   }
 
   return radius;
