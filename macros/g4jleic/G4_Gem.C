@@ -20,32 +20,44 @@ double Gem(PHG4Reco* g4Reco,
 
   // here is our silicon:
   double shift_z =  jleic_shiftz; // shift z from GlobalVariables.C
-  double hadron_inner_radius = 0.; // cm
-  double hadron_outer_radius = 115.; // cm
-  double size_z = 30.;
-  double place_z = 400./2.;
-  PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("GemH", 0);
-  cyl->set_double_param("radius",hadron_inner_radius);
+  double gem_inner_radius = 0.; // cm
+  double gem_outer_radius = 115.; // cm
+  double size_z = 1.;
+  PHG4CylinderSubsystem *cyl;
+  for (int ilayer=0; ilayer<8; ilayer++)
+  {
+    double irad = gem_inner_radius + 1. + 0.5*ilayer;
+    double orad = gem_outer_radius - 25. + 2.*ilayer;
+  cyl = new PHG4CylinderSubsystem("GemHadron", ilayer);
+  cyl->set_double_param("radius",irad);
   cyl->set_string_param("material","G4_Al");
-  cyl->set_double_param("thickness",hadron_outer_radius - hadron_inner_radius);
+  cyl->set_double_param("thickness",orad-irad);
   cyl->set_int_param("lengthviarapidity",0);
   cyl->set_double_param("length", size_z);
-  cyl->set_double_param("place_z",place_z+shift_z);
+  double place_z = 340./2. + shift_z + 5. + 3.*ilayer;
+  cyl->set_double_param("place_z",place_z);
+  cout << "place_z H layer " << ilayer << ": " << place_z << endl;
   cyl->SetActive();
-  cyl->SuperDetector("GEMH");
+  cyl->SuperDetector("GEMHADRON");
   g4Reco->registerSubsystem( cyl );
-
-  cyl = new PHG4CylinderSubsystem("GemE", 0);
-  cyl->set_double_param("radius",hadron_inner_radius);
+  }
+  for (int ilayer=0; ilayer<8; ilayer++)
+  {
+    double irad = gem_inner_radius + 1. + 0.5*ilayer;
+    double orad = gem_outer_radius - 25. + 2.*ilayer;
+  cyl = new PHG4CylinderSubsystem("GEMELECTRON", ilayer);
+  cyl->set_double_param("radius",gem_inner_radius);
   cyl->set_string_param("material","G4_Al");
-  cyl->set_double_param("thickness",hadron_outer_radius - hadron_inner_radius);
+  cyl->set_double_param("thickness",orad - irad);
   cyl->set_int_param("lengthviarapidity",0);
   cyl->set_double_param("length", size_z);
-  cyl->set_double_param("place_z",shift_z-place_z);
+  double place_z =  -340./2. + shift_z -5. - 3.*ilayer;
+  cyl->set_double_param("place_z",place_z);
+  cout << "place_z E layer " << ilayer << ": " << place_z << " orad: " << orad <<  endl;
   cyl->SetActive();
-  cyl->SuperDetector("GEME");
+  cyl->SuperDetector("GEMELECTRON");
   g4Reco->registerSubsystem( cyl );
-
+  }
 
   return radius;
 }
