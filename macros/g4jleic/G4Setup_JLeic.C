@@ -7,6 +7,7 @@
 #include "G4_Gem.C"
 #include "G4_JLDIRC.C"
 #include "G4_Barrel_Hcal.C"
+#include "G4_EndCap_Hadron.C"
 
 #include <g4eval/PHG4DstCompressReco.h>
 #include <fun4all/Fun4AllServer.h>
@@ -36,7 +37,8 @@ void G4Init(const bool do_ctd = true,
 	    const bool do_pipe = true,
             const bool do_gem = true,
             const bool do_jldirc = true,
-            const bool do_barrel_hcal = true
+            const bool do_barrel_hcal = true,
+            const bool do_endcap_hadron = true
 	    )
   {
 
@@ -74,6 +76,12 @@ void G4Init(const bool do_ctd = true,
       Barrel_HcalInit();
     }
 
+  if (do_endcap_hadron)
+    {
+      gROOT->LoadMacro("G4_EndCap_Hadron.C");
+      EndCap_HadronInit();
+    }
+
 }
 
 
@@ -91,6 +99,7 @@ int G4Setup(const int absorberactive = 0,
             const bool do_gem = true,
             const bool do_jldirc = true,
             const bool do_barrel_hcal = true,
+            const bool do_endcap_hadron = true,
 	    const float magfield_rescale = 1.0) {
   
   //---------------
@@ -172,6 +181,8 @@ int G4Setup(const int absorberactive = 0,
   // Gem (hadron and electron going side
   
   if (do_gem) double tmp = Gem(g4Reco, radius, 0, absorberactive);
+
+  if (do_endcap_hadron) double tmp =  EndCap_Hadron(g4Reco, radius, 0, absorberactive);
   radius = 200.;
   //----------------------------------------
   // BLACKHOLE
