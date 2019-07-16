@@ -15,7 +15,7 @@ double Magnet(PHG4Reco* g4Reco,
 	      int verbosity = 0) {
 
   double magnet_inner_radius = 130;
-  double magnet_outer_radius = 144;
+  double magnet_outer_radius = 143;
   double magnet_length = 400.;
   if (radius > magnet_inner_radius) {
     cout << "inconsistency: radius: " << radius 
