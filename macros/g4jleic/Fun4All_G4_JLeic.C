@@ -96,7 +96,9 @@ int Fun4All_G4_JLeic(
 
   bool do_gem = true;
 
-  bool do_endcap_hadron = true;
+  bool do_drich = true;
+
+  bool do_endcap_electron = true;
 
   bool do_tracking = true;
   //---------------
@@ -111,7 +113,7 @@ int Fun4All_G4_JLeic(
   gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_JLeic.C");
-  G4Init(do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_endcap_hadron);
+  G4Init(do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_drich, do_endcap_electron);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -300,10 +302,10 @@ int Fun4All_G4_JLeic(
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
     G4Setup(absorberactive, magfield, EDecayType::kAll,
-            do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_endcap_hadron, magfield_rescale);
+            do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_drich, do_endcap_electron, magfield_rescale);
 #else
     G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-            do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_endcap_hadron, magfield_rescale);
+            do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_drich, do_endcap_electron, magfield_rescale);
 #endif
   }
 
