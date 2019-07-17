@@ -5,6 +5,7 @@
 #include <g4calo/RawTowerBuilderByHitIndex.h>
 #include <g4calo/RawTowerDigitizer.h>
 #include <caloreco/RawClusterBuilderFwd.h>
+#include <caloreco/RawClusterBuilderTemplateFEMC.h>
 #include <caloreco/RawTowerCalibration.h>
 #include <g4detectors/PHG4ForwardCalCellReco.h>
 #include <g4detectors/PHG4ForwardEcalSubsystem.h>
@@ -16,6 +17,18 @@ R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 #endif
 
+
+
+enum enu_Femc_clusterizer
+{
+  kFemcGraphClusterizer,
+  kFemcTemplateClusterizer
+};
+
+//template clusterizer, as developed by Sasha Bazilevsky
+enu_Femc_clusterizer Femc_clusterizer = kFemcTemplateClusterizer;
+// graph clusterizer
+//enu_Femc_clusterizer Femc_clusterizer = kFemcGraphClusterizer;
 
 void
 FEMCInit()
@@ -193,13 +206,32 @@ void FEMC_Clusters(int verbosity = 0) {
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
-  
-  RawClusterBuilderFwd* ClusterBuilder = new RawClusterBuilderFwd("FEMCRawClusterBuilderFwd");
-  ClusterBuilder->Detector("FEMC");
-  ClusterBuilder->Verbosity(verbosity);
-  ClusterBuilder->set_threshold_energy(0.010);  
-  se->registerSubsystem( ClusterBuilder );
-  
+
+
+  if ( Femc_clusterizer == kFemcTemplateClusterizer )
+    {
+      RawClusterBuilderTemplateFEMC *ClusterBuilder = new RawClusterBuilderTemplateFEMC("EmcRawClusterBuilderTemplateFEMC");
+      ClusterBuilder->Detector("FEMC");
+      ClusterBuilder->Verbosity(verbosity);
+      ClusterBuilder->set_threshold_energy(0.010);
+      se->registerSubsystem(ClusterBuilder);
+    }
+  else if ( Femc_clusterizer == kFemcGraphClusterizer )
+    {
+      RawClusterBuilderFwd* ClusterBuilder = new RawClusterBuilderFwd("FEMCRawClusterBuilderFwd");
+
+
+      ClusterBuilder->Detector("FEMC");
+      ClusterBuilder->Verbosity(verbosity);
+      ClusterBuilder->set_threshold_energy(0.010);  
+      se->registerSubsystem( ClusterBuilder );
+    }
+  else
+    {
+      cout << "FEMC_Clusters - unknown clusterizer setting!"<<endl;
+      exit(1);
+    }
+
   return;
 }
 

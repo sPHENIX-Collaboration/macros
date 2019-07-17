@@ -145,9 +145,8 @@ int Fun4All_G4_sPHENIX(
   gSystem->Load("libg4detectors.so");
   gSystem->Load("libphhepmc.so");
   gSystem->Load("libg4testbench.so");
-  gSystem->Load("libg4hough.so");
   gSystem->Load("libg4eval.so");
-
+  gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
   G4Init(do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor);
@@ -528,11 +527,11 @@ int Fun4All_G4_sPHENIX(
     if (do_tracking)
     {
       // This gets the default drift velocity only! 
-      PHG4TPCElectronDrift *dr = (PHG4TPCElectronDrift *)se->getSubsysReco("PHG4TPCElectronDrift");
+      PHG4TpcElectronDrift *dr = (PHG4TpcElectronDrift *)se->getSubsysReco("PHG4TpcElectronDrift");
       assert(dr);
-      double TPCDriftVelocity = dr->get_double_param("drift_velocity");
-      time_window_minus = -105.5 / TPCDriftVelocity;  // ns
-      time_window_plus = 105.5 / TPCDriftVelocity;    // ns;
+      double TpcDriftVelocity = dr->get_double_param("drift_velocity");
+      time_window_minus = -105.5 / TpcDriftVelocity;  // ns
+      time_window_plus = 105.5 / TpcDriftVelocity;    // ns;
     }
     pileup->set_time_window(time_window_minus, time_window_plus);  // override timing window in ns
     cout << "Collision pileup enabled using file " << pileupfile << " with collision rate " << pileup_collision_rate

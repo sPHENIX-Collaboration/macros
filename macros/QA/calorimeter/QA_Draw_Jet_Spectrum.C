@@ -16,8 +16,8 @@
 #include <cmath>
 
 //some common style files
+#include "../../sPHENIXStyle/sPhenixStyle.C"
 #include "QA_Draw_Utility.C"
-#include "SetOKStyle.C"
 using namespace std;
 
 void QA_Draw_Jet_Spectrum(
@@ -29,9 +29,7 @@ void QA_Draw_Jet_Spectrum(
     const char *qa_file_name_ref =
         "data/G4sPHENIXCells_2000jets25GeV.root_qa.root")
 {
-  SetOKStyle();
-  gStyle->SetOptStat(0);
-  gStyle->SetOptFit(1111);
+  SetsPhenixStyle();
   TVirtualFitter::SetDefaultFitter("Minuit2");
 
   TFile *qa_file_new = new TFile(qa_file_name_new);
@@ -87,7 +85,7 @@ void QA_Draw_Jet_Spectrum(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           TString(jet) + TString("_Leading_eta"), "TH1F");
       assert(h_ref);
 
@@ -118,7 +116,7 @@ void QA_Draw_Jet_Spectrum(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           TString(jet) + TString("_Leading_phi"), "TH1F");
       assert(h_ref);
 
@@ -148,7 +146,7 @@ void QA_Draw_Jet_Spectrum(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           TString(jet) + TString("_Leading_Et"), "TH1F");
       assert(h_ref);
 
@@ -178,7 +176,7 @@ void QA_Draw_Jet_Spectrum(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           TString(jet) + TString("_Leading_Mass"), "TH1F");
       assert(h_ref);
 
@@ -209,7 +207,7 @@ void QA_Draw_Jet_Spectrum(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           TString(jet) + TString("_Leading_CompSize"), "TH1F");
       assert(h_ref);
 
@@ -240,7 +238,7 @@ void QA_Draw_Jet_Spectrum(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           TString(jet) + TString("_Leading_CEMC_Ratio"), "TH1F");
       assert(h_ref);
 
@@ -271,7 +269,7 @@ void QA_Draw_Jet_Spectrum(
     TH1F *h_ref = NULL;
     if (qa_file_ref)
     {
-      TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+      h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
           TString(jet) + TString("_Leading_CEMC_HCalIN_Ratio"), "TH1F");
       assert(h_ref);
 
@@ -306,7 +304,7 @@ void QA_Draw_Jet_Spectrum(
       TH1F *h_ref = NULL;
       if (qa_file_ref)
       {
-        TH1F *h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
+        h_ref = (TH1F *) qa_file_ref->GetObjectChecked(
             TString(jet) + TString("_Leading_Leakage_Ratio"), "TH1F");
         assert(h_ref);
 
@@ -322,7 +320,7 @@ void QA_Draw_Jet_Spectrum(
     }
   }
 
-  PutInputFileName(c1, .04, qa_file_name_new, qa_file_name_ref);
+//  PutInputFileName(c1, .04, qa_file_name_new, qa_file_name_ref);
   SaveCanvas(c1, TString(qa_file_name_new) + TString(c1->GetName()), true);
 }
 

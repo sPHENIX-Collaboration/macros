@@ -13,7 +13,7 @@
 #ifndef  __SPHENIXSTYLE_H
 #define __SPHENIXSTYLE_H
 
-#include "TStyle.h"
+#include <TStyle.h>
 
 //! \brief sPHENIX Style, based on a style file from ATLAS by Peter Steinberg
 /*
