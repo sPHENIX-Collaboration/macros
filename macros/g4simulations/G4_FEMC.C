@@ -213,7 +213,10 @@ void FEMC_Clusters(int verbosity = 0) {
       RawClusterBuilderTemplateFEMC *ClusterBuilder = new RawClusterBuilderTemplateFEMC("EmcRawClusterBuilderTemplateFEMC");
       ClusterBuilder->Detector("FEMC");
       ClusterBuilder->Verbosity(verbosity);
-      ClusterBuilder->set_threshold_energy(0.010);
+      ClusterBuilder->set_threshold_energy(0.020); // This threshold should be the same as in FEMCprof_Thresh**.root file below
+      std::string femc_prof = getenv("CALIBRATIONROOT");
+      femc_prof += "/EmcProfile/FEMCprof_Thresh20MeV.root";
+      ClusterBuilder->LoadProfile(femc_prof.c_str());
       se->registerSubsystem(ClusterBuilder);
     }
   else if ( Femc_clusterizer == kFemcGraphClusterizer )
