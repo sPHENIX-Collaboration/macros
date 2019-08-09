@@ -42,7 +42,7 @@ R__LOAD_LIBRARY(libPHSartre.so)
 using namespace std;
 
 int Fun4All_G4_EICDetector(
-                           const int nEvents = 3,
+                           const int nEvents = 1,
                            const char * inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
                            const char * outputFile = "G4EICDetector.root"
                            )
@@ -202,7 +202,7 @@ int Fun4All_G4_EICDetector(
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(01); // uncomment for batch production running with minimal output messages
+  // se->Verbosity(01); // uncomment for batch production running with minimal output messages
   // se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
 
   // just if we set some flags somewhere in this macro
@@ -296,8 +296,7 @@ int Fun4All_G4_EICDetector(
     {
       // toss low multiplicity dummy events
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-      gen->add_particles("pi-",3); // mu+,e+,proton,pi+,Upsilon
-      gen->add_particles("pi+",3); // 100 pion option
+      gen->add_particles("pi-",1); // mu+,e+,proton,pi+,Upsilon
       if (readhepmc)
         {
           gen->set_reuse_existing_vertex(true);
@@ -313,7 +312,7 @@ int Fun4All_G4_EICDetector(
         }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0, 0.0);
-      gen->set_eta_range(-1, 1);
+      gen->set_eta_range(-3, 3);
       gen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi());
       //gen->set_pt_range(0.1, 50.0);
       gen->set_pt_range(0.1, 20.0);
