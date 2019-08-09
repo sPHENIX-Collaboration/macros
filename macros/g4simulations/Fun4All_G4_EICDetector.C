@@ -101,7 +101,7 @@ int Fun4All_G4_EICDetector(
   bool do_tracking_cell = do_tracking && true;
   bool do_tracking_track = do_tracking_cell && true;
   bool do_tracking_eval = do_tracking_track && true; // in order to use this evaluation, please build this analysis module analysis/blob/master/Tracking/FastTrackingEval/
-  bool do_vertex_finding = true;
+  bool do_vertex_finding = false; // this option exclude vertex in the track fitting and use RAVE to reconstruct primary and 2ndary vertexes
 
   bool do_pstof = false;
 
@@ -297,6 +297,8 @@ int Fun4All_G4_EICDetector(
       // toss low multiplicity dummy events
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
       gen->add_particles("pi-",1); // mu+,e+,proton,pi+,Upsilon
+      //gen->add_particles("pi+",100); // 100 pion option
+
       if (readhepmc)
         {
           gen->set_reuse_existing_vertex(true);
