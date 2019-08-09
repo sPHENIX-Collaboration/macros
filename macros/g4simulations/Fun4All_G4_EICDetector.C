@@ -36,6 +36,7 @@ R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
+R__LOAD_LIBRARY(libPHSartre.so)
 #endif
 
 using namespace std;
