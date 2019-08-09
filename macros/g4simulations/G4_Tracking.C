@@ -11,7 +11,6 @@
 #include <g4intt/PHG4InttDigitizer.h>
 #include <g4intt/PHG4InttSubsystem.h>
 #include <g4intt/PHG4InttHitReco.h>
-#include <g4intt/PHG4InttDefs.h>
 
 #include <g4main/PHG4Reco.h>
 
@@ -26,9 +25,15 @@
 #include <g4tpc/PHG4TpcPadPlaneReadout.h>
 #include <g4tpc/PHG4TpcSubsystem.h>
 
+#include <g4outertracker/PHG4OuterTrackerDefs.h>
+#include <g4outertracker/PHG4OuterTrackerDigitizer.h>
+#include <g4outertracker/PHG4OuterTrackerSubsystem.h>
+#include <g4outertracker/PHG4OuterTrackerHitReco.h>
+
 #include <intt/InttClusterizer.h>
 #include <mvtx/MvtxClusterizer.h>
 #include <tpc/TpcClusterizer.h>
+#include <outertracker/OuterTrackerClusterizer.h>
 
 #include <trackreco/PHGenFitTrkFitter.h>
 #include <trackreco/PHGenFitTrkProp.h>
@@ -43,11 +48,14 @@
 R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
+R__LOAD_LIBRARY(libg4outertracker.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libtpc.so)
+R__LOAD_LIBRARY(liboutertracker.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
+
 #endif
 
 
@@ -137,6 +145,9 @@ int tpc_layer_rphi_count_inner = 1152;
 int n_tpc_layer_mid = 16;
 int n_tpc_layer_outer = 16;
 int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
+
+// setting to zero turns off OuterTracker detector
+int n_outertrack_layers = 2;
 
 int Max_si_layer;
 
@@ -268,6 +279,40 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 
   radius += no_overlapp;
 
+  cout << "Create OuterTrack subsystem module " << endl;
+  gSystem->Load("libg4outertracker.so");
+
+  if(n_outertrack_layers > 0)
+    {
+      // Add the OuterTracker
+      double Inrad_start = 82.0;
+      double Thickness = 0.01;  // 100 microns thick
+      double Layer_spacing = 2.0;
+      double Length = 220.;
+      int NSeg_Phi = 10000;   // gives about 100 micron resolution in r*phi
+      int NSeg_Z = 5400; // gives about 100 micron resolution in z
+      for(int ilayer = 0; ilayer < n_outertrack_layers; ++ilayer)
+	{
+	  int ot_layer = ilayer + n_maps_layer + n_intt_layer + n_gas_layer;
+	  cout << "Creating and registering layer " << ilayer << " of OuterTracker " << " which is layer " << ot_layer << " of sPHENIX" << endl;
+	  double Inner_rad = (double) ilayer * Layer_spacing + Inrad_start;
+	  double Outer_rad = Inner_rad + Thickness;
+	  PHG4OuterTrackerSubsystem *otr = new PHG4OuterTrackerSubsystem("OuterTracker", ot_layer);
+	  otr->Verbosity(0);
+	  otr->set_double_param(ot_layer, "ot_inner_radius", Inner_rad);
+	  otr->set_double_param(ot_layer, "ot_outer_radius", Outer_rad);
+	  otr->set_double_param(ot_layer, "ot_length", Length);
+	  otr->set_int_param(ot_layer, "layer", ilayer);
+	  otr->set_int_param(ot_layer, "ot_nseg_phi", NSeg_Phi);
+	  otr->set_int_param(ot_layer, "ot_nseg_z", NSeg_Z);
+	  
+	  g4Reco->registerSubsystem(otr);
+
+	  radius = radius + Outer_rad;
+	}
+    }
+
+
   return radius;
 }
 
@@ -348,6 +393,14 @@ void Tracking_Cells(int verbosity = 0)
   padplane->set_int_param("tpc_minlayer_inner", n_maps_layer + n_intt_layer);  // sPHENIX layer number of first Tpc readout layer
   padplane->set_int_param("ntpc_layers_inner", n_tpc_layer_inner);
   padplane->set_int_param("ntpc_phibins_inner", tpc_layer_rphi_count_inner);
+
+  // OuterTracker
+if(n_outertrack_layers > 0)
+{
+  PHG4OuterTrackerHitReco *reco = new PHG4OuterTrackerHitReco("OuterTracker");
+  reco->Verbosity(0);
+  se->registerSubsystem(reco);
+ }
 
   return;
 }
@@ -477,6 +530,15 @@ void Tracking_Reco(int verbosity = 0)
 
   se->registerSubsystem(digitpc);
 
+  // OuterTracker
+  if(n_outertrack_layers > 0)
+    {
+      PHG4OuterTrackerDigitizer *digi_otr = new PHG4OuterTrackerDigitizer("OuterTrackerDigitizer");
+      digi_otr->Verbosity(0);
+      se->registerSubsystem(digi_otr);
+    }
+
+
   //-------------
   // Cluster Hits
   //-------------
@@ -505,6 +567,14 @@ void Tracking_Reco(int verbosity = 0)
   TpcClusterizer* tpcclusterizer = new TpcClusterizer();
   tpcclusterizer->Verbosity(0);
   se->registerSubsystem(tpcclusterizer);
+
+  // For the OuterTracker
+  if(n_outertrack_layers > 0)
+    {
+      OuterTrackerClusterizer *otrclusterizer = new OuterTrackerClusterizer("OuterTrackerClusterizer");
+      otrclusterizer->Verbosity(0);
+      se->registerSubsystem(otrclusterizer);
+    }
 
   //-------------
   // Tracking
@@ -621,7 +691,7 @@ void Tracking_Reco(int verbosity = 0)
   eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
   eval->do_gpoint_eval(false);
   eval->do_eval_light(true);
-  eval->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
+  eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(0);
   se->registerSubsystem(eval);
 
