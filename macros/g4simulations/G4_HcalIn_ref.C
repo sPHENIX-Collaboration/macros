@@ -22,9 +22,9 @@ R__LOAD_LIBRARY(libg4eval.so)
 #endif
 
 //Inner HCal absorber material selector:
-//false - Default, absorber material is SS310
-//true - Choose if you want Aluminum
-const bool inner_hcal_material_Al = false;
+//false - old version, absorber material is SS310
+//true - default Choose if you want Aluminum
+const bool inner_hcal_material_Al = true;
 
 static int inner_hcal_eic = 0;
 
