@@ -33,7 +33,7 @@
 #include <trackreco/PHGenFitTrkFitter.h>
 #include <trackreco/PHGenFitTrkProp.h>
 #include <trackreco/PHHoughSeeding.h>
-#include <trackreco/PHInitVertexing.h>
+#include <trackreco/PHInitZVertexing.h>
 #include <trackreco/PHTrackSeeding.h>
 #include <trackreco/PHTruthVertexing.h>
 #include <trackreco/PHTruthTrackSeeding.h>
@@ -48,6 +48,7 @@ R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
+//R__LOAD_LIBRARY(libg4hough.so)
 #endif
 
 
@@ -511,17 +512,35 @@ void Tracking_Reco(int verbosity = 0)
   //------------
 
   // This should be true for everything except testing wirh truth track seeding!
-  const bool use_track_prop = true;
+  const bool use_track_prop = true;   // false to run truth tracking
+  const bool use_truth_vertex = false;   // false to get initial vertex from MVTX hits
   if (use_track_prop)
     {
       //--------------------------------------------------
       // Normal track seeding and propagation
       //--------------------------------------------------
 
-      // for now, we cheat to get the initial vertex for the full track reconstruction case
-      PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
-      init_vtx->Verbosity(0);
-      se->registerSubsystem(init_vtx);     
+      if(use_truth_vertex)
+	{
+	  // We cheat to get the initial vertex for the full track reconstruction case
+	  PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
+	  init_vtx->Verbosity(0);
+	  se->registerSubsystem(init_vtx);
+	}
+      else
+	{
+	  // get the initial vertex for track fitting from the MVTX hits
+
+	    PHInitZVertexing* init_zvtx  = new PHInitZVertexing(7, 7, "PHInitZVertexing");
+	    int seed_layer[7] = {0,1,2,3,4,5,6};
+	    init_zvtx->set_seeding_layer(seed_layer,7);
+	    // this is the minimum number of associated MVTX triplets for a vertex to be accepted as a candidate.
+	    // Suggest to use 2 for p+p and 5 for Au+Au (to reduce spurious vertices).
+	    // Track seeding currently uses the vertex with the most triplets - i.e. only one vertex is currently used downstream.
+	    init_zvtx->set_min_zvtx_tracks(2);
+	    init_zvtx->Verbosity(0);
+	    se->registerSubsystem(init_zvtx);
+	} 
       
       // find seed tracks using a subset of TPC layers
       PHTrackSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer);
@@ -621,7 +640,7 @@ void Tracking_Reco(int verbosity = 0)
   eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
   eval->do_gpoint_eval(false);
   eval->do_eval_light(true);
-  eval->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
+  eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(0);
   se->registerSubsystem(eval);
 
