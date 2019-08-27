@@ -512,8 +512,8 @@ void Tracking_Reco(int verbosity = 0)
   //------------
 
   // This should be true for everything except testing wirh truth track seeding!
-  const bool use_track_prop = true;   // false to run truth tracking
-  const bool use_truth_vertex = false;   // false to get initial vertex from MVTX hits
+  const bool use_track_prop = true;   // normally true, false to run truth tracking
+  const bool use_truth_vertex = true;   // set to false to get initial vertex from MVTX hits
   if (use_track_prop)
     {
       //--------------------------------------------------
@@ -535,9 +535,9 @@ void Tracking_Reco(int verbosity = 0)
 	    int seed_layer[7] = {0,1,2,3,4,5,6};
 	    init_zvtx->set_seeding_layer(seed_layer,7);
 	    // this is the minimum number of associated MVTX triplets for a vertex to be accepted as a candidate.
-	    // Suggest to use 2 for p+p and 5 for Au+Au (to reduce spurious vertices).
+	    // Suggest to use 1 for p+p and 5 for Au+Au (to reduce spurious vertices).
 	    // Track seeding currently uses the vertex with the most triplets - i.e. only one vertex is currently used downstream.
-	    init_zvtx->set_min_zvtx_tracks(2);
+	    init_zvtx->set_min_zvtx_tracks(1);
 	    init_zvtx->Verbosity(0);
 	    se->registerSubsystem(init_zvtx);
 	} 
