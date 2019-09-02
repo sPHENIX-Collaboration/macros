@@ -513,7 +513,7 @@ void Tracking_Reco(int verbosity = 0)
 
   // This should be true for everything except testing wirh truth track seeding!
   const bool use_track_prop = true;   // normally true, false to run truth tracking
-  const bool use_truth_vertex = true;   // set to false to get initial vertex from MVTX hits
+  const bool use_truth_vertex = false;   // set to false to get initial vertex from MVTX hits
   if (use_track_prop)
     {
       //--------------------------------------------------
@@ -537,8 +537,8 @@ void Tracking_Reco(int verbosity = 0)
 	    // this is the minimum number of associated MVTX triplets for a vertex to be accepted as a candidate.
 	    // Suggest to use 1 for p+p and 5 for Au+Au (to reduce spurious vertices).
 	    // Track seeding currently uses the vertex with the most triplets - i.e. only one vertex is currently used downstream.
-	    init_zvtx->set_min_zvtx_tracks(1);
-	    init_zvtx->Verbosity(0);
+	    //init_zvtx->set_min_zvtx_tracks(5);
+	    init_zvtx->Verbosity(1);
 	    se->registerSubsystem(init_zvtx);
 	} 
       
@@ -546,7 +546,7 @@ void Tracking_Reco(int verbosity = 0)
       int min_layers = 4;
       int nlayers_seeds = 12;
       PHHoughSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer, nlayers_seeds, min_layers);
-      track_seed->Verbosity(0);
+      track_seed->Verbosity(2);
       se->registerSubsystem(track_seed);
 
       // Find all clusters associated with each seed track
@@ -595,11 +595,17 @@ void Tracking_Reco(int verbosity = 0)
   //------------------------------------------------
 
   PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
-  kalman->Verbosity(verbosity);
+  kalman->Verbosity(2);
 
   if (use_primary_vertex)
     kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
   kalman->set_use_truth_vertex(false);
+  kalman->set_over_write_svtxtrackmap(true);
+  kalman->set_over_write_svtxvertexmap(true);
+  //std::string vmethod("avr");  // only for 1 vertex events
+  //std::string vmethod("mvf-sigmacut:9.0");  // default is 9 sigmas. Method does not work well.
+  std::string vmethod("avr-minweight:0.5-primcut:9-seccut:9");  // seems to handle multi-vertex events well.
+  kalman->set_vertexing_method(vmethod);
   se->registerSubsystem(kalman);
 
   //------------------
