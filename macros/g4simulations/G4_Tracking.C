@@ -51,99 +51,56 @@ R__LOAD_LIBRARY(libtrack_reco.so)
 //R__LOAD_LIBRARY(libg4hough.so)
 #endif
 
-
 #include <vector>
 
-// define INTTLADDER8, INTTLADDER6, INTTLADDER4_ZP or INTTLADDER4_PP, INTTLADDER0 to get 8, 6, 4 or 0 layers
-// one and only one of these has to be defined, because #elseif does not seem to work properly in the interpreter
-#define INTTLADDER4_PP
+// Tracking simulation setup parameters and flag - leave them alone!
+//==============================================
 
-// Dead map options for INTT
-enum enu_InttDeadMapType
-{
-  kInttNoDeadMap = 0,        // All channel in Intt is alive
-  kIntt4PercentDeadMap = 4,  // 4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
-  kIntt8PercentDeadMap = 8   // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
-};
-
-// Choose Intt deadmap here
-enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;
-
-// if true, refit tracks with primary vertex included in track fit  - good for analysis of prompt tracks only
-// Adds second node to node tree, keeps original track node undisturbed
-// Adds second evaluator to process refitted tracks and outputs separate ntuples
-bool use_primary_vertex = false;
-
+////////////// MVTX 
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
 
-// Configure the Intt layers
-// offsetphi is in deg, every other layer is offset by one half of the phi spacing between ladders
-#ifdef INTTLADDER8
-int n_intt_layer = 8;
-// default layer configuration
-int laddertype[8] = {PHG4InttDefs::SEGMENTATION_Z,
-                     PHG4InttDefs::SEGMENTATION_Z,
-                     PHG4InttDefs::SEGMENTATION_PHI,
-                     PHG4InttDefs::SEGMENTATION_PHI,
-                     PHG4InttDefs::SEGMENTATION_PHI,
-                     PHG4InttDefs::SEGMENTATION_PHI,
-                     PHG4InttDefs::SEGMENTATION_PHI,
-                     PHG4InttDefs::SEGMENTATION_PHI};                                    // default
-int nladder[8] = {17, 17, 15, 15, 18, 18, 21, 21};                                       // default
-double sensor_radius[8] = {6.876, 7.462, 8.987, 9.545, 10.835, 11.361, 12.676, 13.179};  // radius of center of sensor for layer default
-double offsetphi[8] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3], 0.0, 0.5 * 360.0 / nladder[5], 0.0, 0.5 * 360.0 / nladder[7]};
-#endif
-#ifdef INTTLADDER6
-int n_intt_layer = 6;
-int laddertype[6] = {PHG4InttDefs::SEGMENTATION_Z,
-                     PHG4InttDefs::SEGMENTATION_Z,
-                     PHG4InttDefs::SEGMENTATION_PHI,
-                     PHG4InttDefs::SEGMENTATION_PHI,
-                     PHG4InttDefs::SEGMENTATION_PHI,
-                     PHG4InttDefs::SEGMENTATION_PHI};
-int nladder[6] = {17, 17, 15, 15, 18, 18};
-double sensor_radius[6] = {6.876, 7.462, 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
-double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3], 0.0, 0.5 * 360.0 / nladder[5]};
-#endif
-#ifdef INTTLADDER4_ZP
-int n_intt_layer = 4;
-int laddertype[4] = {PHG4InttDefs::SEGMENTATION_Z,
-                     PHG4InttDefs::SEGMENTATION_Z,
-                     PHG4InttDefs::SEGMENTATION_PHI,
-                     PHG4InttDefs::SEGMENTATION_PHI};
-int nladder[4] = {17, 17, 18, 18};
-double sensor_radius[6] = {6.876, 7.462, 10.835, 11.361};  // radius of center of sensor for layer default
-double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
-#endif
-#ifdef INTTLADDER4_PP
-int n_intt_layer = 4;
+/////////////// INTT 
+int n_intt_layer = 4;  // must be 4 or 0, setting to zero removes INTT completely
 int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI};
 int nladder[4] = {15,  15, 18, 18};
-double sensor_radius[6] = { 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
-double offsetphi[6] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3]};
-#endif
-#ifdef INTTLADDER0
-int n_intt_layer = 0;
-int laddertype[1] = {0};
-int nladder[1] = {0};
-double sensor_radius[1] = {0};
-double offsetphi[1] = {0};
-#endif
+double sensor_radius[4] = { 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
+double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3]};
+enum enu_InttDeadMapType      // Dead map options for INTT
+{
+  kInttNoDeadMap = 0,        // All channel in Intt is alive
+  kIntt4PercentDeadMap = 4,  // 4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
+  kIntt8PercentDeadMap = 8   // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
+};
+enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
 
+///////////////// TPC 
 int n_tpc_layer_inner = 16;
 int tpc_layer_rphi_count_inner = 1152;
 int n_tpc_layer_mid = 16;
 int n_tpc_layer_outer = 16;
 int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
 
-int Max_si_layer;
+// Tracking reconstruction setup parameters and flags
+//=====================================
+const int init_vertexing_min_zvtx_tracks = 2; // PHInitZvertexing parameter for reducing spurious vertices, use 2 for Pythia8 events, 5 for large multiplicity events
+const bool use_track_prop = true;   // true for normal track seeding, false to run with truth track seeding instead
+const bool g4eval_use_initial_vertex = false;   // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
+const bool use_primary_vertex = false;  // if true, refit tracks with primary vertex included - adds second node to node tree, adds second evaluator and outputs separate ntuples
+
+// This is the setup we have been using before PHInitZVertexing was implemented - smeared truth vertex for a single collision per event. Make it the default for now.
+std::string vmethod("avf-smoothing:1");  // only good for 1 vertex events // vmethod is a string used to set the Rave final-vertexing method:
+const bool use_truth_vertex = true;   // set to false to get initial vertex from MVTX hits using PHInitZVertexing, true for using smeared truth vertex
+
+// This is the setup that uses PHInitZvertexing to find initial vertices, and allows for multiple collisions per event
+//const bool use_truth_vertex = false;   // set to false to get initial vertex from MVTX hits using PHInitZVertexing, true for using smeared truth vertex
+//std::string vmethod("avr-smoothing:1-minweight:0.5-primcut:9-seccut:9");  // seems to handle multi-vertex events.
+
 
 void TrackingInit(int verbosity = 0)
 {
-  Max_si_layer = n_maps_layer + n_intt_layer + n_gas_layer;
 }
 
 double Tracking(PHG4Reco* g4Reco, double radius,
@@ -275,7 +232,7 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 void Tracking_Cells(int verbosity = 0)
 {
   // runs the cellularization of the energy deposits (g4hits)
-  // into detector hits (g4cells)
+  // into detector hits (TrkrHits)
 
   //---------------
   // Load libraries
@@ -355,10 +312,11 @@ void Tracking_Cells(int verbosity = 0)
 
 void Tracking_Reco(int verbosity = 0)
 {
+  // processes the TrkrHits to make clusters, then reconstruct tracks and vertices
+
   //---------------
   // Load libraries
   //---------------
-
   gSystem->Load("libfun4all.so");
   gSystem->Load("libtrack_reco.so");
 
@@ -511,9 +469,6 @@ void Tracking_Reco(int verbosity = 0)
   // Tracking
   //------------
 
-  // This should be true for everything except testing wirh truth track seeding!
-  const bool use_track_prop = true;   // normally true, false to run truth tracking
-  const bool use_truth_vertex = false;   // set to false to get initial vertex from MVTX hits
   if (use_track_prop)
     {
       //--------------------------------------------------
@@ -530,15 +485,13 @@ void Tracking_Reco(int verbosity = 0)
       else
 	{
 	  // get the initial vertex for track fitting from the MVTX hits
-
 	    PHInitZVertexing* init_zvtx  = new PHInitZVertexing(7, 7, "PHInitZVertexing");
 	    int seed_layer[7] = {0,1,2,3,4,5,6};
 	    init_zvtx->set_seeding_layer(seed_layer,7);
 	    // this is the minimum number of associated MVTX triplets for a vertex to be accepted as a candidate.
-	    // Suggest to use 1 for p+p and 5 for Au+Au (to reduce spurious vertices).
-	    // Track seeding currently uses the vertex with the most triplets - i.e. only one vertex is currently used downstream.
-	    //init_zvtx->set_min_zvtx_tracks(5);
-	    init_zvtx->Verbosity(1);
+	    // Suggest to use 2 for Pythia8 and 5 for Au+Au (to reduce spurious vertices).
+	    init_zvtx->set_min_zvtx_tracks(init_vertexing_min_zvtx_tracks);
+	    init_zvtx->Verbosity(0);
 	    se->registerSubsystem(init_zvtx);
 	} 
       
@@ -546,39 +499,27 @@ void Tracking_Reco(int verbosity = 0)
       int min_layers = 4;
       int nlayers_seeds = 12;
       PHHoughSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer, nlayers_seeds, min_layers);
-      track_seed->Verbosity(2);
+      track_seed->Verbosity(0);
       se->registerSubsystem(track_seed);
 
       // Find all clusters associated with each seed track
       PHGenFitTrkProp* track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", n_maps_layer, n_intt_layer, n_gas_layer);
       track_prop->Verbosity(0);
       se->registerSubsystem(track_prop);
-
       for(int i = 0;i<n_intt_layer;i++)
 	{
-	  if(laddertype[i] == PHG4InttDefs::SEGMENTATION_Z)
-	    {
-	      // strip length is along phi
-	      track_prop->set_max_search_win_theta_intt(i, 0.010);
-	      track_prop->set_min_search_win_theta_intt(i, 0.00);
-	      track_prop->set_max_search_win_phi_intt(i, 0.20);
-	      track_prop->set_min_search_win_phi_intt(i, 0.20);
-	    }
-	  else
-	    {
-	      // strip length is along theta
-	      track_prop->set_max_search_win_theta_intt(i, 0.200);
-	      track_prop->set_min_search_win_theta_intt(i, 0.200);
-	      track_prop->set_max_search_win_phi_intt(i, 0.0050);
-	      track_prop->set_min_search_win_phi_intt(i, 0.000);
-	    }
+	  // strip length is along theta
+	  track_prop->set_max_search_win_theta_intt(i, 0.200);
+	  track_prop->set_min_search_win_theta_intt(i, 0.200);
+	  track_prop->set_max_search_win_phi_intt(i, 0.0050);
+	  track_prop->set_min_search_win_phi_intt(i, 0.000);
 	}
     }
   else
     {
-      //--------------------------------------------------
-      // Track finding using truth information
-      //--------------------------------------------------
+      //-------------------------------------------------------
+      // Track finding using truth information only
+      //------------------------------------------------------
 
       PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
       init_vtx->Verbosity(0);
@@ -594,18 +535,16 @@ void Tracking_Reco(int verbosity = 0)
   // Fitting of tracks using Kalman Filter
   //------------------------------------------------
 
+
   PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
-  kalman->Verbosity(2);
+  kalman->Verbosity(0);
 
   if (use_primary_vertex)
     kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
-  kalman->set_use_truth_vertex(false);
-  kalman->set_over_write_svtxtrackmap(true);
-  kalman->set_over_write_svtxvertexmap(true);
-  //std::string vmethod("avr");  // only for 1 vertex events
-  //std::string vmethod("mvf-sigmacut:9.0");  // default is 9 sigmas. Method does not work well.
-  std::string vmethod("avr-minweight:0.5-primcut:9-seccut:9");  // seems to handle multi-vertex events well.
+
   kalman->set_vertexing_method(vmethod);
+  kalman->set_use_truth_vertex(false);
+
   se->registerSubsystem(kalman);
 
   //------------------
@@ -640,7 +579,6 @@ void Tracking_Reco(int verbosity = 0)
   //----------------
   // Tracking evaluation
   //----------------
-
   SvtxEvaluator* eval;
   eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str(), "SvtxTrackMap", n_maps_layer, n_intt_layer, n_gas_layer);
   eval->do_cluster_eval(true);
@@ -648,6 +586,7 @@ void Tracking_Reco(int verbosity = 0)
   eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
   eval->do_gpoint_eval(false);
   eval->do_eval_light(true);
+  eval->set_use_initial_vertex(g4eval_use_initial_vertex);
   eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(0);
   se->registerSubsystem(eval);
