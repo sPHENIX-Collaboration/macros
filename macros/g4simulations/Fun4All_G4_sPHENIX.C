@@ -1,4 +1,8 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+
+//cpp
+#include <string>
+
 #include <fun4all/SubsysReco.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -27,6 +31,7 @@
 #include "G4_HIJetReco.C"
 #include "G4_DSTReader.C"
 #include "DisplayOn.C"
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libphhepmc.so)
@@ -262,22 +267,25 @@ int Fun4All_G4_sPHENIX(
 
     if (usegun)
     {
-      PHG4ParticleGun *gun = new PHG4ParticleGun();
-      //  gun->set_name("anti_proton");
-      gun->set_name("geantino");
-      gun->set_vtx(0, 0, 0);
-      gun->set_mom(10, 0, 0.01);
-      // gun->AddParticle("geantino",1.7776,-0.4335,0.);
-      // gun->AddParticle("geantino",1.7709,-0.4598,0.);
-      // gun->AddParticle("geantino",2.5621,0.60964,0.);
-      // gun->AddParticle("geantino",1.8121,0.253,0.);
-      //	  se->registerSubsystem(gun);
+      //Some initializing; Modify here for alt particles/positions/momentums
+      std::string particleName = "geantino";
+      double pt = 10.0;// Some big value as default for gun studies
+      double phi = -0.012271;// Set as -TMath::Pi() to TMath::Pi();  We pick this value as default to be centered on a mid-rapidity ecal crystal
+      double eta = -0.014844;// Assuming you want calo acceptance, recommend +- 1; We pick this value as default to be centered on a mid-rapidity ecal crystal
+      double sinheta = std::sinh(eta);
+      double mom = std::sqrt(pt*pt*(1.0 + sinheta*sinheta));
+      if(TMath::Abs(phi) > TMath::Pi()){
+	std::cout << "You are using gun but setting phi beyond +-TMath::Pi(). return 1" << std::endl;
+	return 1;
+      }
+
+      //Create the gun from the above initializing values
       PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
-      pgen->set_name("geantino");
+      pgen->set_name(particleName);
       pgen->set_z_range(0, 0);
-      pgen->set_eta_range(0.01, 0.01);
-      pgen->set_mom_range(10, 10);
-      pgen->set_phi_range(5.3 / 180. * TMath::Pi(), 5.7 / 180. * TMath::Pi());
+      pgen->set_eta_range(eta, eta);
+      pgen->set_mom_range(mom, mom);
+      pgen->set_phi_range(phi, phi);
       se->registerSubsystem(pgen);
     }
 

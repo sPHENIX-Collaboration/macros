@@ -69,6 +69,11 @@ double HCalInner(PHG4Reco* g4Reco,
       cout <<"HCalInner - construct inner HCal absorber with G4_Al"<<endl;
       hcal->set_string_param("material","G4_Al");
     }
+  else
+    {
+      cout <<"HCalInner - construct inner HCal absorber with SS310"<<endl;
+      hcal->set_string_param("material","SS310");
+    }
   // hcal->set_double_param("inner_radius", 117.27);
   //-----------------------------------------
   // the light correction can be set in a single call
