@@ -266,7 +266,8 @@ int Fun4All_G4_sPHENIX(
       //  gun->set_name("anti_proton");
       gun->set_name("geantino");
       gun->set_vtx(0, 0, 0);
-      gun->set_mom(10, 0, 0.01);
+      gun->set_mom(10, 0, 0.01); // shoot not directly at midrapidity to avoid gaps
+      // you can add particles to the gun, 3 momenta as argument
       // gun->AddParticle("geantino",1.7776,-0.4335,0.);
       // gun->AddParticle("geantino",1.7709,-0.4598,0.);
       // gun->AddParticle("geantino",2.5621,0.60964,0.);
@@ -275,9 +276,9 @@ int Fun4All_G4_sPHENIX(
       PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
       pgen->set_name("geantino");
       pgen->set_z_range(0, 0);
-      pgen->set_eta_range(0.01, 0.01);
-      pgen->set_mom_range(10, 10);
-      pgen->set_phi_range(5.3 / 180. * TMath::Pi(), 5.7 / 180. * TMath::Pi());
+      pgen->set_eta_range(-1.1, 1.1); // nominal sPHENIX eta range
+      pgen->set_mom_range(10, 10); // momentum range - irrelevant for geantinos
+      pgen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi()); // full phi range
       se->registerSubsystem(pgen);
     }
 
