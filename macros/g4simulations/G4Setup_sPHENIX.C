@@ -8,6 +8,7 @@
 #include "G4_Magnet.C"
 #include "G4_HcalOut_ref.C"
 #include "G4_PlugDoor.C"
+#include "G4_FEMC.C"
 
 #include <g4eval/PHG4DstCompressReco.h>
 #include <fun4all/Fun4AllServer.h>
@@ -38,7 +39,8 @@ void G4Init(const bool do_tracking = true,
 	    const bool do_magnet = true,
 	    const bool do_hcalout = true,
 	    const bool do_pipe = true,
-	    const bool do_plugdoor = false
+	    const bool do_plugdoor = false,
+	    const bool do_FEMC = false
 	    )
   {
 
@@ -89,6 +91,12 @@ void G4Init(const bool do_tracking = true,
       gROOT->LoadMacro("G4_PlugDoor.C");
       PlugDoorInit();
     }
+  if (do_FEMC)
+    {
+      gROOT->LoadMacro("G4_FEMC.C");
+      FEMCInit();
+    }
+
 }
 
 
@@ -108,6 +116,7 @@ int G4Setup(const int absorberactive = 0,
       const bool do_pipe = true,
       const bool do_plugdoor = false,
 //	    const bool do_plugdoor = true,
+	    const bool do_FEMC = false, 
 	    const float magfield_rescale = 1.0) {
   
   //---------------
@@ -196,6 +205,9 @@ int G4Setup(const int absorberactive = 0,
   // sPHENIX forward flux return door
   if (do_plugdoor) PlugDoor(g4Reco, absorberactive);
 
+  // forward EMC
+  if(do_FEMC) FEMCSetup(g4Reco, absorberactive);
+
   //----------------------------------------
   // BLACKHOLE
   
@@ -279,6 +291,12 @@ void ShowerCompress(int verbosity = 0) {
   compress->AddTowerContainer("TOWER_SIM_HCALOUT");
   compress->AddTowerContainer("TOWER_RAW_HCALOUT");
   compress->AddTowerContainer("TOWER_CALIB_HCALOUT");
+  compress->AddHitContainer("G4HIT_FEMC");
+  compress->AddHitContainer("G4HIT_ABSORBER_FEMC");
+  compress->AddCellContainer("G4CELL_FEMC");
+  compress->AddTowerContainer("TOWER_SIM_FEMC");
+  compress->AddTowerContainer("TOWER_RAW_FEMC");
+  compress->AddTowerContainer("TOWER_CALIB_FEMC");
   se->registerSubsystem(compress);
   
   return; 
@@ -304,5 +322,8 @@ void DstCompress(Fun4AllDstOutputManager* out) {
     out->StripNode("G4CELL_CEMC");
     out->StripNode("G4CELL_HCALIN");
     out->StripNode("G4CELL_HCALOUT");
+    out->StripNode("G4HIT_FEMC");
+    out->StripNode("G4HIT_ABSORBER_FEMC");
+    out->StripNode("G4CELL_FEMC");
   }
 }
