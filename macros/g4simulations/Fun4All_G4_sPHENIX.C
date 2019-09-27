@@ -118,7 +118,7 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_eval = do_hcalout_cluster && true;
 
   // forward EMC
-  bool do_FEMC = true;
+  bool do_FEMC = false;
   bool do_FEMC_cell = do_FEMC && true;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
