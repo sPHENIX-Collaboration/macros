@@ -25,6 +25,7 @@ double DRich(PHG4Reco* g4Reco,
   double size_z = 170.;
   double place_z = 400./2.-jleic_shiftz+size_z/2.;
   PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("DRICH", 0);
+  cyl->set_color(1.,1.,0.2,0.2);
   cyl->set_double_param("radius",drich_inner_radius);
   cyl->set_string_param("material","G4_CARBON_DIOXIDE");
   cyl->set_double_param("thickness",drich_outer_radius - drich_inner_radius);
