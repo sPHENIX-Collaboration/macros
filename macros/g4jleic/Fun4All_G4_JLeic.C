@@ -7,6 +7,7 @@
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllNoSyncDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
+#include <g4histos/G4HitNtuple.h>
 #include <g4main/PHG4ParticleGeneratorBase.h>
 #include <g4main/PHG4ParticleGenerator.h>
 #include <g4main/PHG4SimpleEventGenerator.h>
@@ -28,6 +29,8 @@ R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libphhepmc.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
+R__LOAD_LIBRARY(libg4histos.so)
+
 #endif
 
 using namespace std;
@@ -68,9 +71,9 @@ int Fun4All_G4_JLeic(
 
   // Besides the above flags. One can further choose to further put in following particles in Geant4 simulation
   // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
-  const bool particles = true && !readhits;
+  const bool particles = false && !readhits;
   // or gun/ very simple single particle gun generator
-  const bool usegun = false && !readhits;
+  const bool usegun = true && !readhits;
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
   const bool upsilons = false && !readhits;
   const int num_upsilons_per_event = 1;  // can set more than 1 upsilon per event, each has a unique embed flag
@@ -100,7 +103,9 @@ int Fun4All_G4_JLeic(
 
   bool do_endcap_electron = true;
 
-  bool do_tracking = true;
+  bool do_endcap_hadron = true;
+
+  bool do_tracking = false;
   //---------------
   // Load libraries
   //---------------
@@ -113,11 +118,12 @@ int Fun4All_G4_JLeic(
   gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_JLeic.C");
-  G4Init(do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_drich, do_endcap_electron);
+  G4Init(do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_drich, do_endcap_electron, do_endcap_hadron);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
-  //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
-  const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root"); // default map from the calibration database
+
+//  const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root"); // default map from the calibration database
+  const string magfield = "2.0"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
   const float magfield_rescale = 1; // scale map if needed
 
   //---------------
@@ -238,10 +244,10 @@ int Fun4All_G4_JLeic(
       //	  se->registerSubsystem(gun);
       PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
       pgen->set_name("geantino");
-      pgen->set_z_range(0, 0);
+      pgen->set_z_range(-40, -40);
       pgen->set_eta_range(0.01, 0.01);
       pgen->set_mom_range(10, 10);
-      pgen->set_phi_range(5.3 / 180. * TMath::Pi(), 5.7 / 180. * TMath::Pi());
+      pgen->set_phi_range(-1 * TMath::Pi(), 1 * TMath::Pi());
       se->registerSubsystem(pgen);
     }
 
@@ -302,10 +308,10 @@ int Fun4All_G4_JLeic(
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
     G4Setup(absorberactive, magfield, EDecayType::kAll,
-            do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_drich, do_endcap_electron, magfield_rescale);
+            do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_drich, do_endcap_electron, do_endcap_hadron, magfield_rescale);
 #else
     G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-            do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_drich, do_endcap_electron, magfield_rescale);
+            do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_drich, do_endcap_electron, do_endcap_hadron, magfield_rescale);
 #endif
   }
 
@@ -405,6 +411,15 @@ int Fun4All_G4_JLeic(
     Tracking_Reco();
     Tracking_Eval("trkeval.root");
   }
+   G4HitNtuple *g4h = new G4HitNtuple("G4HitNtuple","/phenix/scratch/pinkenbu/g4hitntuple.root");
+   g4h->AddNode("PIPE", 0);
+   g4h->AddNode("JLVTX",1);
+   g4h->AddNode("JLCTD",2);
+   g4h->AddNode("JLDIRC",3);
+   g4h->AddNode("MAGNET",4);
+   g4h->AddNode("BARRELHCAL",5);
+   se->registerSubsystem(g4h);
+
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
   // if (do_dst_compress) DstCompress(out);
     se->registerOutputManager(out);
