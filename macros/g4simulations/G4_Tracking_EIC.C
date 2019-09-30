@@ -3,9 +3,10 @@
 #include <fun4all/Fun4AllServer.h>
 #include <g4eval/SvtxEvaluator.h>
 #include <g4trackfastsim/PHG4TrackFastSim.h>
+#include <trackreco/PHRaveVertexing.h>
 #include <g4trackfastsim/PHG4TrackFastSimEval.h>
 class SubsysReco;
-R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libg4trackfastsim.so)
 #endif
 
@@ -45,7 +46,7 @@ double Tracking(PHG4Reco *g4Reco, double radius,
   return radius;
 }
 
-void Tracking_Reco(int verbosity = 0)
+void Tracking_Reco(int verbosity = 0, bool displaced_vertex = false)
 {
   //---------------
   // Load libraries
@@ -53,6 +54,7 @@ void Tracking_Reco(int verbosity = 0)
 
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4trackfastsim.so");
+  gSystem->Load("libtrack_reco.so");
 
   //---------------
   // Fun4All server
@@ -63,9 +65,22 @@ void Tracking_Reco(int verbosity = 0)
   PHG4TrackFastSim *kalman = new PHG4TrackFastSim("PHG4TrackFastSim");
   kalman->Verbosity(verbosity);
 
-  kalman->set_use_vertex_in_fitting(true);
-  kalman->set_vertex_xy_resolution(50E-4);
-  kalman->set_vertex_z_resolution(50E-4);
+  if (displaced_vertex)
+  {
+    //use very loose vertex constraint (1cm in sigma) to allow reco of displaced vertex
+    kalman->set_use_vertex_in_fitting(true);
+    kalman->set_vertex_xy_resolution(1);
+    kalman->set_vertex_z_resolution(1);
+    kalman->enable_vertexing(true);
+  }
+  else
+  {
+    // constraint to a primary vertex and use it as part of the fitting level arm
+    kalman->set_use_vertex_in_fitting(true);
+    kalman->set_vertex_xy_resolution(50e-4);
+    kalman->set_vertex_z_resolution(50e-4);
+  }
+
 
   kalman->set_sub_top_node_name("SVTX");
   kalman->set_trackmap_out_name("SvtxTrackMap");
@@ -190,6 +205,15 @@ void Tracking_Reco(int verbosity = 0)
   kalman->add_state_name("FHCAL");
 
   se->registerSubsystem(kalman);
+
+//  if (displaced_vertex)
+//  {
+//    PHRaveVertexing * rave = new PHRaveVertexing ();
+//    rave->set_vertexing_method("kalman-smoothing:1");
+//    rave -> set_over_write_svtxvertexmap(true);
+//    rave->Verbosity(10);
+//    se->registerSubsystem(rave);
+//  }
 
   return;
 }

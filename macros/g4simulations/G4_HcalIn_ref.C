@@ -22,9 +22,9 @@ R__LOAD_LIBRARY(libg4eval.so)
 #endif
 
 //Inner HCal absorber material selector:
-//false - Default, absorber material is SS310
-//true - Choose if you want Aluminum
-const bool inner_hcal_material_Al = false;
+//false - old version, absorber material is SS310
+//true - default Choose if you want Aluminum
+const bool inner_hcal_material_Al = true;
 
 static int inner_hcal_eic = 0;
 
@@ -65,10 +65,15 @@ double HCalInner(PHG4Reco* g4Reco,
   // these are the parameters you can change with their default settings
   // hcal->set_string_param("material","SS310");
   if(inner_hcal_material_Al)
-    {
-      cout <<"HCalInner - construct inner HCal absorber with G4_Al"<<endl;
-      hcal->set_string_param("material","G4_Al");
-    }
+  {
+    cout <<"HCalInner - construct inner HCal absorber with G4_Al"<<endl;
+    hcal->set_string_param("material","G4_Al");
+  }
+  else
+  {
+    cout <<"HCalInner - construct inner HCal absorber with SS310"<<endl;
+    hcal->set_string_param("material","SS310");
+  }
   // hcal->set_double_param("inner_radius", 117.27);
   //-----------------------------------------
   // the light correction can be set in a single call
