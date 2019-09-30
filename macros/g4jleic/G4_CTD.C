@@ -41,6 +41,7 @@ double CTD(PHG4Reco* g4Reco,
 	continue;
       }
       cyl = new PHG4CylinderSubsystem("JLCTD", ilayer);
+      cyl->set_color(0.1, 0, 1., 0.1);
       cyl->set_double_param("radius",radius);
       cyl->set_string_param("material","G4_Si");
       cyl->set_double_param("thickness",si_thickness);
