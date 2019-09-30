@@ -28,9 +28,9 @@ void Tracking_Reco(int verbosity = 0)
   PHG4TrackFastSim *kalman = new PHG4TrackFastSim("PHG4TrackFastSim");
   kalman->Verbosity(verbosity);
 
-  kalman->set_use_vertex_in_fitting(true);
-  kalman->set_vertex_xy_resolution(50E-4);
-  kalman->set_vertex_z_resolution(50E-4);
+  kalman->set_use_vertex_in_fitting(false);
+//  kalman->set_vertex_xy_resolution(50E-4);
+//  kalman->set_vertex_z_resolution(50E-4);
 
   kalman->set_sub_top_node_name("TRACKS");
   kalman->set_trackmap_out_name("KalFitTrackMap");
@@ -39,9 +39,9 @@ void Tracking_Reco(int verbosity = 0)
   kalman->add_phg4hits(
       "G4HIT_JLVTX",                //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Cylinder,  //      const DETECTOR_TYPE phg4dettype,
-      5e-4,                        //      const float radres,
-      5e-4,                        //      const float phires,
-      5e-4,                        //      const float lonres,
+      20e-4,                        //      const float radres,
+      20e-4,                        //      const float phires,
+      20e-4,                        //      const float lonres,
       1,                           //      const float eff,
       0                            //      const float noise
   );
@@ -56,10 +56,10 @@ void Tracking_Reco(int verbosity = 0)
       1,                           //      const float eff,
       0                            //      const float noise
   );
-
+//
   // GEM0, 70um azimuthal resolution, 1cm radial strips
   kalman->add_phg4hits(
-      "G4HIT_GEMH",                    //      const std::string& phg4hitsNames,
+      "G4HIT_GEMHADRON",                    //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
       1. / sqrt(12.),                    //      const float radres,
       70e-4,                             //      const float phires,
@@ -69,7 +69,7 @@ void Tracking_Reco(int verbosity = 0)
   );
   // GEM1, 70um azimuthal resolution, 1cm radial strips
   kalman->add_phg4hits(
-      "G4HIT_GEME",                    //      const std::string& phg4hitsNames,
+      "G4HIT_GEMHADRON",                    //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
       1. / sqrt(12.),                    //      const float radres,
       70e-4,                             //      const float phires,
