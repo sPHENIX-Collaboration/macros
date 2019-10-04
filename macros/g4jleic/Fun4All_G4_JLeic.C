@@ -7,6 +7,7 @@
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllNoSyncDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
+#include <g4histos/G4HitNtuple.h>
 #include <g4main/PHG4ParticleGeneratorBase.h>
 #include <g4main/PHG4ParticleGenerator.h>
 #include <g4main/PHG4SimpleEventGenerator.h>
@@ -19,28 +20,26 @@
 #include <phpythia8/PHPythia8.h>
 #include <phhepmc/Fun4AllHepMCPileupInputManager.h>
 #include <phhepmc/Fun4AllHepMCInputManager.h>
-#include "G4Setup_sPHENIX.C"
-#include "G4_Bbc.C"
-#include "G4_Global.C"
-#include "G4_CaloTrigger.C"
-#include "G4_Jets.C"
-#include "G4_HIJetReco.C"
-#include "G4_DSTReader.C"
+#include "G4Setup_JLeic.C"
 #include "DisplayOn.C"
+#include "G4_Tracking_EIC.C"
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libphhepmc.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
+R__LOAD_LIBRARY(libg4histos.so)
+
 #endif
 
 using namespace std;
 
 
-int Fun4All_G4_sPHENIX(
+int Fun4All_G4_JLeic(
     const int nEvents = 1,
     const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
-    const char *outputFile = "G4sPHENIX.root",
+    const char *outputFile = "G4JLeic.root",
     const char *embed_input_file = "/sphenix/data/data02/review_2017-08-02/sHijing/fm_0-4.list")
 {
 
@@ -72,9 +71,9 @@ int Fun4All_G4_sPHENIX(
 
   // Besides the above flags. One can further choose to further put in following particles in Geant4 simulation
   // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
-  const bool particles = true && !readhits;
+  const bool particles = false && !readhits;
   // or gun/ very simple single particle gun generator
-  const bool usegun = false && !readhits;
+  const bool usegun = true && !readhits;
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
   const bool upsilons = false && !readhits;
   const int num_upsilons_per_event = 1;  // can set more than 1 upsilon per event, each has a unique embed flag
@@ -86,63 +85,27 @@ int Fun4All_G4_sPHENIX(
   // What to run
   //======================
 
-  bool do_bbc = true;
-
   bool do_pipe = true;
 
-  bool do_tracking = true;
-  bool do_tracking_cell = do_tracking && true;
-  bool do_tracking_track = do_tracking_cell && true;
-  bool do_tracking_eval = do_tracking_track && true;
+  bool do_ctd = true;
 
-  bool do_pstof = false;
+  bool do_vtx = true;
 
-  bool do_cemc = true;
-  bool do_cemc_cell = do_cemc && true;
-  bool do_cemc_twr = do_cemc_cell && true;
-  bool do_cemc_cluster = do_cemc_twr && true;
-  bool do_cemc_eval = do_cemc_cluster && true;
-
-  bool do_hcalin = true;
-  bool do_hcalin_cell = do_hcalin && true;
-  bool do_hcalin_twr = do_hcalin_cell && true;
-  bool do_hcalin_cluster = do_hcalin_twr && true;
-  bool do_hcalin_eval = do_hcalin_cluster && true;
+  bool do_jldirc = true;
 
   bool do_magnet = true;
 
-  bool do_hcalout = true;
-  bool do_hcalout_cell = do_hcalout && true;
-  bool do_hcalout_twr = do_hcalout_cell && true;
-  bool do_hcalout_cluster = do_hcalout_twr && true;
-  bool do_hcalout_eval = do_hcalout_cluster && true;
+  bool do_barrel_hcal = true;
 
-  // forward EMC
-  bool do_FEMC = false;
-  bool do_FEMC_cell = do_FEMC && true;
-  bool do_FEMC_twr = do_FEMC_cell && true;
-  bool do_FEMC_cluster = do_FEMC_twr && true;
+  bool do_gem = true;
 
-  //! forward flux return plug door. Out of acceptance and off by default.
-  bool do_plugdoor = false;
+  bool do_drich = true;
 
-  bool do_global = true;
-  bool do_global_fastsim = true;
+  bool do_endcap_electron = true;
 
-  bool do_calotrigger = true && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
+  bool do_endcap_hadron = true;
 
-  bool do_jet_reco = true;
-  bool do_jet_eval = do_jet_reco && true;
-
-  // HI Jet Reco for p+Au / Au+Au collisions (default is false for
-  // single particle / p+p-only simulations, or for p+Au / Au+Au
-  // simulations which don't particularly care about jets)
-  bool do_HIjetreco = false && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
-
-  bool do_dst_compress = false;
-
-  //Option to convert DST to human command readable TTree for quick poke around the outputs
-  bool do_DSTReader = false;
+  bool do_tracking = false;
   //---------------
   // Load libraries
   //---------------
@@ -154,13 +117,14 @@ int Fun4All_G4_sPHENIX(
   gSystem->Load("libg4eval.so");
   gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup
-  gROOT->LoadMacro("G4Setup_sPHENIX.C");
-  G4Init(do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor, do_FEMC);
+  gROOT->LoadMacro("G4Setup_JLeic.C");
+  G4Init(do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_drich, do_endcap_electron, do_endcap_hadron);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
-  //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
-  const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root"); // default map from the calibration database
-  const float magfield_rescale = -1.4 / 1.5;                                     // scale the map to a 1.4 T field
+
+//  const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root"); // default map from the calibration database
+  const string magfield = "2.0"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
+  const float magfield_rescale = 1; // scale map if needed
 
   //---------------
   // Fun4All server
@@ -184,7 +148,7 @@ int Fun4All_G4_sPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  //  rc->set_IntFlag("RANDOMSEED", 12345);
+    rc->set_IntFlag("RANDOMSEED", 12345);
 
   //-----------------
   // Event generation
@@ -252,7 +216,7 @@ int Fun4All_G4_sPHENIX(
         gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
                                               PHG4SimpleEventGenerator::Uniform,
                                               PHG4SimpleEventGenerator::Uniform);
-        gen->set_vertex_distribution_mean(0.0, 0.0, 0.0);
+        gen->set_vertex_distribution_mean(0.0, 0.0, jleic_shiftz);
         gen->set_vertex_distribution_width(0.0, 0.0, 5.0);
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
@@ -280,10 +244,10 @@ int Fun4All_G4_sPHENIX(
       //	  se->registerSubsystem(gun);
       PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
       pgen->set_name("geantino");
-      pgen->set_z_range(0, 0);
+      pgen->set_z_range(-40, -40);
       pgen->set_eta_range(0.01, 0.01);
       pgen->set_mom_range(10, 10);
-      pgen->set_phi_range(5.3 / 180. * TMath::Pi(), 5.7 / 180. * TMath::Pi());
+      pgen->set_phi_range(-1 * TMath::Pi(), 1 * TMath::Pi());
       se->registerSubsystem(pgen);
     }
 
@@ -344,115 +308,12 @@ int Fun4All_G4_sPHENIX(
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
     G4Setup(absorberactive, magfield, EDecayType::kAll,
-            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_FEMC, magfield_rescale);
+            do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_drich, do_endcap_electron, do_endcap_hadron, magfield_rescale);
 #else
     G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_FEMC, magfield_rescale);
+            do_ctd, do_vtx, do_magnet, do_pipe, do_gem, do_jldirc, do_barrel_hcal, do_drich, do_endcap_electron, do_endcap_hadron, magfield_rescale);
 #endif
   }
-
-  //---------
-  // BBC Reco
-  //---------
-
-  if (do_bbc)
-  {
-    gROOT->LoadMacro("G4_Bbc.C");
-    BbcInit();
-    Bbc_Reco();
-  }
-  //------------------
-  // Detector Division
-  //------------------
-
-  if (do_tracking_cell) Tracking_Cells();
-
-  if (do_cemc_cell) CEMC_Cells();
-
-  if (do_hcalin_cell) HCALInner_Cells();
-
-  if (do_hcalout_cell) HCALOuter_Cells();
-
-  //-----------------------------
-  // CEMC towering and clustering
-  //-----------------------------
-
-  if (do_cemc_twr) CEMC_Towers();
-  if (do_cemc_cluster) CEMC_Clusters();
-
-  //-----------------------------
-  // HCAL towering and clustering
-  //-----------------------------
-
-  if (do_hcalin_twr) HCALInner_Towers();
-  if (do_hcalin_cluster) HCALInner_Clusters();
-
-  if (do_hcalout_twr) HCALOuter_Towers();
-  if (do_hcalout_cluster) HCALOuter_Clusters();
-
-  if (do_dst_compress) ShowerCompress();
-
-  //--------------
-  // SVTX tracking
-  //--------------
-
-  if (do_tracking_track) Tracking_Reco();
-
-  //-----------------
-  // Global Vertexing
-  //-----------------
-
-  if (do_global)
-  {
-    gROOT->LoadMacro("G4_Global.C");
-    Global_Reco();
-  }
-
-  else if (do_global_fastsim)
-  {
-    gROOT->LoadMacro("G4_Global.C");
-    Global_FastSim();
-  }
-
-  //-----------------
-  // Calo Trigger Simulation
-  //-----------------
-
-  if (do_calotrigger)
-  {
-    gROOT->LoadMacro("G4_CaloTrigger.C");
-    CaloTrigger_Sim();
-  }
-
-  //---------
-  // Jet reco
-  //---------
-
-  if (do_jet_reco)
-  {
-    gROOT->LoadMacro("G4_Jets.C");
-    Jet_Reco();
-  }
-
-  if (do_HIjetreco)
-  {
-    gROOT->LoadMacro("G4_HIJetReco.C");
-    HIJetReco();
-  }
-
-  //----------------------
-  // Simulation evaluation
-  //----------------------
-
-  if (do_tracking_eval) Tracking_Eval(string(outputFile) + "_g4svtx_eval.root");
-
-  if (do_cemc_eval) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
-
-  if (do_hcalin_eval) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
-
-  if (do_hcalout_eval) HCALOuter_Eval(string(outputFile) + "_g4hcalout_eval.root");
-
-  if (do_jet_eval) Jet_Eval(string(outputFile) + "_g4jet_eval.root");
 
   //--------------
   // IO management
@@ -529,42 +390,39 @@ int Fun4All_G4_sPHENIX(
 
     double time_window_minus = -35000;
     double time_window_plus = 35000;
-
+/*
     if (do_tracking)
     {
       // This gets the default drift velocity only! 
       PHG4TpcElectronDrift *dr = (PHG4TpcElectronDrift *)se->getSubsysReco("PHG4TpcElectronDrift");
       assert(dr);
       double TpcDriftVelocity = dr->get_double_param("drift_velocity");
-      time_window_minus = -105.5 / TpcDriftVelocity;  // ns
-      time_window_plus = 105.5 / TpcDriftVelocity;    // ns;
     }
+*/
+      time_window_minus = -105.5 / 5;  // ns
+      time_window_plus = 105.5 / 5;    // ns;
     pileup->set_time_window(time_window_minus, time_window_plus);  // override timing window in ns
     cout << "Collision pileup enabled using file " << pileupfile << " with collision rate " << pileup_collision_rate
          << " and time window " << time_window_minus << " to " << time_window_plus << endl;
   }
 
-  if (do_DSTReader)
+  if (do_tracking)
   {
-    //Convert DST to human command readable TTree for quick poke around the outputs
-    gROOT->LoadMacro("G4_DSTReader.C");
-
-    G4DSTreader(outputFile,  //
-                /*int*/ absorberactive,
-                /*bool*/ do_tracking,
-                /*bool*/ do_pstof,
-                /*bool*/ do_cemc,
-                /*bool*/ do_hcalin,
-                /*bool*/ do_magnet,
-                /*bool*/ do_hcalout,
-                /*bool*/ do_cemc_twr,
-                /*bool*/ do_hcalin_twr,
-                /*bool*/ do_hcalout_twr);
+    Tracking_Reco();
+    Tracking_Eval("trkeval.root");
   }
+   G4HitNtuple *g4h = new G4HitNtuple("G4HitNtuple","/phenix/scratch/pinkenbu/g4hitntuple.root");
+   g4h->AddNode("PIPE", 0);
+   g4h->AddNode("JLVTX",1);
+   g4h->AddNode("JLCTD",2);
+   g4h->AddNode("JLDIRC",3);
+   g4h->AddNode("MAGNET",4);
+   g4h->AddNode("BARRELHCAL",5);
+   se->registerSubsystem(g4h);
 
-  //  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
   // if (do_dst_compress) DstCompress(out);
-  //  se->registerOutputManager(out);
+    se->registerOutputManager(out);
 
   //-----------------
   // Event processing

@@ -101,6 +101,7 @@ int Fun4All_G4_EICDetector(
   bool do_tracking_cell = do_tracking && true;
   bool do_tracking_track = do_tracking_cell && true;
   bool do_tracking_eval = do_tracking_track && true; // in order to use this evaluation, please build this analysis module analysis/blob/master/Tracking/FastTrackingEval/
+  bool do_vertex_finding = false; // this option exclude vertex in the track fitting and use RAVE to reconstruct primary and 2ndary vertexes
 
   bool do_pstof = false;
 
@@ -194,14 +195,14 @@ int Fun4All_G4_EICDetector(
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root"); // default map from the calibration database
-  const float magfield_rescale = 1.4/1.5; // scale the map to a 1.4 T field
+  const float magfield_rescale = -1.4/1.5; // scale the map to a 1.4 T field. Reverse field sign to get around a bug in RAVE
 
   //---------------
   // Fun4All server
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-//  se->Verbosity(01); // uncomment for batch production running with minimal output messages
+  // se->Verbosity(01); // uncomment for batch production running with minimal output messages
   // se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
 
   // just if we set some flags somewhere in this macro
@@ -297,6 +298,7 @@ int Fun4All_G4_EICDetector(
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
       gen->add_particles("pi-",1); // mu+,e+,proton,pi+,Upsilon
       //gen->add_particles("pi+",100); // 100 pion option
+
       if (readhepmc)
         {
           gen->set_reuse_existing_vertex(true);
@@ -472,7 +474,7 @@ int Fun4All_G4_EICDetector(
   // SVTX tracking
   //--------------
 
-  if (do_tracking_track) Tracking_Reco();
+  if (do_tracking_track) Tracking_Reco(0, do_vertex_finding);
 
   //-----------------
   // Global Vertexing

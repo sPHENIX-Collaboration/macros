@@ -1,14 +1,15 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 #include "G4_Pipe.C"
-#include "G4_Tracking.C"
-#include "G4_PSTOF.C"
-#include "G4_CEmc_Spacal.C"
-#include "G4_HcalIn_ref.C"
+#include "G4_VTX.C"
+#include "G4_CTD.C"
 #include "G4_Magnet.C"
-#include "G4_HcalOut_ref.C"
-#include "G4_PlugDoor.C"
-#include "G4_FEMC.C"
+#include "G4_Gem.C"
+#include "G4_JLDIRC.C"
+#include "G4_Barrel_Hcal.C"
+#include "G4_DRich.C"
+#include "G4_EndCap_Electron.C"
+#include "G4_EndCap_Hadron.C"
 
 #include <g4eval/PHG4DstCompressReco.h>
 #include <fun4all/Fun4AllServer.h>
@@ -32,15 +33,16 @@ double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
 // without running into unresolved libraries and include files
 void RunLoadTest() {}
 
-void G4Init(const bool do_tracking = true,
-      const bool do_pstof = true,
-	    const bool do_cemc = true,
-	    const bool do_hcalin = true,
+void G4Init(const bool do_ctd = true,
+            const bool do_vtx = true,
 	    const bool do_magnet = true,
-	    const bool do_hcalout = true,
 	    const bool do_pipe = true,
-	    const bool do_plugdoor = false,
-	    const bool do_FEMC = false
+            const bool do_gem = true,
+            const bool do_jldirc = true,
+            const bool do_barrel_hcal = true,
+            const bool do_drich = true,
+            const bool do_endcap_electron = true,
+            const bool do_endcap_hadron = true
 	    )
   {
 
@@ -51,72 +53,71 @@ void G4Init(const bool do_tracking = true,
       gROOT->LoadMacro("G4_Pipe.C");
       PipeInit();
     }  
-  if (do_tracking)
+  if (do_ctd)
     {
-      gROOT->LoadMacro("G4_Tracking.C"); 
-      TrackingInit();
-    }
-
-  if (do_pstof) 
-    {
-      gROOT->LoadMacro("G4_PSTOF.C");
-      PSTOFInit();
-    }
-
-  if (do_cemc)
-    {
-      gROOT->LoadMacro("G4_CEmc_Spacal.C");
-      CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
-    }
-
-  if (do_hcalin) 
-    {
-      gROOT->LoadMacro("G4_HcalIn_ref.C");
-      HCalInnerInit();
-    }
-
+      gROOT->LoadMacro("G4_CTD.C");
+      CTDInit();
+    }  
   if (do_magnet)
     {
       gROOT->LoadMacro("G4_Magnet.C");
       MagnetInit();
     }
-  if (do_hcalout)
+  if (do_gem)
     {
-      gROOT->LoadMacro("G4_HcalOut_ref.C");
-      HCalOuterInit();
+      gROOT->LoadMacro("G4_Gem.C");
+      GemInit();
+    }
+  if (do_jldirc)
+    {
+      gROOT->LoadMacro("G4_JLDIRC.C");
+      JLDIRCInit();
     }
 
-  if (do_pipe)
+  if (do_barrel_hcal)
     {
-      gROOT->LoadMacro("G4_PlugDoor.C");
-      PlugDoorInit();
+      gROOT->LoadMacro("G4_Barrel_Hcal.C");
+      Barrel_HcalInit();
     }
-  if (do_FEMC)
+
+  if (do_drich)
     {
-      gROOT->LoadMacro("G4_FEMC.C");
-      FEMCInit();
+      gROOT->LoadMacro("G4_DRich.C");
+      DRichInit();
+    }
+
+  if (do_endcap_electron)
+    {
+      gROOT->LoadMacro("G4_EndCap_Electron.C");
+      EndCap_ElectronInit();
+    }
+
+  if (do_endcap_hadron)
+    {
+      gROOT->LoadMacro("G4_EndCap_Hadron.C");
+      EndCap_HadronInit();
     }
 
 }
 
 
 int G4Setup(const int absorberactive = 0,
-	    const string &field ="1.5",
+	    const string &field ="2.0",
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 	    const EDecayType decayType = EDecayType::kAll,
 #else
 	    const EDecayType decayType = TPythia6Decayer::kAll,
 #endif
-	    const bool do_tracking = true,
-	    const bool do_pstof = true,
-	    const bool do_cemc = true,
-	    const bool do_hcalin = true,
+	    const bool do_ctd = true,
+	    const bool do_vtx = true,
 	    const bool do_magnet = true,
-	    const bool do_hcalout = true,
-      const bool do_pipe = true,
-      const bool do_plugdoor = false,
-//	    const bool do_plugdoor = true,
-	    const bool do_FEMC = false, 
+            const bool do_pipe = true,
+            const bool do_gem = true,
+            const bool do_jldirc = true,
+            const bool do_barrel_hcal = true,
+            const bool do_drich = true,
+            const bool do_endcap_electron = true,
+            const bool do_endcap_hadron = true,
 	    const float magfield_rescale = 1.0) {
   
   //---------------
@@ -170,49 +171,46 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // PIPE
   if (do_pipe) radius = Pipe(g4Reco, radius, absorberactive);
-  
-  //----------------------------------------
-  // TRACKING
-  if (do_tracking) radius = Tracking(g4Reco, radius, absorberactive);
 
   //----------------------------------------
-  // PSTOF
-  
-  if (do_pstof) radius = PSTOF(g4Reco, radius, absorberactive);
+  // VTX
+  if (do_vtx) radius = VTX(g4Reco, radius, absorberactive);
 
   //----------------------------------------
-  // CEMC
-//
-  if (do_cemc) radius = CEmc(g4Reco, radius, 8, absorberactive);
-//  if (do_cemc) radius = CEmc_Vis(g4Reco, radius, 8, absorberactive);// for visualization substructure of SPACAL, slow to render
+  // CTD
+  if (do_ctd) radius = CTD(g4Reco, radius, absorberactive);
   
   //----------------------------------------
-  // HCALIN
+  // DIRC
+  if (do_jldirc) radius = JLDIRC(g4Reco, radius, absorberactive);
   
-  if (do_hcalin) radius = HCalInner(g4Reco, radius, 4, absorberactive);
-
   //----------------------------------------
   // MAGNET
   
   if (do_magnet) radius = Magnet(g4Reco, radius, 0, absorberactive);
 
   //----------------------------------------
-  // HCALOUT
-  
-  if (do_hcalout) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
+  // Barrel Hcal
+ 
+  if (do_barrel_hcal) radius = Barrel_Hcal(g4Reco, radius, 0, absorberactive);
+
 
   //----------------------------------------
-  // sPHENIX forward flux return door
-  if (do_plugdoor) PlugDoor(g4Reco, absorberactive);
+  // Gem (hadron and electron going side
+  
+  if (do_gem) double tmp = Gem(g4Reco, radius, 0, absorberactive);
 
-  // forward EMC
-  if(do_FEMC) FEMCSetup(g4Reco, absorberactive);
+  if (do_drich) double tmp =  DRich(g4Reco, radius, 0, absorberactive);
 
+  if (do_endcap_electron) double tmp =  EndCap_Electron(g4Reco, radius, 0, absorberactive);
+
+  if (do_endcap_hadron) double tmp =  EndCap_Hadron(g4Reco, radius, 0, absorberactive);
+  radius = 200.;
   //----------------------------------------
   // BLACKHOLE
   
   // swallow all particles coming out of the backend of sPHENIX
-  PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
+  PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 0);
 blackhole->set_double_param("radius",radius + 10); // add 10 cm
 
   blackhole->set_int_param("lengthviarapidity",0);
@@ -221,13 +219,15 @@ blackhole->set_double_param("radius",radius + 10); // add 10 cm
   blackhole->set_double_param("thickness",0.1); // it needs some thickness
   blackhole->SetActive(); // always see what leaks out
   blackhole->OverlapCheck(overlapcheck);
+  blackhole->SuperDetector("BLACKHOLE");
   g4Reco->registerSubsystem(blackhole);
 
   //----------------------------------------
   // FORWARD BLACKHOLEs
   // +Z
   blackhole = new PHG4CylinderSubsystem("BH_FORWARD_PLUS", 1);
-  blackhole->SuperDetector("BH_FORWARD_PLUS");
+  blackhole->SuperDetector("BLACKHOLE");
+//  blackhole->SuperDetector("BH_FORWARD_PLUS");
   blackhole->set_double_param("radius",0); // add 10 cm
   blackhole->set_int_param("lengthviarapidity",0);
   blackhole->set_double_param("length",0.1); // make it cover the world in length
@@ -238,8 +238,9 @@ blackhole->set_double_param("radius",radius + 10); // add 10 cm
   blackhole->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(blackhole);
 
-  blackhole = new PHG4CylinderSubsystem("BH_FORWARD_NEG", 1);
-  blackhole->SuperDetector("BH_FORWARD_NEG");
+  blackhole = new PHG4CylinderSubsystem("BH_FORWARD_NEG", 2);
+  blackhole->SuperDetector("BLACKHOLE");
+//  blackhole->SuperDetector("BH_FORWARD_NEG");
   blackhole->set_double_param("radius",0); // add 10 cm
   blackhole->set_int_param("lengthviarapidity",0);
   blackhole->set_double_param("length",0.1); // make it cover the world in length
@@ -254,76 +255,4 @@ blackhole->set_double_param("radius",radius + 10); // add 10 cm
   g4Reco->registerSubsystem(truth);
   se->registerSubsystem( g4Reco );
   return 0;
-}
-
-void ShowerCompress(int verbosity = 0) {
-
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4eval.so");
-
-  Fun4AllServer *se = Fun4AllServer::instance();
-  
-  PHG4DstCompressReco* compress = new PHG4DstCompressReco("PHG4DstCompressReco");
-  compress->AddHitContainer("G4HIT_PIPE");
-  compress->AddHitContainer("G4HIT_SVTXSUPPORT");
-  compress->AddHitContainer("G4HIT_CEMC_ELECTRONICS");
-  compress->AddHitContainer("G4HIT_CEMC");
-  compress->AddHitContainer("G4HIT_ABSORBER_CEMC");
-  compress->AddHitContainer("G4HIT_CEMC_SPT");
-  compress->AddHitContainer("G4HIT_ABSORBER_HCALIN");
-  compress->AddHitContainer("G4HIT_HCALIN");
-  compress->AddHitContainer("G4HIT_HCALIN_SPT");
-  compress->AddHitContainer("G4HIT_MAGNET");
-  compress->AddHitContainer("G4HIT_ABSORBER_HCALOUT");
-  compress->AddHitContainer("G4HIT_HCALOUT");
-  compress->AddHitContainer("G4HIT_BH_1");
-  compress->AddHitContainer("G4HIT_BH_FORWARD_PLUS");
-  compress->AddHitContainer("G4HIT_BH_FORWARD_NEG");
-  compress->AddCellContainer("G4CELL_CEMC");
-  compress->AddCellContainer("G4CELL_HCALIN");
-  compress->AddCellContainer("G4CELL_HCALOUT");
-  compress->AddTowerContainer("TOWER_SIM_CEMC");
-  compress->AddTowerContainer("TOWER_RAW_CEMC");
-  compress->AddTowerContainer("TOWER_CALIB_CEMC");
-  compress->AddTowerContainer("TOWER_SIM_HCALIN");
-  compress->AddTowerContainer("TOWER_RAW_HCALIN");
-  compress->AddTowerContainer("TOWER_CALIB_HCALIN");
-  compress->AddTowerContainer("TOWER_SIM_HCALOUT");
-  compress->AddTowerContainer("TOWER_RAW_HCALOUT");
-  compress->AddTowerContainer("TOWER_CALIB_HCALOUT");
-  compress->AddHitContainer("G4HIT_FEMC");
-  compress->AddHitContainer("G4HIT_ABSORBER_FEMC");
-  compress->AddCellContainer("G4CELL_FEMC");
-  compress->AddTowerContainer("TOWER_SIM_FEMC");
-  compress->AddTowerContainer("TOWER_RAW_FEMC");
-  compress->AddTowerContainer("TOWER_CALIB_FEMC");
-  se->registerSubsystem(compress);
-  
-  return; 
-}
-
-void DstCompress(Fun4AllDstOutputManager* out) {
-  if (out) {
-    out->StripNode("G4HIT_PIPE");
-    out->StripNode("G4HIT_SVTXSUPPORT");
-    out->StripNode("G4HIT_CEMC_ELECTRONICS");
-    out->StripNode("G4HIT_CEMC");
-    out->StripNode("G4HIT_ABSORBER_CEMC");
-    out->StripNode("G4HIT_CEMC_SPT");
-    out->StripNode("G4HIT_ABSORBER_HCALIN");
-    out->StripNode("G4HIT_HCALIN");
-    out->StripNode("G4HIT_HCALIN_SPT");
-    out->StripNode("G4HIT_MAGNET");
-    out->StripNode("G4HIT_ABSORBER_HCALOUT");
-    out->StripNode("G4HIT_HCALOUT");
-    out->StripNode("G4HIT_BH_1");
-    out->StripNode("G4HIT_BH_FORWARD_PLUS");
-    out->StripNode("G4HIT_BH_FORWARD_NEG");
-    out->StripNode("G4CELL_CEMC");
-    out->StripNode("G4CELL_HCALIN");
-    out->StripNode("G4CELL_HCALOUT");
-    out->StripNode("G4HIT_FEMC");
-    out->StripNode("G4HIT_ABSORBER_FEMC");
-    out->StripNode("G4CELL_FEMC");
-  }
 }
