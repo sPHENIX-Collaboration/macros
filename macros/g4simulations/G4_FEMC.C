@@ -68,10 +68,10 @@ FEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
   mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
 
   cout << mapping_femc.str() << endl;
-
   femc->SetTowerMappingFile( mapping_femc.str() );
   femc->OverlapCheck(overlapcheck);
-
+  femc->SetActive();
+  femc->SuperDetector("FEMC");
   if (absorberactive)  femc->SetAbsorberActive();
 
   g4Reco->registerSubsystem( femc );
