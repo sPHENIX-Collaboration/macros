@@ -92,7 +92,7 @@ void G4Init(bool do_svtx = true,
 
   if (do_FEMC)
     {
-      gROOT->LoadMacro("G4_FEMC.C");
+      gROOT->LoadMacro("G4_FEMC_EIC.C");
       FEMCInit();
     }
 
