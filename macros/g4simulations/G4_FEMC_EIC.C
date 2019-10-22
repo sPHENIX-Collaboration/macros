@@ -63,8 +63,7 @@ FEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
   ostringstream mapping_femc;
 
-  // fsPHENIX ECAL
-  femc->SetfsPHENIXDetector(); 
+  
   mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
 
   cout << mapping_femc.str() << endl;
