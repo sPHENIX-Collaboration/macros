@@ -9,7 +9,7 @@
 #include "G4_Magnet.C"
 #include "G4_HcalOut_ref.C"
 #include "G4_PlugDoor_EIC.C"
-#include "G4_FEMC.C"
+#include "G4_FEMC_EIC.C"
 #include "G4_FHCAL.C"
 #include "G4_EEMC.C"
 #include "G4_DIRC.C"
