@@ -4,6 +4,19 @@
 #include <g4main/PHG4Reco.h>
 #endif
 
+// This starts the QT based G4 gui which takes control
+// when x'ed out it will return a pointer to PHG4Reco so
+// the gui can be startrd again
+PHG4Reco *QTGui()
+{
+  Fun4AllServer *se = Fun4AllServer::instance();
+  PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
+  g4->InitRun(se->topNode());
+  g4->ApplyDisplayAction();
+  g4->StartGui();
+  return g4;
+}
+
 // stupid macro to turn on the geant4 display
 // we ask Fun4All for a pointer to PHG4Reco
 // using the ApplyCommand will start up the
