@@ -13,5 +13,8 @@
 # Initialize kernel
 /run/initialize
 #
-# Visualization setting
-/control/execute vis.mac
+# create empty scene
+#
+/vis/scene/create
+# open graphics (opengl QT)
+/vis/open OGL
