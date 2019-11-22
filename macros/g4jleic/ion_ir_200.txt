@@ -1,0 +1,83 @@
+Detector region ion elements																								
+momentum	200	GeV/c																						
+																								
+Element name	Type	Length [m]	Good field half-aperture [cm]	Inner Half-A [cm]	Outer Radius [cm]	Dipole field [T]		Quadrupole field [T/m]		Sextupole [T/m^2]	Solenoid [T]	X center [m]	Y center [m]	Z center [m]	Theta center [rad]	Phi [rad]								
+Upstream elements						Bx	By	Normal	Skew															
+iASUS	SOLENOID	1.6	3	4	12	0	0	0	0	0	0	0.639733367	0	-12.78400333	-0.05	0								
+iQUS3S	QUADRUPOLE	0.5	3	4	12	0	0	0	0	0	0	0.567263571	0	-11.33581546	-0.05	0								
+iQUS2	QUADRUPOLE	2.1	3	4	12	0	0	93.39904288	0	0	0	0.492294817	0	-9.837690066	-0.05	0								
+iQUS2S	QUADRUPOLE	0.5	2	3	10	0	0	0	0	0	0	0.417326063	0	-8.339564674	-0.05	0								
+iQUS1b	QUADRUPOLE	1.45	2	3	10	0	0	-95.10673243	0	0	0	0.35860054	0	-7.166033119	-0.05	0								
+iQUS1S	QUADRUPOLE	0.5	2	3	10	0	0	0	0	0	0	0.299875016	0	-5.992501562	-0.05	0								
+iQUS1A	QUADRUPOLE	1.45	2	3	10	0	0	-95.10673243	0	0	0	0.241149492	0	-4.818970007	-0.05	0								
+iCUS1	KICKER	0.3	2	3	10	0	0	0	0	0	0	0.187421885	0	-3.745313477	-0.05	0								
+iCUS2	KICKER	0.3	2	3	10	0	0	0	0	0	0	0.1624323	0	-3.245938346	-0.05	0								
+
+Downstream elements 																								
+iBDS1a	RBEND	1.499999437	4	38.5	48.5	0	1.3342564	0	0	0	0	-0.288222883	0	5.742771125	-0.0515	0
+iQDS1a	QUADRUPOLE	2.25	4	9.2	23.1	0	0	-37.24620638	0	0	0	-0.413196359	0	8.114480214	-0.053	0								
+iQDS1S	QUADRUPOLE	0.5	4	9.9	24.8	0	0	0	0	0	0	-0.496632284	0	9.687268644	-0.053	0								
+iQDS1b	QUADRUPOLE	2.25	4	12.3	31.0	0	0	-37.24620638	0	0	0	-0.58006821	0	11.26005708	-0.053	0								
+iQDS2S	QUADRUPOLE	0.5	4	13.0	32.7	0	0	0	0	0	0	-0.663504135	0	12.83284551	-0.053	0								
+iQDS2	QUADRUPOLE	4.5	4	17.7	44.4	0	0	25.96076478	0	0	0	-0.80653715	0	15.52905425	-0.053	0								
+iQDS3S	QUADRUPOLE	0.5	4	18.4	46.2	0	0	0	0	0	0	-0.949570164	0	18.22526298	-0.053	0								
+iASDS	SOLENOID	1.2	4	19.8	49.7	0	0	0	0	0	0	-1.005194115	0	19.2737886	-0.053	0
+iBDS2	RBEND	7.999063697	4	40	90	0	-4.419724325	0	0	0	0	-1.270096426	0	25.76770364	-0.0265	0								
+iBDS3	RBEND	6.499239262	4.5	4.5	30	0	5.439660708	0	0	0	0	-1.414164881	0	44.56372384	-0.0265	0								
+iQDS4	QUADRUPOLE	0.8	3.5	4.5	30	0	0	150.2308213	0	0	0	-1.791435874	0	52.89448481	-0.053	0								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
