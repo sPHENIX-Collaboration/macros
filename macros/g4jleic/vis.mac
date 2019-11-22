@@ -25,8 +25,8 @@
 # the X server. I've heard similar stories about OGLIX on other
 # machines. You might have to play with it. GEANT prints out a
 # list of available graphics systems at some point.
-#/vis/open OGLIX
-/vis/open OGLSX 1200x900-0+0
+/vis/open OGLIX 1200x900-0+0
+#/vis/open OGLSX 1200x900-0+0
 # increase display limit for more complex detectors
 /vis/ogl/set/displayListLimit 500000
 /vis/viewer/set/viewpointThetaPhi 240 -10
