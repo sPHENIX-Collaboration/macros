@@ -7,6 +7,7 @@
 #include "G4_Gem.C"
 #include "G4_JLDIRC.C"
 #include "G4_Barrel_Hcal.C"
+#include "G4_BeamLine.C"
 #include "G4_DRich.C"
 #include "G4_EndCap_Electron.C"
 #include "G4_EndCap_Hadron.C"
@@ -42,7 +43,8 @@ void G4Init(const bool do_ctd = true,
             const bool do_barrel_hcal = true,
             const bool do_drich = true,
             const bool do_endcap_electron = true,
-            const bool do_endcap_hadron = true
+            const bool do_endcap_hadron = true,
+            const bool do_beamline = true
 	    )
   {
 
@@ -97,6 +99,11 @@ void G4Init(const bool do_ctd = true,
       gROOT->LoadMacro("G4_EndCap_Hadron.C");
       EndCap_HadronInit();
     }
+  if (do_beamline)
+  {
+      gROOT->LoadMacro("G4_BeamLine.C");
+      BeamLineInit();
+  }
 
 }
 
@@ -118,6 +125,7 @@ int G4Setup(const int absorberactive = 0,
             const bool do_drich = true,
             const bool do_endcap_electron = true,
             const bool do_endcap_hadron = true,
+            const bool do_beamline = true,
 	    const float magfield_rescale = 1.0) {
   
   //---------------
@@ -205,6 +213,8 @@ int G4Setup(const int absorberactive = 0,
   if (do_endcap_electron) double tmp =  EndCap_Electron(g4Reco, radius, 0, absorberactive);
 
   if (do_endcap_hadron) double tmp =  EndCap_Hadron(g4Reco, radius, 0, absorberactive);
+
+  if (do_beamline) double tmp = BeamLine(g4Reco, radius, 0, absorberactive);
   radius = 200.;
   //----------------------------------------
   // BLACKHOLE
