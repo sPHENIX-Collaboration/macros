@@ -141,6 +141,9 @@ int Fun4All_G4_sPHENIX(
   // simulations which don't particularly care about jets)
   bool do_HIjetreco = false && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
 
+  // 3-D topoCluster reconstruction in both HCal layers -- requires towers from both
+  bool do_topocluster = false && do_hcalin_twr && do_hcalout_twr;
+
   bool do_dst_compress = false;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
@@ -449,6 +452,12 @@ int Fun4All_G4_sPHENIX(
   {
     gROOT->LoadMacro("G4_HIJetReco.C");
     HIJetReco();
+  }
+
+  if (do_topoCluster)
+  {
+    gROOT->LoadMacro("G4_TopoClusterReco.C");
+    TopoClusterReco();
   }
 
   //----------------------
