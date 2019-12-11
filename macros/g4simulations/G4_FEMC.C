@@ -5,6 +5,7 @@
 #include <g4calo/RawTowerBuilderByHitIndex.h>
 #include <g4calo/RawTowerDigitizer.h>
 #include <caloreco/RawClusterBuilderFwd.h>
+#include <caloreco/RawClusterBuilderTemplateFEMC.h>
 #include <caloreco/RawTowerCalibration.h>
 #include <g4detectors/PHG4ForwardCalCellReco.h>
 #include <g4detectors/PHG4ForwardEcalSubsystem.h>
@@ -16,6 +17,18 @@ R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 #endif
 
+
+
+enum enu_Femc_clusterizer
+{
+  kFemcGraphClusterizer,
+  kFemcTemplateClusterizer
+};
+
+//template clusterizer, as developed by Sasha Bazilevsky
+enu_Femc_clusterizer Femc_clusterizer = kFemcTemplateClusterizer;
+// graph clusterizer
+//enu_Femc_clusterizer Femc_clusterizer = kFemcGraphClusterizer;
 
 void
 FEMCInit()
@@ -55,10 +68,10 @@ FEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
   mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
 
   cout << mapping_femc.str() << endl;
-
   femc->SetTowerMappingFile( mapping_femc.str() );
   femc->OverlapCheck(overlapcheck);
-
+  femc->SetActive();
+  femc->SuperDetector("FEMC");
   if (absorberactive)  femc->SetAbsorberActive();
 
   g4Reco->registerSubsystem( femc );
@@ -193,13 +206,35 @@ void FEMC_Clusters(int verbosity = 0) {
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
-  
-  RawClusterBuilderFwd* ClusterBuilder = new RawClusterBuilderFwd("FEMCRawClusterBuilderFwd");
-  ClusterBuilder->Detector("FEMC");
-  ClusterBuilder->Verbosity(verbosity);
-  ClusterBuilder->set_threshold_energy(0.010);  
-  se->registerSubsystem( ClusterBuilder );
-  
+
+
+  if ( Femc_clusterizer == kFemcTemplateClusterizer )
+    {
+      RawClusterBuilderTemplateFEMC *ClusterBuilder = new RawClusterBuilderTemplateFEMC("EmcRawClusterBuilderTemplateFEMC");
+      ClusterBuilder->Detector("FEMC");
+      ClusterBuilder->Verbosity(verbosity);
+      ClusterBuilder->set_threshold_energy(0.020); // This threshold should be the same as in FEMCprof_Thresh**.root file below
+      std::string femc_prof = getenv("CALIBRATIONROOT");
+      femc_prof += "/EmcProfile/FEMCprof_Thresh20MeV.root";
+      ClusterBuilder->LoadProfile(femc_prof.c_str());
+      se->registerSubsystem(ClusterBuilder);
+    }
+  else if ( Femc_clusterizer == kFemcGraphClusterizer )
+    {
+      RawClusterBuilderFwd* ClusterBuilder = new RawClusterBuilderFwd("FEMCRawClusterBuilderFwd");
+
+
+      ClusterBuilder->Detector("FEMC");
+      ClusterBuilder->Verbosity(verbosity);
+      ClusterBuilder->set_threshold_energy(0.010);  
+      se->registerSubsystem( ClusterBuilder );
+    }
+  else
+    {
+      cout << "FEMC_Clusters - unknown clusterizer setting!"<<endl;
+      exit(1);
+    }
+
   return;
 }
 

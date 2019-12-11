@@ -3,6 +3,7 @@
 #include <qa_modules/QAG4SimulationCalorimeterSum.h>
 #include <qa_modules/QAG4SimulationJet.h>
 #include <qa_modules/QAHistManagerDef.h>
+#include <phool/PHRandomSeed.h>
 #include <fun4all/SubsysReco.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -123,6 +124,13 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_cluster = do_hcalout_twr && true;
   bool do_hcalout_eval = do_hcalout_cluster && false;
 
+  // forward EMC
+  bool do_femc = true;
+  bool do_femc_cell = do_femc && true;
+  bool do_femc_twr = do_femc_cell && true;
+  bool do_femc_cluster = do_femc_twr && true;
+  bool do_femc_eval = do_femc_cluster && true;
+
   //! forward flux return plug door. Out of acceptance and off by default.
   bool do_plugdoor = false;
 
@@ -151,13 +159,12 @@ int Fun4All_G4_sPHENIX(
   gSystem->Load("libg4detectors.so");
   gSystem->Load("libphhepmc.so");
   gSystem->Load("libg4testbench.so");
-  gSystem->Load("libg4hough.so");
   gSystem->Load("libg4eval.so");
   gSystem->Load("libg4intt.so");
   gSystem->Load("libqa_modules");
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
-  G4Init(do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor);
+  G4Init(do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor, do_femc);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -176,6 +183,10 @@ int Fun4All_G4_sPHENIX(
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(01);
+
+  //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
+  PHRandomSeed::Verbosity(1);
+
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
@@ -346,10 +357,10 @@ int Fun4All_G4_sPHENIX(
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
     G4Setup(absorberactive, magfield, EDecayType::kAll,
-            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, magfield_rescale);
+            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
 #else
     G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, magfield_rescale);
+            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
 #endif
   }
 
@@ -375,6 +386,8 @@ int Fun4All_G4_sPHENIX(
 
   if (do_hcalout_cell) HCALOuter_Cells();
 
+  if (do_femc_cell) FEMC_Cells();
+
   //-----------------------------
   // CEMC towering and clustering
   //-----------------------------
@@ -391,6 +404,9 @@ int Fun4All_G4_sPHENIX(
 
   if (do_hcalout_twr) HCALOuter_Towers();
   if (do_hcalout_cluster) HCALOuter_Clusters();
+
+  if (do_femc_twr) FEMC_Towers();
+  if (do_femc_cluster) FEMC_Clusters();
 
   if (do_dst_compress) ShowerCompress();
 
@@ -453,6 +469,8 @@ int Fun4All_G4_sPHENIX(
   if (do_hcalin_eval) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
 
   if (do_hcalout_eval) HCALOuter_Eval(string(outputFile) + "_g4hcalout_eval.root");
+
+  if (do_femc_eval) FEMC_Eval(string(outputFile) + "_g4femc_eval.root");
 
   if (do_jet_eval) Jet_Eval(string(outputFile) + "_g4jet_eval.root");
 
@@ -537,9 +555,9 @@ int Fun4All_G4_sPHENIX(
       // This gets the default drift velocity only! 
       PHG4TpcElectronDrift *dr = (PHG4TpcElectronDrift *)se->getSubsysReco("PHG4TpcElectronDrift");
       assert(dr);
-      double TPCDriftVelocity = dr->get_double_param("drift_velocity");
-      time_window_minus = -105.5 / TPCDriftVelocity;  // ns
-      time_window_plus = 105.5 / TPCDriftVelocity;    // ns;
+      double TpcDriftVelocity = dr->get_double_param("drift_velocity");
+      time_window_minus = -105.5 / TpcDriftVelocity;  // ns
+      time_window_plus = 105.5 / TpcDriftVelocity;    // ns;
     }
     pileup->set_time_window(time_window_minus, time_window_plus);  // override timing window in ns
     cout << "Collision pileup enabled using file " << pileupfile << " with collision rate " << pileup_collision_rate
