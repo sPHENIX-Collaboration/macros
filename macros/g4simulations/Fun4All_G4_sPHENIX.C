@@ -1,4 +1,5 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <phool/PHRandomSeed.h>
 #include <fun4all/SubsysReco.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -175,6 +176,10 @@ int Fun4All_G4_sPHENIX(
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
+
+  //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
+  PHRandomSeed::Verbosity(1);
+
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
