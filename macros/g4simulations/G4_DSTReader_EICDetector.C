@@ -1,3 +1,10 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <g4eval/PHG4DSTReader.h>
+R__LOAD_LIBRARY(libg4eval.so)
+#endif
+
 //////////////////////////////////////////////////////////////////
 /*!
   \file G4_DSTReader.C
@@ -10,21 +17,18 @@
 
 #include <string>
 
+void G4DSTreader_EICDetectorInit() {}
 void
 G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
                          int absorberactive = 1, //
                          bool do_svtx = true, //
-                         bool do_preshower = false, //
                          bool do_cemc = true, //
                          bool do_hcalin = true, //
                          bool do_magnet = true, //
                          bool do_hcalout = true, //
                          bool do_cemc_twr = true, //
                          bool do_hcalin_twr = true, //
-                         bool do_magnet = true, //
                          bool do_hcalout_twr = true, //
-                         bool do_FGEM = true, //
-                         bool do_EGEM = true, //
                          bool do_FHCAL = true, //
                          bool do_FHCAL_twr = true, //
                          bool do_FEMC = true, //
@@ -58,6 +62,15 @@ G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
       if (do_svtx)
         {
           ana->AddNode("SVTX");
+          ana->AddNode("EGEM_0");
+          ana->AddNode("EGEM_1");
+          ana->AddNode("EGEM_2");
+          ana->AddNode("EGEM_3");
+          ana->AddNode("FGEM_0");
+          ana->AddNode("FGEM_1");
+          ana->AddNode("FGEM_2");
+          ana->AddNode("FGEM_3");
+          ana->AddNode("FGEM_4");
         }
 
       if (do_cemc)
@@ -110,22 +123,6 @@ G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
           ana->AddNode("EEMC");
           if (absorberactive)
             ana->AddNode("ABSORBER_EEMC");
-        }
-
-      if (do_FGEM)
-        {
-          ana->AddNode("FGEM_0");
-          ana->AddNode("FGEM_1");
-          ana->AddNode("FGEM_2");
-          ana->AddNode("FGEM_3");
-          ana->AddNode("FGEM_4");
-        }
-
-      if (do_EGEM)
-        {
-          ana->AddNode("EGEM_0");
-          ana->AddNode("EGEM_1");
-          ana->AddNode("EGEM_2");
         }
 
       ana->AddNode("BH_1");

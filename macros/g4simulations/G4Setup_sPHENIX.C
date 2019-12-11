@@ -1,14 +1,47 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "G4_Pipe.C"
+#include "G4_Tracking.C"
+#include "G4_PSTOF.C"
+#include "G4_CEmc_Spacal.C"
+#include "G4_HcalIn_ref.C"
+#include "G4_Magnet.C"
+#include "G4_HcalOut_ref.C"
+#include "G4_PlugDoor.C"
+#include "G4_FEMC.C"
 
-double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
+#include <g4eval/PHG4DstCompressReco.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <g4decayer/EDecayType.hh>
+#include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4main/PHG4TruthSubsystem.h>
+#include <g4main/PHG4Reco.h>
+#include <phfield/PHFieldConfig.h>
+#include <g4main/HepMCNodeReader.h>
+class SubsysReco;
+R__LOAD_LIBRARY(libg4decayer.so)
+R__LOAD_LIBRARY(libg4detectors.so)
+#else
 bool overlapcheck = false; // set to true if you want to check for overlaps
+double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
+#endif
 
-void G4Init(bool do_svtx = true,
-	    bool do_preshower = false,
-	    bool do_cemc = true,
-	    bool do_hcalin = true,
-	    bool do_magnet = true,
-	    bool do_hcalout = true,
-	    bool do_pipe = true)
+// This function is only used to test if we can load this as root6 macro
+// without running into unresolved libraries and include files
+void RunLoadTest() {}
+
+void G4Init(const bool do_tracking = true,
+      const bool do_pstof = true,
+	    const bool do_cemc = true,
+	    const bool do_hcalin = true,
+	    const bool do_magnet = true,
+	    const bool do_hcalout = true,
+	    const bool do_pipe = true,
+	    const bool do_plugdoor = false,
+	    const bool do_FEMC = false
+	    )
   {
 
   // load detector/material macros and execute Init() function
@@ -18,16 +51,16 @@ void G4Init(bool do_svtx = true,
       gROOT->LoadMacro("G4_Pipe.C");
       PipeInit();
     }  
-  if (do_svtx)
+  if (do_tracking)
     {
-      gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
-      SvtxInit();
+      gROOT->LoadMacro("G4_Tracking.C"); 
+      TrackingInit();
     }
 
-  if (do_preshower) 
+  if (do_pstof) 
     {
-      gROOT->LoadMacro("G4_PreShower.C");
-      PreShowerInit();
+      gROOT->LoadMacro("G4_PSTOF.C");
+      PSTOFInit();
     }
 
   if (do_cemc)
@@ -53,19 +86,37 @@ void G4Init(bool do_svtx = true,
       HCalOuterInit();
     }
 
+  if (do_pipe)
+    {
+      gROOT->LoadMacro("G4_PlugDoor.C");
+      PlugDoorInit();
+    }
+  if (do_FEMC)
+    {
+      gROOT->LoadMacro("G4_FEMC.C");
+      FEMCInit();
+    }
+
 }
 
 
 int G4Setup(const int absorberactive = 0,
 	    const string &field ="1.5",
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+	    const EDecayType decayType = EDecayType::kAll,
+#else
 	    const EDecayType decayType = TPythia6Decayer::kAll,
-	    const bool do_svtx = true,
-	    const bool do_preshower = false,
+#endif
+	    const bool do_tracking = true,
+	    const bool do_pstof = true,
 	    const bool do_cemc = true,
 	    const bool do_hcalin = true,
 	    const bool do_magnet = true,
 	    const bool do_hcalout = true,
-	    const bool do_pipe = true,
+      const bool do_pipe = true,
+      const bool do_plugdoor = false,
+//	    const bool do_plugdoor = true,
+	    const bool do_FEMC = false, 
 	    const float magfield_rescale = 1.0) {
   
   //---------------
@@ -81,12 +132,21 @@ int G4Setup(const int absorberactive = 0,
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
+  // read-in HepMC events to Geant4 if there is any
+  HepMCNodeReader *hr = new HepMCNodeReader();
+  se->registerSubsystem(hr);
+
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->set_rapidity_coverage(1.1); // according to drawings
 // uncomment to set QGSP_BERT_HP physics list for productions 
 // (default is QGSP_BERT for speed)
   //  g4Reco->SetPhysicsList("QGSP_BERT_HP"); 
-  if (decayType != TPythia6Decayer::kAll) {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+  if (decayType != EDecayType::kAll) 
+#else
+  if (decayType != TPythia6Decayer::kAll) 
+#endif
+  {
     g4Reco->set_force_decay(decayType);
   }
   
@@ -96,9 +156,9 @@ int G4Setup(const int absorberactive = 0,
   if (stringline.fail()) { // conversion to double fails -> we have a string
 
     if (field.find("sPHENIX.root") != string::npos) {
-      g4Reco->set_field_map(field, 1);
+      g4Reco->set_field_map(field, PHFieldConfig::Field3DCartesian);
     } else {
-      g4Reco->set_field_map(field, 2);
+      g4Reco->set_field_map(field, PHFieldConfig::kField2D);
     }
   } else {
     g4Reco->set_field(fieldstrength); // use const soleniodal field
@@ -112,13 +172,13 @@ int G4Setup(const int absorberactive = 0,
   if (do_pipe) radius = Pipe(g4Reco, radius, absorberactive);
   
   //----------------------------------------
-  // SVTX
-  if (do_svtx) radius = Svtx(g4Reco, radius, absorberactive);
+  // TRACKING
+  if (do_tracking) radius = Tracking(g4Reco, radius, absorberactive);
 
   //----------------------------------------
-  // PRESHOWER
+  // PSTOF
   
-  if (do_preshower) radius = PreShower(g4Reco, radius, absorberactive);
+  if (do_pstof) radius = PSTOF(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // CEMC
@@ -140,6 +200,13 @@ int G4Setup(const int absorberactive = 0,
   // HCALOUT
   
   if (do_hcalout) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
+
+  //----------------------------------------
+  // sPHENIX forward flux return door
+  if (do_plugdoor) PlugDoor(g4Reco, absorberactive);
+
+  // forward EMC
+  if(do_FEMC) FEMCSetup(g4Reco, absorberactive);
 
   //----------------------------------------
   // BLACKHOLE
@@ -186,6 +253,7 @@ blackhole->set_double_param("radius",radius + 10); // add 10 cm
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
   se->registerSubsystem( g4Reco );
+  return 0;
 }
 
 void ShowerCompress(int verbosity = 0) {
@@ -223,6 +291,12 @@ void ShowerCompress(int verbosity = 0) {
   compress->AddTowerContainer("TOWER_SIM_HCALOUT");
   compress->AddTowerContainer("TOWER_RAW_HCALOUT");
   compress->AddTowerContainer("TOWER_CALIB_HCALOUT");
+  compress->AddHitContainer("G4HIT_FEMC");
+  compress->AddHitContainer("G4HIT_ABSORBER_FEMC");
+  compress->AddCellContainer("G4CELL_FEMC");
+  compress->AddTowerContainer("TOWER_SIM_FEMC");
+  compress->AddTowerContainer("TOWER_RAW_FEMC");
+  compress->AddTowerContainer("TOWER_CALIB_FEMC");
   se->registerSubsystem(compress);
   
   return; 
@@ -248,5 +322,8 @@ void DstCompress(Fun4AllDstOutputManager* out) {
     out->StripNode("G4CELL_CEMC");
     out->StripNode("G4CELL_HCALIN");
     out->StripNode("G4CELL_HCALOUT");
+    out->StripNode("G4HIT_FEMC");
+    out->StripNode("G4HIT_ABSORBER_FEMC");
+    out->StripNode("G4CELL_FEMC");
   }
 }

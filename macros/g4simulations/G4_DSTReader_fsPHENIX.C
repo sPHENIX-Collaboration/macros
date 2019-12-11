@@ -1,3 +1,10 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <g4eval/PHG4DSTReader.h>
+R__LOAD_LIBRARY(libg4eval.so)
+#endif
+
 //////////////////////////////////////////////////////////////////
 /*!
  \file G4_DSTReader.C
@@ -10,18 +17,18 @@
 
 #include <string>
 
+void G4DSTreader_fsPHENIXInit() {}
+
 void
 G4DSTreader_fsPHENIX( const char * outputFile = "G4sPHENIXCells.root",//
     int absorberactive = 1, //
     bool do_svtx = true, //
-    bool do_preshower = false, //
     bool do_cemc = true, //
     bool do_hcalin = true, //
     bool do_magnet = true, //
     bool do_hcalout = true, //
     bool do_cemc_twr = true, //
     bool do_hcalin_twr = true, //
-    bool do_magnet = true, //
     bool do_hcalout_twr = true, //
     bool do_FGEM = true, //
     bool do_FHCAL = true, //

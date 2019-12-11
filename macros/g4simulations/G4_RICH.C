@@ -1,3 +1,11 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include <g4detectors/PHG4RICHSubsystem.h>
+#include <g4main/PHG4Reco.h>
+R__LOAD_LIBRARY(libg4detectors.so)
+#endif
+
 // $Id: G4_RICH.C,v 1.2 2013/10/09 01:08:17 jinhuang Exp $
 
 /*!
@@ -24,8 +32,8 @@ RICHInit()
 void
 RICHSetup(PHG4Reco* g4Reco, //
 	  const int N_RICH_Sector = 8, //
-	  const double min_eta = 1.45, //
-	  const double R_mirror_ref = 195, //cm
+	  const double min_eta = 1.3, //
+	  const double R_mirror_ref = 190, //cm // Reduced from 195 (2014 LOI) -> 190 to avoid overlap with FGEM4 (it seems to fit fine in the AutoCAD drawing- is the RICH longer in Geant4 than in the AutoCAD drawing?)
 	  const double z_shift = 75, // cm
 	  const double R_shift = 18.5 // cm
 	  )

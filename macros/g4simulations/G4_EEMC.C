@@ -1,5 +1,23 @@
-using namespace std;
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include <fun4all/Fun4AllServer.h>
+#include <g4calo/RawTowerBuilderByHitIndex.h>
+#include <g4calo/RawTowerDigitizer.h>
+#include <caloreco/RawClusterBuilderFwd.h>
+#include <caloreco/RawTowerCalibration.h>
+#include <g4detectors/PHG4CrystalCalorimeterSubsystem.h>
+#include <g4detectors/PHG4ForwardCalCellReco.h>
+#include <g4eval/CaloEvaluator.h>
+#include <g4main/PHG4Reco.h>
+R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libg4calo.so)
+R__LOAD_LIBRARY(libg4detectors.so)
+R__LOAD_LIBRARY(libg4eval.so)
+#endif
 
+using namespace std;
+const int use_projective_geometry = 0;
 void
 EEMCInit()
 {
@@ -24,20 +42,33 @@ EEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
   gSystem->Load("libg4detectors.so");
 
-  /** Use dedicated EEMC module */
+    /** Use dedicated EEMC module */
   PHG4CrystalCalorimeterSubsystem *eemc = new PHG4CrystalCalorimeterSubsystem("EEMC");
 
   /* path to central copy of calibrations repositry */
   ostringstream mapping_eemc;
 
   /* Use non-projective geometry */
-  mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v004.txt";
-  cout << mapping_eemc.str() << endl;
+  if(!use_projective_geometry)
+    {
+      mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v005.txt";
+      eemc->SetTowerMappingFile( mapping_eemc.str() );
+    }
 
-  eemc->SetTowerMappingFile( mapping_eemc.str() );
+   /* use projective geometry */
+  else
+    {
+      ostringstream mapping_eemc_4x4construct;
+  
+      mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/crystals_v005.txt";
+      mapping_eemc_4x4construct << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/4_by_4_construction_v005.txt";
+  eemc->SetProjectiveGeometry ( mapping_eemc.str() , mapping_eemc_4x4construct.str() );
+    }
+
   eemc->OverlapCheck(overlapcheck);
 
-  if (absorberactive)  eemc->SetAbsorberActive();
+// SetAbsorberActive method not implemented
+//  if (absorberactive)  eemc->SetAbsorberActive();
 
   /* register Ecal module */
   g4Reco->registerSubsystem( eemc );
@@ -104,6 +135,19 @@ void EEMC_Clusters(int verbosity = 0) {
   ClusterBuilder->Detector("EEMC");
   ClusterBuilder->Verbosity(verbosity);
   se->registerSubsystem( ClusterBuilder );
+
+  return;
+}
+
+void EEMC_Eval(std::string outputfile, int verbosity = 0)
+{
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libg4eval.so");
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  CaloEvaluator *eval = new CaloEvaluator("EEMCEVALUATOR", "EEMC", outputfile.c_str());
+  eval->Verbosity(verbosity);
+  se->registerSubsystem(eval);
 
   return;
 }

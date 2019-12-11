@@ -1,23 +1,52 @@
-
-double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include "G4_Pipe.C"
+#include "G4_Tracking_EIC.C"
+#include "G4_PSTOF.C"
+#include "G4_CEmc_EIC.C"
+#include "G4_HcalIn_ref.C"
+#include "G4_Magnet.C"
+#include "G4_HcalOut_ref.C"
+#include "G4_PlugDoor_EIC.C"
+#include "G4_FEMC_EIC.C"
+#include "G4_FHCAL.C"
+#include "G4_EEMC.C"
+#include "G4_DIRC.C"
+#include "G4_RICH.C"
+#include "G4_Aerogel.C"
+#include <g4eval/PHG4DstCompressReco.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <g4decayer/EDecayType.hh>
+#include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4main/PHG4TruthSubsystem.h>
+#include <g4main/HepMCNodeReader.h>
+#include <g4main/PHG4Reco.h>
+#include <phfield/PHFieldConfig.h>
+R__LOAD_LIBRARY(libg4decayer.so)
+R__LOAD_LIBRARY(libg4detectors.so)
+#else
 bool overlapcheck = false; // set to true if you want to check for overlaps
+double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
+#endif
+void RunLoadTest() {}
 
 void G4Init(bool do_svtx = true,
-            bool do_preshower = false,
             bool do_cemc = true,
             bool do_hcalin = true,
             bool do_magnet = true,
             bool do_hcalout = true,
             bool do_pipe = true,
-            bool do_FGEM = true,
-            bool do_EGEM = true,
+            bool do_plugdoor = true,
             bool do_FEMC = true,
             bool do_FHCAL = true,
             bool do_EEMC = true,
             bool do_DIRC = true,
             bool do_RICH = true,
-            bool do_Aerogel = true
-	    ) {
+            bool do_Aerogel = true)
+{
 
   // load detector/material macros and execute Init() function
 
@@ -26,28 +55,28 @@ void G4Init(bool do_svtx = true,
       gROOT->LoadMacro("G4_Pipe.C");
       PipeInit();
     }
+
+  if (do_plugdoor)
+    {
+      gROOT->LoadMacro("G4_PlugDoor_EIC.C");
+      PlugDoorInit();
+    }
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx_maps+tpc.C");
-      SvtxInit();
+      //gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
+      gROOT->LoadMacro("G4_Tracking_EIC.C"); 
+      TrackingInit();
     }
-
-  if (do_preshower)
-    {
-      gROOT->LoadMacro("G4_PreShower.C");
-      PreShowerInit();
-    }
-
   if (do_cemc)
     {
-      gROOT->LoadMacro("G4_CEmc_Spacal.C");
+      gROOT->LoadMacro("G4_CEmc_EIC.C");
       CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
     }
 
   if (do_hcalin)
     {
       gROOT->LoadMacro("G4_HcalIn_ref.C");
-      HCalInnerInit();
+      HCalInnerInit(1);
     }
 
   if (do_magnet)
@@ -61,21 +90,9 @@ void G4Init(bool do_svtx = true,
       HCalOuterInit();
     }
 
-  if (do_FGEM)
-    {
-      gROOT->LoadMacro("G4_FGEM_fsPHENIX.C");
-      FGEM_Init();
-    }
-
-  if (do_EGEM)
-    {
-      gROOT->LoadMacro("G4_EGEM_EIC.C");
-      EGEM_Init();
-    }
-
   if (do_FEMC)
     {
-      gROOT->LoadMacro("G4_FEMC.C");
+      gROOT->LoadMacro("G4_FEMC_EIC.C");
       FEMCInit();
     }
 
@@ -115,16 +132,18 @@ void G4Init(bool do_svtx = true,
 
 int G4Setup(const int absorberactive = 0,
             const string &field ="1.5",
-            const EDecayType decayType = TPythia6Decayer::kAll,
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+	    const EDecayType decayType = EDecayType::kAll,
+#else
+	    const EDecayType decayType = TPythia6Decayer::kAll,
+#endif
             const bool do_svtx = true,
-            const bool do_preshower = false,
             const bool do_cemc = true,
             const bool do_hcalin = true,
             const bool do_magnet = true,
             const bool do_hcalout = true,
             const bool do_pipe = true,
-            const bool do_FGEM = true,
-            const bool do_EGEM = true,
+            const bool do_plugdoor = true,
             const bool do_FEMC = false,
             const bool do_FHCAL = false,
             const bool do_EEMC = true,
@@ -146,13 +165,22 @@ int G4Setup(const int absorberactive = 0,
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
+  // read-in HepMC events to Geant4 if there is any
+  HepMCNodeReader *hr = new HepMCNodeReader();
+  se->registerSubsystem(hr);
+
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->set_rapidity_coverage(1.1); // according to drawings
 // uncomment to set QGSP_BERT_HP physics list for productions 
 // (default is QGSP_BERT for speed)
   //  g4Reco->SetPhysicsList("QGSP_BERT_HP"); 
  
-  if (decayType != TPythia6Decayer::kAll) {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+  if (decayType != EDecayType::kAll) 
+#else
+  if (decayType != TPythia6Decayer::kAll) 
+#endif
+  {
     g4Reco->set_force_decay(decayType);
   }
 
@@ -162,9 +190,9 @@ int G4Setup(const int absorberactive = 0,
   if (stringline.fail()) { // conversion to double fails -> we have a string
 
     if (field.find("sPHENIX.root") != string::npos) {
-      g4Reco->set_field_map(field, 1);
+      g4Reco->set_field_map(field, PHFieldConfig::Field3DCartesian);
     } else {
-      g4Reco->set_field_map(field, 2);
+      g4Reco->set_field_map(field, PHFieldConfig::kField2D);
     }
   } else {
     g4Reco->set_field(fieldstrength); // use const soleniodal field
@@ -179,12 +207,7 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // SVTX
-  if (do_svtx) radius = Svtx(g4Reco, radius, absorberactive);
-
-  //----------------------------------------
-  // PRESHOWER
-
-  if (do_preshower) radius = PreShower(g4Reco, radius, absorberactive);
+   if (do_svtx) radius = Tracking(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // CEMC
@@ -206,15 +229,6 @@ int G4Setup(const int absorberactive = 0,
   // HCALOUT
 
   if (do_hcalout) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
-
-  //----------------------------------------
-  // Forward tracking
-
-  if ( do_FGEM )
-    FGEMSetup(g4Reco);
-
-  if ( do_EGEM )
-    EGEMSetup(g4Reco);
 
   //----------------------------------------
   // FEMC
@@ -246,30 +260,9 @@ int G4Setup(const int absorberactive = 0,
   if ( do_Aerogel )
     AerogelSetup(g4Reco);
 
-  // sPHENIX forward flux return(s)
-  PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
-  flux_return_plus->set_int_param("lengthviarapidity",0);
-  flux_return_plus->set_double_param("length",10.2);
-  flux_return_plus->set_double_param("radius",2.1);
-  flux_return_plus->set_double_param("thickness",263.5-5.0);
-  flux_return_plus->set_double_param("place_z",335.9);
-  flux_return_plus->set_string_param("material","G4_Fe");
-  flux_return_plus->SetActive(false);
-  flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
-  flux_return_plus->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(flux_return_plus);
-
-  PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
-  flux_return_minus->set_int_param("lengthviarapidity",0);
-  flux_return_minus->set_double_param("length",10.2);
-  flux_return_minus->set_double_param("radius",90.0);
-  flux_return_minus->set_double_param("place_z",-335.9);
-  flux_return_minus->set_double_param("thickness",263.5-5.0 - (90-2.1));
-  flux_return_minus->set_string_param("material","G4_Fe");
-  flux_return_minus->SetActive(false);
-  flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
-  flux_return_minus->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(flux_return_minus);
+  //----------------------------------------
+  // sPHENIX forward flux return door
+  if (do_plugdoor) PlugDoor(g4Reco, absorberactive);
 
   //----------------------------------------
   // BLACKHOLE
@@ -316,6 +309,7 @@ int G4Setup(const int absorberactive = 0,
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
   se->registerSubsystem( g4Reco );
+  return 0;
 }
 
 

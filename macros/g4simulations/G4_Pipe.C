@@ -1,3 +1,10 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4main/PHG4Reco.h>
+R__LOAD_LIBRARY(libg4detectors.so)
+#endif
 
 void PipeInit() {}
 
@@ -34,7 +41,7 @@ double Pipe(PHG4Reco* g4Reco,
   if (absorberactive)  cyl->SetActive();
   g4Reco->registerSubsystem( cyl );
   
-  PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("BE_PIPE", 1);
+  cyl = new PHG4CylinderSubsystem("BE_PIPE", 1);
   cyl->set_double_param("radius",be_pipe_radius);
   cyl->set_int_param("lengthviarapidity",0);
   cyl->set_double_param("length",be_pipe_length);

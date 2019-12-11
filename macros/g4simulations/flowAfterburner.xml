@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<FLOWAFTERBURNER>
+  <RANDOM>
+    <SEED>11793</SEED>
+  </RANDOM>
+  <INPUT>sHijing.dat</INPUT>
+  <OUTPUT>flowAfterburner.dat</OUTPUT>
+<!--
+     the following adjusts the values used in the executable
+     if you want to change the values used by the flow afterburner
+     module in our simulations you need to change the macro
+-->
+  <CUTS>
+    <MINETA>-4.0</MINETA>
+    <MAXETA>4.0</MAXETA>
+    <MINPT>0.0</MINPT>
+    <MAXPT>100.0</MAXPT>
+  </CUTS>
+  <ALGORITHM>MINBIAS</ALGORITHM>
+</FLOWAFTERBURNER>

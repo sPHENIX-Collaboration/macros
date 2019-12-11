@@ -1,9 +1,33 @@
-
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+#include "G4_Pipe.C"
+#include "G4_Tracking.C"
+#include "G4_CEmc_Spacal.C"
+#include "G4_HcalIn_ref.C"
+#include "G4_Magnet.C"
+#include "G4_HcalOut_ref.C"
+#include "G4_FGEM_fsPHENIX.C"
+#include "G4_FEMC.C"
+#include "G4_FHCAL.C"
+#include <g4decayer/EDecayType.hh>
+#include <g4detectors/PHG4ConeSubsystem.h>
+#include <g4eval/PHG4DstCompressReco.h>
+#include <g4main/PHG4Reco.h>
+#include <g4main/PHG4TruthSubsystem.h>
+#include <phfield/PHFieldConfig.h>
+class SubsysReco;
+R__LOAD_LIBRARY(libg4decayer.so)
+R__LOAD_LIBRARY(libg4detectors.so)
+int make_piston(string name, PHG4Reco* g4Reco);
+#else
 double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
 bool overlapcheck = false; // set to true if you want to check for overlaps
+#endif
+
+void RunLoadTest() {}
 
 void G4Init(bool do_svtx = true,
-	    bool do_preshower = false,
 	    bool do_cemc = true,
 	    bool do_hcalin = true,
 	    bool do_magnet = true,
@@ -11,7 +35,8 @@ void G4Init(bool do_svtx = true,
             bool do_pipe = true,
             bool do_FGEM = true,
 	    bool do_FEMC = true,
-	    bool do_FHCAL = true) {
+	    bool do_FHCAL = true,
+            int n_TPC_layers = 40) {
 
   // load detector/material macros and execute Init() function
 
@@ -22,16 +47,8 @@ void G4Init(bool do_svtx = true,
     }
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Svtx.C");
-      //gROOT->LoadMacro("G4_Svtx_ladders.C"); // testing
-      //gROOT->LoadMacro("G4_Svtx_ITS.C");     // testing
-      SvtxInit();
-    }
-
-  if (do_preshower) 
-    {
-      gROOT->LoadMacro("G4_PreShower.C");
-      PreShowerInit();
+      gROOT->LoadMacro("G4_Tracking.C");
+      TrackingInit(n_TPC_layers);
     }
 
   if (do_cemc)
@@ -79,9 +96,12 @@ void G4Init(bool do_svtx = true,
 
 int G4Setup(const int absorberactive = 0,
 	    const string &field ="1.5",
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+	    const EDecayType decayType = EDecayType::kAll,
+#else
 	    const EDecayType decayType = TPythia6Decayer::kAll,
+#endif
 	    const bool do_svtx = true,
-	    const bool do_preshower = false,
 	    const bool do_cemc = true,
 	    const bool do_hcalin = true,
 	    const bool do_magnet = true,
@@ -105,14 +125,22 @@ int G4Setup(const int absorberactive = 0,
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
+  // read-in HepMC events to Geant4 if there is any
+  HepMCNodeReader *hr = new HepMCNodeReader();
+  se->registerSubsystem(hr);
+
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->save_DST_geometry(true); //Save geometry from Geant4 to DST
   g4Reco->set_rapidity_coverage(1.1); // according to drawings
 // uncomment to set QGSP_BERT_HP physics list for productions 
 // (default is QGSP_BERT for speed)
   //  g4Reco->SetPhysicsList("QGSP_BERT_HP"); 
- 
-  if (decayType != TPythia6Decayer::kAll) {
+ #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+  if (decayType != EDecayType::kAll)
+#else
+  if (decayType != TPythia6Decayer::kAll)
+#endif
+  {
     g4Reco->set_force_decay(decayType);
   }
   
@@ -122,9 +150,9 @@ int G4Setup(const int absorberactive = 0,
   if (stringline.fail()) { // conversion to double fails -> we have a string
 
     if (field.find("sPHENIX.root") != string::npos) {
-      g4Reco->set_field_map(field, 1);
+      g4Reco->set_field_map(field, PHFieldConfig::Field3DCartesian);
     } else {
-      g4Reco->set_field_map(field, 2);
+      g4Reco->set_field_map(field, PHFieldConfig::kField2D);
     }
   } else {
     g4Reco->set_field(fieldstrength); // use const soleniodal field
@@ -139,12 +167,7 @@ int G4Setup(const int absorberactive = 0,
   
   //----------------------------------------
   // SVTX
-  if (do_svtx) radius = Svtx(g4Reco, radius, absorberactive);
-
-  //----------------------------------------
-  // PRESHOWER
-  
-  if (do_preshower) radius = PreShower(g4Reco, radius, absorberactive);
+  if (do_svtx) radius = Tracking(g4Reco, radius, absorberactive);
 
   //----------------------------------------
   // CEMC
@@ -185,7 +208,7 @@ int G4Setup(const int absorberactive = 0,
   if ( do_FHCAL )
     FHCALSetup(g4Reco, absorberactive);
 
-  // sPHENIX forward flux return(s)
+  // sPHENIX forward flux return(s) with reduced thickness
   PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
   flux_return_plus->set_int_param("lengthviarapidity",0);
   flux_return_plus->set_double_param("length",10.2);
@@ -212,11 +235,13 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // piston magnet
-  make_piston("magpiston", g4Reco);
+//  make_piston("magpiston", g4Reco);
 
   //----------------------------------------
   // BLACKHOLE
-  
+  // minimal space for forward instrumentation
+  if (radius<270) radius = 270;
+
   // swallow all particles coming out of the backend of sPHENIX
   PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
 blackhole->set_double_param("radius",radius + 10); // add 10 cm
@@ -259,6 +284,7 @@ blackhole->set_double_param("radius",radius + 10); // add 10 cm
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
   se->registerSubsystem( g4Reco );
+  return 0;
 }
 
 

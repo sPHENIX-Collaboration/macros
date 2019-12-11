@@ -1,3 +1,12 @@
+#pragma once
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <fun4all/Fun4AllServer.h>
+#include <g4vertex/GlobalVertexReco.h>
+#include <g4vertex/GlobalVertexFastSimReco.h>
+R__LOAD_LIBRARY(libg4vertex.so)
+#endif
+
+void GlobalInit() {}
 
 void Global_Reco(int verbosity = 0) {
   
