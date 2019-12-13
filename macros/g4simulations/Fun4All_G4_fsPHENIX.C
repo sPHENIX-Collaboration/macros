@@ -76,7 +76,8 @@ int Fun4All_G4_fsPHENIX(
   // central tracking
   bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
-  bool do_tracking_track = do_tracking_cell && true;
+  bool do_tracking_cluster = do_tracking_cell && true;
+  bool do_tracking_track = do_tracking_cluster && true;
   bool do_tracking_eval = do_tracking_track && true;
 
   // central calorimeters, which is a detailed simulation and slow to run
@@ -310,6 +311,7 @@ int Fun4All_G4_fsPHENIX(
   //--------------
   // SVTX tracking
   //--------------
+  if (do_tracking_cluster) Tracking_Clus();
 
   if (do_tracking_track) Tracking_Reco();
 
