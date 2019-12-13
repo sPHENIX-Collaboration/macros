@@ -310,7 +310,7 @@ void Tracking_Cells(int verbosity = 0)
   return;
 }
 
-void Tracking_Reco(int verbosity = 0)
+void Tracking_Clus(int verbosity = 0)
 {
   // processes the TrkrHits to make clusters, then reconstruct tracks and vertices
 
@@ -464,6 +464,24 @@ void Tracking_Reco(int verbosity = 0)
   TpcClusterizer* tpcclusterizer = new TpcClusterizer();
   tpcclusterizer->Verbosity(0);
   se->registerSubsystem(tpcclusterizer);
+
+}
+
+void Tracking_Reco(int verbosity = 0)
+{
+  // processes the TrkrHits to make clusters, then reconstruct tracks and vertices
+
+  //---------------
+  // Load libraries
+  //---------------
+  gSystem->Load("libfun4all.so");
+  gSystem->Load("libtrack_reco.so");
+
+  //---------------
+  // Fun4All server
+  //---------------
+
+  Fun4AllServer* se = Fun4AllServer::instance();
 
   //-------------
   // Tracking
