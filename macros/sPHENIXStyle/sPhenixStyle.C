@@ -2,11 +2,13 @@
 // sPHENIX Style, based on a style file from BaBar, v0.1
 //
 
-#include <iostream>
 
 #include "sPhenixStyle.h"
 
-#include "TROOT.h"
+#include <TROOT.h>
+#include <TColor.h>
+
+#include <iostream>
 
 void SetsPhenixStyle ()
 {

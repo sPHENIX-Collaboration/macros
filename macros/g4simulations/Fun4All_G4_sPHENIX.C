@@ -1,4 +1,5 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <phool/PHRandomSeed.h>
 #include <fun4all/SubsysReco.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -95,6 +96,10 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
   // Event pile up simulation with collision rate in Hz MB collisions.
   // Note please follow up the macro to verify the settings for beam parameters
   const double pileup_collision_rate = 0;  // 100e3 for 100kHz nominal AuAu collision rate.
+  const bool do_write_output = false;
+  // To write cluster files set do_write_output = true and set 
+  // do_tracking = true, do_tracking_cell = true, do_tracking_cluster = true and 
+  // leave the tracking for later do_tracking_track =  false,  do_tracking_eval = false
 
   //======================
   // What to run
@@ -106,7 +111,8 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
 
   bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
-  bool do_tracking_track = do_tracking_cell && true;
+  bool do_tracking_cluster = do_tracking_cell && true;
+  bool do_tracking_track = do_tracking_cluster && true;
   bool do_tracking_eval = do_tracking_track && true;
 
   bool do_pstof = false;
@@ -138,6 +144,13 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
   bool do_hcalout_cluster = do_hcalout_twr && true;
   bool do_hcalout_eval = do_hcalout_cluster && true;
 
+  // forward EMC
+  bool do_femc = true;
+  bool do_femc_cell = do_femc && true;
+  bool do_femc_twr = do_femc_cell && true;
+  bool do_femc_cluster = do_femc_twr && true;
+  bool do_femc_eval = do_femc_cluster && true;
+
   //! forward flux return plug door. Out of acceptance and off by default.
   bool do_plugdoor = false;
 
@@ -168,12 +181,11 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
   gSystem->Load("libg4detectors.so");
   gSystem->Load("libphhepmc.so");
   gSystem->Load("libg4testbench.so");
-  gSystem->Load("libg4hough.so");
   gSystem->Load("libg4eval.so");
-
+  gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
-  G4Init(do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor);
+  G4Init(do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor, do_femc);
 
   // now that you have loaded G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C, change the INTT layout to be as specified
   SetINTTLayout(layout);
@@ -195,6 +207,10 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
+
+  //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
+  PHRandomSeed::Verbosity(1);
+
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
@@ -365,10 +381,10 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
     G4Setup(absorberactive, magfield, EDecayType::kAll,
-            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, magfield_rescale);
+            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
 #else
     G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, magfield_rescale);
+            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
 #endif
   }
 
@@ -394,6 +410,8 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
 
   if (do_hcalout_cell) HCALOuter_Cells();
 
+  if (do_femc_cell) FEMC_Cells();
+
   //-----------------------------
   // CEMC towering and clustering
   //-----------------------------
@@ -411,11 +429,16 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
   if (do_hcalout_twr) HCALOuter_Towers();
   if (do_hcalout_cluster) HCALOuter_Clusters();
 
+  if (do_femc_twr) FEMC_Towers();
+  if (do_femc_cluster) FEMC_Clusters();
+
   if (do_dst_compress) ShowerCompress();
 
   //--------------
   // SVTX tracking
   //--------------
+
+  if (do_tracking_cluster) Tracking_Clus();
 
   if (do_tracking_track) Tracking_Reco();
 
@@ -472,6 +495,8 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
   if (do_hcalin_eval) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
 
   if (do_hcalout_eval) HCALOuter_Eval(string(outputFile) + "_g4hcalout_eval.root");
+
+  if (do_femc_eval) FEMC_Eval(string(outputFile) + "_g4femc_eval.root");
 
   if (do_jet_eval) Jet_Eval(string(outputFile) + "_g4jet_eval.root");
 
@@ -554,11 +579,11 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
     if (do_tracking)
     {
       // This gets the default drift velocity only! 
-      PHG4TPCElectronDrift *dr = (PHG4TPCElectronDrift *)se->getSubsysReco("PHG4TPCElectronDrift");
+      PHG4TpcElectronDrift *dr = (PHG4TpcElectronDrift *)se->getSubsysReco("PHG4TpcElectronDrift");
       assert(dr);
-      double TPCDriftVelocity = dr->get_double_param("drift_velocity");
-      time_window_minus = -105.5 / TPCDriftVelocity;  // ns
-      time_window_plus = 105.5 / TPCDriftVelocity;    // ns;
+      double TpcDriftVelocity = dr->get_double_param("drift_velocity");
+      time_window_minus = -105.5 / TpcDriftVelocity;  // ns
+      time_window_plus = 105.5 / TpcDriftVelocity;    // ns;
     }
     pileup->set_time_window(time_window_minus, time_window_plus);  // override timing window in ns
     cout << "Collision pileup enabled using file " << pileupfile << " with collision rate " << pileup_collision_rate
@@ -583,10 +608,11 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
                 /*bool*/ do_hcalout_twr);
   }
 
-  //  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
-  // if (do_dst_compress) DstCompress(out);
-  //  se->registerOutputManager(out);
-
+  if(do_write_output) {
+    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+    if (do_dst_compress) DstCompress(out);
+    se->registerOutputManager(out);
+  }
   //-----------------
   // Event processing
   //-----------------
