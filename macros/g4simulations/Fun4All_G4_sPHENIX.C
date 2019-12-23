@@ -26,6 +26,7 @@
 #include "G4_CaloTrigger.C"
 #include "G4_Jets.C"
 #include "G4_HIJetReco.C"
+#include "G4_TopoClusterReco.C"
 #include "G4_DSTReader.C"
 #include "DisplayOn.C"
 R__LOAD_LIBRARY(libfun4all.so)
@@ -142,7 +143,7 @@ int Fun4All_G4_sPHENIX(
   bool do_HIjetreco = false && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
 
   // 3-D topoCluster reconstruction in both HCal layers -- requires towers from both
-  bool do_topocluster = false && do_hcalin_twr && do_hcalout_twr;
+  bool do_topoCluster = false && do_hcalin_twr && do_hcalout_twr;
 
   bool do_dst_compress = false;
 
