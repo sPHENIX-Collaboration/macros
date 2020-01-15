@@ -106,7 +106,7 @@ int Fun4All_G4_sPHENIX(
   bool do_tracking_cell = do_tracking && true;
   bool do_tracking_cluster = do_tracking_cell && true;
   bool do_tracking_track = do_tracking_cluster && true;
-  bool do_tracking_eval = do_tracking_track && false;
+  bool do_tracking_eval = do_tracking_track && true;//do_tracking_track && false;
 
   bool do_pstof = false;
 
@@ -672,7 +672,7 @@ int Fun4All_G4_sPHENIX(
       cout << "***** Enter any integer to proceed" << endl;
       cin >> i;
     }
-
+  gSystem->ListLibraries();
   se->run(nEvents);
 
   // QA outputs
