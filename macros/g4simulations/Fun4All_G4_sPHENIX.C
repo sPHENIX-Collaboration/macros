@@ -2,6 +2,7 @@
 #include <qa_modules/QAG4SimulationCalorimeter.h>
 #include <qa_modules/QAG4SimulationCalorimeterSum.h>
 #include <qa_modules/QAG4SimulationJet.h>
+#include <qa_modules/QAG4SimulationTracking.h>
 #include <qa_modules/QAHistManagerDef.h>
 #include <phool/PHRandomSeed.h>
 #include <fun4all/SubsysReco.h>
@@ -601,6 +602,8 @@ int Fun4All_G4_sPHENIX(
 
   // QA parts
   {
+    if (do_tracking)
+      se->registerSubsystem(new QAG4SimulationTracking());
 
     if (do_cemc)
       se->registerSubsystem(new QAG4SimulationCalorimeter("CEMC"));
