@@ -83,6 +83,10 @@ int Fun4All_G4_sPHENIX(
   // Event pile up simulation with collision rate in Hz MB collisions.
   // Note please follow up the macro to verify the settings for beam parameters
   const double pileup_collision_rate = 0;  // 100e3 for 100kHz nominal AuAu collision rate.
+  const bool do_write_output = false;
+  // To write cluster files set do_write_output = true and set 
+  // do_tracking = true, do_tracking_cell = true, do_tracking_cluster = true and 
+  // leave the tracking for later do_tracking_track =  false,  do_tracking_eval = false
 
   //======================
   // What to run
@@ -94,7 +98,8 @@ int Fun4All_G4_sPHENIX(
 
   bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
-  bool do_tracking_track = do_tracking_cell && true;
+  bool do_tracking_cluster = do_tracking_cell && true;
+  bool do_tracking_track = do_tracking_cluster && true;
   bool do_tracking_eval = do_tracking_track && true;
 
   bool do_pstof = false;
@@ -120,7 +125,7 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_eval = do_hcalout_cluster && true;
 
   // forward EMC
-  bool do_femc = true;
+  bool do_femc = false;
   bool do_femc_cell = do_femc && true;
   bool do_femc_twr = do_femc_cell && true;
   bool do_femc_cluster = do_femc_twr && true;
@@ -411,6 +416,8 @@ int Fun4All_G4_sPHENIX(
   // SVTX tracking
   //--------------
 
+  if (do_tracking_cluster) Tracking_Clus();
+
   if (do_tracking_track) Tracking_Reco();
 
   //-----------------
@@ -585,10 +592,11 @@ int Fun4All_G4_sPHENIX(
                 /*bool*/ do_hcalout_twr);
   }
 
-  //  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
-  // if (do_dst_compress) DstCompress(out);
-  //  se->registerOutputManager(out);
-
+  if(do_write_output) {
+    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+    if (do_dst_compress) DstCompress(out);
+    se->registerOutputManager(out);
+  }
   //-----------------
   // Event processing
   //-----------------
