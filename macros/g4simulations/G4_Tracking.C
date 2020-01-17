@@ -56,10 +56,10 @@ R__LOAD_LIBRARY(libtrack_reco.so)
 // Tracking simulation setup parameters and flag - leave them alone!
 //==============================================
 
-////////////// MVTX 
+////////////// MVTX
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
 
-/////////////// INTT 
+/////////////// INTT
 int n_intt_layer = 4;  // must be 4 or 0, setting to zero removes INTT completely
 int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI,
@@ -76,7 +76,7 @@ enum enu_InttDeadMapType      // Dead map options for INTT
 };
 enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
 
-///////////////// TPC 
+///////////////// TPC
 int n_tpc_layer_inner = 16;
 int tpc_layer_rphi_count_inner = 1152;
 int n_tpc_layer_mid = 16;
@@ -116,40 +116,19 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 
     // MAPS inner barrel layers
     //======================================================
-
-    // Y. Corrales Morales 4Feb2019
-    // New Mvtx configuration to give 2.0 mm clearance from sPHENIX beam-pipe (Walt 3 Jan 2018)
-    //TODO: Add function to estimate stave tilt angle from values given by Walt (Rmin, Rmid, Rmax and sensor width)
-    //TODO: Add default values in PHG4MvtxSubsystem or PHG4MvtxDetector
-    double maps_layer_radius[3] = {25.69, 33.735, 41.475};  // mm - numbers from Walt 3 Jan 2019 (Rmid)
-    double phi_tilt[3] = {0.295, 0.303, 0.298};             // radians - numbers calculated from values given by Walt 3 Jan 2019
-
-    // D. McGlinchey 6Aug2018 - type no longer is used, included here because I was too lazy to remove it from the code
-    // Y. Corrales Morales - removed, no longer used in the code
-    // int stave_type[3] = {0, 0, 0};
-    int staves_in_layer[3] = {12, 16, 20};  // Number of staves per layer in sPHENIX Mvtx
+    // YCM (2020-01-08): Using default values from PHG4MvtxSubsystem and PHG4MvtxDefs....
 
     PHG4MvtxSubsystem* mvtx = new PHG4MvtxSubsystem("MVTX");
     mvtx->Verbosity(verbosity);
 
     for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
     {
+      double radius_lyr = PHG4MvtxDefs::mvtxdat[ilayer][PHG4MvtxDefs::kRmd];
       if (verbosity)
-        cout << "Create Maps layer " << ilayer << " with radius " << maps_layer_radius[ilayer] << " mm, "
-             << " pixel size 30 x 30 microns "
-             << " active pixel thickness 0.0018 microns" << endl;
-      mvtx->set_double_param(ilayer,"layer_nominal_radius", maps_layer_radius[ilayer]);  // thickness in cm
-      mvtx->set_int_param(ilayer, "N_staves", staves_in_layer[ilayer]);                   // uses fixed number of staves regardless of radius, if set. Otherwise, calculates optimum number of staves
-
-      mvtx->set_double_param(ilayer,"phitilt", phi_tilt[ilayer]);
-
-      radius = maps_layer_radius[ilayer];
+        cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << endl;
+      radius = radius_lyr;
     }
-    mvtx->set_string_param(PHG4MvtxDefs::GLOBAL ,"stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v02.gdml"));
-    // The cell size is used only during pixilization of sensor hits, but it is convemient to set it now because the geometry object needs it
-    mvtx->set_double_param(PHG4MvtxDefs::ALPIDE_SEGMENTATION, "pixel_x", 0.0030);          // pitch in cm
-    mvtx->set_double_param(PHG4MvtxDefs::ALPIDE_SEGMENTATION, "pixel_z", 0.0030);          // length in cm
-    mvtx->set_double_param(PHG4MvtxDefs::ALPIDE_SEGMENTATION, "pixel_thickness", 0.0018);  // thickness in cm
+    mvtx->set_string_param(PHG4MvtxDefs::GLOBAL ,"stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v1.gdml"));
     mvtx->SetActive(1);
     mvtx->OverlapCheck(maps_overlapcheck);
     g4Reco->registerSubsystem(mvtx);
@@ -511,8 +490,8 @@ void Tracking_Reco(int verbosity = 0)
 	    init_zvtx->set_min_zvtx_tracks(init_vertexing_min_zvtx_tracks);
 	    init_zvtx->Verbosity(0);
 	    se->registerSubsystem(init_zvtx);
-	} 
-      
+	}
+
       // find seed tracks using a subset of TPC layers
       int min_layers = 4;
       int nlayers_seeds = 12;
@@ -541,10 +520,10 @@ void Tracking_Reco(int verbosity = 0)
 
       PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
       init_vtx->Verbosity(0);
-      se->registerSubsystem(init_vtx);     
+      se->registerSubsystem(init_vtx);
 
       // For each truth particle, create a track and associate clusters with it using truth information
-      PHTruthTrackSeeding* pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeeding"); 
+      PHTruthTrackSeeding* pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeeding");
       pat_rec->Verbosity(0);
       se->registerSubsystem(pat_rec);
     }
