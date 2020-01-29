@@ -407,6 +407,13 @@ int Fun4All_G4_sPHENIX(
   if (do_hcalout_twr) HCALOuter_Towers();
   if (do_hcalout_cluster) HCALOuter_Clusters();
 
+  // if enabled, do topoClustering early, upstream of any possible jet reconstruction
+  if (do_topoCluster)
+  {
+    gROOT->LoadMacro("G4_TopoClusterReco.C");
+    TopoClusterReco();
+  }
+
   if (do_femc_twr) FEMC_Towers();
   if (do_femc_cluster) FEMC_Clusters();
 
@@ -460,12 +467,6 @@ int Fun4All_G4_sPHENIX(
   {
     gROOT->LoadMacro("G4_HIJetReco.C");
     HIJetReco();
-  }
-
-  if (do_topoCluster)
-  {
-    gROOT->LoadMacro("G4_TopoClusterReco.C");
-    TopoClusterReco();
   }
 
   //----------------------
