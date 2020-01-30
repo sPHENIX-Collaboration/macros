@@ -88,14 +88,17 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
   // this is the bottom layer length
   double totalbottomlength = z3 + z4;
 
+  //Added by Barak, 12/12/19
+  double ztemp = 0;
+  double layer_shift = 0;
+
   double height = 0;
   for (int thislayer = min_cemc_layer; thislayer <= max_cemc_layer;
        thislayer++) {
 
     // the length for a particular layer is determined from the bottom length
-    double thislength = totalbottomlength + height / TMath::Tan(theta1) +
-                        height / TMath::Tan(theta2);
-
+    double thislength = totalbottomlength + (height / TMath::Tan(theta1)) + (height / TMath::Tan(theta2));
+    
     cemc = new PHG4CylinderSubsystem("ABSORBER_CEMC", thislayer);
     cemc->set_double_param("radius", radius);
     cemc->set_string_param("material", "Spacal_W_Epoxy");
@@ -105,7 +108,13 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
 
     // starts centered around IP
     // shift backwards 30 cm for total 370 cm length to cover -1.5<eta<1.24
-    cemc->set_double_param("place_z", -30);
+    //cemc->set_double_param("place_z", -30);
+    
+    //Modified by Barak, 12/12/19
+    ztemp = radius / TMath::Tan(theta2);
+    layer_shift = -1. * (ztemp - (thislength/2.));
+    cemc->set_double_param("place_z", layer_shift);
+
     cemc->SuperDetector("ABSORBER_CEMC");
     if (absorberactive)
       cemc->SetActive();
@@ -117,6 +126,10 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     radius += no_overlapp;
 
     height += tungs_width;
+    height += no_overlapp; //Added by Barak, 12/13/19
+
+    //Added by Barak, 12/13/19
+    thislength = totalbottomlength + (height / TMath::Tan(theta1)) + (height / TMath::Tan(theta2));
 
     cemc = new PHG4CylinderSubsystem("CEMC", thislayer);
     cemc->set_double_param("radius", radius);
@@ -127,7 +140,11 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     cemc->set_double_param("length", thislength);
 
     // shift back -30 cm to cover -1.4<eta<1.1
-    cemc->set_double_param("place_z", -30);
+    //cemc->set_double_param("place_z", -30);
+    
+    //Modified by Barak, 12/12/19
+    cemc->set_double_param("place_z", layer_shift);
+
     cemc->SuperDetector("CEMC");
 
     cemc->SetActive();
@@ -138,6 +155,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     radius += no_overlapp;
 
     height += scint_width;
+    height += no_overlapp; //Added by Barak, 12/13/19
   }
 
   PHG4CylinderSubsystem *cemc_cyl =
@@ -145,13 +163,18 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
   cemc_cyl->set_double_param("radius", radius);
   cemc_cyl->set_string_param("material", "G4_TEFLON");
   cemc_cyl->set_double_param("thickness", 0.5);
-
+  
   double l1 = (radius + 0.5) / TMath::Tan(theta1);
   double l2 = (radius + 0.5) / TMath::Tan(theta2);
   cemc_cyl->set_int_param("lengthviarapidity", 0);
   cemc_cyl->set_double_param("length", l1 + l2);
   // shift back -30 cm to cover -1.4<eta<1.1
-  cemc_cyl->set_double_param("place_z", -30);
+  //cemc_cyl->set_double_param("place_z", -30);
+
+  //Modified by Barak, 12/12/19
+  layer_shift =  -1.*( (l2 - l1)/2. );
+  cemc_cyl->set_double_param("place_z", layer_shift);
+
   if (absorberactive)
     cemc_cyl->SetActive();
   cemc_cyl->OverlapCheck(overlapcheck);
@@ -170,9 +193,13 @@ void CEMC_Cells(int verbosity = 0) {
   cemc_cells->Verbosity(verbosity);
   double radius = 95;
   for (int i = min_cemc_layer; i <= max_cemc_layer; i++) {
-    cemc_cells->cellsize(i, 2. * TMath::Pi() / 256. * radius,
-                         2. * TMath::Pi() / 256. * radius);
-    radius += (scint_width + tungs_width);
+    
+    //Added by Barak, 12/13/19
+    radius += (tungs_width + no_overlapp);
+    if(i>1) radius += (scint_width + no_overlapp);
+
+    cemc_cells->cellsize(i, 2. * TMath::Pi() / 256. * radius, 2. * TMath::Pi() / 256. * radius);
+
   }
   se->registerSubsystem(cemc_cells);
 

@@ -83,7 +83,7 @@ void EEMC_Towers(int verbosity = 0) {
 
   ostringstream mapping_eemc;
   mapping_eemc << getenv("CALIBRATIONROOT") <<
-    "/CrystalCalorimeter/mapping/towerMap_EEMC_v004.txt";
+    "/CrystalCalorimeter/mapping/towerMap_EEMC_v005.txt";
 
   RawTowerBuilderByHitIndex* tower_EEMC = new RawTowerBuilderByHitIndex("TowerBuilder_EEMC");
   tower_EEMC->Detector("EEMC");
