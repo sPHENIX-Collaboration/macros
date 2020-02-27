@@ -269,6 +269,11 @@ void CEMC_Clusters(int verbosity = 0) {
     cemc_clusterbuilder->Detector("CEMC");
     cemc_clusterbuilder->Verbosity(verbosity);
 
+    ClusterBuilder->set_threshold_energy(0.030); // This threshold should be the same as in CEMCprof_Thresh**.root file below
+    std::string femc_prof = getenv("CALIBRATIONROOT");
+    femc_prof += "/EmcProfile/CEMCprof_Thresh30MeV.root";
+    ClusterBuilder->LoadProfile(femc_prof.c_str());
+
     se->registerSubsystem(cemc_clusterbuilder);
   } else {
     cout << "CEMC_Clusters - unknown clusterizer setting!! " << endl;
