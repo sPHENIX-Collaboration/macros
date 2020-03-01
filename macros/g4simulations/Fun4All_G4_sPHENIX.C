@@ -1,4 +1,6 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include <qa_modules/QAG4SimulationTracking.h>
+#include <qa_modules/QAHistManagerDef.h>
 #include <phool/PHRandomSeed.h>
 #include <fun4all/SubsysReco.h>
 #include <fun4all/Fun4AllServer.h>
@@ -29,6 +31,7 @@
 #include "G4_TopoClusterReco.C"
 #include "G4_DSTReader.C"
 #include "DisplayOn.C"
+R__LOAD_LIBRARY(libqa_modules.so)
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libphhepmc.so)
@@ -158,6 +161,7 @@ int Fun4All_G4_sPHENIX(
   // Load libraries
   //---------------
 
+  gSystem->Load("libqa_modules");
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4detectors.so");
   gSystem->Load("libphhepmc.so");
@@ -200,6 +204,7 @@ int Fun4All_G4_sPHENIX(
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
   //  rc->set_IntFlag("RANDOMSEED", 12345);
+  rc->set_IntFlag("RANDOMSEED", TString(outputFile).Hash());
 
   //-----------------
   // Event generation
@@ -620,6 +625,12 @@ int Fun4All_G4_sPHENIX(
                 /*bool*/ do_hcalout_twr);
   }
 
+  // QA parts
+  {
+    if (do_tracking)
+      se->registerSubsystem(new QAG4SimulationTracking());
+  }
+
   if(do_write_output) {
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
     if (do_dst_compress) DstCompress(out);
@@ -651,6 +662,10 @@ int Fun4All_G4_sPHENIX(
 
   se->run(nEvents);
 
+  // QA outputs
+  {
+    QAHistManagerDef::saveQARootFile(string(outputFile) + "_qa.root");
+  }
   //-----
   // Exit
   //-----
