@@ -32,6 +32,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <limits>
 
 #include <iostream>
 
@@ -156,7 +157,7 @@ double DrawReference(TH1 *hnew, TH1 *href, bool draw_href_error = false)
 
   hnew->Draw();  // set scale
 
-  double ks_test = NAN;
+  double ks_test = numeric_limits<double>::signaling_NaN();
 
   if (href)
   {
