@@ -5,7 +5,7 @@
 #include <g4calo/RawTowerBuilderByHitIndex.h>
 #include <g4calo/RawTowerDigitizer.h>
 #include <caloreco/RawClusterBuilderFwd.h>
-#include <caloreco/RawClusterBuilderTemplateFEMC.h>
+#include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
 #include <g4detectors/PHG4ForwardCalCellReco.h>
 #include <g4detectors/PHG4ForwardEcalSubsystem.h>
@@ -210,7 +210,7 @@ void FEMC_Clusters(int verbosity = 0) {
 
   if ( Femc_clusterizer == kFemcTemplateClusterizer )
     {
-      RawClusterBuilderTemplateFEMC *ClusterBuilder = new RawClusterBuilderTemplateFEMC("EmcRawClusterBuilderTemplateFEMC");
+      RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("EmcRawClusterBuilderTemplateFEMC");
       ClusterBuilder->Detector("FEMC");
       ClusterBuilder->Verbosity(verbosity);
       ClusterBuilder->set_threshold_energy(0.020); // This threshold should be the same as in FEMCprof_Thresh**.root file below

@@ -181,6 +181,7 @@ void HCALInner_Clusters(int verbosity = 0) {
     {
       RawClusterBuilderTemplate* ClusterBuilder = new RawClusterBuilderTemplate("HcalInRawClusterBuilderTemplate");
       ClusterBuilder->Detector("HCALIN");
+      ClusterBuilder->SetCylindricalGeometry();
       ClusterBuilder->Verbosity(verbosity);
       se->registerSubsystem( ClusterBuilder );
 

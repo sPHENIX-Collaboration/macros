@@ -262,6 +262,11 @@ void CEMC_Clusters(int verbosity = 0) {
     cemc_clusterbuilder->Detector("CEMC");
     cemc_clusterbuilder->Verbosity(verbosity);
 
+    cemc_clusterbuilder->set_threshold_energy(0.030); // This threshold should be the same as in CEMCprof_Thresh**.root file below
+    std::string femc_prof = getenv("CALIBRATIONROOT");
+    femc_prof += "/EmcProfile/CEMCprof_Thresh30MeV.root";
+    cemc_clusterbuilder->LoadProfile(femc_prof.c_str());
+
     se->registerSubsystem(cemc_clusterbuilder);
   } else if (Cemc_clusterizer == kCemcGraphClusterizer) {
     RawClusterBuilderGraph *cemc_clusterbuilder =
