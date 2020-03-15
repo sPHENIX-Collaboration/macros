@@ -49,7 +49,7 @@ void QA_Draw_Tracking_pTRatio(
   if (qa_file_new)
   {
     TH1 *h_norm = (TH1 *) qa_file_new->GetObjectChecked(
-        TString("h_QAG4Sim_Tracking_Normalization"), "TH1");
+        TString("h_QAG4SimulationTracking_Normalization"), "TH1");
     assert(h_norm);
 
     Nevent_new = h_norm->GetBinContent(h_norm->GetXaxis()->FindBin("Truth Track"));
@@ -57,14 +57,14 @@ void QA_Draw_Tracking_pTRatio(
   if (qa_file_ref)
   {
     TH1 *h_norm = (TH1 *) qa_file_ref->GetObjectChecked(
-        TString("h_QAG4Sim_Tracking_Normalization"), "TH1");
+        TString("h_QAG4SimulationTracking_Normalization"), "TH1");
     assert(h_norm);
 
     Nevent_ref = h_norm->GetBinContent(h_norm->GetXaxis()->FindBin("Truth Track"));
   }
 
   TH2 *h_new = (TH2 *) qa_file_new->GetObjectChecked(
-      TString("h_QAG4Sim_Tracking_pTRecoGenRatio_pTGen"), "TH2");
+      TString("h_QAG4SimulationTracking_pTRecoGenRatio_pTGen"), "TH2");
   assert(h_new);
 
 //  h_new->Rebin(1, 2);
@@ -75,7 +75,7 @@ void QA_Draw_Tracking_pTRatio(
   if (qa_file_ref)
   {
     h_ref = (TH2 *) qa_file_ref->GetObjectChecked(
-        TString("h_QAG4Sim_Tracking_pTRecoGenRatio_pTGen"), "TH2");
+        TString("h_QAG4SimulationTracking_pTRecoGenRatio_pTGen"), "TH2");
     assert(h_ref);
 
 //    h_ref->Rebin(1, 2);

@@ -48,7 +48,7 @@ void QA_Draw_Tracking_TruthMatchingOverview(
   if (qa_file_new)
   {
     TH1 *h_norm = (TH1 *) qa_file_new->GetObjectChecked(
-        TString("h_QAG4Sim_Tracking_Normalization"), "TH1");
+        TString("h_QAG4SimulationTracking_Normalization"), "TH1");
     assert(h_norm);
 
     Nevent_new = h_norm->GetBinContent(h_norm->GetXaxis()->FindBin("Event"));
@@ -56,7 +56,7 @@ void QA_Draw_Tracking_TruthMatchingOverview(
   if (qa_file_ref)
   {
     TH1 *h_norm = (TH1 *) qa_file_ref->GetObjectChecked(
-        TString("h_QAG4Sim_Tracking_Normalization"), "TH1");
+        TString("h_QAG4SimulationTracking_Normalization"), "TH1");
     assert(h_norm);
 
     Nevent_ref = h_norm->GetBinContent(h_norm->GetXaxis()->FindBin("Event"));
@@ -76,9 +76,9 @@ void QA_Draw_Tracking_TruthMatchingOverview(
     p->SetLogx();
 
     TH1 *h_pass = (TH1 *) qa_file_new->GetObjectChecked(
-        "h_QAG4Sim_Tracking_nReco_pTGen", "TH1");
+        "h_QAG4SimulationTracking_nReco_pTGen", "TH1");
     TH1 *h_norm = (TH1 *) qa_file_new->GetObjectChecked(
-        "h_QAG4Sim_Tracking_nGen_pTGen", "TH1");
+        "h_QAG4SimulationTracking_nGen_pTGen", "TH1");
     assert(h_norm);
     assert(h_pass);
     TH1 *h_ratio = GetBinominalRatio(h_pass, h_norm);
@@ -91,9 +91,9 @@ void QA_Draw_Tracking_TruthMatchingOverview(
     if (qa_file_ref)
     {
       TH1 *h_pass = (TH1 *) qa_file_ref->GetObjectChecked(
-          "h_QAG4Sim_Tracking_nReco_pTGen", "TH1");
+          "h_QAG4SimulationTracking_nReco_pTGen", "TH1");
       TH1 *h_norm = (TH1 *) qa_file_ref->GetObjectChecked(
-          "h_QAG4Sim_Tracking_nGen_pTGen", "TH1");
+          "h_QAG4SimulationTracking_nGen_pTGen", "TH1");
       assert(h_norm);
       assert(h_pass);
       TH1 *h_ratio_ref = GetBinominalRatio(h_pass, h_norm);
