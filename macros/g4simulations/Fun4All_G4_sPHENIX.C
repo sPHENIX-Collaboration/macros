@@ -289,7 +289,7 @@ int Fun4All_G4_sPHENIX(
       gen = new PHG4SimpleEventGenerator();
       gen->add_particles("pi-", 10);  // mu+,e+,proton,pi+,Upsilon
       gen->add_particles("pi+", 10);  // 100 pion option
-      if (readhepmc || do_embedding || runpythia8 || runpythia6)
+      if (true) // reuse vertex of the last generator
       {
         gen->set_reuse_existing_vertex(true);
         gen->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
