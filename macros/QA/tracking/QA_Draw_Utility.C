@@ -200,7 +200,7 @@ double DrawReference(TH1 *hnew, TH1 *href, bool draw_href_error = false)
   }
   else
   {
-    gPad->SetTopMargin(.7);
+    gPad->SetTopMargin(.14);
     TLegend *legend = new TLegend(0, .93, 0, 1, hnew->GetTitle(), "NB NDC");
     legend->Draw();
   }
@@ -310,7 +310,7 @@ FitResolution(const TH2F *h2, const bool normalize_mean = true)
 
 //! Fit for profile along the Y direction of TH2F
 TGraphErrors *
-FitProfile(const TH2F *h2)
+FitProfile(const TH2 *h2)
 {
   TProfile *p2 = h2->ProfileX();
 
