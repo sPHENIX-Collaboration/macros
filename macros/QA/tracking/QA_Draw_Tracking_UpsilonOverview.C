@@ -123,7 +123,7 @@ void QA_Draw_Tracking_UpsilonOverview(
   {
     p = (TPad *) c1->cd(idx++);
     c1->Update();
-    p->SetLogy();
+//    p->SetLogy();
 
     TH1 *h_new = (TH1 *) qa_file_new->GetObjectChecked(
         prefix + TString("nReco_Pair_InvMassReco"), "TH1");
@@ -147,7 +147,7 @@ void QA_Draw_Tracking_UpsilonOverview(
 
     h_new->SetTitle(TString(hist_name_prefix) + TString::Format(
                                                     ": #Upsilon #rightarrow e^{+}e^{-} lineshape"));
-    h_new->GetXaxis()->SetRangeUser(5, 11);
+    h_new->GetXaxis()->SetRangeUser(7, 10);
     DrawReference(h_new, h_ref, false);
   }
 
