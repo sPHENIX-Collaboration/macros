@@ -1,7 +1,7 @@
 // $Id: $
 
 /*!
- * \file QA_Draw_Tracking_pTRatio.C
+ * \file QA_Draw_Tracking_UpsilonOverview.C
  * \brief 
  * \author Jin Huang <jhuang@bnl.gov>
  * \version $Revision:   $
@@ -22,8 +22,8 @@
 #include "QA_Draw_Utility.C"
 using namespace std;
 
-void QA_Draw_Tracking_pTRatio(
-    const char *hist_name_prefix = "QAG4SimulationTracking",
+void QA_Draw_Tracking_UpsilonOverview(
+    const char *hist_name_prefix = "QAG4SimulationUpsilon",
     const char *qa_file_name_new =
         "data/G4sPHENIX.root_qa.root",
     const char *qa_file_name_ref =
@@ -66,63 +66,46 @@ void QA_Draw_Tracking_pTRatio(
     Nevent_ref = h_norm->GetBinContent(h_norm->GetXaxis()->FindBin("Truth Track"));
   }
 
-  TH2 *h_new = (TH2 *) qa_file_new->GetObjectChecked(
-      prefix + TString("pTRecoGenRatio_pTGen"), "TH2");
-  assert(h_new);
-
-  //  h_new->Rebin(1, 2);
-  h_new->Sumw2();
-  //  h_new->Scale(1. / Nevent_new);
-
-  TH2 *h_ref = NULL;
-  if (qa_file_ref)
-  {
-    h_ref = (TH2 *) qa_file_ref->GetObjectChecked(
-        prefix + TString("pTRecoGenRatio_pTGen"), "TH2");
-    assert(h_ref);
-
-    //    h_ref->Rebin(1, 2);
-    h_ref->Sumw2();
-    h_ref->Scale(Nevent_new / Nevent_ref);
-  }
-
-  TCanvas *c1 = new TCanvas(TString("QA_Draw_Tracking_pTRatio") + TString("_") + hist_name_prefix,
-                            TString("QA_Draw_Tracking_pTRatio") + TString("_") + hist_name_prefix,
+  TCanvas *c1 = new TCanvas(TString("QA_Draw_Tracking_UpsilonOverview") + TString("_") + hist_name_prefix,
+                            TString("QA_Draw_Tracking_UpsilonOverview") + TString("_") + hist_name_prefix,
                             1800, 1000);
-  c1->Divide(4, 2);
+  c1->Divide(2, 1);
   int idx = 1;
   TPad *p;
 
-  vector<pair<double, double>> gpt_ranges{
-      {0, 1},
-      {1, 5},
-      {5, 10},
-      {10, 20},
-      {20, 30},
-      {30, 40},
-      {40, 45},
-      {45, 50}};
-  for (auto pt_range : gpt_ranges)
   {
-    cout << __PRETTY_FUNCTION__ << " process " << pt_range.first << " - " << pt_range.second << " GeV/c";
-
     p = (TPad *) c1->cd(idx++);
     c1->Update();
     p->SetLogy();
 
-    const double epsilon = 1e-6;
-    const int bin_start = h_new->GetXaxis()->FindBin(pt_range.first + epsilon);
-    const int bin_end = h_new->GetXaxis()->FindBin(pt_range.second - epsilon);
+    TH2 *h_new = (TH2 *) qa_file_new->GetObjectChecked(
+        prefix + TString("pTRecoGenRatio_pTGen"), "TH2");
+    assert(h_new);
+
+    //  h_new->Rebin(1, 2);
+    h_new->Sumw2();
+    //  h_new->Scale(1. / Nevent_new);
+
+    TH2 *h_ref = NULL;
+    if (qa_file_ref)
+    {
+      h_ref = (TH2 *) qa_file_ref->GetObjectChecked(
+          prefix + TString("pTRecoGenRatio_pTGen"), "TH2");
+      assert(h_ref);
+
+      //    h_ref->Rebin(1, 2);
+      h_ref->Sumw2();
+      h_ref->Scale(Nevent_new / Nevent_ref);
+    }
 
     TH1 *h_proj_new = h_new->ProjectionY(
         TString::Format(
-            "%s_New_ProjX_%d_%d",
-            h_new->GetName(), bin_start, bin_end),
-        bin_start, bin_end);
+            "%s_New_ProjX",
+            h_new->GetName()));
 
-    h_proj_new->GetXaxis()->SetRangeUser(.7, 1.3);
+    h_proj_new->GetXaxis()->SetRangeUser(0, 1.3);
     h_proj_new->SetTitle(TString(hist_name_prefix) + TString::Format(
-                                                         ": %.1f - %.1f GeV/c", pt_range.first, pt_range.second));
+                                                         ": Electron lineshape"));
     h_proj_new->GetXaxis()->SetTitle(TString::Format(
         "Reco p_{T}/Truth p_{T}"));
 
@@ -131,11 +114,41 @@ void QA_Draw_Tracking_pTRatio(
       h_proj_ref =
           h_new->ProjectionY(
               TString::Format(
-                  "%s_Ref_ProjX_%d_%d",
-                  h_new->GetName(), bin_start, bin_end),
-              bin_start, bin_end);
+                  "%s_Ref_ProjX",
+                  h_new->GetName()));
 
     DrawReference(h_proj_new, h_proj_ref);
+  }
+
+  {
+    p = (TPad *) c1->cd(idx++);
+    c1->Update();
+    p->SetLogy();
+
+    TH1 *h_new = (TH1 *) qa_file_new->GetObjectChecked(
+        prefix + TString("nReco_Pair_InvMassReco"), "TH1");
+    assert(h_new);
+
+    //    h_new->Rebin(2);
+    h_new->Sumw2();
+    //  h_new->Scale(1. / Nevent_new);
+
+    TH1 *h_ref = NULL;
+    if (qa_file_ref)
+    {
+      h_ref = (TH1 *) qa_file_ref->GetObjectChecked(
+          prefix + TString("nReco_Pair_InvMassReco"), "TH1");
+      assert(h_ref);
+
+      //      h_ref->Rebin(2);
+      h_ref->Sumw2();
+      //      h_ref->Scale(Nevent_new / Nevent_ref);
+    }
+
+    h_new->SetTitle(TString(hist_name_prefix) + TString::Format(
+                                                    ": #Upsilon #rightarrow e^{+}e^{-} lineshape"));
+    h_new->GetXaxis()->SetRangeUser(5, 11);
+    DrawReference(h_new, h_ref, false);
   }
 
   SaveCanvas(c1, TString(qa_file_name_new) + TString("_") + TString(c1->GetName()), true);

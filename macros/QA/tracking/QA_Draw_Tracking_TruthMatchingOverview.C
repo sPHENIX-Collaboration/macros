@@ -69,8 +69,9 @@ void QA_Draw_Tracking_TruthMatchingOverview(
     Nevent_ref = h_norm->GetBinContent(h_norm->GetXaxis()->FindBin("Event"));
   }
 
-  TCanvas *c1 = new TCanvas(TString("QA_Draw_Tracking_TruthMatchingOverview"),
-                            TString("QA_Draw_Tracking_TruthMatchingOverview"), 1800, 1000);
+  TCanvas *c1 = new TCanvas(TString("QA_Draw_Tracking_TruthMatchingOverview") + TString("_") + hist_name_prefix,
+                            TString("QA_Draw_Tracking_TruthMatchingOverview") + TString("_") + hist_name_prefix,
+                            1800, 1000);
   c1->Divide(2, 1);
   int idx = 1;
   TPad *p;
@@ -154,6 +155,6 @@ void QA_Draw_Tracking_TruthMatchingOverview(
     ge_QAG4SimulationTracking_pTRecoGenRatio_pTGen->SetTitle("Mean and sigma, p_{T,reco}/p_{T,truth}");
     DrawReference(ge_QAG4SimulationTracking_pTRecoGenRatio_pTGen, h_ratio_ref, true);
 
-    SaveCanvas(c1, TString(qa_file_name_new) + TString(c1->GetName()), true);
+    SaveCanvas(c1, TString(qa_file_name_new) + TString("_") + TString(c1->GetName()), true);
   }
 }
