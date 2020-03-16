@@ -200,7 +200,7 @@ double DrawReference(TH1 *hnew, TH1 *href, bool draw_href_error = false)
   }
   else
   {
-    gPad->SetTopMargin(.14);
+    gPad->SetTopMargin(.07);
     TLegend *legend = new TLegend(0, .93, 0, 1, hnew->GetTitle(), "NB NDC");
     legend->Draw();
   }
@@ -253,6 +253,30 @@ void DrawReference(TGraph *hnew, TGraph *href, bool draw_href_error = true)
       href->Draw("HIST same");
     hnew->Draw("p e");  // over lay data points
   }
+
+
+  // ---------------------------------
+  // now, make summary header
+  // ---------------------------------
+  if (href)
+  {
+    gPad->SetTopMargin(.14);
+    TLegend *legend = new TLegend(0, .93, 0, 1, hnew->GetTitle(), "NB NDC");
+    legend->Draw();
+    legend = new TLegend(0, .86, .3, .93, NULL, "NB NDC");
+    legend->AddEntry(href, Form("Reference"), "f");
+    legend->Draw();
+    legend = new TLegend(0.3, .86, 1, .93, NULL, "NB NDC");
+    TLegendEntry *le = legend->AddEntry(hnew, Form("New"), "lpe");
+    legend->Draw();
+  }
+  else
+  {
+    gPad->SetTopMargin(.07);
+    TLegend *legend = new TLegend(0, .93, 0, 1, hnew->GetTitle(), "NB NDC");
+    legend->Draw();
+  }
+
 }
 
 //! Fit for resolution of TH2F
