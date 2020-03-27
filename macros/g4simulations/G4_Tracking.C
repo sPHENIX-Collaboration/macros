@@ -275,7 +275,7 @@ void Tracking_Cells(int verbosity = 0)
   edrift->Verbosity(0);
   // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
   // They represent effects not due to ideal gas properties and ideal readout plane behavior
-  // defaults are 0.12 and 0.15, they can be changed here to get a different resolution
+  // defaults are 0.085 and 0.105, they can be changed here to get a different resolution
   edrift->set_double_param("added_smear_trans",0.085);
   edrift->set_double_param("added_smear_long",0.105);
   edrift->registerPadPlane(padplane);
