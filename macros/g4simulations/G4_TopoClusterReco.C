@@ -29,6 +29,9 @@ void TopoClusterReco(int verbosity = 0) {
   ClusterBuilder->set_noise( 0.0025 , 0.006 , 0.03 );
   ClusterBuilder->set_significance( 4.0 , 2.0 , 0.0 );
   ClusterBuilder->allow_corner_neighbor( true );
+  ClusterBuilder->set_do_split( false ); 
+  ClusterBuilder->set_minE_local_max( 1.0, 1.0, 1.0 ); 
+  ClusterBuilder->set_R_shower( 0.025 );
   se->registerSubsystem( ClusterBuilder );
   
   return;
