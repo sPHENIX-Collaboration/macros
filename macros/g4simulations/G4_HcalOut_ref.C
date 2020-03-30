@@ -168,6 +168,7 @@ void HCALOuter_Clusters(int verbosity = 0) {
   {
     RawClusterBuilderTemplate* ClusterBuilder = new RawClusterBuilderTemplate("HcalOutRawClusterBuilderTemplate");
     ClusterBuilder->Detector("HCALOUT");
+    ClusterBuilder->SetCylindricalGeometry();
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem( ClusterBuilder );
   }
