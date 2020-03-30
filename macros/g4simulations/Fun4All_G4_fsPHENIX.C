@@ -34,11 +34,10 @@ R__LOAD_LIBRARY(libPHPythia8.so)
 #endif
 
 int Fun4All_G4_fsPHENIX(
-		       const int nEvents = 2,
-           const char * inputFile = "/sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
-		       const char * outputFile = "G4fsPHENIX.root",
-           const char * embed_input_file = "/sphenix/sim/sim01/production/2016-07-12/sHijing/spacal2d/G4Hits_sPHENIX_sHijing-0-4.4fm.list"
-		       )
+    const int nEvents = 2,
+    const char * inputFile = "/sphenix/sim/sim01/production/2016-07-21/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
+    const char * outputFile = "G4fsPHENIX.root",
+    const char * embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/fsPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root")
 {
   // Set the number of TPC layer
   const int n_TPC_layers = 40;  // use 60 for backward compatibility only
@@ -382,18 +381,21 @@ int Fun4All_G4_fsPHENIX(
       se->registerInputManager(hitsin);
     }
   if (do_embedding)
+  {
+    if (embed_input_file == NULL)
     {
-      if (embed_input_file == NULL)
-        {
-          cout << "Missing embed_input_file! Exit";
-          exit(3);
-        }
-
-      Fun4AllDstInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTinEmbed");
-      //      in1->AddFile(embed_input_file); // if one use a single input file
-      in1->AddListFile(embed_input_file); // RecommendedL: if one use a text list of many input files
-      se->registerInputManager(in1);
+      cout << "Missing embed_input_file! Exit";
+      exit(3);
     }
+    //meta-lib for DST objects used in simulation outputs
+    gSystem->Load("libg4dst.so");
+
+    Fun4AllDstInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTinEmbed");
+    in1->AddFile(embed_input_file); // if one use a single input file
+//    in1->AddListFile(embed_input_file);  // Recommended: if one use a text list of many input files
+    in1->Repeat(); // if file(or filelist) is exhausted, start from beginning
+    se->registerInputManager(in1);
+  }
   if (readhepmc)
     {
       Fun4AllInputManager *in = new Fun4AllHepMCInputManager( "DSTIN");

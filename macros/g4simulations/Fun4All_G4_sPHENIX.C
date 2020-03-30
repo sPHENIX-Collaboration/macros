@@ -30,6 +30,7 @@
 #include "G4_CaloTrigger.C"
 #include "G4_Jets.C"
 #include "G4_HIJetReco.C"
+#include "G4_TopoClusterReco.C"
 #include "G4_DSTReader.C"
 #include "DisplayOn.C"
 R__LOAD_LIBRARY(libfun4all.so)
@@ -48,7 +49,7 @@ int Fun4All_G4_sPHENIX(
     const char *inputFile = "e-",
     const double inputpT = 4,
     const char *outputFile = "G4sPHENIX.root",
-    const char *embed_input_file = "/sphenix/data/data02/review_2017-08-02/sHijing/fm_0-4.list")
+    const char *embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root")
 {
 
   //===============
@@ -130,7 +131,7 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_eval = do_hcalout_cluster && false;
 
   // forward EMC
-  bool do_femc = true;
+  bool do_femc = false;
   bool do_femc_cell = do_femc && true;
   bool do_femc_twr = do_femc_cell && true;
   bool do_femc_cluster = do_femc_twr && true;
@@ -151,6 +152,9 @@ int Fun4All_G4_sPHENIX(
   // single particle / p+p-only simulations, or for p+Au / Au+Au
   // simulations which don't particularly care about jets)
   bool do_HIjetreco = false && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
+
+  // 3-D topoCluster reconstruction, potentially in all calorimeter layers
+  bool do_topoCluster = false && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
 
   bool do_dst_compress = false;
 
@@ -410,6 +414,13 @@ int Fun4All_G4_sPHENIX(
   if (do_hcalout_twr) HCALOuter_Towers();
   if (do_hcalout_cluster) HCALOuter_Clusters();
 
+  // if enabled, do topoClustering early, upstream of any possible jet reconstruction
+  if (do_topoCluster)
+  {
+    gROOT->LoadMacro("G4_TopoClusterReco.C");
+    TopoClusterReco();
+  }
+
   if (do_femc_twr) FEMC_Towers();
   if (do_femc_cluster) FEMC_Clusters();
 
@@ -508,8 +519,9 @@ int Fun4All_G4_sPHENIX(
     gSystem->Load("libg4dst.so");
 
     Fun4AllDstInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTinEmbed");
-    //      in1->AddFile(embed_input_file); // if one use a single input file
-    in1->AddListFile(embed_input_file);  // RecommendedL: if one use a text list of many input files
+    in1->AddFile(embed_input_file); // if one use a single input file
+//    in1->AddListFile(embed_input_file);  // Recommended: if one use a text list of many input files
+    in1->Repeat(); // if file(or filelist) is exhausted, start from beginning
     se->registerInputManager(in1);
   }
 
