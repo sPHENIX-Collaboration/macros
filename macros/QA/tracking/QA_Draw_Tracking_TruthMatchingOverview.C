@@ -82,6 +82,7 @@ void QA_Draw_Tracking_TruthMatchingOverview(
     p = (TPad *) c1->cd(idx++);
     c1->Update();
     p->SetLogx();
+    p->SetGridy();
 
     TH1 *h_pass = (TH1 *) qa_file_new->GetObjectChecked(
         prefix + "nReco_pTGen", "TH1");
@@ -154,7 +155,7 @@ void QA_Draw_Tracking_TruthMatchingOverview(
 
     ge_QAG4SimulationTracking_pTRecoGenRatio_pTGen->SetTitle("Mean and sigma, p_{T,reco}/p_{T,truth}");
     DrawReference(ge_QAG4SimulationTracking_pTRecoGenRatio_pTGen, h_ratio_ref, true);
-
-    SaveCanvas(c1, TString(qa_file_name_new) + TString("_") + TString(c1->GetName()), true);
   }
+
+  SaveCanvas(c1, TString(qa_file_name_new) + TString("_") + TString(c1->GetName()), true);
 }
