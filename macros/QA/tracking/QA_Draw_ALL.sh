@@ -26,7 +26,7 @@ root -b -q "QA_Draw_Tracking_TruthMatchingOverview.C(${q}QAG4SimulationTracking$
 root -b -q "QA_Draw_Tracking_pTRatio.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
 root -b -q "QA_Draw_Tracking_TruthMatching_NumOfHits.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
 
-root -b -q "QA_Draw_Tracking_UpsilonOverview.C(${q}QAG4SimulationUpsilon${q},$new_QA_file, $reference_QA_file)"
+# root -b -q "QA_Draw_Tracking_UpsilonOverview.C(${q}QAG4SimulationUpsilon${q},$new_QA_file, $reference_QA_file)"
 
 echo "$0 - Output plots:";
 ls -lh $1*.png;

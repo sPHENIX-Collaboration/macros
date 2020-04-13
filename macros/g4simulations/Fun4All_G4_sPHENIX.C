@@ -82,7 +82,7 @@ int Fun4All_G4_sPHENIX(
   // or gun/ very simple single particle gun generator
   const bool usegun = false && !readhits;
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
-  const bool upsilons = true && !readhits;
+  const bool upsilons = false && !readhits;
   const int num_upsilons_per_event = 1;  // can set more than 1 upsilon per event, each has a unique embed flag
   // Event pile up simulation with collision rate in Hz MB collisions.
   // Note please follow up the macro to verify the settings for beam parameters
