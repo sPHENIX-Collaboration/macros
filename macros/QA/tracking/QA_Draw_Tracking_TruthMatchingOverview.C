@@ -135,7 +135,7 @@ void QA_Draw_Tracking_TruthMatchingOverview(
         prefix + "pTRecoGenRatio_pTGen", "TH2");
     assert(h_QAG4SimulationTracking_pTRecoGenRatio_pTGen);
 
-    h_QAG4SimulationTracking_pTRecoGenRatio_pTGen->Rebin2D(16, 1);
+    h_QAG4SimulationTracking_pTRecoGenRatio_pTGen->Rebin2D(32, 1);
 
     TGraphErrors *ge_QAG4SimulationTracking_pTRecoGenRatio_pTGen = FitProfile(h_QAG4SimulationTracking_pTRecoGenRatio_pTGen);
     ge_QAG4SimulationTracking_pTRecoGenRatio_pTGen->Draw("pe");
