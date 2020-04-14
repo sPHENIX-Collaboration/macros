@@ -44,7 +44,7 @@ using namespace std;
 
 
 int Fun4All_G4_sPHENIX(
-    const int nEvents = 100,
+    const int nEvents = 5,
     const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
     const char *outputFile = "G4sPHENIX.root",
     const char *embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root")
@@ -259,10 +259,18 @@ int Fun4All_G4_sPHENIX(
     // If "readhepMC" is also set, the particles will be embedded in Hijing events
     if (particles)
     {
+
+      // 10.1103/PhysRevC.83.024913 : 0-10%AuAu 200 GeV dNch_deta = 609.
+      static const double target_dNch_deta = 609;
+      // eta range
+      static const double deta_dphi = .5;
+      static const double eta_start = .2;
+      static const int n_pion = int(target_dNch_deta * deta_dphi * deta_dphi / 4);//number particle  per 1/4 batch
+
       // toss low multiplicity dummy events
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-      gen->add_particles("pi-",10);  // mu+,e+,proton,pi+,Upsilon
-      gen->add_particles("pi+",10); // 100 pion option
+      gen->add_particles("pi-",n_pion);  // mu+,e+,proton,pi+,Upsilon
+      gen->add_particles("pi+",n_pion); // 100 pion option
       if (readhepmc || do_embedding || runpythia8 || runpythia6)
       {
         gen->set_reuse_existing_vertex(true);
@@ -278,8 +286,8 @@ int Fun4All_G4_sPHENIX(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0, 0.0);
-      gen->set_eta_range(-1.0, 1.0);
-      gen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi());
+      gen->set_eta_range(eta_start, eta_start + deta_dphi);
+      gen->set_phi_range(0, deta_dphi);
       gen->set_pt_range(0.1, 2);
       gen->Embed(2);
       gen->Verbosity(0);
@@ -287,8 +295,8 @@ int Fun4All_G4_sPHENIX(
       se->registerSubsystem(gen);
 
       gen = new PHG4SimpleEventGenerator();
-      gen->add_particles("pi-", 10);  // mu+,e+,proton,pi+,Upsilon
-      gen->add_particles("pi+", 10);  // 100 pion option
+      gen->add_particles("pi-", n_pion);  // mu+,e+,proton,pi+,Upsilon
+      gen->add_particles("pi+", n_pion);  // 100 pion option
       if (true) // reuse vertex of the last generator
       {
         gen->set_reuse_existing_vertex(true);
@@ -304,8 +312,8 @@ int Fun4All_G4_sPHENIX(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0, 0.0);
-      gen->set_eta_range(-1.0, 1.0);
-      gen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi());
+      gen->set_eta_range(eta_start, eta_start + deta_dphi);
+      gen->set_phi_range(0, deta_dphi);
       gen->set_pt_range(2, 50);
       gen->Embed(2);
       gen->Verbosity(0);
