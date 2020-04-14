@@ -71,7 +71,7 @@ void QA_Draw_Tracking_TruthMatching_NumOfHits(
 
   //MVTX, INTT, TPC
   vector<TString> detectors{"MVTX", "INTT", "TPC"};
-  vector<int> eff_nhit_cuts{2, 2, 40};
+  vector<int> eff_nhit_cuts{2, 2, 36};
   vector<double> nhit_spectrum_pt_cuts{2, 2, 2};
   vector<TH2 *> h_pass_detectors(3, nullptr);
   static const int nrebin = 5;
