@@ -70,7 +70,7 @@ void QA_Draw_Tracking_pTRatio(
       prefix + TString("pTRecoGenRatio_pTGen"), "TH2");
   assert(h_new);
 
-  //  h_new->Rebin(1, 2);
+  h_new->Rebin(1, 3);
   h_new->Sumw2();
   //  h_new->Scale(1. / Nevent_new);
 
@@ -81,7 +81,7 @@ void QA_Draw_Tracking_pTRatio(
         prefix + TString("pTRecoGenRatio_pTGen"), "TH2");
     assert(h_ref);
 
-    //    h_ref->Rebin(1, 2);
+    h_ref->Rebin(1, 3);
     h_ref->Sumw2();
     h_ref->Scale(Nevent_new / Nevent_ref);
   }
