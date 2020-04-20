@@ -21,7 +21,7 @@ double Pipe(PHG4Reco* g4Reco,
   static const double be_pipe_radius = 3.1000;
   static const double be_pipe_thickness = 3.1762 - be_pipe_radius;  // 760 um based on spec sheet
   static const double be_pipe_length_plus = 66.8;                   // +z beam pipe extend.
-  static const double be_pipe_length_neg = -79.8;                   // +z beam pipe extend.
+  static const double be_pipe_length_neg = -79.8;                   // -z beam pipe extend.
 
   static const double be_pipe_length = be_pipe_length_plus - be_pipe_length_neg;  // pipe length
   static const double be_pipe_center = 0.5 * (be_pipe_length_plus + be_pipe_length_neg);
