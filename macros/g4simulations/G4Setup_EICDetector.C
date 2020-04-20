@@ -1,7 +1,7 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 #include "GlobalVariables.C"
-#include "G4_Pipe.C"
+#include "G4_Pipe_EIC.C"
 #include "G4_Tracking_EIC.C"
 #include "G4_PSTOF.C"
 #include "G4_CEmc_EIC.C"
@@ -52,7 +52,7 @@ void G4Init(bool do_svtx = true,
 
   if (do_pipe)
     {
-      gROOT->LoadMacro("G4_Pipe.C");
+      gROOT->LoadMacro("G4_Pipe_EIC.C");
       PipeInit();
     }
 
