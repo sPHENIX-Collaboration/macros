@@ -63,17 +63,22 @@ namespace
       // get histograms
       auto hnew = static_cast<TH1*>( qa_file_new->GetObjectChecked( Form( "%s%s_%i", prefix.Data(), tag.Data(), layer ), "TH1" ) );
       hnew->Scale( 1./hnew->GetEntries() );
+      hnew->SetMinimum(0);
 
       // reference
-      auto href = qa_file_ref ? static_cast<TH1*>( qa_file_new->GetObjectChecked( Form( "%s%s_%i", prefix.Data(), tag.Data(), layer ), "TH1" ) ) : nullptr;
-      if( href ) href->Scale( 1./href->GetEntries() );
+      auto href = qa_file_ref ? static_cast<TH1*>( qa_file_ref->GetObjectChecked( Form( "%s%s_%i", prefix.Data(), tag.Data(), layer ), "TH1" ) ) : nullptr;
+      if( href )
+      {
+        href->Scale( 1./href->GetEntries() );
+        href->SetMinimum(0);
+      }
 
       // draw
       cv->cd( ilayer+1 );
-      DrawReference(hnew, href, false);
+      DrawReference(hnew, href);
 
       auto line = VerticalLine( gPad, 0 );
-      line->Draw(); 
+      line->Draw();
     }
 
     return cv;
