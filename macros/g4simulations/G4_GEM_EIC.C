@@ -35,8 +35,8 @@ void EGEMSetup(PHG4Reco *g4Reco)
   float thickness = 3.;
   make_GEM_station("EGEM_0", g4Reco, -20.5 + thickness, -0.94, -1.95);
   make_GEM_station("EGEM_1", g4Reco, -69.5 + thickness, -2.07, -3.21);
-  make_GEM_station("EGEM_2", g4Reco, -137.0 + thickness, -1.4, -3.9);
-  make_GEM_station("EGEM_3", g4Reco, -160.0 + thickness, -1.5, -4.00);
+  make_GEM_station("EGEM_2", g4Reco, -137.0 + thickness, -1.4, -3.5);
+  make_GEM_station("EGEM_3", g4Reco, -160.0 + thickness, -1.5, -3.6);
 }
 
 void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
@@ -59,14 +59,15 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   // We also need two outer barrel layers which might need some adjustments by the space limitation
   // and needs integration with the central vertex detector.
   //
-  // Note:  last station need to be removed to avoid confliction with the gas RICH. GEM chamber at z=2.7m is used instead
+  // Note1:  last station need to be removed to avoid confliction with the gas RICH. GEM chamber at z=2.7m is used instead
+  // Note2:  increase inner radius for beam pipe flange clearance
 
-  make_LANL_FST_station("FST_0", g4Reco, 17, 3.2, 19);
-  make_LANL_FST_station("FST_1", g4Reco, 62, 3.2, 19);
+  make_LANL_FST_station("FST_0", g4Reco, 17, 3.2, 18);
+  make_LANL_FST_station("FST_1", g4Reco, 62, 3.2, 18);
 
   ///////////////////////////////////////////////////////////////////////////
 
-  make_LANL_FST_station("FST_2", g4Reco, 120, 4.5, 35);
+  make_LANL_FST_station("FST_2", g4Reco, 120, 10, 35);
 
   ///////////////////////////////////////////////////////////////////////////
 
@@ -95,7 +96,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
 
   ///////////////////////////////////////////////////////////////////////////
 
-  make_LANL_FST_station("FST_3", g4Reco, 140, 5, 39);
+  make_LANL_FST_station("FST_3", g4Reco, 140, 12, 41);
 
   ///////////////////////////////////////////////////////////////////////////
 
@@ -130,12 +131,12 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
 
   ///////////////////////////////////////////////////////////////////////////
 
-  make_LANL_FST_station("FST_4", g4Reco, 160, 6, 41);
+  make_LANL_FST_station("FST_4", g4Reco, 160, 12, 41);
 
   ///////////////////////////////////////////////////////////////////////////
 
   name = "FGEM_4";
-  etamax = 4;
+  etamax = 3.5;
   etamin = min_eta;
   zpos = 271.0;
   gem = new PHG4SectorSubsystem(name.c_str());
@@ -183,7 +184,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
 
   ///////////////////////////////////////////////////////////////////////////
 
-  make_LANL_FST_station("FST_5", g4Reco, 280, 10, 41);
+  make_LANL_FST_station("FST_5", g4Reco, 280, 17, 41);
 
   ///////////////////////////////////////////////////////////////////////////
 }
