@@ -1,10 +1,10 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6, 00, 0)
-#include <g4detectors/PHG4CylinderSubsystem.h>
-#include <g4main/PHG4Reco.h>
-#include <g4detectors/PHG4GDMLSubsystem.h>
-#include "GlobalVariables.C"
 #include <TSystem.h>
+#include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4detectors/PHG4GDMLSubsystem.h>
+#include <g4main/PHG4Reco.h>
+#include "GlobalVariables.C"
 R__LOAD_LIBRARY(libg4detectors.so)
 #endif
 
@@ -18,12 +18,11 @@ double Pipe(PHG4Reco* g4Reco,
             double radius,
             const int absorberactive = 0,
             int verbosity = 0,
-            bool use_forward_pipes = true
-)
+            bool use_forward_pipes = true)
 {
   // process pipe extentions?
-  const static bool do_pipe_hadron_forward_extension = true;
-  const static bool do_pipe_electron_forward_extension = true;
+  const static bool do_pipe_hadron_forward_extension = use_forward_pipes && true;
+  const static bool do_pipe_electron_forward_extension = use_forward_pipes && true;
 
   // Central pipe dimension
   // Extracted via mechanical model: Detector chamber 3-20-20
@@ -78,24 +77,23 @@ double Pipe(PHG4Reco* g4Reco,
 
   if (do_pipe_electron_forward_extension)
   {
-  PHG4GDMLSubsystem *gdml = new PHG4GDMLSubsystem("ElectronForwardEnvelope");
-  gdml->set_string_param("GDMPath",string(getenv("CALIBRATIONROOT")) + "/Beam/Detector chamber 3-20-20.G4Import.gdml");
-  gdml->set_string_param("TopVolName","ElectronForwardEnvelope");
-  gdml->set_int_param("skip_DST_geometry_export", 1); // do not export extended beam pipe as it is not supported by TGeo and outside Kalman filter acceptance
-  gdml->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(gdml);
+    PHG4GDMLSubsystem* gdml = new PHG4GDMLSubsystem("ElectronForwardEnvelope");
+    gdml->set_string_param("GDMPath", string(getenv("CALIBRATIONROOT")) + "/Beam/Detector chamber 3-20-20.G4Import.gdml");
+    gdml->set_string_param("TopVolName", "ElectronForwardEnvelope");
+    gdml->set_int_param("skip_DST_geometry_export", 1);  // do not export extended beam pipe as it is not supported by TGeo and outside Kalman filter acceptance
+    gdml->OverlapCheck(overlapcheck);
+    g4Reco->registerSubsystem(gdml);
   }
 
   if (do_pipe_hadron_forward_extension)
   {
-  PHG4GDMLSubsystem *gdml = new PHG4GDMLSubsystem("HadronForwardEnvelope");
-  gdml->set_string_param("GDMPath",string(getenv("CALIBRATIONROOT")) + "/Beam/Detector chamber 3-20-20.G4Import.gdml");
-  gdml->set_string_param("TopVolName","HadronForwardEnvelope");
-  gdml->set_int_param("skip_DST_geometry_export", 1); // do not export extended beam pipe as it is not supported by TGeo and outside Kalman filter acceptance
-  gdml->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(gdml);
+    PHG4GDMLSubsystem* gdml = new PHG4GDMLSubsystem("HadronForwardEnvelope");
+    gdml->set_string_param("GDMPath", string(getenv("CALIBRATIONROOT")) + "/Beam/Detector chamber 3-20-20.G4Import.gdml");
+    gdml->set_string_param("TopVolName", "HadronForwardEnvelope");
+    gdml->set_int_param("skip_DST_geometry_export", 1);  // do not export extended beam pipe as it is not supported by TGeo and outside Kalman filter acceptance
+    gdml->OverlapCheck(overlapcheck);
+    g4Reco->registerSubsystem(gdml);
   }
-
 
   return radius;
 }
