@@ -13,14 +13,15 @@ void PipeInit()
 }
 
 //! construct beam pipe
-//! \param[in] use_forward_pipes whetehr to include the engineer
+//! \param[in] use_forward_pipes whether to include the forward pipe extension beyond the Be section
 double Pipe(PHG4Reco* g4Reco,
             double radius,
             const int absorberactive = 0,
-            int verbosity = 0,
-            bool use_forward_pipes = true)
+            int verbosity = 0
+            )
 {
   // process pipe extentions?
+  bool use_forward_pipes = false;
   const static bool do_pipe_hadron_forward_extension = use_forward_pipes && true;
   const static bool do_pipe_electron_forward_extension = use_forward_pipes && true;
 
