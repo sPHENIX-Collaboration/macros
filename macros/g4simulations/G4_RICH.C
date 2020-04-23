@@ -35,7 +35,9 @@ RICHSetup(PHG4Reco* g4Reco, //
 	  const double min_eta = 1.3, //
 	  const double R_mirror_ref = 190, //cm // Reduced from 195 (2014 LOI) -> 190 to avoid overlap with FGEM4 (it seems to fit fine in the AutoCAD drawing- is the RICH longer in Geant4 than in the AutoCAD drawing?)
 	  const double z_shift = 75, // cm
-	  const double R_shift = 18.5 // cm
+	  const double R_shift = 18.5, // cm
+    const double R_beampipe_front = 8, // clearance for EIC beam pipe flange
+    const double R_beampipe_back = 27 // clearance for EIC beam pipe flange
 	  )
 {
 
@@ -50,6 +52,9 @@ RICHSetup(PHG4Reco* g4Reco, //
 
   rich->get_RICH_geometry().set_z_shift(z_shift * ePHENIXRICH::RICH_Geometry::Unit_cm());
   rich->get_RICH_geometry().set_R_shift(R_shift * ePHENIXRICH::RICH_Geometry::Unit_cm());
+
+  rich->get_RICH_geometry().set_R_beam_pipe_front(R_beampipe_front * ePHENIXRICH::RICH_Geometry::Unit_cm());
+  rich->get_RICH_geometry().set_R_beam_pipe_back(R_beampipe_back * ePHENIXRICH::RICH_Geometry::Unit_cm());
 
   /* Register RICH module */
   rich->OverlapCheck( overlapcheck );

@@ -51,7 +51,7 @@ FHCALSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
   /* path to central copy of calibrations repositry */
   mapping_hhcal << getenv("CALIBRATIONROOT") ;
-  mapping_hhcal << "/ForwardHcal/mapping/towerMap_FHCAL_v004.txt";
+  mapping_hhcal << "/ForwardHcal/mapping/towerMap_FHCAL_v005.txt";
   cout << mapping_hhcal.str() << endl;
   //mapping_hhcal << "towerMap_FHCAL_latest.txt";
 
@@ -73,7 +73,7 @@ void FHCAL_Towers(int verbosity = 0) {
 
   ostringstream mapping_fhcal;
   mapping_fhcal << getenv("CALIBRATIONROOT") <<
-  	"/ForwardHcal/mapping/towerMap_FHCAL_v004.txt";
+  	"/ForwardHcal/mapping/towerMap_FHCAL_v005.txt";
   //mapping_fhcal << "towerMap_FHCAL_latest.txt";
 
   RawTowerBuilderByHitIndex* tower_FHCAL = new RawTowerBuilderByHitIndex("TowerBuilder_FHCAL");
