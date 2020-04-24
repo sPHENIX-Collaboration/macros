@@ -64,6 +64,7 @@ namespace
       auto hnew = static_cast<TH1*>( qa_file_new->GetObjectChecked( Form( "%s%s_%i", prefix.Data(), tag.Data(), layer ), "TH1" ) );
       hnew->Scale( 1./hnew->GetEntries() );
       hnew->SetMinimum(0);
+      hnew->SetTitle(TString("MVTX ") + hnew->GetTitle()); // note detector name in title
 
       // reference
       auto href = qa_file_ref ? static_cast<TH1*>( qa_file_ref->GetObjectChecked( Form( "%s%s_%i", prefix.Data(), tag.Data(), layer ), "TH1" ) ) : nullptr;
