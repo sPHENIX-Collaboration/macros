@@ -2,6 +2,7 @@
 #include <qa_modules/QAG4SimulationUpsilon.h>
 #include <qa_modules/QAG4SimulationTracking.h>
 #include <qa_modules/QAHistManagerDef.h>
+#include <qa_modules/QAG4SimulationMvtx.h>
 #include <phool/PHRandomSeed.h>
 #include <fun4all/SubsysReco.h>
 #include <fun4all/Fun4AllServer.h>
@@ -644,6 +645,8 @@ int Fun4All_G4_sPHENIX(
         qa->addEmbeddingID(3);
         se->registerSubsystem(qa);
       }
+
+      se->registerSubsystem( new QAG4SimulationMvtx );
     }
   }
 
