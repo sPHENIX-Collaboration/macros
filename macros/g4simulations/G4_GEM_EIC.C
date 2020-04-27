@@ -236,9 +236,10 @@ int make_LANL_FST_station(string name, PHG4Reco *g4Reco, double zpos, double Rmi
   const double mm = .1 * cm;
   const double um = 1e-3 * mm;
   // build up layers
-  fst->get_geometry().AddLayer("SliconSensor", "G4_Al", 20 * um, false, 100);
-  fst->get_geometry().AddLayer("SliconSensor", "G4_Si", 50 * um, true, 100);
-  fst->get_geometry().AddLayer("HDI", "G4_KAPTON", 50 * um, false, 100);
+  fst->get_geometry().AddLayer("SliconSensor", "G4_Si", 18 * um, true, 100);
+  fst->get_geometry().AddLayer("Metalconnection", "G4_Al", 15 * um, false, 100);
+  fst->get_geometry().AddLayer("SliconSupport", "G4_Al", 285 * um, false, 100);
+  fst->get_geometry().AddLayer("HDI", "G4_KAPTON", 20 * um, false, 100);
   fst->get_geometry().AddLayer("Cooling", "G4_WATER", 100 * um, false, 100);
   fst->get_geometry().AddLayer("Support", "G4_GRAPHITE", 50 * um, false, 100);
   fst->get_geometry().AddLayer("Support_Gap", "G4_AIR", 1 * cm, false, 100);
