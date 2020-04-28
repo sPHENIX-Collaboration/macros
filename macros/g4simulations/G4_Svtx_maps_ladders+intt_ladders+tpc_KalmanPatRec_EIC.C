@@ -48,7 +48,7 @@ int tpc_layer_rphi_count_outer = 2304;
 int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
 
 double inner_cage_radius = 20.;
-double inner_readout_radius = 30.;
+// double inner_readout_radius = 30.; - deprecated for EIC simulation
 
 // TPC gas parameters
 // These are set for a variety of gas choices...
@@ -314,7 +314,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   radius += cage_thickness;
 
-  double inner_readout_radius = radius;
+  // double inner_readout_radius = radius; 
   //  if (inner_readout_radius < radius) inner_readout_radius = radius;
   //
   string tpcgas = "sPHENIX_TPC_Gas";  //  Ne(90%) CF4(10%) - defined in g4main/PHG4Reco.cc
@@ -336,7 +336,7 @@ double Svtx(PHG4Reco* g4Reco, double radius,
 
   double outer_radius = 78.;
 
-  // Active layers of the TPC from 30-40 cm (inner layers)
+  // Active layers of the TPC (inner layers)
 
   for (int ilayer = n_maps_layer + n_intt_layer; ilayer < (n_maps_layer + n_intt_layer + n_tpc_layer_inner); ++ilayer)
   {
