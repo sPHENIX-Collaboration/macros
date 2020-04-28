@@ -64,12 +64,12 @@ FEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
   ostringstream mapping_femc;
 
   
-  femc->SetEICDetector(); 
+//  femc->SetEICDetector();
 
   // fsPHENIX ECAL
 //  mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
   // PbScint ECAL with enlarged beam pipe opening for Mar 2020 beam pipe
-  mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_v006.txt";
+  mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_v007.txt";
 
   cout << mapping_femc.str() << endl;
   femc->SetTowerMappingFile( mapping_femc.str() );
@@ -94,7 +94,7 @@ void FEMC_Towers(int verbosity = 0) {
 //  mapping_femc << getenv("CALIBRATIONROOT") <<
 //   	"/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
   // PbScint ECAL with enlarged beam pipe opening for Mar 2020 beam pipe
-  mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_v006.txt";
+  mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_v007.txt";
 
 
   RawTowerBuilderByHitIndex* tower_FEMC = new RawTowerBuilderByHitIndex("TowerBuilder_FEMC");
