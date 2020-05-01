@@ -271,7 +271,7 @@ int G4Setup(const int absorberactive = 0,
   {
     radius = BlackHoleGeometry::max_radius;
   }
-  double blackholeradius = radius + no_overlapp; // make the black hole 100 cm larger than the detector
+  double blackholeradius = radius + 100; // make the black hole 100 cm larger than the detector
   PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
   blackhole->set_double_param("radius",blackholeradius); // add 100 cm
 
