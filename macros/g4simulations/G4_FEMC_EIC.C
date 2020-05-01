@@ -33,6 +33,10 @@ enu_Femc_clusterizer Femc_clusterizer = kFemcTemplateClusterizer;
 void
 FEMCInit()
 {
+  if (BlackHoleGeometry::max_radius < 200)
+  {
+    BlackHoleGeometry::max_radius = 200; // eye balled, it can shrink a bit
+  }
 }
 
 void FEMC_Cells(int verbosity = 0) {

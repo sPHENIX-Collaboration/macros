@@ -18,9 +18,15 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 #include <cmath>
 
+const double radiator_R = 83.65;
+
 void
 DIRCInit()
 {
+  if (BlackHoleGeometry::max_radius < radiator_R)
+  {
+    BlackHoleGeometry::max_radius = radiator_R; // from default in code - needs changing
+  }
 
 }
 
@@ -30,7 +36,6 @@ DIRCInit()
 double
 DIRCSetup(PHG4Reco* g4Reco)
 {
-  const double radiator_R = 83.65;
   const double length = 400;
   const double z_shift = -75; //115
   const double z_start = z_shift + length / 2.;
@@ -38,9 +43,8 @@ DIRCSetup(PHG4Reco* g4Reco)
 
   PHG4SectorSubsystem *dirc;
   dirc = new PHG4SectorSubsystem("DIRC");
-  dirc->get_geometry().set_normal_polar_angle(3.14159265358979323846/2);
-  dirc->get_geometry().set_normal_start(
-                                        83.65 * PHG4Sector::Sector_Geometry::Unit_cm());
+  dirc->get_geometry().set_normal_polar_angle(M_PI/2);
+  dirc->get_geometry().set_normal_start(83.65 * PHG4Sector::Sector_Geometry::Unit_cm());
   dirc->get_geometry().set_min_polar_angle(atan2(radiator_R, z_start));
   dirc->get_geometry().set_max_polar_angle(atan2(radiator_R, z_end));
   dirc->get_geometry().set_min_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());

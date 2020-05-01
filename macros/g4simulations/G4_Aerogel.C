@@ -18,6 +18,10 @@ R__LOAD_LIBRARY(libg4detectors.so)
 void
 AerogelInit()
 {
+  if (BlackHoleGeometry::max_radius < 174.5)
+  {
+    BlackHoleGeometry::max_radius = 174.5; // magnet outer radius generous value from display
+  }
 
 }
 
