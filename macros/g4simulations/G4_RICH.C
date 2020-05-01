@@ -23,6 +23,10 @@ using namespace std;
 void
 RICHInit()
 {
+  if (BlackHoleGeometry::max_radius < 200)
+  {
+    BlackHoleGeometry::max_radius = 200; // from default in code - needs changing
+  }
 }
 
 //! ePHENIX Gas RICH. Ref to Geometry parameter defined in ePHENIXRICH::RICH_Geometry
@@ -36,9 +40,9 @@ RICHSetup(PHG4Reco* g4Reco, //
 	  const double R_mirror_ref = 190, //cm // Reduced from 195 (2014 LOI) -> 190 to avoid overlap with FGEM4 (it seems to fit fine in the AutoCAD drawing- is the RICH longer in Geant4 than in the AutoCAD drawing?)
 	  const double z_shift = 75, // cm
 	  const double R_shift = 18.5, // cm
-    const double R_beampipe_front = 8, // clearance for EIC beam pipe flange
-    const double R_beampipe_back = 27 // clearance for EIC beam pipe flange
-	  )
+	  const double R_beampipe_front = 8, // clearance for EIC beam pipe flange
+	  const double R_beampipe_back = 27 // clearance for EIC beam pipe flange
+  )
 {
 
   /* Use dedicated RICH subsystem */
