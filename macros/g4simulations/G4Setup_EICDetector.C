@@ -266,44 +266,49 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // BLACKHOLE
-
   // swallow all particles coming out of the backend of sPHENIX
+  if (radius < BlackHoleGeometry::max_radius)
+  {
+    radius = BlackHoleGeometry::max_radius;
+  }
+  double blackholeradius = radius + no_overlapp; // make the black hole 100 cm larger than the detector
   PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
-  blackhole->set_double_param("radius",radius + 100); // add 100 cm
+  blackhole->set_double_param("radius",blackholeradius); // add 100 cm
 
   blackhole->set_int_param("lengthviarapidity",0);
-  blackhole->set_double_param("length",g4Reco->GetWorldSizeZ() - no_overlapp); // make it cover the world in length
+  blackhole->set_double_param("length",g4Reco->GetWorldSizeZ() - 2*no_overlapp); // make it cover the world in length
   blackhole->BlackHole();
-  blackhole->set_double_param("thickness",0.1); // it needs some thickness
+  blackhole->set_double_param("thickness",no_overlapp/2.); // it needs some thickness
   blackhole->SetActive(); // always see what leaks out
-  blackhole->OverlapCheck(overlapcheck);
+  blackhole->OverlapCheck(true);
   g4Reco->registerSubsystem(blackhole);
 
   //----------------------------------------
-  // FORWARD BLACKHOLEs
+  // FORWARD/BACKWARD BLACKHOLEs (thin disks, thickness is radius, length is thickness)
   // +Z
   blackhole = new PHG4CylinderSubsystem("BH_FORWARD_PLUS", 1);
   blackhole->SuperDetector("BH_FORWARD_PLUS");
   blackhole->set_double_param("radius",0); // add 10 cm
   blackhole->set_int_param("lengthviarapidity",0);
-  blackhole->set_double_param("length",0.1); // make it cover the world in length
-  blackhole->set_double_param("place_z",g4Reco->GetWorldSizeZ()/2. - 0.1  - no_overlapp);
+  blackhole->set_double_param("length",no_overlapp/2.); // it needs some thickness but not go outside world
+  blackhole->set_double_param("place_z",g4Reco->GetWorldSizeZ()/2.  - no_overlapp); // put at the end of the world
   blackhole->BlackHole();
-  blackhole->set_double_param("thickness",radius - no_overlapp); // it needs some thickness
+  // make it slightly larger in radius so we cover the small gap left by central BH cylinder
+  blackhole->set_double_param("thickness",blackholeradius+no_overlapp);
   blackhole->SetActive(); // always see what leaks out
-  blackhole->OverlapCheck(overlapcheck);
+  blackhole->OverlapCheck(true);
   g4Reco->registerSubsystem(blackhole);
 
   blackhole = new PHG4CylinderSubsystem("BH_FORWARD_NEG", 1);
   blackhole->SuperDetector("BH_FORWARD_NEG");
   blackhole->set_double_param("radius",0); // add 10 cm
   blackhole->set_int_param("lengthviarapidity",0);
-  blackhole->set_double_param("length",0.1); // make it cover the world in length
-  blackhole->set_double_param("place_z", - g4Reco->GetWorldSizeZ()/2. +0.1  + no_overlapp);
+  blackhole->set_double_param("length",no_overlapp/2.); // it needs some thickness but not go outside world
+  blackhole->set_double_param("place_z", - g4Reco->GetWorldSizeZ()/2.  + no_overlapp);
   blackhole->BlackHole();
-  blackhole->set_double_param("thickness",radius - no_overlapp); // it needs some thickness
+  blackhole->set_double_param("thickness",blackholeradius+no_overlapp);
   blackhole->SetActive(); // always see what leaks out
-  blackhole->OverlapCheck(overlapcheck);
+  blackhole->OverlapCheck(true);
   g4Reco->registerSubsystem(blackhole);
 
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
