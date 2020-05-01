@@ -6,7 +6,16 @@
 R__LOAD_LIBRARY(libg4detectors.so)
 #endif
 
-void PlugDoorInit() {}
+const double r_2  = 263.5;
+
+void PlugDoorInit() 
+{
+  if (BlackHoleGeometry::max_radius < r_2)
+  {
+    BlackHoleGeometry::max_radius = r_2; // eye balled, it can shrink a bit
+  }
+}
+
 void PlugDoor(PHG4Reco *g4Reco,
               const int absorberactive = 0,
               int verbosity = 0)
@@ -17,7 +26,6 @@ void PlugDoor(PHG4Reco *g4Reco,
   const double z_1  = 330.81;
   const double z_2  = 360.81;
   const double r_1  = 30;
-  const double r_2  = 263.5;
   const string material("Steel_1006");
   const int flux_door_active = false;
 
