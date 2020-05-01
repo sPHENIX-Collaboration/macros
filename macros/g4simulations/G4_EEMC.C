@@ -21,6 +21,10 @@ const int use_projective_geometry = 0;
 void
 EEMCInit()
 {
+  if (BlackHoleGeometry::max_radius < 70)
+  {
+    BlackHoleGeometry::max_radius = 70; // eye balled, it can shrink a bit
+  }
 }
 
 void EEMC_Cells(int verbosity = 0) {

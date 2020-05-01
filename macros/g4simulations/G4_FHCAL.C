@@ -21,6 +21,10 @@ using namespace std;
 void
 FHCALInit()
 {
+  if (BlackHoleGeometry::max_radius < 270)
+  {
+    BlackHoleGeometry::max_radius = 270; // eye balled, it can shrink a bit
+  }
 }
 
 void FHCAL_Cells(int verbosity = 0) {
