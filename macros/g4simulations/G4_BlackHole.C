@@ -18,12 +18,7 @@ void BlackHole(PHG4Reco *g4Reco, double radius)
   double blackhole_length = (BlackHoleGeometry::max_z - BlackHoleGeometry::min_z)+2*BlackHoleGeometry::gap;
   double blackhole_zpos = BlackHoleGeometry::min_z - BlackHoleGeometry::gap + blackhole_length/2.;
   double blackhole_radius = radius + BlackHoleGeometry::gap+10; // make the black hole slightly larger than the radius
-  cout << "blackhole_length: " << blackhole_length << endl;
-  cout << "blackhole_zpos: " << blackhole_zpos << endl;
-  cout << "blackhole_radius: " << blackhole_radius << endl;
-  cout << "BlackHoleGeometry::min_z: " << BlackHoleGeometry::min_z << endl;
-  cout << "BlackHoleGeometry::max_z: " << BlackHoleGeometry::max_z << endl;
-  cout << "BlackHoleGeometry::gap: " << BlackHoleGeometry::gap << endl;
+
   PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
   blackhole->set_double_param("radius",blackhole_radius); 
   blackhole->set_double_param("length", blackhole_length); // make it cover the world in length
@@ -41,7 +36,14 @@ void BlackHole(PHG4Reco *g4Reco, double radius)
   //----------------------------------------
   // FORWARD/BACKWARD BLACKHOLEs (thin disks, thickness is radius, length is thickness)
   // +Z
-  double blackhole_forward_zpos = blackhole_zpos + blackhole_length/2.+BlackHoleGeometry::gap/4.+BlackHoleGeometry::gap;
+// if min/max z is not symmetric, the cylinder is not centered around z=0
+// to find the offset we start with the middle of the barrel at blackhole_zpos, then add its length/2. which
+// gets us to the end of the cylinder, then we add another gap so the endcap does not overlap
+// the endcap itself is BlackHoleGeometry::gap/2 thick, leaving BlackHoleGeometry::gap/4 on each side of the
+// center. Basically we have a gap of BlackHoleGeometry::gap/4 between the barrel and the endplates
+// therefore we add BlackHoleGeometry::gap to the radius of the endcap so particles trying to go through
+// the tiny gap between barren and endplate will hit the endplate
+  double blackhole_forward_zpos = blackhole_zpos + blackhole_length/2.+BlackHoleGeometry::gap/2.;
   blackhole = new PHG4CylinderSubsystem("BH_FORWARD_PLUS", 1);
   blackhole->SuperDetector("BH_FORWARD_PLUS");
   blackhole->set_double_param("radius",0.);
@@ -58,7 +60,7 @@ void BlackHole(PHG4Reco *g4Reco, double radius)
   g4Reco->registerSubsystem(blackhole);
 
   // -Z
-  double blackhole_backward_zpos = blackhole_zpos - (blackhole_length/2.+BlackHoleGeometry::gap/4.+BlackHoleGeometry::gap);
+  double blackhole_backward_zpos = blackhole_zpos - (blackhole_length/2.+BlackHoleGeometry::gap/2.);
 
   blackhole = new PHG4CylinderSubsystem("BH_FORWARD_NEG", 1);
   blackhole->SuperDetector("BH_FORWARD_NEG");
