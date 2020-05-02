@@ -40,9 +40,7 @@ void G4Init(bool do_svtx = true,
             bool do_pipe = true,
             bool do_FEMC = true,
             bool do_FHCAL = true,
-            bool do_DIRC = true,
-            bool do_RICH = true,
-            bool do_Aerogel = true)
+            bool do_DIRC = true)
 {
 
   // load detector/material macros and execute Init() function
@@ -104,21 +102,18 @@ void G4Init(bool do_svtx = true,
       EEMCInit();
     }
 
-  if (do_DIRC)
+  if (Enable::DIRC)
     {
-      gROOT->LoadMacro("G4_DIRC.C");
       DIRCInit();
     }
 
-  if (do_RICH)
+  if (Enable::RICH)
     {
-      gROOT->LoadMacro("G4_RICH.C");
       RICHInit();
     }
 
-  if (do_Aerogel)
+  if (Enable::Aerogel)
     {
-      gROOT->LoadMacro("G4_Aerogel.C");
       AerogelInit();
     }
 
@@ -147,8 +142,6 @@ int G4Setup(const int absorberactive = 0,
             const bool do_FEMC = false,
             const bool do_FHCAL = false,
             const bool do_DIRC = true,
-            const bool do_RICH = true,
-            const bool do_Aerogel = true,
             const float magfield_rescale = 1.0) {
 
   //---------------
@@ -252,15 +245,20 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // PID
 
-  if ( do_DIRC )
+  if (Enable::DIRC)
+  {
     DIRCSetup(g4Reco);
+  }
 
-  if ( do_RICH )
+  if (Enable::RICH)
+  {
     RICHSetup(g4Reco);
+  }
 
-  if ( do_Aerogel )
+  if (Enable::Aerogel)
+  {
     AerogelSetup(g4Reco);
-
+  }
   //----------------------------------------
   // sPHENIX forward flux return door
   if (Enable::PlugDoor)
