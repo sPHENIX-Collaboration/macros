@@ -94,11 +94,11 @@ void G4Init(bool do_svtx = true,
       gROOT->LoadMacro("G4_FHCAL.C");
       FHCALInit();
     }
-  if (Enable::PlugDoor)
+  if (Enable::PLUGDOOR)
     {
       PlugDoorInit();
     }
-  if (Enable::BlackHole)
+  if (Enable::BLACKHOLE)
   {
     BlackHoleInit();
   }
@@ -219,7 +219,7 @@ int G4Setup(const int absorberactive = 0,
   if ( do_FHCAL )
     FHCALSetup(g4Reco, absorberactive);
 
-  if (Enable::PlugDoor)
+  if (Enable::PLUGDOOR)
   {
     PlugDoor(g4Reco, absorberactive);
   }
@@ -230,7 +230,7 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // BLACKHOLE if enabled, needs info from all previous sub detectors for dimensions
-  if (Enable::BlackHole)
+  if (Enable::BLACKHOLE)
   {
     BlackHole(g4Reco, radius);
   }
