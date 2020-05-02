@@ -113,35 +113,35 @@ int Fun4All_G4_EICDetector(
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
 
-  bool do_hcalin = false;
-  bool do_hcalin_cell = do_hcalin && true;
+  Enable::HCALIN = true;
+  bool do_hcalin_cell = Enable::HCALIN && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
   bool do_hcalin_eval = do_hcalin_cluster && true;
 
   bool do_magnet = false;
 
-  bool do_hcalout = false;
-  bool do_hcalout_cell = do_hcalout && true;
+  Enable::HCALOUT = false;
+  bool do_hcalout_cell = Enable::HCALOUT && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
   bool do_hcalout_eval = do_hcalout_cluster && true;
 
   // EICDetector geometry - barrel
-  bool do_DIRC = false;
+  Enable::DIRC = false;
 
   // EICDetector geometry - 'hadron' direction
-  Enable::RICH = true;
-  Enable::Aerogel = false;
+  Enable::RICH = false;
+  Enable::AEROGEL = false;
 
-  bool do_FEMC = false;
-  bool do_FEMC_cell = do_FEMC && true;
+  Enable::FEMC = false;
+  bool do_FEMC_cell = Enable::FEMC && true;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
   bool do_FEMC_eval = do_FEMC_cluster && true;
 
-  bool do_FHCAL = false;
-  bool do_FHCAL_cell = do_FHCAL && true;
+  Enable::FHCAL = false;
+  bool do_FHCAL_cell = Enable::FHCAL && true;
   bool do_FHCAL_twr = do_FHCAL_cell && true;
   bool do_FHCAL_cluster = do_FHCAL_twr && true;
   bool do_FHCAL_eval = do_FHCAL_cluster && true;
@@ -153,7 +153,7 @@ int Fun4All_G4_EICDetector(
   bool do_EEMC_cluster = do_EEMC_twr && true;
   bool do_EEMC_eval = do_EEMC_cluster && true;
 
-  Enable::PlugDoor = false;
+  Enable::PLUGDOOR = false;
 
   // Other options
   bool do_global = false;
@@ -181,7 +181,7 @@ int Fun4All_G4_EICDetector(
   bool do_DSTReader = false;
 
 // new settings using Enable namespace in GlobalVariables.C
-  Enable::BlackHole = true;
+  Enable::BLACKHOLE = true;
   BlackHoleGeometry::visible = true;
 
   //---------------
@@ -196,7 +196,7 @@ int Fun4All_G4_EICDetector(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_EICDetector.C");
-  G4Init(do_tracking,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FEMC,do_FHCAL,do_DIRC);
+  G4Init(do_tracking,do_cemc,do_magnet,do_pipe);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -401,18 +401,9 @@ int Fun4All_G4_EICDetector(
       // Detector description
       //---------------------
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
       G4Setup(absorberactive, magfield, EDecayType::kAll,
-              do_tracking,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,
-              do_FEMC,do_FHCAL,do_DIRC,
+              do_tracking,do_cemc,do_magnet,do_pipe,
               magfield_rescale);
-#else
-      G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-              do_tracking,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,
-              do_FEMC,do_FHCAL,do_DIRC,
-              magfield_rescale);
-#endif
-
     }
 
   //---------
@@ -584,15 +575,15 @@ int Fun4All_G4_EICDetector(
                                /*int*/ absorberactive ,
                                /*bool*/ do_tracking ,
                                /*bool*/ do_cemc ,
-                               /*bool*/ do_hcalin ,
+                               /*bool*/ Enable::HCALIN ,
                                /*bool*/ do_magnet ,
-                               /*bool*/ do_hcalout ,
+                               /*bool*/ Enable::HCALOUT ,
                                /*bool*/ do_cemc_twr ,
                                /*bool*/ do_hcalin_twr ,
                                /*bool*/ do_hcalout_twr,
-                               /*bool*/ do_FHCAL,
+                               /*bool*/ Enable::FHCAL,
                                /*bool*/ do_FHCAL_twr,
-                               /*bool*/ do_FEMC,
+                               /*bool*/ Enable::FEMC,
                                /*bool*/ do_FEMC_twr,
                                /*bool*/ Enable::EEMC,
                                /*bool*/ do_EEMC_twr
