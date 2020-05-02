@@ -30,12 +30,24 @@ enu_Femc_clusterizer Femc_clusterizer = kFemcTemplateClusterizer;
 // graph clusterizer
 //enu_Femc_clusterizer Femc_clusterizer = kFemcGraphClusterizer;
 
+namespace FEMCMACRO
+{
+// from ForwardEcal/mapping/towerMap_FEMC_v007.txt
+  const double Gz0 = 310.;
+  const double Gdz = 36.5;
+  const double outer_radius = 182.655;
+}
+
 void
 FEMCInit()
 {
-  if (BlackHoleGeometry::max_radius < 200)
+  if (BlackHoleGeometry::max_radius < FEMCMACRO::outer_radius)
   {
-    BlackHoleGeometry::max_radius = 200; // eye balled, it can shrink a bit
+    BlackHoleGeometry::max_radius = FEMCMACRO::outer_radius; 
+  }
+  if (BlackHoleGeometry::max_z < FEMCMACRO::Gz0 + FEMCMACRO::Gdz/2.)
+  {
+    BlackHoleGeometry::max_z = FEMCMACRO::Gz0 + FEMCMACRO::Gdz/2.;
   }
 }
 
