@@ -1,10 +1,12 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+
 #include "GlobalVariables.C"
+
 #include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4main/PHG4Reco.h>
+
 R__LOAD_LIBRARY(libg4detectors.so)
-#endif
+
 
 void BlackHoleInit() {}
 
@@ -17,8 +19,7 @@ void BlackHole(PHG4Reco *g4Reco, double radius)
   }
   double blackhole_length = (BlackHoleGeometry::max_z - BlackHoleGeometry::min_z)+2*BlackHoleGeometry::gap;
   double blackhole_zpos = BlackHoleGeometry::min_z - BlackHoleGeometry::gap + blackhole_length/2.;
-  double blackhole_radius = radius + BlackHoleGeometry::gap+10; // make the black hole slightly larger than the radius
-
+  double blackhole_radius = radius + BlackHoleGeometry::gap; // make the black hole slightly larger than the radius
   PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
   blackhole->set_double_param("radius",blackhole_radius); 
   blackhole->set_double_param("length", blackhole_length); // make it cover the world in length
