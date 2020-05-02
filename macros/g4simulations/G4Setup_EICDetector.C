@@ -36,9 +36,7 @@ void RunLoadTest() {}
 
 void G4Init(bool do_svtx = true,
             bool do_cemc = true,
-            bool do_hcalin = true,
             bool do_magnet = true,
-            bool do_hcalout = true,
             bool do_pipe = true)
 {
 
@@ -67,9 +65,8 @@ void G4Init(bool do_svtx = true,
       CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
     }
 
-  if (do_hcalin)
+  if (Enable::HCALIN)
     {
-      gROOT->LoadMacro("G4_HcalIn_ref.C");
       HCalInnerInit(1);
     }
 
@@ -78,9 +75,8 @@ void G4Init(bool do_svtx = true,
       gROOT->LoadMacro("G4_Magnet.C");
       MagnetInit();
     }
-  if (do_hcalout)
+  if (Enable::HCALOUT)
     {
-      gROOT->LoadMacro("G4_HcalOut_ref.C");
       HCalOuterInit();
     }
 
@@ -128,9 +124,7 @@ int G4Setup(const int absorberactive = 0,
 	    const EDecayType decayType = EDecayType::kAll,
             const bool do_svtx = true,
             const bool do_cemc = true,
-            const bool do_hcalin = true,
             const bool do_magnet = true,
-            const bool do_hcalout = true,
             const bool do_pipe = true,
             const float magfield_rescale = 1.0) {
 
@@ -200,8 +194,10 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // HCALIN
 
-  if (do_hcalin) radius = HCalInner(g4Reco, radius, 4, absorberactive);
-
+  if (Enable::HCALIN)
+  {
+    radius = HCalInner(g4Reco, radius, 4, absorberactive);
+  }
   //----------------------------------------
   // MAGNET
 
@@ -210,8 +206,10 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // HCALOUT
 
-  if (do_hcalout) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
-
+  if (Enable::HCALOUT)
+  {
+    radius = HCalOuter(g4Reco, radius, 4, absorberactive);
+  }
   //----------------------------------------
   // FEMC
 
