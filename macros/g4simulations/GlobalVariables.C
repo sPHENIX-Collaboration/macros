@@ -4,9 +4,12 @@ static double no_overlapp = 0.0001; // added to radii to avoid overlapping volum
 
 namespace Enable
 {
+  static bool Aerogel = false;
   static bool BlackHole = false;
+  static bool DIRC = false;
   static bool EEMC = false;
   static bool OverLapCheck = false;
+  static bool RICH = false;
   static bool PlugDoor = false;
 }
 
