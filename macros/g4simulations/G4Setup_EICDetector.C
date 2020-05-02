@@ -39,8 +39,7 @@ void G4Init(bool do_svtx = true,
             bool do_hcalout = true,
             bool do_pipe = true,
             bool do_FEMC = true,
-            bool do_FHCAL = true,
-            bool do_DIRC = true)
+            bool do_FHCAL = true)
 {
 
   // load detector/material macros and execute Init() function
@@ -51,7 +50,7 @@ void G4Init(bool do_svtx = true,
       PipeInit();
     }
 
-  if (Enable::PlugDoor)
+  if (Enable::PLUGDOOR)
     {
       PlugDoorInit();
     }
@@ -112,12 +111,12 @@ void G4Init(bool do_svtx = true,
       RICHInit();
     }
 
-  if (Enable::Aerogel)
+  if (Enable::AEROGEL)
     {
       AerogelInit();
     }
 
-  if (Enable::BlackHole)
+  if (Enable::BLACKHOLE)
   {
     BlackHoleInit();
   }
@@ -141,7 +140,6 @@ int G4Setup(const int absorberactive = 0,
             const bool do_pipe = true,
             const bool do_FEMC = false,
             const bool do_FHCAL = false,
-            const bool do_DIRC = true,
             const float magfield_rescale = 1.0) {
 
   //---------------
@@ -255,19 +253,19 @@ int G4Setup(const int absorberactive = 0,
     RICHSetup(g4Reco);
   }
 
-  if (Enable::Aerogel)
+  if (Enable::AEROGEL)
   {
     AerogelSetup(g4Reco);
   }
   //----------------------------------------
   // sPHENIX forward flux return door
-  if (Enable::PlugDoor)
+  if (Enable::PLUGDOOR)
   {
     PlugDoor(g4Reco, absorberactive);
   }
   //----------------------------------------
   // BLACKHOLE if enabled, needs info from all previous sub detectors for dimensions
-  if (Enable::BlackHole)
+  if (Enable::BLACKHOLE)
   {
     BlackHole(g4Reco, radius);
   }
