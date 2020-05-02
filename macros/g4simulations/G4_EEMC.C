@@ -1,5 +1,5 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+
 #include "GlobalVariables.C"
 #include <fun4all/Fun4AllServer.h>
 #include <g4calo/RawTowerBuilderByHitIndex.h>
@@ -14,16 +14,22 @@ R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
-#endif
 
-using namespace std;
+
 const int use_projective_geometry = 0;
-void
-EEMCInit()
+
+const double Gdz = 18.+0.0001;
+const double Gz0 = -170.;
+
+void EEMCInit()
 {
-  if (BlackHoleGeometry::max_radius < 70)
+  if (BlackHoleGeometry::max_radius < 65.6)
   {
-    BlackHoleGeometry::max_radius = 70; // eye balled, it can shrink a bit
+    BlackHoleGeometry::max_radius = 65.6; // from towerMap_EEMC_v006.txt
+  }
+  if (BlackHoleGeometry::min_z > Gz0 - Gdz/2.)
+  {
+    BlackHoleGeometry::min_z = Gz0 - Gdz/2.;
   }
 }
 
