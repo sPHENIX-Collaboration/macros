@@ -2,15 +2,20 @@
 
 #include "GlobalVariables.C"
 
-#include <fun4all/Fun4AllServer.h>
 #include <g4calo/RawTowerBuilderByHitIndex.h>
 #include <g4calo/RawTowerDigitizer.h>
-#include <caloreco/RawClusterBuilderFwd.h>
-#include <caloreco/RawTowerCalibration.h>
+
 #include <g4detectors/PHG4ForwardCalCellReco.h>
 #include <g4detectors/PHG4ForwardHcalSubsystem.h>
+
 #include <g4eval/CaloEvaluator.h>
+
 #include <g4main/PHG4Reco.h>
+
+#include <caloreco/RawClusterBuilderFwd.h>
+#include <caloreco/RawTowerCalibration.h>
+
+#include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
@@ -23,14 +28,13 @@ namespace FhcalMacro
 const double Gz0 = 400.;
 const double Gdz = 100.;
 const double outer_radius = 262.;
-}
+}  // namespace FhcalMacro
 
-void
-FHCALInit()
+void FHCALInit()
 {
   if (BlackHoleGeometry::max_radius < FhcalMacro::outer_radius)
   {
-    BlackHoleGeometry::max_radius = FhcalMacro::outer_radius; // eye balled, it can shrink a bit
+    BlackHoleGeometry::max_radius = FhcalMacro::outer_radius;
   }
   if (BlackHoleGeometry::max_z < FhcalMacro::Gz0 + FhcalMacro::Gdz / 2.)
   {
@@ -38,8 +42,8 @@ FHCALInit()
   }
 }
 
-void FHCAL_Cells(int verbosity = 0) {
-
+void FHCAL_Cells(int verbosity = 0)
+{
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -47,14 +51,12 @@ void FHCAL_Cells(int verbosity = 0) {
   PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("FHCALCellReco");
   hc->Detector("FHCAL");
   se->registerSubsystem(hc);
-  
-  return;  
+
+  return;
 }
 
-void
-FHCALSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
+void FHCALSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 {
-
   gSystem->Load("libg4detectors.so");
 
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -65,22 +67,21 @@ FHCALSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
   ostringstream mapping_hhcal;
 
   /* path to central copy of calibrations repositry */
-  mapping_hhcal << getenv("CALIBRATIONROOT") ;
+  mapping_hhcal << getenv("CALIBRATIONROOT");
   mapping_hhcal << "/ForwardHcal/mapping/towerMap_FHCAL_v005.txt";
   cout << mapping_hhcal.str() << endl;
   //mapping_hhcal << "towerMap_FHCAL_latest.txt";
 
-  hhcal->SetTowerMappingFile( mapping_hhcal.str() );
+  hhcal->SetTowerMappingFile(mapping_hhcal.str());
   hhcal->OverlapCheck(overlapcheck);
 
   if (absorberactive) hhcal->SetAbsorberActive();
 
-  g4Reco->registerSubsystem( hhcal );
-
+  g4Reco->registerSubsystem(hhcal);
 }
 
-void FHCAL_Towers(int verbosity = 0) {
-
+void FHCAL_Towers(int verbosity = 0)
+{
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4calo.so");
   gSystem->Load("libcalo_reco.so");
@@ -88,13 +89,13 @@ void FHCAL_Towers(int verbosity = 0) {
 
   ostringstream mapping_fhcal;
   mapping_fhcal << getenv("CALIBRATIONROOT")
-		<< "/ForwardHcal/mapping/towerMap_FHCAL_v005.txt";
+                << "/ForwardHcal/mapping/towerMap_FHCAL_v005.txt";
   //mapping_fhcal << "towerMap_FHCAL_latest.txt";
 
-  RawTowerBuilderByHitIndex* tower_FHCAL = new RawTowerBuilderByHitIndex("TowerBuilder_FHCAL");
+  RawTowerBuilderByHitIndex *tower_FHCAL = new RawTowerBuilderByHitIndex("TowerBuilder_FHCAL");
   tower_FHCAL->Detector("FHCAL");
   tower_FHCAL->set_sim_tower_node_prefix("SIM");
-  tower_FHCAL->GeometryTableFile( mapping_fhcal.str() );
+  tower_FHCAL->GeometryTableFile(mapping_fhcal.str());
 
   se->registerSubsystem(tower_FHCAL);
 
@@ -127,31 +128,29 @@ void FHCAL_Towers(int verbosity = 0) {
   TowerDigitizer->Detector("FHCAL");
   TowerDigitizer->Verbosity(verbosity);
   TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
-  se->registerSubsystem( TowerDigitizer );
+  se->registerSubsystem(TowerDigitizer);
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("FHCALRawTowerCalibration");
   TowerCalibration->Detector("FHCAL");
   TowerCalibration->Verbosity(verbosity);
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration->set_calib_const_GeV_ADC(1./0.03898);  // calibrated with muons
+  TowerCalibration->set_calib_const_GeV_ADC(1. / 0.03898);  // calibrated with muons
   TowerCalibration->set_pedstal_ADC(0);
-  se->registerSubsystem( TowerCalibration );
-
-
+  se->registerSubsystem(TowerCalibration);
 }
 
-void FHCAL_Clusters(int verbosity = 0) {
-
+void FHCAL_Clusters(int verbosity = 0)
+{
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
-  
-  RawClusterBuilderFwd* ClusterBuilder = new RawClusterBuilderFwd("FHCALRawClusterBuilderFwd");
+
+  RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("FHCALRawClusterBuilderFwd");
   ClusterBuilder->Detector("FHCAL");
   ClusterBuilder->Verbosity(verbosity);
-  ClusterBuilder->set_threshold_energy(0.100);  
-  se->registerSubsystem( ClusterBuilder );
-  
+  ClusterBuilder->set_threshold_energy(0.100);
+  se->registerSubsystem(ClusterBuilder);
+
   return;
 }
 
