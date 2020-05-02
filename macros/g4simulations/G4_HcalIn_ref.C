@@ -1,25 +1,38 @@
 //Inner HCal reconstruction macro
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+
 #include "GlobalVariables.C"
-#include <caloreco/RawClusterBuilderGraph.h>
-#include <caloreco/RawClusterBuilderTemplate.h>
-#include <caloreco/RawTowerCalibration.h>
-#include <fun4all/Fun4AllServer.h>
+
 #include <g4calo/HcalRawTowerBuilder.h>
 #include <g4calo/RawTowerDigitizer.h>
+
 #include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4detectors/PHG4InnerHcalSubsystem.h>
 #include <g4detectors/PHG4HcalCellReco.h>
+
 #include <g4eval/CaloEvaluator.h>
+
 #include <g4main/PHG4Reco.h>
-void HCalInner_SupportRing(PHG4Reco* g4Reco,
-			   const int absorberactive = 0);
+
+#include <caloreco/RawClusterBuilderGraph.h>
+#include <caloreco/RawClusterBuilderTemplate.h>
+#include <caloreco/RawTowerCalibration.h>
+
+#include <fun4all/Fun4AllServer.h>
+
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
-#endif
+
+void HCalInner_SupportRing(PHG4Reco* g4Reco,
+			   const int absorberactive = 0);
+
+namespace HcalInMacro
+{
+const double support_ring_outer_radius =  178.0 - 0.001;
+const double support_ring_z_ring2 = (2150 + 2175) / 2. / 10.;
+const double dz = 25. / 10.;
 
 //Inner HCal absorber material selector:
 //false - old version, absorber material is SS310
@@ -39,14 +52,18 @@ enum enu_HCalIn_clusterizer
 enu_HCalIn_clusterizer HCalIn_clusterizer = kHCalInTemplateClusterizer;
 //! graph clusterizer, RawClusterBuilderGraph
 //enu_HCalIn_clusterizer HCalIn_clusterizer = kHCalInGraphClusterizer;
+}
 
 
 // Init is called by G4Setup.C
 void HCalInnerInit(const int iflag = 0) 
 {
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius,HcalInMacro::support_ring_outer_radius);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, HcalInMacro::support_ring_z_ring2+HcalInMacro::dz/2.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -HcalInMacro::support_ring_z_ring2-HcalInMacro::dz/2.);
   if (iflag == 1)
   {
-    inner_hcal_eic = 1;
+    HcalInMacro::inner_hcal_eic = 1;
   }
 }
 
@@ -64,7 +81,7 @@ double HCalInner(PHG4Reco* g4Reco,
   PHG4InnerHcalSubsystem *hcal = new PHG4InnerHcalSubsystem("HCALIN");
   // these are the parameters you can change with their default settings
   // hcal->set_string_param("material","SS310");
-  if(inner_hcal_material_Al)
+  if(HcalInMacro::inner_hcal_material_Al)
   {
     cout <<"HCalInner - construct inner HCal absorber with G4_Al"<<endl;
     hcal->set_string_param("material","G4_Al");
@@ -134,20 +151,17 @@ void HCalInner_SupportRing(PHG4Reco* g4Reco,
   gSystem->Load("libg4testbench.so");
 
   const double z_ring1 = (2025 + 2050) / 2. / 10.;
-  const double z_ring2 = (2150 + 2175) / 2. / 10.;
-  const double dz = 25. / 10.;
   const double innerradius_sphenix = 116.;
   const double innerradius_ephenix_hadronside = 138.;
-  const double maxradius = 178.0 - 0.001; // avoid touching the outer HCal envelop volumne
   const double z_rings[] =
-    { -z_ring2, -z_ring1, z_ring1, z_ring2 };
+    { -HcalInMacro::support_ring_z_ring2, -z_ring1, z_ring1, HcalInMacro::support_ring_z_ring2 };
 
   PHG4CylinderSubsystem *cyl;
 
   for (int i = 0; i < 4; i++)
     {
       double innerradius = innerradius_sphenix;
-      if ( z_rings[i] > 0 && inner_hcal_eic == 1)
+      if ( z_rings[i] > 0 && HcalInMacro::inner_hcal_eic == 1)
       {
         innerradius = innerradius_ephenix_hadronside;
       }
@@ -156,9 +170,9 @@ void HCalInner_SupportRing(PHG4Reco* g4Reco,
       cyl->SuperDetector("HCALIN_SPT");
       cyl->set_double_param("radius",innerradius);
       cyl->set_int_param("lengthviarapidity",0);
-      cyl->set_double_param("length",dz);
+      cyl->set_double_param("length",HcalInMacro::dz);
       cyl->set_string_param("material","SS310");
-      cyl->set_double_param("thickness",maxradius - innerradius);
+      cyl->set_double_param("thickness",HcalInMacro::support_ring_outer_radius - innerradius);
       if (absorberactive)
 	{
 	  cyl->SetActive();
@@ -220,7 +234,7 @@ void HCALInner_Towers(int verbosity = 0) {
   //Default sampling fraction for SS310
   double visible_sample_fraction_HCALIN = 0.0631283 ; //, /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV-0000.root_qa.rootQA_Draw_HCALIN_G4Hit.pdf
 
-  if(inner_hcal_material_Al) visible_sample_fraction_HCALIN = 0.162166; //for "G4_Al", Abhisek Sen <sen.abhisek@gmail.com>
+  if(HcalInMacro::inner_hcal_material_Al) visible_sample_fraction_HCALIN = 0.162166; //for "G4_Al", Abhisek Sen <sen.abhisek@gmail.com>
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalInRawTowerCalibration");
   TowerCalibration->Detector("HCALIN");
@@ -240,7 +254,7 @@ void HCALInner_Clusters(int verbosity = 0) {
 
   Fun4AllServer *se = Fun4AllServer::instance();
   
-  if (HCalIn_clusterizer == kHCalInTemplateClusterizer)
+  if (HcalInMacro::HCalIn_clusterizer == HcalInMacro::kHCalInTemplateClusterizer)
   {
     RawClusterBuilderTemplate* ClusterBuilder = new RawClusterBuilderTemplate("HcalInRawClusterBuilderTemplate");
     ClusterBuilder->Detector("HCALIN");
@@ -249,7 +263,7 @@ void HCALInner_Clusters(int verbosity = 0) {
     se->registerSubsystem( ClusterBuilder );
 
   }
-  else if (HCalIn_clusterizer == kHCalInGraphClusterizer)
+  else if (HcalInMacro::HCalIn_clusterizer == HcalInMacro::kHCalInGraphClusterizer)
   {
     RawClusterBuilderGraph* ClusterBuilder = new RawClusterBuilderGraph("HcalInRawClusterBuilderGraph");
     ClusterBuilder->Detector("HCALIN");
