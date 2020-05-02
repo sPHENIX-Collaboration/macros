@@ -131,8 +131,8 @@ int Fun4All_G4_EICDetector(
   bool do_DIRC = false;
 
   // EICDetector geometry - 'hadron' direction
-  bool do_RICH = false;
-  bool do_Aerogel = false;
+  Enable::RICH = true;
+  Enable::Aerogel = false;
 
   bool do_FEMC = false;
   bool do_FEMC_cell = do_FEMC && true;
@@ -147,7 +147,7 @@ int Fun4All_G4_EICDetector(
   bool do_FHCAL_eval = do_FHCAL_cluster && true;
 
   // EICDetector geometry - 'electron' direction
-  Enable::EEMC = true;
+  Enable::EEMC = false;
   bool do_EEMC_cell = Enable::EEMC && false;
   bool do_EEMC_twr = do_EEMC_cell && true;
   bool do_EEMC_cluster = do_EEMC_twr && true;
@@ -196,7 +196,7 @@ int Fun4All_G4_EICDetector(
 
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_EICDetector.C");
-  G4Init(do_tracking,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FEMC,do_FHCAL,do_DIRC,do_RICH,do_Aerogel);
+  G4Init(do_tracking,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FEMC,do_FHCAL,do_DIRC);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -404,12 +404,12 @@ int Fun4All_G4_EICDetector(
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
       G4Setup(absorberactive, magfield, EDecayType::kAll,
               do_tracking,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,
-              do_FEMC,do_FHCAL,do_DIRC,do_RICH,do_Aerogel,
+              do_FEMC,do_FHCAL,do_DIRC,
               magfield_rescale);
 #else
       G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
               do_tracking,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,
-              do_FEMC,do_FHCAL,do_DIRC,do_RICH,do_Aerogel,
+              do_FEMC,do_FHCAL,do_DIRC,
               magfield_rescale);
 #endif
 
