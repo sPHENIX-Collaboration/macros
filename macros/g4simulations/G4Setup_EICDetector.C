@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlobalVariables.C"
+
 #include "G4_Pipe_EIC.C"
 #include "G4_Tracking_EIC.C"
 #include "G4_PSTOF.C"
@@ -27,6 +28,7 @@
 #include <g4main/HepMCNodeReader.h>
 #include <g4main/PHG4Reco.h>
 #include <phfield/PHFieldConfig.h>
+
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 
@@ -37,9 +39,7 @@ void G4Init(bool do_svtx = true,
             bool do_hcalin = true,
             bool do_magnet = true,
             bool do_hcalout = true,
-            bool do_pipe = true,
-            bool do_FEMC = true,
-            bool do_FHCAL = true)
+            bool do_pipe = true)
 {
 
   // load detector/material macros and execute Init() function
@@ -84,15 +84,13 @@ void G4Init(bool do_svtx = true,
       HCalOuterInit();
     }
 
-  if (do_FEMC)
+  if (Enable::FEMC)
     {
-      gROOT->LoadMacro("G4_FEMC_EIC.C");
       FEMCInit();
     }
 
-  if (do_FHCAL)
+  if (Enable::FHCAL)
     {
-      gROOT->LoadMacro("G4_FHCAL.C");
       FHCALInit();
     }
 
@@ -127,19 +125,13 @@ void G4Init(bool do_svtx = true,
 
 int G4Setup(const int absorberactive = 0,
             const string &field ="1.5",
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 	    const EDecayType decayType = EDecayType::kAll,
-#else
-	    const EDecayType decayType = TPythia6Decayer::kAll,
-#endif
             const bool do_svtx = true,
             const bool do_cemc = true,
             const bool do_hcalin = true,
             const bool do_magnet = true,
             const bool do_hcalout = true,
             const bool do_pipe = true,
-            const bool do_FEMC = false,
-            const bool do_FHCAL = false,
             const float magfield_rescale = 1.0) {
 
   //---------------
@@ -223,15 +215,18 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // FEMC
 
-  if ( do_FEMC )
+  if ( Enable::FEMC )
+  {
     FEMCSetup(g4Reco, absorberactive);
+  }
 
   //----------------------------------------
   // FHCAL
 
-  if ( do_FHCAL )
+  if ( Enable::FHCAL )
+  {
     FHCALSetup(g4Reco, absorberactive);
-
+  }
   //----------------------------------------
   // EEMC
 
