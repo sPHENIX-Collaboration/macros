@@ -23,9 +23,13 @@ using namespace std;
 void
 RICHInit()
 {
-  if (BlackHoleGeometry::max_radius < 200)
+  if (BlackHoleGeometry::max_radius < 135)
   {
-    BlackHoleGeometry::max_radius = 200; // from default in code - needs changing
+    BlackHoleGeometry::max_radius = 135;
+  }
+  if (BlackHoleGeometry::max_z < 268.)
+  {
+    BlackHoleGeometry::max_z = 268;
   }
 }
 
