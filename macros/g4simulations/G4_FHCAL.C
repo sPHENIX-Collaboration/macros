@@ -1,6 +1,7 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+
 #include "GlobalVariables.C"
+
 #include <fun4all/Fun4AllServer.h>
 #include <g4calo/RawTowerBuilderByHitIndex.h>
 #include <g4calo/RawTowerDigitizer.h>
@@ -10,20 +11,30 @@
 #include <g4detectors/PHG4ForwardHcalSubsystem.h>
 #include <g4eval/CaloEvaluator.h>
 #include <g4main/PHG4Reco.h>
+
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
-#endif
 
-using namespace std;
+namespace FhcalMacro
+{
+// from ForwardHcal/mapping/towerMap_FHCAL_v005.txt
+const double Gz0 = 400.;
+const double Gdz = 100.;
+const double outer_radius = 262.;
+}
 
 void
 FHCALInit()
 {
-  if (BlackHoleGeometry::max_radius < 270)
+  if (BlackHoleGeometry::max_radius < FhcalMacro::outer_radius)
   {
-    BlackHoleGeometry::max_radius = 270; // eye balled, it can shrink a bit
+    BlackHoleGeometry::max_radius = FhcalMacro::outer_radius; // eye balled, it can shrink a bit
+  }
+  if (BlackHoleGeometry::max_z < FhcalMacro::Gz0 + FhcalMacro::Gdz / 2.)
+  {
+    BlackHoleGeometry::max_z = FhcalMacro::Gz0 + FhcalMacro::Gdz / 2.;
   }
 }
 
@@ -76,8 +87,8 @@ void FHCAL_Towers(int verbosity = 0) {
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_fhcal;
-  mapping_fhcal << getenv("CALIBRATIONROOT") <<
-  	"/ForwardHcal/mapping/towerMap_FHCAL_v005.txt";
+  mapping_fhcal << getenv("CALIBRATIONROOT")
+		<< "/ForwardHcal/mapping/towerMap_FHCAL_v005.txt";
   //mapping_fhcal << "towerMap_FHCAL_latest.txt";
 
   RawTowerBuilderByHitIndex* tower_FHCAL = new RawTowerBuilderByHitIndex("TowerBuilder_FHCAL");
