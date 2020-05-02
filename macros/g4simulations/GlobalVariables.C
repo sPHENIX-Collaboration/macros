@@ -6,6 +6,7 @@ namespace Enable
 {
   static bool BlackHole = false;
   static bool OverLapCheck = false;
+  static bool PlugDoor = false;
 }
 
 namespace BlackHoleGeometry
