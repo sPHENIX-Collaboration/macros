@@ -4,13 +4,21 @@ static double no_overlapp = 0.0001; // added to radii to avoid overlapping volum
 
 namespace Enable
 {
-  static bool Aerogel = false;
-  static bool BlackHole = false;
+  static bool AEROGEL = false;
+  static bool BLACKHOLE = false;
+  static bool CEMC = false;
   static bool DIRC = false;
   static bool EEMC = false;
-  static bool OverLapCheck = false;
+  static bool FEMC = false;
+  static bool FHCAL = false;
+  static bool HCALIN = false;
+  static bool HCALOUT = false;
+  static bool OVERLAPCHECK = false;
+  static bool PIPE = false;
+  static bool PSTOF = false;
   static bool RICH = false;
-  static bool PlugDoor = false;
+  static bool PLUGDOOR = false;
+  static bool TRACKING = false;
 }
 
 namespace BlackHoleGeometry
