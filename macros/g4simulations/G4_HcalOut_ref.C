@@ -39,13 +39,12 @@ enu_HCalOut_clusterizer HCalOut_clusterizer = kHCalOutTemplateClusterizer;
 //enu_HCalOut_clusterizer HCalOut_clusterizer = kHCalOutGraphClusterizer;
 }  // namespace HcalOutMacro
 
-
 // Init is called by G4Setup.C
 void HCalOuterInit()
 {
-BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius,HcalOutMacro::outer_radius);
-BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z,HcalOutMacro::size_z / 2.);
- BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z,-HcalOutMacro::size_z / 2.);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, HcalOutMacro::outer_radius);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, HcalOutMacro::size_z / 2.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -HcalOutMacro::size_z / 2.);
 }
 
 double HCalOuter(PHG4Reco *g4Reco,
