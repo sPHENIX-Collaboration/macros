@@ -17,13 +17,13 @@ void WorldSize(PHG4Reco *g4Reco, double radius)
   {
     g4Reco->SetWorldSizeX(world_radius+100);
   }
-// our world is symmetric, pick the largest of abs(min_z) || abs(max_z)
+// our world is a symmetric cylinder so the center is at 0/0/0, pick the largest of abs(min_z) || abs(max_z)
   double min_zval = std::min(BlackHoleGeometry::min_z,-((g4Reco->GetWorldSizeZ()-100)/2.));
   double max_zval = std::max(BlackHoleGeometry::max_z,(g4Reco->GetWorldSizeZ()-100)/2.);
   double final_zval = std::max(fabs(min_zval),fabs(max_zval))+100; // add 1m
   if (g4Reco->GetWorldSizeZ() < 2*(final_zval))
   {
-    g4Reco->SetWorldSizeZ( 2*(max_zval));
+    g4Reco->SetWorldSizeZ( 2*(final_zval));
   }
   return;
 }
