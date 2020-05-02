@@ -40,7 +40,6 @@ void G4Init(bool do_svtx = true,
             bool do_pipe = true,
             bool do_FEMC = true,
             bool do_FHCAL = true,
-            bool do_EEMC = true,
             bool do_DIRC = true,
             bool do_RICH = true,
             bool do_Aerogel = true)
@@ -100,9 +99,8 @@ void G4Init(bool do_svtx = true,
       FHCALInit();
     }
 
-  if (do_EEMC)
+  if ( Enable::EEMC)
     {
-      gROOT->LoadMacro("G4_EEMC.C");
       EEMCInit();
     }
 
@@ -148,7 +146,6 @@ int G4Setup(const int absorberactive = 0,
             const bool do_pipe = true,
             const bool do_FEMC = false,
             const bool do_FHCAL = false,
-            const bool do_EEMC = true,
             const bool do_DIRC = true,
             const bool do_RICH = true,
             const bool do_Aerogel = true,
@@ -247,8 +244,10 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // EEMC
 
-  if ( do_EEMC )
+  if ( Enable::EEMC )
+  {
     EEMCSetup(g4Reco, absorberactive);
+  }
 
   //----------------------------------------
   // PID
