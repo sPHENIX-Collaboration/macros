@@ -22,28 +22,6 @@ static constexpr int nlayers_mvtx = 3;
 namespace
 {
 
-  TLine* VerticalLine( TVirtualPad* pad, Double_t x )
-  {
-
-    pad->Update();
-
-    Double_t yMin = pad->GetUymin();
-    Double_t yMax = pad->GetUymax();
-
-    if( pad->GetLogy() )
-    {
-      yMin = TMath::Power( 10, yMin );
-      yMax = TMath::Power( 10, yMax );
-    }
-
-    TLine *line = new TLine( x, yMin, x, yMax );
-    line->SetLineStyle( 2 );
-    line->SetLineWidth( 1 );
-    line->SetLineColor( 1 );
-    return line;
-
-  }
-
   TCanvas* Draw( TFile* qa_file_new, TFile* qa_file_ref, const TString& hist_name_prefix, const TString& tag )
   {
 
@@ -106,11 +84,7 @@ void QA_Draw_Mvtx(
     qa_file_ref = new TFile(qa_file_name_ref);
     assert(qa_file_ref->IsOpen());
   }
-
-  // assume MVTX layers are 0, 1 and 2
-  static constexpr int first_layer_mvtx = 0;
-  static constexpr int nlayers_mvtx = 3;
-
+  
   std::vector<TCanvas*> cvlist;
 
   cvlist.push_back( Draw( qa_file_new, qa_file_ref, hist_name_prefix, "drphi" ) );
