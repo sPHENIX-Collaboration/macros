@@ -1,22 +1,30 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+
 #include "GlobalVariables.C"
+
+#include <g4calo/RawTowerBuilder.h>
+#include <g4calo/RawTowerDigitizer.h>
+
+#include <g4detectors/PHG4CylinderCellReco.h>
+#include <g4detectors/PHG4CylinderSubsystem.h>
+
+#include <g4eval/CaloEvaluator.h>
+
+#include <g4main/PHG4Reco.h>
+
 #include <caloreco/RawClusterBuilderGraph.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
+
 #include <fun4all/Fun4AllServer.h>
-#include <g4calo/RawTowerBuilder.h>
-#include <g4calo/RawTowerDigitizer.h>
-#include <g4detectors/PHG4CylinderCellReco.h>
-#include <g4detectors/PHG4CylinderSubsystem.h>
-#include <g4eval/CaloEvaluator.h>
-#include <g4main/PHG4Reco.h>
+
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
-#endif
 
+namespace CemcEicMacro
+{
 double cemcdepth = 9;
 // tungs to scint width ratio of ~10:1
 // corresponds to approx 2% sampling fraction
@@ -24,6 +32,7 @@ double cemcdepth = 9;
 // 18 radiation lengths for 40 layers
 double scint_width = 0.05;
 double tungs_width = 0.245;
+  double electronics_width = 0.5;
 
 int min_cemc_layer = 1;
 int max_cemc_layer = 41;
@@ -47,8 +56,11 @@ enum enu_Cemc_clusterizer {
 enu_Cemc_clusterizer Cemc_clusterizer = kCemcTemplateClusterizer;
 //! graph clusterizer, RawClusterBuilderGraph
 // enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
+}
 
-void CEmcInit(const int nslats = 1) {}
+void CEmcInit(const int nslats = 1) 
+{
+}
 
 double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
             const int absorberactive = 0) {
@@ -72,16 +84,16 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
   // as indicated in the loop below
 
   // eta = -ln(tan(theta/2))
-  double theta1 = 2. * TMath::ATan(TMath::Exp(-1 * posrapidity));
-  double theta2 = 2. * TMath::ATan(TMath::Exp(-1 * negrapidity));
+  double theta1 = 2. * TMath::ATan(TMath::Exp(-1 * CemcEicMacro::posrapidity));
+  double theta2 = 2. * TMath::ATan(TMath::Exp(-1 * CemcEicMacro::negrapidity));
   // get the angle between the beam pipe and negative pseudorapidity axis
   theta2 = TMath::Pi() - theta2;
 
-  double z1 = topradius / TMath::Tan(theta1);
-  double z2 = topradius / TMath::Tan(theta2);
+  double z1 = CemcEicMacro::topradius / TMath::Tan(theta1);
+  double z2 = CemcEicMacro::topradius / TMath::Tan(theta2);
 
-  double z3 = bottomradius / TMath::Tan(theta1);
-  double z4 = bottomradius / TMath::Tan(theta2);
+  double z3 = CemcEicMacro::bottomradius / TMath::Tan(theta1);
+  double z4 = CemcEicMacro::bottomradius / TMath::Tan(theta2);
 
   // this is the top layer length
   double totaltoplength = z1 + z2;
@@ -93,7 +105,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
   double layer_shift = 0;
 
   double height = 0;
-  for (int thislayer = min_cemc_layer; thislayer <= max_cemc_layer;
+  for (int thislayer = CemcEicMacro::min_cemc_layer; thislayer <= CemcEicMacro::max_cemc_layer;
        thislayer++) {
 
     // the length for a particular layer is determined from the bottom length
@@ -102,7 +114,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     cemc = new PHG4CylinderSubsystem("ABSORBER_CEMC", thislayer);
     cemc->set_double_param("radius", radius);
     cemc->set_string_param("material", "Spacal_W_Epoxy");
-    cemc->set_double_param("thickness", tungs_width);
+    cemc->set_double_param("thickness", CemcEicMacro::tungs_width);
     cemc->set_double_param("length", thislength);
     cemc->set_int_param("lengthviarapidity", 0);
 
@@ -122,10 +134,10 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
 
     g4Reco->registerSubsystem(cemc);
 
-    radius += tungs_width;
+    radius += CemcEicMacro::tungs_width;
     radius += no_overlapp;
 
-    height += tungs_width;
+    height += CemcEicMacro::tungs_width;
     height += no_overlapp; //Added by Barak, 12/13/19
 
     //Added by Barak, 12/13/19
@@ -134,7 +146,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     cemc = new PHG4CylinderSubsystem("CEMC", thislayer);
     cemc->set_double_param("radius", radius);
     cemc->set_string_param("material", "PMMA");
-    cemc->set_double_param("thickness", scint_width);
+    cemc->set_double_param("thickness", CemcEicMacro::scint_width);
     cemc->set_int_param("lightyield", 1);
     cemc->set_int_param("lengthviarapidity", 0);
     cemc->set_double_param("length", thislength);
@@ -151,10 +163,10 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     cemc->OverlapCheck(overlapcheck);
     g4Reco->registerSubsystem(cemc);
 
-    radius += scint_width;
+    radius += CemcEicMacro::scint_width;
     radius += no_overlapp;
 
-    height += scint_width;
+    height += CemcEicMacro::scint_width;
     height += no_overlapp; //Added by Barak, 12/13/19
   }
 
@@ -162,7 +174,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
       new PHG4CylinderSubsystem("CEMC_ELECTRONICS", 0);
   cemc_cyl->set_double_param("radius", radius);
   cemc_cyl->set_string_param("material", "G4_TEFLON");
-  cemc_cyl->set_double_param("thickness", 0.5);
+  cemc_cyl->set_double_param("thickness", CemcEicMacro::electronics_width);
   
   double l1 = (radius + 0.5) / TMath::Tan(theta1);
   double l2 = (radius + 0.5) / TMath::Tan(theta2);
@@ -179,6 +191,11 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     cemc_cyl->SetActive();
   cemc_cyl->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(cemc_cyl);
+// update black hole settings since we have the values here
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, radius+CemcEicMacro::electronics_width);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, layer_shift + (l1 + l2)/2.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, layer_shift-(l1 + l2)/2.);
+
   return radius;
 }
 
@@ -192,11 +209,11 @@ void CEMC_Cells(int verbosity = 0) {
   cemc_cells->Detector("CEMC");
   cemc_cells->Verbosity(verbosity);
   double radius = 95;
-  for (int i = min_cemc_layer; i <= max_cemc_layer; i++) {
+  for (int i = CemcEicMacro::min_cemc_layer; i <= CemcEicMacro::max_cemc_layer; i++) {
     
     //Added by Barak, 12/13/19
-    radius += (tungs_width + no_overlapp);
-    if(i>1) radius += (scint_width + no_overlapp);
+    radius += (CemcEicMacro::tungs_width + no_overlapp);
+    if(i>1) radius += (CemcEicMacro::scint_width + no_overlapp);
 
     cemc_cells->cellsize(i, 2. * TMath::Pi() / 256. * radius, 2. * TMath::Pi() / 256. * radius);
 
@@ -256,7 +273,7 @@ void CEMC_Clusters(int verbosity = 0) {
   gSystem->Load("libcalo_reco.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  if (Cemc_clusterizer == kCemcTemplateClusterizer) {
+  if (CemcEicMacro::Cemc_clusterizer ==  CemcEicMacro::kCemcTemplateClusterizer) {
     RawClusterBuilderTemplate *cemc_clusterbuilder =
         new RawClusterBuilderTemplate("EmcRawClusterBuilderTemplate");
     cemc_clusterbuilder->Detector("CEMC");
@@ -268,7 +285,7 @@ void CEMC_Clusters(int verbosity = 0) {
     cemc_clusterbuilder->LoadProfile(femc_prof.c_str());
 
     se->registerSubsystem(cemc_clusterbuilder);
-  } else if (Cemc_clusterizer == kCemcGraphClusterizer) {
+  } else if ( CemcEicMacro::Cemc_clusterizer == CemcEicMacro::kCemcGraphClusterizer) {
     RawClusterBuilderGraph *cemc_clusterbuilder =
         new RawClusterBuilderGraph("EmcRawClusterBuilderGraph");
     cemc_clusterbuilder->Detector("CEMC");
