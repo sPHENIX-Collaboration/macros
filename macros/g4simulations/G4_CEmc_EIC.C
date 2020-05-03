@@ -32,20 +32,21 @@ double cemcdepth = 9;
 // 18 radiation lengths for 40 layers
 double scint_width = 0.05;
 double tungs_width = 0.245;
-  double electronics_width = 0.5;
+double electronics_width = 0.5;
 
 int min_cemc_layer = 1;
 int max_cemc_layer = 41;
 
-double topradius = 106.8; // cm
-double bottomradius = 95; // cm
+double topradius = 106.8;  // cm
+double bottomradius = 95;  // cm
 double negrapidity = -1.5;
 double posrapidity = 1.24;
 // this is default set to -1.5<eta<1.24 for 2018 Letter of Intent
 // if the user changes these, the z position of the
 // calorimeter must be changed in the function CEmc(...)
 
-enum enu_Cemc_clusterizer {
+enum enu_Cemc_clusterizer
+{
   kCemcGraphClusterizer,
 
   kCemcTemplateClusterizer
@@ -56,16 +57,17 @@ enum enu_Cemc_clusterizer {
 enu_Cemc_clusterizer Cemc_clusterizer = kCemcTemplateClusterizer;
 //! graph clusterizer, RawClusterBuilderGraph
 // enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
-}
+}  // namespace CemcEicMacro
 
-void CEmcInit(const int nslats = 1) 
+void CEmcInit(const int nslats = 1)
 {
 }
 
 double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
-            const int absorberactive = 0) {
-
-  if (radius > 95) {
+            const int absorberactive = 0)
+{
+  if (radius > 95)
+  {
     cout << "inconsistency, radius: " << radius
          << " larger than allowed inner radius for CEMC = 95 cm" << endl;
     gSystem->Exit(-1);
@@ -106,11 +108,11 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
 
   double height = 0;
   for (int thislayer = CemcEicMacro::min_cemc_layer; thislayer <= CemcEicMacro::max_cemc_layer;
-       thislayer++) {
-
+       thislayer++)
+  {
     // the length for a particular layer is determined from the bottom length
     double thislength = totalbottomlength + (height / TMath::Tan(theta1)) + (height / TMath::Tan(theta2));
-    
+
     cemc = new PHG4CylinderSubsystem("ABSORBER_CEMC", thislayer);
     cemc->set_double_param("radius", radius);
     cemc->set_string_param("material", "Spacal_W_Epoxy");
@@ -121,10 +123,10 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     // starts centered around IP
     // shift backwards 30 cm for total 370 cm length to cover -1.5<eta<1.24
     //cemc->set_double_param("place_z", -30);
-    
+
     //Modified by Barak, 12/12/19
     ztemp = radius / TMath::Tan(theta2);
-    layer_shift = -1. * (ztemp - (thislength/2.));
+    layer_shift = -1. * (ztemp - (thislength / 2.));
     cemc->set_double_param("place_z", layer_shift);
 
     cemc->SuperDetector("ABSORBER_CEMC");
@@ -138,7 +140,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     radius += no_overlapp;
 
     height += CemcEicMacro::tungs_width;
-    height += no_overlapp; //Added by Barak, 12/13/19
+    height += no_overlapp;  //Added by Barak, 12/13/19
 
     //Added by Barak, 12/13/19
     thislength = totalbottomlength + (height / TMath::Tan(theta1)) + (height / TMath::Tan(theta2));
@@ -153,7 +155,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
 
     // shift back -30 cm to cover -1.4<eta<1.1
     //cemc->set_double_param("place_z", -30);
-    
+
     //Modified by Barak, 12/12/19
     cemc->set_double_param("place_z", layer_shift);
 
@@ -167,7 +169,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     radius += no_overlapp;
 
     height += CemcEicMacro::scint_width;
-    height += no_overlapp; //Added by Barak, 12/13/19
+    height += no_overlapp;  //Added by Barak, 12/13/19
   }
 
   PHG4CylinderSubsystem *cemc_cyl =
@@ -175,7 +177,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
   cemc_cyl->set_double_param("radius", radius);
   cemc_cyl->set_string_param("material", "G4_TEFLON");
   cemc_cyl->set_double_param("thickness", CemcEicMacro::electronics_width);
-  
+
   double l1 = (radius + 0.5) / TMath::Tan(theta1);
   double l2 = (radius + 0.5) / TMath::Tan(theta2);
   cemc_cyl->set_int_param("lengthviarapidity", 0);
@@ -184,22 +186,23 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
   //cemc_cyl->set_double_param("place_z", -30);
 
   //Modified by Barak, 12/12/19
-  layer_shift =  -1.*( (l2 - l1)/2. );
+  layer_shift = -1. * ((l2 - l1) / 2.);
   cemc_cyl->set_double_param("place_z", layer_shift);
 
   if (absorberactive)
     cemc_cyl->SetActive();
   cemc_cyl->OverlapCheck(overlapcheck);
   g4Reco->registerSubsystem(cemc_cyl);
-// update black hole settings since we have the values here
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, radius+CemcEicMacro::electronics_width);
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, layer_shift + (l1 + l2)/2.);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, layer_shift-(l1 + l2)/2.);
+  // update black hole settings since we have the values here
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, radius + CemcEicMacro::electronics_width);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, layer_shift + (l1 + l2) / 2.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, layer_shift - (l1 + l2) / 2.);
 
   return radius;
 }
 
-void CEMC_Cells(int verbosity = 0) {
+void CEMC_Cells(int verbosity = 0)
+{
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -209,21 +212,21 @@ void CEMC_Cells(int verbosity = 0) {
   cemc_cells->Detector("CEMC");
   cemc_cells->Verbosity(verbosity);
   double radius = 95;
-  for (int i = CemcEicMacro::min_cemc_layer; i <= CemcEicMacro::max_cemc_layer; i++) {
-    
+  for (int i = CemcEicMacro::min_cemc_layer; i <= CemcEicMacro::max_cemc_layer; i++)
+  {
     //Added by Barak, 12/13/19
     radius += (CemcEicMacro::tungs_width + no_overlapp);
-    if(i>1) radius += (CemcEicMacro::scint_width + no_overlapp);
+    if (i > 1) radius += (CemcEicMacro::scint_width + no_overlapp);
 
     cemc_cells->cellsize(i, 2. * TMath::Pi() / 256. * radius, 2. * TMath::Pi() / 256. * radius);
-
   }
   se->registerSubsystem(cemc_cells);
 
   return;
 }
 
-void CEMC_Towers(int verbosity = 0) {
+void CEMC_Towers(int verbosity = 0)
+{
   gSystem->Load("libg4calo.so");
   gSystem->Load("libcalo_reco.so");
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -235,7 +238,7 @@ void CEMC_Towers(int verbosity = 0) {
   se->registerSubsystem(CemcTowerBuilder);
 
   const double photoelectron_per_GeV =
-      500; // 500 photon per total GeV deposition
+      500;  // 500 photon per total GeV deposition
   // just set a 4% sampling fraction - already tuned by tungs/scint width ratio
   double sampling_fraction = 4e-02;
   RawTowerDigitizer *CemcTowerDigitizer =
@@ -245,12 +248,12 @@ void CEMC_Towers(int verbosity = 0) {
   CemcTowerDigitizer->set_digi_algorithm(
       RawTowerDigitizer::kSimple_photon_digitization);
   CemcTowerDigitizer->set_pedstal_central_ADC(0);
-  CemcTowerDigitizer->set_pedstal_width_ADC(8); // eRD1 test beam setting
+  CemcTowerDigitizer->set_pedstal_width_ADC(8);  // eRD1 test beam setting
   CemcTowerDigitizer->set_photonelec_ADC(
-      1); // not simulating ADC discretization error
+      1);  // not simulating ADC discretization error
   CemcTowerDigitizer->set_photonelec_yield_visible_GeV(photoelectron_per_GeV /
                                                        sampling_fraction);
-  CemcTowerDigitizer->set_zero_suppression_ADC(16); // eRD1 test beam setting
+  CemcTowerDigitizer->set_zero_suppression_ADC(16);  // eRD1 test beam setting
   se->registerSubsystem(CemcTowerDigitizer);
 
   RawTowerCalibration *CemcTowerCalibration =
@@ -268,37 +271,43 @@ void CEMC_Towers(int verbosity = 0) {
   return;
 }
 
-void CEMC_Clusters(int verbosity = 0) {
-
+void CEMC_Clusters(int verbosity = 0)
+{
   gSystem->Load("libcalo_reco.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  if (CemcEicMacro::Cemc_clusterizer ==  CemcEicMacro::kCemcTemplateClusterizer) {
+  if (CemcEicMacro::Cemc_clusterizer == CemcEicMacro::kCemcTemplateClusterizer)
+  {
     RawClusterBuilderTemplate *cemc_clusterbuilder =
         new RawClusterBuilderTemplate("EmcRawClusterBuilderTemplate");
     cemc_clusterbuilder->Detector("CEMC");
     cemc_clusterbuilder->Verbosity(verbosity);
 
-    cemc_clusterbuilder->set_threshold_energy(0.030); // This threshold should be the same as in CEMCprof_Thresh**.root file below
+    cemc_clusterbuilder->set_threshold_energy(0.030);  // This threshold should be the same as in CEMCprof_Thresh**.root file below
     std::string femc_prof = getenv("CALIBRATIONROOT");
     femc_prof += "/EmcProfile/CEMCprof_Thresh30MeV.root";
     cemc_clusterbuilder->LoadProfile(femc_prof.c_str());
 
     se->registerSubsystem(cemc_clusterbuilder);
-  } else if ( CemcEicMacro::Cemc_clusterizer == CemcEicMacro::kCemcGraphClusterizer) {
+  }
+  else if (CemcEicMacro::Cemc_clusterizer == CemcEicMacro::kCemcGraphClusterizer)
+  {
     RawClusterBuilderGraph *cemc_clusterbuilder =
         new RawClusterBuilderGraph("EmcRawClusterBuilderGraph");
     cemc_clusterbuilder->Detector("CEMC");
     cemc_clusterbuilder->Verbosity(verbosity);
 
     se->registerSubsystem(cemc_clusterbuilder);
-  } else {
+  }
+  else
+  {
     cout << "CEMC_Clusters - unknown clusterizer setting!! " << endl;
     exit(1);
   }
   return;
 }
-void CEMC_Eval(std::string outputfile, int verbosity = 0) {
+void CEMC_Eval(std::string outputfile, int verbosity = 0)
+{
   gSystem->Load("libfun4all.so");
   gSystem->Load("libg4eval.so");
   Fun4AllServer *se = Fun4AllServer::instance();
