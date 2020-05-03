@@ -13,22 +13,21 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 namespace PipeEicMacro
 {
-  // Central pipe dimension
-  // Extracted via mechanical model: Detector chamber 3-20-20
-  // directly implimenting the central Be section in G4 cylinder for max speed simulation in the detector region.
-  // The jointer lip structure of the pipe R = 3.2cm x L=5mm is ignored here
-  static const double be_pipe_radius = 3.1000;
-  static const double be_pipe_thickness = 3.1762 - be_pipe_radius;  // 760 um for sPHENIX
-  static const double be_pipe_length_plus = 66.8;                   // +z beam pipe extend.
-  static const double be_pipe_length_neg = -79.8;                   // -z beam pipe extend.
-}
+// Central pipe dimension
+// Extracted via mechanical model: Detector chamber 3-20-20
+// directly implimenting the central Be section in G4 cylinder for max speed simulation in the detector region.
+// The jointer lip structure of the pipe R = 3.2cm x L=5mm is ignored here
+static const double be_pipe_radius = 3.1000;
+static const double be_pipe_thickness = 3.1762 - be_pipe_radius;  // 760 um for sPHENIX
+static const double be_pipe_length_plus = 66.8;                   // +z beam pipe extend.
+static const double be_pipe_length_neg = -79.8;                   // -z beam pipe extend.
+}  // namespace PipeEicMacro
 
 void PipeInit()
 {
-BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, PipeEicMacro::be_pipe_radius + PipeEicMacro::be_pipe_thickness);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, PipeEicMacro::be_pipe_radius + PipeEicMacro::be_pipe_thickness);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, PipeEicMacro::be_pipe_length_plus);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, PipeEicMacro::be_pipe_length_neg);
-
 }
 
 //! construct beam pipe
@@ -36,14 +35,12 @@ BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, PipeEicM
 double Pipe(PHG4Reco* g4Reco,
             double radius,
             const int absorberactive = 0,
-            int verbosity = 0
-            )
+            int verbosity = 0)
 {
   // process pipe extentions?
   bool use_forward_pipes = false;
   const static bool do_pipe_hadron_forward_extension = use_forward_pipes && true;
   const static bool do_pipe_electron_forward_extension = use_forward_pipes && true;
-
 
   static const double be_pipe_length = PipeEicMacro::be_pipe_length_plus - PipeEicMacro::be_pipe_length_neg;  // pipe length
   static const double be_pipe_center = 0.5 * (PipeEicMacro::be_pipe_length_plus + PipeEicMacro::be_pipe_length_neg);
