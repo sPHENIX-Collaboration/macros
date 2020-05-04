@@ -1,5 +1,5 @@
 /*!
- * \file QA_Draw_MVtx.C
+ * \file QA_Draw_Intt.C
  * \brief
  * \author Hugo Pereira Da Costa <hugo.pereira-da-costa@cea.fr>
  * \version $Revision:   $
@@ -15,9 +15,9 @@
 #include "../../sPHENIXStyle/sPhenixStyle.C"
 #include "QA_Draw_Utility.C"
 
-// assume MVTX layers are 0, 1 and 2
-static constexpr int first_layer_mvtx = 0;
-static constexpr int nlayers_mvtx = 3;
+// assume INTT layers are 3 to 6
+static constexpr int first_layer_intt = 3;
+static constexpr int nlayers_intt = 4;
 
 namespace
 {
@@ -28,15 +28,15 @@ namespace
     const TString prefix = TString("h_") + hist_name_prefix + TString("_");
 
     auto cv = new TCanvas(
-      TString("QA_Draw_Mvtx_") + tag + TString("_") + hist_name_prefix,
-      TString("QA_Draw_Mvtx_") + tag + TString("_") + hist_name_prefix,
+      TString("QA_Draw_Intt_") + tag + TString("_") + hist_name_prefix,
+      TString("QA_Draw_Intt_") + tag + TString("_") + hist_name_prefix,
       1800, 1000);
 
-    cv->Divide( nlayers_mvtx, 1 );
-    for( int ilayer = 0; ilayer < nlayers_mvtx; ++ilayer )
+    DivideCanvas( cv, nlayers_intt );
+    for( int ilayer = 0; ilayer < nlayers_intt; ++ilayer )
     {
 
-      const int layer = ilayer + first_layer_mvtx;
+      const int layer = ilayer + first_layer_intt;
 
       // get histograms
       auto hnew = static_cast<TH1*>( qa_file_new->GetObjectChecked( Form( "%s%s_%i", prefix.Data(), tag.Data(), layer ), "TH1" ) );
@@ -65,8 +65,8 @@ namespace
 
 }
 
-void QA_Draw_Mvtx(
-    const char *hist_name_prefix = "QAG4SimulationMvtx",
+void QA_Draw_Intt(
+    const char *hist_name_prefix = "QAG4SimulationIntt",
     const char *qa_file_name_new =  "data/G4sPHENIX.root_qa.root",
     const char *qa_file_name_ref =  "data/G4sPHENIX.root_qa.root"
     )
@@ -83,7 +83,7 @@ void QA_Draw_Mvtx(
     qa_file_ref = new TFile(qa_file_name_ref);
     assert(qa_file_ref->IsOpen());
   }
-  
+
   std::vector<TCanvas*> cvlist;
 
   cvlist.push_back( Draw( qa_file_new, qa_file_ref, hist_name_prefix, "drphi" ) );

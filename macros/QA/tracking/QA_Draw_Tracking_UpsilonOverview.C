@@ -112,7 +112,7 @@ void QA_Draw_Tracking_UpsilonOverview(
     TH1 *h_proj_ref = nullptr;
     if (h_ref)
       h_proj_ref =
-          h_new->ProjectionY(
+          h_ref->ProjectionY(
               TString::Format(
                   "%s_Ref_ProjX",
                   h_new->GetName()));
