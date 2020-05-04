@@ -260,7 +260,7 @@ int G4Setup(const int absorberactive = 0,
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
 // finally adjust the world size in case the default is too small
-//  WorldSize(g4Reco, radius);
+  WorldSize(g4Reco, radius);
 
   se->registerSubsystem( g4Reco );
   return 0;
