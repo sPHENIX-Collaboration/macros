@@ -34,17 +34,13 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 void RunLoadTest() {}
 
-void G4Init(bool do_svtx = true,
-            bool do_cemc = true,
-            bool do_magnet = true,
-            bool do_pipe = true)
+void G4Init()
 {
 
   // load detector/material macros and execute Init() function
 
-  if (do_pipe)
+  if (Enable::PIPE)
     {
-      gROOT->LoadMacro("G4_Pipe_EIC.C");
       PipeInit();
     }
 
@@ -53,15 +49,13 @@ void G4Init(bool do_svtx = true,
       PlugDoorInit();
     }
 
-  if (do_svtx)
+  if (Enable::TRACKING)
     {
-      //gROOT->LoadMacro("G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec.C"); 
-      gROOT->LoadMacro("G4_Tracking_EIC.C"); 
       TrackingInit();
     }
-  if (do_cemc)
+
+  if (Enable::CEMC)
     {
-      gROOT->LoadMacro("G4_CEmc_EIC.C");
       CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
     }
 
@@ -70,9 +64,8 @@ void G4Init(bool do_svtx = true,
       HCalInnerInit(1);
     }
 
-  if (do_magnet)
+  if (Enable::MAGNET)
     {
-      gROOT->LoadMacro("G4_Magnet.C");
       MagnetInit();
     }
   if (Enable::HCALOUT)
@@ -122,10 +115,6 @@ void G4Init(bool do_svtx = true,
 int G4Setup(const int absorberactive = 0,
             const string &field ="1.5",
 	    const EDecayType decayType = EDecayType::kAll,
-            const bool do_svtx = true,
-            const bool do_cemc = true,
-            const bool do_magnet = true,
-            const bool do_pipe = true,
             const float magfield_rescale = 1.0) {
 
   //---------------
@@ -151,11 +140,7 @@ int G4Setup(const int absorberactive = 0,
 // (default is QGSP_BERT for speed)
   //  g4Reco->SetPhysicsList("QGSP_BERT_HP"); 
  
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
   if (decayType != EDecayType::kAll) 
-#else
-  if (decayType != TPythia6Decayer::kAll) 
-#endif
   {
     g4Reco->set_force_decay(decayType);
   }
@@ -179,16 +164,23 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // PIPE
-  if (do_pipe) radius = Pipe(g4Reco, radius, absorberactive);
-
+  if (Enable::PIPE)
+  {
+    radius = Pipe(g4Reco, radius, absorberactive);
+  }
   //----------------------------------------
   // SVTX
-   if (do_svtx) radius = Tracking(g4Reco, radius, absorberactive);
-
+  if (Enable::TRACKING)
+  {
+    radius = Tracking(g4Reco, radius, absorberactive);
+  }
   //----------------------------------------
   // CEMC
   //
-  if (do_cemc) radius = CEmc(g4Reco, radius, 8, absorberactive);
+  if (Enable::CEMC)
+  {
+    radius = CEmc(g4Reco, radius, 8, absorberactive);
+  }
   //  if (do_cemc) radius = CEmc_Vis(g4Reco, radius, 8, absorberactive);// for visualization substructure of SPACAL, slow to render
 
   //----------------------------------------
@@ -201,8 +193,10 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // MAGNET
 
-  if (do_magnet) radius = Magnet(g4Reco, radius, 0, absorberactive);
-
+  if (Enable::MAGNET) 
+  {
+    radius = Magnet(g4Reco, radius, 0, absorberactive);
+  }
   //----------------------------------------
   // HCALOUT
 
@@ -266,7 +260,7 @@ int G4Setup(const int absorberactive = 0,
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
 // finally adjust the world size in case the default is too small
-  WorldSize(g4Reco, radius);
+//  WorldSize(g4Reco, radius);
 
   se->registerSubsystem( g4Reco );
   return 0;
