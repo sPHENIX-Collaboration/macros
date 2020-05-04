@@ -1,22 +1,32 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 00, 0)
-#include <fun4all/Fun4AllServer.h>
+
+#include "GlobalVariables.C"
+
+#include "G4_GEM_EIC.C"
+#include "G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec_EIC.C"
+
 #include <g4eval/SvtxEvaluator.h>
+
 #include <g4trackfastsim/PHG4TrackFastSim.h>
+
 #include <trackreco/PHRaveVertexing.h>
+
 #include <g4trackfastsim/PHG4TrackFastSimEval.h>
-class SubsysReco;
-R__LOAD_LIBRARY(libtrack_reco.so)
-R__LOAD_LIBRARY(libg4trackfastsim.so)
-#endif
+
+#include <fun4all/Fun4AllServer.h>
 
 #include <vector>
 
-#include "G4_GEM_EIC.C"
+class SubsysReco;
+
+R__LOAD_LIBRARY(libtrack_reco.so)
+R__LOAD_LIBRARY(libg4trackfastsim.so)
+
+
+
 
 // load the version of central travker macro with cylindrical approximation of the TPC
 // This is required for fast tracking to properly count hits in TPC
-#include "G4_Svtx_maps_ladders+intt_ladders+tpc_KalmanPatRec_EIC.C"
 
 void TrackingInit(int verbosity = 0)
 {
