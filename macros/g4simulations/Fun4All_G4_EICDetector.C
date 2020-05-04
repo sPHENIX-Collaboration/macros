@@ -181,8 +181,8 @@ int Fun4All_G4_EICDetector(
   bool do_DSTReader = false;
 
 // new settings using Enable namespace in GlobalVariables.C
-  // Enable::BLACKHOLE = true;
-  // BlackHoleGeometry::visible = true;
+  Enable::BLACKHOLE = true;
+  BlackHoleGeometry::visible = true;
 
   //---------------
   // Load libraries
