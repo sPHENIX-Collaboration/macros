@@ -13,11 +13,12 @@ namespace Enable
   static bool FHCAL = false;
   static bool HCALIN = false;
   static bool HCALOUT = false;
+  static bool MAGNET = false;
   static bool OVERLAPCHECK = false;
   static bool PIPE = false;
+  static bool PLUGDOOR = false;
   static bool PSTOF = false;
   static bool RICH = false;
-  static bool PLUGDOOR = false;
   static bool TRACKING = false;
 }
 
