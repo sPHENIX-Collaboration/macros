@@ -2,6 +2,7 @@
 #include <qa_modules/QAG4SimulationUpsilon.h>
 #include <qa_modules/QAG4SimulationTracking.h>
 #include <qa_modules/QAHistManagerDef.h>
+#include <qa_modules/QAG4SimulationIntt.h>
 #include <qa_modules/QAG4SimulationMvtx.h>
 #include <phool/PHRandomSeed.h>
 #include <fun4all/SubsysReco.h>
@@ -646,6 +647,7 @@ int Fun4All_G4_sPHENIX(
         se->registerSubsystem(qa);
       }
 
+      se->registerSubsystem( new QAG4SimulationIntt );
       se->registerSubsystem( new QAG4SimulationMvtx );
     }
   }

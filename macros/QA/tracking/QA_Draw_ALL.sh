@@ -20,6 +20,9 @@ endif
 echo "$0 - New QA file: $new_QA_file";
 echo "$0 - Reference QA file: $reference_QA_file";
 
+# intt stuff
+root -b -q "QA_Draw_Intt.C(${q}QAG4SimulationIntt${q},$new_QA_file, $reference_QA_file)"
+
 # mvtx stuff
 root -b -q "QA_Draw_Mvtx.C(${q}QAG4SimulationMvtx${q},$new_QA_file, $reference_QA_file)"
 

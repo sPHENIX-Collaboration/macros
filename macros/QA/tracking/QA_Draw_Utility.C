@@ -38,6 +38,45 @@
 
 using namespace std;
 
+//! Divide canvas in a given number of pads, with a number of pads in both directions that match the width/height ratio of the canvas
+void DivideCanvas(TVirtualPad* p, int npads)
+{
+  if( !p ) return;
+  if( !npads ) return;
+  const double ratio = double(p->GetWw())/p->GetWh();
+  Int_t columns = std::max( 1, int(std::sqrt( npads*ratio )) );
+  Int_t rows = std::max( 1, int(npads/columns) );
+  while( rows * columns < npads )
+  {
+    columns++;
+    if( rows * columns < npads ) rows++;
+  }
+  p->Divide( rows, columns );
+}
+
+//! Draw a vertical line in a pad at given x coordinate
+TLine* VerticalLine( TVirtualPad* p, Double_t x )
+{
+  
+  p->Update();
+  
+  Double_t yMin = p->GetUymin();
+  Double_t yMax = p->GetUymax();
+  
+  if( p->GetLogy() )
+  {
+    yMin = TMath::Power( 10, yMin );
+    yMax = TMath::Power( 10, yMax );
+  }
+  
+  TLine *line = new TLine( x, yMin, x, yMax );
+  line->SetLineStyle( 2 );
+  line->SetLineWidth( 1 );
+  line->SetLineColor( 1 );
+  return line;
+  
+}
+
 //! Service function to SaveCanvas()
 void SavePad(TPad *p)
 {
