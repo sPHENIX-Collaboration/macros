@@ -30,6 +30,7 @@ root -b -q "QA_Draw_Mvtx.C(${q}QAG4SimulationMvtx${q},$new_QA_file, $reference_Q
 root -b -q "QA_Draw_Tracking_TruthMatchingOverview.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
 root -b -q "QA_Draw_Tracking_pTRatio.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
 root -b -q "QA_Draw_Tracking_TruthMatching_NumOfHits.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
+root -b -q "QA_Draw_Tracking_nClus_Layer.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
 
 root -b -q "QA_Draw_Tracking_UpsilonOverview.C(${q}QAG4SimulationUpsilon${q},$new_QA_file, $reference_QA_file)"
 
