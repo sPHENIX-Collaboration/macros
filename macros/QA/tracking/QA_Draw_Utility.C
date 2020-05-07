@@ -57,47 +57,47 @@ void DivideCanvas(TVirtualPad* p, int npads)
 //! Draw a vertical line in a pad at given x coordinate
 TLine* VerticalLine( TVirtualPad* p, Double_t x )
 {
-  
+
   p->Update();
-  
+
   Double_t yMin = p->GetUymin();
   Double_t yMax = p->GetUymax();
-  
+
   if( p->GetLogy() )
   {
     yMin = std::pow( 10, yMin );
     yMax = std::pow( 10, yMax );
   }
-  
+
   TLine *line = new TLine( x, yMin, x, yMax );
   line->SetLineStyle( 2 );
   line->SetLineWidth( 1 );
   line->SetLineColor( 1 );
   return line;
-  
+
 }
 
 //! Draw a horizontal line in a pad at given x coordinate
 TLine* HorizontalLine( TVirtualPad* p, Double_t y )
 {
-  
+
   p->Update();
-  
+
   Double_t xMin = p->GetUxmin();
   Double_t xMax = p->GetUxmax();
-  
+
   if( p->GetLogx() )
   {
     xMin = std::pow( 10, xMin );
     xMax = std::pow( 10, xMax );
   }
-  
+
   TLine *line = new TLine( xMin, y, xMax, y );
   line->SetLineStyle( 2 );
   line->SetLineWidth( 1 );
   line->SetLineColor( 1 );
   return line;
-  
+
 }
 
 //! Service function to SaveCanvas()
