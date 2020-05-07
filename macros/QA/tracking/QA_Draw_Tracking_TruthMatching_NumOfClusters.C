@@ -1,7 +1,7 @@
 // $Id: $
 
 /*!
- * \file QA_Draw_Tracking_TruthMatching_NumOfHits.C
+ * \file QA_Draw_Tracking_TruthMatching_NumOfClusters.C
  * \brief 
  * \author Jin Huang <jhuang@bnl.gov>
  * \version $Revision:   $
@@ -22,7 +22,7 @@
 #include "QA_Draw_Utility.C"
 using namespace std;
 
-void QA_Draw_Tracking_TruthMatching_NumOfHits(
+void QA_Draw_Tracking_TruthMatching_NumOfClusters(
     const char *hist_name_prefix = "QAG4SimulationTracking",
     const char *qa_file_name_new =
         "data/G4sPHENIX.root_qa.root",
@@ -71,8 +71,9 @@ void QA_Draw_Tracking_TruthMatching_NumOfHits(
 
   //MVTX, INTT, TPC
   vector<TString> detectors{"MVTX", "INTT", "TPC"};
-  vector<int> eff_nhit_cuts{2, 2, 36};
-  vector<double> nhit_spectrum_pt_cuts{2, 2, 2};
+  vector<int> eff_ncluster_cuts{2, 1, 36};
+  vector<double> ncluster_spectrum_pt_cuts{2, 2, 2};
+
   vector<TH2 *> h_pass_detectors(3, nullptr);
   static const int nrebin = 5;
 
@@ -104,8 +105,8 @@ void QA_Draw_Tracking_TruthMatching_NumOfHits(
     h_norm_ref->Rebin(nrebin);
   }
 
-  TCanvas *c1 = new TCanvas(TString("QA_Draw_Tracking_TruthMatching_NumOfHits") + TString("_") + hist_name_prefix,
-                            TString("QA_Draw_Tracking_TruthMatching_NumOfHits") + TString("_") + hist_name_prefix,
+  TCanvas *c1 = new TCanvas(TString("QA_Draw_Tracking_TruthMatching_NumOfClusters") + TString("_") + hist_name_prefix,
+                            TString("QA_Draw_Tracking_TruthMatching_NumOfClusters") + TString("_") + hist_name_prefix,
                             1800, 1000);
   c1->Divide(3, 2);
   TPad *p;
@@ -122,22 +123,22 @@ void QA_Draw_Tracking_TruthMatching_NumOfHits(
       c1->Update();
       p->SetLogy();
 
-      const int bin_start = h_pass_detector->GetXaxis()->FindBin(nhit_spectrum_pt_cuts[i]);
+      const int bin_start = h_pass_detector->GetXaxis()->FindBin(ncluster_spectrum_pt_cuts[i]);
 
-      TH1 *h_pass_detector_nhit = h_pass_detector->ProjectionY(
-          TString(h_pass_detector->GetName()) + "_nHit_new",
+      TH1 *h_pass_detector_ncluster = h_pass_detector->ProjectionY(
+          TString(h_pass_detector->GetName()) + "_nCluster_new",
           bin_start);
-      TH1 *h_pass_detector_nhit_ref = nullptr;
+      TH1 *h_pass_detector_ncluster_ref = nullptr;
       if (h_pass_detector_ref)
       {
-        h_pass_detector_nhit_ref = h_pass_detector_ref->ProjectionY(
-            TString(h_pass_detector_ref->GetName()) + "_nHit_ref",
+        h_pass_detector_ncluster_ref = h_pass_detector_ref->ProjectionY(
+            TString(h_pass_detector_ref->GetName()) + "_nCluster_ref",
             bin_start);
       }
 
-      h_pass_detector_nhit->SetTitle(TString(hist_name_prefix) + ": " + detector + Form(" n_{Hit} | p_{T} #geq %.1fGeV/c", nhit_spectrum_pt_cuts[i]));
-      h_pass_detector_nhit->SetYTitle("# of reconstructed track");
-      DrawReference(h_pass_detector_nhit, h_pass_detector_nhit_ref, false);
+      h_pass_detector_ncluster->SetTitle(TString(hist_name_prefix) + ": " + detector + Form(" n_{Cluster} | p_{T} #geq %.1fGeV/c", ncluster_spectrum_pt_cuts[i]));
+      h_pass_detector_ncluster->SetYTitle("# of reconstructed track");
+      DrawReference(h_pass_detector_ncluster, h_pass_detector_ncluster_ref, false);
     }
 
     {
@@ -146,7 +147,7 @@ void QA_Draw_Tracking_TruthMatching_NumOfHits(
       p->SetLogx();
       p->SetGridy();
 
-      const int bin_start = h_pass_detector->GetYaxis()->FindBin(eff_nhit_cuts[i]);
+      const int bin_start = h_pass_detector->GetYaxis()->FindBin(eff_ncluster_cuts[i]);
       TH1 *h_pass = h_pass_detector->ProjectionX(
           TString(h_pass_detector->GetName()) + "_nReco_new",
           bin_start);
@@ -155,7 +156,7 @@ void QA_Draw_Tracking_TruthMatching_NumOfHits(
       h_pass->Rebin(nrebin);
 
       TH1 *h_ratio = GetBinominalRatio(h_pass, h_norm);
-      h_ratio->GetYaxis()->SetTitle("Reco efficiency | " + detector + Form(" n_{Hit} #geq %d", eff_nhit_cuts[i]));
+      h_ratio->GetYaxis()->SetTitle("Reco efficiency | " + detector + Form(" n_{Cluster} #geq %d", eff_ncluster_cuts[i]));
       h_ratio->GetYaxis()->SetRangeUser(-0, 1.);
       //
       TH1 *h_ratio_ref = NULL;
@@ -171,7 +172,7 @@ void QA_Draw_Tracking_TruthMatching_NumOfHits(
         h_ratio_ref = GetBinominalRatio(h_pass, h_norm);
       }
       //
-      h_ratio->SetTitle("Tracking efficiency | " + detector + Form(" n_{Hit} #geq %d", eff_nhit_cuts[i]));
+      h_ratio->SetTitle("Tracking efficiency | " + detector + Form(" n_{Cluster} #geq %d", eff_ncluster_cuts[i]));
       DrawReference(h_ratio, h_ratio_ref, false);
     }
   }
