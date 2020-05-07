@@ -95,7 +95,9 @@ int Fun4All_G4_EICDetector(
   // sPHENIX barrel
   bool do_bbc = true;
 
+  // whether to simulate the Be section of the beam pipe
   bool do_pipe = true;
+  // EIC beam pipe extension beyond the Be-section can be turned on with use_forward_pipes = true in G4_Pipe_EIC.C
 
   bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
