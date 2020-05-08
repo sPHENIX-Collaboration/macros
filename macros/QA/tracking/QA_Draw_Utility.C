@@ -57,24 +57,47 @@ void DivideCanvas(TVirtualPad* p, int npads)
 //! Draw a vertical line in a pad at given x coordinate
 TLine* VerticalLine( TVirtualPad* p, Double_t x )
 {
-  
+
   p->Update();
-  
+
   Double_t yMin = p->GetUymin();
   Double_t yMax = p->GetUymax();
-  
+
   if( p->GetLogy() )
   {
-    yMin = TMath::Power( 10, yMin );
-    yMax = TMath::Power( 10, yMax );
+    yMin = std::pow( 10, yMin );
+    yMax = std::pow( 10, yMax );
   }
-  
+
   TLine *line = new TLine( x, yMin, x, yMax );
   line->SetLineStyle( 2 );
   line->SetLineWidth( 1 );
   line->SetLineColor( 1 );
   return line;
-  
+
+}
+
+//! Draw a horizontal line in a pad at given x coordinate
+TLine* HorizontalLine( TVirtualPad* p, Double_t y )
+{
+
+  p->Update();
+
+  Double_t xMin = p->GetUxmin();
+  Double_t xMax = p->GetUxmax();
+
+  if( p->GetLogx() )
+  {
+    xMin = std::pow( 10, xMin );
+    xMax = std::pow( 10, xMax );
+  }
+
+  TLine *line = new TLine( xMin, y, xMax, y );
+  line->SetLineStyle( 2 );
+  line->SetLineWidth( 1 );
+  line->SetLineColor( 1 );
+  return line;
+
 }
 
 //! Service function to SaveCanvas()
@@ -463,7 +486,7 @@ TH1 *GetBinominalRatio(TH1 *h_pass, TH1 *h_n_trial, bool process_zero_bins = fal
                                  (p + 1 / (2 * n_trial)) / (1 + 1 / n_trial));
           h_ratio->SetBinError(x, y,
                                z,  //
-                               TMath::Sqrt(
+                               std::sqrt(
                                    1. / n_trial * p * (1 - p) + 1. / (4 * n_trial * n_trial)) /
                                    (1 + 1 / n_trial));
         }
