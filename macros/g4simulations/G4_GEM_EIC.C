@@ -1,27 +1,40 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 00, 0)
-#include <TMath.h>
-#include <g4detectors/PHG4SectorSubsystem.h>
-#include <g4main/PHG4Reco.h>
-#include <string>
+
 #include "GlobalVariables.C"
 
-using namespace std;
+#include <g4detectors/PHG4SectorSubsystem.h>
+
+#include <g4main/PHG4Reco.h>
+
+#include <TMath.h>
+
+#include <string>
+
+R__LOAD_LIBRARY(libg4detectors.so)
 
 int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
                      double etamax, const int N_Sector = 8);
 void AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem);
 int make_LANL_FST_station(string name, PHG4Reco *g4Reco, double zpos, double Rmin,
                           double Rmax);
-R__LOAD_LIBRARY(libg4detectors.so)
-#endif
+
+namespace Enable
+{
+  static bool EGEM = false;
+  static bool FGEM = false;
+}
 
 void EGEM_Init()
 {
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 80.);
+// extends only to -z
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z,-160. );
 }
 
 void FGEM_Init()
 {
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 150.);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 282.);
 }
 
 void EGEMSetup(PHG4Reco *g4Reco)
