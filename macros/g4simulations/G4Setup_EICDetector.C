@@ -12,6 +12,7 @@
 #include "G4_PlugDoor_EIC.C"
 #include "G4_FEMC_EIC.C"
 #include "G4_FHCAL.C"
+#include "G4_GEM_EIC.C"
 #include "G4_EEMC.C"
 #include "G4_DIRC.C"
 #include "G4_RICH.C"
@@ -49,6 +50,15 @@ void G4Init()
       PlugDoorInit();
     }
 
+  if (Enable::EGEM)
+  {
+    EGEM_Init();
+  }
+
+  if (Enable::FGEM)
+  {
+    FGEM_Init();
+  }
   if (Enable::TRACKING)
     {
       TrackingInit();
@@ -72,6 +82,7 @@ void G4Init()
     {
       HCalOuterInit();
     }
+
 
   if (Enable::FEMC)
     {
@@ -169,7 +180,17 @@ int G4Setup(const int absorberactive = 0,
     radius = Pipe(g4Reco, radius, absorberactive);
   }
   //----------------------------------------
-  // SVTX
+  
+  if (Enable::EGEM)
+  {
+    EGEMSetup(g4Reco);
+  }
+
+  if (Enable::FGEM)
+  {
+    FGEMSetup(g4Reco);
+  }
+
   if (Enable::TRACKING)
   {
     radius = Tracking(g4Reco, radius, absorberactive);
@@ -260,7 +281,7 @@ int G4Setup(const int absorberactive = 0,
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
 // finally adjust the world size in case the default is too small
-  WorldSize(g4Reco, radius);
+//  WorldSize(g4Reco, radius);
 
   se->registerSubsystem( g4Reco );
   return 0;
