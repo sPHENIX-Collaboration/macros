@@ -55,7 +55,7 @@ void QA_Draw_Tracking_UpsilonOverview(
         prefix + TString("Normalization"), "TH1");
     assert(h_norm);
 
-    Nevent_new = h_norm->GetBinContent(h_norm->GetXaxis()->FindBin("Truth Track"));
+    Nevent_new = h_norm->GetBinContent(h_norm->GetXaxis()->FindBin("Event"));
   }
   if (qa_file_ref)
   {
@@ -63,7 +63,7 @@ void QA_Draw_Tracking_UpsilonOverview(
         prefix + TString("Normalization"), "TH1");
     assert(h_norm);
 
-    Nevent_ref = h_norm->GetBinContent(h_norm->GetXaxis()->FindBin("Truth Track"));
+    Nevent_ref = h_norm->GetBinContent(h_norm->GetXaxis()->FindBin("Event"));
   }
 
   TCanvas *c1 = new TCanvas(TString("QA_Draw_Tracking_UpsilonOverview") + TString("_") + hist_name_prefix,
