@@ -37,7 +37,6 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
             const int absorberactive = 0,
             int verbosity = 0)
 {
-  gSystem->Load("libg4mvtx.so");
   bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
 
   // Update EIC MAPS layer structure based on inner two layers of U. Birmingham tracker
