@@ -17,6 +17,8 @@
 #include "G4_DIRC.C"
 #include "G4_RICH.C"
 #include "G4_Aerogel.C"
+#include "G4_TPC_EIC.C"
+#include "G4_Mvtx.C"
 #include "G4_BlackHole.C"
 #include "G4_WorldSize.C"
 #include <g4eval/PHG4DstCompressReco.h>
@@ -58,6 +60,14 @@ void G4Init()
   if (Enable::FGEM)
   {
     FGEM_Init();
+  }
+  if (Enable::MVTX)
+  {
+    MvtxInit();
+  }
+  if (Enable::TPC)
+  {
+    TPCInit();
   }
   if (Enable::TRACKING)
     {
@@ -191,9 +201,17 @@ int G4Setup(const int absorberactive = 0,
     FGEMSetup(g4Reco);
   }
 
+  if (Enable::MVTX)
+  {
+    radius = Mvtx(g4Reco, radius, absorberactive);
+  }
+  if (Enable::TPC)
+  {
+    radius = TPC(g4Reco, radius, absorberactive);
+  }
   if (Enable::TRACKING)
   {
-    radius = Tracking(g4Reco, radius, absorberactive);
+//    radius = Tracking(g4Reco, radius, absorberactive);
   }
   //----------------------------------------
   // CEMC
@@ -281,7 +299,7 @@ int G4Setup(const int absorberactive = 0,
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
 // finally adjust the world size in case the default is too small
-//  WorldSize(g4Reco, radius);
+  WorldSize(g4Reco, radius);
 
   se->registerSubsystem( g4Reco );
   return 0;
