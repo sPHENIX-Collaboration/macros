@@ -101,21 +101,26 @@ int Fun4All_G4_EICDetector(
   Enable::PIPE = true;
   // EIC beam pipe extension beyond the Be-section can be turned on with use_forward_pipes = true in G4_Pipe_EIC.C
 
+  Enable::EGEM = true;
+  Enable::FGEM = true;
+  Enable::MVTX = true;
+  Enable::TPC = true;
   Enable::TRACKING = true;
   bool do_tracking_cell = Enable::TRACKING && true;
-  bool do_tracking_track = do_tracking_cell && false;
-  bool do_tracking_eval = do_tracking_track && true; // in order to use this evaluation, please build this analysis module analysis/blob/master/Tracking/FastTrackingEval/
+  bool do_tracking_track = do_tracking_cell && true;
+  bool do_tracking_eval = do_tracking_track && true;
   bool do_vertex_finding = false; // this option exclude vertex in the track fitting and use RAVE to reconstruct primary and 2ndary vertexes
+
 
   Enable::CEMC = true;
   bool do_cemc_cell = Enable::CEMC && true;
-  bool do_cemc_twr = do_cemc_cell && false;
+  bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
 
   Enable::HCALIN = true;
   bool do_hcalin_cell = Enable::HCALIN && true;
-  bool do_hcalin_twr = do_hcalin_cell && false;
+  bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
   bool do_hcalin_eval = do_hcalin_cluster && true;
 
@@ -123,7 +128,7 @@ int Fun4All_G4_EICDetector(
 
   Enable::HCALOUT = true;
   bool do_hcalout_cell = Enable::HCALOUT && true;
-  bool do_hcalout_twr = do_hcalout_cell && false;
+  bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
   bool do_hcalout_eval = do_hcalout_cluster && true;
 
@@ -136,28 +141,28 @@ int Fun4All_G4_EICDetector(
 
   Enable::FEMC = true;
   bool do_FEMC_cell = Enable::FEMC && true;
-  bool do_FEMC_twr = do_FEMC_cell && false;
+  bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
   bool do_FEMC_eval = do_FEMC_cluster && true;
 
   Enable::FHCAL = true;
   bool do_FHCAL_cell = Enable::FHCAL && true;
-  bool do_FHCAL_twr = do_FHCAL_cell && false;
+  bool do_FHCAL_twr = do_FHCAL_cell && true;
   bool do_FHCAL_cluster = do_FHCAL_twr && true;
   bool do_FHCAL_eval = do_FHCAL_cluster && true;
 
   // EICDetector geometry - 'electron' direction
   Enable::EEMC = true;
   bool do_EEMC_cell = Enable::EEMC && true;
-  bool do_EEMC_twr = do_EEMC_cell && false;
+  bool do_EEMC_twr = do_EEMC_cell && true;
   bool do_EEMC_cluster = do_EEMC_twr && true;
   bool do_EEMC_eval = do_EEMC_cluster && true;
 
   Enable::PLUGDOOR = true;
 
   // Other options
-  bool do_global = false;
-  bool do_global_fastsim = false;
+  bool do_global = true;
+  bool do_global_fastsim = true;
 
   bool do_calotrigger = false && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
 
@@ -181,8 +186,8 @@ int Fun4All_G4_EICDetector(
   bool do_DSTReader = false;
 
 // new settings using Enable namespace in GlobalVariables.C
-  Enable::BLACKHOLE = true;
-  BlackHoleGeometry::visible = true;
+   Enable::BLACKHOLE = true;
+   BlackHoleGeometry::visible = true;
 
   //---------------
   // Load libraries
@@ -221,7 +226,7 @@ int Fun4All_G4_EICDetector(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  // rc->set_IntFlag("RANDOMSEED", 12345);
+  rc->set_IntFlag("RANDOMSEED", 12345);
 
   //-----------------
   // Event generation
