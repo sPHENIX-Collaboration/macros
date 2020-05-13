@@ -15,11 +15,9 @@ namespace Enable
   static bool HCALOUT = false;
   static bool MAGNET = false;
   static bool OVERLAPCHECK = false;
-  static bool PIPE = false;
   static bool PLUGDOOR = false;
   static bool PSTOF = false;
   static bool RICH = false;
-  static bool TRACKING = false;
 }
 
 namespace BlackHoleGeometry
