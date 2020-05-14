@@ -1,20 +1,22 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include <fun4all/Fun4AllServer.h>
+
 #include <g4jets/FastJetAlgo.h>
 #include <g4jets/JetReco.h>
 #include <g4jets/TowerJetInput.h>
+#include <g4jets/TruthJetInput.h>
+
 #include <g4eval/JetEvaluator.h>
+
+#include <fun4all/Fun4AllServer.h>
+
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libg4eval.so)
-#endif
+
 
 void Jet_FwdRecoInit() {}
 
 void Jet_FwdReco(int verbosity = 0) {
 
-  gSystem->Load("libg4jets.so");
-  
   Fun4AllServer *se = Fun4AllServer::instance();
 
   // truth particle level jets
@@ -57,8 +59,6 @@ void Jet_FwdReco(int verbosity = 0) {
 void Jet_FwdEval(std::string outfilename = "g4fwdjets_eval.root",
 	      int verbosity = 0) {
 
-  gSystem->Load("libg4eval.so");
-  
   Fun4AllServer *se = Fun4AllServer::instance();
 
   JetEvaluator* eval = new JetEvaluator("JETEVALUATOR",
