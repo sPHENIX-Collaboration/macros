@@ -1,13 +1,3 @@
-#pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include "GlobalVariables.C"
-#include <g4detectors/PHG4RICHSubsystem.h>
-#include <g4main/PHG4Reco.h>
-R__LOAD_LIBRARY(libg4detectors.so)
-#endif
-
-// $Id: G4_RICH.C,v 1.2 2013/10/09 01:08:17 jinhuang Exp $
-
 /*!
  * \file G4_RICH.C
  * \brief Setup the gas RICH detector as designed in ePHENIX LOI
@@ -15,22 +5,26 @@ R__LOAD_LIBRARY(libg4detectors.so)
  * \version $Revision: 1.2 $
  * \date $Date: 2013/10/09 01:08:17 $
  */
+#pragma once
 
-using namespace std;
+#include "GlobalVariables.C"
 
-// global macro parameters
+#include <g4detectors/PHG4RICHSubsystem.h>
+
+#include <g4main/PHG4Reco.h>
+
+R__LOAD_LIBRARY(libg4detectors.so)
+
+namespace Enable
+{
+  static bool RICH = false;
+}
 
 void
 RICHInit()
 {
-  if (BlackHoleGeometry::max_radius < 135)
-  {
-    BlackHoleGeometry::max_radius = 135;
-  }
-  if (BlackHoleGeometry::max_z < 268.)
-  {
-    BlackHoleGeometry::max_z = 268;
-  }
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 135.);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 268.);
 }
 
 //! ePHENIX Gas RICH. Ref to Geometry parameter defined in ePHENIXRICH::RICH_Geometry
@@ -64,9 +58,9 @@ RICHSetup(PHG4Reco* g4Reco, //
   rich->get_RICH_geometry().set_R_beam_pipe_front(R_beampipe_front * ePHENIXRICH::RICH_Geometry::Unit_cm());
   rich->get_RICH_geometry().set_R_beam_pipe_back(R_beampipe_back * ePHENIXRICH::RICH_Geometry::Unit_cm());
 
-  /* Register RICH module */
-  rich->OverlapCheck( overlapcheck );
+  rich->OverlapCheck( Enable::OVERLAPCHECK );
 
+  /* Register RICH module */
   g4Reco->registerSubsystem( rich );
 
 }

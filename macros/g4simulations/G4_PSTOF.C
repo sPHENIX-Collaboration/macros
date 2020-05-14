@@ -13,6 +13,10 @@ R__LOAD_LIBRARY(libg4detectors.so)
  * \version $Revision$
  * \date $Date$
  */
+namespace Enable
+{
+  static bool PSTOF = false;
+}
 
 void PSTOFInit()
 {}

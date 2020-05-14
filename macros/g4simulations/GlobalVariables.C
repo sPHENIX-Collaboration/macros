@@ -4,22 +4,12 @@ static double no_overlapp = 0.0001; // added to radii to avoid overlapping volum
 
 namespace Enable
 {
-  static bool AEROGEL = false;
-  static bool BLACKHOLE = false;
-  static bool CEMC = false;
-  static bool DIRC = false;
-  static bool EEMC = false;
-  static bool FEMC = false;
-  static bool FHCAL = false;
-  static bool HCALIN = false;
-  static bool HCALOUT = false;
-  static bool MAGNET = false;
   static bool OVERLAPCHECK = false;
-  static bool PLUGDOOR = false;
-  static bool PSTOF = false;
-  static bool RICH = false;
 }
 
+// every G4 subsystem needs to implement this
+// rather than forcing another include file, 
+// let's put this into the GlobalVariables.C
 namespace BlackHoleGeometry
 {
   static double max_radius = 0.; // this is needed for the overall dimension of the black hole
