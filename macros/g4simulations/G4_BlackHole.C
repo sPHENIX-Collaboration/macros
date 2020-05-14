@@ -7,6 +7,10 @@
 
 R__LOAD_LIBRARY(libg4detectors.so)
 
+namespace Enable
+{
+  static bool BLACKHOLE = false;
+}
 
 void BlackHoleInit() {}
 
