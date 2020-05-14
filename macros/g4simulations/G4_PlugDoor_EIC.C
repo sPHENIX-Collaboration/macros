@@ -15,20 +15,20 @@ namespace Enable
 
 namespace G4PLUGDOOR
 {
-// sPHENIX forward flux return(s)
-// define via four corners in the engineering drawing
-const double z_1 = 330.81;
-const double z_2 = 360.81;
-const double r_1 = 30;
-const double r_2 = 263.5;
+  // sPHENIX forward flux return(s)
+  // define via four corners in the engineering drawing
+  const double z_1 = 330.81;
+  const double z_2 = 360.81;
+  const double r_1 = 30;
+  const double r_2 = 263.5;
 
-const double length = z_2 - z_1;
-const double place_z = -(z_1 + z_2) / 2.;
+  const double length = z_2 - z_1;
+  const double place_z = -(z_1 + z_2) / 2.;
 }  // namespace G4PLUGDOOR
 
 void PlugDoorInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius,G4PLUGDOOR::r_2);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PLUGDOOR::r_2);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4PLUGDOOR::place_z - G4PLUGDOOR::length / 2.);
 }
 
