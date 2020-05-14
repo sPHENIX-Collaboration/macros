@@ -32,38 +32,38 @@ namespace Enable
 
 namespace G4CEMC
 {
-double cemcdepth = 9;
-// tungs to scint width ratio of ~10:1
-// corresponds to approx 2% sampling fraction
+  double cemcdepth = 9;
+  // tungs to scint width ratio of ~10:1
+  // corresponds to approx 2% sampling fraction
 
-// 18 radiation lengths for 40 layers
-double scint_width = 0.05;
-double tungs_width = 0.245;
-double electronics_width = 0.5;
+  // 18 radiation lengths for 40 layers
+  double scint_width = 0.05;
+  double tungs_width = 0.245;
+  double electronics_width = 0.5;
 
-int min_cemc_layer = 1;
-int max_cemc_layer = 41;
+  int min_cemc_layer = 1;
+  int max_cemc_layer = 41;
 
-double topradius = 106.8;  // cm
-double bottomradius = 95;  // cm
-double negrapidity = -1.5;
-double posrapidity = 1.24;
-// this is default set to -1.5<eta<1.24 for 2018 Letter of Intent
-// if the user changes these, the z position of the
-// calorimeter must be changed in the function CEmc(...)
+  double topradius = 106.8;  // cm
+  double bottomradius = 95;  // cm
+  double negrapidity = -1.5;
+  double posrapidity = 1.24;
+  // this is default set to -1.5<eta<1.24 for 2018 Letter of Intent
+  // if the user changes these, the z position of the
+  // calorimeter must be changed in the function CEmc(...)
 
-enum enu_Cemc_clusterizer
-{
-  kCemcGraphClusterizer,
+  enum enu_Cemc_clusterizer
+  {
+    kCemcGraphClusterizer,
 
-  kCemcTemplateClusterizer
-};
+    kCemcTemplateClusterizer
+  };
 
-//! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha
-//! Bazilevsky
-enu_Cemc_clusterizer Cemc_clusterizer = kCemcTemplateClusterizer;
-//! graph clusterizer, RawClusterBuilderGraph
-// enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
+  //! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha
+  //! Bazilevsky
+  enu_Cemc_clusterizer Cemc_clusterizer = kCemcTemplateClusterizer;
+  //! graph clusterizer, RawClusterBuilderGraph
+  // enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
 }  // namespace G4CEMC
 
 void CEmcInit(const int nslats = 1)
@@ -245,7 +245,7 @@ void CEMC_Towers(int verbosity = 0)
   CemcTowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitization);
   CemcTowerDigitizer->set_pedstal_central_ADC(0);
   CemcTowerDigitizer->set_pedstal_width_ADC(8);  // eRD1 test beam setting
-  CemcTowerDigitizer->set_photonelec_ADC(1);  // not simulating ADC discretization error
+  CemcTowerDigitizer->set_photonelec_ADC(1);     // not simulating ADC discretization error
   CemcTowerDigitizer->set_photonelec_yield_visible_GeV(photoelectron_per_GeV / sampling_fraction);
   CemcTowerDigitizer->set_zero_suppression_ADC(16);  // eRD1 test beam setting
   se->registerSubsystem(CemcTowerDigitizer);
