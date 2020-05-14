@@ -21,19 +21,16 @@ void AerogelInit()
 void AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8,  //
                   const double min_eta = 1.242)
 {
-  PHG4SectorSubsystem* ag new PHG4SectorSubsystem("Aerogel");
+  PHG4SectorSubsystem* ag = new PHG4SectorSubsystem("Aerogel");
 
-  ag->get_geometry().set_normal_polar_angle(
-      (PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta) + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
+  ag->get_geometry().set_normal_polar_angle((PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta) +
+                                             PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) /
+                                            2);
   //  ag->get_geometry().set_normal_polar_angle(0);
-  ag->get_geometry().set_normal_start(
-      280 * PHG4Sector::Sector_Geometry::Unit_cm());  // 307
-  ag->get_geometry().set_min_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(1.85));
-  ag->get_geometry().set_max_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta));
-  ag->get_geometry().set_min_polar_edge(
-      PHG4Sector::Sector_Geometry::FlatEdge());
+  ag->get_geometry().set_normal_start(280 * PHG4Sector::Sector_Geometry::Unit_cm());  // 307
+  ag->get_geometry().set_min_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(1.85));
+  ag->get_geometry().set_max_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta));
+  ag->get_geometry().set_min_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());
   ag->get_geometry().set_material("G4_AIR");
   ag->get_geometry().set_N_Sector(N_Sector);
   ag->OverlapCheck(overlapcheck);
