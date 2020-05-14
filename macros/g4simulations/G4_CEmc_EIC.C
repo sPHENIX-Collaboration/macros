@@ -18,6 +18,8 @@
 
 #include <fun4all/Fun4AllServer.h>
 
+#include <cmath>
+
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
@@ -94,7 +96,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
   double theta1 = 2. * TMath::ATan(TMath::Exp(-1 * G4CEMC::posrapidity));
   double theta2 = 2. * TMath::ATan(TMath::Exp(-1 * G4CEMC::negrapidity));
   // get the angle between the beam pipe and negative pseudorapidity axis
-  theta2 = TMath::Pi() - theta2;
+  theta2 = M_PI - theta2;
 
   double z1 = G4CEMC::topradius / TMath::Tan(theta1);
   double z2 = G4CEMC::topradius / TMath::Tan(theta2);
@@ -217,7 +219,7 @@ void CEMC_Cells(int verbosity = 0)
     radius += (G4CEMC::tungs_width + no_overlapp);
     if (i > 1) radius += (G4CEMC::scint_width + no_overlapp);
 
-    cemc_cells->cellsize(i, 2. * TMath::Pi() / 256. * radius, 2. * TMath::Pi() / 256. * radius);
+    cemc_cells->cellsize(i, 2. * M_PI / 256. * radius, 2. * M_PI / 256. * radius);
   }
   se->registerSubsystem(cemc_cells);
 
