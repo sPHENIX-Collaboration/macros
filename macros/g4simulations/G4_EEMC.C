@@ -1,56 +1,49 @@
 #pragma once
 
 #include "GlobalVariables.C"
-#include <fun4all/Fun4AllServer.h>
+
 #include <g4calo/RawTowerBuilderByHitIndex.h>
 #include <g4calo/RawTowerDigitizer.h>
-#include <caloreco/RawClusterBuilderFwd.h>
-#include <caloreco/RawTowerCalibration.h>
 #include <g4detectors/PHG4CrystalCalorimeterSubsystem.h>
 #include <g4detectors/PHG4ForwardCalCellReco.h>
+
 #include <g4eval/CaloEvaluator.h>
+
 #include <g4main/PHG4Reco.h>
+
+#include <caloreco/RawClusterBuilderFwd.h>
+#include <caloreco/RawTowerCalibration.h>
+
+#include <fun4all/Fun4AllServer.h>
+
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 
+namespace Enable
+{
+  static bool EEMC = false;
+}
 
+namespace G4EEMC
+{
 const int use_projective_geometry = 0;
-
 const double Gdz = 18.+0.0001;
 const double Gz0 = -170.;
+}
 
 void EEMCInit()
 {
-  if (BlackHoleGeometry::max_radius < 65.6)
-  {
-    BlackHoleGeometry::max_radius = 65.6; // from towerMap_EEMC_v006.txt
-  }
-  if (BlackHoleGeometry::min_z > Gz0 - Gdz/2.)
-  {
-    BlackHoleGeometry::min_z = Gz0 - Gdz/2.;
-  }
-}
-
-void EEMC_Cells(int verbosity = 0) {
-
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
-  Fun4AllServer *se = Fun4AllServer::instance();
-
-  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("EEMCCellReco");
-  hc->Detector("EEMC");
-  se->registerSubsystem(hc);
-
-  return;
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 65.6); // from towerMap_EEMC_v006.txt
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z,G4EEMC::Gz0 - G4EEMC::Gdz/2. );
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4EEMC::Gz0 - G4EEMC::Gdz/2.);
 }
 
 void
 EEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 {
 
-  gSystem->Load("libg4detectors.so");
 
     /** Use dedicated EEMC module */
   PHG4CrystalCalorimeterSubsystem *eemc = new PHG4CrystalCalorimeterSubsystem("EEMC");
@@ -59,7 +52,7 @@ EEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
   ostringstream mapping_eemc;
 
   /* Use non-projective geometry */
-  if(!use_projective_geometry)
+  if(!G4EEMC::use_projective_geometry)
     {
       mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v006.txt";
       eemc->SetTowerMappingFile( mapping_eemc.str() );
@@ -85,15 +78,24 @@ EEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
 }
 
+void EEMC_Cells(int verbosity = 0) {
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("EEMCCellReco");
+  hc->Detector("EEMC");
+  se->registerSubsystem(hc);
+
+  return;
+}
+
+
 void EEMC_Towers(int verbosity = 0) {
 
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_eemc;
-  mapping_eemc << getenv("CALIBRATIONROOT") <<
-    "/CrystalCalorimeter/mapping/towerMap_EEMC_v006.txt";
+  mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v006.txt";
 
   RawTowerBuilderByHitIndex* tower_EEMC = new RawTowerBuilderByHitIndex("TowerBuilder_EEMC");
   tower_EEMC->Detector("EEMC");
@@ -137,8 +139,6 @@ void EEMC_Towers(int verbosity = 0) {
 
 void EEMC_Clusters(int verbosity = 0) {
 
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   RawClusterBuilderFwd* ClusterBuilder = new RawClusterBuilderFwd("EEMCRawClusterBuilderFwd");
@@ -151,8 +151,6 @@ void EEMC_Clusters(int verbosity = 0) {
 
 void EEMC_Eval(std::string outputfile, int verbosity = 0)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4eval.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("EEMCEVALUATOR", "EEMC", outputfile.c_str());
