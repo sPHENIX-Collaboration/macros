@@ -1,6 +1,14 @@
 #pragma once
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 00, 0)
+#include "DisplayOn.C"
+#include "G4Setup_EICDetector.C"
+#include "G4_Bbc.C"
+#include "G4_CaloTrigger.C"
+#include "G4_DSTReader_EICDetector.C"
+#include "G4_FwdJets.C"
+#include "G4_Global.C"
+#include "G4_HIJetReco.C"
+#include "G4_Jets.C"
 
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -25,23 +33,12 @@
 #include <phpythia8/PHPythia8.h>
 #include <phsartre/PHSartre.h>
 #include <phsartre/PHSartreParticleTrigger.h>
-#include "DisplayOn.C"
-#include "G4Setup_EICDetector.C"
-#include "G4_Bbc.C"
-#include "G4_CaloTrigger.C"
-#include "G4_DSTReader_EICDetector.C"
-#include "G4_FwdJets.C"
-#include "G4_Global.C"
-#include "G4_HIJetReco.C"
-#include "G4_Jets.C"
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
 R__LOAD_LIBRARY(libPHSartre.so)
-#endif
-
-using namespace std;
 
 int Fun4All_G4_EICDetector(
     const int nEvents = 1,
@@ -189,14 +186,7 @@ int Fun4All_G4_EICDetector(
   // Load libraries
   //---------------
 
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libphhepmc.so");
-  gSystem->Load("libg4testbench.so");
-  gSystem->Load("libg4eval.so");
-
   // establish the geometry and reconstruction setup
-  gROOT->LoadMacro("G4Setup_EICDetector.C");
   G4Init();
 
   int absorberactive = 0;  // set to 1 to make all absorbers active volumes
@@ -247,8 +237,6 @@ int Fun4All_G4_EICDetector(
   }
   else if (runpythia8)
   {
-    gSystem->Load("libPHPythia8.so");
-
     PHPythia8 *pythia8 = new PHPythia8();
     // see coresoftware/generators/PHPythia8 for example config
     pythia8->set_config_file("phpythia8.cfg");
@@ -256,8 +244,6 @@ int Fun4All_G4_EICDetector(
   }
   else if (runpythia6)
   {
-    gSystem->Load("libPHPythia6.so");
-
     PHPythia6 *pythia6 = new PHPythia6();
     // see coresoftware/generators/PHPythia6 for example config
     pythia6->set_config_file("phpythia6_ep.cfg");
@@ -282,7 +268,6 @@ int Fun4All_G4_EICDetector(
     // see coresoftware/generators/PHSartre/README for setup instructions
     // before running:
     // setenv SARTRE_DIR /opt/sphenix/core/sartre-1.20_root-5.34.36
-    gSystem->Load("libPHSartre.so");
 
     PHSartre *mysartre = new PHSartre();
     // see coresoftware/generators/PHSartre for example config
@@ -412,7 +397,6 @@ int Fun4All_G4_EICDetector(
 
   if (do_bbc)
   {
-    gROOT->LoadMacro("G4_Bbc.C");
     BbcInit();
     Bbc_Reco();
   }
@@ -479,13 +463,11 @@ int Fun4All_G4_EICDetector(
 
   if (do_global)
   {
-    gROOT->LoadMacro("G4_Global.C");
     Global_Reco();
   }
 
   else if (do_global_fastsim)
   {
-    gROOT->LoadMacro("G4_Global.C");
     Global_FastSim();
   }
 
@@ -495,7 +477,6 @@ int Fun4All_G4_EICDetector(
 
   if (do_calotrigger)
   {
-    gROOT->LoadMacro("G4_CaloTrigger.C");
     CaloTrigger_Sim();
   }
 
@@ -505,19 +486,16 @@ int Fun4All_G4_EICDetector(
 
   if (do_jet_reco)
   {
-    gROOT->LoadMacro("G4_Jets.C");
     Jet_Reco();
   }
 
   if (do_HIjetreco)
   {
-    gROOT->LoadMacro("G4_HIJetReco.C");
     HIJetReco();
   }
 
   if (do_fwd_jet_reco)
   {
-    gROOT->LoadMacro("G4_FwdJets.C");
     Jet_FwdReco();
   }
 
@@ -570,8 +548,6 @@ int Fun4All_G4_EICDetector(
   if (do_DSTReader)
   {
     //Convert DST to human command readable TTree for quick poke around the outputs
-    gROOT->LoadMacro("G4_DSTReader_EICDetector.C");
-
     G4DSTreader_EICDetector(outputFile,  //
                             /*int*/ absorberactive,
                             /*bool*/ Enable::TRACKING,
