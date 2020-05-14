@@ -1,8 +1,10 @@
 #pragma once
 
-#include <g4detectors/PHG4SectorSubsystem.h>
-#include <g4main/PHG4Reco.h>
 #include "GlobalVariables.C"
+
+#include <g4detectors/PHG4SectorSubsystem.h>
+
+#include <g4main/PHG4Reco.h>
 
 /*!
  * \file G4_Aerogel.C
@@ -11,6 +13,11 @@
  * \version $Revision: 1.2 $
  * \date $Date: 2013/10/09 01:08:17 $
  */
+
+namespace Enable
+{
+  static bool AEROGEL = false;
+}
 
 void AerogelInit()
 {
