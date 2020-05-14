@@ -1,11 +1,8 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include "GlobalVariables.C"
+
 #include <g4detectors/PHG4SectorSubsystem.h>
 #include <g4main/PHG4Reco.h>
-R__LOAD_LIBRARY(libg4detectors.so)
-#endif
-// $Id: G4_Aerogel.C,v 1.2 2013/10/09 01:08:17 jinhuang Exp $
+#include "GlobalVariables.C"
 
 /*!
  * \file G4_Aerogel.C
@@ -15,35 +12,22 @@ R__LOAD_LIBRARY(libg4detectors.so)
  * \date $Date: 2013/10/09 01:08:17 $
  */
 
-void
-AerogelInit()
+void AerogelInit()
 {
-  if (BlackHoleGeometry::max_radius < 164)
-  {
-    BlackHoleGeometry::max_radius = 164; // magnet outer radius generous value from display
-  }
-  if (BlackHoleGeometry::max_z < 287.)
-  {
-    BlackHoleGeometry::max_z = 287;
-  }
-
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 164.);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 287.);
 }
 
-void
-AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
-    const double min_eta = 1.242
-    )
+void AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8,  //
+                  const double min_eta = 1.242)
 {
-
-  PHG4SectorSubsystem *ag;
-  ag = new PHG4SectorSubsystem("Aerogel");
+  PHG4SectorSubsystem* ag new PHG4SectorSubsystem("Aerogel");
 
   ag->get_geometry().set_normal_polar_angle(
-      (PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta)
-          + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
-//  ag->get_geometry().set_normal_polar_angle(0);
+      (PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta) + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
+  //  ag->get_geometry().set_normal_polar_angle(0);
   ag->get_geometry().set_normal_start(
-      280 * PHG4Sector::Sector_Geometry::Unit_cm()); // 307
+      280 * PHG4Sector::Sector_Geometry::Unit_cm());  // 307
   ag->get_geometry().set_min_polar_angle(
       PHG4Sector::Sector_Geometry::eta_to_polar_angle(1.85));
   ag->get_geometry().set_max_polar_angle(
@@ -56,11 +40,9 @@ AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
 
   // Aerogel dimensions ins cm
   double radiator_length = 2.;
-  double expansion_length = 18.;// 10.;
+  double expansion_length = 18.;  // 10.;
 
-  ag->get_geometry().AddLayers_AeroGel_ePHENIX( radiator_length * PHG4Sector::Sector_Geometry::Unit_cm(),
-						expansion_length * PHG4Sector::Sector_Geometry::Unit_cm() );
+  ag->get_geometry().AddLayers_AeroGel_ePHENIX(radiator_length * PHG4Sector::Sector_Geometry::Unit_cm(),
+                                               expansion_length * PHG4Sector::Sector_Geometry::Unit_cm());
   g4Reco->registerSubsystem(ag);
-
 }
-
