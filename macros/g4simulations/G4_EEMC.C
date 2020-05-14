@@ -28,58 +28,54 @@ namespace Enable
 
 namespace G4EEMC
 {
-const int use_projective_geometry = 0;
-const double Gdz = 18.+0.0001;
-const double Gz0 = -170.;
-}
+  const int use_projective_geometry = 0;
+  const double Gdz = 18. + 0.0001;
+  const double Gz0 = -170.;
+}  // namespace G4EEMC
 
 void EEMCInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 65.6); // from towerMap_EEMC_v006.txt
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z,G4EEMC::Gz0 - G4EEMC::Gdz/2. );
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4EEMC::Gz0 - G4EEMC::Gdz/2.);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 65.6);  // from towerMap_EEMC_v006.txt
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4EEMC::Gz0 - G4EEMC::Gdz / 2.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4EEMC::Gz0 - G4EEMC::Gdz / 2.);
 }
 
-void
-EEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
+void EEMCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 {
-
-
-    /** Use dedicated EEMC module */
+  /** Use dedicated EEMC module */
   PHG4CrystalCalorimeterSubsystem *eemc = new PHG4CrystalCalorimeterSubsystem("EEMC");
 
   /* path to central copy of calibrations repositry */
   ostringstream mapping_eemc;
 
   /* Use non-projective geometry */
-  if(!G4EEMC::use_projective_geometry)
-    {
-      mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v006.txt";
-      eemc->SetTowerMappingFile( mapping_eemc.str() );
-    }
+  if (!G4EEMC::use_projective_geometry)
+  {
+    mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v006.txt";
+    eemc->SetTowerMappingFile(mapping_eemc.str());
+  }
 
-   /* use projective geometry */
+  /* use projective geometry */
   else
-    {
-      ostringstream mapping_eemc_4x4construct;
-  
-      mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/crystals_v005.txt";
-      mapping_eemc_4x4construct << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/4_by_4_construction_v005.txt";
-  eemc->SetProjectiveGeometry ( mapping_eemc.str() , mapping_eemc_4x4construct.str() );
-    }
+  {
+    ostringstream mapping_eemc_4x4construct;
+
+    mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/crystals_v005.txt";
+    mapping_eemc_4x4construct << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/4_by_4_construction_v005.txt";
+    eemc->SetProjectiveGeometry(mapping_eemc.str(), mapping_eemc_4x4construct.str());
+  }
 
   eemc->OverlapCheck(overlapcheck);
 
-// SetAbsorberActive method not implemented
-//  if (absorberactive)  eemc->SetAbsorberActive();
+  // SetAbsorberActive method not implemented
+  //  if (absorberactive)  eemc->SetAbsorberActive();
 
   /* register Ecal module */
-  g4Reco->registerSubsystem( eemc );
-
+  g4Reco->registerSubsystem(eemc);
 }
 
-void EEMC_Cells(int verbosity = 0) {
-
+void EEMC_Cells(int verbosity = 0)
+{
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("EEMCCellReco");
@@ -89,21 +85,19 @@ void EEMC_Cells(int verbosity = 0) {
   return;
 }
 
-
-void EEMC_Towers(int verbosity = 0) {
-
+void EEMC_Towers(int verbosity = 0)
+{
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_eemc;
   mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v006.txt";
 
-  RawTowerBuilderByHitIndex* tower_EEMC = new RawTowerBuilderByHitIndex("TowerBuilder_EEMC");
+  RawTowerBuilderByHitIndex *tower_EEMC = new RawTowerBuilderByHitIndex("TowerBuilder_EEMC");
   tower_EEMC->Detector("EEMC");
   tower_EEMC->set_sim_tower_node_prefix("SIM");
-  tower_EEMC->GeometryTableFile( mapping_eemc.str() );
+  tower_EEMC->GeometryTableFile(mapping_eemc.str());
 
   se->registerSubsystem(tower_EEMC);
-
 
   /* Calorimeter digitization */
 
@@ -116,13 +110,12 @@ void EEMC_Towers(int verbosity = 0) {
   TowerDigitizer_EEMC->set_raw_tower_node_prefix("RAW");
   TowerDigitizer_EEMC->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitization);
   TowerDigitizer_EEMC->set_pedstal_central_ADC(0);
-  TowerDigitizer_EEMC->set_pedstal_width_ADC(8);// eRD1 test beam setting
-  TowerDigitizer_EEMC->set_photonelec_ADC(1);//not simulating ADC discretization error
-  TowerDigitizer_EEMC->set_photonelec_yield_visible_GeV( EEMC_photoelectron_per_GeV );
-  TowerDigitizer_EEMC->set_zero_suppression_ADC(16); // eRD1 test beam setting
+  TowerDigitizer_EEMC->set_pedstal_width_ADC(8);  // eRD1 test beam setting
+  TowerDigitizer_EEMC->set_photonelec_ADC(1);     //not simulating ADC discretization error
+  TowerDigitizer_EEMC->set_photonelec_yield_visible_GeV(EEMC_photoelectron_per_GeV);
+  TowerDigitizer_EEMC->set_zero_suppression_ADC(16);  // eRD1 test beam setting
 
-  se->registerSubsystem( TowerDigitizer_EEMC );
-
+  se->registerSubsystem(TowerDigitizer_EEMC);
 
   /* Calorimeter calibration */
 
@@ -130,21 +123,20 @@ void EEMC_Towers(int verbosity = 0) {
   TowerCalibration_EEMC->Detector("EEMC");
   TowerCalibration_EEMC->Verbosity(verbosity);
   TowerCalibration_EEMC->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration_EEMC->set_calib_const_GeV_ADC( 1. / EEMC_photoelectron_per_GeV );
-  TowerCalibration_EEMC->set_pedstal_ADC( 0 );
+  TowerCalibration_EEMC->set_calib_const_GeV_ADC(1. / EEMC_photoelectron_per_GeV);
+  TowerCalibration_EEMC->set_pedstal_ADC(0);
 
-  se->registerSubsystem( TowerCalibration_EEMC );
-
+  se->registerSubsystem(TowerCalibration_EEMC);
 }
 
-void EEMC_Clusters(int verbosity = 0) {
-
+void EEMC_Clusters(int verbosity = 0)
+{
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  RawClusterBuilderFwd* ClusterBuilder = new RawClusterBuilderFwd("EEMCRawClusterBuilderFwd");
+  RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("EEMCRawClusterBuilderFwd");
   ClusterBuilder->Detector("EEMC");
   ClusterBuilder->Verbosity(verbosity);
-  se->registerSubsystem( ClusterBuilder );
+  se->registerSubsystem(ClusterBuilder);
 
   return;
 }
