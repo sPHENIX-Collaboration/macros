@@ -25,19 +25,19 @@ namespace Enable
 
 namespace G4FEMC
 {
-// from ForwardEcal/mapping/towerMap_FEMC_v007.txt
-const double Gz0 = 310.;
-const double Gdz = 36.5;
-const double outer_radius = 182.655;
-enum enu_Femc_clusterizer
-{
-  kFemcGraphClusterizer,
-  kFemcTemplateClusterizer
-};
-//template clusterizer, as developed by Sasha Bazilevsky
-enu_Femc_clusterizer Femc_clusterizer = kFemcTemplateClusterizer;
-// graph clusterizer
-//enu_Femc_clusterizer Femc_clusterizer = kFemcGraphClusterizer;
+  // from ForwardEcal/mapping/towerMap_FEMC_v007.txt
+  const double Gz0 = 310.;
+  const double Gdz = 36.5;
+  const double outer_radius = 182.655;
+  enum enu_Femc_clusterizer
+  {
+    kFemcGraphClusterizer,
+    kFemcTemplateClusterizer
+  };
+  //template clusterizer, as developed by Sasha Bazilevsky
+  enu_Femc_clusterizer Femc_clusterizer = kFemcTemplateClusterizer;
+  // graph clusterizer
+  //enu_Femc_clusterizer Femc_clusterizer = kFemcGraphClusterizer;
 }  // namespace G4FEMC
 
 void FEMCInit()
