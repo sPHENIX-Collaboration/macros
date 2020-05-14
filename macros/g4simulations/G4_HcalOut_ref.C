@@ -23,28 +23,33 @@ R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 
-namespace HcalOutMacro
+namespace Enable
 {
-const double outer_radius = 264.71;
-const double size_z = 304.91 * 2;
-enum enu_HCalOut_clusterizer
-{
-  kHCalOutGraphClusterizer,
-  kHCalOutTemplateClusterizer
-};
+  static bool HCALOUT = false;
+}
 
-//! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
-enu_HCalOut_clusterizer HCalOut_clusterizer = kHCalOutTemplateClusterizer;
-//! graph clusterizer, RawClusterBuilderGraph
-//enu_HCalOut_clusterizer HCalOut_clusterizer = kHCalOutGraphClusterizer;
-}  // namespace HcalOutMacro
+namespace G4HCALOUT
+{
+  const double outer_radius = 264.71;
+  const double size_z = 304.91 * 2;
+  enum enu_HCalOut_clusterizer
+  {
+    kHCalOutGraphClusterizer,
+    kHCalOutTemplateClusterizer
+  };
+
+  //! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
+  enu_HCalOut_clusterizer HCalOut_clusterizer = kHCalOutTemplateClusterizer;
+  //! graph clusterizer, RawClusterBuilderGraph
+  //enu_HCalOut_clusterizer HCalOut_clusterizer = kHCalOutGraphClusterizer;
+}  // namespace G4HCALOUT
 
 // Init is called by G4Setup.C
 void HCalOuterInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, HcalOutMacro::outer_radius);
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, HcalOutMacro::size_z / 2.);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -HcalOutMacro::size_z / 2.);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4HCALOUT::outer_radius);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4HCALOUT::size_z / 2.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -G4HCALOUT::size_z / 2.);
 }
 
 double HCalOuter(PHG4Reco *g4Reco,
@@ -68,7 +73,7 @@ double HCalOuter(PHG4Reco *g4Reco,
   // hcal->set_double_param("magnet_cutout_scinti_radius", 195.96);
   // hcal->SetLightCorrection(NAN,NAN,NAN,NAN);
   //-----------------------------------------
-  // hcal->set_double_param("outer_radius", HcalOutMacro::outer_radius);
+  // hcal->set_double_param("outer_radius", G4HCALOUT::outer_radius);
   // hcal->set_double_param("place_x", 0.);
   // hcal->set_double_param("place_y", 0.);
   // hcal->set_double_param("place_z", 0.);
@@ -81,7 +86,7 @@ double HCalOuter(PHG4Reco *g4Reco,
   // hcal->set_double_param("scinti_inner_radius",183.89);
   // hcal->set_double_param("scinti_outer_radius",263.27);
   // hcal->set_double_param("scinti_tile_thickness", 0.7);
-  // hcal->set_double_param("size_z", HcalOutMacro::size_z);
+  // hcal->set_double_param("size_z", G4HCALOUT::size_z);
   // hcal->set_double_param("steplimits", NAN);
   // hcal->set_double_param("tilt_angle", -11.23);
 
@@ -178,7 +183,7 @@ void HCALOuter_Clusters(int verbosity = 0)
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  if (HcalOutMacro::HCalOut_clusterizer == HcalOutMacro::kHCalOutTemplateClusterizer)
+  if (G4HCALOUT::HCalOut_clusterizer == G4HCALOUT::kHCalOutTemplateClusterizer)
   {
     RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("HcalOutRawClusterBuilderTemplate");
     ClusterBuilder->Detector("HCALOUT");
@@ -186,7 +191,7 @@ void HCALOuter_Clusters(int verbosity = 0)
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem(ClusterBuilder);
   }
-  else if (HcalOutMacro::HCalOut_clusterizer == HcalOutMacro::kHCalOutGraphClusterizer)
+  else if (G4HCALOUT::HCalOut_clusterizer == G4HCALOUT::kHCalOutGraphClusterizer)
   {
     RawClusterBuilderGraph *ClusterBuilder = new RawClusterBuilderGraph("HcalOutRawClusterBuilderGraph");
     ClusterBuilder->Detector("HCALOUT");

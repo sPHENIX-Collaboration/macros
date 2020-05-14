@@ -22,30 +22,27 @@ R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 
-namespace FhcalMacro
+namespace Enable
 {
-// from ForwardHcal/mapping/towerMap_FHCAL_v005.txt
-const double Gz0 = 400.;
-const double Gdz = 100.;
-const double outer_radius = 262.;
-}  // namespace FhcalMacro
+  static bool FHCAL = false;
+}
+
+namespace G4FHCAL
+{
+  // from ForwardHcal/mapping/towerMap_FHCAL_v005.txt
+  const double Gz0 = 400.;
+  const double Gdz = 100.;
+  const double outer_radius = 262.;
+}  // namespace G4FHCAL
 
 void FHCALInit()
 {
-  if (BlackHoleGeometry::max_radius < FhcalMacro::outer_radius)
-  {
-    BlackHoleGeometry::max_radius = FhcalMacro::outer_radius;
-  }
-  if (BlackHoleGeometry::max_z < FhcalMacro::Gz0 + FhcalMacro::Gdz / 2.)
-  {
-    BlackHoleGeometry::max_z = FhcalMacro::Gz0 + FhcalMacro::Gdz / 2.;
-  }
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4FHCAL::outer_radius);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4FHCAL::Gz0 + G4FHCAL::Gdz / 2.);
 }
 
 void FHCAL_Cells(int verbosity = 0)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("FHCALCellReco");
@@ -57,8 +54,6 @@ void FHCAL_Cells(int verbosity = 0)
 
 void FHCALSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 {
-  gSystem->Load("libg4detectors.so");
-
   Fun4AllServer *se = Fun4AllServer::instance();
 
   /** Use dedicated FHCAL module */
@@ -69,7 +64,7 @@ void FHCALSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
   /* path to central copy of calibrations repositry */
   mapping_hhcal << getenv("CALIBRATIONROOT");
   mapping_hhcal << "/ForwardHcal/mapping/towerMap_FHCAL_v005.txt";
-  cout << mapping_hhcal.str() << endl;
+  //  cout << mapping_hhcal.str() << endl;
   //mapping_hhcal << "towerMap_FHCAL_latest.txt";
 
   hhcal->SetTowerMappingFile(mapping_hhcal.str());
@@ -82,9 +77,6 @@ void FHCALSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 
 void FHCAL_Towers(int verbosity = 0)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4calo.so");
-  gSystem->Load("libcalo_reco.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_fhcal;
@@ -141,8 +133,6 @@ void FHCAL_Towers(int verbosity = 0)
 
 void FHCAL_Clusters(int verbosity = 0)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("FHCALRawClusterBuilderFwd");
@@ -156,8 +146,6 @@ void FHCAL_Clusters(int verbosity = 0)
 
 void FHCAL_Eval(std::string outputfile, int verbosity = 0)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4eval.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("FHCALEVALUATOR", "FHCAL", outputfile.c_str());
