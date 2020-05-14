@@ -18,7 +18,12 @@ R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 
-namespace FemcMacro
+namespace Enable
+{
+  static bool FEMC = false;
+}
+
+namespace G4FEMC
 {
 // from ForwardEcal/mapping/towerMap_FEMC_v007.txt
 const double Gz0 = 310.;
@@ -33,18 +38,12 @@ enum enu_Femc_clusterizer
 enu_Femc_clusterizer Femc_clusterizer = kFemcTemplateClusterizer;
 // graph clusterizer
 //enu_Femc_clusterizer Femc_clusterizer = kFemcGraphClusterizer;
-}  // namespace FemcMacro
+}  // namespace G4FEMC
 
 void FEMCInit()
 {
-  if (BlackHoleGeometry::max_radius < FemcMacro::outer_radius)
-  {
-    BlackHoleGeometry::max_radius = FemcMacro::outer_radius;
-  }
-  if (BlackHoleGeometry::max_z < FemcMacro::Gz0 + FemcMacro::Gdz / 2.)
-  {
-    BlackHoleGeometry::max_z = FemcMacro::Gz0 + FemcMacro::Gdz / 2.;
-  }
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4FEMC::outer_radius);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4FEMC::Gz0 + G4FEMC::Gdz / 2.);
 }
 
 void FEMC_Cells(int verbosity = 0)
@@ -210,7 +209,7 @@ void FEMC_Clusters(int verbosity = 0)
 {
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  if (FemcMacro::Femc_clusterizer == FemcMacro::kFemcTemplateClusterizer)
+  if (G4FEMC::Femc_clusterizer == G4FEMC::kFemcTemplateClusterizer)
   {
     RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("EmcRawClusterBuilderTemplateFEMC");
     ClusterBuilder->Detector("FEMC");
@@ -221,7 +220,7 @@ void FEMC_Clusters(int verbosity = 0)
     ClusterBuilder->LoadProfile(femc_prof.c_str());
     se->registerSubsystem(ClusterBuilder);
   }
-  else if (FemcMacro::Femc_clusterizer == FemcMacro::kFemcGraphClusterizer)
+  else if (G4FEMC::Femc_clusterizer == G4FEMC::kFemcGraphClusterizer)
   {
     RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("FEMCRawClusterBuilderFwd");
 
