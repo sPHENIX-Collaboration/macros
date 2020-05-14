@@ -26,17 +26,17 @@ namespace Enable
 
 namespace G4DIRC
 {
-const double radiator_R = 83.65;
-const double length = 400;
-const double z_shift = -75;  //115
-const double z_start = z_shift + length / 2.;
-const double z_end = z_shift - length / 2.;
-const double outer_skin_radius = 89.25;
+  const double radiator_R = 83.65;
+  const double length = 400;
+  const double z_shift = -75;  //115
+  const double z_start = z_shift + length / 2.;
+  const double z_end = z_shift - length / 2.;
+  const double outer_skin_radius = 89.25;
 }  // namespace G4DIRC
 
 void DIRCInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius,G4DIRC::outer_skin_radius);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4DIRC::outer_skin_radius);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4DIRC::z_start);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4DIRC::z_end);
 }
