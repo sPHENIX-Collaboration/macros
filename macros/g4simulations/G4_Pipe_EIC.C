@@ -58,9 +58,6 @@ double Pipe(PHG4Reco* g4Reco,
     gSystem->Exit(-1);
   }
 
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4testbench.so");
-
   // mid-rapidity beryillium pipe
   PHG4CylinderSubsystem* cyl = new PHG4CylinderSubsystem("VAC_BE_PIPE", 0);
   cyl->set_double_param("radius", 0.0);

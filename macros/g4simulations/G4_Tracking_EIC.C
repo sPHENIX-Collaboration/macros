@@ -255,15 +255,6 @@ void Tracking_Reco(int verbosity = 0, bool displaced_vertex = false)
 void Tracking_Eval(std::string outputfile, int verbosity = 0)
 {
   //---------------
-  // Load libraries
-  //---------------
-
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4trackfastsim.so");
-  gSystem->Load("libg4eval.so");
-
-  //---------------
   // Fun4All server
   //---------------
 
