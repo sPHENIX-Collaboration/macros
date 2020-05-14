@@ -19,6 +19,7 @@
 #include "G4_Aerogel.C"
 #include "G4_TPC_EIC.C"
 #include "G4_Mvtx.C"
+#include "G4_User.C"
 #include "G4_BlackHole.C"
 #include "G4_WorldSize.C"
 #include <g4eval/PHG4DstCompressReco.h>
@@ -123,6 +124,10 @@ void G4Init()
     {
       AerogelInit();
     }
+  if (Enable::USER)
+  {
+    UserInit();
+  }
 
   if (Enable::BLACKHOLE)
   {
@@ -288,6 +293,10 @@ int G4Setup(const int absorberactive = 0,
   if (Enable::PLUGDOOR)
   {
     PlugDoor(g4Reco, absorberactive);
+  }
+  if (Enable::USER)
+  {
+    UserDetector(g4Reco);
   }
   //----------------------------------------
   // BLACKHOLE if enabled, needs info from all previous sub detectors for dimensions
