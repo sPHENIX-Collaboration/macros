@@ -1,7 +1,7 @@
 #pragma once
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 #include "GlobalVariables.C"
-#include <g4detectors/PHG4SectorSubsystem.h>
+#include <g4detectors/PHG4mRICHSubsystem.h>
 #include <g4main/PHG4Reco.h>
 R__LOAD_LIBRARY(libg4detectors.so)
 #endif
@@ -21,38 +21,24 @@ AerogelInit()
 
 }
 
+//-1: single module
+// 0: build h-side sectors and e-side wall
+// 1: build h-side sectors
+// 2: build e-side wall
+// 3: build h-side wall
+// 4: build h-side wall and e-side wall
 void
-AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8, //
-    const double min_eta = 1.242
+AerogelSetup(PHG4Reco* g4Reco, const int detectorSetup = 0, //1: full setup; 0:skeleton 
+    const int mRICHsystemSetup = 0 
     )
 {
+  PHG4mRICHSubsystem *mRICH = new PHG4mRICHSubsystem("mRICH",0);
+  mRICH->set_int_param("detectorSetup",detectorSetup);
+  mRICH->set_int_param("subsystemSetup",mRICHsystemSetup);
+  mRICH->UseCalibFiles(PHG4DetectorSubsystem::xml);
+  mRICH->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/mRICH/Geometry/") );
+  mRICH->OverlapCheck(overlapcheck);
 
-  PHG4SectorSubsystem *ag;
-  ag = new PHG4SectorSubsystem("Aerogel");
-
-  ag->get_geometry().set_normal_polar_angle(
-      (PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta)
-          + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
-//  ag->get_geometry().set_normal_polar_angle(0);
-  ag->get_geometry().set_normal_start(
-      280 * PHG4Sector::Sector_Geometry::Unit_cm()); // 307
-  ag->get_geometry().set_min_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(1.85));
-  ag->get_geometry().set_max_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta));
-  ag->get_geometry().set_min_polar_edge(
-      PHG4Sector::Sector_Geometry::FlatEdge());
-  ag->get_geometry().set_material("G4_AIR");
-  ag->get_geometry().set_N_Sector(N_Sector);
-  ag->OverlapCheck(overlapcheck);
-
-  // Aerogel dimensions ins cm
-  double radiator_length = 2.;
-  double expansion_length = 18.;// 10.;
-
-  ag->get_geometry().AddLayers_AeroGel_ePHENIX( radiator_length * PHG4Sector::Sector_Geometry::Unit_cm(),
-						expansion_length * PHG4Sector::Sector_Geometry::Unit_cm() );
-  g4Reco->registerSubsystem(ag);
-
+  g4Reco->registerSubsystem(mRICH);
 }
 
