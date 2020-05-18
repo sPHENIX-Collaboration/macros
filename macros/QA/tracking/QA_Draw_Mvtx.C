@@ -86,13 +86,20 @@ void QA_Draw_Mvtx(
   
   std::vector<TCanvas*> cvlist;
 
+  // phi residuals, errors and pulls
   cvlist.push_back( Draw( qa_file_new, qa_file_ref, hist_name_prefix, "drphi" ) );
   cvlist.push_back( Draw( qa_file_new, qa_file_ref, hist_name_prefix, "rphi_error" ) );
   cvlist.push_back( Draw( qa_file_new, qa_file_ref, hist_name_prefix, "phi_pulls" ) );
 
+  // z residuals, errors and pulls
   cvlist.push_back( Draw( qa_file_new, qa_file_ref, hist_name_prefix, "dz" ) );
   cvlist.push_back( Draw( qa_file_new, qa_file_ref, hist_name_prefix, "z_error" ) );
   cvlist.push_back( Draw( qa_file_new, qa_file_ref, hist_name_prefix, "z_pulls" ) );
+
+  // cluster sizes
+  cvlist.push_back( Draw( qa_file_new, qa_file_ref, hist_name_prefix, "clus_size" ) );
+  cvlist.push_back( Draw( qa_file_new, qa_file_ref, hist_name_prefix, "clus_size_phi" ) );
+  cvlist.push_back( Draw( qa_file_new, qa_file_ref, hist_name_prefix, "clus_size_z" ) );
 
   for( const auto& cv:cvlist )
   { SaveCanvas(cv, TString(qa_file_name_new) + TString("_") + TString(cv->GetName()), true); }
