@@ -10,9 +10,6 @@
 #include "G4_FGEM_fsPHENIX.C"
 #include "G4_FEMC.C"
 #include "G4_FHCAL.C"
-#include "G4_PlugDoor_fsPHENIX.C"
-#include "G4_BlackHole.C"
-#include "G4_WorldSize.C"
 #include <g4decayer/EDecayType.hh>
 #include <g4detectors/PHG4ConeSubsystem.h>
 #include <g4eval/PHG4DstCompressReco.h>
@@ -94,14 +91,6 @@ void G4Init(bool do_svtx = true,
       gROOT->LoadMacro("G4_FHCAL.C");
       FHCALInit();
     }
-  if (Enable::PLUGDOOR)
-    {
-      PlugDoorInit();
-    }
-  if (Enable::BLACKHOLE)
-  {
-    BlackHoleInit();
-  }
 }
 
 
@@ -219,25 +208,81 @@ int G4Setup(const int absorberactive = 0,
   if ( do_FHCAL )
     FHCALSetup(g4Reco, absorberactive);
 
-  if (Enable::PLUGDOOR)
-  {
-    PlugDoor(g4Reco, absorberactive);
-  }
+  // sPHENIX forward flux return(s) with reduced thickness
+  PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
+  flux_return_plus->set_int_param("lengthviarapidity",0);
+  flux_return_plus->set_double_param("length",10.2);
+  flux_return_plus->set_double_param("radius",2.1);
+  flux_return_plus->set_double_param("thickness",263.5-5.0);
+  flux_return_plus->set_double_param("place_z",335.9);
+  flux_return_plus->set_string_param("material","G4_Fe");
+  flux_return_plus->SetActive(false);
+  flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
+  flux_return_plus->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(flux_return_plus);
+
+  PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
+  flux_return_minus->set_int_param("lengthviarapidity",0);
+  flux_return_minus->set_double_param("length",10.2);
+  flux_return_minus->set_double_param("radius",2.1);
+  flux_return_minus->set_double_param("place_z",-335.9);
+  flux_return_minus->set_double_param("thickness",263.5-5.0);
+  flux_return_minus->set_string_param("material","G4_Fe");
+  flux_return_minus->SetActive(false);
+  flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
+  flux_return_minus->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(flux_return_minus);
 
   //----------------------------------------
   // piston magnet
 //  make_piston("magpiston", g4Reco);
 
   //----------------------------------------
-  // BLACKHOLE if enabled, needs info from all previous sub detectors for dimensions
-  if (Enable::BLACKHOLE)
-  {
-    BlackHole(g4Reco, radius);
-  }
+  // BLACKHOLE
+  // minimal space for forward instrumentation
+  if (radius<270) radius = 270;
+
+  // swallow all particles coming out of the backend of sPHENIX
+  PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
+blackhole->set_double_param("radius",radius + 10); // add 10 cm
+
+  blackhole->set_int_param("lengthviarapidity",0);
+  blackhole->set_double_param("length",g4Reco->GetWorldSizeZ() - no_overlapp); // make it cover the world in length
+  blackhole->BlackHole();
+  blackhole->set_double_param("thickness",0.1); // it needs some thickness
+  blackhole->SetActive(); // always see what leaks out
+  blackhole->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(blackhole);
+
+  //----------------------------------------
+  // FORWARD BLACKHOLEs
+  // +Z
+  blackhole = new PHG4CylinderSubsystem("BH_FORWARD_PLUS", 1);
+  blackhole->SuperDetector("BH_FORWARD_PLUS");
+  blackhole->set_double_param("radius",0); // add 10 cm
+  blackhole->set_int_param("lengthviarapidity",0);
+  blackhole->set_double_param("length",0.1); // make it cover the world in length
+  blackhole->set_double_param("place_z",g4Reco->GetWorldSizeZ()/2. - 0.1  - no_overlapp);
+  blackhole->BlackHole();
+  blackhole->set_double_param("thickness",radius - no_overlapp); // it needs some thickness
+  blackhole->SetActive(); // always see what leaks out
+  blackhole->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(blackhole);
+
+  blackhole = new PHG4CylinderSubsystem("BH_FORWARD_NEG", 1);
+  blackhole->SuperDetector("BH_FORWARD_NEG");
+  blackhole->set_double_param("radius",0); // add 10 cm
+  blackhole->set_int_param("lengthviarapidity",0);
+  blackhole->set_double_param("length",0.1); // make it cover the world in length
+  blackhole->set_double_param("place_z", - g4Reco->GetWorldSizeZ()/2. +0.1  + no_overlapp);
+  blackhole->BlackHole();
+  blackhole->set_double_param("thickness",radius - no_overlapp); // it needs some thickness
+  blackhole->SetActive(); // always see what leaks out
+  blackhole->OverlapCheck(overlapcheck);
+  g4Reco->registerSubsystem(blackhole);
+
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
-// finally adjust the world size in case the default is too small
-  WorldSize(g4Reco, radius);
   se->registerSubsystem( g4Reco );
   return 0;
 }
