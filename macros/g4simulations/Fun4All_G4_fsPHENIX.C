@@ -63,7 +63,8 @@ int Fun4All_G4_fsPHENIX(
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
   const bool do_embedding = false;
-
+  // Write the DST
+  const bool do_write_output = false;
   //======================
   // What to run
   //======================
@@ -433,9 +434,11 @@ int Fun4All_G4_fsPHENIX(
           );
     }
 
-  //Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
-  //if (do_dst_compress) DstCompress(out);
-  //se->registerOutputManager(out);
+  if(do_write_output) {
+  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+  if (do_dst_compress) DstCompress(out);
+  se->registerOutputManager(out);
+  }
 
   //-----------------
   // Event processing

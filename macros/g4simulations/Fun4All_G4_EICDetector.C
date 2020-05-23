@@ -83,6 +83,8 @@ int Fun4All_G4_EICDetector(
   const bool usegun = false && !readhits;
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
   const bool upsilons = false && !readhits;
+  // Write the DST
+  const bool do_write_output = false;
 
   //======================
   // What to run
@@ -566,9 +568,12 @@ int Fun4All_G4_EICDetector(
                             /*bool*/ do_EEMC_twr);
   }
 
-  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
-  if (do_dst_compress) DstCompress(out);
-  se->registerOutputManager(out);
+  if(do_write_output) 
+  {
+    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+    if (do_dst_compress) DstCompress(out);
+    se->registerOutputManager(out);
+  }
 
   //-----------------
   // Event processing
