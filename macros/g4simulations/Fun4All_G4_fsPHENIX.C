@@ -64,65 +64,65 @@ int Fun4All_G4_fsPHENIX(
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
   const bool do_embedding = false;
   // Write the DST
-  const bool do_write_output = false;
+  const bool do_write_output = true;
   //======================
   // What to run
   //======================
 
-  bool do_bbc = true;
+  bool do_bbc = false;
   
   bool do_pipe = true;
   
   // central tracking
   bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
-  bool do_tracking_cluster = do_tracking_cell && true;
+  bool do_tracking_cluster = do_tracking_cell && false;
   bool do_tracking_track = do_tracking_cluster && true;
   bool do_tracking_eval = do_tracking_track && true;
 
   // central calorimeters, which is a detailed simulation and slow to run
   bool do_cemc = true;
-  bool do_cemc_cell = do_cemc && true;
+  bool do_cemc_cell = do_cemc && false;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && false;
 
-  bool do_hcalin = true;
-  bool do_hcalin_cell = do_hcalin && true;
+  Enable::HCALIN = true;
+  bool do_hcalin_cell =   Enable::HCALIN && false;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
   bool do_hcalin_eval = do_hcalin_cluster && false;
 
-  bool do_magnet = true;
+  Enable::MAGNET = true;
 
-  bool do_hcalout = true;
-  bool do_hcalout_cell = do_hcalout && true;
+  Enable::HCALOUT = true;
+  bool do_hcalout_cell = Enable::HCALOUT && false;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
   bool do_hcalout_eval = do_hcalout_cluster && false;
 
-  bool do_global = true;
+  bool do_global = false;
   bool do_global_fastsim = false;
 
   bool do_jet_reco = false;
   bool do_jet_eval = do_jet_reco && true;
 
-  bool do_fwd_jet_reco = true;
+  bool do_fwd_jet_reco = false;
   bool do_fwd_jet_eval = do_fwd_jet_reco && true;
 
   // fsPHENIX geometry
 
   bool do_FGEM = true;
-  bool do_FGEM_track = do_FGEM &&  true;
+  bool do_FGEM_track = do_FGEM &&  false;
   bool do_FGEM_eval = do_FGEM_track &&  true;
 
   bool do_FEMC = true;
-  bool do_FEMC_cell = do_FEMC && true;
+  bool do_FEMC_cell = do_FEMC && false;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
 
-  bool do_FHCAL = true;
-  bool do_FHCAL_cell = do_FHCAL && true;
+  Enable::FHCAL = true;
+  bool do_FHCAL_cell = Enable::FHCAL && false;
   bool do_FHCAL_twr = do_FHCAL_cell && true;
   bool do_FHCAL_cluster = do_FHCAL_twr && true;
 
@@ -142,7 +142,7 @@ int Fun4All_G4_fsPHENIX(
   gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_fsPHENIX.C");
-  G4Init(do_tracking,do_cemc,do_hcalin,do_magnet,do_hcalout,do_pipe,do_FGEM,do_FEMC,do_FHCAL,n_TPC_layers);
+  G4Init(do_tracking,do_cemc,do_pipe,do_FGEM,do_FEMC,n_TPC_layers);
 
   int absorberactive = 0; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -172,7 +172,7 @@ int Fun4All_G4_fsPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-//   rc->set_IntFlag("RANDOMSEED", 12345);
+   rc->set_IntFlag("RANDOMSEED", 12345);
 
   //-----------------
   // Event generation
@@ -244,17 +244,10 @@ int Fun4All_G4_fsPHENIX(
       // Detector description
       //---------------------
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
       G4Setup(absorberactive, magfield, EDecayType::kAll,
-	      do_tracking, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
-	      do_FGEM, do_FEMC, do_FHCAL,
+	      do_tracking, do_cemc, do_pipe,
+	      do_FGEM, do_FEMC,
 	      magfield_rescale);
-#else
-      G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-	      do_tracking, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,
-	      do_FGEM, do_FEMC, do_FHCAL,
-	      magfield_rescale);
-#endif
     }
 
   //---------
@@ -420,14 +413,14 @@ int Fun4All_G4_fsPHENIX(
           /*int*/ absorberactive ,
           /*bool*/ do_tracking ,
           /*bool*/ do_cemc ,
-          /*bool*/ do_hcalin ,
-          /*bool*/ do_magnet ,
-          /*bool*/ do_hcalout ,
+          /*bool*/ Enable::HCALIN,
+          /*bool*/ Enable::MAGNET,
+          /*bool*/ Enable::HCALOUT,
           /*bool*/ do_cemc_twr ,
           /*bool*/ do_hcalin_twr ,
 	  /*bool*/ do_hcalout_twr,
     /*bool*/ do_FGEM,
-	  /*bool*/ do_FHCAL,
+	  /*bool*/ Enable::FHCAL,
 	  /*bool*/ do_FHCAL_twr,
 	  /*bool*/ do_FEMC,
 	  /*bool*/ do_FEMC_twr

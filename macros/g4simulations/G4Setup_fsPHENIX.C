@@ -29,13 +29,9 @@ void RunLoadTest() {}
 
 void G4Init(bool do_svtx = true,
 	    bool do_cemc = true,
-	    bool do_hcalin = true,
-	    bool do_magnet = true,
-	    bool do_hcalout = true,
             bool do_pipe = true,
             bool do_FGEM = true,
 	    bool do_FEMC = true,
-	    bool do_FHCAL = true,
             int n_TPC_layers = 40) {
 
   // load detector/material macros and execute Init() function
@@ -57,20 +53,17 @@ void G4Init(bool do_svtx = true,
       CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
     }  
 
-  if (do_hcalin) 
+  if (Enable::HCALIN) 
     {
-      gROOT->LoadMacro("G4_HcalIn_ref.C");
       HCalInnerInit();
     }
 
-  if (do_magnet)
+  if (Enable::MAGNET)
     {
-      gROOT->LoadMacro("G4_Magnet.C");
       MagnetInit();
     }
-  if (do_hcalout)
+  if (Enable::HCALOUT)
     {
-      gROOT->LoadMacro("G4_HcalOut_ref.C");
       HCalOuterInit();
     }
 
@@ -86,9 +79,8 @@ void G4Init(bool do_svtx = true,
       FEMCInit();
     }
 
-  if (do_FHCAL) 
+  if (Enable::FHCAL) 
     {
-      gROOT->LoadMacro("G4_FHCAL.C");
       FHCALInit();
     }
 }
@@ -103,22 +95,11 @@ int G4Setup(const int absorberactive = 0,
 #endif
 	    const bool do_svtx = true,
 	    const bool do_cemc = true,
-	    const bool do_hcalin = true,
-	    const bool do_magnet = true,
-	    const bool do_hcalout = true,
 	    const bool do_pipe = true,
 	    const bool do_FGEM = true,
 	    const bool do_FEMC = false,
-	    const bool do_FHCAL = false,
      	    const float magfield_rescale = 1.0) {
   
-  //---------------
-  // Load libraries
-  //---------------
-
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4testbench.so");
-
   //---------------
   // Fun4All server
   //---------------
@@ -178,17 +159,26 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // HCALIN
   
-  if (do_hcalin) radius = HCalInner(g4Reco, radius, 4, absorberactive);
+  if (Enable::HCALIN)
+  {
+ radius = HCalInner(g4Reco, radius, 4, absorberactive);
+  }
 
   //----------------------------------------
   // MAGNET
   
-  if (do_magnet) radius = Magnet(g4Reco, radius, 0, absorberactive);
+  if (Enable::MAGNET)
+  {
+   radius = Magnet(g4Reco, radius, 0, absorberactive);
+  }
 
   //----------------------------------------
   // HCALOUT
   
-  if (do_hcalout) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
+  if (Enable::HCALOUT)
+  {
+ radius = HCalOuter(g4Reco, radius, 4, absorberactive);
+  }
 
   //----------------------------------------
   // Forward tracking
@@ -205,8 +195,10 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // FHCAL
 
-  if ( do_FHCAL )
+  if (Enable::FHCAL)
+  {
     FHCALSetup(g4Reco, absorberactive);
+  }
 
   // sPHENIX forward flux return(s) with reduced thickness
   PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
