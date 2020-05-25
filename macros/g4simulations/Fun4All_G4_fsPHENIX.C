@@ -1,5 +1,5 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+
 #include <fun4all/SubsysReco.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -31,7 +31,6 @@ R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
-#endif
 
 int Fun4All_G4_fsPHENIX(
     const int nEvents = 2,
@@ -63,39 +62,37 @@ int Fun4All_G4_fsPHENIX(
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
   const bool do_embedding = false;
-  // Write the DST
-  const bool do_write_output = true;
   //======================
   // What to run
   //======================
 
   bool do_bbc = false;
   
-  bool do_pipe = true;
+  bool do_pipe = false;
   
   // central tracking
-  bool do_tracking = true;
+  bool do_tracking = false;
   bool do_tracking_cell = do_tracking && true;
   bool do_tracking_cluster = do_tracking_cell && false;
   bool do_tracking_track = do_tracking_cluster && true;
   bool do_tracking_eval = do_tracking_track && true;
 
   // central calorimeters, which is a detailed simulation and slow to run
-  bool do_cemc = true;
+  bool do_cemc = false;
   bool do_cemc_cell = do_cemc && false;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && false;
 
-  Enable::HCALIN = true;
+  Enable::HCALIN = false;
   bool do_hcalin_cell =   Enable::HCALIN && false;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
   bool do_hcalin_eval = do_hcalin_cluster && false;
 
-  Enable::MAGNET = true;
+  Enable::MAGNET = false;
 
-  Enable::HCALOUT = true;
+  Enable::HCALOUT = false;
   bool do_hcalout_cell = Enable::HCALOUT && false;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
@@ -112,24 +109,29 @@ int Fun4All_G4_fsPHENIX(
 
   // fsPHENIX geometry
 
-  bool do_FGEM = true;
+  bool do_FGEM = false;
   bool do_FGEM_track = do_FGEM &&  false;
   bool do_FGEM_eval = do_FGEM_track &&  true;
 
-  bool do_FEMC = true;
+  bool do_FEMC = false;
   bool do_FEMC_cell = do_FEMC && false;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
 
-  Enable::FHCAL = true;
+  Enable::FHCAL = false;
   bool do_FHCAL_cell = Enable::FHCAL && false;
   bool do_FHCAL_twr = do_FHCAL_cell && true;
   bool do_FHCAL_cluster = do_FHCAL_twr && true;
 
-  bool do_dst_compress = false;
+  Enable::PLUGDOOR = true;
+  Enable::PLUGDOOR_ABSORBER = true;
+
+  // Write the DST
+  const bool do_write_output = true;
+  const bool do_dst_compress = false;
   
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  bool do_DSTReader = false;
+  const bool do_DSTReader = false;
   //---------------
   // Load libraries
   //---------------
