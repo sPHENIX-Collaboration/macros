@@ -209,7 +209,7 @@ int G4Setup(const int absorberactive = 0,
 
   if (Enable::PLUGDOOR)
   {
-    PlugDoor(g4Reco, absorberactive);
+    PlugDoor(g4Reco);
   }
 
   //----------------------------------------

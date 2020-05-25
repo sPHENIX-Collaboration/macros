@@ -11,31 +11,29 @@ namespace Enable
 {
   static bool PLUGDOOR = false;
   static bool PLUGDOOR_ABSORBER = false;
-}
+}  // namespace Enable
 
 namespace G4PLUGDOOR
 {
-const double place_z = 335.9;
-const double length = 10.2;
-const double inner_radius = 2.1;
-const double thickness = 258.5;
-}
+  const double place_z = 335.9;
+  const double length = 10.2;
+  const double inner_radius = 2.1;
+  const double thickness = 258.5;
+}  // namespace G4PLUGDOOR
 
 void PlugDoorInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius,G4PLUGDOOR::inner_radius+G4PLUGDOOR::thickness);
-    BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z,G4PLUGDOOR::place_z + G4PLUGDOOR::length/2.);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z,-(G4PLUGDOOR::place_z + G4PLUGDOOR::length/2.));
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PLUGDOOR::inner_radius + G4PLUGDOOR::thickness);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PLUGDOOR::place_z + G4PLUGDOOR::length / 2.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -(G4PLUGDOOR::place_z + G4PLUGDOOR::length / 2.));
 }
 
-void PlugDoor(PHG4Reco *g4Reco,
-              const int absorberactive = 0,
-              int verbosity = 0)
+void PlugDoor(PHG4Reco *g4Reco)
 {
   //----------------------------------------
   // fsPHENIX forward flux return(s)
   const string material("Steel_1006");
-  const bool flux_door_active = Enable::ABSORBER || Enable::PLUGDOOR_ABSORBER ;
+  const bool flux_door_active = Enable::ABSORBER || Enable::PLUGDOOR_ABSORBER;
 
   PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
   flux_return_plus->set_double_param("length", G4PLUGDOOR::length);
