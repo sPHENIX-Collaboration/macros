@@ -105,7 +105,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   gem->OverlapCheck(overlapcheck);
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
-  g4Reco->registerSubsystem(gem);
+  //g4Reco->registerSubsystem(gem);
 
   ///////////////////////////////////////////////////////////////////////////
 
@@ -140,8 +140,8 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
   gem->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(gem);
-
+  //g4Reco->registerSubsystem(gem);
+  
   ///////////////////////////////////////////////////////////////////////////
 
   make_LANL_FST_station("FST_4", g4Reco, 160, 12, 41);
@@ -169,7 +169,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   gem->OverlapCheck(overlapcheck);
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
-  g4Reco->registerSubsystem(gem);
+  //g4Reco->registerSubsystem(gem);
 
   zpos = zpos - (zpos * sin(tilt) + zpos * cos(tilt) * tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(2) - tilt)) * sin(tilt);
 
@@ -193,7 +193,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
   gem->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(gem);
+  //g4Reco->registerSubsystem(gem);
 
   ///////////////////////////////////////////////////////////////////////////
 

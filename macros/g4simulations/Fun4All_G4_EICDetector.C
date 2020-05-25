@@ -92,26 +92,26 @@ int Fun4All_G4_EICDetector(
   bool do_bbc = true;
 
   // whether to simulate the Be section of the beam pipe
-  Enable::PIPE = true;
+  Enable::PIPE = false;
   // EIC beam pipe extension beyond the Be-section can be turned on with use_forward_pipes = true in G4_Pipe_EIC.C
 
-  Enable::EGEM = true;
+  Enable::EGEM = false;
   Enable::FGEM = true;
   Enable::MVTX = true;
-  Enable::TPC = true;
+  Enable::TPC = false;
   Enable::TRACKING = true;
   bool do_tracking_cell = Enable::TRACKING && true;
   bool do_tracking_track = do_tracking_cell && true;
   bool do_tracking_eval = do_tracking_track && true;
   bool do_vertex_finding = false;  // this option exclude vertex in the track fitting and use RAVE to reconstruct primary and 2ndary vertexes
 
-  Enable::CEMC = true;
+  Enable::CEMC = false;
   bool do_cemc_cell = Enable::CEMC && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
 
-  Enable::HCALIN = true;
+  Enable::HCALIN = false;
   bool do_hcalin_cell = Enable::HCALIN && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
@@ -119,39 +119,39 @@ int Fun4All_G4_EICDetector(
 
   Enable::MAGNET = true;
 
-  Enable::HCALOUT = true;
+  Enable::HCALOUT = false;
   bool do_hcalout_cell = Enable::HCALOUT && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
   bool do_hcalout_eval = do_hcalout_cluster && true;
 
   // EICDetector geometry - barrel
-  Enable::DIRC = true;
+  Enable::DIRC = false;
 
   // EICDetector geometry - 'hadron' direction
-  Enable::RICH = true;
-  Enable::AEROGEL = true;
+  Enable::RICH = false;
+  Enable::AEROGEL = false;
 
-  Enable::FEMC = true;
+  Enable::FEMC = false;
   bool do_FEMC_cell = Enable::FEMC && true;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
   bool do_FEMC_eval = do_FEMC_cluster && true;
 
-  Enable::FHCAL = true;
+  Enable::FHCAL = false;
   bool do_FHCAL_cell = Enable::FHCAL && true;
   bool do_FHCAL_twr = do_FHCAL_cell && true;
   bool do_FHCAL_cluster = do_FHCAL_twr && true;
   bool do_FHCAL_eval = do_FHCAL_cluster && true;
 
   // EICDetector geometry - 'electron' direction
-  Enable::EEMC = true;
+  Enable::EEMC = false;
   bool do_EEMC_cell = Enable::EEMC && true;
   bool do_EEMC_twr = do_EEMC_cell && true;
   bool do_EEMC_cluster = do_EEMC_twr && true;
   bool do_EEMC_eval = do_EEMC_cluster && true;
 
-  Enable::PLUGDOOR = true;
+  Enable::PLUGDOOR = false;
 
   // Other options
   bool do_global = true;
