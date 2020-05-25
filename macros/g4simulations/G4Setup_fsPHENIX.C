@@ -2,6 +2,7 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 #include "GlobalVariables.C"
 #include "G4_Pipe.C"
+#include "G4_PlugDoor_fsPHENIX.C"
 #include "G4_Tracking.C"
 #include "G4_CEmc_Spacal.C"
 #include "G4_HcalIn_ref.C"
@@ -83,6 +84,12 @@ void G4Init(bool do_svtx = true,
     {
       FHCALInit();
     }
+
+  if (Enable::PLUGDOOR)
+  {
+    PlugDoorInit();
+  }
+
 }
 
 
@@ -200,30 +207,10 @@ int G4Setup(const int absorberactive = 0,
     FHCALSetup(g4Reco, absorberactive);
   }
 
-  // sPHENIX forward flux return(s) with reduced thickness
-  PHG4CylinderSubsystem *flux_return_plus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
-  flux_return_plus->set_int_param("lengthviarapidity",0);
-  flux_return_plus->set_double_param("length",10.2);
-  flux_return_plus->set_double_param("radius",2.1);
-  flux_return_plus->set_double_param("thickness",263.5-5.0);
-  flux_return_plus->set_double_param("place_z",335.9);
-  flux_return_plus->set_string_param("material","G4_Fe");
-  flux_return_plus->SetActive(false);
-  flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
-  flux_return_plus->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(flux_return_plus);
-
-  PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FWDFLUXRET", 0);
-  flux_return_minus->set_int_param("lengthviarapidity",0);
-  flux_return_minus->set_double_param("length",10.2);
-  flux_return_minus->set_double_param("radius",2.1);
-  flux_return_minus->set_double_param("place_z",-335.9);
-  flux_return_minus->set_double_param("thickness",263.5-5.0);
-  flux_return_minus->set_string_param("material","G4_Fe");
-  flux_return_minus->SetActive(false);
-  flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
-  flux_return_minus->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(flux_return_minus);
+  if (Enable::PLUGDOOR)
+  {
+    PlugDoor(g4Reco, absorberactive);
+  }
 
   //----------------------------------------
   // piston magnet
