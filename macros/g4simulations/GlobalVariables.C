@@ -5,6 +5,7 @@ static double no_overlapp = 0.0001;  // added to radii to avoid overlapping volu
 namespace Enable
 {
   static bool OVERLAPCHECK = false;
+  static bool ABSORBER = false;
 }
 
 // every G4 subsystem needs to implement this
