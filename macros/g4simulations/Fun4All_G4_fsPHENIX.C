@@ -126,12 +126,17 @@ int Fun4All_G4_fsPHENIX(
   Enable::PLUGDOOR = true;
   Enable::PLUGDOOR_ABSORBER = true;
 
+  // new settings using Enable namespace in GlobalVariables.C
+  //Enable::BLACKHOLE = true;
+  BlackHoleGeometry::visible = true;
+
   // Write the DST
   const bool do_write_output = true;
   const bool do_dst_compress = false;
   
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   const bool do_DSTReader = false;
+
   //---------------
   // Load libraries
   //---------------
