@@ -11,6 +11,7 @@ R__LOAD_LIBRARY(libg4detectors.so)
 namespace Enable
 {
   static bool PLUGDOOR = false;
+  static bool PLUGDOOR_ABSORBER = false;
 }
 
 namespace G4PLUGDOOR
@@ -32,13 +33,11 @@ void PlugDoorInit()
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4PLUGDOOR::place_z - G4PLUGDOOR::length / 2.);
 }
 
-void PlugDoor(PHG4Reco *g4Reco,
-              const int absorberactive = 0,
-              int verbosity = 0)
+void PlugDoor(PHG4Reco *g4Reco)
 {
   //----------------------------------------
   const string material("Steel_1006");
-  const int flux_door_active = false;
+  const bool flux_door_active = Enable::ABSORBER || Enable::PLUGDOOR_ABSORBER;
 
   PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FLUXRET_ETA_MINUS", 0);
   flux_return_minus->set_int_param("lengthviarapidity", 0);

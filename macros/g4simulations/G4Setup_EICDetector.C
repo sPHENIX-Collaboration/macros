@@ -262,7 +262,7 @@ int G4Setup(const int absorberactive = 0,
 
   if (Enable::FHCAL)
   {
-    FHCALSetup(g4Reco, absorberactive);
+    FHCALSetup(g4Reco);
   }
   //----------------------------------------
   // EEMC
@@ -293,7 +293,7 @@ int G4Setup(const int absorberactive = 0,
   // sPHENIX forward flux return door
   if (Enable::PLUGDOOR)
   {
-    PlugDoor(g4Reco, absorberactive);
+    PlugDoor(g4Reco);
   }
   if (Enable::USER)
   {

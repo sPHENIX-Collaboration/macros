@@ -211,7 +211,7 @@ int G4Setup(const int absorberactive = 0,
 
   if (Enable::FHCAL)
   {
-    FHCALSetup(g4Reco, absorberactive);
+    FHCALSetup(g4Reco);
   }
 
   if (Enable::PLUGDOOR)
@@ -230,7 +230,7 @@ int G4Setup(const int absorberactive = 0,
   }
   // BLACKHOLE
   // minimal space for forward instrumentation
-  if (radius<270) radius = 270;
+  // if (radius<270) radius = 270;
 
   if (Enable::BLACKHOLE)
   {

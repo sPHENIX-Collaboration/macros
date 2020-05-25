@@ -25,6 +25,7 @@ R__LOAD_LIBRARY(libg4eval.so)
 namespace Enable
 {
   static bool FHCAL = false;
+  static bool FHCAL_ABSORBER = false;
 }
 
 namespace G4FHCAL
@@ -52,8 +53,9 @@ void FHCAL_Cells(int verbosity = 0)
   return;
 }
 
-void FHCALSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
+void FHCALSetup(PHG4Reco *g4Reco)
 {
+  const bool AbsorberActive = Enable::ABSORBER || Enable::FHCAL_ABSORBER;
   Fun4AllServer *se = Fun4AllServer::instance();
 
   /** Use dedicated FHCAL module */
@@ -70,7 +72,7 @@ void FHCALSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
   hhcal->SetTowerMappingFile(mapping_hhcal.str());
   hhcal->OverlapCheck(overlapcheck);
 
-  if (absorberactive) hhcal->SetAbsorberActive();
+  if (AbsorberActive) hhcal->SetAbsorberActive();
 
   g4Reco->registerSubsystem(hhcal);
 }
