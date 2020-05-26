@@ -30,7 +30,6 @@ void G4Init(bool do_svtx = true,
 	    bool do_cemc = true,
             bool do_pipe = true,
             bool do_FGEM = true,
-	    bool do_FEMC = true,
             int n_TPC_layers = 40) {
 
   // load detector/material macros and execute Init() function
@@ -72,9 +71,8 @@ void G4Init(bool do_svtx = true,
       FGEM_Init();
     }
 
-  if (do_FEMC)
+  if (Enable::FEMC)
     {
-      gROOT->LoadMacro("G4_FEMC.C");
       FEMCInit();
     }
 
@@ -111,7 +109,6 @@ int G4Setup(const int absorberactive = 0,
 	    const bool do_cemc = true,
 	    const bool do_pipe = true,
 	    const bool do_FGEM = true,
-	    const bool do_FEMC = false,
      	    const float magfield_rescale = 1.0) {
   
   //---------------
@@ -203,9 +200,10 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // FEMC
 
-  if ( do_FEMC )
-    FEMCSetup(g4Reco, absorberactive);
-
+  if ( Enable::FEMC )
+  {
+    FEMCSetup(g4Reco);
+  }
   //----------------------------------------
   // FHCAL
 
