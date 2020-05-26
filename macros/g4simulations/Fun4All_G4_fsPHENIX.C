@@ -65,6 +65,7 @@ int Fun4All_G4_fsPHENIX(
   //======================
   // What to run
   //======================
+//  Enable::ABSORBER = true;
 
   bool do_bbc = false;
   
@@ -113,8 +114,9 @@ int Fun4All_G4_fsPHENIX(
   bool do_FGEM_track = do_FGEM &&  false;
   bool do_FGEM_eval = do_FGEM_track &&  true;
 
-  bool do_FEMC = false;
-  bool do_FEMC_cell = do_FEMC && false;
+  Enable::FEMC = true;
+  Enable::FEMC_ABSORBER = true;
+  bool do_FEMC_cell = Enable::FEMC && false;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
 
@@ -123,11 +125,11 @@ int Fun4All_G4_fsPHENIX(
   bool do_FHCAL_twr = do_FHCAL_cell && true;
   bool do_FHCAL_cluster = do_FHCAL_twr && true;
 
-  Enable::PLUGDOOR = true;
+  Enable::PLUGDOOR = false;
   Enable::PLUGDOOR_ABSORBER = true;
 
   // new settings using Enable namespace in GlobalVariables.C
-  //Enable::BLACKHOLE = true;
+//  Enable::BLACKHOLE = true;
   BlackHoleGeometry::visible = true;
 
   // Write the DST
@@ -149,9 +151,9 @@ int Fun4All_G4_fsPHENIX(
   gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_fsPHENIX.C");
-  G4Init(do_tracking,do_cemc,do_pipe,do_FGEM,do_FEMC,n_TPC_layers);
+  G4Init(do_tracking,do_cemc,do_pipe,do_FGEM,n_TPC_layers);
 
-  int absorberactive = 0; // set to 1 to make all absorbers active volumes
+  int absorberactive = 1; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root"); // default map from the calibration database
   const float magfield_rescale = -1.4/1.5; // make consistent with Fun4All_G4_sPHENIX()
@@ -253,7 +255,7 @@ int Fun4All_G4_fsPHENIX(
 
       G4Setup(absorberactive, magfield, EDecayType::kAll,
 	      do_tracking, do_cemc, do_pipe,
-	      do_FGEM, do_FEMC,
+	      do_FGEM,
 	      magfield_rescale);
     }
 
@@ -429,7 +431,7 @@ int Fun4All_G4_fsPHENIX(
     /*bool*/ do_FGEM,
 	  /*bool*/ Enable::FHCAL,
 	  /*bool*/ do_FHCAL_twr,
-	  /*bool*/ do_FEMC,
+			    /*bool*/ Enable::FEMC,
 	  /*bool*/ do_FEMC_twr
           );
     }
