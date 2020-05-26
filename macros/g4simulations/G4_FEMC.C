@@ -1,5 +1,5 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+
 #include "GlobalVariables.C"
 #include <fun4all/Fun4AllServer.h>
 #include <g4calo/RawTowerBuilderByHitIndex.h>
@@ -15,10 +15,21 @@ R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
-#endif
+
+namespace Enable
+{
+  static bool FEMC = false;
+  static bool FEMC_ABSORBER = false;
+}
 
 
-
+namespace G4FEMC
+{
+// from ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt
+  const double Gz0 = 305.;
+  const double Gdz = 40.;
+  const double outer_radius = 180.;
+  string calibfile = "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
 enum enu_Femc_clusterizer
 {
   kFemcGraphClusterizer,
@@ -29,37 +40,19 @@ enum enu_Femc_clusterizer
 enu_Femc_clusterizer Femc_clusterizer = kFemcTemplateClusterizer;
 // graph clusterizer
 //enu_Femc_clusterizer Femc_clusterizer = kFemcGraphClusterizer;
+}
 
 void
 FEMCInit()
 {
-  if (BlackHoleGeometry::max_radius < 180)
-  {
-    BlackHoleGeometry::max_radius = 180; // eye balled
-  }
-}
-
-void FEMC_Cells(int verbosity = 0) {
-
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
-  Fun4AllServer *se = Fun4AllServer::instance();
-
-  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("FEMCCellReco");
-  hc->Detector("FEMC");
-  se->registerSubsystem(hc);
-  
-  return;  
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4FEMC::outer_radius);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4FEMC::Gz0 + G4FEMC::Gdz / 2.);
 }
 
 void
 FEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 {
-
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4calo.so");
-  gSystem->Load("libcalo_reco.so");
-
+  bool AbsorberActive = Enable::ABSORBER || Enable::FEMC_ABSORBER;
   Fun4AllServer *se = Fun4AllServer::instance();
 
   /** Use dedicated FEMC module */
@@ -69,23 +62,33 @@ FEMCSetup(PHG4Reco* g4Reco, const int absorberactive = 0)
 
   // fsPHENIX ECAL
   femc->SetfsPHENIXDetector(); 
-  mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
+  mapping_femc<< getenv("CALIBRATIONROOT") << G4FEMC::calibfile;
 
-  cout << mapping_femc.str() << endl;
+//  cout << mapping_femc.str() << endl;
   femc->SetTowerMappingFile( mapping_femc.str() );
   femc->OverlapCheck(overlapcheck);
   femc->SetActive();
   femc->SuperDetector("FEMC");
-  if (absorberactive)  femc->SetAbsorberActive();
+  if (AbsorberActive)  femc->SetAbsorberActive(AbsorberActive);
 
   g4Reco->registerSubsystem( femc );
 
 }
 
+void FEMC_Cells(int verbosity = 0)
+{
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("FEMCCellReco");
+  hc->Detector("FEMC");
+  se->registerSubsystem(hc);
+
+  return;
+}
+
 void FEMC_Towers(int verbosity = 0) {
 
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_femc;
@@ -207,12 +210,10 @@ void FEMC_Towers(int verbosity = 0) {
 
 void FEMC_Clusters(int verbosity = 0) {
 
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
 
-  if ( Femc_clusterizer == kFemcTemplateClusterizer )
+  if ( G4FEMC::Femc_clusterizer == G4FEMC::kFemcTemplateClusterizer )
     {
       RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("EmcRawClusterBuilderTemplateFEMC");
       ClusterBuilder->Detector("FEMC");
@@ -223,7 +224,7 @@ void FEMC_Clusters(int verbosity = 0) {
       ClusterBuilder->LoadProfile(femc_prof.c_str());
       se->registerSubsystem(ClusterBuilder);
     }
-  else if ( Femc_clusterizer == kFemcGraphClusterizer )
+  else if ( G4FEMC::Femc_clusterizer == G4FEMC::kFemcGraphClusterizer )
     {
       RawClusterBuilderFwd* ClusterBuilder = new RawClusterBuilderFwd("FEMCRawClusterBuilderFwd");
 
@@ -244,8 +245,6 @@ void FEMC_Clusters(int verbosity = 0) {
 
 void FEMC_Eval(std::string outputfile, int verbosity = 0)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4eval.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("FEMCEVALUATOR", "FEMC", outputfile.c_str());
