@@ -6,6 +6,7 @@ namespace Enable
 {
   static bool OVERLAPCHECK = false;
   static bool ABSORBER = false;
+  static int VERBOSITY = 0;
 }
 
 // every G4 subsystem needs to implement this
