@@ -31,7 +31,7 @@
 #include "G4_TPC_EIC.C"
 #include "G4_Tracking_EIC.C"
 #include "G4_User.C"
-#include "G4_WorldSize.C"
+#include "G4_World.C"
 
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
@@ -41,7 +41,6 @@ void RunLoadTest() {}
 void G4Init()
 {
   // load detector/material macros and execute Init() function
-
   if (Enable::PIPE)
   {
     PipeInit();
@@ -156,6 +155,9 @@ int G4Setup(const int absorberactive = 0,
   se->registerSubsystem(hr);
 
   PHG4Reco *g4Reco = new PHG4Reco();
+
+  WorldInit(g4Reco);
+
   g4Reco->set_rapidity_coverage(1.1);  // according to drawings
                                        // uncomment to set QGSP_BERT_HP physics list for productions
                                        // (default is QGSP_BERT for speed)
