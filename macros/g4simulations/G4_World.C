@@ -8,10 +8,10 @@ R__LOAD_LIBRARY(libg4testbench.so)
 
 namespace G4WORLD
 {
-  static double AddSpace = 100.; // add this much space in cm around edge of detector
-  static string WorldMaterial = "G4_Air"; // default world material, use G4_Galactic for material scan
-  static string PhysicsList = "QGSP_BERT"; // for calorimeters use HP lists
-}
+  static double AddSpace = 100.;            // add this much space in cm around edge of detector
+  static string WorldMaterial = "G4_Air";   // default world material, use G4_Galactic for material scan
+  static string PhysicsList = "QGSP_BERT";  // for calorimeters use HP lists
+}  // namespace G4WORLD
 
 void WorldInit(PHG4Reco *g4Reco)
 {
@@ -19,10 +19,9 @@ void WorldInit(PHG4Reco *g4Reco)
   g4Reco->SetPhysicsList(G4WORLD::PhysicsList);
 }
 
-
 void WorldSize(PHG4Reco *g4Reco, double radius)
 {
-  double world_radius = std::max(radius,BlackHoleGeometry::max_radius);
+  double world_radius = std::max(radius, BlackHoleGeometry::max_radius);
   g4Reco->SetWorldSizeY(std::max(g4Reco->GetWorldSizeY(),world_radius+G4WORLD::AddSpace);
 // our world is a symmetric cylinder so the center is at 0/0/0, pick the largest of abs(min_z) || abs(max_z)
   double min_zval = std::min(BlackHoleGeometry::min_z,-((g4Reco->GetWorldSizeZ()-100)/2.));
