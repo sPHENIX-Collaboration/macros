@@ -31,7 +31,10 @@ void HCalInner_SupportRing(PHG4Reco *g4Reco,
 namespace Enable
 {
   static bool HCALIN = false;
-}
+  static bool HCALIN_ABSORBER = false;
+  static bool HCALIN_OVERLAPCHECK = false;
+  static int HCALIN_VERBOSITY = 0;
+}  // namespace Enable
 
 namespace G4HCALIN
 {
@@ -74,11 +77,13 @@ void HCalInnerInit(const int iflag = 0)
 double HCalInner(PHG4Reco *g4Reco,
                  double radius,
                  const int crossings,
-                 const int absorberactive = 0,
-                 int verbosity = 0)
+                 const int absorberactive = 0)
 {
-  // all sizes are in cm!
+  bool AbsorberActive = Enable::ABSORBER || Enable::HCALIN_ABSORBER || absorberactive;
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALIN_OVERLAPCHECK;
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
 
+  // all sizes are in cm!
   PHG4InnerHcalSubsystem *hcal = new PHG4InnerHcalSubsystem("HCALIN");
   // these are the parameters you can change with their default settings
   // hcal->set_string_param("material","SS310");
@@ -134,11 +139,11 @@ double HCalInner(PHG4Reco *g4Reco,
 
   hcal->SetActive();
   hcal->SuperDetector("HCALIN");
-  if (absorberactive)
+  if (AbsorberActive)
   {
     hcal->SetAbsorberActive();
   }
-  hcal->OverlapCheck(overlapcheck);
+  hcal->OverlapCheck(OverlapCheck);
 
   g4Reco->registerSubsystem(hcal);
 
@@ -154,6 +159,8 @@ double HCalInner(PHG4Reco *g4Reco,
 void HCalInner_SupportRing(PHG4Reco *g4Reco,
                            const int absorberactive = 0)
 {
+  bool AbsorberActive = Enable::ABSORBER || Enable::HCALIN_ABSORBER || absorberactive;
+
   const double z_ring1 = (2025 + 2050) / 2. / 10.;
   const double innerradius_sphenix = 116.;
   const double innerradius_ephenix_hadronside = 138.;
@@ -177,7 +184,7 @@ void HCalInner_SupportRing(PHG4Reco *g4Reco,
     cyl->set_double_param("length", G4HCALIN::dz);
     cyl->set_string_param("material", "SS310");
     cyl->set_double_param("thickness", G4HCALIN::support_ring_outer_radius - innerradius);
-    if (absorberactive)
+    if (AbsorberActive)
     {
       cyl->SetActive();
     }
@@ -187,8 +194,10 @@ void HCalInner_SupportRing(PHG4Reco *g4Reco,
   return;
 }
 
-void HCALInner_Cells(int verbosity = 0)
+void HCALInner_Cells()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4HcalCellReco *hc = new PHG4HcalCellReco("HCALIN_CELLRECO");
@@ -207,8 +216,9 @@ void HCALInner_Cells(int verbosity = 0)
   return;
 }
 
-void HCALInner_Towers(int verbosity = 0)
+void HCALInner_Towers()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalInRawTowerBuilder");
@@ -247,8 +257,10 @@ void HCALInner_Towers(int verbosity = 0)
   return;
 }
 
-void HCALInner_Clusters(int verbosity = 0)
+void HCALInner_Clusters()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   if (G4HCALIN::HCalIn_clusterizer == G4HCALIN::kHCalInTemplateClusterizer)
@@ -274,11 +286,12 @@ void HCALInner_Clusters(int verbosity = 0)
   return;
 }
 
-void HCALInner_Eval(std::string outputfile, int verbosity = 0)
+void HCALInner_Eval(const std::string &outputfile)
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  CaloEvaluator *eval = new CaloEvaluator("HCALINEVALUATOR", "HCALIN", outputfile.c_str());
+  CaloEvaluator *eval = new CaloEvaluator("HCALINEVALUATOR", "HCALIN", outputfile);
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
