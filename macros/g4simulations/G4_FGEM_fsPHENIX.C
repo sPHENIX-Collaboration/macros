@@ -28,7 +28,7 @@ namespace Enable
 
 void FGEM_Init()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius,130.);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 130.);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 280.);
 }
 
@@ -272,7 +272,7 @@ void FGEM_FastSim_Reco(int verbosity = 0)
       "G4HIT_FGEM_1",                    //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
       1. / sqrt(12),                     //      const float radres,
-      70e-4,                            //      const float phires,
+      70e-4,                             //      const float phires,
       100e-4,                            //      const float lonres,
       1,                                 //      const float eff,
       0                                  //      const float noise
