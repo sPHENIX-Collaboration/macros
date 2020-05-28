@@ -28,6 +28,7 @@ namespace Enable
   static bool HCALOUT = false;
   static bool HCALOUT_ABSORBER = false;
   static bool HCALOUT_OVERLAPCHECK = false;
+  static int HCALOUT_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4HCALOUT
@@ -57,11 +58,11 @@ void HCalOuterInit()
 double HCalOuter(PHG4Reco *g4Reco,
                  double radius,
                  const int crossings,
-                 const int absorberactive = 0,
-                 int verbosity = 0)
+                 const int absorberactive = 0)
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::HCALOUT_ABSORBER || absorberactive;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALOUT_OVERLAPCHECK;
+  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
 
   PHG4OuterHcalSubsystem *hcal = new PHG4OuterHcalSubsystem("HCALOUT");
   // hcal->set_double_param("inner_radius", 183.3);
@@ -117,8 +118,10 @@ double HCalOuter(PHG4Reco *g4Reco,
   return radius;
 }
 
-void HCALOuter_Cells(int verbosity = 0)
+void HCALOuter_Cells()
 {
+  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4HcalCellReco *hc = new PHG4HcalCellReco("HCALOUT_CELLRECO");
@@ -137,8 +140,10 @@ void HCALOuter_Cells(int verbosity = 0)
   return;
 }
 
-void HCALOuter_Towers(int verbosity = 0)
+void HCALOuter_Towers()
 {
+  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalOutRawTowerBuilder");
@@ -174,8 +179,10 @@ void HCALOuter_Towers(int verbosity = 0)
   return;
 }
 
-void HCALOuter_Clusters(int verbosity = 0)
+void HCALOuter_Clusters()
 {
+  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   if (G4HCALOUT::HCalOut_clusterizer == G4HCALOUT::kHCalOutTemplateClusterizer)
@@ -202,8 +209,10 @@ void HCALOuter_Clusters(int verbosity = 0)
   return;
 }
 
-void HCALOuter_Eval(const std::string &outputfile, int verbosity = 0)
+void HCALOuter_Eval(const std::string &outputfile)
 {
+  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("HCALOUTEVALUATOR", "HCALOUT", outputfile);
