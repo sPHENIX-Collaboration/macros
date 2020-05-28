@@ -1,37 +1,35 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 00, 0)
-#include <fun4all/Fun4AllServer.h>
+
+#include "GlobalVariables.C"
+
 #include <g4detectors/PHG4SectorSubsystem.h>
+
 #include <g4eval/SvtxEvaluator.h>
+
 #include <g4main/PHG4Reco.h>
+
 #include <g4trackfastsim/PHG4TrackFastSim.h>
 #include <g4trackfastsim/PHG4TrackFastSimEval.h>
-#include "GlobalVariables.C"
+
+#include <fun4all/Fun4AllServer.h>
+
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4trackfastsim.so)
+
 int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
                      double etamax, const int N_Sector = 8);
 void AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem);
-#endif
-// $Id: G4_FGEM_fsPHENIX.C,v 1.2 2014/01/22 01:44:13 jinhuang Exp $
 
-/*!
- * \file G4_FGEM_fsPHENIX.C
- * \brief 
- * \author Jin Huang <jhuang@bnl.gov>
- * \version $Revision: 1.2 $
- * \date $Date: 2014/01/22 01:44:13 $
- */
-
-using namespace std;
+namespace Enable
+{
+  static bool FGEM = false;
+}
 
 void FGEM_Init()
 {
-  if (BlackHoleGeometry::max_radius < 130)
-  {
-    BlackHoleGeometry::max_radius = 130; // eye balled
-  }
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius,130.);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 280.);
 }
 
 void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
@@ -56,17 +54,13 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   etamin = min_eta;
   zpos = 1.2e2;
 
-  gem = new PHG4SectorSubsystem(name.c_str());
+  gem = new PHG4SectorSubsystem(name);
 
   gem->get_geometry().set_normal_polar_angle(tilt);
-  gem->get_geometry().set_normal_start(
-      zpos * PHG4Sector::Sector_Geometry::Unit_cm(), 0);
-  gem->get_geometry().set_min_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamax));
-  gem->get_geometry().set_max_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamin));
-  gem->get_geometry().set_max_polar_edge(
-      PHG4Sector::Sector_Geometry::FlatEdge());
+  gem->get_geometry().set_normal_start(zpos * PHG4Sector::Sector_Geometry::Unit_cm(), 0);
+  gem->get_geometry().set_min_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamax));
+  gem->get_geometry().set_max_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamin));
+  gem->get_geometry().set_max_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());
   gem->get_geometry().set_material("G4_METHANE");
   gem->get_geometry().set_N_Sector(N_Sector);
   gem->OverlapCheck(overlapcheck);
@@ -80,18 +74,14 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   etamax = 4;
   etamin = min_eta;
   zpos = 1.6e2;
-  gem = new PHG4SectorSubsystem(name.c_str());
+  gem = new PHG4SectorSubsystem(name);
 
   gem->SuperDetector(name);
   gem->get_geometry().set_normal_polar_angle(tilt);
-  gem->get_geometry().set_normal_start(
-      zpos * PHG4Sector::Sector_Geometry::Unit_cm(), 0);
-  gem->get_geometry().set_min_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamax));
-  gem->get_geometry().set_max_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(2));
-  gem->get_geometry().set_max_polar_edge(
-      PHG4Sector::Sector_Geometry::FlatEdge());
+  gem->get_geometry().set_normal_start(zpos * PHG4Sector::Sector_Geometry::Unit_cm(), 0);
+  gem->get_geometry().set_min_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamax));
+  gem->get_geometry().set_max_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(2));
+  gem->get_geometry().set_max_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());
   gem->get_geometry().set_material("G4_METHANE");
   gem->get_geometry().set_N_Sector(N_Sector);
   gem->OverlapCheck(overlapcheck);
@@ -104,19 +94,15 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
 
   zpos = zpos - (zpos * sin(tilt) + zpos * cos(tilt) * tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(2) - tilt)) * sin(tilt);
 
-  gem->get_geometry().set_normal_polar_angle(
-      (PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta) + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
+  gem->get_geometry().set_normal_polar_angle((PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta) + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
   gem->get_geometry().set_normal_start(
       zpos * PHG4Sector::Sector_Geometry::Unit_cm(),
       PHG4Sector::Sector_Geometry::eta_to_polar_angle(2));
-  gem->get_geometry().set_min_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(2));
-  gem->get_geometry().set_max_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta));
+  gem->get_geometry().set_min_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(2));
+  gem->get_geometry().set_max_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta));
   gem->get_geometry().set_material("G4_METHANE");
   gem->get_geometry().set_N_Sector(N_Sector);
-  gem->get_geometry().set_min_polar_edge(
-      PHG4Sector::Sector_Geometry::FlatEdge());
+  gem->get_geometry().set_min_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());
 
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
@@ -129,18 +115,14 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   etamax = 4;
   etamin = min_eta;
   zpos = 2.75e2;
-  gem = new PHG4SectorSubsystem(name.c_str());
+  gem = new PHG4SectorSubsystem(name);
 
   gem->SuperDetector(name);
   gem->get_geometry().set_normal_polar_angle(tilt);
-  gem->get_geometry().set_normal_start(
-      zpos * PHG4Sector::Sector_Geometry::Unit_cm(), 0);
-  gem->get_geometry().set_min_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamax));
-  gem->get_geometry().set_max_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(2));
-  gem->get_geometry().set_max_polar_edge(
-      PHG4Sector::Sector_Geometry::FlatEdge());
+  gem->get_geometry().set_normal_start(zpos * PHG4Sector::Sector_Geometry::Unit_cm(), 0);
+  gem->get_geometry().set_min_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamax));
+  gem->get_geometry().set_max_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(2));
+  gem->get_geometry().set_max_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());
   gem->get_geometry().set_material("G4_METHANE");
   gem->get_geometry().set_N_Sector(N_Sector);
   gem->OverlapCheck(overlapcheck);
@@ -153,19 +135,15 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   gem = new PHG4SectorSubsystem(name + "_LowerEta");
   gem->SuperDetector(name);
 
-  gem->get_geometry().set_normal_polar_angle(
-      (PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta) + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
+  gem->get_geometry().set_normal_polar_angle((PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta) + PHG4Sector::Sector_Geometry::eta_to_polar_angle(2)) / 2);
   gem->get_geometry().set_normal_start(
       zpos * PHG4Sector::Sector_Geometry::Unit_cm(),
       PHG4Sector::Sector_Geometry::eta_to_polar_angle(2));
-  gem->get_geometry().set_min_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(2));
-  gem->get_geometry().set_max_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta));
+  gem->get_geometry().set_min_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(2));
+  gem->get_geometry().set_max_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta));
   gem->get_geometry().set_material("G4_METHANE");
   gem->get_geometry().set_N_Sector(N_Sector);
-  gem->get_geometry().set_min_polar_edge(
-      PHG4Sector::Sector_Geometry::FlatEdge());
+  gem->get_geometry().set_min_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());
 
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
@@ -188,8 +166,7 @@ void AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem)
   const int N_Layers = 1;  // simplified setup
   const double thickness = 2 * cm;
 
-  gem->get_geometry().AddLayer("EntranceWindow", "G4_MYLAR", 25 * um, false,
-                               100);
+  gem->get_geometry().AddLayer("EntranceWindow", "G4_MYLAR", 25 * um, false, 100);
   gem->get_geometry().AddLayer("Cathode", "G4_GRAPHITE", 10 * um, false, 100);
 
   for (int d = 1; d <= N_Layers; d++)
@@ -198,8 +175,7 @@ void AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem)
     s << "DriftLayer_";
     s << d;
 
-    gem->get_geometry().AddLayer(s.str(), "G4_METHANE", thickness / N_Layers,
-                                 true);
+    gem->get_geometry().AddLayer(s.str(), "G4_METHANE", thickness / N_Layers, true);
   }
 }
 
@@ -230,16 +206,11 @@ int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
   gem->SuperDetector(name);
 
   gem->get_geometry().set_normal_polar_angle(polar_angle);
-  gem->get_geometry().set_normal_start(
-      zpos * PHG4Sector::Sector_Geometry::Unit_cm());
-  gem->get_geometry().set_min_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamax));
-  gem->get_geometry().set_max_polar_angle(
-      PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamin));
-  gem->get_geometry().set_max_polar_edge(
-      PHG4Sector::Sector_Geometry::FlatEdge());
-  gem->get_geometry().set_min_polar_edge(
-      PHG4Sector::Sector_Geometry::FlatEdge());
+  gem->get_geometry().set_normal_start(zpos * PHG4Sector::Sector_Geometry::Unit_cm());
+  gem->get_geometry().set_min_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamax));
+  gem->get_geometry().set_max_polar_angle(PHG4Sector::Sector_Geometry::eta_to_polar_angle(etamin));
+  gem->get_geometry().set_max_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());
+  gem->get_geometry().set_min_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());
   gem->get_geometry().set_N_Sector(N_Sector);
   gem->get_geometry().set_material("G4_METHANE");
   gem->OverlapCheck(overlapcheck);
@@ -358,13 +329,10 @@ void FGEM_FastSim_Reco(int verbosity = 0)
 
 void FGEM_FastSim_Eval(std::string outputfile, int verbosity = 0)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4trackfastsim.so");
-
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4TrackFastSimEval *fast_sim_eval = new PHG4TrackFastSimEval("FastTrackingEval");
-  fast_sim_eval->set_filename(outputfile.c_str());
+  fast_sim_eval->set_filename(outputfile);
   se->registerSubsystem(fast_sim_eval);
 
   return;
