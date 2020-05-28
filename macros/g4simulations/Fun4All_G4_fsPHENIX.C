@@ -87,22 +87,22 @@ int Fun4All_G4_fsPHENIX(
   bool do_tracking_eval = do_tracking_track && true;
 
   // central calorimeters, which is a detailed simulation and slow to run
-  bool do_cemc = false;
-  bool do_cemc_cell = do_cemc && false;
+  Enable::CEMC = true;
+  bool do_cemc_cell = Enable::CEMC && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
-  bool do_cemc_eval = do_cemc_cluster && false;
+  bool do_cemc_eval = do_cemc_cluster && true;
 
   Enable::HCALIN = false;
-  bool do_hcalin_cell =   Enable::HCALIN && false;
+  bool do_hcalin_cell =   Enable::HCALIN && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
-  bool do_hcalin_eval = do_hcalin_cluster && false;
+  bool do_hcalin_eval = do_hcalin_cluster && true;
 
   Enable::MAGNET = false;
 
   Enable::HCALOUT = false;
-  bool do_hcalout_cell = Enable::HCALOUT && false;
+  bool do_hcalout_cell = Enable::HCALOUT && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
   bool do_hcalout_eval = do_hcalout_cluster && false;
@@ -118,7 +118,7 @@ int Fun4All_G4_fsPHENIX(
 
   // fsPHENIX geometry
 
-  Enable::FGEM = true;
+  Enable::FGEM = false;
   bool do_FGEM_track = Enable::FGEM &&  false;
   bool do_FGEM_eval = do_FGEM_track &&  true;
 
@@ -137,7 +137,7 @@ int Fun4All_G4_fsPHENIX(
   Enable::PLUGDOOR_ABSORBER = true;
 
   // new settings using Enable namespace in GlobalVariables.C
-  Enable::BLACKHOLE = true;
+//  Enable::BLACKHOLE = true;
   BlackHoleGeometry::visible = true;
 
 
@@ -153,7 +153,7 @@ int Fun4All_G4_fsPHENIX(
   gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_fsPHENIX.C");
-  G4Init(do_tracking,do_cemc,do_pipe,n_TPC_layers);
+  G4Init(do_tracking,do_pipe,n_TPC_layers);
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -239,11 +239,11 @@ int Fun4All_G4_fsPHENIX(
       }
       gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_size_parameters(0.0,0.0);
-      gen->set_eta_range(1.4, 3.0);
+      gen->set_eta_range(-3.0, 3.0);
       //gen->set_eta_range(3.0, 3.0); //fsPHENIX FWD
-      gen->set_phi_range(-1.0*TMath::Pi(), 1.0*TMath::Pi());
+      gen->set_phi_range(-1.0*M_PI, 1.0*M_PI);
       //gen->set_phi_range(TMath::Pi()/2-0.1, TMath::Pi()/2-0.1);
-      gen->set_p_range(30.0, 30.0);
+      gen->set_p_range(10.0, 10.0);
       gen->Embed(1);
       gen->Verbosity(0);
       se->registerSubsystem(gen);
@@ -256,7 +256,7 @@ int Fun4All_G4_fsPHENIX(
       //---------------------
 
       G4Setup(absorberactive, magfield, EDecayType::kAll,
-	      do_tracking, do_cemc, do_pipe,
+	      do_tracking, do_pipe,
 	      magfield_rescale);
     }
 
@@ -422,7 +422,7 @@ int Fun4All_G4_fsPHENIX(
       G4DSTreader_fsPHENIX( outputFile, //
           /*int*/ absorberactive ,
           /*bool*/ do_tracking ,
-          /*bool*/ do_cemc ,
+			    /*bool*/ Enable::CEMC ,
           /*bool*/ Enable::HCALIN,
           /*bool*/ Enable::MAGNET,
           /*bool*/ Enable::HCALOUT,

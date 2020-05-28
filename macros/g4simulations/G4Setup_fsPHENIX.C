@@ -27,7 +27,6 @@ int make_piston(string name, PHG4Reco* g4Reco);
 void RunLoadTest() {}
 
 void G4Init(bool do_svtx = true,
-	    bool do_cemc = true,
             bool do_pipe = true,
             int n_TPC_layers = 40) {
 
@@ -44,10 +43,9 @@ void G4Init(bool do_svtx = true,
       TrackingInit(n_TPC_layers);
     }
 
-  if (do_cemc)
+  if (Enable::CEMC)
     {
-      gROOT->LoadMacro("G4_CEmc_Spacal.C");
-      CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
+      CEmcInit();
     }  
 
   if (Enable::HCALIN) 
@@ -98,13 +96,8 @@ void G4Init(bool do_svtx = true,
 
 int G4Setup(const int absorberactive = 0,
 	    const string &field ="1.5",
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 	    const EDecayType decayType = EDecayType::kAll,
-#else
-	    const EDecayType decayType = TPythia6Decayer::kAll,
-#endif
 	    const bool do_svtx = true,
-	    const bool do_cemc = true,
 	    const bool do_pipe = true,
      	    const float magfield_rescale = 1.0) {
   
@@ -161,7 +154,10 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // CEMC
 //
-  if (do_cemc) radius = CEmc(g4Reco, radius, 8, absorberactive);
+  if (Enable::CEMC)
+  {
+    radius = CEmc(g4Reco, radius, 8, absorberactive);
+  }
 //  if (do_cemc) radius = CEmc_Vis(g4Reco, radius, 8, absorberactive);// for visualization substructure of SPACAL, slow to render
   
   //----------------------------------------
