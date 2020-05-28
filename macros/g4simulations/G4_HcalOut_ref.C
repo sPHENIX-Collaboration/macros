@@ -28,7 +28,7 @@ namespace Enable
   static bool HCALOUT = false;
   static bool HCALOUT_ABSORBER = false;
   static bool HCALOUT_OVERLAPCHECK = false;
-}
+}  // namespace Enable
 
 namespace G4HCALOUT
 {
