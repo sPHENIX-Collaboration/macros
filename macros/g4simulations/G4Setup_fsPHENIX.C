@@ -12,7 +12,7 @@
 #include "G4_FEMC.C"
 #include "G4_FHCAL.C"
 #include "G4_User.C"
-#include "G4_WorldSize.C"
+#include "G4_World.C"
 #include <g4decayer/EDecayType.hh>
 #include <g4detectors/PHG4ConeSubsystem.h>
 #include <g4eval/PHG4DstCompressReco.h>
@@ -29,7 +29,6 @@ void RunLoadTest() {}
 void G4Init(bool do_svtx = true,
 	    bool do_cemc = true,
             bool do_pipe = true,
-            bool do_FGEM = true,
             int n_TPC_layers = 40) {
 
   // load detector/material macros and execute Init() function
@@ -65,9 +64,8 @@ void G4Init(bool do_svtx = true,
       HCalOuterInit();
     }
 
-  if (do_FGEM)
+  if (Enable::FGEM)
     {
-      gROOT->LoadMacro("G4_FGEM_fsPHENIX.C");
       FGEM_Init();
     }
 
@@ -108,7 +106,6 @@ int G4Setup(const int absorberactive = 0,
 	    const bool do_svtx = true,
 	    const bool do_cemc = true,
 	    const bool do_pipe = true,
-	    const bool do_FGEM = true,
      	    const float magfield_rescale = 1.0) {
   
   //---------------
@@ -194,8 +191,10 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // Forward tracking
 
-  if ( do_FGEM )
+  if ( Enable::FGEM )
+  {
     FGEMSetup(g4Reco);
+  }
 
   //----------------------------------------
   // FEMC
