@@ -92,6 +92,7 @@ void FEMC_Cells()
 
 void FEMC_Towers()
 {
+  int verbosity = std::max(Enable::VERBOSITY,Enable::FEMC_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_femc;
@@ -110,7 +111,7 @@ void FEMC_Towers()
   //RawTowerDigitizer *TowerDigitizer1 = new RawTowerDigitizer("FEMCRawTowerDigitizer1");
   //TowerDigitizer1->Detector("FEMC");
   //TowerDigitizer1->TowerType(1);
-  //TowerDigitizer1->Verbosity(Enable::FEMC_VERBOSITY);
+  //TowerDigitizer1->Verbosity(verbosity);
   //TowerDigitizer1->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   //se->registerSubsystem( TowerDigitizer1 );
 
@@ -118,7 +119,7 @@ void FEMC_Towers()
   //RawTowerDigitizer *TowerDigitizer2 = new RawTowerDigitizer("FEMCRawTowerDigitizer2");
   //TowerDigitizer2->Detector("FEMC");
   //TowerDigitizer2->TowerType(2);
-  //TowerDigitizer2->Verbosity(Enable::FEMC_VERBOSITY);
+  //TowerDigitizer2->Verbosity(verbosity);
   //TowerDigitizer2->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   //se->registerSubsystem( TowerDigitizer2 );
 
@@ -126,28 +127,28 @@ void FEMC_Towers()
   RawTowerDigitizer *TowerDigitizer3 = new RawTowerDigitizer("FEMCRawTowerDigitizer3");
   TowerDigitizer3->Detector("FEMC");
   TowerDigitizer3->TowerType(3);
-  TowerDigitizer3->Verbosity(Enable::FEMC_VERBOSITY);
+  TowerDigitizer3->Verbosity(verbosity);
   TowerDigitizer3->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem(TowerDigitizer3);
 
   RawTowerDigitizer *TowerDigitizer4 = new RawTowerDigitizer("FEMCRawTowerDigitizer4");
   TowerDigitizer4->Detector("FEMC");
   TowerDigitizer4->TowerType(4);
-  TowerDigitizer4->Verbosity(Enable::FEMC_VERBOSITY);
+  TowerDigitizer4->Verbosity(verbosity);
   TowerDigitizer4->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem(TowerDigitizer4);
 
   RawTowerDigitizer *TowerDigitizer5 = new RawTowerDigitizer("FEMCRawTowerDigitizer5");
   TowerDigitizer5->Detector("FEMC");
   TowerDigitizer5->TowerType(5);
-  TowerDigitizer5->Verbosity(Enable::FEMC_VERBOSITY);
+  TowerDigitizer5->Verbosity(verbosity);
   TowerDigitizer5->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem(TowerDigitizer5);
 
   RawTowerDigitizer *TowerDigitizer6 = new RawTowerDigitizer("FEMCRawTowerDigitizer6");
   TowerDigitizer6->Detector("FEMC");
   TowerDigitizer6->TowerType(6);
-  TowerDigitizer6->Verbosity(Enable::FEMC_VERBOSITY);
+  TowerDigitizer6->Verbosity(verbosity);
   TowerDigitizer6->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem(TowerDigitizer6);
 
@@ -155,7 +156,7 @@ void FEMC_Towers()
   //RawTowerCalibration *TowerCalibration1 = new RawTowerCalibration("FEMCRawTowerCalibration1");
   //TowerCalibration1->Detector("FEMC");
   //TowerCalibration1->TowerType(1);
-  //TowerCalibration1->Verbosity(Enable::FEMC_VERBOSITY);
+  //TowerCalibration1->Verbosity(verbosity);
   //TowerCalibration1->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
   //TowerCalibration1->set_calib_const_GeV_ADC(1.0);  // sampling fraction = 1.0
   //TowerCalibration1->set_pedstal_ADC(0);
@@ -165,7 +166,7 @@ void FEMC_Towers()
   //RawTowerCalibration *TowerCalibration2 = new RawTowerCalibration("FEMCRawTowerCalibration2");
   //TowerCalibration2->Detector("FEMC");
   //TowerCalibration2->TowerType(2);
-  //TowerCalibration2->Verbosity(Enable::FEMC_VERBOSITY);
+  //TowerCalibration2->Verbosity(verbosity);
   //TowerCalibration2->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
   //TowerCalibration2->set_calib_const_GeV_ADC(1.0/0.249);  // sampling fraction = 0.249 for e-
   //TowerCalibration2->set_pedstal_ADC(0);
@@ -175,7 +176,7 @@ void FEMC_Towers()
   RawTowerCalibration *TowerCalibration3 = new RawTowerCalibration("FEMCRawTowerCalibration3");
   TowerCalibration3->Detector("FEMC");
   TowerCalibration3->TowerType(3);
-  TowerCalibration3->Verbosity(Enable::FEMC_VERBOSITY);
+  TowerCalibration3->Verbosity(verbosity);
   TowerCalibration3->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
   TowerCalibration3->set_calib_const_GeV_ADC(1.0 / 0.030);  // sampling fraction = 0.030
   TowerCalibration3->set_pedstal_ADC(0);
@@ -184,7 +185,7 @@ void FEMC_Towers()
   RawTowerCalibration *TowerCalibration4 = new RawTowerCalibration("FEMCRawTowerCalibration4");
   TowerCalibration4->Detector("FEMC");
   TowerCalibration4->TowerType(4);
-  TowerCalibration4->Verbosity(Enable::FEMC_VERBOSITY);
+  TowerCalibration4->Verbosity(verbosity);
   TowerCalibration4->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
   TowerCalibration4->set_calib_const_GeV_ADC(1.0 / 0.030);  // sampling fraction = 0.030
   TowerCalibration4->set_pedstal_ADC(0);
@@ -193,7 +194,7 @@ void FEMC_Towers()
   RawTowerCalibration *TowerCalibration5 = new RawTowerCalibration("FEMCRawTowerCalibration5");
   TowerCalibration5->Detector("FEMC");
   TowerCalibration5->TowerType(5);
-  TowerCalibration5->Verbosity(Enable::FEMC_VERBOSITY);
+  TowerCalibration5->Verbosity(verbosity);
   TowerCalibration5->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
   TowerCalibration5->set_calib_const_GeV_ADC(1.0 / 0.030);  // sampling fraction = 0.030
   TowerCalibration5->set_pedstal_ADC(0);
@@ -202,7 +203,7 @@ void FEMC_Towers()
   RawTowerCalibration *TowerCalibration6 = new RawTowerCalibration("FEMCRawTowerCalibration6");
   TowerCalibration6->Detector("FEMC");
   TowerCalibration6->TowerType(6);
-  TowerCalibration6->Verbosity(Enable::FEMC_VERBOSITY);
+  TowerCalibration6->Verbosity(verbosity);
   TowerCalibration6->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
   TowerCalibration6->set_calib_const_GeV_ADC(1.0 / 0.030);  // sampling fraction = 0.030
   TowerCalibration6->set_pedstal_ADC(0);
@@ -211,13 +212,15 @@ void FEMC_Towers()
 
 void FEMC_Clusters()
 {
+  int verbosity = std::max(Enable::VERBOSITY,Enable::FEMC_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   if (G4FEMC::Femc_clusterizer == G4FEMC::kFemcTemplateClusterizer)
   {
     RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("EmcRawClusterBuilderTemplateFEMC");
     ClusterBuilder->Detector("FEMC");
-    ClusterBuilder->Verbosity(Enable::FEMC_VERBOSITY);
+    ClusterBuilder->Verbosity(verbosity);
     ClusterBuilder->set_threshold_energy(0.020);  // This threshold should be the same as in FEMCprof_Thresh**.root file below
     std::string femc_prof = getenv("CALIBRATIONROOT");
     femc_prof += "/EmcProfile/FEMCprof_Thresh20MeV.root";
@@ -229,7 +232,7 @@ void FEMC_Clusters()
     RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("FEMCRawClusterBuilderFwd");
 
     ClusterBuilder->Detector("FEMC");
-    ClusterBuilder->Verbosity(Enable::FEMC_VERBOSITY);
+    ClusterBuilder->Verbosity(verbosity);
     ClusterBuilder->set_threshold_energy(0.010);
     se->registerSubsystem(ClusterBuilder);
   }
@@ -244,10 +247,11 @@ void FEMC_Clusters()
 
 void FEMC_Eval(std::string outputfile)
 {
+  int verbosity = std::max(Enable::VERBOSITY,Enable::FEMC_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("FEMCEVALUATOR", "FEMC", outputfile.c_str());
-  eval->Verbosity(Enable::FEMC_VERBOSITY);
+  eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
   return;
