@@ -83,8 +83,13 @@ int Fun4All_G4_EICDetector(
   const bool usegun = false && !readhits;
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
   const bool upsilons = false && !readhits;
+
   // Write the DST
   const bool do_write_output = false;
+  // Compress DST files
+  const bool do_dst_compress = false;
+  //Option to convert DST to human command readable TTree for quick poke around the outputs
+  const bool do_DSTReader = false;
 
   //======================
   // What to run
@@ -173,12 +178,6 @@ int Fun4All_G4_EICDetector(
   // single particle / p+p simulations, or for Au+Au simulations which
   // don't care about jets)
   bool do_HIjetreco = false && do_jet_reco && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
-
-  // Compress DST files
-  bool do_dst_compress = false;
-
-  //Option to convert DST to human command readable TTree for quick poke around the outputs
-  bool do_DSTReader = false;
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
