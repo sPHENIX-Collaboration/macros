@@ -62,6 +62,14 @@ int Fun4All_G4_fsPHENIX(
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
   const bool do_embedding = false;
+
+  // Write the DST
+  const bool do_write_output = true;
+  const bool do_dst_compress = false;
+
+  //Option to convert DST to human command readable TTree for quick poke around the outputs
+  const bool do_DSTReader = false;
+
   //======================
   // What to run
   //======================
@@ -110,13 +118,13 @@ int Fun4All_G4_fsPHENIX(
 
   // fsPHENIX geometry
 
-  bool do_FGEM = false;
-  bool do_FGEM_track = do_FGEM &&  false;
+  Enable::FGEM = true;
+  bool do_FGEM_track = Enable::FGEM &&  false;
   bool do_FGEM_eval = do_FGEM_track &&  true;
 
-  Enable::FEMC = true;
-  Enable::FEMC_ABSORBER = true;
-  bool do_FEMC_cell = Enable::FEMC && false;
+  Enable::FEMC = false;
+  Enable::FEMC_ABSORBER = false;
+  bool do_FEMC_cell = Enable::FEMC && true;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
 
@@ -129,15 +137,9 @@ int Fun4All_G4_fsPHENIX(
   Enable::PLUGDOOR_ABSORBER = true;
 
   // new settings using Enable namespace in GlobalVariables.C
-//  Enable::BLACKHOLE = true;
+  Enable::BLACKHOLE = true;
   BlackHoleGeometry::visible = true;
 
-  // Write the DST
-  const bool do_write_output = true;
-  const bool do_dst_compress = false;
-  
-  //Option to convert DST to human command readable TTree for quick poke around the outputs
-  const bool do_DSTReader = false;
 
   //---------------
   // Load libraries
@@ -151,7 +153,7 @@ int Fun4All_G4_fsPHENIX(
   gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_fsPHENIX.C");
-  G4Init(do_tracking,do_cemc,do_pipe,do_FGEM,n_TPC_layers);
+  G4Init(do_tracking,do_cemc,do_pipe,n_TPC_layers);
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -255,7 +257,6 @@ int Fun4All_G4_fsPHENIX(
 
       G4Setup(absorberactive, magfield, EDecayType::kAll,
 	      do_tracking, do_cemc, do_pipe,
-	      do_FGEM,
 	      magfield_rescale);
     }
 
@@ -428,7 +429,7 @@ int Fun4All_G4_fsPHENIX(
           /*bool*/ do_cemc_twr ,
           /*bool*/ do_hcalin_twr ,
 	  /*bool*/ do_hcalout_twr,
-    /*bool*/ do_FGEM,
+			    /*bool*/ Enable::FGEM,
 	  /*bool*/ Enable::FHCAL,
 	  /*bool*/ do_FHCAL_twr,
 			    /*bool*/ Enable::FEMC,
