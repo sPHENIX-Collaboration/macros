@@ -22,13 +22,13 @@ namespace Enable
 {
   static bool EGEM = false;
   static bool FGEM = false;
-}
+}  // namespace Enable
 
 void EGEM_Init()
 {
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 80.);
-// extends only to -z
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z,-160. );
+  // extends only to -z
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -160.);
 }
 
 void FGEM_Init()
