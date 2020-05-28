@@ -26,6 +26,8 @@ R__LOAD_LIBRARY(libg4eval.so)
 namespace Enable
 {
   static bool HCALOUT = false;
+  static bool HCALOUT_ABSORBER = false;
+  static bool HCALOUT_OVERLAPCHECK = false;
 }
 
 namespace G4HCALOUT
@@ -58,8 +60,8 @@ double HCalOuter(PHG4Reco *g4Reco,
                  const int absorberactive = 0,
                  int verbosity = 0)
 {
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4testbench.so");
+  bool AbsorberActive = Enable::ABSORBER || Enable::HCALOUT_ABSORBER || absorberactive;
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALOUT_OVERLAPCHECK;
 
   PHG4OuterHcalSubsystem *hcal = new PHG4OuterHcalSubsystem("HCALOUT");
   // hcal->set_double_param("inner_radius", 183.3);
@@ -101,11 +103,11 @@ double HCalOuter(PHG4Reco *g4Reco,
 
   hcal->SetActive();
   hcal->SuperDetector("HCALOUT");
-  if (absorberactive)
+  if (AbsorberActive)
   {
     hcal->SetAbsorberActive();
   }
-  hcal->OverlapCheck(overlapcheck);
+  hcal->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(hcal);
 
   radius = hcal->get_double_param("outer_radius");
@@ -117,8 +119,6 @@ double HCalOuter(PHG4Reco *g4Reco,
 
 void HCALOuter_Cells(int verbosity = 0)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4HcalCellReco *hc = new PHG4HcalCellReco("HCALOUT_CELLRECO");
@@ -139,8 +139,6 @@ void HCALOuter_Cells(int verbosity = 0)
 
 void HCALOuter_Towers(int verbosity = 0)
 {
-  gSystem->Load("libg4calo.so");
-  gSystem->Load("libcalo_reco.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
   HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalOutRawTowerBuilder");
@@ -153,8 +151,7 @@ void HCALOuter_Towers(int verbosity = 0)
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalOutRawTowerDigitizer");
   TowerDigitizer->Detector("HCALOUT");
   //  TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
-  TowerDigitizer->set_digi_algorithm(
-      RawTowerDigitizer::kSimple_photon_digitalization);
+  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitalization);
   TowerDigitizer->set_pedstal_central_ADC(0);
   TowerDigitizer->set_pedstal_width_ADC(1);  // From Jin's guess. No EMCal High Gain data yet! TODO: update
   TowerDigitizer->set_photonelec_ADC(16. / 5.);
@@ -179,8 +176,6 @@ void HCALOuter_Towers(int verbosity = 0)
 
 void HCALOuter_Clusters(int verbosity = 0)
 {
-  gSystem->Load("libcalo_reco.so");
-
   Fun4AllServer *se = Fun4AllServer::instance();
 
   if (G4HCALOUT::HCalOut_clusterizer == G4HCALOUT::kHCalOutTemplateClusterizer)
@@ -207,13 +202,11 @@ void HCALOuter_Clusters(int verbosity = 0)
   return;
 }
 
-void HCALOuter_Eval(std::string outputfile, int verbosity = 0)
+void HCALOuter_Eval(const std::string &outputfile, int verbosity = 0)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4eval.so");
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  CaloEvaluator *eval = new CaloEvaluator("HCALOUTEVALUATOR", "HCALOUT", outputfile.c_str());
+  CaloEvaluator *eval = new CaloEvaluator("HCALOUTEVALUATOR", "HCALOUT", outputfile);
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
