@@ -27,22 +27,29 @@ namespace G4PIPE
   static double al_pipe_length    = 88.3;   // extension beyond +/- 40 cm
 }  // namespace G4PIPE
 
-void PipeInit() {}
+void PipeInit() 
+{
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PIPE::be_pipe_length/2.+G4PIPE::al_pipe_length);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -(G4PIPE::be_pipe_length/2.+G4PIPE::al_pipe_length));
+}
 
 double Pipe(PHG4Reco* g4Reco,
 	    double radius,
-	    const int absorberactive = 0,
-	    int verbosity = 0) {
+	    const int absorberactive = 0)
+{
 
+  bool AbsorberActive = Enable::ABSORBER || Enable::PIPE_ABSORBER || absorberactive;
+bool OverlapCheck = Enable::OVERLAPCHECK || Enable::PIPE_OVERLAPCHECK;
+  int verbosity = std::max(Enable::VERBOSITY, Enable::PIPE_VERBOSITY);
+  
   if (radius > G4PIPE::be_pipe_radius) {
     cout << "inconsistency: radius: " << radius 
 	 << " larger than pipe inner radius: " << G4PIPE::be_pipe_radius << endl;
     gSystem->Exit(-1);
   }
-  
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4testbench.so");
 
+  
   // mid-rapidity beryillium pipe
   PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("VAC_BE_PIPE", 0);
   cyl->set_double_param("radius",0.0);
@@ -51,7 +58,8 @@ double Pipe(PHG4Reco* g4Reco,
   cyl->set_string_param("material","G4_Galactic");
   cyl->set_double_param("thickness",G4PIPE::be_pipe_radius);
   cyl->SuperDetector("PIPE");
-  if (absorberactive)  cyl->SetActive();
+  if (AbsorberActive)  cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem( cyl );
   
   cyl = new PHG4CylinderSubsystem("BE_PIPE", 1);
@@ -61,7 +69,8 @@ double Pipe(PHG4Reco* g4Reco,
   cyl->set_string_param("material","G4_Be");
   cyl->set_double_param("thickness",G4PIPE::be_pipe_thickness);
   cyl->SuperDetector("PIPE");
-  if (absorberactive)  cyl->SetActive();
+  if (AbsorberActive)  cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem( cyl );
 
   // north aluminum pipe
@@ -73,7 +82,8 @@ double Pipe(PHG4Reco* g4Reco,
   cyl->set_string_param("material","G4_Galactic");
   cyl->set_double_param("thickness",G4PIPE::al_pipe_radius);
   cyl->SuperDetector("PIPE");
-  if (absorberactive)  cyl->SetActive();
+  if (AbsorberActive)  cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem( cyl );
 
   cyl = new PHG4CylinderSubsystem("N_AL_PIPE", 3);
@@ -84,7 +94,8 @@ double Pipe(PHG4Reco* g4Reco,
   cyl->set_string_param("material","G4_Al");
   cyl->set_double_param("thickness",G4PIPE::al_pipe_thickness);
   cyl->SuperDetector("PIPE");
-  if (absorberactive)  cyl->SetActive();
+  if (AbsorberActive)  cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem( cyl );
 
   // south aluminum pipe
@@ -96,7 +107,8 @@ double Pipe(PHG4Reco* g4Reco,
   cyl->set_string_param("material","G4_Galactic");
   cyl->set_double_param("thickness",G4PIPE::al_pipe_radius);
   cyl->SuperDetector("PIPE");
-  if (absorberactive)  cyl->SetActive();
+  if (AbsorberActive)  cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem( cyl );
 
   cyl = new PHG4CylinderSubsystem("S_AL_PIPE", 5);
@@ -107,7 +119,8 @@ double Pipe(PHG4Reco* g4Reco,
   cyl->set_string_param("material","G4_Al");
   cyl->set_double_param("thickness",G4PIPE::al_pipe_thickness);
   cyl->SuperDetector("PIPE");
-  if (absorberactive)  cyl->SetActive();
+  if (AbsorberActive)  cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem( cyl );
   
   radius = G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness;
