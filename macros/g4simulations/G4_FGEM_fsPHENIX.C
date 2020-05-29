@@ -187,6 +187,8 @@ int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
   //      << "make_GEM_station - GEM construction with PHG4SectorSubsystem - make_GEM_station_EdgeReadout  of "
   //      << name << endl;
 
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::FGEM_OVERLAPCHECK;
+
   double polar_angle = 0;
 
   if (zpos < 0)
