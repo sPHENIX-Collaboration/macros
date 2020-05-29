@@ -17,27 +17,30 @@ R__LOAD_LIBRARY(libg4mvtx.so)
 namespace Enable
 {
   static bool MVTX = false;
+  static bool MVTX_OVERLAPCHECK = false;
+  static int MVTX_VERBOSITY = 0;
+
 }
 
-namespace MVTX
+namespace G4MVTX
 {
   const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
-  const int N_staves[MVTX::n_maps_layer] = {18, 24, 30};
-  const double nom_radius[MVTX::n_maps_layer] = {36.4, 48.1, 59.8};
+  const int N_staves[n_maps_layer] = {18, 24, 30};
+  const double nom_radius[n_maps_layer] = {36.4, 48.1, 59.8};
 }  // namespace MVTX
 
 void MvtxInit(int verbosity = 0)
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, MVTX::nom_radius[MVTX::n_maps_layer - 1] / 10. + 0.7);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4MVTX::nom_radius[G4MVTX::n_maps_layer - 1] / 10. + 0.7);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 16.);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -17.);
 }
 
 double Mvtx(PHG4Reco* g4Reco, double radius,
-            const int absorberactive = 0,
-            int verbosity = 0)
+            const int absorberactive = 0)
 {
-  bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
+  bool maps_overlapcheck = Enable::OVERLAPCHECK || Enable::MVTX_OVERLAPCHECK;
+  int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
 
   // Update EIC MAPS layer structure based on inner two layers of U. Birmingham tracker
 
@@ -52,14 +55,14 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   //    ALICE outer 840 mm  4 mm  133.8 6.0 deg 0.8 % X0  16
   //    ALICE outer 840 mm  4 mm  180 6.0 deg 0.8 % X0  21
 
-  //    int N_staves[MVTX::n_maps_layer] = {18, 24, 30};
-  //    double nom_radius[MVTX::n_maps_layer] = {36.4, 48.1,  59.8};
-  for (int ilyr = 0; ilyr < MVTX::n_maps_layer; ilyr++)
+  //    int N_staves[G4MVTX::n_maps_layer] = {18, 24, 30};
+  //    double nom_radius[G4MVTX::n_maps_layer] = {36.4, 48.1,  59.8};
+  for (int ilyr = 0; ilyr < G4MVTX::n_maps_layer; ilyr++)
   {
     mvtx->set_int_param(ilyr, "active", 1);  //non-automatic initialization in PHG4DetectorGroupSubsystem
     mvtx->set_int_param(ilyr, "layer", ilyr);
-    mvtx->set_int_param(ilyr, "N_staves", MVTX::N_staves[ilyr]);
-    mvtx->set_double_param(ilyr, "layer_nominal_radius", MVTX::nom_radius[ilyr]);  // mm
+    mvtx->set_int_param(ilyr, "N_staves", G4MVTX::N_staves[ilyr]);
+    mvtx->set_double_param(ilyr, "layer_nominal_radius", G4MVTX::nom_radius[ilyr]);  // mm
     mvtx->set_double_param(ilyr, "phitilt", 12.0 * 180. / M_PI + M_PI);
     mvtx->set_double_param(ilyr, "phi0", 0);
   }
@@ -68,7 +71,7 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   mvtx->SetActive(1);
   mvtx->OverlapCheck(maps_overlapcheck);
   g4Reco->registerSubsystem(mvtx);
-  return MVTX::nom_radius[MVTX::n_maps_layer - 1] / 10.;  // return cm
+  return G4MVTX::nom_radius[G4MVTX::n_maps_layer - 1] / 10.;  // return cm
 }
 
 // Central detector cell reco is disabled as EIC setup use the fast tracking sim for now
