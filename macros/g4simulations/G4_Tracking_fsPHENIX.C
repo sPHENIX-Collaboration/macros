@@ -3,6 +3,7 @@
 #include "GlobalVariables.C"
 
 #include "G4_Mvtx.C"
+#include "G4_Intt.C"
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -47,6 +48,7 @@ R__LOAD_LIBRARY(libtrack_reco.so)
 //==============================================
 
 /////////////// INTT
+/*
 int n_intt_layer = 4;  // must be 4 or 0, setting to zero removes INTT completely
 int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI,
@@ -62,7 +64,7 @@ enum enu_InttDeadMapType      // Dead map options for INTT
   kIntt8PercentDeadMap = 8   // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
 };
 enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
-
+*/
 ///////////////// TPC
 int n_tpc_layer_inner = 16;
 int tpc_layer_rphi_count_inner = 1152;
@@ -95,7 +97,7 @@ double Tracking(PHG4Reco* g4Reco, double radius,
                 int verbosity = 0)
 {
   // create the three tracker subsystems
-
+/*
   if (n_intt_layer > 0)
   {
     //-------------------
@@ -143,7 +145,7 @@ double Tracking(PHG4Reco* g4Reco, double radius,
     // outer radius marker (translation back to cm)
     radius = intt_radius_max * 0.1;
   }
-
+*/
 
   // The Tpc - always present!
   //================================
@@ -183,6 +185,7 @@ void Tracking_Cells(int verbosity = 0)
 
   // Intt hit reco
   //===========
+/*
   if (n_intt_layer > 0)
   {
     // new storage containers
@@ -193,7 +196,7 @@ void Tracking_Cells(int verbosity = 0)
     reco->Verbosity(verbosity);
     se->registerSubsystem(reco);
   }
-
+*/
   //=========================
   // setup Tpc readout for filling cells
   // g4tpc/PHG4TpcElectronDrift uses
@@ -216,7 +219,7 @@ void Tracking_Cells(int verbosity = 0)
 
   // The pad plane readout default is set in PHG4TpcPadPlaneReadout
   // We may want to change the number of inner layers, and can do that here
-  padplane->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + n_intt_layer);  // sPHENIX layer number of first Tpc readout layer
+  padplane->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);  // sPHENIX layer number of first Tpc readout layer
   padplane->set_int_param("ntpc_layers_inner", n_tpc_layer_inner);
   padplane->set_int_param("ntpc_phibins_inner", tpc_layer_rphi_count_inner);
 
@@ -236,47 +239,9 @@ void Tracking_Clus(int verbosity = 0)
   //-------------------------------------------
   // Digitize the hit energy into ADC
   //------------------------------------------
-
-  if (n_intt_layer > 0)
+  if (G4INTT::n_intt_layer > 0)
     {
 
-#ifdef SVTXDEADMAP
-      if (InttDeadMapOption != kInttNoDeadMap)
-	{
-	  // Load pre-defined deadmaps
-	  PHG4SvtxDeadMapLoader* deadMapIntt = new PHG4SvtxDeadMapLoader("INTT");
-	  for (int i = 0; i < n_intt_layer; i++)
-	    {
-	      const int database_strip_type = (laddertype[i] == PHG4InttDefs::SEGMENTATION_Z) ? 0 : 1;
-	      string DeadMapConfigName = Form("LadderType%d_RndSeed%d/", database_strip_type, i);
-
-
-	      if (InttDeadMapOption == kIntt4PercentDeadMap)
-		{
-
-		  string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_4Percent/"); //4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
-		  DeadMapPath +=  DeadMapConfigName;
-		  deadMapIntt->deadMapPath(G4MVTX::n_maps_layer + i, DeadMapPath);
-
-		}
-	      else if (InttDeadMapOption == kIntt8PercentDeadMap)
-		{
-
-		  string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap_8Percent/"); // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
-		  DeadMapPath +=  DeadMapConfigName;
-		  deadMapIntt->deadMapPath(G4MVTX::n_maps_layer + i, DeadMapPath);
-
-		}
-	      else
-		{
-		  cout <<"Tracking_Reco - fatal error - invalid InttDeadMapOption = "<<InttDeadMapOption<<endl;
-		  exit(1);
-		}
-	    }
-	  //      deadMapIntt -> Verbosity(1);
-	  se->registerSubsystem(deadMapIntt);
-	}
-#endif // SVTXDEADMAP
 
       // Intt
       //=====
@@ -301,6 +266,7 @@ void Tracking_Clus(int verbosity = 0)
 	| 11                    | Threshold DAC 7 | 176           | 704                 | 55000                             | 44000     | 1.29E+00        |
 	DAC0-7 threshold as fraction to MIP voltage are set to PHG4InttDigitizer::set_adc_scale as 3-bit ADC threshold as fractions to MIP energy deposition.
       */
+/*
       std::vector<double> userrange;  // 3-bit ADC threshold relative to the mip_e at each layer.
       userrange.push_back(0.0584625322997416);
       userrange.push_back(0.116925064599483);
@@ -314,24 +280,24 @@ void Tracking_Clus(int verbosity = 0)
       // new containers
       PHG4InttDigitizer* digiintt = new PHG4InttDigitizer();
       digiintt->Verbosity(verbosity);
-      for (int i = 0; i < n_intt_layer; i++)
+      for (int i = 0; i < G4INTT::n_intt_layer; i++)
 	{
 	  digiintt->set_adc_scale(G4MVTX::n_maps_layer + i, userrange);
 	}
       se->registerSubsystem(digiintt);
+*/
     }
-
   // Tpc
   //====
   PHG4TpcDigitizer* digitpc = new PHG4TpcDigitizer();
-  digitpc->SetTpcMinLayer(G4MVTX::n_maps_layer + n_intt_layer);
+  digitpc->SetTpcMinLayer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
   double ENC = 670.0;  // standard
   digitpc->SetENC(ENC);
   double ADC_threshold = 4.0 * ENC;
   digitpc->SetADCThreshold(ADC_threshold);  // 4 * ENC seems OK
   digitpc->Verbosity(0);
   cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
-       << " maps+Intt layers set to " << G4MVTX::n_maps_layer + n_intt_layer << endl;
+       << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << endl;
 
   se->registerSubsystem(digitpc);
 
@@ -341,6 +307,7 @@ void Tracking_Clus(int verbosity = 0)
 
   // For the Intt layers
   //===============
+/*
   InttClusterizer* inttclusterizer = new InttClusterizer("InttClusterizer", G4MVTX::n_maps_layer, G4MVTX::n_maps_layer + n_intt_layer - 1);
   inttclusterizer->Verbosity(verbosity);
   // no Z clustering for Intt type 1 layers (we DO want Z clustering for type 0 layers)
@@ -351,7 +318,7 @@ void Tracking_Clus(int verbosity = 0)
       inttclusterizer->set_z_clustering(i, false);
   }
   se->registerSubsystem(inttclusterizer);
-
+*/
   // For the Tpc
   //==========
   TpcClusterizer* tpcclusterizer = new TpcClusterizer();
@@ -403,15 +370,15 @@ void Tracking_Reco(int verbosity = 0)
       // find seed tracks using a subset of TPC layers
       int min_layers = 4;
       int nlayers_seeds = 12;
-      PHHoughSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", G4MVTX::n_maps_layer, n_intt_layer, n_gas_layer, nlayers_seeds, min_layers);
+      PHHoughSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, n_gas_layer, nlayers_seeds, min_layers);
       track_seed->Verbosity(0);
       se->registerSubsystem(track_seed);
 
       // Find all clusters associated with each seed track
-      PHGenFitTrkProp* track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", G4MVTX::n_maps_layer, n_intt_layer, n_gas_layer);
+      PHGenFitTrkProp* track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, n_gas_layer);
       track_prop->Verbosity(0);
       se->registerSubsystem(track_prop);
-      for(int i = 0;i<n_intt_layer;i++)
+      for(int i = 0;i<G4INTT::n_intt_layer;i++)
 	{
 	  // strip length is along theta
 	  track_prop->set_max_search_win_theta_intt(i, 0.200);
@@ -475,7 +442,7 @@ void Tracking_Reco(int verbosity = 0)
   // Tracking evaluation
   //----------------
   SvtxEvaluator* eval;
-  eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile, "SvtxTrackMap", G4MVTX::n_maps_layer, n_intt_layer, n_gas_layer);
+  eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile, "SvtxTrackMap", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, n_gas_layer);
   eval->do_cluster_eval(true);
   eval->do_g4hit_eval(true);
   eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
@@ -491,7 +458,7 @@ void Tracking_Reco(int verbosity = 0)
     // make a second evaluator that records tracks fitted with primary vertex included
     // good for analysis of prompt tracks, particularly if Mvtx is not present
     SvtxEvaluator* evalp;
-    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", G4MVTX::n_maps_layer, n_intt_layer, n_gas_layer);    evalp->do_cluster_eval(true);
+    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, n_gas_layer);    evalp->do_cluster_eval(true);
     evalp->do_g4hit_eval(true);
     evalp->do_hit_eval(false);
     evalp->do_gpoint_eval(false);
