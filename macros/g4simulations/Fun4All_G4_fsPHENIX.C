@@ -1,24 +1,6 @@
 #pragma once
 
-#include <fun4all/SubsysReco.h>
-#include <fun4all/Fun4AllServer.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllDummyInputManager.h>
-#include <fun4all/Fun4AllOutputManager.h>
-#include <fun4all/Fun4AllDstInputManager.h>
-#include <fun4all/Fun4AllNoSyncDstInputManager.h>
-#include <fun4all/Fun4AllDstOutputManager.h>
-#include <g4main/PHG4ParticleGeneratorBase.h>
-#include <g4main/PHG4ParticleGenerator.h>
-#include <g4main/PHG4SimpleEventGenerator.h>
-#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
-#include <g4main/PHG4ParticleGun.h>
-#include <g4main/HepMCNodeReader.h>
-#include <g4detectors/PHG4DetectorSubsystem.h>
-#include <phhepmc/Fun4AllHepMCInputManager.h>
-#include <phool/recoConsts.h>
-#include <phpythia6/PHPythia6.h>
-#include <phpythia8/PHPythia8.h>
+#include "GlobalVariables.C"
 #include "DisplayOn.C"
 #include "G4Setup_fsPHENIX.C"
 #include "G4_Bbc.C"
@@ -27,6 +9,33 @@
 #include "G4_Jets.C"
 #include "G4_FwdJets.C"
 #include "G4_DSTReader_fsPHENIX.C"
+
+#include <g4detectors/PHG4DetectorSubsystem.h>
+
+#include <g4main/PHG4ParticleGeneratorBase.h>
+#include <g4main/PHG4ParticleGenerator.h>
+#include <g4main/PHG4SimpleEventGenerator.h>
+#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
+#include <g4main/PHG4ParticleGun.h>
+#include <g4main/HepMCNodeReader.h>
+
+#include <phhepmc/Fun4AllHepMCInputManager.h>
+
+#include <phpythia6/PHPythia6.h>
+
+#include <phpythia8/PHPythia8.h>
+
+#include <fun4all/SubsysReco.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllDummyInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllNoSyncDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+
+#include <phool/recoConsts.h>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
@@ -72,70 +81,72 @@ int Fun4All_G4_fsPHENIX(
   //======================
 //  Enable::ABSORBER = true;
 
-  bool do_bbc = false;
+  bool do_bbc = true;
   
-  Enable::PIPE = false;
-  Enable::PIPE_OVERLAPCHECK = true;
+  Enable::PIPE = true;
+  Enable::PIPE_OVERLAPCHECK = false;
   // central tracking
-  bool do_tracking = false;
+  bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
-  bool do_tracking_cluster = do_tracking_cell && false;
+  bool do_tracking_cluster = do_tracking_cell && true;
   bool do_tracking_track = do_tracking_cluster && true;
   bool do_tracking_eval = do_tracking_track && true;
 
   // central calorimeters, which is a detailed simulation and slow to run
-  Enable::CEMC = false;
+  Enable::CEMC = true;
   bool do_cemc_cell = Enable::CEMC && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
 
-  Enable::HCALIN = false;
+  Enable::HCALIN = true;
   bool do_hcalin_cell =   Enable::HCALIN && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
   bool do_hcalin_eval = do_hcalin_cluster && true;
 
-  Enable::MAGNET = false;
+  Enable::MAGNET = true;
 
-  Enable::HCALOUT = false;
+  Enable::HCALOUT = true;
   bool do_hcalout_cell = Enable::HCALOUT && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
-  bool do_hcalout_eval = do_hcalout_cluster && false;
+  bool do_hcalout_eval = do_hcalout_cluster && true;
 
-  bool do_global = false;
+  bool do_global = true;
   bool do_global_fastsim = false;
 
-  bool do_jet_reco = false;
+  bool do_jet_reco = true;
   bool do_jet_eval = do_jet_reco && true;
 
-  bool do_fwd_jet_reco = false;
+  bool do_fwd_jet_reco = true;
   bool do_fwd_jet_eval = do_fwd_jet_reco && true;
 
   // fsPHENIX geometry
 
-  Enable::FGEM = false;
-  bool do_FGEM_track = Enable::FGEM &&  false;
+  Enable::FGEM = true;
+  bool do_FGEM_track = Enable::FGEM &&  true;
   bool do_FGEM_eval = do_FGEM_track &&  true;
 
-  Enable::FEMC = false;
-  Enable::FEMC_ABSORBER = false;
+  Enable::FEMC = true;
+  Enable::FEMC_ABSORBER = true;
   bool do_FEMC_cell = Enable::FEMC && true;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
 
-  Enable::FHCAL = false;
-  bool do_FHCAL_cell = Enable::FHCAL && false;
+  Enable::FHCAL = true;
+  Enable::FHCAL_ABSORBER = true;
+  bool do_FHCAL_cell = Enable::FHCAL && true;
   bool do_FHCAL_twr = do_FHCAL_cell && true;
   bool do_FHCAL_cluster = do_FHCAL_twr && true;
 
-  Enable::PISTON = false;
+  Enable::PISTON = true;
+  Enable::PISTON_ABSORBER = true;
   Enable::PISTON_OVERLAPCHECK = false;
 
   Enable::PLUGDOOR = true;
+  Enable::PLUGDOOR_ABSORBER = true;
   Enable::PLUGDOOR_OVERLAPCHECK = false;
-  Enable::PLUGDOOR_ABSORBER = false;
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
