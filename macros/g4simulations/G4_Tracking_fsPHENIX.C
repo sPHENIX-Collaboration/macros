@@ -16,10 +16,6 @@
 
 #include <g4main/PHG4Reco.h>
 
-#include <g4mvtx/PHG4MvtxDefs.h>
-#include <g4mvtx/PHG4MvtxDigitizer.h>
-#include <g4mvtx/PHG4MvtxSubsystem.h>
-
 #include <g4tpc/PHG4TpcDigitizer.h>
 #include <g4tpc/PHG4TpcElectronDrift.h>
 #include <g4tpc/PHG4TpcPadPlane.h>
@@ -27,7 +23,6 @@
 #include <g4tpc/PHG4TpcSubsystem.h>
 
 #include <intt/InttClusterizer.h>
-#include <mvtx/MvtxClusterizer.h>
 #include <tpc/TpcClusterizer.h>
 
 #include <trackreco/PHGenFitTrkFitter.h>
@@ -43,10 +38,8 @@
 
 R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libg4intt.so)
-R__LOAD_LIBRARY(libg4mvtx.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libintt.so)
-R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 
@@ -103,31 +96,6 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 {
   // create the three tracker subsystems
 
-/*
-  if (n_maps_layer > 0)
-  {
-    bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
-
-    // MAPS inner barrel layers
-    //======================================================
-    // YCM (2020-01-08): Using default values from PHG4MvtxSubsystem and PHG4MvtxDefs....
-
-    PHG4MvtxSubsystem* mvtx = new PHG4MvtxSubsystem("MVTX");
-    mvtx->Verbosity(verbosity);
-
-    for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
-    {
-      double radius_lyr = PHG4MvtxDefs::mvtxdat[ilayer][PHG4MvtxDefs::kRmd];
-      if (verbosity)
-        cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << endl;
-      radius = radius_lyr;
-    }
-    mvtx->set_string_param(PHG4MvtxDefs::GLOBAL ,"stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v1.gdml"));
-    mvtx->SetActive(1);
-    mvtx->OverlapCheck(maps_overlapcheck);
-    g4Reco->registerSubsystem(mvtx);
-  }
-*/
   if (n_intt_layer > 0)
   {
     //-------------------
@@ -208,41 +176,11 @@ void Tracking_Cells(int verbosity = 0)
   // into detector hits (TrkrHits)
 
   //---------------
-  // Load libraries
-  //---------------
-
-  gSystem->Load("libtrack_io.so");
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4tpc.so");
-  gSystem->Load("libg4intt.so");
-  gSystem->Load("libg4mvtx.so");
-  gSystem->Load("libtpc.so");
-  gSystem->Load("libintt.so");
-  gSystem->Load("libmvtx.so");
-
-  //---------------
   // Fun4All server
   //---------------
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  // Mvtx hit reco
-  //===========
-/*
-  if (n_maps_layer > 0)
-  {
-    // new storage containers
-    PHG4MvtxHitReco* maps_hits = new PHG4MvtxHitReco("MVTX");
-    maps_hits->Verbosity(verbosity);
-    for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
-    {
-      // override the default timing window for this layer - default is +/- 5000 ns
-      maps_hits->set_timing_window(ilayer, -5000, 5000);
-    }
-    se->registerSubsystem(maps_hits);
-  }
-*/
   // Intt hit reco
   //===========
   if (n_intt_layer > 0)
@@ -290,12 +228,6 @@ void Tracking_Clus(int verbosity = 0)
   // processes the TrkrHits to make clusters, then reconstruct tracks and vertices
 
   //---------------
-  // Load libraries
-  //---------------
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libtrack_reco.so");
-
-  //---------------
   // Fun4All server
   //---------------
 
@@ -305,15 +237,6 @@ void Tracking_Clus(int verbosity = 0)
   // Digitize the hit energy into ADC
   //------------------------------------------
 
-  // Mvtx
-  //======
-/*
-  PHG4MvtxDigitizer* digimvtx = new PHG4MvtxDigitizer();
-  digimvtx->Verbosity(0);
-  // energy deposit in 25 microns = 9.6 KeV = 1000 electrons collected after recombination
-  //digimvtx->set_adc_scale(0.95e-6);  // default set in code is 0.95e-06, which is 99 electrons
-  se->registerSubsystem(digimvtx);
-*/
   if (n_intt_layer > 0)
     {
 
@@ -416,13 +339,6 @@ void Tracking_Clus(int verbosity = 0)
   // Cluster Hits
   //-------------
 
-/*
-  // For the Mvtx layers
-  //================
-  MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
-  mvtxclusterizer->Verbosity(verbosity);
-  se->registerSubsystem(mvtxclusterizer);
-*/
   // For the Intt layers
   //===============
   InttClusterizer* inttclusterizer = new InttClusterizer("InttClusterizer", G4MVTX::n_maps_layer, G4MVTX::n_maps_layer + n_intt_layer - 1);
@@ -447,12 +363,6 @@ void Tracking_Clus(int verbosity = 0)
 void Tracking_Reco(int verbosity = 0)
 {
   // processes the TrkrHits to make clusters, then reconstruct tracks and vertices
-
-  //---------------
-  // Load libraries
-  //---------------
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libtrack_reco.so");
 
   //---------------
   // Fun4All server
@@ -553,18 +463,8 @@ void Tracking_Reco(int verbosity = 0)
 }
 
 
- void Tracking_Eval(std::string outputfile,  int verbosity = 0)
+ void Tracking_Eval(const std::string &outputfile,  int verbosity = 0)
 {
-  //---------------
-  // Load libraries
-  //---------------
-
-  gSystem->Load("libg4eval.so");
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libtrack_reco.so");
-
-
   //---------------
   // Fun4All server
   //---------------
@@ -575,7 +475,7 @@ void Tracking_Reco(int verbosity = 0)
   // Tracking evaluation
   //----------------
   SvtxEvaluator* eval;
-  eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile.c_str(), "SvtxTrackMap", G4MVTX::n_maps_layer, n_intt_layer, n_gas_layer);
+  eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile, "SvtxTrackMap", G4MVTX::n_maps_layer, n_intt_layer, n_gas_layer);
   eval->do_cluster_eval(true);
   eval->do_g4hit_eval(true);
   eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...

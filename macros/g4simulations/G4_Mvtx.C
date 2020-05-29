@@ -17,6 +17,7 @@
 #include <vector>
 
 R__LOAD_LIBRARY(libg4mvtx.so)
+R__LOAD_LIBRARY(libmvtx.so)
 
 namespace Enable
 {
