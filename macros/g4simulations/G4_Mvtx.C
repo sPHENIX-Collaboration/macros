@@ -4,6 +4,7 @@
 
 #include <g4mvtx/PHG4MvtxDefs.h>
 #include <g4mvtx/PHG4MvtxDigitizer.h>
+#include <g4mvtx/PHG4MvtxHitReco.h>
 #include <g4mvtx/PHG4MvtxSubsystem.h>
 
 #include <g4main/PHG4Reco.h>
@@ -69,7 +70,7 @@ void Mvtx_Cells()
     // new storage containers
     PHG4MvtxHitReco* maps_hits = new PHG4MvtxHitReco("MVTX");
     maps_hits->Verbosity(verbosity);
-    for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
+    for (int ilayer = 0; ilayer < G4MVTX::n_maps_layer; ilayer++)
     {
       // override the default timing window for this layer - default is +/- 5000 ns
       maps_hits->set_timing_window(ilayer, -5000, 5000);
