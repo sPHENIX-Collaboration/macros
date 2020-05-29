@@ -4,10 +4,11 @@
 #include "G4_BlackHole.C"
 #include "G4_Pipe.C"
 #include "G4_PlugDoor_fsPHENIX.C"
-#include "G4_Tracking.C"
+#include "G4_Tracking_fsPHENIX.C"
 #include "G4_CEmc_Spacal.C"
 #include "G4_HcalIn_ref.C"
 #include "G4_Magnet.C"
+#include "G4_Mvtx.C"
 #include "G4_HcalOut_ref.C"
 #include "G4_FGEM_fsPHENIX.C"
 #include "G4_FEMC.C"
@@ -17,15 +18,24 @@
 #include "G4_World.C"
 
 #include <g4decayer/EDecayType.hh>
+
 #include <g4detectors/PHG4ConeSubsystem.h>
+
 #include <g4eval/PHG4DstCompressReco.h>
+
 #include <g4main/PHG4Reco.h>
 #include <g4main/PHG4TruthSubsystem.h>
+#include <g4main/HepMCNodeReader.h>
+
 #include <phfield/PHFieldConfig.h>
 
+#include <fun4all/Fun4AllDstOutputManager.h>
 
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
+
+void ShowerCompress(int verbosity = 0);
+void DstCompress(Fun4AllDstOutputManager* out);
 
 void RunLoadTest() {}
 
@@ -38,9 +48,12 @@ void G4Init(bool do_svtx = true)
     {
       PipeInit();
     }
+  if (Enable::MVTX)
+  {
+    MvtxInit();
+  }
   if (do_svtx)
     {
-      gROOT->LoadMacro("G4_Tracking.C");
       TrackingInit();
     }
 
@@ -146,6 +159,10 @@ int G4Setup(const int absorberactive = 0,
   if (Enable::PIPE)
   {
     radius = Pipe(g4Reco, radius, absorberactive);
+  }
+  if (Enable::MVTX)
+  {
+    radius = Mvtx(g4Reco, radius, absorberactive);
   }
   //----------------------------------------
   // SVTX
