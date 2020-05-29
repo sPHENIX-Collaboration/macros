@@ -17,7 +17,6 @@
 #include <g4main/PHG4SimpleEventGenerator.h>
 #include <g4main/PHG4ParticleGeneratorVectorMeson.h>
 #include <g4main/PHG4ParticleGun.h>
-#include <g4main/HepMCNodeReader.h>
 
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 
@@ -86,70 +85,74 @@ int Fun4All_G4_fsPHENIX(
   Enable::PIPE = true;
   Enable::PIPE_OVERLAPCHECK = false;
   // central tracking
+  Enable::MVTX = true;
+  bool do_mvtx_cell = Enable::MVTX && true;
+  bool do_mvtx_cluster = do_mvtx_cell && true;
+
   bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
   bool do_tracking_cluster = do_tracking_cell && true;
   bool do_tracking_track = do_tracking_cluster && true;
-  bool do_tracking_eval = do_tracking_track && true;
+  bool do_tracking_eval = do_tracking_track && false;
 
   // central calorimeters, which is a detailed simulation and slow to run
-  Enable::CEMC = true;
+  Enable::CEMC = false;
   bool do_cemc_cell = Enable::CEMC && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
 
-  Enable::HCALIN = true;
+  Enable::HCALIN = false;
   bool do_hcalin_cell =   Enable::HCALIN && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
   bool do_hcalin_eval = do_hcalin_cluster && true;
 
-  Enable::MAGNET = true;
+  Enable::MAGNET = false;
 
-  Enable::HCALOUT = true;
+  Enable::HCALOUT = false;
   bool do_hcalout_cell = Enable::HCALOUT && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
   bool do_hcalout_eval = do_hcalout_cluster && true;
 
-  bool do_global = true;
+  bool do_global = false;
   bool do_global_fastsim = false;
 
-  bool do_jet_reco = true;
+  bool do_jet_reco = false;
   bool do_jet_eval = do_jet_reco && true;
 
-  bool do_fwd_jet_reco = true;
+  bool do_fwd_jet_reco = false;
   bool do_fwd_jet_eval = do_fwd_jet_reco && true;
 
   // fsPHENIX geometry
 
-  Enable::FGEM = true;
+  Enable::FGEM = false;
   bool do_FGEM_track = Enable::FGEM &&  true;
   bool do_FGEM_eval = do_FGEM_track &&  true;
 
-  Enable::FEMC = true;
+  Enable::FEMC = false;
   Enable::FEMC_ABSORBER = true;
   bool do_FEMC_cell = Enable::FEMC && true;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
 
-  Enable::FHCAL = true;
+  Enable::FHCAL = false;
   Enable::FHCAL_ABSORBER = true;
   bool do_FHCAL_cell = Enable::FHCAL && true;
   bool do_FHCAL_twr = do_FHCAL_cell && true;
   bool do_FHCAL_cluster = do_FHCAL_twr && true;
 
-  Enable::PISTON = true;
+  Enable::PISTON = false;
   Enable::PISTON_ABSORBER = true;
   Enable::PISTON_OVERLAPCHECK = false;
 
-  Enable::PLUGDOOR = true;
+  Enable::PLUGDOOR = false;
   Enable::PLUGDOOR_ABSORBER = true;
   Enable::PLUGDOOR_OVERLAPCHECK = false;
 
   // new settings using Enable namespace in GlobalVariables.C
-  Enable::BLACKHOLE = true;
+//  Enable::BLACKHOLE = true;
   BlackHoleGeometry::visible = true;
 
 
@@ -276,6 +279,8 @@ int Fun4All_G4_fsPHENIX(
   // Detector Division
   //------------------
 
+  if (do_mvtx_cell) Mvtx_Cells();
+
   if (do_tracking_cell) Tracking_Cells();
 
   if (do_cemc_cell) CEMC_Cells();
@@ -315,6 +320,7 @@ int Fun4All_G4_fsPHENIX(
   //--------------
   // SVTX tracking
   //--------------
+  if (do_mvtx_cluster) Mvtx_Clustering();
   if (do_tracking_cluster) Tracking_Clus();
 
   if (do_tracking_track) Tracking_Reco();
