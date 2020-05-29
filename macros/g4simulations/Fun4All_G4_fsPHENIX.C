@@ -88,12 +88,15 @@ int Fun4All_G4_fsPHENIX(
   Enable::MVTX = true;
   bool do_mvtx_cell = Enable::MVTX && true;
   bool do_mvtx_cluster = do_mvtx_cell && true;
+  Enable::INTT = true;
+  bool do_intt_cell = Enable::INTT && true;
+  bool do_intt_cluster = do_intt_cell && true;
 
   bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
   bool do_tracking_cluster = do_tracking_cell && true;
   bool do_tracking_track = do_tracking_cluster && true;
-  bool do_tracking_eval = do_tracking_track && false;
+  bool do_tracking_eval = do_tracking_track && true;
 
   // central calorimeters, which is a detailed simulation and slow to run
   Enable::CEMC = false;
@@ -280,6 +283,7 @@ int Fun4All_G4_fsPHENIX(
   //------------------
 
   if (do_mvtx_cell) Mvtx_Cells();
+  if (do_intt_cell) Intt_Cells();
 
   if (do_tracking_cell) Tracking_Cells();
 
@@ -321,6 +325,7 @@ int Fun4All_G4_fsPHENIX(
   // SVTX tracking
   //--------------
   if (do_mvtx_cluster) Mvtx_Clustering();
+  if (do_intt_cluster) Intt_Clustering();
   if (do_tracking_cluster) Tracking_Clus();
 
   if (do_tracking_track) Tracking_Reco();

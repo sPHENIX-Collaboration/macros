@@ -52,6 +52,10 @@ void G4Init(bool do_svtx = true)
   {
     MvtxInit();
   }
+  if (Enable::INTT)
+  {
+    InttInit();
+  }
   if (do_svtx)
     {
       TrackingInit();
@@ -163,6 +167,10 @@ int G4Setup(const int absorberactive = 0,
   if (Enable::MVTX)
   {
     radius = Mvtx(g4Reco, radius, absorberactive);
+  }
+  if (Enable::INTT)
+  {
+    radius = Intt(g4Reco, radius, absorberactive);
   }
   //----------------------------------------
   // SVTX
