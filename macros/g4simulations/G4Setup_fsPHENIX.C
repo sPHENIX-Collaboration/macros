@@ -29,8 +29,8 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 void RunLoadTest() {}
 
-void G4Init(bool do_svtx = true,
-            int n_TPC_layers = 40) {
+void G4Init(bool do_svtx = true)
+{
 
   // load detector/material macros and execute Init() function
 
@@ -41,7 +41,7 @@ void G4Init(bool do_svtx = true,
   if (do_svtx)
     {
       gROOT->LoadMacro("G4_Tracking.C");
-      TrackingInit(n_TPC_layers);
+      TrackingInit();
     }
 
   if (Enable::CEMC)

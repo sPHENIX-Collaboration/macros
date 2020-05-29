@@ -38,9 +38,6 @@ int Fun4All_G4_fsPHENIX(
     const char * outputFile = "G4fsPHENIX.root",
     const char * embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/fsPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root")
 {
-  // Set the number of TPC layer
-  const int n_TPC_layers = 40;  // use 60 for backward compatibility only
-
   //===============
   // Input options
   //===============
@@ -77,8 +74,8 @@ int Fun4All_G4_fsPHENIX(
 
   bool do_bbc = false;
   
-  Enable::PIPE = true;
-//  Enable::PIPE_OVERLAPCHECK = true;
+  Enable::PIPE = false;
+  Enable::PIPE_OVERLAPCHECK = true;
   // central tracking
   bool do_tracking = false;
   bool do_tracking_cell = do_tracking && true;
@@ -133,27 +130,20 @@ int Fun4All_G4_fsPHENIX(
   bool do_FHCAL_twr = do_FHCAL_cell && true;
   bool do_FHCAL_cluster = do_FHCAL_twr && true;
 
-  Enable::PLUGDOOR = false;
-  Enable::PLUGDOOR_ABSORBER = true;
+  Enable::PISTON = false;
+  Enable::PISTON_OVERLAPCHECK = false;
+
+  Enable::PLUGDOOR = true;
+  Enable::PLUGDOOR_OVERLAPCHECK = false;
+  Enable::PLUGDOOR_ABSORBER = false;
 
   // new settings using Enable namespace in GlobalVariables.C
-  // Enable::BLACKHOLE = true;
+  Enable::BLACKHOLE = true;
   BlackHoleGeometry::visible = true;
 
 
-  //---------------
-  // Load libraries
-  //---------------
-
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libphhepmc.so");
-  gSystem->Load("libg4testbench.so");
-  gSystem->Load("libg4eval.so");
-  gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup
-  gROOT->LoadMacro("G4Setup_fsPHENIX.C");
-  G4Init(do_tracking,n_TPC_layers);
+  G4Init(do_tracking);
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
