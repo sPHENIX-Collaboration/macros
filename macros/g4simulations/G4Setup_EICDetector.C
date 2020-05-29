@@ -2,16 +2,6 @@
 
 #include "GlobalVariables.C"
 
-#include <fun4all/Fun4AllDstOutputManager.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllServer.h>
-#include <g4detectors/PHG4CylinderSubsystem.h>
-#include <g4eval/PHG4DstCompressReco.h>
-#include <g4main/HepMCNodeReader.h>
-#include <g4main/PHG4Reco.h>
-#include <g4main/PHG4TruthSubsystem.h>
-#include <phfield/PHFieldConfig.h>
-#include <g4decayer/EDecayType.hh>
 #include "G4_Aerogel.C"
 #include "G4_BlackHole.C"
 #include "G4_CEmc_EIC.C"
@@ -23,7 +13,7 @@
 #include "G4_HcalIn_ref.C"
 #include "G4_HcalOut_ref.C"
 #include "G4_Magnet.C"
-#include "G4_Mvtx.C"
+#include "G4_Mvtx_EIC.C"
 #include "G4_PSTOF.C"
 #include "G4_Pipe_EIC.C"
 #include "G4_PlugDoor_EIC.C"
@@ -32,6 +22,22 @@
 #include "G4_Tracking_EIC.C"
 #include "G4_User.C"
 #include "G4_World.C"
+
+#include <g4detectors/PHG4CylinderSubsystem.h>
+
+#include <g4eval/PHG4DstCompressReco.h>
+
+#include <g4main/HepMCNodeReader.h>
+#include <g4main/PHG4Reco.h>
+#include <g4main/PHG4TruthSubsystem.h>
+
+#include <phfield/PHFieldConfig.h>
+
+#include <g4decayer/EDecayType.hh>
+
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
