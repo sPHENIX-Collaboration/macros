@@ -1,4 +1,5 @@
 #pragma once
+
 #include "GlobalVariables.C"
 #include "G4_BlackHole.C"
 #include "G4_Pipe.C"
@@ -21,8 +22,10 @@
 #include <g4main/PHG4TruthSubsystem.h>
 #include <phfield/PHFieldConfig.h>
 class SubsysReco;
+
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
+
 int make_piston(string name, PHG4Reco* g4Reco);
 
 void RunLoadTest() {}
@@ -111,15 +114,9 @@ int G4Setup(const int absorberactive = 0,
 
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->save_DST_geometry(true); //Save geometry from Geant4 to DST
+  WorldInit(g4Reco);
   g4Reco->set_rapidity_coverage(1.1); // according to drawings
-// uncomment to set QGSP_BERT_HP physics list for productions 
-// (default is QGSP_BERT for speed)
-  //  g4Reco->SetPhysicsList("QGSP_BERT_HP"); 
- #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
   if (decayType != EDecayType::kAll)
-#else
-  if (decayType != TPythia6Decayer::kAll)
-#endif
   {
     g4Reco->set_force_decay(decayType);
   }
@@ -241,9 +238,6 @@ int G4Setup(const int absorberactive = 0,
 
 
 void ShowerCompress(int verbosity = 0) {
-
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4eval.so");
 
   Fun4AllServer *se = Fun4AllServer::instance();
   
@@ -421,4 +415,3 @@ make_piston(string name, PHG4Reco* g4Reco)
 
   return 0;
 }
-
