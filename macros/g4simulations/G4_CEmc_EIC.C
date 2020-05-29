@@ -66,6 +66,7 @@ namespace G4CEMC
   // enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
 }  // namespace G4CEMC
 
+// Black hole and size parameters set in CEmc function
 void CEmcInit(const int nslats = 1)
 {
 }
