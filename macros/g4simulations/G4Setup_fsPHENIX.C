@@ -12,6 +12,7 @@
 #include "G4_FGEM_fsPHENIX.C"
 #include "G4_FEMC.C"
 #include "G4_FHCAL.C"
+#include "G4_Piston.C"
 #include "G4_User.C"
 #include "G4_World.C"
 
@@ -21,12 +22,10 @@
 #include <g4main/PHG4Reco.h>
 #include <g4main/PHG4TruthSubsystem.h>
 #include <phfield/PHFieldConfig.h>
-class SubsysReco;
+
 
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
-
-int make_piston(string name, PHG4Reco* g4Reco);
 
 void RunLoadTest() {}
 
@@ -78,6 +77,10 @@ void G4Init(bool do_svtx = true,
     {
       FHCALInit();
     }
+  if (Enable::PISTON)
+  {
+    PistonInit();
+  }
 
   if (Enable::PLUGDOOR)
   {
@@ -202,24 +205,20 @@ int G4Setup(const int absorberactive = 0,
   {
     FHCALSetup(g4Reco);
   }
+  if (Enable::PISTON)
+  {
+    Piston(g4Reco);
+  }
 
   if (Enable::PLUGDOOR)
   {
     PlugDoor(g4Reco);
   }
 
-  //----------------------------------------
-  // piston magnet
-//  make_piston("magpiston", g4Reco);
-
-  //----------------------------------------
   if (Enable::USER)
   {
     UserDetector(g4Reco);
   }
-  // BLACKHOLE
-  // minimal space for forward instrumentation
-  // if (radius<270) radius = 270;
 
   if (Enable::BLACKHOLE)
   {
@@ -318,100 +317,3 @@ void DstCompress(Fun4AllDstOutputManager* out) {
   }
 }
 
-int
-make_piston(string name, PHG4Reco* g4Reco)
-{
-  double be_pipe_radius    = 2.16;   // 2.16 cm based on spec sheet
-  double be_pipe_thickness = 0.0760; // 760 um based on spec sheet
-  double be_pipe_length    = 80.0;   // +/- 40 cm
-
-  double al_pipe_radius    = 2.16;   // same as Be pipe
-  double al_pipe_thickness = 0.1600; // 1.6 mm based on spec
-  double al_pipe_length    = 88.3;   // extension beyond +/- 40 cm
-
-  const double zpos0 = al_pipe_length + be_pipe_length * 0.5; // first large GEM station
-  const double zpos1 = 305 - 20; // front of forward ECal/MPC
-  const double zpos2 = 335.9 - 10.2 / 2.; // front of the forward field endcap
-  const double calorimeter_hole_diamater = 9.92331 *2; // side length of the middle hole of MPC that can hold the piston. Also the max diameter of the piston in that region
-
-  const double beampipe_radius = be_pipe_radius;
-
-  // teeth cone section specific
-  const double number_of_wteeth = 100;
-  const double teeth_thickness = 0.3504 * 2; //2 X0
-  const double eta_inner = -log(tan(atan((beampipe_radius + 0.1) / zpos0) / 2));
-  const double eta_outter = 4.2;
-  const double eta_teeth_outter = 4.05;
-  double pos = zpos0 + (zpos1 - zpos0) / 2;
-//  cout << "MAGNETIC PISTON:" << eta_inner << " " << eta_outter << " " << pos
-//      << endl;
-
-  PHG4ConeSubsystem *magpiston = new PHG4ConeSubsystem("Piston", 0);
-  magpiston->SetZlength((zpos1 - zpos0) / 2);
-  magpiston->SetPlaceZ((zpos1 + zpos0) / 2);
-  magpiston->SetR1(beampipe_radius,
-      tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter)) * zpos0);
-  magpiston->SetR2(beampipe_radius,
-      tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter)) * zpos1);
-  magpiston->SetMaterial("G4_Fe");
-  magpiston->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(magpiston);
-
-//  PHG4ConeSubsystem *magpiston = new PHG4ConeSubsystem(name.c_str(), 1);
-//  magpiston->SetZlength((zpos1 - zpos0) / 2);
-//  magpiston->SetPlaceZ(pos);
-//  magpiston->Set_eta_range(eta_outter, eta_inner);
-//  magpiston->SetMaterial("G4_Fe");
-//  magpiston->SuperDetector(name.c_str());
-//  magpiston->SetActive(false);
-//  g4Reco->registerSubsystem(magpiston);
-
-  pos = zpos0 + 1.0 + teeth_thickness / 2;
-  for (int i = 0; i < number_of_wteeth; i++)
-    {
-      stringstream s;
-      s << name;
-      s << "_teeth_";
-      s << i;
-
-      magpiston = new PHG4ConeSubsystem(s.str(), i);
-      magpiston->SuperDetector(name);
-      magpiston->SetZlength(teeth_thickness / 2);
-      magpiston->SetPlaceZ(pos);
-      magpiston->SetR1(
-          //
-          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter - .01))
-              * (pos - teeth_thickness / 2), //
-          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_teeth_outter))
-              * (pos - teeth_thickness / 2) //
-              );
-      magpiston->SetR2(
-          //
-          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter - .01))
-              * (pos + teeth_thickness / 2), //
-          tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(eta_outter - .01))
-              * (pos + teeth_thickness / 2) + .1 //
-              );
-      magpiston->SetMaterial("G4_W");
-      magpiston->SuperDetector(name.c_str());
-      magpiston->SetActive(false);
-      magpiston->OverlapCheck(overlapcheck);
-      g4Reco->registerSubsystem(magpiston);
-      pos += ((zpos1 - zpos0 - 10) / number_of_wteeth);
-    }
-
-  // last piece connect to the field return
-  PHG4CylinderSubsystem *magpiston2 = new PHG4CylinderSubsystem("Piston_EndSection", 0);
-  magpiston2->set_int_param("lengthviarapidity",0);
-  magpiston2->set_double_param("length",zpos2 - zpos1);
-  magpiston2->set_double_param("place_z", (zpos2 + zpos1) / 2.);
-  magpiston2->set_double_param("radius",beampipe_radius);
-  magpiston2->set_double_param("thickness",calorimeter_hole_diamater / 2. - beampipe_radius);
-  magpiston2->set_string_param("material","G4_Fe");
-  magpiston2->SuperDetector(name);
-  magpiston2->SetActive(false);
-  magpiston2->OverlapCheck(overlapcheck);
-  g4Reco->registerSubsystem(magpiston2);
-
-  return 0;
-}
