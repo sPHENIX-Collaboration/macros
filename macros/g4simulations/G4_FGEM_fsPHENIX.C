@@ -4,8 +4,6 @@
 
 #include <g4detectors/PHG4SectorSubsystem.h>
 
-#include <g4eval/SvtxEvaluator.h>
-
 #include <g4main/PHG4Reco.h>
 
 #include <g4trackfastsim/PHG4TrackFastSim.h>
@@ -24,6 +22,7 @@ void AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem);
 namespace Enable
 {
   static bool FGEM = false;
+  static bool FGEM_OVERLAPCHECK = false;
 }
 
 void FGEM_Init()
@@ -37,6 +36,8 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
 )
 {
   const double tilt = .1;
+
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::FGEM_OVERLAPCHECK;
 
   string name;
   double etamax;
@@ -63,7 +64,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   gem->get_geometry().set_max_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());
   gem->get_geometry().set_material("G4_METHANE");
   gem->get_geometry().set_N_Sector(N_Sector);
-  gem->OverlapCheck(overlapcheck);
+  gem->OverlapCheck(OverlapCheck);
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
   g4Reco->registerSubsystem(gem);
@@ -84,7 +85,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   gem->get_geometry().set_max_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());
   gem->get_geometry().set_material("G4_METHANE");
   gem->get_geometry().set_N_Sector(N_Sector);
-  gem->OverlapCheck(overlapcheck);
+  gem->OverlapCheck(OverlapCheck);
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
   g4Reco->registerSubsystem(gem);
@@ -106,7 +107,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
 
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
-  gem->OverlapCheck(overlapcheck);
+  gem->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(gem);
 
   ///////////////////////////////////////////////////////////////////////////
@@ -125,7 +126,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   gem->get_geometry().set_max_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());
   gem->get_geometry().set_material("G4_METHANE");
   gem->get_geometry().set_N_Sector(N_Sector);
-  gem->OverlapCheck(overlapcheck);
+  gem->OverlapCheck(OverlapCheck);
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
   g4Reco->registerSubsystem(gem);
@@ -147,7 +148,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
 
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
-  gem->OverlapCheck(overlapcheck);
+  gem->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(gem);
 
   ///////////////////////////////////////////////////////////////////////////
@@ -213,7 +214,7 @@ int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
   gem->get_geometry().set_min_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());
   gem->get_geometry().set_N_Sector(N_Sector);
   gem->get_geometry().set_material("G4_METHANE");
-  gem->OverlapCheck(overlapcheck);
+  gem->OverlapCheck(OverlapCheck);
 
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
