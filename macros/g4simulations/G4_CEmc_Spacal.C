@@ -67,12 +67,9 @@ namespace G4CEMC
 
 }  // namespace G4CEMC
 
-// just a dummy parameter used by the tilted plate geom
+// black hole parameters are set in CEmc function
 void CEmcInit()
-{
-  //  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 150.);
-  //  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -150.);
-}
+{}
 
 //! EMCal main setup macro
 double
