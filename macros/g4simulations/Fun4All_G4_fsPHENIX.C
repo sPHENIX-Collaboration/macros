@@ -77,8 +77,8 @@ int Fun4All_G4_fsPHENIX(
 
   bool do_bbc = false;
   
-  bool do_pipe = false;
-  
+  Enable::PIPE = true;
+//  Enable::PIPE_OVERLAPCHECK = true;
   // central tracking
   bool do_tracking = false;
   bool do_tracking_cell = do_tracking && true;
@@ -87,7 +87,7 @@ int Fun4All_G4_fsPHENIX(
   bool do_tracking_eval = do_tracking_track && true;
 
   // central calorimeters, which is a detailed simulation and slow to run
-  Enable::CEMC = true;
+  Enable::CEMC = false;
   bool do_cemc_cell = Enable::CEMC && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
@@ -137,7 +137,7 @@ int Fun4All_G4_fsPHENIX(
   Enable::PLUGDOOR_ABSORBER = true;
 
   // new settings using Enable namespace in GlobalVariables.C
-//  Enable::BLACKHOLE = true;
+  // Enable::BLACKHOLE = true;
   BlackHoleGeometry::visible = true;
 
 
@@ -153,7 +153,7 @@ int Fun4All_G4_fsPHENIX(
   gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_fsPHENIX.C");
-  G4Init(do_tracking,do_pipe,n_TPC_layers);
+  G4Init(do_tracking,n_TPC_layers);
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -256,7 +256,7 @@ int Fun4All_G4_fsPHENIX(
       //---------------------
 
       G4Setup(absorberactive, magfield, EDecayType::kAll,
-	      do_tracking, do_pipe,
+	      do_tracking,
 	      magfield_rescale);
     }
 
