@@ -25,16 +25,16 @@ namespace Enable
   static bool MVTX_OVERLAPCHECK = false;
   static int MVTX_VERBOSITY = 0;
 
-}
+}  // namespace Enable
 
 namespace G4MVTX
 {
   const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
-}  // namespace MVTX
+}  // namespace G4MVTX
 
 void MvtxInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, PHG4MvtxDefs::mvtxdat[G4MVTX::n_maps_layer-1][PHG4MvtxDefs::kRmd]);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, PHG4MvtxDefs::mvtxdat[G4MVTX::n_maps_layer - 1][PHG4MvtxDefs::kRmd]);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 16.);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -17.);
 }
@@ -55,28 +55,27 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
       cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << endl;
     radius = radius_lyr;
   }
-  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL ,"stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v1.gdml"));
+  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v1.gdml"));
   mvtx->SetActive();
   mvtx->OverlapCheck(maps_overlapcheck);
   g4Reco->registerSubsystem(mvtx);
   return radius;
 }
 
-
 // Central detector cell reco is disabled as EIC setup use the fast tracking sim for now
 void Mvtx_Cells()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
-    // new storage containers
-    PHG4MvtxHitReco* maps_hits = new PHG4MvtxHitReco("MVTX");
-    maps_hits->Verbosity(verbosity);
-    for (int ilayer = 0; ilayer < G4MVTX::n_maps_layer; ilayer++)
-    {
-      // override the default timing window for this layer - default is +/- 5000 ns
-      maps_hits->set_timing_window(ilayer, -5000, 5000);
-    }
-    se->registerSubsystem(maps_hits);
+  // new storage containers
+  PHG4MvtxHitReco* maps_hits = new PHG4MvtxHitReco("MVTX");
+  maps_hits->Verbosity(verbosity);
+  for (int ilayer = 0; ilayer < G4MVTX::n_maps_layer; ilayer++)
+  {
+    // override the default timing window for this layer - default is +/- 5000 ns
+    maps_hits->set_timing_window(ilayer, -5000, 5000);
+  }
+  se->registerSubsystem(maps_hits);
   return;
 }
 
@@ -94,5 +93,4 @@ void Mvtx_Clustering()
   MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
   mvtxclusterizer->Verbosity(verbosity);
   se->registerSubsystem(mvtxclusterizer);
-
 }
