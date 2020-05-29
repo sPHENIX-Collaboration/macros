@@ -13,6 +13,7 @@
 #include "G4_FHCAL.C"
 #include "G4_User.C"
 #include "G4_World.C"
+
 #include <g4decayer/EDecayType.hh>
 #include <g4detectors/PHG4ConeSubsystem.h>
 #include <g4eval/PHG4DstCompressReco.h>
@@ -27,14 +28,12 @@ int make_piston(string name, PHG4Reco* g4Reco);
 void RunLoadTest() {}
 
 void G4Init(bool do_svtx = true,
-            bool do_pipe = true,
             int n_TPC_layers = 40) {
 
   // load detector/material macros and execute Init() function
 
-  if (do_pipe)
+  if (Enable::PIPE)
     {
-      gROOT->LoadMacro("G4_Pipe.C");
       PipeInit();
     }
   if (do_svtx)
@@ -98,7 +97,6 @@ int G4Setup(const int absorberactive = 0,
 	    const string &field ="1.5",
 	    const EDecayType decayType = EDecayType::kAll,
 	    const bool do_svtx = true,
-	    const bool do_pipe = true,
      	    const float magfield_rescale = 1.0) {
   
   //---------------
@@ -145,8 +143,10 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // PIPE
-  if (do_pipe) radius = Pipe(g4Reco, radius, absorberactive);
-  
+  if (Enable::PIPE)
+  {
+    radius = Pipe(g4Reco, radius, absorberactive);
+  }
   //----------------------------------------
   // SVTX
   if (do_svtx) radius = Tracking(g4Reco, radius, absorberactive);
@@ -158,7 +158,6 @@ int G4Setup(const int absorberactive = 0,
   {
     radius = CEmc(g4Reco, radius, 8, absorberactive);
   }
-//  if (do_cemc) radius = CEmc_Vis(g4Reco, radius, 8, absorberactive);// for visualization substructure of SPACAL, slow to render
   
   //----------------------------------------
   // HCALIN
