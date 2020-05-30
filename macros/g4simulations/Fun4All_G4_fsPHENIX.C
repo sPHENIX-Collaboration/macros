@@ -88,18 +88,17 @@ int Fun4All_G4_fsPHENIX(
   Enable::MVTX = true;
   bool do_mvtx_cell = Enable::MVTX && true;
   bool do_mvtx_cluster = do_mvtx_cell && true;
+
   Enable::INTT = true;
   bool do_intt_cell = Enable::INTT && true;
   bool do_intt_cluster = do_intt_cell && true;
+
   Enable::TPC = true;
   Enable::TPC_ABSORBER = true;
   bool do_tpc_cell = Enable::TPC && true;
   bool do_tpc_cluster = do_tpc_cell && true;
 
-  bool do_tracking = true;
-  bool do_tracking_cell = do_tracking && true;
-  bool do_tracking_cluster = do_tracking_cell && true;
-  bool do_tracking_track = do_tracking_cluster && true;
+  bool do_tracking_track =  do_tpc_cell && do_intt_cell && do_mvtx_cell && true;
   bool do_tracking_eval = do_tracking_track && true;
 
   // central calorimeters, which is a detailed simulation and slow to run
