@@ -1,7 +1,7 @@
 #pragma once
 
-#include "G4_INTT.C"
-#include "G4_MVTX.C"
+#include "G4_Intt.C"
+#include "G4_Mvtx.C"
 #include "G4_TPC.C"
 
 #include <g4eval/PHG4DSTReader.h>
