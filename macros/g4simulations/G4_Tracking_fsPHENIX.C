@@ -4,6 +4,7 @@
 
 #include "G4_Mvtx.C"
 #include "G4_Intt.C"
+#include "G4_TPC.C"
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -11,13 +12,6 @@
 
 #include <g4main/PHG4Reco.h>
 
-#include <g4tpc/PHG4TpcDigitizer.h>
-#include <g4tpc/PHG4TpcElectronDrift.h>
-#include <g4tpc/PHG4TpcPadPlane.h>
-#include <g4tpc/PHG4TpcPadPlaneReadout.h>
-#include <g4tpc/PHG4TpcSubsystem.h>
-
-#include <tpc/TpcClusterizer.h>
 
 #include <trackreco/PHGenFitTrkFitter.h>
 #include <trackreco/PHGenFitTrkProp.h>
@@ -37,14 +31,14 @@ R__LOAD_LIBRARY(libtrack_reco.so)
 
 // Tracking simulation setup parameters and flag - leave them alone!
 //==============================================
-
+/*
 ///////////////// TPC
 int n_tpc_layer_inner = 16;
 int tpc_layer_rphi_count_inner = 1152;
 int n_tpc_layer_mid = 16;
 int n_tpc_layer_outer = 16;
 int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
-
+*/
 // Tracking reconstruction setup parameters and flags
 //=====================================
 const int init_vertexing_min_zvtx_tracks = 2; // PHInitZvertexing parameter for reducing spurious vertices, use 2 for Pythia8 events, 5 for large multiplicity events
@@ -71,7 +65,7 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 {
   // The Tpc - always present!
   //================================
-  gSystem->Load("libg4tpc.so");
+/*
 
   PHG4TpcSubsystem* tpc = new PHG4TpcSubsystem("TPC");
   tpc->SetActive();
@@ -90,7 +84,7 @@ double Tracking(PHG4Reco* g4Reco, double radius,
   radius = 77. + 1.17;
 
   radius += no_overlapp;
-
+*/
   return radius;
 }
 
@@ -110,7 +104,7 @@ void Tracking_Cells(int verbosity = 0)
   // g4tpc/PHG4TpcElectronDrift uses
   // g4tpc/PHG4TpcPadPlaneReadout
   //=========================
-
+/*
   PHG4TpcPadPlane *padplane = new PHG4TpcPadPlaneReadout();
   padplane->Verbosity(0);
 
@@ -130,7 +124,7 @@ void Tracking_Cells(int verbosity = 0)
   padplane->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);  // sPHENIX layer number of first Tpc readout layer
   padplane->set_int_param("ntpc_layers_inner", n_tpc_layer_inner);
   padplane->set_int_param("ntpc_phibins_inner", tpc_layer_rphi_count_inner);
-
+*/
   return;
 }
 
@@ -141,7 +135,7 @@ void Tracking_Clus(int verbosity = 0)
   //---------------
   // Fun4All server
   //---------------
-
+/*
   Fun4AllServer* se = Fun4AllServer::instance();
 
   // Tpc
@@ -167,7 +161,7 @@ void Tracking_Clus(int verbosity = 0)
   TpcClusterizer* tpcclusterizer = new TpcClusterizer();
   tpcclusterizer->Verbosity(0);
   se->registerSubsystem(tpcclusterizer);
-
+*/
 }
 
 void Tracking_Reco(int verbosity = 0)
@@ -213,12 +207,12 @@ void Tracking_Reco(int verbosity = 0)
       // find seed tracks using a subset of TPC layers
       int min_layers = 4;
       int nlayers_seeds = 12;
-      PHHoughSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, n_gas_layer, nlayers_seeds, min_layers);
+      PHHoughSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer, nlayers_seeds, min_layers);
       track_seed->Verbosity(0);
       se->registerSubsystem(track_seed);
 
       // Find all clusters associated with each seed track
-      PHGenFitTrkProp* track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, n_gas_layer);
+      PHGenFitTrkProp* track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer);
       track_prop->Verbosity(0);
       se->registerSubsystem(track_prop);
       for(int i = 0;i<G4INTT::n_intt_layer;i++)
@@ -285,7 +279,7 @@ void Tracking_Reco(int verbosity = 0)
   // Tracking evaluation
   //----------------
   SvtxEvaluator* eval;
-  eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile, "SvtxTrackMap", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, n_gas_layer);
+  eval = new SvtxEvaluator("SVTXEVALUATOR", outputfile, "SvtxTrackMap", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer);
   eval->do_cluster_eval(true);
   eval->do_g4hit_eval(true);
   eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
@@ -301,7 +295,7 @@ void Tracking_Reco(int verbosity = 0)
     // make a second evaluator that records tracks fitted with primary vertex included
     // good for analysis of prompt tracks, particularly if Mvtx is not present
     SvtxEvaluator* evalp;
-    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, n_gas_layer);    evalp->do_cluster_eval(true);
+    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer);    evalp->do_cluster_eval(true);
     evalp->do_g4hit_eval(true);
     evalp->do_hit_eval(false);
     evalp->do_gpoint_eval(false);
