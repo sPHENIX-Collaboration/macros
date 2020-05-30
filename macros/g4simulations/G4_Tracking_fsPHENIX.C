@@ -24,21 +24,11 @@
 
 #include <trackbase/TrkrHitTruthAssoc.h>
 
-R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libg4eval.so)
-R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 
 // Tracking simulation setup parameters and flag - leave them alone!
 //==============================================
-/*
-///////////////// TPC
-int n_tpc_layer_inner = 16;
-int tpc_layer_rphi_count_inner = 1152;
-int n_tpc_layer_mid = 16;
-int n_tpc_layer_outer = 16;
-int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
-*/
 // Tracking reconstruction setup parameters and flags
 //=====================================
 const int init_vertexing_min_zvtx_tracks = 2; // PHInitZvertexing parameter for reducing spurious vertices, use 2 for Pythia8 events, 5 for large multiplicity events
@@ -57,111 +47,6 @@ const bool use_truth_vertex = true;   // set to false to get initial vertex from
 
 void TrackingInit(int verbosity = 0)
 {
-}
-
-double Tracking(PHG4Reco* g4Reco, double radius,
-                const int absorberactive = 0,
-                int verbosity = 0)
-{
-  // The Tpc - always present!
-  //================================
-/*
-
-  PHG4TpcSubsystem* tpc = new PHG4TpcSubsystem("TPC");
-  tpc->SetActive();
-  tpc->SuperDetector("TPC");
-  tpc->set_double_param("steplimits", 1);
-  // By default uses "sPHENIX_TPC_Gas", defined in PHG4Reco. That is 90:10 Ne:C4
-
-  if (absorberactive)
-  {
-    tpc->SetAbsorberActive();
-  }
-  tpc->OverlapCheck(overlapcheck);
-
-  g4Reco->registerSubsystem(tpc);
-
-  radius = 77. + 1.17;
-
-  radius += no_overlapp;
-*/
-  return radius;
-}
-
-void Tracking_Cells(int verbosity = 0)
-{
-  // runs the cellularization of the energy deposits (g4hits)
-  // into detector hits (TrkrHits)
-
-  //---------------
-  // Fun4All server
-  //---------------
-
-  Fun4AllServer* se = Fun4AllServer::instance();
-
-  //=========================
-  // setup Tpc readout for filling cells
-  // g4tpc/PHG4TpcElectronDrift uses
-  // g4tpc/PHG4TpcPadPlaneReadout
-  //=========================
-/*
-  PHG4TpcPadPlane *padplane = new PHG4TpcPadPlaneReadout();
-  padplane->Verbosity(0);
-
-  PHG4TpcElectronDrift *edrift = new PHG4TpcElectronDrift();
-  edrift->Detector("TPC");
-  edrift->Verbosity(0);
-  // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
-  // They represent effects not due to ideal gas properties and ideal readout plane behavior
-  // defaults are 0.085 and 0.105, they can be changed here to get a different resolution
-  //edrift->set_double_param("added_smear_trans",0.085);
-  //edrift->set_double_param("added_smear_long",0.105);
-  edrift->registerPadPlane(padplane);
-  se->registerSubsystem(edrift);
-
-  // The pad plane readout default is set in PHG4TpcPadPlaneReadout
-  // We may want to change the number of inner layers, and can do that here
-  padplane->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);  // sPHENIX layer number of first Tpc readout layer
-  padplane->set_int_param("ntpc_layers_inner", n_tpc_layer_inner);
-  padplane->set_int_param("ntpc_phibins_inner", tpc_layer_rphi_count_inner);
-*/
-  return;
-}
-
-void Tracking_Clus(int verbosity = 0)
-{
-  // processes the TrkrHits to make clusters, then reconstruct tracks and vertices
-
-  //---------------
-  // Fun4All server
-  //---------------
-/*
-  Fun4AllServer* se = Fun4AllServer::instance();
-
-  // Tpc
-  //====
-  PHG4TpcDigitizer* digitpc = new PHG4TpcDigitizer();
-  digitpc->SetTpcMinLayer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
-  double ENC = 670.0;  // standard
-  digitpc->SetENC(ENC);
-  double ADC_threshold = 4.0 * ENC;
-  digitpc->SetADCThreshold(ADC_threshold);  // 4 * ENC seems OK
-  digitpc->Verbosity(0);
-  cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
-       << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << endl;
-
-  se->registerSubsystem(digitpc);
-
-  //-------------
-  // Cluster Hits
-  //-------------
-
-  // For the Tpc
-  //==========
-  TpcClusterizer* tpcclusterizer = new TpcClusterizer();
-  tpcclusterizer->Verbosity(0);
-  se->registerSubsystem(tpcclusterizer);
-*/
 }
 
 void Tracking_Reco(int verbosity = 0)
@@ -295,7 +180,8 @@ void Tracking_Reco(int verbosity = 0)
     // make a second evaluator that records tracks fitted with primary vertex included
     // good for analysis of prompt tracks, particularly if Mvtx is not present
     SvtxEvaluator* evalp;
-    evalp = new SvtxEvaluator("SVTXEVALUATOR", string(outputfile.c_str()) + "_primary_eval.root", "PrimaryTrackMap", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer);    evalp->do_cluster_eval(true);
+    evalp = new SvtxEvaluator("SVTXEVALUATOR", outputfile + "_primary_eval.root", "PrimaryTrackMap", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer);
+    evalp->do_cluster_eval(true);
     evalp->do_g4hit_eval(true);
     evalp->do_hit_eval(false);
     evalp->do_gpoint_eval(false);
