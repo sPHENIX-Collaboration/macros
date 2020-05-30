@@ -30,24 +30,24 @@ void HCalInner_SupportRing(PHG4Reco *g4Reco,
 
 namespace Enable
 {
-  static bool HCALIN = false;
-  static bool HCALIN_ABSORBER = false;
-  static bool HCALIN_OVERLAPCHECK = false;
-  static int HCALIN_VERBOSITY = 0;
+  bool HCALIN = false;
+  bool HCALIN_ABSORBER = false;
+  bool HCALIN_OVERLAPCHECK = false;
+  int HCALIN_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4HCALIN
 {
-  const double support_ring_outer_radius = 178.0 - 0.001;
-  const double support_ring_z_ring2 = (2150 + 2175) / 2. / 10.;
-  const double dz = 25. / 10.;
+  double support_ring_outer_radius = 178.0 - 0.001;
+  double support_ring_z_ring2 = (2150 + 2175) / 2. / 10.;
+  double dz = 25. / 10.;
 
   //Inner HCal absorber material selector:
   //false - old version, absorber material is SS310
   //true - default Choose if you want Aluminum
-  const bool inner_hcal_material_Al = true;
+  bool inner_hcal_material_Al = true;
 
-  static int inner_hcal_eic = 0;
+  int inner_hcal_eic = 0;
 
   enum enu_HCalIn_clusterizer
   {

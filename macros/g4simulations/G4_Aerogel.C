@@ -16,7 +16,7 @@
 
 namespace Enable
 {
-  static bool AEROGEL = false;
+  bool AEROGEL = false;
 }
 
 void AerogelInit()

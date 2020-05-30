@@ -4,9 +4,9 @@ static double no_overlapp = 0.0001;  // added to radii to avoid overlapping volu
 
 namespace Enable
 {
-  static bool OVERLAPCHECK = false;
-  static bool ABSORBER = false;
-  static int VERBOSITY = 0;
+  bool OVERLAPCHECK = false;
+  bool ABSORBER = false;
+  int VERBOSITY = 0;
 }
 
 // every G4 subsystem needs to implement this
@@ -14,9 +14,9 @@ namespace Enable
 // let's put this into the GlobalVariables.C
 namespace BlackHoleGeometry
 {
-  static double max_radius = 0.;  // this is needed for the overall dimension of the black hole
-  static double min_z = 0.;
-  static double max_z = 0.;
-  static double gap = no_overlapp;
-  static bool visible = false;
+  double max_radius = 0.;  // this is needed for the overall dimension of the black hole
+  double min_z = 0.;
+  double max_z = 0.;
+  double gap = no_overlapp;
+  bool visible = false;
 };  // namespace BlackHoleGeometry

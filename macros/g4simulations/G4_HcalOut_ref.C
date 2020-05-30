@@ -25,16 +25,16 @@ R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
 {
-  static bool HCALOUT = false;
-  static bool HCALOUT_ABSORBER = false;
-  static bool HCALOUT_OVERLAPCHECK = false;
-  static int HCALOUT_VERBOSITY = 0;
+  bool HCALOUT = false;
+  bool HCALOUT_ABSORBER = false;
+  bool HCALOUT_OVERLAPCHECK = false;
+  int HCALOUT_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4HCALOUT
 {
-  const double outer_radius = 264.71;
-  const double size_z = 304.91 * 2;
+  double outer_radius = 264.71;
+  double size_z = 304.91 * 2;
   enum enu_HCalOut_clusterizer
   {
     kHCalOutGraphClusterizer,
