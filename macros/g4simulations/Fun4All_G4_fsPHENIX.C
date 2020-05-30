@@ -78,7 +78,7 @@ int Fun4All_G4_fsPHENIX(
   //======================
   // What to run
   //======================
-//  Enable::ABSORBER = true;
+// Enable::ABSORBER = true;
 
   bool do_bbc = true;
   
@@ -91,6 +91,10 @@ int Fun4All_G4_fsPHENIX(
   Enable::INTT = true;
   bool do_intt_cell = Enable::INTT && true;
   bool do_intt_cluster = do_intt_cell && true;
+  Enable::TPC = true;
+  Enable::TPC_ABSORBER = true;
+  bool do_tpc_cell = Enable::TPC && true;
+  bool do_tpc_cluster = do_tpc_cell && true;
 
   bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
@@ -160,7 +164,7 @@ int Fun4All_G4_fsPHENIX(
 
 
   // establish the geometry and reconstruction setup
-  G4Init(do_tracking);
+  G4Init();
 
   int absorberactive = 1; // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -284,8 +288,9 @@ int Fun4All_G4_fsPHENIX(
 
   if (do_mvtx_cell) Mvtx_Cells();
   if (do_intt_cell) Intt_Cells();
+  if (do_tpc_cell) TPC_Cells();
 
-  if (do_tracking_cell) Tracking_Cells();
+//  if (do_tracking_cell) Tracking_Cells();
 
   if (do_cemc_cell) CEMC_Cells();
 
@@ -326,7 +331,8 @@ int Fun4All_G4_fsPHENIX(
   //--------------
   if (do_mvtx_cluster) Mvtx_Clustering();
   if (do_intt_cluster) Intt_Clustering();
-  if (do_tracking_cluster) Tracking_Clus();
+  if (do_tpc_cluster) TPC_Clustering();
+//  if (do_tracking_cluster) Tracking_Clus();
 
   if (do_tracking_track) Tracking_Reco();
 
