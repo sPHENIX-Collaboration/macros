@@ -26,27 +26,26 @@ namespace Enable
   static bool INTT = false;
   static bool INTT_OVERLAPCHECK = false;
   static int INTT_VERBOSITY = 0;
-
 }  // namespace Enable
 
 namespace G4INTT
 {
-  const int n_intt_layer = 4;           // must be 4 or 0, setting to zero removes INTT completely
-  const double intt_radius_max = 140.;  // including stagger radius (mm)
-  const int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
+  static int n_intt_layer = 4;           // must be 4 or 0, setting to zero removes INTT completely
+  static double intt_radius_max = 140.;  // including stagger radius (mm)
+  static int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
                              PHG4InttDefs::SEGMENTATION_PHI,
                              PHG4InttDefs::SEGMENTATION_PHI,
                              PHG4InttDefs::SEGMENTATION_PHI};
-  const int nladder[4] = {15, 15, 18, 18};
-  const double sensor_radius[4] = {8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
-  const double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
+  static int nladder[4] = {15, 15, 18, 18};
+  static double sensor_radius[4] = {8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
+  static double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
   enum enu_InttDeadMapType  // Dead map options for INTT
   {
     kInttNoDeadMap = 0,        // All channel in Intt is alive
     kIntt4PercentDeadMap = 4,  // 4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
     kIntt8PercentDeadMap = 8   // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
   };
-  const enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
+  static enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
 
 }  // namespace G4INTT
 
@@ -55,13 +54,16 @@ void InttInit()
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4INTT::intt_radius_max / 10.);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 16.);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -17.);
+if (!Enable::MVTX)
+ {
+  G4MVTX::n_maps_layer = 0;
+}
 }
 
 double Intt(PHG4Reco* g4Reco, double radius,
             const int absorberactive = 0)
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
-
   bool intt_overlapcheck = Enable::OVERLAPCHECK || Enable::INTT_OVERLAPCHECK;
 
   // instantiate the INTT subsystem and register it

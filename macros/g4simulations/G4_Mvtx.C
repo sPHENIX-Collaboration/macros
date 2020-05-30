@@ -29,7 +29,7 @@ namespace Enable
 
 namespace G4MVTX
 {
-  const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
+  static int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
 }  // namespace G4MVTX
 
 void MvtxInit()
