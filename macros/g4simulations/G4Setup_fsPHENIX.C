@@ -119,7 +119,6 @@ void G4Init()
 int G4Setup(const int absorberactive = 0,
 	    const string &field ="1.5",
 	    const EDecayType decayType = EDecayType::kAll,
-	    const bool do_svtx = true,
      	    const float magfield_rescale = 1.0) {
   
   //---------------

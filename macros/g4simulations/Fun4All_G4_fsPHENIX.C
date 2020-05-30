@@ -73,7 +73,7 @@ int Fun4All_G4_fsPHENIX(
   const bool do_dst_compress = false;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  const bool do_DSTReader = false;
+  const bool do_DSTReader = true;
 
   //======================
   // What to run
@@ -267,7 +267,6 @@ int Fun4All_G4_fsPHENIX(
       //---------------------
 
       G4Setup(absorberactive, magfield, EDecayType::kAll,
-	      do_tracking,
 	      magfield_rescale);
     }
 
@@ -277,7 +276,6 @@ int Fun4All_G4_fsPHENIX(
   
   if (do_bbc) 
     {
-      gROOT->LoadMacro("G4_Bbc.C");
       BbcInit();
       Bbc_Reco();
     }
@@ -289,8 +287,6 @@ int Fun4All_G4_fsPHENIX(
   if (do_mvtx_cell) Mvtx_Cells();
   if (do_intt_cell) Intt_Cells();
   if (do_tpc_cell) TPC_Cells();
-
-//  if (do_tracking_cell) Tracking_Cells();
 
   if (do_cemc_cell) CEMC_Cells();
 
@@ -332,7 +328,6 @@ int Fun4All_G4_fsPHENIX(
   if (do_mvtx_cluster) Mvtx_Clustering();
   if (do_intt_cluster) Intt_Clustering();
   if (do_tpc_cluster) TPC_Clustering();
-//  if (do_tracking_cluster) Tracking_Clus();
 
   if (do_tracking_track) Tracking_Reco();
 
@@ -439,7 +434,6 @@ int Fun4All_G4_fsPHENIX(
 
       G4DSTreader_fsPHENIX( outputFile, //
           /*int*/ absorberactive ,
-          /*bool*/ do_tracking ,
 			    /*bool*/ Enable::CEMC ,
           /*bool*/ Enable::HCALIN,
           /*bool*/ Enable::MAGNET,
