@@ -1,22 +1,22 @@
 #pragma once
 
-#include "GlobalVariables.C"
 #include "G4_BlackHole.C"
-#include "G4_Pipe.C"
-#include "G4_PlugDoor_fsPHENIX.C"
-#include "G4_Tracking_fsPHENIX.C"
 #include "G4_CEmc_Spacal.C"
+#include "G4_FEMC.C"
+#include "G4_FGEM_fsPHENIX.C"
+#include "G4_FHCAL.C"
 #include "G4_HcalIn_ref.C"
+#include "G4_HcalOut_ref.C"
 #include "G4_Magnet.C"
 #include "G4_Mvtx.C"
-#include "G4_HcalOut_ref.C"
-#include "G4_FGEM_fsPHENIX.C"
-#include "G4_FEMC.C"
-#include "G4_FHCAL.C"
+#include "G4_Pipe.C"
 #include "G4_Piston.C"
+#include "G4_PlugDoor_fsPHENIX.C"
 #include "G4_TPC.C"
+#include "G4_Tracking_fsPHENIX.C"
 #include "G4_User.C"
 #include "G4_World.C"
+#include "GlobalVariables.C"
 
 #include <g4decayer/EDecayType.hh>
 
@@ -24,9 +24,9 @@
 
 #include <g4eval/PHG4DstCompressReco.h>
 
+#include <g4main/HepMCNodeReader.h>
 #include <g4main/PHG4Reco.h>
 #include <g4main/PHG4TruthSubsystem.h>
-#include <g4main/HepMCNodeReader.h>
 
 #include <phfield/PHFieldConfig.h>
 
@@ -36,19 +36,18 @@ R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 
 void ShowerCompress(int verbosity = 0);
-void DstCompress(Fun4AllDstOutputManager* out);
+void DstCompress(Fun4AllDstOutputManager *out);
 
 void RunLoadTest() {}
 
 void G4Init()
 {
-
   // load detector/material macros and execute Init() function
 
   if (Enable::PIPE)
-    {
-      PipeInit();
-    }
+  {
+    PipeInit();
+  }
   if (Enable::MVTX)
   {
     MvtxInit();
@@ -62,38 +61,38 @@ void G4Init()
     TPCInit();
   }
   if (Enable::CEMC)
-    {
-      CEmcInit();
-    }  
+  {
+    CEmcInit();
+  }
 
-  if (Enable::HCALIN) 
-    {
-      HCalInnerInit();
-    }
+  if (Enable::HCALIN)
+  {
+    HCalInnerInit();
+  }
 
   if (Enable::MAGNET)
-    {
-      MagnetInit();
-    }
+  {
+    MagnetInit();
+  }
   if (Enable::HCALOUT)
-    {
-      HCalOuterInit();
-    }
+  {
+    HCalOuterInit();
+  }
 
   if (Enable::FGEM)
-    {
-      FGEM_Init();
-    }
+  {
+    FGEM_Init();
+  }
 
   if (Enable::FEMC)
-    {
-      FEMCInit();
-    }
+  {
+    FEMCInit();
+  }
 
-  if (Enable::FHCAL) 
-    {
-      FHCALInit();
-    }
+  if (Enable::FHCAL)
+  {
+    FHCALInit();
+  }
   if (Enable::PISTON)
   {
     PistonInit();
@@ -112,15 +111,13 @@ void G4Init()
   {
     BlackHoleInit();
   }
-
 }
 
-
 int G4Setup(const int absorberactive = 0,
-	    const string &field ="1.5",
-	    const EDecayType decayType = EDecayType::kAll,
-     	    const float magfield_rescale = 1.0) {
-  
+            const string &field = "1.5",
+            const EDecayType decayType = EDecayType::kAll,
+            const float magfield_rescale = 1.0)
+{
   //---------------
   // Fun4All server
   //---------------
@@ -131,30 +128,36 @@ int G4Setup(const int absorberactive = 0,
   HepMCNodeReader *hr = new HepMCNodeReader();
   se->registerSubsystem(hr);
 
-  PHG4Reco* g4Reco = new PHG4Reco();
-  g4Reco->save_DST_geometry(true); //Save geometry from Geant4 to DST
+  PHG4Reco *g4Reco = new PHG4Reco();
+  g4Reco->save_DST_geometry(true);  //Save geometry from Geant4 to DST
   WorldInit(g4Reco);
-  g4Reco->set_rapidity_coverage(1.1); // according to drawings
+  g4Reco->set_rapidity_coverage(1.1);  // according to drawings
   if (decayType != EDecayType::kAll)
   {
     g4Reco->set_force_decay(decayType);
   }
-  
+
   double fieldstrength;
   istringstream stringline(field);
   stringline >> fieldstrength;
-  if (stringline.fail()) { // conversion to double fails -> we have a string
+  if (stringline.fail())
+  {  // conversion to double fails -> we have a string
 
-    if (field.find("sPHENIX.root") != string::npos) {
+    if (field.find("sPHENIX.root") != string::npos)
+    {
       g4Reco->set_field_map(field, PHFieldConfig::Field3DCartesian);
-    } else {
+    }
+    else
+    {
       g4Reco->set_field_map(field, PHFieldConfig::kField2D);
     }
-  } else {
-    g4Reco->set_field(fieldstrength); // use const soleniodal field
+  }
+  else
+  {
+    g4Reco->set_field(fieldstrength);  // use const soleniodal field
   }
   g4Reco->set_field_rescale(magfield_rescale);
-  
+
   double radius = 0.;
 
   //----------------------------------------
@@ -177,40 +180,40 @@ int G4Setup(const int absorberactive = 0,
   }
   //----------------------------------------
   // CEMC
-//
+  //
   if (Enable::CEMC)
   {
     radius = CEmc(g4Reco, radius, 8, absorberactive);
   }
-  
+
   //----------------------------------------
   // HCALIN
-  
+
   if (Enable::HCALIN)
   {
- radius = HCalInner(g4Reco, radius, 4, absorberactive);
+    radius = HCalInner(g4Reco, radius, 4, absorberactive);
   }
 
   //----------------------------------------
   // MAGNET
-  
+
   if (Enable::MAGNET)
   {
-   radius = Magnet(g4Reco, radius, 0, absorberactive);
+    radius = Magnet(g4Reco, radius, 0, absorberactive);
   }
 
   //----------------------------------------
   // HCALOUT
-  
+
   if (Enable::HCALOUT)
   {
- radius = HCalOuter(g4Reco, radius, 4, absorberactive);
+    radius = HCalOuter(g4Reco, radius, 4, absorberactive);
   }
 
   //----------------------------------------
   // Forward tracking
 
-  if ( Enable::FGEM )
+  if (Enable::FGEM)
   {
     FGEMSetup(g4Reco);
   }
@@ -218,7 +221,7 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // FEMC
 
-  if ( Enable::FEMC )
+  if (Enable::FEMC)
   {
     FEMCSetup(g4Reco);
   }
@@ -255,16 +258,15 @@ int G4Setup(const int absorberactive = 0,
   // finally adjust the world size in case the default is too small
   WorldSize(g4Reco, radius);
 
-  se->registerSubsystem( g4Reco );
+  se->registerSubsystem(g4Reco);
   return 0;
 }
 
-
-void ShowerCompress(int verbosity = 0) {
-
+void ShowerCompress(int verbosity = 0)
+{
   Fun4AllServer *se = Fun4AllServer::instance();
-  
-  PHG4DstCompressReco* compress = new PHG4DstCompressReco("PHG4DstCompressReco");
+
+  PHG4DstCompressReco *compress = new PHG4DstCompressReco("PHG4DstCompressReco");
   compress->AddHitContainer("G4HIT_PIPE");
   compress->AddHitContainer("G4HIT_SVTXSUPPORT");
   compress->AddHitContainer("G4HIT_CEMC_ELECTRONICS");
@@ -296,7 +298,7 @@ void ShowerCompress(int verbosity = 0) {
   compress->AddHitContainer("G4HIT_FEMC");
   compress->AddHitContainer("G4HIT_ABSORBER_FEMC");
   compress->AddHitContainer("G4HIT_FHCAL");
-  compress->AddHitContainer("G4HIT_ABSORBER_FHCAL"); 
+  compress->AddHitContainer("G4HIT_ABSORBER_FHCAL");
   compress->AddCellContainer("G4CELL_FEMC");
   compress->AddCellContainer("G4CELL_FHCAL");
   compress->AddTowerContainer("TOWER_SIM_FEMC");
@@ -305,14 +307,16 @@ void ShowerCompress(int verbosity = 0) {
   compress->AddTowerContainer("TOWER_SIM_FHCAL");
   compress->AddTowerContainer("TOWER_RAW_FHCAL");
   compress->AddTowerContainer("TOWER_CALIB_FHCAL");
-  
+
   se->registerSubsystem(compress);
-  
-  return; 
+
+  return;
 }
 
-void DstCompress(Fun4AllDstOutputManager* out) {
-  if (out) {
+void DstCompress(Fun4AllDstOutputManager *out)
+{
+  if (out)
+  {
     out->StripNode("G4HIT_PIPE");
     out->StripNode("G4HIT_SVTXSUPPORT");
     out->StripNode("G4HIT_CEMC_ELECTRONICS");
@@ -335,9 +339,8 @@ void DstCompress(Fun4AllDstOutputManager* out) {
     out->StripNode("G4HIT_FEMC");
     out->StripNode("G4HIT_ABSORBER_FEMC");
     out->StripNode("G4HIT_FHCAL");
-    out->StripNode("G4HIT_ABSORBER_FHCAL"); 
+    out->StripNode("G4HIT_ABSORBER_FHCAL");
     out->StripNode("G4CELL_FEMC");
     out->StripNode("G4CELL_FHCAL");
   }
 }
-

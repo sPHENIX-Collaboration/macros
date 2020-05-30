@@ -2,8 +2,8 @@
 
 #include "GlobalVariables.C"
 
-#include "G4_Mvtx.C"
 #include "G4_Intt.C"
+#include "G4_Mvtx.C"
 
 #include <g4tpc/PHG4TpcDigitizer.h>
 #include <g4tpc/PHG4TpcElectronDrift.h>
@@ -30,20 +30,19 @@ namespace Enable
 
 namespace G4TPC
 {
-static int n_tpc_layer_inner = 16;
-static int tpc_layer_rphi_count_inner = 1152;
-static int n_tpc_layer_mid = 16;
-static int n_tpc_layer_outer = 16;
-static int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
+  static int n_tpc_layer_inner = 16;
+  static int tpc_layer_rphi_count_inner = 1152;
+  static int n_tpc_layer_mid = 16;
+  static int n_tpc_layer_outer = 16;
+  static int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
   static double tpc_outer_radius = 77. + 1.17;
-}
-
+}  // namespace G4TPC
 
 void TPCInit() {}
 
 double TPC(PHG4Reco* g4Reco,
-	    double radius,
-	   const int absorberactive = 0)
+           double radius,
+           const int absorberactive = 0)
 {
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::TPC_OVERLAPCHECK;
   bool AbsorberActive = Enable::ABSORBER || Enable::TPC_ABSORBER;
@@ -51,7 +50,7 @@ double TPC(PHG4Reco* g4Reco,
   PHG4TpcSubsystem* tpc = new PHG4TpcSubsystem("TPC");
   tpc->SetActive();
   tpc->SuperDetector("TPC");
-  tpc->set_double_param("steplimits", 1); // 1cm steps
+  tpc->set_double_param("steplimits", 1);  // 1cm steps
 
   if (AbsorberActive)
   {
@@ -70,7 +69,6 @@ double TPC(PHG4Reco* g4Reco,
 
 void TPC_Cells()
 {
-
   Fun4AllServer* se = Fun4AllServer::instance();
 
   //=========================
@@ -79,10 +77,10 @@ void TPC_Cells()
   // g4tpc/PHG4TpcPadPlaneReadout
   //=========================
 
-  PHG4TpcPadPlane *padplane = new PHG4TpcPadPlaneReadout();
+  PHG4TpcPadPlane* padplane = new PHG4TpcPadPlaneReadout();
   padplane->Verbosity(0);
 
-  PHG4TpcElectronDrift *edrift = new PHG4TpcElectronDrift();
+  PHG4TpcElectronDrift* edrift = new PHG4TpcElectronDrift();
   edrift->Detector("TPC");
   edrift->Verbosity(0);
   // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
@@ -127,6 +125,4 @@ void TPC_Clustering()
   TpcClusterizer* tpcclusterizer = new TpcClusterizer();
   tpcclusterizer->Verbosity(0);
   se->registerSubsystem(tpcclusterizer);
-
-
 }
