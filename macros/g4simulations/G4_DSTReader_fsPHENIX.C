@@ -1,9 +1,15 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include <fun4all/Fun4AllServer.h>
+
+#include "G4_INTT.C"
+#include "G4_MVTX.C"
+#include "G4_TPC.C"
+
 #include <g4eval/PHG4DSTReader.h>
+
+#include <fun4all/Fun4AllServer.h>
+
 R__LOAD_LIBRARY(libg4eval.so)
-#endif
+
 
 //////////////////////////////////////////////////////////////////
 /*!
@@ -22,7 +28,6 @@ void G4DSTreader_fsPHENIXInit() {}
 void
 G4DSTreader_fsPHENIX( const char * outputFile = "G4sPHENIXCells.root",//
     int absorberactive = 1, //
-    bool do_svtx = true, //
     bool do_cemc = true, //
     bool do_hcalin = true, //
     bool do_magnet = true, //
@@ -59,9 +64,17 @@ G4DSTreader_fsPHENIX( const char * outputFile = "G4sPHENIXCells.root",//
 
   if (save_g4_raw)
     {
-      if (do_svtx)
+      if (Enable::MVTX)
         {
-          ana->AddNode("SVTX");
+          ana->AddNode("MVTX");
+        }
+      if (Enable::INTT)
+        {
+          ana->AddNode("INTT");
+        }
+      if (Enable::TPC)
+        {
+          ana->AddNode("TPC");
         }
 
       if (do_cemc)
