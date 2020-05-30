@@ -14,6 +14,7 @@
 #include "G4_FEMC.C"
 #include "G4_FHCAL.C"
 #include "G4_Piston.C"
+#include "G4_TPC.C"
 #include "G4_User.C"
 #include "G4_World.C"
 
@@ -39,7 +40,7 @@ void DstCompress(Fun4AllDstOutputManager* out);
 
 void RunLoadTest() {}
 
-void G4Init(bool do_svtx = true)
+void G4Init()
 {
 
   // load detector/material macros and execute Init() function
@@ -56,11 +57,10 @@ void G4Init(bool do_svtx = true)
   {
     InttInit();
   }
-  if (do_svtx)
-    {
-      TrackingInit();
-    }
-
+  if (Enable::TPC)
+  {
+    TPCInit();
+  }
   if (Enable::CEMC)
     {
       CEmcInit();
@@ -172,10 +172,10 @@ int G4Setup(const int absorberactive = 0,
   {
     radius = Intt(g4Reco, radius, absorberactive);
   }
-  //----------------------------------------
-  // SVTX
-  if (do_svtx) radius = Tracking(g4Reco, radius, absorberactive);
-
+  if (Enable::TPC)
+  {
+    radius = TPC(g4Reco, radius);
+  }
   //----------------------------------------
   // CEMC
 //
