@@ -26,7 +26,7 @@ R__LOAD_LIBRARY(libg4trackfastsim.so)
 
 namespace Enable
 {
-  static bool TRACKING = false;
+  bool TRACKING = false;
 }
 
 void TrackingInit() {}

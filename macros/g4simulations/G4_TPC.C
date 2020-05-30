@@ -22,20 +22,20 @@ R__LOAD_LIBRARY(libtpc.so)
 
 namespace Enable
 {
-  static bool TPC = false;
-  static bool TPC_ABSORBER = false;
-  static bool TPC_OVERLAPCHECK = false;
-  static int TPC_VERBOSITY = 0;
+  bool TPC = false;
+  bool TPC_ABSORBER = false;
+  bool TPC_OVERLAPCHECK = false;
+  int TPC_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4TPC
 {
-  static int n_tpc_layer_inner = 16;
-  static int tpc_layer_rphi_count_inner = 1152;
-  static int n_tpc_layer_mid = 16;
-  static int n_tpc_layer_outer = 16;
-  static int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
-  static double tpc_outer_radius = 77. + 1.17;
+  int n_tpc_layer_inner = 16;
+  int tpc_layer_rphi_count_inner = 1152;
+  int n_tpc_layer_mid = 16;
+  int n_tpc_layer_outer = 16;
+  int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
+  double tpc_outer_radius = 77. + 1.17;
 }  // namespace G4TPC
 
 void TPCInit() {}

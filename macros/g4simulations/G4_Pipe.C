@@ -10,21 +10,21 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 namespace Enable
 {
-  static bool PIPE = false;
-  static bool PIPE_ABSORBER = false;
-  static bool PIPE_OVERLAPCHECK = false;
-  static int PIPE_VERBOSITY = 0;
+  bool PIPE = false;
+  bool PIPE_ABSORBER = false;
+  bool PIPE_OVERLAPCHECK = false;
+  int PIPE_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4PIPE
 {
-  static double be_pipe_radius = 2.0005;     // 4.001 cm inner diameter from spec sheet
-  static double be_pipe_thickness = 0.0760;  // 760 um based on spec sheet
-  static double be_pipe_length = 80.0;       // +/- 40 cm
+  double be_pipe_radius = 2.0005;     // 4.001 cm inner diameter from spec sheet
+  double be_pipe_thickness = 0.0760;  // 760 um based on spec sheet
+  double be_pipe_length = 80.0;       // +/- 40 cm
 
-  static double al_pipe_radius = 2.0005;     // same as Be pipe
-  static double al_pipe_thickness = 0.1600;  // 1.6 mm based on spec
-  static double al_pipe_length = 88.3;       // extension beyond +/- 40 cm
+  double al_pipe_radius = 2.0005;     // same as Be pipe
+  double al_pipe_thickness = 0.1600;  // 1.6 mm based on spec
+  double al_pipe_length = 88.3;       // extension beyond +/- 40 cm
 }  // namespace G4PIPE
 
 void PipeInit()

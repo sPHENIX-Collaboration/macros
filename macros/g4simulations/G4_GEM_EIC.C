@@ -20,8 +20,8 @@ int make_LANL_FST_station(string name, PHG4Reco *g4Reco, double zpos, double Rmi
 
 namespace Enable
 {
-  static bool EGEM = false;
-  static bool FGEM = false;
+  bool EGEM = false;
+  bool FGEM = false;
 }  // namespace Enable
 
 void EGEM_Init()

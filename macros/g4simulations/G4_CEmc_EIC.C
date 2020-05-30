@@ -27,7 +27,7 @@ R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
 {
-  static bool CEMC = false;
+  bool CEMC = false;
 }
 
 namespace G4CEMC

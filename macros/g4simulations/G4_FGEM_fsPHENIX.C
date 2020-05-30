@@ -21,8 +21,8 @@ void AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem);
 
 namespace Enable
 {
-  static bool FGEM = false;
-  static bool FGEM_OVERLAPCHECK = false;
+  bool FGEM = false;
+  bool FGEM_OVERLAPCHECK = false;
 }
 
 void FGEM_Init()

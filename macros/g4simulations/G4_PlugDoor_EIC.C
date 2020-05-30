@@ -10,21 +10,21 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 namespace Enable
 {
-  static bool PLUGDOOR = false;
-  static bool PLUGDOOR_ABSORBER = false;
+  bool PLUGDOOR = false;
+  bool PLUGDOOR_ABSORBER = false;
 }
 
 namespace G4PLUGDOOR
 {
   // sPHENIX forward flux return(s)
   // define via four corners in the engineering drawing
-  const double z_1 = 330.81;
-  const double z_2 = 360.81;
-  const double r_1 = 30;
-  const double r_2 = 263.5;
+  double z_1 = 330.81;
+  double z_2 = 360.81;
+  double r_1 = 30;
+  double r_2 = 263.5;
 
-  const double length = z_2 - z_1;
-  const double place_z = -(z_1 + z_2) / 2.;
+  double length = z_2 - z_1;
+  double place_z = -(z_1 + z_2) / 2.;
 }  // namespace G4PLUGDOOR
 
 void PlugDoorInit()

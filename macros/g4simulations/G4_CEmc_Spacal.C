@@ -36,10 +36,10 @@ R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
 {
-  static bool CEMC = false;
-  static bool CEMC_ABSORBER = false;
-  static bool CEMC_OVERLAPCHECK = false;
-  static int CEMC_VERBOSITY = 0;
+   bool CEMC = false;
+   bool CEMC_ABSORBER = false;
+   bool CEMC_OVERLAPCHECK = false;
+   int CEMC_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4CEMC

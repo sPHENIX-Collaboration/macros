@@ -10,17 +10,17 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 namespace Enable
 {
-  static bool PLUGDOOR = false;
-  static bool PLUGDOOR_ABSORBER = false;
-  static bool PLUGDOOR_OVERLAPCHECK = false;
+  bool PLUGDOOR = false;
+  bool PLUGDOOR_ABSORBER = false;
+  bool PLUGDOOR_OVERLAPCHECK = false;
 }  // namespace Enable
 
 namespace G4PLUGDOOR
 {
-  const double place_z = 335.9;
-  const double length = 10.2;
-  const double inner_radius = 2.1;
-  const double thickness = 258.5;
+  double place_z = 335.9;
+  double length = 10.2;
+  double inner_radius = 2.1;
+  double thickness = 258.5;
 }  // namespace G4PLUGDOOR
 
 void PlugDoorInit()

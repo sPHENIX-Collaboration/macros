@@ -13,17 +13,17 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 namespace Enable
 {
-  static bool PISTON = false;
-  static bool PISTON_ABSORBER = false;
-  static bool PISTON_OVERLAPCHECK = false;
-  static int PISTON_VERBOSITY = 0;
+  bool PISTON = false;
+  bool PISTON_ABSORBER = false;
+  bool PISTON_OVERLAPCHECK = false;
+  int PISTON_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4PISTON
 {
-  static double zpos1 = 305. - 20.; // front of forward ECal/MPC
-  static double zpos2 = 335.9 - 10.2 / 2.; // front of the forward field endcap
-  static double calorimeter_hole_diameter = 9.92331 *2; // side length of the middle hole of MPC that
+  double zpos1 = 305. - 20.; // front of forward ECal/MPC
+  double zpos2 = 335.9 - 10.2 / 2.; // front of the forward field endcap
+  double calorimeter_hole_diameter = 9.92331 *2; // side length of the middle hole of MPC that
 }  // namespace G4PISTON
 
 void PistonInit()

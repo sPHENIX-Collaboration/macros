@@ -10,16 +10,16 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 namespace Enable
 {
-  static bool MAGNET = false;
-  static bool MAGNET_ABSORBER = false;
-  static bool MAGNET_OVERLAPCHECK = false;
+  bool MAGNET = false;
+  bool MAGNET_ABSORBER = false;
+  bool MAGNET_OVERLAPCHECK = false;
 }  // namespace Enable
 
 namespace G4MAGNET
 {
-  static double magnet_outer_cryostat_wall_radius = 174.5;
-  static double magnet_outer_cryostat_wall_thickness = 2.5;
-  static double magnet_length = 379.;
+  double magnet_outer_cryostat_wall_radius = 174.5;
+  double magnet_outer_cryostat_wall_thickness = 2.5;
+  double magnet_length = 379.;
 }  // namespace G4MAGNET
 
 void MagnetInit()

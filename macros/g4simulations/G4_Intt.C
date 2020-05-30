@@ -23,29 +23,29 @@ R__LOAD_LIBRARY(libintt.so)
 
 namespace Enable
 {
-  static bool INTT = false;
-  static bool INTT_OVERLAPCHECK = false;
-  static int INTT_VERBOSITY = 0;
+  bool INTT = false;
+  bool INTT_OVERLAPCHECK = false;
+  int INTT_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4INTT
 {
-  static int n_intt_layer = 4;           // must be 4 or 0, setting to zero removes INTT completely
-  static double intt_radius_max = 140.;  // including stagger radius (mm)
-  static int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
+  int n_intt_layer = 4;           // must be 4 or 0, setting to zero removes INTT completely
+  double intt_radius_max = 140.;  // including stagger radius (mm)
+  int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
                              PHG4InttDefs::SEGMENTATION_PHI,
                              PHG4InttDefs::SEGMENTATION_PHI,
                              PHG4InttDefs::SEGMENTATION_PHI};
-  static int nladder[4] = {15, 15, 18, 18};
-  static double sensor_radius[4] = {8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
-  static double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
+  int nladder[4] = {15, 15, 18, 18};
+  double sensor_radius[4] = {8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
+  double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
   enum enu_InttDeadMapType  // Dead map options for INTT
   {
     kInttNoDeadMap = 0,        // All channel in Intt is alive
     kIntt4PercentDeadMap = 4,  // 4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
     kIntt8PercentDeadMap = 8   // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
   };
-  static enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
+  enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
 
 }  // namespace G4INTT
 

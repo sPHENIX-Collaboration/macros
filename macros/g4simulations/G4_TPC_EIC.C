@@ -19,7 +19,7 @@ R__LOAD_LIBRARY(libg4mvtx.so)
 
 namespace Enable
 {
-  static bool TPC = false;
+  bool TPC = false;
 }
 
 namespace G4TPC

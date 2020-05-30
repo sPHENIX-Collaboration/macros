@@ -14,7 +14,7 @@ R__LOAD_LIBRARY(libg4detectors.so)
 // This creates the Enable Flag to be used in the main steering macro
 namespace Enable
 {
-  static bool PIPE = false;
+  bool PIPE = false;
 }
 
 namespace G4PIPE
@@ -23,10 +23,10 @@ namespace G4PIPE
   // Extracted via mechanical model: Detector chamber 3-20-20
   // directly implimenting the central Be section in G4 cylinder for max speed simulation in the detector region.
   // The jointer lip structure of the pipe R = 3.2cm x L=5mm is ignored here
-  static double be_pipe_radius = 3.1000;
-  static double be_pipe_thickness = 3.1762 - be_pipe_radius;  // 760 um for sPHENIX
-  static double be_pipe_length_plus = 66.8;                   // +z beam pipe extend.
-  static double be_pipe_length_neg = -79.8;                   // -z beam pipe extend.
+  double be_pipe_radius = 3.1000;
+  double be_pipe_thickness = 3.1762 - be_pipe_radius;  // 760 um for sPHENIX
+  double be_pipe_length_plus = 66.8;                   // +z beam pipe extend.
+  double be_pipe_length_neg = -79.8;                   // -z beam pipe extend.
 }  // namespace G4PIPE
 
 void PipeInit()
@@ -45,11 +45,11 @@ double Pipe(PHG4Reco* g4Reco,
 {
   // process pipe extentions?
   bool use_forward_pipes = false;
-  const static bool do_pipe_hadron_forward_extension = use_forward_pipes && true;
-  const static bool do_pipe_electron_forward_extension = use_forward_pipes && true;
+  const bool do_pipe_hadron_forward_extension = use_forward_pipes && true;
+  const bool do_pipe_electron_forward_extension = use_forward_pipes && true;
 
-  static const double be_pipe_length = G4PIPE::be_pipe_length_plus - G4PIPE::be_pipe_length_neg;  // pipe length
-  static const double be_pipe_center = 0.5 * (G4PIPE::be_pipe_length_plus + G4PIPE::be_pipe_length_neg);
+  const double be_pipe_length = G4PIPE::be_pipe_length_plus - G4PIPE::be_pipe_length_neg;  // pipe length
+  const double be_pipe_center = 0.5 * (G4PIPE::be_pipe_length_plus + G4PIPE::be_pipe_length_neg);
 
   if (radius > G4PIPE::be_pipe_radius)
   {

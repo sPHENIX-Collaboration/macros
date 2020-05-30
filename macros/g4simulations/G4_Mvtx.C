@@ -21,15 +21,15 @@ R__LOAD_LIBRARY(libmvtx.so)
 
 namespace Enable
 {
-  static bool MVTX = false;
-  static bool MVTX_OVERLAPCHECK = false;
-  static int MVTX_VERBOSITY = 0;
+  bool MVTX = false;
+  bool MVTX_OVERLAPCHECK = false;
+  int MVTX_VERBOSITY = 0;
 
 }  // namespace Enable
 
 namespace G4MVTX
 {
-  static int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
+  int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
 }  // namespace G4MVTX
 
 void MvtxInit()

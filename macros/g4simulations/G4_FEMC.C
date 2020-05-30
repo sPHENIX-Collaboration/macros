@@ -25,17 +25,17 @@ R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
 {
-  static bool FEMC = false;
-  static bool FEMC_ABSORBER = false;
-  static int FEMC_VERBOSITY = 0;
+  bool FEMC = false;
+  bool FEMC_ABSORBER = false;
+  int FEMC_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4FEMC
 {
   // from ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt
-  const double Gz0 = 305.;
-  const double Gdz = 40.;
-  const double outer_radius = 180.;
+  double Gz0 = 305.;
+  double Gdz = 40.;
+  double outer_radius = 180.;
   string calibfile = "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
   enum enu_Femc_clusterizer
   {

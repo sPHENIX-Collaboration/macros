@@ -16,17 +16,17 @@ R__LOAD_LIBRARY(libg4mvtx.so)
 
 namespace Enable
 {
-  static bool MVTX = false;
-  static bool MVTX_OVERLAPCHECK = false;
-  static int MVTX_VERBOSITY = 0;
+  bool MVTX = false;
+  bool MVTX_OVERLAPCHECK = false;
+  int MVTX_VERBOSITY = 0;
 
 }
 
 namespace G4MVTX
 {
-  const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
-  const int N_staves[n_maps_layer] = {18, 24, 30};
-  const double nom_radius[n_maps_layer] = {36.4, 48.1, 59.8};
+  int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
+  int N_staves[n_maps_layer] = {18, 24, 30};
+  double nom_radius[n_maps_layer] = {36.4, 48.1, 59.8};
 }  // namespace MVTX
 
 void MvtxInit(int verbosity = 0)

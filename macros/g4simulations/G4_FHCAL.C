@@ -24,16 +24,16 @@ R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
 {
-  static bool FHCAL = false;
-  static bool FHCAL_ABSORBER = false;
+  bool FHCAL = false;
+  bool FHCAL_ABSORBER = false;
 }
 
 namespace G4FHCAL
 {
   // from ForwardHcal/mapping/towerMap_FHCAL_v005.txt
-  const double Gz0 = 400.;
-  const double Gdz = 100.;
-  const double outer_radius = 262.;
+  double Gz0 = 400.;
+  double Gdz = 100.;
+  double outer_radius = 262.;
 }  // namespace G4FHCAL
 
 void FHCALInit()
