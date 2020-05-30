@@ -113,8 +113,7 @@ void G4Init()
   }
 }
 
-int G4Setup(const int absorberactive = 0,
-            const string &field = "1.5",
+int G4Setup(const string &field = "1.5",
             const EDecayType decayType = EDecayType::kAll,
             const float magfield_rescale = 1.0)
 {
@@ -164,15 +163,15 @@ int G4Setup(const int absorberactive = 0,
   // PIPE
   if (Enable::PIPE)
   {
-    radius = Pipe(g4Reco, radius, absorberactive);
+    radius = Pipe(g4Reco, radius);
   }
   if (Enable::MVTX)
   {
-    radius = Mvtx(g4Reco, radius, absorberactive);
+    radius = Mvtx(g4Reco, radius);
   }
   if (Enable::INTT)
   {
-    radius = Intt(g4Reco, radius, absorberactive);
+    radius = Intt(g4Reco, radius);
   }
   if (Enable::TPC)
   {
@@ -183,7 +182,7 @@ int G4Setup(const int absorberactive = 0,
   //
   if (Enable::CEMC)
   {
-    radius = CEmc(g4Reco, radius, 8, absorberactive);
+    radius = CEmc(g4Reco, radius, 8);
   }
 
   //----------------------------------------
@@ -191,7 +190,7 @@ int G4Setup(const int absorberactive = 0,
 
   if (Enable::HCALIN)
   {
-    radius = HCalInner(g4Reco, radius, 4, absorberactive);
+    radius = HCalInner(g4Reco, radius, 4);
   }
 
   //----------------------------------------
@@ -199,7 +198,7 @@ int G4Setup(const int absorberactive = 0,
 
   if (Enable::MAGNET)
   {
-    radius = Magnet(g4Reco, radius, 0, absorberactive);
+    radius = Magnet(g4Reco, radius, 0);
   }
 
   //----------------------------------------
@@ -207,7 +206,7 @@ int G4Setup(const int absorberactive = 0,
 
   if (Enable::HCALOUT)
   {
-    radius = HCalOuter(g4Reco, radius, 4, absorberactive);
+    radius = HCalOuter(g4Reco, radius, 4);
   }
 
   //----------------------------------------
