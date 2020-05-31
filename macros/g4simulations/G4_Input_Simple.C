@@ -34,7 +34,28 @@ namespace INPUTSIMPLE
   double pmin = 0.5;
   double pmax = 50.;
   map<string,unsigned int> particles;
+  void AddParticle(const string &name, const unsigned int num);
 }
+
+void INPUTSIMPLE::AddParticle(const string &name, const unsigned int num)
+{
+  if (num == 0)
+  {
+    cout << "INPUTSIMPLE::AddParticle(\"" << name << "\"," << num 
+         << "): number of " << name << " has to be > 0" << endl;
+    return;
+  }
+  auto iter = particles.find(name);
+  if (iter != particles.end())
+  {
+    iter->second += num;
+  }
+  else
+  {
+    particles.insert(make_pair(name,num));
+  }
+}
+
 
 void InputSimpleInit()
 {

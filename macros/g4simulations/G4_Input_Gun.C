@@ -25,7 +25,14 @@ namespace INPUTGUN
   double vy = 0.;
   double vz = 0.;
   deque<tuple<string,double,double,double>> particles;
+  void AddParticle(const string &name, const double px, const double py, const double pz);
 }
+
+void INPUTGUN::AddParticle(const string &name, const double px, const double py, const double pz)
+{
+  particles.push_back(make_tuple(name,px,py,pz));
+}
+
 
 void InputGunInit()
 {
