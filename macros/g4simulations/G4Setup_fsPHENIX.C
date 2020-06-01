@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GlobalVariables.C"
+
 #include "G4_BlackHole.C"
 #include "G4_CEmc_Spacal.C"
 #include "G4_FEMC.C"
@@ -16,7 +18,6 @@
 #include "G4_Tracking_fsPHENIX.C"
 #include "G4_User.C"
 #include "G4_World.C"
-#include "GlobalVariables.C"
 
 #include <g4decayer/EDecayType.hh>
 
@@ -123,10 +124,12 @@ int G4Setup(const string &field = "1.5",
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
+  if (Input::HEPMC)
+  {
   // read-in HepMC events to Geant4 if there is any
   HepMCNodeReader *hr = new HepMCNodeReader();
   se->registerSubsystem(hr);
-
+  }
   PHG4Reco *g4Reco = new PHG4Reco();
   g4Reco->save_DST_geometry(true);  //Save geometry from Geant4 to DST
   WorldInit(g4Reco);
