@@ -2,6 +2,13 @@
 static bool overlapcheck = false;
 static double no_overlapp = 0.0001;  // added to radii to avoid overlapping volumes
 
+namespace Input
+{
+  bool HEPMC = false;
+  int HEPMC_VERBOSITY = 0;
+  bool EMBED = false;
+}
+
 namespace Enable
 {
   bool OVERLAPCHECK = false;
