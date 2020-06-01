@@ -2,10 +2,14 @@
 
 #include "GlobalVariables.C"
 
-#include <g4main/PHG4SimpleEventGenerator.h>
+#include "G4_Input_Simple.C"
+#include "G4_Input_Gun.C"
+
 #include <phpythia6/PHPythia6.h>
 
 #include <phpythia8/PHPythia8.h>
+
+#include <phhepmc/Fun4AllHepMCInputManager.h>
 
 #include <fun4all/Fun4AllDummyInputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -21,15 +25,33 @@ namespace Input
   bool READHITS = false;
   bool PYTHIA6 = false;
   bool PYTHIA8 = false;
-  bool GUN = false;
 }
 
-#include "G4_Input_Simple.C"
+namespace INPUTHEPMC
+{
+  string filename;
+}
+
+namespace INPUTREADHITS
+{
+  string filename;
+}
+
+namespace INPUTEMBED
+{
+  string filename;
+}
+
 
 void InputInit()
 {
 // first consistency checks - not all input generators play nice
 // with each other
+  if (Input::READHITS && Input::EMBED)
+  {
+    cout << "Reading Hits and Embedding into background at the same time is not supported" << endl;
+    gSystem->Exit(1);
+  }
 
   Fun4AllServer *se = Fun4AllServer::instance();
   if (Input::PYTHIA6)
@@ -49,12 +71,26 @@ void InputInit()
   {
     InputSimpleInit();
   }
+  if (Input::GUN)
+  {
+    InputGunInit();
+  }
 
 }
 
 void InputManagers()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
+  if (Input::HEPMC)
+  {
+    Fun4AllInputManager *in = new Fun4AllHepMCInputManager("DSTIN");
+    in->Verbosity(Input::HEPMC_VERBOSITY);
+    se->registerInputManager(in);
+    se->fileopen(in->Name(), INPUTHEPMC::filename);
+  }
+  else
+  {
     Fun4AllInputManager *in = new Fun4AllDummyInputManager("JADE");
     se->registerInputManager(in);
+  }
 }
