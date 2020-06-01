@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GlobalVariables.C"
+
 #include "DisplayOn.C"
 #include "G4Setup_fsPHENIX.C"
 #include "G4_Bbc.C"
@@ -8,7 +10,7 @@
 #include "G4_FwdJets.C"
 #include "G4_Global.C"
 #include "G4_Jets.C"
-#include "GlobalVariables.C"
+#include "G4_Input.C"
 
 #include <g4detectors/PHG4DetectorSubsystem.h>
 
@@ -19,10 +21,6 @@
 #include <g4main/PHG4SimpleEventGenerator.h>
 
 #include <phhepmc/Fun4AllHepMCInputManager.h>
-
-#include <phpythia6/PHPythia6.h>
-
-#include <phpythia8/PHPythia8.h>
 
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -37,8 +35,6 @@
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
-R__LOAD_LIBRARY(libPHPythia6.so)
-R__LOAD_LIBRARY(libPHPythia8.so)
 
 int Fun4All_G4_fsPHENIX(
     const int nEvents = 2,
@@ -49,6 +45,22 @@ int Fun4All_G4_fsPHENIX(
   //===============
   // Input options
   //===============
+//  Input::SIMPLE = true;
+  Input::SIMPLE_VERBOSITY = true;
+  INPUTSIMPLE::AddParticle("pi-",1);
+  INPUTSIMPLE::AddParticle("e-",0);
+  INPUTSIMPLE::AddParticle("pi-",10);
+
+//  Input::PYTHIA6 = true;
+//  Input::PYTHIA8 = true;
+
+//  Input::GUN = true;
+  Input::GUN_VERBOSITY = 5;
+  INPUTGUN::AddParticle("pi-",0,1,0);
+
+  Input::HEPMC = true;
+  Input::HEPMC_VERBOSITY = 1;
+  INPUTHEPMC::filename=inputFile;
 
   // Either:
   // read previously generated g4-hits files, in this case it opens a DST and skips
@@ -56,45 +68,51 @@ int Fun4All_G4_fsPHENIX(
   // about the number of layers used for the cell reco code
   const bool readhits = false;
   // Or:
-  // read files in HepMC format (typically output from event generators like hijing or pythia)
-  const bool readhepmc = false;  // read HepMC files
   // Or:
   // Use particle generator
-  const bool runpythia8 = false;
-  const bool runpythia6 = false;
   // And
   // Further choose to embed newly simulated events to a previous simulation. Not compatible with `readhits = true`
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
   const bool do_embedding = false;
 
+// Initialize the selected Input
+  InputInit();
   // Write the DST
   const bool do_write_output = true;
   const bool do_dst_compress = false;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  const bool do_DSTReader = true;
+  const bool do_DSTReader = false;
+
+// turn the display on
+  bool display_on = false;
 
   //======================
   // What to run
   //======================
-  // Enable::ABSORBER = true;
+// Global options (enabled for all enables subsystems - if implemented)
+//  Enable::ABSORBER = true;
+//  Enable::OVERLAPCHECK = true;
+//  Enable::VERBOSITY = 1;
+  int absorberactive = 0;  // set to 1 to make all absorbers active volumes
 
-  bool do_bbc = true;
+  bool do_bbc = false;
 
-  Enable::PIPE = true;
-  Enable::PIPE_OVERLAPCHECK = false;
+  Enable::PIPE = false;
+  Enable::PIPE_ABSORBER = true;
+//  Enable::PIPE_OVERLAPCHECK = false;
   // central tracking
-  Enable::MVTX = true;
+  Enable::MVTX = false;
   bool do_mvtx_cell = Enable::MVTX && true;
   bool do_mvtx_cluster = do_mvtx_cell && true;
 
-  Enable::INTT = true;
+  Enable::INTT = false;
   bool do_intt_cell = Enable::INTT && true;
   bool do_intt_cluster = do_intt_cell && true;
 
-  Enable::TPC = true;
-  Enable::TPC_ABSORBER = true;
+  Enable::TPC = false;
+//  Enable::TPC_ABSORBER = true;
   bool do_tpc_cell = Enable::TPC && true;
   bool do_tpc_cluster = do_tpc_cell && true;
 
@@ -103,20 +121,24 @@ int Fun4All_G4_fsPHENIX(
 
   // central calorimeters, which is a detailed simulation and slow to run
   Enable::CEMC = false;
+//  Enable::CEMC_ABSORBER = true;
   bool do_cemc_cell = Enable::CEMC && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
 
   Enable::HCALIN = false;
+//  Enable::HCALIN_ABSORBER = true;
   bool do_hcalin_cell = Enable::HCALIN && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
   bool do_hcalin_eval = do_hcalin_cluster && true;
 
   Enable::MAGNET = false;
+//  Enable::MAGNET_ABSORBER = true;
 
   Enable::HCALOUT = false;
+//  Enable::HCALOUT_ABSORBER = true;
   bool do_hcalout_cell = Enable::HCALOUT && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
@@ -138,46 +160,41 @@ int Fun4All_G4_fsPHENIX(
   bool do_FGEM_eval = do_FGEM_track && true;
 
   Enable::FEMC = false;
-  Enable::FEMC_ABSORBER = true;
+//  Enable::FEMC_ABSORBER = true;
   bool do_FEMC_cell = Enable::FEMC && true;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
 
   Enable::FHCAL = false;
-  Enable::FHCAL_ABSORBER = true;
+//  Enable::FHCAL_ABSORBER = true;
   bool do_FHCAL_cell = Enable::FHCAL && true;
   bool do_FHCAL_twr = do_FHCAL_cell && true;
   bool do_FHCAL_cluster = do_FHCAL_twr && true;
 
   Enable::PISTON = false;
-  Enable::PISTON_ABSORBER = true;
+//  Enable::PISTON_ABSORBER = true;
   Enable::PISTON_OVERLAPCHECK = false;
 
   Enable::PLUGDOOR = false;
-  Enable::PLUGDOOR_ABSORBER = true;
+//  Enable::PLUGDOOR_ABSORBER = true;
   Enable::PLUGDOOR_OVERLAPCHECK = false;
 
   // new settings using Enable namespace in GlobalVariables.C
   //  Enable::BLACKHOLE = true;
   BlackHoleGeometry::visible = true;
 
-  // establish the geometry and reconstruction setup
+  // Initialize the selected subsystems
   G4Init();
 
-  int absorberactive = 1;  // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
   const float magfield_rescale = -1.4 / 1.5;                                                         // make consistent with Fun4All_G4_sPHENIX()
+
 
   //---------------
   // Fun4All server
   //---------------
 
-  bool display_on = false;
-  if (display_on)
-  {
-    gROOT->LoadMacro("DisplayOn.C");
-  }
 
   Fun4AllServer *se = Fun4AllServer::instance();
   //  se->Verbosity(0); // uncomment for batch production running with minimal output messages
@@ -197,6 +214,7 @@ int Fun4All_G4_fsPHENIX(
   //-----------------
   // Event generation
   //-----------------
+//  InputInit();
 
   if (readhits)
   {
@@ -208,57 +226,8 @@ int Fun4All_G4_fsPHENIX(
       exit(1);
     }
   }
-  else if (readhepmc)
-  {
-    // action is performed in later stage at the input manager level
-  }
-  else if (runpythia8)
-  {
-    gSystem->Load("libPHPythia8.so");
-
-    PHPythia8 *pythia8 = new PHPythia8();
-    // see coresoftware/generators/PHPythia8 for example config
-    pythia8->set_config_file("phpythia8.cfg");
-    se->registerSubsystem(pythia8);
-  }
-  else if (runpythia6)
-  {
-    gSystem->Load("libPHPythia6.so");
-
-    PHPythia6 *pythia6 = new PHPythia6();
-    pythia6->set_config_file("phpythia6.cfg");
-    se->registerSubsystem(pythia6);
-  }
   else
   {
-    // toss low multiplicity dummy events
-    PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-    //gen->add_particles("e-",5); // mu+,e+,proton,pi+,Upsilon
-    //gen->add_particles("e+",5); // mu-,e-,anti_proton,pi-
-    gen->add_particles("pi-", 1);  // mu-,e-,anti_proton,pi-
-    if (readhepmc || do_embedding)
-    {
-      gen->set_reuse_existing_vertex(true);
-      gen->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
-    }
-    else
-    {
-      gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
-                                            PHG4SimpleEventGenerator::Uniform,
-                                            PHG4SimpleEventGenerator::Uniform);
-      gen->set_vertex_distribution_mean(0.0, 0.0, 0.0);
-      gen->set_vertex_distribution_width(0.0, 0.0, 5.0);
-    }
-    gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
-    gen->set_vertex_size_parameters(0.0, 0.0);
-    gen->set_eta_range(-3.0, 3.0);
-    //gen->set_eta_range(3.0, 3.0); //fsPHENIX FWD
-    gen->set_phi_range(-1.0 * M_PI, 1.0 * M_PI);
-    //gen->set_phi_range(TMath::Pi()/2-0.1, TMath::Pi()/2-0.1);
-    gen->set_p_range(10.0, 10.0);
-    gen->Embed(1);
-    gen->Verbosity(0);
-    se->registerSubsystem(gen);
   }
 
   if (!readhits)
@@ -267,7 +236,7 @@ int Fun4All_G4_fsPHENIX(
     // Detector description
     //---------------------
 
-    G4Setup(absorberactive, magfield, EDecayType::kAll,
+    G4Setup(magfield, EDecayType::kAll,
             magfield_rescale);
   }
 
@@ -344,13 +313,11 @@ int Fun4All_G4_fsPHENIX(
 
   if (do_global)
   {
-    gROOT->LoadMacro("G4_Global.C");
     Global_Reco();
   }
 
   else if (do_global_fastsim)
   {
-    gROOT->LoadMacro("G4_Global.C");
     Global_FastSim();
   }
 
@@ -360,13 +327,11 @@ int Fun4All_G4_fsPHENIX(
 
   if (do_jet_reco)
   {
-    gROOT->LoadMacro("G4_Jets.C");
     Jet_Reco();
   }
 
   if (do_fwd_jet_reco)
   {
-    gROOT->LoadMacro("G4_FwdJets.C");
     Jet_FwdReco();
   }
   //----------------------
@@ -414,25 +379,14 @@ int Fun4All_G4_fsPHENIX(
     in1->Repeat();                   // if file(or filelist) is exhausted, start from beginning
     se->registerInputManager(in1);
   }
-  if (readhepmc)
-  {
-    Fun4AllInputManager *in = new Fun4AllHepMCInputManager("DSTIN");
-    se->registerInputManager(in);
-    se->fileopen(in->Name().c_str(), inputFile);
-  }
-  else
-  {
     // for single particle generators we just need something which drives
     // the event loop, the Dummy Input Mgr does just that
-    Fun4AllInputManager *in = new Fun4AllDummyInputManager("JADE");
-    se->registerInputManager(in);
-  }
+//      Fun4AllInputManager *in = new Fun4AllDummyInputManager("JADE");
+//    se->registerInputManager(in);
 
   if (do_DSTReader)
   {
     //Convert DST to human command readable TTree for quick poke around the outputs
-    gROOT->LoadMacro("G4_DSTReader_fsPHENIX.C");
-
     G4DSTreader_fsPHENIX(outputFile,  //
                          /*int*/ absorberactive,
                          /*bool*/ Enable::CEMC,
@@ -449,6 +403,8 @@ int Fun4All_G4_fsPHENIX(
                          /*bool*/ do_FEMC_twr);
   }
 
+  InputManagers();
+
   if (do_write_output)
   {
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
@@ -464,7 +420,7 @@ int Fun4All_G4_fsPHENIX(
     return 0;
   }
   // if we run the particle generator and use 0 it'll run forever
-  if (nEvents == 0 && !readhits && !readhepmc)
+  if (nEvents == 0 && !readhits && !Input::HEPMC)
   {
     cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
     cout << "it will run forever, so I just return without running anything" << endl;
