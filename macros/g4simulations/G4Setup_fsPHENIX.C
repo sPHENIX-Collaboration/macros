@@ -126,9 +126,9 @@ int G4Setup(const string &field = "1.5",
 
   if (Input::HEPMC)
   {
-  // read-in HepMC events to Geant4 if there is any
-  HepMCNodeReader *hr = new HepMCNodeReader();
-  se->registerSubsystem(hr);
+    // read-in HepMC events to Geant4 if there is any
+    HepMCNodeReader *hr = new HepMCNodeReader();
+    se->registerSubsystem(hr);
   }
   PHG4Reco *g4Reco = new PHG4Reco();
   g4Reco->save_DST_geometry(true);  //Save geometry from Geant4 to DST
