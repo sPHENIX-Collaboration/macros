@@ -17,7 +17,7 @@ namespace Input
 {
   bool SIMPLE = false;
   bool SIMPLE_VERBOSITY = 0;
-}
+}  // namespace Input
 
 namespace INPUTSIMPLE
 {
@@ -29,19 +29,19 @@ namespace INPUTSIMPLE
   double vzwidth = 5.;
   double etamin = -1.;
   double etamax = 3.;
-  double phimin = -1.*M_PI;
-  double phimax = 1.*M_PI;
+  double phimin = -1. * M_PI;
+  double phimax = 1. * M_PI;
   double pmin = 0.5;
   double pmax = 50.;
-  map<string,unsigned int> particles;
+  map<string, unsigned int> particles;
   void AddParticle(const string &name, const unsigned int num);
-}
+}  // namespace INPUTSIMPLE
 
 void INPUTSIMPLE::AddParticle(const string &name, const unsigned int num)
 {
   if (num == 0)
   {
-    cout << "INPUTSIMPLE::AddParticle(\"" << name << "\"," << num 
+    cout << "INPUTSIMPLE::AddParticle(\"" << name << "\"," << num
          << "): number of " << name << " has to be > 0" << endl;
     return;
   }
@@ -52,47 +52,45 @@ void INPUTSIMPLE::AddParticle(const string &name, const unsigned int num)
   }
   else
   {
-    particles.insert(make_pair(name,num));
+    particles.insert(make_pair(name, num));
   }
 }
-
 
 void InputSimpleInit()
 {
   if (INPUTSIMPLE::particles.empty())
   {
     cout << "Input::SIMPLE: particle map is empty use for e.g. 5 pi-" << endl;
-    cout << "INPUTSIMPLE::particles[\"pi-\"] = 5;" << endl; 
+    cout << "INPUTSIMPLE::particles[\"pi-\"] = 5;" << endl;
     gSystem->Exit(-1);
   }
   Fun4AllServer *se = Fun4AllServer::instance();
-    // toss low multiplicity dummy events
-    PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-    for (map<string,unsigned int>::const_iterator iter = INPUTSIMPLE::particles.begin();
-	 iter != INPUTSIMPLE::particles.end(); ++iter)
-    {
+  // toss low multiplicity dummy events
+  PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
+  for (map<string, unsigned int>::const_iterator iter = INPUTSIMPLE::particles.begin();
+       iter != INPUTSIMPLE::particles.end(); ++iter)
+  {
     gen->add_particles(iter->first, iter->second);
-    }
-    if (Input::HEPMC || Input::EMBED)
-    {
-      gen->set_reuse_existing_vertex(true);
-      gen->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
-    }
-    else
-    {
-      gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
-                                            PHG4SimpleEventGenerator::Uniform,
-                                            PHG4SimpleEventGenerator::Uniform);
-      gen->set_vertex_distribution_mean(INPUTSIMPLE::vxmean, INPUTSIMPLE::vymean, INPUTSIMPLE::vzmean);
-      gen->set_vertex_distribution_width(INPUTSIMPLE::vxwidth,INPUTSIMPLE::vywidth,INPUTSIMPLE::vzwidth);
-    }
-    gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
-    gen->set_vertex_size_parameters(0.0, 0.0);
-    gen->set_eta_range(INPUTSIMPLE::etamin,INPUTSIMPLE::etamax);
-    //gen->set_eta_range(3.0, 3.0); //fsPHENIX FWD
-    gen->set_phi_range(INPUTSIMPLE::phimin, INPUTSIMPLE::phimax);
-    gen->set_p_range(INPUTSIMPLE::pmin,INPUTSIMPLE::pmax);
-    gen->Embed(1);
-    gen->Verbosity(Input::SIMPLE_VERBOSITY);
-    se->registerSubsystem(gen);
+  }
+  if (Input::HEPMC || Input::EMBED)
+  {
+    gen->set_reuse_existing_vertex(true);
+    gen->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+  }
+  else
+  {
+    gen->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
+                                          PHG4SimpleEventGenerator::Uniform,
+                                          PHG4SimpleEventGenerator::Uniform);
+    gen->set_vertex_distribution_mean(INPUTSIMPLE::vxmean, INPUTSIMPLE::vymean, INPUTSIMPLE::vzmean);
+    gen->set_vertex_distribution_width(INPUTSIMPLE::vxwidth, INPUTSIMPLE::vywidth, INPUTSIMPLE::vzwidth);
+  }
+  gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
+  gen->set_vertex_size_parameters(0.0, 0.0);
+  gen->set_eta_range(INPUTSIMPLE::etamin, INPUTSIMPLE::etamax);
+  gen->set_phi_range(INPUTSIMPLE::phimin, INPUTSIMPLE::phimax);
+  gen->set_p_range(INPUTSIMPLE::pmin, INPUTSIMPLE::pmax);
+  gen->Embed(1);
+  gen->Verbosity(Input::SIMPLE_VERBOSITY);
+  se->registerSubsystem(gen);
 }
