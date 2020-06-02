@@ -11,6 +11,7 @@
 
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 
+#include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDummyInputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllServer.h>
@@ -83,14 +84,22 @@ void InputManagers()
   Fun4AllServer *se = Fun4AllServer::instance();
   if (Input::HEPMC)
   {
-    Fun4AllInputManager *in = new Fun4AllHepMCInputManager("DSTIN");
+    Fun4AllInputManager *in = new Fun4AllHepMCInputManager("HEPMCin");
     in->Verbosity(Input::HEPMC_VERBOSITY);
     se->registerInputManager(in);
     se->fileopen(in->Name(), INPUTHEPMC::filename);
   }
-  else
+  else if (Input::READHITS)
+  {
+    Fun4AllInputManager *hitsin = new Fun4AllDstInputManager("DSTin");
+    hitsin->fileopen(INPUTREADHITS::filename);
+    hitsin->Verbosity(1);
+    se->registerInputManager(hitsin);
+  }
+ else
   {
     Fun4AllInputManager *in = new Fun4AllDummyInputManager("JADE");
+    in->Verbosity(1);
     se->registerInputManager(in);
   }
 }
