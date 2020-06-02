@@ -2,8 +2,8 @@
 
 #include "GlobalVariables.C"
 
-#include "G4_Input_Simple.C"
 #include "G4_Input_Gun.C"
+#include "G4_Input_Simple.C"
 
 #include <phpythia6/PHPythia6.h>
 
@@ -14,6 +14,7 @@
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDummyInputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllNoSyncDstInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
@@ -26,7 +27,7 @@ namespace Input
   bool READHITS = false;
   bool PYTHIA6 = false;
   bool PYTHIA8 = false;
-}
+}  // namespace Input
 
 namespace INPUTHEPMC
 {
@@ -43,11 +44,10 @@ namespace INPUTEMBED
   string filename;
 }
 
-
 void InputInit()
 {
-// first consistency checks - not all input generators play nice
-// with each other
+  // first consistency checks - not all input generators play nice
+  // with each other
   if (Input::READHITS && Input::EMBED)
   {
     cout << "Reading Hits and Embedding into background at the same time is not supported" << endl;
@@ -76,12 +76,19 @@ void InputInit()
   {
     InputGunInit();
   }
-
 }
 
 void InputManagers()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
+  if (Input::EMBED)
+  {
+    gSystem->Load("libg4dst.so");
+    Fun4AllDstInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTinEmbed");
+    in1->AddFile(INPUTEMBED::filename);  // if one use a single input file
+    in1->Repeat();                       // if file(or filelist) is exhausted, start from beginning
+    se->registerInputManager(in1);
+  }
   if (Input::HEPMC)
   {
     Fun4AllInputManager *in = new Fun4AllHepMCInputManager("HEPMCin");
@@ -96,7 +103,7 @@ void InputManagers()
     hitsin->Verbosity(1);
     se->registerInputManager(hitsin);
   }
- else
+  else
   {
     Fun4AllInputManager *in = new Fun4AllDummyInputManager("JADE");
     in->Verbosity(1);
