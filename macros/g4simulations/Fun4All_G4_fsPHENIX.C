@@ -36,6 +36,14 @@
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 
+// If using the default embedding file results in a error, try
+// TFile *f1 = TFile::Open("http://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/fsPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root")
+// if it returns a certificate error, something like
+// Error in <DavixOpen>: can not open file with davix: Failure (Neon): Server certificate verification failed: bad certificate chain after 3 attempts (6)
+// add the line
+// Davix.GSI.CACheck: n
+// to your .rootrc
+
 int Fun4All_G4_fsPHENIX(
     const int nEvents = 2,
     const char *inputFile = "/sphenix/sim/sim01/production/2016-07-21/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
@@ -49,17 +57,20 @@ int Fun4All_G4_fsPHENIX(
   // read previously generated g4-hits files, in this case it opens a DST and skips
   // the simulations step completely. The G4Setup macro is only loaded to get information
   // about the number of layers used for the cell reco code
-  Input::READHITS = true;
+  Input::READHITS = false;
   INPUTREADHITS::filename=inputFile;
 
-//  Input::SIMPLE = true;
+//  Input::EMBED = true;
+  INPUTEMBED::filename=embed_input_file;
+
+  Input::SIMPLE = true;
   Input::SIMPLE_VERBOSITY = true;
   INPUTSIMPLE::AddParticle("pi-",5);
 //  INPUTSIMPLE::AddParticle("e-",0);
 //  INPUTSIMPLE::AddParticle("pi-",10);
 
 //  Input::PYTHIA6 = true;
-//  Input::PYTHIA8 = true;
+  Input::PYTHIA8 = true;
 
 //  Input::GUN = true;
   Input::GUN_VERBOSITY = 5;
@@ -76,7 +87,7 @@ int Fun4All_G4_fsPHENIX(
   // Further choose to embed newly simulated events to a previous simulation. Not compatible with `readhits = true`
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
-  const bool do_embedding = false;
+  const bool do_embedding = true;
 
 // Initialize the selected Input
 //  InputInit();
@@ -105,31 +116,31 @@ int Fun4All_G4_fsPHENIX(
   Enable::PIPE_ABSORBER = true;
 //  Enable::PIPE_OVERLAPCHECK = false;
   // central tracking
-  Enable::MVTX = true;
+  Enable::MVTX = false;
   bool do_mvtx_cell = Enable::MVTX && true;
   bool do_mvtx_cluster = do_mvtx_cell && true;
 
-  Enable::INTT = true;
+  Enable::INTT = false;
   bool do_intt_cell = Enable::INTT && true;
   bool do_intt_cluster = do_intt_cell && true;
 
   Enable::TPC = true;
 //  Enable::TPC_ABSORBER = true;
-  bool do_tpc_cell = Enable::TPC && true;
+  bool do_tpc_cell = Enable::TPC && false;
   bool do_tpc_cluster = do_tpc_cell && true;
 
   bool do_tracking_track = do_tpc_cell && do_intt_cell && do_mvtx_cell && true;
   bool do_tracking_eval = do_tracking_track && true;
 
   // central calorimeters, which is a detailed simulation and slow to run
-  Enable::CEMC = true;
+  Enable::CEMC = false;
 //  Enable::CEMC_ABSORBER = true;
   bool do_cemc_cell = Enable::CEMC && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
 
-  Enable::HCALIN = true;
+  Enable::HCALIN = false;
 //  Enable::HCALIN_ABSORBER = true;
   bool do_hcalin_cell = Enable::HCALIN && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
@@ -139,14 +150,14 @@ int Fun4All_G4_fsPHENIX(
   Enable::MAGNET = true;
 //  Enable::MAGNET_ABSORBER = true;
 
-  Enable::HCALOUT = true;
+  Enable::HCALOUT = false;
 //  Enable::HCALOUT_ABSORBER = true;
   bool do_hcalout_cell = Enable::HCALOUT && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
   bool do_hcalout_eval = do_hcalout_cluster && true;
 
-  bool do_global = true;
+  bool do_global = false;
   bool do_global_fastsim = false;
 
   bool do_jet_reco = false;
@@ -157,13 +168,13 @@ int Fun4All_G4_fsPHENIX(
 
   // fsPHENIX geometry
 
-  Enable::FGEM = true;
+  Enable::FGEM = false;
   bool do_FGEM_track = Enable::FGEM && false;
   bool do_FGEM_eval = do_FGEM_track && true;
 
   Enable::FEMC = true;
 //  Enable::FEMC_ABSORBER = true;
-  bool do_FEMC_cell = Enable::FEMC && true;
+  bool do_FEMC_cell = Enable::FEMC && false;
   bool do_FEMC_twr = do_FEMC_cell && true;
   bool do_FEMC_cluster = do_FEMC_twr && true;
 
@@ -359,10 +370,6 @@ int Fun4All_G4_fsPHENIX(
     in1->Repeat();                   // if file(or filelist) is exhausted, start from beginning
     se->registerInputManager(in1);
   }
-    // for single particle generators we just need something which drives
-    // the event loop, the Dummy Input Mgr does just that
-//      Fun4AllInputManager *in = new Fun4AllDummyInputManager("JADE");
-//    se->registerInputManager(in);
 
   if (do_DSTReader)
   {
