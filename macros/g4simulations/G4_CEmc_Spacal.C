@@ -68,7 +68,8 @@ namespace G4CEMC
 }  // namespace G4CEMC
 
 // black hole parameters are set in CEmc function
-void CEmcInit()
+// needs a dummy argument to play with current G4Setup_sPHENIX.C
+void CEmcInit(const int i)
 {}
 
 //! EMCal main setup macro

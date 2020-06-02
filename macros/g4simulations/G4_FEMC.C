@@ -55,9 +55,9 @@ void FEMCInit()
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4FEMC::Gz0 + G4FEMC::Gdz / 2.);
 }
 
-void FEMCSetup(PHG4Reco *g4Reco)
+void FEMCSetup(PHG4Reco *g4Reco, const int absorberactive)
 {
-  bool AbsorberActive = Enable::ABSORBER || Enable::FEMC_ABSORBER;
+  bool AbsorberActive = Enable::ABSORBER || Enable::FEMC_ABSORBER || (absorberactive>0);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   /** Use dedicated FEMC module */
