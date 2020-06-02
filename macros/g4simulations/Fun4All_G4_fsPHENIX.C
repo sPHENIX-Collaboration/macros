@@ -45,11 +45,18 @@ int Fun4All_G4_fsPHENIX(
   //===============
   // Input options
   //===============
+  // Either:
+  // read previously generated g4-hits files, in this case it opens a DST and skips
+  // the simulations step completely. The G4Setup macro is only loaded to get information
+  // about the number of layers used for the cell reco code
+  Input::READHITS = true;
+  INPUTREADHITS::filename=inputFile;
+
 //  Input::SIMPLE = true;
   Input::SIMPLE_VERBOSITY = true;
-  INPUTSIMPLE::AddParticle("pi-",1);
-  INPUTSIMPLE::AddParticle("e-",0);
-  INPUTSIMPLE::AddParticle("pi-",10);
+  INPUTSIMPLE::AddParticle("pi-",5);
+//  INPUTSIMPLE::AddParticle("e-",0);
+//  INPUTSIMPLE::AddParticle("pi-",10);
 
 //  Input::PYTHIA6 = true;
 //  Input::PYTHIA8 = true;
@@ -58,16 +65,11 @@ int Fun4All_G4_fsPHENIX(
   Input::GUN_VERBOSITY = 5;
   INPUTGUN::AddParticle("pi-",0,1,0);
 
-  Input::HEPMC = true;
+//  Input::HEPMC = true;
   Input::HEPMC_VERBOSITY = 1;
   INPUTHEPMC::filename=inputFile;
 
-  // Either:
-  // read previously generated g4-hits files, in this case it opens a DST and skips
-  // the simulations step completely. The G4Setup macro is only loaded to get information
-  // about the number of layers used for the cell reco code
-  const bool readhits = false;
-  // Or:
+
   // Or:
   // Use particle generator
   // And
@@ -77,7 +79,7 @@ int Fun4All_G4_fsPHENIX(
   const bool do_embedding = false;
 
 // Initialize the selected Input
-  InputInit();
+//  InputInit();
   // Write the DST
   const bool do_write_output = true;
   const bool do_dst_compress = false;
@@ -97,21 +99,21 @@ int Fun4All_G4_fsPHENIX(
 //  Enable::VERBOSITY = 1;
   int absorberactive = 0;  // set to 1 to make all absorbers active volumes
 
-  bool do_bbc = false;
+  bool do_bbc = true;
 
-  Enable::PIPE = false;
+  Enable::PIPE = true;
   Enable::PIPE_ABSORBER = true;
 //  Enable::PIPE_OVERLAPCHECK = false;
   // central tracking
-  Enable::MVTX = false;
+  Enable::MVTX = true;
   bool do_mvtx_cell = Enable::MVTX && true;
   bool do_mvtx_cluster = do_mvtx_cell && true;
 
-  Enable::INTT = false;
+  Enable::INTT = true;
   bool do_intt_cell = Enable::INTT && true;
   bool do_intt_cluster = do_intt_cell && true;
 
-  Enable::TPC = false;
+  Enable::TPC = true;
 //  Enable::TPC_ABSORBER = true;
   bool do_tpc_cell = Enable::TPC && true;
   bool do_tpc_cluster = do_tpc_cell && true;
@@ -120,31 +122,31 @@ int Fun4All_G4_fsPHENIX(
   bool do_tracking_eval = do_tracking_track && true;
 
   // central calorimeters, which is a detailed simulation and slow to run
-  Enable::CEMC = false;
+  Enable::CEMC = true;
 //  Enable::CEMC_ABSORBER = true;
   bool do_cemc_cell = Enable::CEMC && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
 
-  Enable::HCALIN = false;
+  Enable::HCALIN = true;
 //  Enable::HCALIN_ABSORBER = true;
   bool do_hcalin_cell = Enable::HCALIN && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
   bool do_hcalin_eval = do_hcalin_cluster && true;
 
-  Enable::MAGNET = false;
+  Enable::MAGNET = true;
 //  Enable::MAGNET_ABSORBER = true;
 
-  Enable::HCALOUT = false;
+  Enable::HCALOUT = true;
 //  Enable::HCALOUT_ABSORBER = true;
   bool do_hcalout_cell = Enable::HCALOUT && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
   bool do_hcalout_eval = do_hcalout_cluster && true;
 
-  bool do_global = false;
+  bool do_global = true;
   bool do_global_fastsim = false;
 
   bool do_jet_reco = false;
@@ -155,11 +157,11 @@ int Fun4All_G4_fsPHENIX(
 
   // fsPHENIX geometry
 
-  Enable::FGEM = false;
-  bool do_FGEM_track = Enable::FGEM && true;
+  Enable::FGEM = true;
+  bool do_FGEM_track = Enable::FGEM && false;
   bool do_FGEM_eval = do_FGEM_track && true;
 
-  Enable::FEMC = false;
+  Enable::FEMC = true;
 //  Enable::FEMC_ABSORBER = true;
   bool do_FEMC_cell = Enable::FEMC && true;
   bool do_FEMC_twr = do_FEMC_cell && true;
@@ -214,28 +216,13 @@ int Fun4All_G4_fsPHENIX(
   //-----------------
   // Event generation
   //-----------------
-//  InputInit();
+  InputInit();
 
-  if (readhits)
-  {
-    // Get the hits from a file
-    // The input manager is declared later
-    if (do_embedding)
-    {
-      cout << "Do not support read hits and embed background at the same time." << endl;
-      exit(1);
-    }
-  }
-  else
-  {
-  }
-
-  if (!readhits)
+  if (!Input::READHITS)
   {
     //---------------------
     // Detector description
     //---------------------
-
     G4Setup(magfield, EDecayType::kAll,
             magfield_rescale);
   }
@@ -356,13 +343,6 @@ int Fun4All_G4_fsPHENIX(
   // IO management
   //--------------
 
-  if (readhits)
-  {
-    // Hits file
-    Fun4AllInputManager *hitsin = new Fun4AllDstInputManager("DSTin");
-    hitsin->fileopen(inputFile);
-    se->registerInputManager(hitsin);
-  }
   if (do_embedding)
   {
     if (embed_input_file == NULL)
@@ -420,7 +400,7 @@ int Fun4All_G4_fsPHENIX(
     return 0;
   }
   // if we run the particle generator and use 0 it'll run forever
-  if (nEvents == 0 && !readhits && !Input::HEPMC)
+  if (nEvents == 0 && !Input::HEPMC && !Input::READHITS)
   {
     cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
     cout << "it will run forever, so I just return without running anything" << endl;
