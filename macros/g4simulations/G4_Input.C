@@ -53,6 +53,11 @@ void InputInit()
     cout << "Reading Hits and Embedding into background at the same time is not supported" << endl;
     gSystem->Exit(1);
   }
+  if (Input::PYTHIA6 && Input::PYTHIA8)
+  {
+    cout << "Pythia6 and Pythia8 cannot be run together - might be possible but needs R&D" << endl;
+    gSystem->Exit(1);
+  }
 
   Fun4AllServer *se = Fun4AllServer::instance();
   if (Input::PYTHIA6)
