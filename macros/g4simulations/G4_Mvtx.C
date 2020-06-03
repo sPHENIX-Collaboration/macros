@@ -32,11 +32,12 @@ namespace Enable
 namespace G4MVTX
 {
   int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
+  double radius_offset = 0.7; // clearance around radius
 }  // namespace G4MVTX
 
 void MvtxInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, PHG4MvtxDefs::mvtxdat[G4MVTX::n_maps_layer - 1][PHG4MvtxDefs::kRmd]);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, (PHG4MvtxDefs::mvtxdat[G4MVTX::n_maps_layer - 1][PHG4MvtxDefs::kRmd])/10.+G4MVTX::radius_offset);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 16.);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -17.);
 }
@@ -57,12 +58,13 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
     {
       cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << endl;
     }
-    radius = radius_lyr;
+    radius = radius_lyr/10.;
   }
   mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v1.gdml"));
   mvtx->SetActive();
   mvtx->OverlapCheck(maps_overlapcheck);
   g4Reco->registerSubsystem(mvtx);
+  radius += G4MVTX::radius_offset;
   return radius;
 }
 
