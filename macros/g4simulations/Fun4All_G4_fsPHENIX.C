@@ -95,9 +95,9 @@ int Fun4All_G4_fsPHENIX(
   //  INPUTSIMPLE::AddParticle("e-",0);
   //  INPUTSIMPLE::AddParticle("pi-",10);
 
-//  Input::PYTHIA6 = true;
+  //  Input::PYTHIA6 = true;
 
-//  Input::PYTHIA8 = true;
+  //  Input::PYTHIA8 = true;
 
   //  Input::GUN = true;
   //Input::GUN_VERBOSITY = 0;
@@ -107,11 +107,10 @@ int Fun4All_G4_fsPHENIX(
   Input::HEPMC_VERBOSITY = 0;
   INPUTHEPMC::filename = inputFile;
 
-
   //-----------------
   // Initialize the selected Input/Event generation
   //-----------------
-InputInit();
+  InputInit();
 
   //======================
   // Write the DST
@@ -121,7 +120,7 @@ InputInit();
   Enable::DSTOUT_COMPRESS = false;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-//  Enable::DSTREADER = true;
+  //  Enable::DSTREADER = true;
 
   // turn the display on (default off)
   Enable::DISPLAY = false;
@@ -209,39 +208,36 @@ InputInit();
   Enable::FHCAL_TOWER = Enable::FHCAL_CELL && true;
   Enable::FHCAL_CLUSTER = Enable::FHCAL_TOWER && true;
 
-//  Enable::PISTON = true;
+  //  Enable::PISTON = true;
   Enable::PISTON_ABSORBER = true;
   Enable::PISTON_OVERLAPCHECK = false;
 
   Enable::PLUGDOOR = true;
-//  Enable::PLUGDOOR_ABSORBER = true;
+  //  Enable::PLUGDOOR_ABSORBER = true;
   Enable::PLUGDOOR_OVERLAPCHECK = false;
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
-//  BlackHoleGeometry::visible = true;
-
+  //  BlackHoleGeometry::visible = true;
 
   //---------------
   // Magnet Settings
   //---------------
 
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
-//  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
-//  G4MAGNET::magfield_rescale = -1.4 / 1.5;  // make consistent with expected Babar field strength of 1.4T
+  //  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
+  //  G4MAGNET::magfield_rescale = -1.4 / 1.5;  // make consistent with expected Babar field strength of 1.4T
 
   //---------------
   // Pythia Decayer
   //---------------
-// list of decay types in
-// $OFFLINE_MAIN/include/g4decayer/EDecayType.hh
-// default is All:
-// G4P6DECAYER::decayType = EDecayType::kAll;
+  // list of decay types in
+  // $OFFLINE_MAIN/include/g4decayer/EDecayType.hh
+  // default is All:
+  // G4P6DECAYER::decayType = EDecayType::kAll;
 
   // Initialize the selected subsystems
   G4Init();
-
-
 
   if (!Input::READHITS)
   {
@@ -322,7 +318,7 @@ InputInit();
   // Global Vertexing
   //-----------------
 
-  if (Enable::GLOBAL_RECO) 
+  if (Enable::GLOBAL_RECO)
   {
     Global_Reco();
   }
@@ -364,7 +360,6 @@ InputInit();
   //--------------
 
   InputManagers();
-
 
   //--------------
   // Set up Output Managers
