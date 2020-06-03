@@ -23,6 +23,8 @@ namespace Enable
 {
   bool MVTX = false;
   bool MVTX_OVERLAPCHECK = false;
+  bool MVTX_CELL = false;
+  bool MVTX_CLUSTER = false;
   int MVTX_VERBOSITY = 0;
 
 }  // namespace Enable
@@ -52,7 +54,9 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   {
     double radius_lyr = PHG4MvtxDefs::mvtxdat[ilayer][PHG4MvtxDefs::kRmd];
     if (verbosity)
+    {
       cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << endl;
+    }
     radius = radius_lyr;
   }
   mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v1.gdml"));

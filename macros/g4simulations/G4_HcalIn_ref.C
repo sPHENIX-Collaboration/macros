@@ -33,6 +33,10 @@ namespace Enable
   bool HCALIN = false;
   bool HCALIN_ABSORBER = false;
   bool HCALIN_OVERLAPCHECK = false;
+  bool HCALIN_CELL = false;
+  bool HCALIN_TOWER = false;
+  bool HCALIN_CLUSTER = false;
+  bool HCALIN_EVAL = false;
   int HCALIN_VERBOSITY = 0;
 }  // namespace Enable
 

@@ -2,6 +2,9 @@
 
 #include "GlobalVariables.C"
 
+#include "G4_FEMC.C"
+#include "G4_FHCAL.C"
+
 #include <g4detectors/PHG4SectorSubsystem.h>
 
 #include <g4main/PHG4Reco.h>
@@ -23,6 +26,9 @@ namespace Enable
 {
   bool FGEM = false;
   bool FGEM_OVERLAPCHECK = false;
+  bool FGEM_TRACK = false;
+  bool FGEM_EVAL = false;
+  int FGEM_VERBOSITY = 0;
 }
 
 void FGEM_Init()
@@ -224,14 +230,9 @@ int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
   return 0;
 }
 
-void FGEM_FastSim_Reco(int verbosity = 0)
+void FGEM_FastSim_Reco()
 {
-  //---------------
-  // Load libraries
-  //---------------
-
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4trackfastsim.so");
+int verbosity = std::max(Enable::VERBOSITY, Enable::FGEM_VERBOSITY);
 
   //---------------
   // Fun4All server
@@ -324,14 +325,21 @@ void FGEM_FastSim_Reco(int verbosity = 0)
   );
 
   // Saved track states (projections)
-  kalman->add_state_name("FEMC");
-  kalman->add_state_name("FHCAL");
 
+  if (Enable::FEMC)
+  {
+  kalman->add_state_name("FEMC");
+  }
+  if (Enable::FHCAL)
+  {
+    kalman->add_state_name("FHCAL");
+  }
   se->registerSubsystem(kalman);
 }
 
-void FGEM_FastSim_Eval(std::string outputfile, int verbosity = 0)
+void FGEM_FastSim_Eval(const std::string &outputfile)
 {
+int verbosity = std::max(Enable::VERBOSITY, Enable::FGEM_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4TrackFastSimEval *fast_sim_eval = new PHG4TrackFastSimEval("FastTrackingEval");

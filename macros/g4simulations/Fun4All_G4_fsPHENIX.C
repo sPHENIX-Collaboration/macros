@@ -9,8 +9,8 @@
 #include "G4_DSTReader_fsPHENIX.C"
 #include "G4_FwdJets.C"
 #include "G4_Global.C"
-#include "G4_Jets.C"
 #include "G4_Input.C"
+#include "G4_Jets.C"
 
 #include <g4detectors/PHG4DetectorSubsystem.h>
 
@@ -50,164 +50,9 @@ int Fun4All_G4_fsPHENIX(
     const char *outputFile = "G4fsPHENIX.root",
     const char *embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/fsPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root")
 {
-  //===============
-  // Input options
-  //===============
-  // Either:
-  // read previously generated g4-hits files, in this case it opens a DST and skips
-  // the simulations step completely. The G4Setup macro is only loaded to get information
-  // about the number of layers used for the cell reco code
-  Input::READHITS = false;
-  INPUTREADHITS::filename=inputFile;
-
-//  Input::EMBED = true;
-  INPUTEMBED::filename=embed_input_file;
-
-  Input::SIMPLE = true;
-  Input::SIMPLE_VERBOSITY = true;
-  INPUTSIMPLE::AddParticle("pi-",5);
-//  INPUTSIMPLE::AddParticle("e-",0);
-//  INPUTSIMPLE::AddParticle("pi-",10);
-
-//  Input::PYTHIA6 = true;
-  Input::PYTHIA8 = true;
-
-//  Input::GUN = true;
-  Input::GUN_VERBOSITY = 5;
-  INPUTGUN::AddParticle("pi-",0,1,0);
-
-//  Input::HEPMC = true;
-  Input::HEPMC_VERBOSITY = 1;
-  INPUTHEPMC::filename=inputFile;
-
-
-  // Or:
-  // Use particle generator
-  // And
-  // Further choose to embed newly simulated events to a previous simulation. Not compatible with `readhits = true`
-  // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
-  // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
-  const bool do_embedding = true;
-
-// Initialize the selected Input
-//  InputInit();
-  // Write the DST
-  const bool do_write_output = true;
-  const bool do_dst_compress = false;
-
-  //Option to convert DST to human command readable TTree for quick poke around the outputs
-  const bool do_DSTReader = false;
-
-// turn the display on
-  bool display_on = false;
-
-  //======================
-  // What to run
-  //======================
-// Global options (enabled for all enables subsystems - if implemented)
-//  Enable::ABSORBER = true;
-//  Enable::OVERLAPCHECK = true;
-//  Enable::VERBOSITY = 1;
-  int absorberactive = 0;  // set to 1 to make all absorbers active volumes
-
-  bool do_bbc = true;
-
-  Enable::PIPE = true;
-  Enable::PIPE_ABSORBER = true;
-//  Enable::PIPE_OVERLAPCHECK = false;
-  // central tracking
-  Enable::MVTX = false;
-  bool do_mvtx_cell = Enable::MVTX && true;
-  bool do_mvtx_cluster = do_mvtx_cell && true;
-
-  Enable::INTT = false;
-  bool do_intt_cell = Enable::INTT && true;
-  bool do_intt_cluster = do_intt_cell && true;
-
-  Enable::TPC = true;
-//  Enable::TPC_ABSORBER = true;
-  bool do_tpc_cell = Enable::TPC && false;
-  bool do_tpc_cluster = do_tpc_cell && true;
-
-  bool do_tracking_track = do_tpc_cell && do_intt_cell && do_mvtx_cell && true;
-  bool do_tracking_eval = do_tracking_track && true;
-
-  // central calorimeters, which is a detailed simulation and slow to run
-  Enable::CEMC = false;
-//  Enable::CEMC_ABSORBER = true;
-  bool do_cemc_cell = Enable::CEMC && true;
-  bool do_cemc_twr = do_cemc_cell && true;
-  bool do_cemc_cluster = do_cemc_twr && true;
-  bool do_cemc_eval = do_cemc_cluster && true;
-
-  Enable::HCALIN = false;
-//  Enable::HCALIN_ABSORBER = true;
-  bool do_hcalin_cell = Enable::HCALIN && true;
-  bool do_hcalin_twr = do_hcalin_cell && true;
-  bool do_hcalin_cluster = do_hcalin_twr && true;
-  bool do_hcalin_eval = do_hcalin_cluster && true;
-
-  Enable::MAGNET = true;
-//  Enable::MAGNET_ABSORBER = true;
-
-  Enable::HCALOUT = false;
-//  Enable::HCALOUT_ABSORBER = true;
-  bool do_hcalout_cell = Enable::HCALOUT && true;
-  bool do_hcalout_twr = do_hcalout_cell && true;
-  bool do_hcalout_cluster = do_hcalout_twr && true;
-  bool do_hcalout_eval = do_hcalout_cluster && true;
-
-  bool do_global = false;
-  bool do_global_fastsim = false;
-
-  bool do_jet_reco = false;
-  bool do_jet_eval = do_jet_reco && true;
-
-  bool do_fwd_jet_reco = false;
-  bool do_fwd_jet_eval = do_fwd_jet_reco && true;
-
-  // fsPHENIX geometry
-
-  Enable::FGEM = false;
-  bool do_FGEM_track = Enable::FGEM && false;
-  bool do_FGEM_eval = do_FGEM_track && true;
-
-  Enable::FEMC = true;
-//  Enable::FEMC_ABSORBER = true;
-  bool do_FEMC_cell = Enable::FEMC && false;
-  bool do_FEMC_twr = do_FEMC_cell && true;
-  bool do_FEMC_cluster = do_FEMC_twr && true;
-
-  Enable::FHCAL = false;
-//  Enable::FHCAL_ABSORBER = true;
-  bool do_FHCAL_cell = Enable::FHCAL && true;
-  bool do_FHCAL_twr = do_FHCAL_cell && true;
-  bool do_FHCAL_cluster = do_FHCAL_twr && true;
-
-  Enable::PISTON = false;
-//  Enable::PISTON_ABSORBER = true;
-  Enable::PISTON_OVERLAPCHECK = false;
-
-  Enable::PLUGDOOR = false;
-//  Enable::PLUGDOOR_ABSORBER = true;
-  Enable::PLUGDOOR_OVERLAPCHECK = false;
-
-  // new settings using Enable namespace in GlobalVariables.C
-  //  Enable::BLACKHOLE = true;
-  BlackHoleGeometry::visible = true;
-
-  // Initialize the selected subsystems
-  G4Init();
-
-  //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
-  const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
-  const float magfield_rescale = -1.4 / 1.5;                                                         // make consistent with Fun4All_G4_sPHENIX()
-
-
   //---------------
   // Fun4All server
   //---------------
-
 
   Fun4AllServer *se = Fun4AllServer::instance();
   //  se->Verbosity(0); // uncomment for batch production running with minimal output messages
@@ -224,25 +69,192 @@ int Fun4All_G4_fsPHENIX(
   // or set it to a fixed value so you can debug your code
   rc->set_IntFlag("RANDOMSEED", 12345);
 
+  //===============
+  // Input options
+  //===============
+  // Either:
+  // read previously generated g4-hits files, in this case it opens a DST and skips
+  // the simulations step completely. The G4Setup macro is only loaded to get information
+  // about the number of layers used for the cell reco code
+  Input::READHITS = false;
+  INPUTREADHITS::filename = inputFile;
+
+  // Or:
+  // Use particle generator
+  // And
+  // Further choose to embed newly simulated events to a previous simulation. Not compatible with `readhits = true`
+  // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
+  // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
+
+  //  Input::EMBED = true;
+  INPUTEMBED::filename = embed_input_file;
+
+  Input::SIMPLE = true;
+  Input::SIMPLE_VERBOSITY = true;
+  INPUTSIMPLE::AddParticle("pi-", 5);
+  //  INPUTSIMPLE::AddParticle("e-",0);
+  //  INPUTSIMPLE::AddParticle("pi-",10);
+
+  //  Input::PYTHIA6 = true;
+  Input::PYTHIA8 = true;
+
+  //  Input::GUN = true;
+  Input::GUN_VERBOSITY = 5;
+  INPUTGUN::AddParticle("pi-", 0, 1, 0);
+
+  //  Input::HEPMC = true;
+  Input::HEPMC_VERBOSITY = 1;
+  INPUTHEPMC::filename = inputFile;
+
+
   //-----------------
-  // Event generation
+  // Initialize the selected Input/Event generation
   //-----------------
-  InputInit();
+InputInit();
+
+  //======================
+  // Write the DST
+  //======================
+
+  Enable::DSTOUT = true;
+  Enable::DSTOUT_COMPRESS = false;
+
+  //Option to convert DST to human command readable TTree for quick poke around the outputs
+  Enable::DSTREADER = true;
+
+  // turn the display on
+  bool display_on = false;
+
+  //======================
+  // What to run
+  //======================
+  // Global options (enabled for all enables subsystems - if implemented)
+  //  Enable::ABSORBER = true;
+  //  Enable::OVERLAPCHECK = true;
+  //  Enable::VERBOSITY = 1;
+
+  Enable::BBC = true;
+
+  Enable::PIPE = true;
+  Enable::PIPE_ABSORBER = true;
+  //  Enable::PIPE_OVERLAPCHECK = false;
+
+  // central tracking
+  Enable::MVTX = true;
+  Enable::MVTX_CELL = Enable::MVTX && true;
+  Enable::MVTX_CLUSTER = Enable::MVTX_CELL && true;
+
+  Enable::INTT = true;
+  Enable::INTT_CELL = Enable::INTT && true;
+  Enable::INTT_CLUSTER = Enable::INTT_CELL && true;
+
+  Enable::TPC = true;
+  //  Enable::TPC_ABSORBER = true;
+  Enable::TPC_CELL = Enable::TPC && true;
+  Enable::TPC_CLUSTER = Enable::TPC_CELL && true;
+
+  Enable::TRACKING_TRACK = Enable::TPC_CELL && Enable::INTT_CELL && Enable::MVTX_CELL && true;
+  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;
+
+  // central calorimeters, which is a detailed simulation and slow to run
+  Enable::CEMC = true;
+  //  Enable::CEMC_ABSORBER = true;
+  Enable::CEMC_CELL = Enable::CEMC && true;
+  Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
+  Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
+  Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
+
+  Enable::HCALIN = true;
+  //  Enable::HCALIN_ABSORBER = true;
+  Enable::HCALIN_CELL = Enable::HCALIN && true;
+  Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
+  Enable::HCALIN_CLUSTER = Enable::HCALIN_TOWER && true;
+  Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && true;
+
+  Enable::MAGNET = true;
+  //  Enable::MAGNET_ABSORBER = true;
+
+  Enable::HCALOUT = true;
+  //  Enable::HCALOUT_ABSORBER = true;
+  Enable::HCALOUT_CELL = Enable::HCALOUT && true;
+  Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
+  Enable::HCALOUT_CLUSTER = Enable::HCALOUT_TOWER && true;
+  Enable::HCALOUT_EVAL = Enable::HCALOUT_CLUSTER && true;
+
+  Enable::GLOBAL_RECO = true;
+  Enable::GLOBAL_FASTSIM = true;
+
+  Enable::JETS = true;
+  Enable::JETS_EVAL = Enable::JETS && true;
+
+  Enable::FWDJETS = true;
+  Enable::FWDJETS_EVAL = Enable::FWDJETS && true;
+
+  // fsPHENIX geometry
+
+  Enable::FGEM = true;
+  Enable::FGEM_TRACK = Enable::FGEM && Enable::MVTX && true;
+  Enable::FGEM_EVAL = Enable::FGEM_TRACK && true;
+
+  Enable::FEMC = true;
+  Enable::FEMC_ABSORBER = true;
+  Enable::FEMC_CELL = Enable::FEMC && true;
+  Enable::FEMC_TOWER = Enable::FEMC_CELL && true;
+  Enable::FEMC_CLUSTER = Enable::FEMC_TOWER && true;
+
+  Enable::FHCAL = true;
+  Enable::FHCAL_ABSORBER = true;
+  Enable::FHCAL_CELL = Enable::FHCAL && true;
+  Enable::FHCAL_TOWER = Enable::FHCAL_CELL && true;
+  Enable::FHCAL_CLUSTER = Enable::FHCAL_TOWER && true;
+
+  Enable::PISTON = true;
+  Enable::PISTON_ABSORBER = true;
+  Enable::PISTON_OVERLAPCHECK = false;
+
+  Enable::PLUGDOOR = true;
+  Enable::PLUGDOOR_ABSORBER = true;
+  Enable::PLUGDOOR_OVERLAPCHECK = false;
+
+  // new settings using Enable namespace in GlobalVariables.C
+  Enable::BLACKHOLE = true;
+  BlackHoleGeometry::visible = true;
+
+
+  //---------------
+  // Magnet Settings
+  //---------------
+
+  //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
+//  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
+//  G4MAGNET::magfield_rescale = -1.4 / 1.5;  // make consistent with expected Babar field strength of 1.4T
+
+  //---------------
+  // Pythia Decayer
+  //---------------
+// list of decay types in
+// $OFFLINE_MAIN/include/g4decayer/EDecayType.hh
+// default is All:
+// G4P6DECAYER::decayType = EDecayType::kAll;
+
+  // Initialize the selected subsystems
+  G4Init();
+
+
 
   if (!Input::READHITS)
   {
     //---------------------
     // Detector description
     //---------------------
-    G4Setup(magfield, EDecayType::kAll,
-            magfield_rescale);
+    G4Setup();
   }
 
   //---------
   // BBC Reco
   //---------
 
-  if (do_bbc)
+  if (Enable::BBC)
   {
     BbcInit();
     Bbc_Reco();
@@ -252,69 +264,69 @@ int Fun4All_G4_fsPHENIX(
   // Detector Division
   //------------------
 
-  if (do_mvtx_cell) Mvtx_Cells();
-  if (do_intt_cell) Intt_Cells();
-  if (do_tpc_cell) TPC_Cells();
+  if (Enable::MVTX_CELL) Mvtx_Cells();
+  if (Enable::INTT_CELL) Intt_Cells();
+  if (Enable::TPC_CELL) TPC_Cells();
 
-  if (do_cemc_cell) CEMC_Cells();
+  if (Enable::CEMC_CELL) CEMC_Cells();
 
-  if (do_hcalin_cell) HCALInner_Cells();
+  if (Enable::HCALIN_CELL) HCALInner_Cells();
 
-  if (do_hcalout_cell) HCALOuter_Cells();
+  if (Enable::HCALOUT_CELL) HCALOuter_Cells();
 
-  if (do_FEMC_cell) FEMC_Cells();
-  if (do_FHCAL_cell) FHCAL_Cells();
+  if (Enable::FEMC_CELL) FEMC_Cells();
+  if (Enable::FHCAL_CELL) FHCAL_Cells();
 
   //-----------------------------
   // CEMC towering and clustering
   //-----------------------------
 
-  if (do_cemc_twr) CEMC_Towers();
-  if (do_cemc_cluster) CEMC_Clusters();
+  if (Enable::CEMC_TOWER) CEMC_Towers();
+  if (Enable::CEMC_CLUSTER) CEMC_Clusters();
 
   //-----------------------------
   // HCAL towering and clustering
   //-----------------------------
 
-  if (do_hcalin_twr) HCALInner_Towers();
-  if (do_hcalin_cluster) HCALInner_Clusters();
+  if (Enable::HCALIN_TOWER) HCALInner_Towers();
+  if (Enable::HCALIN_CLUSTER) HCALInner_Clusters();
 
-  if (do_hcalout_twr) HCALOuter_Towers();
-  if (do_hcalout_cluster) HCALOuter_Clusters();
+  if (Enable::HCALOUT_TOWER) HCALOuter_Towers();
+  if (Enable::HCALOUT_CLUSTER) HCALOuter_Clusters();
 
-  if (do_FEMC_twr) FEMC_Towers();
-  if (do_FEMC_cluster) FEMC_Clusters();
+  if (Enable::FEMC_TOWER) FEMC_Towers();
+  if (Enable::FEMC_CLUSTER) FEMC_Clusters();
 
-  if (do_FHCAL_twr) FHCAL_Towers();
-  if (do_FHCAL_cluster) FHCAL_Clusters();
+  if (Enable::FHCAL_TOWER) FHCAL_Towers();
+  if (Enable::FHCAL_CLUSTER) FHCAL_Clusters();
 
-  if (do_dst_compress) ShowerCompress();
+  if (Enable::DSTOUT_COMPRESS) ShowerCompress();
 
   //--------------
   // SVTX tracking
   //--------------
-  if (do_mvtx_cluster) Mvtx_Clustering();
-  if (do_intt_cluster) Intt_Clustering();
-  if (do_tpc_cluster) TPC_Clustering();
+  if (Enable::MVTX_CLUSTER) Mvtx_Clustering();
+  if (Enable::INTT_CLUSTER) Intt_Clustering();
+  if (Enable::TPC_CLUSTER) TPC_Clustering();
 
-  if (do_tracking_track) Tracking_Reco();
+  if (Enable::TRACKING_TRACK) Tracking_Reco();
 
   //--------------
   // FGEM tracking
   //--------------
 
-  if (do_FGEM_track) FGEM_FastSim_Reco();
+  if (Enable::FGEM_TRACK) FGEM_FastSim_Reco();
 
   //-----------------
   // Global Vertexing
   //-----------------
 
-  if (do_global)
+  if (Enable::GLOBAL_RECO)
   {
     Global_Reco();
   }
 
-  else if (do_global_fastsim)
+  else if (Enable::GLOBAL_FASTSIM)
   {
     Global_FastSim();
   }
@@ -323,12 +335,12 @@ int Fun4All_G4_fsPHENIX(
   // Jet reco
   //---------
 
-  if (do_jet_reco)
+  if (Enable::JETS)
   {
     Jet_Reco();
   }
 
-  if (do_fwd_jet_reco)
+  if (Enable::FWDJETS)
   {
     Jet_FwdReco();
   }
@@ -336,66 +348,37 @@ int Fun4All_G4_fsPHENIX(
   // Simulation evaluation
   //----------------------
 
-  if (do_tracking_eval) Tracking_Eval("g4tracking_eval.root");
+  if (Enable::TRACKING_EVAL) Tracking_Eval("g4tracking_eval.root");
 
-  if (do_cemc_eval) CEMC_Eval("g4cemc_eval.root");
+  if (Enable::CEMC_EVAL) CEMC_Eval("g4cemc_eval.root");
 
-  if (do_hcalin_eval) HCALInner_Eval("g4hcalin_eval.root");
+  if (Enable::HCALIN_EVAL) HCALInner_Eval("g4hcalin_eval.root");
 
-  if (do_hcalout_eval) HCALOuter_Eval("g4hcalout_eval.root");
+  if (Enable::HCALOUT_EVAL) HCALOuter_Eval("g4hcalout_eval.root");
 
-  if (do_jet_eval) Jet_Eval("g4jet_eval.root");
+  if (Enable::JETS_EVAL) Jet_Eval("g4jet_eval.root");
 
-  if (do_fwd_jet_eval) Jet_FwdEval("g4fwdjet_eval.root");
+  if (Enable::FWDJETS_EVAL) Jet_FwdEval("g4fwdjet_eval.root");
 
-  if (do_FGEM_eval) FGEM_FastSim_Eval("g4tracking_fgem_eval.root");
+  if (Enable::FGEM_EVAL) FGEM_FastSim_Eval("g4tracking_fgem_eval.root");
+
+  if (Enable::DSTREADER) G4DSTreader_fsPHENIX(outputFile);
 
   //--------------
-  // IO management
+  // Set up Input Managers
   //--------------
-
-  if (do_embedding)
-  {
-    if (embed_input_file == NULL)
-    {
-      cout << "Missing embed_input_file! Exit";
-      exit(3);
-    }
-    //meta-lib for DST objects used in simulation outputs
-    gSystem->Load("libg4dst.so");
-
-    Fun4AllDstInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTinEmbed");
-    in1->AddFile(embed_input_file);  // if one use a single input file
-                                     //    in1->AddListFile(embed_input_file);  // Recommended: if one use a text list of many input files
-    in1->Repeat();                   // if file(or filelist) is exhausted, start from beginning
-    se->registerInputManager(in1);
-  }
-
-  if (do_DSTReader)
-  {
-    //Convert DST to human command readable TTree for quick poke around the outputs
-    G4DSTreader_fsPHENIX(outputFile,  //
-                         /*int*/ absorberactive,
-                         /*bool*/ Enable::CEMC,
-                         /*bool*/ Enable::HCALIN,
-                         /*bool*/ Enable::MAGNET,
-                         /*bool*/ Enable::HCALOUT,
-                         /*bool*/ do_cemc_twr,
-                         /*bool*/ do_hcalin_twr,
-                         /*bool*/ do_hcalout_twr,
-                         /*bool*/ Enable::FGEM,
-                         /*bool*/ Enable::FHCAL,
-                         /*bool*/ do_FHCAL_twr,
-                         /*bool*/ Enable::FEMC,
-                         /*bool*/ do_FEMC_twr);
-  }
 
   InputManagers();
 
-  if (do_write_output)
+
+  //--------------
+  // Set up Output Managers
+  //--------------
+
+  if (Enable::DSTOUT)
   {
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
-    if (do_dst_compress) DstCompress(out);
+    if (Enable::DSTOUT_COMPRESS) DstCompress(out);
     se->registerOutputManager(out);
   }
 
@@ -443,4 +426,3 @@ void G4Cmd(const char *cmd)
   g4->ApplyCommand(cmd);
 }
 
-void RunFFALoadTest() {}

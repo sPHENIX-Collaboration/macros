@@ -27,6 +27,16 @@
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 
+namespace Enable
+{
+  bool TRACKING_TRACK = false;
+  bool TRACKING_EVAL = false;
+  int TRACKING_VERBOSITY = 0;
+}
+
+namespace G4TRACKING
+{
+
 // Tracking simulation setup parameters and flag - leave them alone!
 //==============================================
 // Tracking reconstruction setup parameters and flags
@@ -43,14 +53,17 @@ const bool use_truth_vertex = true;   // set to false to get initial vertex from
 // This is the setup that uses PHInitZvertexing to find initial vertices, and allows for multiple collisions per event
 //const bool use_truth_vertex = false;   // set to false to get initial vertex from MVTX hits using PHInitZVertexing, true for using smeared truth vertex
 //std::string vmethod("avr-smoothing:1-minweight:0.5-primcut:9-seccut:9");  // seems to handle multi-vertex events.
+}
 
 
 void TrackingInit(int verbosity = 0)
 {
 }
 
-void Tracking_Reco(int verbosity = 0)
+void Tracking_Reco()
 {
+
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   // processes the TrkrHits to make clusters, then reconstruct tracks and vertices
 
   //---------------
@@ -62,18 +75,17 @@ void Tracking_Reco(int verbosity = 0)
   //-------------
   // Tracking
   //------------
-
-  if (use_track_prop)
+  if (G4TRACKING::use_track_prop)
     {
       //--------------------------------------------------
       // Normal track seeding and propagation
       //--------------------------------------------------
 
-      if(use_truth_vertex)
+      if(G4TRACKING::use_truth_vertex)
 	{
 	  // We cheat to get the initial vertex for the full track reconstruction case
 	  PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
-	  init_vtx->Verbosity(0);
+	  init_vtx->Verbosity(verbosity);
 	  se->registerSubsystem(init_vtx);
 	}
       else
@@ -84,8 +96,8 @@ void Tracking_Reco(int verbosity = 0)
 	    init_zvtx->set_seeding_layer(seed_layer,7);
 	    // this is the minimum number of associated MVTX triplets for a vertex to be accepted as a candidate.
 	    // Suggest to use 2 for Pythia8 and 5 for Au+Au (to reduce spurious vertices).
-	    init_zvtx->set_min_zvtx_tracks(init_vertexing_min_zvtx_tracks);
-	    init_zvtx->Verbosity(0);
+	    init_zvtx->set_min_zvtx_tracks(G4TRACKING::init_vertexing_min_zvtx_tracks);
+	    init_zvtx->Verbosity(verbosity);
 	    se->registerSubsystem(init_zvtx);
 	}
 
@@ -98,7 +110,7 @@ void Tracking_Reco(int verbosity = 0)
 
       // Find all clusters associated with each seed track
       PHGenFitTrkProp* track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer);
-      track_prop->Verbosity(0);
+      track_prop->Verbosity(verbosity);
       se->registerSubsystem(track_prop);
       for(int i = 0;i<G4INTT::n_intt_layer;i++)
 	{
@@ -116,12 +128,12 @@ void Tracking_Reco(int verbosity = 0)
       //------------------------------------------------------
 
       PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
-      init_vtx->Verbosity(0);
+      init_vtx->Verbosity(verbosity);
       se->registerSubsystem(init_vtx);
 
       // For each truth particle, create a track and associate clusters with it using truth information
       PHTruthTrackSeeding* pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeeding");
-      pat_rec->Verbosity(0);
+      pat_rec->Verbosity(verbosity);
       se->registerSubsystem(pat_rec);
     }
 
@@ -131,12 +143,13 @@ void Tracking_Reco(int verbosity = 0)
 
 
   PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
-  kalman->Verbosity(0);
+  kalman->Verbosity(verbosity);
 
-  if (use_primary_vertex)
+  if (G4TRACKING::use_primary_vertex)
+  {
     kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
-
-  kalman->set_vertexing_method(vmethod);
+  }
+  kalman->set_vertexing_method(G4TRACKING::vmethod);
   kalman->set_use_truth_vertex(false);
 
   se->registerSubsystem(kalman);
@@ -152,8 +165,10 @@ void Tracking_Reco(int verbosity = 0)
 }
 
 
- void Tracking_Eval(const std::string &outputfile,  int verbosity = 0)
+ void Tracking_Eval(const std::string &outputfile)
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+
   //---------------
   // Fun4All server
   //---------------
@@ -170,12 +185,12 @@ void Tracking_Reco(int verbosity = 0)
   eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
   eval->do_gpoint_eval(false);
   eval->do_eval_light(true);
-  eval->set_use_initial_vertex(g4eval_use_initial_vertex);
+  eval->set_use_initial_vertex(G4TRACKING::g4eval_use_initial_vertex);
   eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
-  eval->Verbosity(0);
+  eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
-  if (use_primary_vertex)
+  if (G4TRACKING::use_primary_vertex)
   {
     // make a second evaluator that records tracks fitted with primary vertex included
     // good for analysis of prompt tracks, particularly if Mvtx is not present
@@ -186,7 +201,7 @@ void Tracking_Reco(int verbosity = 0)
     evalp->do_hit_eval(false);
     evalp->do_gpoint_eval(false);
     evalp->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
-    evalp->Verbosity(0);
+    evalp->Verbosity(verbosity);
     se->registerSubsystem(evalp);
   }
 

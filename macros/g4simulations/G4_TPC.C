@@ -25,6 +25,8 @@ namespace Enable
   bool TPC = false;
   bool TPC_ABSORBER = false;
   bool TPC_OVERLAPCHECK = false;
+  bool TPC_CELL = false;
+  bool TPC_CLUSTER = false;
   int TPC_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -38,7 +40,20 @@ namespace G4TPC
   double tpc_outer_radius = 77. + 1.17;
 }  // namespace G4TPC
 
-void TPCInit() {}
+void TPCInit() 
+{
+// the mvtx is not called if disabled but the default number of layers is set to 3, 
+// so we need to set it to zero
+  if (!Enable::MVTX) 
+ {
+  G4MVTX::n_maps_layer = 0;
+}
+// same for the INTT
+  if (!Enable::INTT) 
+  {
+    G4INTT::n_intt_layer = 0;
+  }
+}
 
 double TPC(PHG4Reco* g4Reco,
            double radius,

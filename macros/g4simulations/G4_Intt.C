@@ -25,6 +25,8 @@ namespace Enable
 {
   bool INTT = false;
   bool INTT_OVERLAPCHECK = false;
+  bool INTT_CELL = false;
+  bool INTT_CLUSTER = false;
   int INTT_VERBOSITY = 0;
 }  // namespace Enable
 

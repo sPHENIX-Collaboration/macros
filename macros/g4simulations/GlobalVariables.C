@@ -1,7 +1,13 @@
 #pragma once
+
+#include <g4decayer/EDecayType.hh>
+
 static bool overlapcheck = false;
 static double no_overlapp = 0.0001;  // added to radii to avoid overlapping volumes
 
+
+// These Input settings are needed in multiple Input selections
+// Putting those here avoids include file ordering problems
 namespace Input
 {
   bool HEPMC = false;
@@ -9,10 +15,13 @@ namespace Input
   bool EMBED = false;
 }
 
+// Global settings affecting multiple subsystems
 namespace Enable
 {
   bool OVERLAPCHECK = false;
   bool ABSORBER = false;
+  bool DSTOUT = false;
+  bool DSTOUT_COMPRESS = false;
   int VERBOSITY = 0;
 }
 
@@ -27,3 +36,8 @@ namespace BlackHoleGeometry
   double gap = no_overlapp;
   bool visible = false;
 };  // namespace BlackHoleGeometry
+
+namespace G4P6DECAYER
+{
+  EDecayType decayType = EDecayType::kAll;
+}

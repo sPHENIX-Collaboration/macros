@@ -1,31 +1,26 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include <fun4all/Fun4AllServer.h>
+
 #include <g4bbc/BbcVertexFastSimReco.h>
+
+#include <fun4all/Fun4AllServer.h>
+
 R__LOAD_LIBRARY(libg4bbc.so)
-#endif
+
+namespace Enable
+{
+  bool BBC = false;
+}
+
+namespace G4BBC
+{
+  double z_smearing = 0.; // should be 6mm, temporary to 0 for TPC
+  double t_smearing = 0.002; // 20ps timing resolution
+}
 
 void BbcInit() {}
 
-double Bbc(PHG4Reco* g4Reco,
-	   double radius,
-	   const int absorberactive = 0,
-	   int verbosity = 0) {
-
-  // the BBC is a fast sim only at the moment
-  // this is a place holder for the G4 material setup
-  
-  return radius; 
-}
-
 void Bbc_Reco(int verbosity = 0) {
   
-  //---------------
-  // Load libraries
-  //---------------
-
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4bbc.so");
 
   //---------------
   // Fun4All server
@@ -34,8 +29,8 @@ void Bbc_Reco(int verbosity = 0) {
   Fun4AllServer *se = Fun4AllServer::instance();
 
   BbcVertexFastSimReco* bbcvertex = new BbcVertexFastSimReco();
-  bbcvertex->set_z_smearing(0.0);   // 6 mm, temporarily perfect for TPC initial vertexing
-  bbcvertex->set_t_smearing(0.002); // 20 ps
+  bbcvertex->set_z_smearing(G4BBC::z_smearing);   // 6 mm, temporarily perfect for TPC initial vertexing
+  bbcvertex->set_t_smearing(G4BBC::t_smearing); // 20 ps
   se->registerSubsystem(bbcvertex);
 
   return;

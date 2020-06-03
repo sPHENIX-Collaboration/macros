@@ -28,6 +28,10 @@ namespace Enable
   bool HCALOUT = false;
   bool HCALOUT_ABSORBER = false;
   bool HCALOUT_OVERLAPCHECK = false;
+  bool HCALOUT_CELL = false;
+  bool HCALOUT_TOWER = false;
+  bool HCALOUT_CLUSTER = false;
+  bool HCALOUT_EVAL = false;
   int HCALOUT_VERBOSITY = 0;
 }  // namespace Enable
 

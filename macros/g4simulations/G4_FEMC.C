@@ -27,6 +27,9 @@ namespace Enable
 {
   bool FEMC = false;
   bool FEMC_ABSORBER = false;
+  bool FEMC_CELL = false;
+  bool FEMC_TOWER = false;
+  bool FEMC_CLUSTER = false;
   int FEMC_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -55,7 +58,7 @@ void FEMCInit()
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4FEMC::Gz0 + G4FEMC::Gdz / 2.);
 }
 
-void FEMCSetup(PHG4Reco *g4Reco, const int absorberactive)
+void FEMCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::FEMC_ABSORBER || (absorberactive>0);
   Fun4AllServer *se = Fun4AllServer::instance();

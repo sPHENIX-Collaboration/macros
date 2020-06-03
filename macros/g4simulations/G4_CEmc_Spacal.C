@@ -36,10 +36,14 @@ R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
 {
-   bool CEMC = false;
-   bool CEMC_ABSORBER = false;
-   bool CEMC_OVERLAPCHECK = false;
-   int CEMC_VERBOSITY = 0;
+  bool CEMC = false;
+  bool CEMC_ABSORBER = false;
+  bool CEMC_OVERLAPCHECK = false;
+  bool CEMC_CELL = false;
+  bool CEMC_TOWER = false;
+  bool CEMC_CLUSTER = false;
+  bool CEMC_EVAL = false;
+  int CEMC_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4CEMC
@@ -69,8 +73,9 @@ namespace G4CEMC
 
 // black hole parameters are set in CEmc function
 // needs a dummy argument to play with current G4Setup_sPHENIX.C
-void CEmcInit(const int i)
-{}
+void CEmcInit(const int i = 0)
+{
+}
 
 //! EMCal main setup macro
 double

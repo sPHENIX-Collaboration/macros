@@ -26,6 +26,10 @@ namespace Enable
 {
   bool FHCAL = false;
   bool FHCAL_ABSORBER = false;
+  bool FHCAL_CELL = false;
+  bool FHCAL_TOWER = false;
+  bool FHCAL_CLUSTER = false;
+  int FHCAL_VERBOSITY = 0;
 }
 
 namespace G4FHCAL
@@ -77,8 +81,10 @@ void FHCALSetup(PHG4Reco *g4Reco)
   g4Reco->registerSubsystem(hhcal);
 }
 
-void FHCAL_Towers(int verbosity = 0)
+void FHCAL_Towers()
 {
+int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_fhcal;
@@ -133,8 +139,9 @@ void FHCAL_Towers(int verbosity = 0)
   se->registerSubsystem(TowerCalibration);
 }
 
-void FHCAL_Clusters(int verbosity = 0)
+void FHCAL_Clusters()
 {
+int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("FHCALRawClusterBuilderFwd");
@@ -146,8 +153,9 @@ void FHCAL_Clusters(int verbosity = 0)
   return;
 }
 
-void FHCAL_Eval(std::string outputfile, int verbosity = 0)
+void FHCAL_Eval(const std::string &outputfile)
 {
+int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("FHCALEVALUATOR", "FHCAL", outputfile.c_str());
