@@ -37,27 +37,30 @@ namespace G4TPC
   int n_tpc_layer_mid = 16;
   int n_tpc_layer_outer = 16;
   int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
-  double tpc_outer_radius = 77. + 1.17;
+  double tpc_outer_radius = 77. + 2;
 }  // namespace G4TPC
 
-void TPCInit() 
+void TPCInit()
 {
-// the mvtx is not called if disabled but the default number of layers is set to 3, 
-// so we need to set it to zero
-  if (!Enable::MVTX) 
- {
-  G4MVTX::n_maps_layer = 0;
-}
-// same for the INTT
-  if (!Enable::INTT) 
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4TPC::tpc_outer_radius);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 211. / 2.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -211. / 2.);
+
+  // the mvtx is not called if disabled but the default number of layers is set to 3,
+  // so we need to set it to zero
+  if (!Enable::MVTX)
+  {
+    G4MVTX::n_maps_layer = 0;
+  }
+  // same for the INTT
+  if (!Enable::INTT)
   {
     G4INTT::n_intt_layer = 0;
   }
 }
 
 double TPC(PHG4Reco* g4Reco,
-           double radius,
-           const int absorberactive = 0)
+           double radius)
 {
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::TPC_OVERLAPCHECK;
   bool AbsorberActive = Enable::ABSORBER || Enable::TPC_ABSORBER;
@@ -84,6 +87,7 @@ double TPC(PHG4Reco* g4Reco,
 
 void TPC_Cells()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
 
   //=========================
@@ -93,11 +97,11 @@ void TPC_Cells()
   //=========================
 
   PHG4TpcPadPlane* padplane = new PHG4TpcPadPlaneReadout();
-  padplane->Verbosity(0);
+  padplane->Verbosity(verbosity);
 
   PHG4TpcElectronDrift* edrift = new PHG4TpcElectronDrift();
   edrift->Detector("TPC");
-  edrift->Verbosity(0);
+  edrift->Verbosity(verbosity);
   // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
   // They represent effects not due to ideal gas properties and ideal readout plane behavior
   // defaults are 0.085 and 0.105, they can be changed here to get a different resolution
@@ -115,6 +119,8 @@ void TPC_Cells()
 
 void TPC_Clustering()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
+
   Fun4AllServer* se = Fun4AllServer::instance();
 
   // Tpc
@@ -125,7 +131,7 @@ void TPC_Clustering()
   digitpc->SetENC(ENC);
   double ADC_threshold = 4.0 * ENC;
   digitpc->SetADCThreshold(ADC_threshold);  // 4 * ENC seems OK
-  digitpc->Verbosity(0);
+  digitpc->Verbosity(verbosity);
   cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
        << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << endl;
 
@@ -138,6 +144,6 @@ void TPC_Clustering()
   // For the Tpc
   //==========
   TpcClusterizer* tpcclusterizer = new TpcClusterizer();
-  tpcclusterizer->Verbosity(0);
+  tpcclusterizer->Verbosity(verbosity);
   se->registerSubsystem(tpcclusterizer);
 }
