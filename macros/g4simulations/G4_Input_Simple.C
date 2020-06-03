@@ -16,7 +16,7 @@ R__LOAD_LIBRARY(libg4testbench.so)
 namespace Input
 {
   bool SIMPLE = false;
-  bool SIMPLE_VERBOSITY = 0;
+  int SIMPLE_VERBOSITY = 0;
 }  // namespace Input
 
 namespace INPUTSIMPLE
