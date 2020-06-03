@@ -35,9 +35,9 @@ namespace G4INTT
   int n_intt_layer = 4;           // must be 4 or 0, setting to zero removes INTT completely
   double intt_radius_max = 140.;  // including stagger radius (mm)
   int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
-                             PHG4InttDefs::SEGMENTATION_PHI,
-                             PHG4InttDefs::SEGMENTATION_PHI,
-                             PHG4InttDefs::SEGMENTATION_PHI};
+                       PHG4InttDefs::SEGMENTATION_PHI,
+                       PHG4InttDefs::SEGMENTATION_PHI,
+                       PHG4InttDefs::SEGMENTATION_PHI};
   int nladder[4] = {15, 15, 18, 18};
   double sensor_radius[4] = {8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
   double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
@@ -53,13 +53,15 @@ namespace G4INTT
 
 void InttInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4INTT::intt_radius_max / 10.);
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 16.);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -17.);
-if (!Enable::MVTX)
- {
-  G4MVTX::n_maps_layer = 0;
-}
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 16.85 + 0.6);  // rail radius + rail outer radius
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 410. / 2.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -410. / 2.);
+  // the mvtx is not called if disabled but the default number of layers is set to 3, so we need to set it
+  // to zero
+  if (!Enable::MVTX)
+  {
+    G4MVTX::n_maps_layer = 0;
+  }
 }
 
 double Intt(PHG4Reco* g4Reco, double radius,
