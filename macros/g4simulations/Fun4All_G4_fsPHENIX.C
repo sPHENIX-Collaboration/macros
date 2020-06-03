@@ -67,7 +67,7 @@ int Fun4All_G4_fsPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  rc->set_IntFlag("RANDOMSEED", 12345);
+  // rc->set_IntFlag("RANDOMSEED", 12345);
 
   //===============
   // Input options
@@ -90,20 +90,21 @@ int Fun4All_G4_fsPHENIX(
   INPUTEMBED::filename = embed_input_file;
 
   Input::SIMPLE = true;
-  Input::SIMPLE_VERBOSITY = true;
+  //Input::SIMPLE_VERBOSITY = 1;
   INPUTSIMPLE::AddParticle("pi-", 5);
   //  INPUTSIMPLE::AddParticle("e-",0);
   //  INPUTSIMPLE::AddParticle("pi-",10);
 
-  //  Input::PYTHIA6 = true;
-  Input::PYTHIA8 = true;
+//  Input::PYTHIA6 = true;
+
+//  Input::PYTHIA8 = true;
 
   //  Input::GUN = true;
-  Input::GUN_VERBOSITY = 5;
+  //Input::GUN_VERBOSITY = 0;
   INPUTGUN::AddParticle("pi-", 0, 1, 0);
 
   //  Input::HEPMC = true;
-  Input::HEPMC_VERBOSITY = 1;
+  Input::HEPMC_VERBOSITY = 0;
   INPUTHEPMC::filename = inputFile;
 
 
@@ -120,7 +121,7 @@ InputInit();
   Enable::DSTOUT_COMPRESS = false;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  Enable::DSTREADER = true;
+//  Enable::DSTREADER = true;
 
   // turn the display on (default off)
   Enable::DISPLAY = false;
@@ -208,17 +209,17 @@ InputInit();
   Enable::FHCAL_TOWER = Enable::FHCAL_CELL && true;
   Enable::FHCAL_CLUSTER = Enable::FHCAL_TOWER && true;
 
-  Enable::PISTON = true;
+//  Enable::PISTON = true;
   Enable::PISTON_ABSORBER = true;
   Enable::PISTON_OVERLAPCHECK = false;
 
   Enable::PLUGDOOR = true;
-  Enable::PLUGDOOR_ABSORBER = true;
+//  Enable::PLUGDOOR_ABSORBER = true;
   Enable::PLUGDOOR_OVERLAPCHECK = false;
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
-  BlackHoleGeometry::visible = true;
+//  BlackHoleGeometry::visible = true;
 
 
   //---------------
@@ -245,13 +246,13 @@ InputInit();
   if (!Input::READHITS)
   {
     //---------------------
-    // Detector description
+    // Set up G4 only if we do not read hits
     //---------------------
     G4Setup();
   }
 
   //---------
-  // BBC Reco
+  // BBC Reco, just smeared vertex
   //---------
 
   if (Enable::BBC)
@@ -321,11 +322,10 @@ InputInit();
   // Global Vertexing
   //-----------------
 
-  if (Enable::GLOBAL_RECO)
+  if (Enable::GLOBAL_RECO) 
   {
     Global_Reco();
   }
-
   else if (Enable::GLOBAL_FASTSIM)
   {
     Global_FastSim();
@@ -335,15 +335,10 @@ InputInit();
   // Jet reco
   //---------
 
-  if (Enable::JETS)
-  {
-    Jet_Reco();
-  }
+  if (Enable::JETS) Jet_Reco();
 
-  if (Enable::FWDJETS)
-  {
-    Jet_FwdReco();
-  }
+  if (Enable::FWDJETS) Jet_FwdReco();
+
   //----------------------
   // Simulation evaluation
   //----------------------
@@ -425,4 +420,3 @@ void G4Cmd(const char *cmd)
   PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
   g4->ApplyCommand(cmd);
 }
-
