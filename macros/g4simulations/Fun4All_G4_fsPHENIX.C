@@ -122,8 +122,8 @@ InputInit();
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   Enable::DSTREADER = true;
 
-  // turn the display on
-  bool display_on = false;
+  // turn the display on (default off)
+  Enable::DISPLAY = false;
 
   //======================
   // What to run
@@ -397,7 +397,7 @@ InputInit();
     return 0;
   }
 
-  if (display_on)
+  if (Enable::DISPLAY)
   {
     DisplayOn();
     // prevent macro from finishing so can see display
