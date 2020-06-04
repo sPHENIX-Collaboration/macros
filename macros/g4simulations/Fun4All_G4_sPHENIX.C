@@ -83,7 +83,7 @@ int Fun4All_G4_sPHENIX(
   // Event pile up simulation with collision rate in Hz MB collisions.
   // Note please follow up the macro to verify the settings for beam parameters
   const double pileup_collision_rate = 0;  // 100e3 for 100kHz nominal AuAu collision rate.
-  const bool do_write_output = true;
+  const bool do_write_output = false;
   // To write cluster files set do_write_output = true and set 
   // do_tracking = true, do_tracking_cell = true, do_tracking_cluster = true and 
   // leave the tracking for later do_tracking_track =  false,  do_tracking_eval = false
@@ -125,7 +125,7 @@ int Fun4All_G4_sPHENIX(
   bool do_hcalout_eval = do_hcalout_cluster && true;
 
   // forward EMC
-  bool do_femc = true;
+  bool do_femc = false;
   bool do_femc_cell = do_femc && true;
   bool do_femc_twr = do_femc_cell && true;
   bool do_femc_cluster = do_femc_twr && true;
@@ -199,7 +199,7 @@ int Fun4All_G4_sPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-   rc->set_IntFlag("RANDOMSEED", 12345);
+  //  rc->set_IntFlag("RANDOMSEED", 12345);
 
   //-----------------
   // Event generation
