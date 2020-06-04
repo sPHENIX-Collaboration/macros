@@ -19,10 +19,6 @@
 #include "G4_User.C"
 #include "G4_World.C"
 
-#include <g4decayer/EDecayType.hh>
-
-#include <g4detectors/PHG4ConeSubsystem.h>
-
 #include <g4eval/PHG4DstCompressReco.h>
 
 #include <g4main/HepMCNodeReader.h>

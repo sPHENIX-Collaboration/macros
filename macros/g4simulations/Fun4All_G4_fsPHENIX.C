@@ -12,24 +12,9 @@
 #include "G4_Input.C"
 #include "G4_Jets.C"
 
-#include <g4detectors/PHG4DetectorSubsystem.h>
-
-#include <g4main/PHG4ParticleGenerator.h>
-#include <g4main/PHG4ParticleGeneratorBase.h>
-#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
-#include <g4main/PHG4ParticleGun.h>
-#include <g4main/PHG4SimpleEventGenerator.h>
-
-#include <phhepmc/Fun4AllHepMCInputManager.h>
-
-#include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
-#include <fun4all/Fun4AllDummyInputManager.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllNoSyncDstInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
-#include <fun4all/SubsysReco.h>
 
 #include <phool/recoConsts.h>
 
