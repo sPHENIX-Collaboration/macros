@@ -213,7 +213,7 @@ int Fun4All_G4_EICDetector(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  rc->set_IntFlag("RANDOMSEED", 12345);
+//  rc->set_IntFlag("RANDOMSEED", 12345);
 
   //-----------------
   // Event generation
