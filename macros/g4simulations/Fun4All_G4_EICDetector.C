@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GlobalVariables.C"
+
 #include "DisplayOn.C"
 #include "G4Setup_EICDetector.C"
 #include "G4_Bbc.C"
@@ -85,9 +87,9 @@ int Fun4All_G4_EICDetector(
   const bool upsilons = false && !readhits;
 
   // Write the DST
-  const bool do_write_output = false;
+  Enable::DSTOUT = false;
   // Compress DST files
-  const bool do_dst_compress = false;
+  Enable::DSTOUT_COMPRESS = false;
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   const bool do_DSTReader = false;
 
@@ -450,7 +452,7 @@ int Fun4All_G4_EICDetector(
   if (do_EEMC_twr) EEMC_Towers();
   if (do_EEMC_cluster) EEMC_Clusters();
 
-  if (do_dst_compress) ShowerCompress();
+  if (Enable::DSTOUT_COMPRESS) ShowerCompress();
 
   //--------------
   // SVTX tracking
@@ -567,10 +569,10 @@ int Fun4All_G4_EICDetector(
                             /*bool*/ do_EEMC_twr);
   }
 
-  if(do_write_output) 
+  if(Enable::DSTOUT)
   {
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
-    if (do_dst_compress) DstCompress(out);
+    if (Enable::DSTOUT_COMPRESS) DstCompress(out);
     se->registerOutputManager(out);
   }
 
