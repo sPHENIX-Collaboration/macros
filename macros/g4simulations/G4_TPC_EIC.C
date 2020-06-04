@@ -1,6 +1,6 @@
 #pragma once
 
-#include "G4_Mvtx.C"
+#include "G4_Mvtx_EIC.C"
 #include "GlobalVariables.C"
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
@@ -64,7 +64,7 @@ double TPC(PHG4Reco* g4Reco, double radius,
   radius = G4TPC::inner_cage_radius;
 
   // inner field cage
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", MVTX::n_maps_layer);
+  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", G4MVTX::n_maps_layer);
   cyl->set_double_param("radius", radius);
   cyl->set_double_param("length", G4TPC::cage_length);
   cyl->set_string_param("material", "G4_KAPTON");
@@ -85,7 +85,7 @@ double TPC(PHG4Reco* g4Reco, double radius,
 
   double tpc_region_thickness[3] = {20., 20., 18.};
   // Active layers of the TPC (inner layers)
-  int nlayer = MVTX::n_maps_layer;
+  int nlayer = G4MVTX::n_maps_layer;
   for (int irange = 0; irange < 3; irange++)
   {
     double tpc_layer_thickness = tpc_region_thickness[irange] / n_tpc_layers[irange];  // thickness per layer
