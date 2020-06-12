@@ -78,6 +78,7 @@ G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
           ana->AddNode("FST_2");
           ana->AddNode("FST_3");
           ana->AddNode("FST_4");
+	  ana->AddNode("FST_5");
         }
 
       if (do_cemc)
