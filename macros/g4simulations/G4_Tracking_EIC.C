@@ -20,7 +20,6 @@
 #include <vector>
 
 class SubsysReco;
-
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libg4trackfastsim.so)
 
@@ -134,103 +133,38 @@ void Tracking_Reco(int verbosity = 0, bool displaced_vertex = false)
 
   if (Enable::FGEM)
   {
-    // LANL FST:   We could put the hit resolution at 5 micron with the 30 micron pixel pitch.
-    kalman->add_phg4hits(
-        "G4HIT_FST_0",                     //      const std::string& phg4hitsNames,
-        PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-        5e-4,                              //      const float radres,
-        5e-4,                              //      const float phires,
-        50e-4 / sqrt(12.),                 //      const float lonres,
-        1,                                 //      const float eff,
-        0                                  //      const float noise
-    );
-    // LANL FST:   We could put the hit resolution at 5 micron with the 30 micron pixel pitch.
-    kalman->add_phg4hits(
-        "G4HIT_FST_1",                     //      const std::string& phg4hitsNames,
-        PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-        5e-4,                              //      const float radres,
-        5e-4,                              //      const float phires,
-        50e-4 / sqrt(12.),                 //      const float lonres,
-        1,                                 //      const float eff,
-        0                                  //      const float noise
-    );
+    bool do_FST = true;
+    bool do_FGEM = true;
 
-    // LANL FST:   We could put the hit resolution at 5 micron with the 30 micron pixel pitch.
-    kalman->add_phg4hits(
-        "G4HIT_FST_2",                     //      const std::string& phg4hitsNames,
-        PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-        5e-4,                              //      const float radres,
-        5e-4,                              //      const float phires,
-        50e-4 / sqrt(12.),                 //      const float lonres,
-        1,                                 //      const float eff,
-        0                                  //      const float noise
-    );
+    if (do_FST)
+    {
+      // LANL FST:   We could put the hit resolution at 5 micron with the 30 micron pixel pitch.
+      for (int i = 0; i < 6; i++)
+      {
+        kalman->add_phg4hits(Form("G4HIT_FST_%d", i),           //      const std::string& phg4hitsNames,
+                             PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
+                             5e-4,                              //      const float radres,
+                             5e-4,                              //      const float phires,
+                             50e-4 / sqrt(12.),                 //      const float lonres,
+                             1,                                 //      const float eff,
+                             0);                                //      const float noise
+      }
+    }
 
-    // GEM2, 70um azimuthal resolution, 1cm radial strips
-    kalman->add_phg4hits(
-        "G4HIT_FGEM_2",                    //      const std::string& phg4hitsNames,
-        PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-        1. / sqrt(12.),                    //      const float radres,
-        70e-4,                             //      const float phires,
-        100e-4,                            //      const float lonres,
-        1,                                 //      const float eff,
-        0                                  //      const float noise
-    );
-
-    // LANL FST:   We could put the hit resolution at 5 micron with the 30 micron pixel pitch.
-    kalman->add_phg4hits(
-        "G4HIT_FST_3",                     //      const std::string& phg4hitsNames,
-        PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-        5e-4,                              //      const float radres,
-        5e-4,                              //      const float phires,
-        50e-4 / sqrt(12.),                 //      const float lonres,
-        1,                                 //      const float eff,
-        0                                  //      const float noise
-    );
-
-    // GEM3, 70um azimuthal resolution, 1cm radial strips
-    kalman->add_phg4hits(
-        "G4HIT_FGEM_3",                    //      const std::string& phg4hitsNames,
-        PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-        1. / sqrt(12.),                    //      const float radres,
-        70e-4,                             //      const float phires,
-        100e-4,                            //      const float lonres,
-        1,                                 //      const float eff,
-        0                                  //      const float noise
-    );
-
-    // LANL FST:   We could put the hit resolution at 5 micron with the 30 micron pixel pitch.
-    kalman->add_phg4hits(
-        "G4HIT_FST_4",                     //      const std::string& phg4hitsNames,
-        PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-        5e-4,                              //      const float radres,
-        5e-4,                              //      const float phires,
-        50e-4 / sqrt(12.),                 //      const float lonres,
-        1,                                 //      const float eff,
-        0                                  //      const float noise
-    );
-
-    // GEM4, 70um azimuthal resolution, 1cm radial strips
-    kalman->add_phg4hits(
-        "G4HIT_FGEM_4",                    //      const std::string& phg4hitsNames,
-        PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-        1. / sqrt(12.),                    //      const float radres,
-        70e-4,                             //      const float phires,
-        100e-4,                            //      const float lonres,
-        1,                                 //      const float eff,
-        0                                  //      const float noise
-    );
-
-    // LANL FST:   We could put the hit resolution at 5 micron with the 30 micron pixel pitch.
-    kalman->add_phg4hits(
-        "G4HIT_FST_5",                     //      const std::string& phg4hitsNames,
-        PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-        5e-4,                              //      const float radres,
-        5e-4,                              //      const float phires,
-        50e-4 / sqrt(12.),                 //      const float lonres,
-        1,                                 //      const float eff,
-        0                                  //      const float noise
-    );
+    if (do_FGEM)
+    {
+      // GEM2, 70um azimuthal resolution, 1cm radial strips
+      for (int i = 2; i < 5; i++)
+      {
+        kalman->add_phg4hits(Form("G4HIT_FGEM_%d", i),          //      const std::string& phg4hitsNames,
+                             PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
+                             1. / sqrt(12.),                    //      const float radres,
+                             70e-4,                             //      const float phires,
+                             100e-4,                            //      const float lonres,
+                             1,                                 //      const float eff,
+                             0);                                //      const float noise
+      }
+    }
   }
 
   // Saved track states (projections)
