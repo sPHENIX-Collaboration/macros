@@ -62,15 +62,22 @@ G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
       if (do_svtx)
         {
           ana->AddNode("SVTX");
+          ana->AddNode("MVTX");
+
           ana->AddNode("EGEM_0");
           ana->AddNode("EGEM_1");
           ana->AddNode("EGEM_2");
           ana->AddNode("EGEM_3");
-          ana->AddNode("FGEM_0");
-          ana->AddNode("FGEM_1");
+
           ana->AddNode("FGEM_2");
           ana->AddNode("FGEM_3");
           ana->AddNode("FGEM_4");
+
+          ana->AddNode("FST_0");
+          ana->AddNode("FST_1");
+          ana->AddNode("FST_2");
+          ana->AddNode("FST_3");
+          ana->AddNode("FST_4");
         }
 
       if (do_cemc)

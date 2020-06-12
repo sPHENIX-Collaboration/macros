@@ -28,6 +28,10 @@ using namespace std;
 
 void FGEM_Init()
 {
+  if (BlackHoleGeometry::max_radius < 130)
+  {
+    BlackHoleGeometry::max_radius = 130; // eye balled
+  }
 }
 
 void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
@@ -221,7 +225,7 @@ int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
   }
 
   PHG4SectorSubsystem *gem;
-  gem = new PHG4SectorSubsystem(name.c_str());
+  gem = new PHG4SectorSubsystem(name);
 
   gem->SuperDetector(name);
 
