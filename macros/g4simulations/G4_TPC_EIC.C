@@ -1,7 +1,8 @@
 #pragma once
 
-#include "G4_Mvtx_EIC.C"
 #include "GlobalVariables.C"
+
+#include "G4_Mvtx_EIC.C"
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
