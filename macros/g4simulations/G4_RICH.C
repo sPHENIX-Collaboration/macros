@@ -17,7 +17,7 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 namespace Enable
 {
-  static bool RICH = false;
+  bool RICH = false;
 }
 
 void RICHInit()

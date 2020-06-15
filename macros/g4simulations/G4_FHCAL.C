@@ -24,15 +24,20 @@ R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
 {
-  static bool FHCAL = false;
+  bool FHCAL = false;
+  bool FHCAL_ABSORBER = false;
+  bool FHCAL_CELL = false;
+  bool FHCAL_TOWER = false;
+  bool FHCAL_CLUSTER = false;
+  int FHCAL_VERBOSITY = 0;
 }
 
 namespace G4FHCAL
 {
   // from ForwardHcal/mapping/towerMap_FHCAL_v005.txt
-  const double Gz0 = 400.;
-  const double Gdz = 100.;
-  const double outer_radius = 262.;
+  double Gz0 = 400.;
+  double Gdz = 100.;
+  double outer_radius = 262.;
 }  // namespace G4FHCAL
 
 void FHCALInit()
@@ -52,8 +57,9 @@ void FHCAL_Cells(int verbosity = 0)
   return;
 }
 
-void FHCALSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
+void FHCALSetup(PHG4Reco *g4Reco)
 {
+  const bool AbsorberActive = Enable::ABSORBER || Enable::FHCAL_ABSORBER;
   Fun4AllServer *se = Fun4AllServer::instance();
 
   /** Use dedicated FHCAL module */
@@ -70,13 +76,15 @@ void FHCALSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
   hhcal->SetTowerMappingFile(mapping_hhcal.str());
   hhcal->OverlapCheck(overlapcheck);
 
-  if (absorberactive) hhcal->SetAbsorberActive();
+  if (AbsorberActive) hhcal->SetAbsorberActive();
 
   g4Reco->registerSubsystem(hhcal);
 }
 
-void FHCAL_Towers(int verbosity = 0)
+void FHCAL_Towers()
 {
+int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_fhcal;
@@ -131,8 +139,9 @@ void FHCAL_Towers(int verbosity = 0)
   se->registerSubsystem(TowerCalibration);
 }
 
-void FHCAL_Clusters(int verbosity = 0)
+void FHCAL_Clusters()
 {
+int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("FHCALRawClusterBuilderFwd");
@@ -144,8 +153,9 @@ void FHCAL_Clusters(int verbosity = 0)
   return;
 }
 
-void FHCAL_Eval(std::string outputfile, int verbosity = 0)
+void FHCAL_Eval(const std::string &outputfile)
 {
+int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("FHCALEVALUATOR", "FHCAL", outputfile.c_str());

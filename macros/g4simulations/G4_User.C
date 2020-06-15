@@ -2,12 +2,12 @@
 
 namespace Enable
 {
-  static bool USER = false;
+  bool USER = false;
 }
 
 namespace G4USER
 {
-  static int myparam = 0;
+  int myparam = 0;
 }
 
 void UserInit(int verbosity = 0)

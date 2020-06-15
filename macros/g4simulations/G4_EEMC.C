@@ -23,14 +23,14 @@ R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
 {
-  static bool EEMC = false;
+  bool EEMC = false;
 }
 
 namespace G4EEMC
 {
-  const int use_projective_geometry = 0;
-  const double Gdz = 18. + 0.0001;
-  const double Gz0 = -170.;
+  int use_projective_geometry = 0;
+  double Gdz = 18. + 0.0001;
+  double Gz0 = -170.;
 }  // namespace G4EEMC
 
 void EEMCInit()
