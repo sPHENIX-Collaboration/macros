@@ -169,6 +169,8 @@ int Fun4All_G4_fsPHENIX(
   Enable::GLOBAL_RECO = true;
   Enable::GLOBAL_FASTSIM = true;
 
+  Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && true;
+
   Enable::JETS = true;
   Enable::JETS_EVAL = Enable::JETS && true;
 
@@ -310,6 +312,15 @@ int Fun4All_G4_fsPHENIX(
   else if (Enable::GLOBAL_FASTSIM)
   {
     Global_FastSim();
+  }
+
+  //-----------------
+  // Calo Trigger Simulation
+  //-----------------
+
+  if (Enable::CALOTRIGGER)
+  {
+    CaloTrigger_Sim();
   }
 
   //---------
