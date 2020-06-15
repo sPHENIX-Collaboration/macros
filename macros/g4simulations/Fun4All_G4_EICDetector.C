@@ -87,7 +87,7 @@ int Fun4All_G4_EICDetector(
   const bool upsilons = false && !readhits;
 
   // Write the DST
-  Enable::DSTOUT = false;
+  Enable::DSTOUT = true;
   // Compress DST files
   Enable::DSTOUT_COMPRESS = false;
   //Option to convert DST to human command readable TTree for quick poke around the outputs
@@ -121,10 +121,11 @@ int Fun4All_G4_EICDetector(
   bool do_cemc_eval = do_cemc_cluster && true;
 
   Enable::HCALIN = true;
-  bool do_hcalin_cell = Enable::HCALIN && true;
-  bool do_hcalin_twr = do_hcalin_cell && true;
-  bool do_hcalin_cluster = do_hcalin_twr && true;
-  bool do_hcalin_eval = do_hcalin_cluster && true;
+  //  Enable::HCALIN_ABSORBER = true;
+  Enable::HCALIN_CELL = Enable::HCALIN && true;
+  Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
+  Enable::HCALIN_CLUSTER = Enable::HCALIN_TOWER && true;
+  Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && true;
 
   Enable::MAGNET = true;
 
@@ -166,20 +167,20 @@ int Fun4All_G4_EICDetector(
   bool do_global = true;
   bool do_global_fastsim = true;
 
-  bool do_calotrigger = false && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
+  bool do_calotrigger = true && do_cemc_twr && Enable::HCALIN_TOWER && do_hcalout_twr;
 
   // Select only one jet reconstruction- they currently use the same
   // output collections on the node tree!
-  bool do_jet_reco = false;
+  bool do_jet_reco = true;
   bool do_jet_eval = do_jet_reco && true;
 
-  bool do_fwd_jet_reco = false;
+  bool do_fwd_jet_reco = true;
   bool do_fwd_jet_eval = do_fwd_jet_reco && true;
 
   // HI Jet Reco for jet simulations in Au+Au (default is false for
   // single particle / p+p simulations, or for Au+Au simulations which
   // don't care about jets)
-  bool do_HIjetreco = false && do_jet_reco && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
+  bool do_HIjetreco = false && do_jet_reco && do_cemc_twr && Enable::HCALIN_TOWER && do_hcalout_twr;
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
@@ -215,7 +216,7 @@ int Fun4All_G4_EICDetector(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-//  rc->set_IntFlag("RANDOMSEED", 12345);
+  rc->set_IntFlag("RANDOMSEED", 12345);
 
   //-----------------
   // Event generation
@@ -412,7 +413,7 @@ int Fun4All_G4_EICDetector(
 
   if (do_cemc_cell) CEMC_Cells();
 
-  if (do_hcalin_cell) HCALInner_Cells();
+  if (Enable::HCALIN_CELL) HCALInner_Cells();
 
   if (do_hcalout_cell) HCALOuter_Cells();
 
@@ -433,8 +434,8 @@ int Fun4All_G4_EICDetector(
   // HCAL towering and clustering
   //-----------------------------
 
-  if (do_hcalin_twr) HCALInner_Towers();
-  if (do_hcalin_cluster) HCALInner_Clusters();
+  if (Enable::HCALIN_TOWER) HCALInner_Towers();
+  if (Enable::HCALIN_CLUSTER) HCALInner_Clusters();
 
   if (do_hcalout_twr) HCALOuter_Towers();
   if (do_hcalout_cluster) HCALOuter_Clusters();
@@ -509,7 +510,7 @@ int Fun4All_G4_EICDetector(
 
   if (do_cemc_eval) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
 
-  if (do_hcalin_eval) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
+  if (Enable::HCALIN_EVAL) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
 
   if (do_hcalout_eval) HCALOuter_Eval(string(outputFile) + "_g4hcalout_eval.root");
 
@@ -559,8 +560,8 @@ int Fun4All_G4_EICDetector(
                             /*bool*/ Enable::MAGNET,
                             /*bool*/ Enable::HCALOUT,
                             /*bool*/ do_cemc_twr,
-                            /*bool*/ do_hcalin_twr,
-                            /*bool*/ do_hcalout_twr,
+                            /*bool*/ Enable::HCALIN_TOWER,
+                            /*bool*/ Enable::HCALOUT_TOWER,
                             /*bool*/ Enable::FHCAL,
                             /*bool*/ do_FHCAL_twr,
                             /*bool*/ Enable::FEMC,
