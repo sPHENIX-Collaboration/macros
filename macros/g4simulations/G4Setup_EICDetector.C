@@ -267,7 +267,7 @@ int G4Setup(const int absorberactive = 0,
 
   if (Enable::EEMC)
   {
-    EEMCSetup(g4Reco, absorberactive);
+    EEMCSetup(g4Reco);
   }
 
   //----------------------------------------

@@ -161,10 +161,14 @@ int Fun4All_G4_EICDetector(
 
   // EICDetector geometry - 'electron' direction
   Enable::EEMC = true;
-  bool do_EEMC_cell = Enable::EEMC && true;
-  bool do_EEMC_twr = do_EEMC_cell && true;
-  bool do_EEMC_cluster = do_EEMC_twr && true;
-  bool do_EEMC_eval = do_EEMC_cluster && true;
+  Enable::EEMC_CELL = Enable::EEMC && true;
+  Enable::EEMC_TOWER = Enable::EEMC_CELL && true;
+  Enable::EEMC_CLUSTER = Enable::EEMC_TOWER && true;
+  Enable::EEMC_EVAL = Enable::EEMC_CLUSTER && true;
+  // bool do_EEMC_cell = Enable::EEMC && true;
+  // bool do_EEMC_twr = do_EEMC_cell && true;
+  // bool do_EEMC_cluster = do_EEMC_twr && true;
+  // bool do_EEMC_eval = do_EEMC_cluster && true;
 
   Enable::PLUGDOOR = true;
 
@@ -426,7 +430,7 @@ int Fun4All_G4_EICDetector(
 
   if (Enable::FHCAL_CELL) FHCAL_Cells();
 
-  if (do_EEMC_cell) EEMC_Cells();
+  if (Enable::EEMC_CELL) EEMC_Cells();
 
   //-----------------------------
   // CEMC towering and clustering
@@ -455,8 +459,8 @@ int Fun4All_G4_EICDetector(
   if (Enable::FHCAL_TOWER) FHCAL_Towers();
   if (Enable::FHCAL_CLUSTER) FHCAL_Clusters();
 
-  if (do_EEMC_twr) EEMC_Towers();
-  if (do_EEMC_cluster) EEMC_Clusters();
+  if (Enable::EEMC_TOWER) EEMC_Towers();
+  if (Enable::EEMC_CLUSTER) EEMC_Clusters();
 
   if (Enable::DSTOUT_COMPRESS) ShowerCompress();
 
@@ -522,7 +526,7 @@ int Fun4All_G4_EICDetector(
 
   if (Enable::FHCAL_EVAL) FHCAL_Eval(string(outputFile) + "_g4fhcal_eval.root");
 
-  if (do_EEMC_eval) EEMC_Eval(string(outputFile) + "_g4eemc_eval.root");
+  if (Enable::EEMC_EVAL) EEMC_Eval(string(outputFile) + "_g4eemc_eval.root");
 
   if (Enable::JETS_EVAL) Jet_Eval(string(outputFile) + "_g4jet_eval.root");
 
@@ -571,7 +575,7 @@ int Fun4All_G4_EICDetector(
                             /*bool*/ Enable::FEMC,
                             /*bool*/ Enable::FEMC_TOWER,
                             /*bool*/ Enable::EEMC,
-                            /*bool*/ do_EEMC_twr);
+                            /*bool*/ Enable::EEMC_TOWER);
   }
 
   if(Enable::DSTOUT)
