@@ -150,10 +150,15 @@ int Fun4All_G4_EICDetector(
   bool do_FEMC_eval = do_FEMC_cluster && true;
 
   Enable::FHCAL = true;
-  bool do_FHCAL_cell = Enable::FHCAL && true;
-  bool do_FHCAL_twr = do_FHCAL_cell && true;
-  bool do_FHCAL_cluster = do_FHCAL_twr && true;
-  bool do_FHCAL_eval = do_FHCAL_cluster && true;
+//  Enable::FHCAL_ABSORBER = true;
+  Enable::FHCAL_CELL = Enable::FHCAL && true;
+  Enable::FHCAL_TOWER = Enable::FHCAL_CELL && true;
+  Enable::FHCAL_CLUSTER = Enable::FHCAL_TOWER && true;
+  Enable::FHCAL_EVAL = Enable::FHCAL_CLUSTER && true;
+  // bool do_FHCAL_cell = Enable::FHCAL && true;
+  // bool do_FHCAL_twr = do_FHCAL_cell && true;
+  // bool do_FHCAL_cluster = do_FHCAL_twr && true;
+  // bool do_FHCAL_eval = do_FHCAL_cluster && true;
 
   // EICDetector geometry - 'electron' direction
   Enable::EEMC = true;
@@ -420,7 +425,7 @@ int Fun4All_G4_EICDetector(
 
   if (do_FEMC_cell) FEMC_Cells();
 
-  if (do_FHCAL_cell) FHCAL_Cells();
+  if (Enable::FHCAL_CELL) FHCAL_Cells();
 
   if (do_EEMC_cell) EEMC_Cells();
 
@@ -448,8 +453,8 @@ int Fun4All_G4_EICDetector(
   if (do_FEMC_twr) FEMC_Towers();
   if (do_FEMC_cluster) FEMC_Clusters();
 
-  if (do_FHCAL_twr) FHCAL_Towers();
-  if (do_FHCAL_cluster) FHCAL_Clusters();
+  if (Enable::FHCAL_TOWER) FHCAL_Towers();
+  if (Enable::FHCAL_CLUSTER) FHCAL_Clusters();
 
   if (do_EEMC_twr) EEMC_Towers();
   if (do_EEMC_cluster) EEMC_Clusters();
@@ -517,7 +522,7 @@ int Fun4All_G4_EICDetector(
 
   if (do_FEMC_eval) FEMC_Eval(string(outputFile) + "_g4femc_eval.root");
 
-  if (do_FHCAL_eval) FHCAL_Eval(string(outputFile) + "_g4fhcal_eval.root");
+  if (Enable::FHCAL_EVAL) FHCAL_Eval(string(outputFile) + "_g4fhcal_eval.root");
 
   if (do_EEMC_eval) EEMC_Eval(string(outputFile) + "_g4eemc_eval.root");
 
@@ -564,7 +569,7 @@ int Fun4All_G4_EICDetector(
                             /*bool*/ Enable::HCALIN_TOWER,
                             /*bool*/ Enable::HCALOUT_TOWER,
                             /*bool*/ Enable::FHCAL,
-                            /*bool*/ do_FHCAL_twr,
+                            /*bool*/ Enable::FHCAL_TOWER,
                             /*bool*/ Enable::FEMC,
                             /*bool*/ do_FEMC_twr,
                             /*bool*/ Enable::EEMC,
