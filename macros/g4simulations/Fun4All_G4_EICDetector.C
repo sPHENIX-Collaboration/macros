@@ -130,10 +130,11 @@ int Fun4All_G4_EICDetector(
   Enable::MAGNET = true;
 
   Enable::HCALOUT = true;
-  bool do_hcalout_cell = Enable::HCALOUT && true;
-  bool do_hcalout_twr = do_hcalout_cell && true;
-  bool do_hcalout_cluster = do_hcalout_twr && true;
-  bool do_hcalout_eval = do_hcalout_cluster && true;
+  //  Enable::HCALOUT_ABSORBER = true;
+  Enable::HCALOUT_CELL = Enable::HCALOUT && true;
+  Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
+  Enable::HCALOUT_CLUSTER = Enable::HCALOUT_TOWER && true;
+  Enable::HCALOUT_EVAL = Enable::HCALOUT_CLUSTER && true;
 
   // EICDetector geometry - barrel
   Enable::DIRC = true;
@@ -167,7 +168,7 @@ int Fun4All_G4_EICDetector(
   bool do_global = true;
   bool do_global_fastsim = true;
 
-  bool do_calotrigger = true && do_cemc_twr && Enable::HCALIN_TOWER && do_hcalout_twr;
+  bool do_calotrigger = true && do_cemc_twr && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   // Select only one jet reconstruction- they currently use the same
   // output collections on the node tree!
@@ -180,7 +181,7 @@ int Fun4All_G4_EICDetector(
   // HI Jet Reco for jet simulations in Au+Au (default is false for
   // single particle / p+p simulations, or for Au+Au simulations which
   // don't care about jets)
-  bool do_HIjetreco = false && do_jet_reco && do_cemc_twr && Enable::HCALIN_TOWER && do_hcalout_twr;
+  bool do_HIjetreco = false && do_jet_reco && do_cemc_twr && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
@@ -415,7 +416,7 @@ int Fun4All_G4_EICDetector(
 
   if (Enable::HCALIN_CELL) HCALInner_Cells();
 
-  if (do_hcalout_cell) HCALOuter_Cells();
+  if (Enable::HCALOUT_CELL) HCALOuter_Cells();
 
   if (do_FEMC_cell) FEMC_Cells();
 
@@ -437,8 +438,8 @@ int Fun4All_G4_EICDetector(
   if (Enable::HCALIN_TOWER) HCALInner_Towers();
   if (Enable::HCALIN_CLUSTER) HCALInner_Clusters();
 
-  if (do_hcalout_twr) HCALOuter_Towers();
-  if (do_hcalout_cluster) HCALOuter_Clusters();
+  if (Enable::HCALOUT_TOWER) HCALOuter_Towers();
+  if (Enable::HCALOUT_CLUSTER) HCALOuter_Clusters();
 
   //-----------------------------
   // e, h direction Calorimeter  towering and clustering
@@ -512,7 +513,7 @@ int Fun4All_G4_EICDetector(
 
   if (Enable::HCALIN_EVAL) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
 
-  if (do_hcalout_eval) HCALOuter_Eval(string(outputFile) + "_g4hcalout_eval.root");
+  if (Enable::HCALOUT_EVAL) HCALOuter_Eval(string(outputFile) + "_g4hcalout_eval.root");
 
   if (do_FEMC_eval) FEMC_Eval(string(outputFile) + "_g4femc_eval.root");
 
