@@ -122,11 +122,6 @@ int Fun4All_G4_EICDetector(
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
 
-  // bool do_cemc_cell = Enable::CEMC && true;
-  // bool do_cemc_twr = do_cemc_cell && true;
-  // bool do_cemc_cluster = do_cemc_twr && true;
-  // bool do_cemc_eval = do_cemc_cluster && true;
-
   Enable::HCALIN = true;
   //  Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
@@ -151,10 +146,11 @@ int Fun4All_G4_EICDetector(
   Enable::AEROGEL = true;
 
   Enable::FEMC = true;
-  bool do_FEMC_cell = Enable::FEMC && true;
-  bool do_FEMC_twr = do_FEMC_cell && true;
-  bool do_FEMC_cluster = do_FEMC_twr && true;
-  bool do_FEMC_eval = do_FEMC_cluster && true;
+//  Enable::FEMC_ABSORBER = true;
+  Enable::FEMC_CELL = Enable::FEMC && true;
+  Enable::FEMC_TOWER = Enable::FEMC_CELL && true;
+  Enable::FEMC_CLUSTER = Enable::FEMC_TOWER && true;
+  Enable::FEMC_EVAL = Enable::FEMC_CLUSTER && true;
 
   Enable::FHCAL = true;
 //  Enable::FHCAL_ABSORBER = true;
@@ -162,10 +158,6 @@ int Fun4All_G4_EICDetector(
   Enable::FHCAL_TOWER = Enable::FHCAL_CELL && true;
   Enable::FHCAL_CLUSTER = Enable::FHCAL_TOWER && true;
   Enable::FHCAL_EVAL = Enable::FHCAL_CLUSTER && true;
-  // bool do_FHCAL_cell = Enable::FHCAL && true;
-  // bool do_FHCAL_twr = do_FHCAL_cell && true;
-  // bool do_FHCAL_cluster = do_FHCAL_twr && true;
-  // bool do_FHCAL_eval = do_FHCAL_cluster && true;
 
   // EICDetector geometry - 'electron' direction
   Enable::EEMC = true;
@@ -430,7 +422,7 @@ int Fun4All_G4_EICDetector(
 
   if (Enable::HCALOUT_CELL) HCALOuter_Cells();
 
-  if (do_FEMC_cell) FEMC_Cells();
+  if (Enable::FEMC_CELL) FEMC_Cells();
 
   if (Enable::FHCAL_CELL) FHCAL_Cells();
 
@@ -457,8 +449,8 @@ int Fun4All_G4_EICDetector(
   // e, h direction Calorimeter  towering and clustering
   //-----------------------------
 
-  if (do_FEMC_twr) FEMC_Towers();
-  if (do_FEMC_cluster) FEMC_Clusters();
+  if (Enable::FEMC_TOWER) FEMC_Towers();
+  if (Enable::FEMC_CLUSTER) FEMC_Clusters();
 
   if (Enable::FHCAL_TOWER) FHCAL_Towers();
   if (Enable::FHCAL_CLUSTER) FHCAL_Clusters();
@@ -526,7 +518,7 @@ int Fun4All_G4_EICDetector(
 
   if (Enable::HCALOUT_EVAL) HCALOuter_Eval(string(outputFile) + "_g4hcalout_eval.root");
 
-  if (do_FEMC_eval) FEMC_Eval(string(outputFile) + "_g4femc_eval.root");
+  if (Enable::FEMC_EVAL) FEMC_Eval(string(outputFile) + "_g4femc_eval.root");
 
   if (Enable::FHCAL_EVAL) FHCAL_Eval(string(outputFile) + "_g4fhcal_eval.root");
 
@@ -577,7 +569,7 @@ int Fun4All_G4_EICDetector(
                             /*bool*/ Enable::FHCAL,
                             /*bool*/ Enable::FHCAL_TOWER,
                             /*bool*/ Enable::FEMC,
-                            /*bool*/ do_FEMC_twr,
+                            /*bool*/ Enable::FEMC_TOWER,
                             /*bool*/ Enable::EEMC,
                             /*bool*/ do_EEMC_twr);
   }
