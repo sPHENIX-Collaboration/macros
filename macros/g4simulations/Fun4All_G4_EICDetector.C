@@ -98,11 +98,12 @@ int Fun4All_G4_EICDetector(
   //======================
 
   // sPHENIX barrel
-  bool do_bbc = true;
+  Enable::BBC = true;
 
   // whether to simulate the Be section of the beam pipe
   Enable::PIPE = true;
-  // EIC beam pipe extension beyond the Be-section can be turned on with use_forward_pipes = true in G4_Pipe_EIC.C
+  // EIC beam pipe extension beyond the Be-section:
+  //G4PIPE::use_forward_pipes = true;
 
   Enable::EGEM = true;
   Enable::FGEM = true;
@@ -115,10 +116,16 @@ int Fun4All_G4_EICDetector(
   bool do_vertex_finding = false;  // this option exclude vertex in the track fitting and use RAVE to reconstruct primary and 2ndary vertexes
 
   Enable::CEMC = true;
-  bool do_cemc_cell = Enable::CEMC && true;
-  bool do_cemc_twr = do_cemc_cell && true;
-  bool do_cemc_cluster = do_cemc_twr && true;
-  bool do_cemc_eval = do_cemc_cluster && true;
+  //  Enable::CEMC_ABSORBER = true;
+  Enable::CEMC_CELL = Enable::CEMC && true;
+  Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
+  Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
+  Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
+
+  // bool do_cemc_cell = Enable::CEMC && true;
+  // bool do_cemc_twr = do_cemc_cell && true;
+  // bool do_cemc_cluster = do_cemc_twr && true;
+  // bool do_cemc_eval = do_cemc_cluster && true;
 
   Enable::HCALIN = true;
   //  Enable::HCALIN_ABSORBER = true;
@@ -173,7 +180,7 @@ int Fun4All_G4_EICDetector(
   bool do_global = true;
   bool do_global_fastsim = true;
 
-  bool do_calotrigger = true && do_cemc_twr && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
+  bool do_calotrigger = true &&  Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   // Select only one jet reconstruction- they currently use the same
   // output collections on the node tree!
@@ -186,7 +193,7 @@ int Fun4All_G4_EICDetector(
   // HI Jet Reco for jet simulations in Au+Au (default is false for
   // single particle / p+p simulations, or for Au+Au simulations which
   // don't care about jets)
-  bool do_HIjetreco = false && do_jet_reco && do_cemc_twr && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
+  bool do_HIjetreco = false && do_jet_reco && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
@@ -405,7 +412,7 @@ int Fun4All_G4_EICDetector(
   // BBC Reco
   //---------
 
-  if (do_bbc)
+  if (Enable::BBC)
   {
     BbcInit();
     Bbc_Reco();
@@ -417,7 +424,7 @@ int Fun4All_G4_EICDetector(
 
   if (do_tracking_cell) Svtx_Cells();
 
-  if (do_cemc_cell) CEMC_Cells();
+  if (Enable::CEMC_CELL) CEMC_Cells();
 
   if (Enable::HCALIN_CELL) HCALInner_Cells();
 
@@ -433,8 +440,8 @@ int Fun4All_G4_EICDetector(
   // CEMC towering and clustering
   //-----------------------------
 
-  if (do_cemc_twr) CEMC_Towers();
-  if (do_cemc_cluster) CEMC_Clusters();
+  if (Enable::CEMC_TOWER) CEMC_Towers();
+  if (Enable::CEMC_CLUSTER) CEMC_Clusters();
 
   //-----------------------------
   // HCAL towering and clustering
@@ -514,7 +521,7 @@ int Fun4All_G4_EICDetector(
   //----------------------
   if (do_tracking_eval) Tracking_Eval(string(outputFile) + "_g4tracking_eval.root");
 
-  if (do_cemc_eval) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
+  if (Enable::CEMC_EVAL) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
 
   if (Enable::HCALIN_EVAL) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
 
@@ -565,7 +572,7 @@ int Fun4All_G4_EICDetector(
                             /*bool*/ Enable::HCALIN,
                             /*bool*/ Enable::MAGNET,
                             /*bool*/ Enable::HCALOUT,
-                            /*bool*/ do_cemc_twr,
+                            /*bool*/ Enable::CEMC_TOWER,
                             /*bool*/ Enable::HCALIN_TOWER,
                             /*bool*/ Enable::HCALOUT_TOWER,
                             /*bool*/ Enable::FHCAL,

@@ -143,12 +143,6 @@ int G4Setup(const int absorberactive = 0,
             const EDecayType decayType = EDecayType::kAll,
             const float magfield_rescale = 1.0)
 {
-  //---------------
-  // Load libraries
-  //---------------
-
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4testbench.so");
 
   //---------------
   // Fun4All server
@@ -201,7 +195,7 @@ int G4Setup(const int absorberactive = 0,
   // PIPE
   if (Enable::PIPE)
   {
-    radius = Pipe(g4Reco, radius, absorberactive);
+    radius = Pipe(g4Reco, radius);
   }
   //----------------------------------------
 
@@ -232,7 +226,7 @@ int G4Setup(const int absorberactive = 0,
   //
   if (Enable::CEMC)
   {
-    radius = CEmc(g4Reco, radius, 8, absorberactive);
+    radius = CEmc(g4Reco, radius, 8);
   }
   //  if (do_cemc) radius = CEmc_Vis(g4Reco, radius, 8, absorberactive);// for visualization substructure of SPACAL, slow to render
 
@@ -325,9 +319,6 @@ int G4Setup(const int absorberactive = 0,
 
 void ShowerCompress(int verbosity = 0)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4eval.so");
-
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4DstCompressReco *compress = new PHG4DstCompressReco("PHG4DstCompressReco");
