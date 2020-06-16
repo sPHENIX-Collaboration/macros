@@ -31,7 +31,10 @@ namespace Enable
 
 namespace G4TRACKING
 {
-  bool displaced_vertex = false;
+  bool DISPLACED_VERTEX = false;
+  bool PROJECTION_CEMC = false;
+  bool PROJECTION_FEMC = false;
+  bool PROJECTION_FHCAL = false;
 }
 
 void TrackingInit() {}
@@ -49,7 +52,7 @@ int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   PHG4TrackFastSim *kalman = new PHG4TrackFastSim("PHG4TrackFastSim");
   //  kalman->Verbosity();
   //  kalman->Smearing(false);
-  if (G4TRACKING::displaced_vertex)
+  if (G4TRACKING::DISPLACED_VERTEX)
   {
     //use very loose vertex constraint (1cm in sigma) to allow reco of displaced vertex
     kalman->set_use_vertex_in_fitting(true);
@@ -178,16 +181,16 @@ int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   }
 
   // Saved track states (projections)
-  if (Enable::FEMC)
+  if (Enable::FEMC && G4TRACKING::PROJECTION_FEMC)
   {
     kalman->add_state_name("FEMC");
   }
-  if (Enable::FHCAL)
+  if (Enable::FHCAL && G4TRACKING::PROJECTION_FHCAL)
   {
      kalman->add_state_name("FHCAL");
   }
 
-  if (Enable::CEMC)
+  if (Enable::CEMC && G4TRACKING::PROJECTION_CEMC)
   {
     kalman->add_state_name("CEMC");
   }
