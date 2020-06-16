@@ -78,7 +78,7 @@ void CEmcInit(const int nslats = 1)
 {
 }
 
-double CEmc(PHG4Reco *g4Reco, double radius, const int crossings)
+double CEmc(PHG4Reco *g4Reco, double radius)
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::CEMC_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::CEMC_OVERLAPCHECK;
@@ -212,8 +212,10 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings)
   return radius;
 }
 
-void CEMC_Cells(int verbosity = 0)
+void CEMC_Cells()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::CEMC_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4CylinderCellReco *cemc_cells = new PHG4CylinderCellReco("CEMCCYLCELLRECO");
