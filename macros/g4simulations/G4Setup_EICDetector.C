@@ -13,12 +13,14 @@
 #include <phfield/PHFieldConfig.h>
 #include <g4decayer/EDecayType.hh>
 #include "G4_Aerogel.C"
+#include "G4_Barrel_EIC.C"
 #include "G4_BlackHole.C"
 #include "G4_CEmc_EIC.C"
 #include "G4_DIRC.C"
 #include "G4_EEMC.C"
 #include "G4_FEMC_EIC.C"
 #include "G4_FHCAL.C"
+#include "G4_FST_EIC.C"
 #include "G4_GEM_EIC.C"
 #include "G4_HcalIn_ref.C"
 #include "G4_HcalOut_ref.C"
@@ -56,10 +58,17 @@ void G4Init()
   {
     EGEM_Init();
   }
-
   if (Enable::FGEM)
   {
     FGEM_Init();
+  }
+  if (Enable::FST)
+  {
+    FST_Init();
+  }
+  if (Enable::BARREL)
+  {
+    BarrelInit();
   }
   if (Enable::MVTX)
   {
@@ -205,8 +214,15 @@ int G4Setup(const int absorberactive = 0,
   if (Enable::FGEM)
   {
     FGEMSetup(g4Reco);
+   }
+  if (Enable::FST)
+  {
+    FSTSetup(g4Reco);
   }
-
+  if (Enable::BARREL)
+  {
+    Barrel(g4Reco, radius, absorberactive);
+  }
   if (Enable::MVTX)
   {
     radius = Mvtx(g4Reco, radius, absorberactive);

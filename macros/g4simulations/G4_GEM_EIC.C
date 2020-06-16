@@ -1,22 +1,15 @@
 #pragma once
 
 #include "GlobalVariables.C"
-
 #include <g4detectors/PHG4SectorSubsystem.h>
-
 #include <g4main/PHG4Reco.h>
-
 #include <TMath.h>
-
 #include <string>
 
 R__LOAD_LIBRARY(libg4detectors.so)
 
-int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
-                     double etamax, const int N_Sector = 8);
+int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin, double etamax, const int N_Sector = 8);
 void AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem);
-int make_LANL_FST_station(string name, PHG4Reco *g4Reco, double zpos, double Rmin,
-                          double Rmax);
 
 namespace Enable
 {
@@ -64,24 +57,6 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   double zpos;
   PHG4SectorSubsystem *gem;
 
-  /// LANL FST From Xuan Li
-  // plane 1, z location: 1200mm, inner radius: 45mm, outer radius: 350mm
-  // plane 2, z location: 1400mm, inner radius: 50mm, outer radius: 390mm
-  // plane 3, z location: 1700mm, inner radius: 60mm, outer radius: 410mm
-  // plane 4, z location: 1900mm, inner radius: 70mm, outer radius: 430mm
-  // We also need two outer barrel layers which might need some adjustments by the space limitation
-  // and needs integration with the central vertex detector.
-  //
-  // Note1:  last station need to be removed to avoid confliction with the gas RICH. GEM chamber at z=2.7m is used instead
-  // Note2:  increase inner radius for beam pipe flange clearance
-
-  make_LANL_FST_station("FST_0", g4Reco, 17, 3.2, 18);
-  make_LANL_FST_station("FST_1", g4Reco, 62, 3.2, 18);
-
-  ///////////////////////////////////////////////////////////////////////////
-
-  make_LANL_FST_station("FST_2", g4Reco, 120, 10, 35);
-
   ///////////////////////////////////////////////////////////////////////////
 
   name = "FGEM_2";
@@ -105,11 +80,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   gem->OverlapCheck(overlapcheck);
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
-  //g4Reco->registerSubsystem(gem);
-
-  ///////////////////////////////////////////////////////////////////////////
-
-  make_LANL_FST_station("FST_3", g4Reco, 140, 12, 41);
+  g4Reco->registerSubsystem(gem);
 
   ///////////////////////////////////////////////////////////////////////////
 
@@ -140,12 +111,8 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
   gem->OverlapCheck(overlapcheck);
-  //g4Reco->registerSubsystem(gem);
+  g4Reco->registerSubsystem(gem);
   
-  ///////////////////////////////////////////////////////////////////////////
-
-  make_LANL_FST_station("FST_4", g4Reco, 160, 12, 41);
-
   ///////////////////////////////////////////////////////////////////////////
 
   name = "FGEM_4";
@@ -169,7 +136,9 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   gem->OverlapCheck(overlapcheck);
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
-  //g4Reco->registerSubsystem(gem);
+  g4Reco->registerSubsystem(gem);
+
+  ///////////////////////////////////////////////////////////////////////////
 
   zpos = zpos - (zpos * sin(tilt) + zpos * cos(tilt) * tan(PHG4Sector::Sector_Geometry::eta_to_polar_angle(2) - tilt)) * sin(tilt);
 
@@ -193,73 +162,8 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   AddLayers_MiniTPCDrift(gem);
   gem->get_geometry().AddLayers_HBD_GEM();
   gem->OverlapCheck(overlapcheck);
-  //g4Reco->registerSubsystem(gem);
+  g4Reco->registerSubsystem(gem);
 
-  ///////////////////////////////////////////////////////////////////////////
-
-  make_LANL_FST_station("FST_5", g4Reco, 280, 17, 41);
-
-  ///////////////////////////////////////////////////////////////////////////
-}
-
-int make_LANL_FST_station(string name, PHG4Reco *g4Reco, double zpos, double Rmin,
-                          double Rmax)
-{
-  //  cout
-  //      << "make_GEM_station - GEM construction with PHG4SectorSubsystem - make_GEM_station_EdgeReadout  of "
-  //      << name << endl;
-
-  // always facing the interaction point
-  double polar_angle = 0;
-  if (zpos < 0)
-  {
-    zpos = -zpos;
-    polar_angle = TMath::Pi();
-  }
-
-  double min_polar_angle = TMath::ATan2(Rmin, zpos);
-  double max_polar_angle = TMath::ATan2(Rmax, zpos);
-
-  if (max_polar_angle < min_polar_angle)
-  {
-    double t = max_polar_angle;
-    max_polar_angle = min_polar_angle;
-    min_polar_angle = t;
-  }
-
-  PHG4SectorSubsystem *fst;
-  fst = new PHG4SectorSubsystem(name.c_str());
-
-  fst->SuperDetector(name);
-
-  fst->get_geometry().set_normal_polar_angle(polar_angle);
-  fst->get_geometry().set_normal_start(
-      zpos * PHG4Sector::Sector_Geometry::Unit_cm());
-  fst->get_geometry().set_min_polar_angle(min_polar_angle);
-  fst->get_geometry().set_max_polar_angle(max_polar_angle);
-  fst->get_geometry().set_max_polar_edge(
-      PHG4Sector::Sector_Geometry::ConeEdge());
-  fst->get_geometry().set_min_polar_edge(
-      PHG4Sector::Sector_Geometry::ConeEdge());
-  fst->get_geometry().set_N_Sector(1);
-  fst->get_geometry().set_material("G4_AIR");
-  fst->OverlapCheck(overlapcheck);
-
-  const double cm = PHG4Sector::Sector_Geometry::Unit_cm();
-  const double mm = .1 * cm;
-  const double um = 1e-3 * mm;
-  // build up layers
-  fst->get_geometry().AddLayer("SliconSensor", "G4_Si", 18 * um, true, 100);
-  fst->get_geometry().AddLayer("Metalconnection", "G4_Al", 15 * um, false, 100);
-  fst->get_geometry().AddLayer("SliconSupport", "G4_Al", 285 * um, false, 100);
-  fst->get_geometry().AddLayer("HDI", "G4_KAPTON", 20 * um, false, 100);
-  fst->get_geometry().AddLayer("Cooling", "G4_WATER", 100 * um, false, 100);
-  fst->get_geometry().AddLayer("Support", "G4_GRAPHITE", 50 * um, false, 100);
-  fst->get_geometry().AddLayer("Support_Gap", "G4_AIR", 1 * cm, false, 100);
-  fst->get_geometry().AddLayer("Support2", "G4_GRAPHITE", 50 * um, false, 100);
-
-  g4Reco->registerSubsystem(fst);
-  return 0;
 }
 
 //! Add drift layers to mini TPC

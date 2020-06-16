@@ -96,8 +96,10 @@ int Fun4All_G4_EICDetector(
   // EIC beam pipe extension beyond the Be-section can be turned on with use_forward_pipes = true in G4_Pipe_EIC.C
 
   Enable::EGEM = false;
-  Enable::FGEM = true;
-  Enable::MVTX = true;
+  Enable::FGEM = false;
+  Enable::FST = true;
+  Enable::BARREL = true;   //barrel tracker
+  Enable::MVTX = false;
   Enable::TPC = false;
   Enable::TRACKING = true;
   bool do_tracking_cell = Enable::TRACKING && true;
@@ -176,7 +178,7 @@ int Fun4All_G4_EICDetector(
   bool do_dst_compress = false;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  bool do_DSTReader = false;
+  bool do_DSTReader = true;
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
@@ -306,10 +308,13 @@ int Fun4All_G4_EICDetector(
     }
     gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
     gen->set_vertex_size_parameters(0.0, 0.0);
-    gen->set_eta_range(-3, 3);
-    gen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi());
+    //gen->set_eta_range(-3, 3);
+    gen->set_eta_range(2,2);
+    gen->set_phi_range(TMath::Pi()/2.0,TMath::Pi()/2.0);
+    //gen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi());
     //gen->set_pt_range(0.1, 50.0);
-    gen->set_pt_range(0.1, 20.0);
+    //gen->set_pt_range(0.1, 20.0);
+    gen->set_pt_range(3,3);
     gen->Embed(1);
     gen->Verbosity(0);
 
