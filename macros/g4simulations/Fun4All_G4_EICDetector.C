@@ -177,23 +177,23 @@ int Fun4All_G4_EICDetector(
   Enable::PLUGDOOR = true;
 
   // Other options
-  bool do_global = true;
-  bool do_global_fastsim = true;
+  Enable::GLOBAL_RECO = true;
+  Enable::GLOBAL_FASTSIM = true;
 
-  bool do_calotrigger = true &&  Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
+  Enable::CALOTRIGGER = true &&  Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   // Select only one jet reconstruction- they currently use the same
   // output collections on the node tree!
-  bool do_jet_reco = true;
-  bool do_jet_eval = do_jet_reco && true;
+  Enable::JETS = true;
+  Enable::JETS_EVAL = Enable::JETS && true;
 
-  bool do_fwd_jet_reco = true;
-  bool do_fwd_jet_eval = do_fwd_jet_reco && true;
+  Enable::FWDJETS = true;
+  Enable::FWDJETS_EVAL = Enable::FWDJETS && true;
 
   // HI Jet Reco for jet simulations in Au+Au (default is false for
   // single particle / p+p simulations, or for Au+Au simulations which
   // don't care about jets)
-  bool do_HIjetreco = false && do_jet_reco && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
+  bool do_HIjetreco = false &&  Enable::JETS && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
@@ -478,12 +478,11 @@ int Fun4All_G4_EICDetector(
   // Global Vertexing
   //-----------------
 
-  if (do_global)
+  if (Enable::GLOBAL_RECO)
   {
     Global_Reco();
   }
-
-  else if (do_global_fastsim)
+  else if (Enable::GLOBAL_FASTSIM)
   {
     Global_FastSim();
   }
@@ -492,7 +491,7 @@ int Fun4All_G4_EICDetector(
   // Calo Trigger Simulation
   //-----------------
 
-  if (do_calotrigger)
+  if (Enable::CALOTRIGGER)
   {
     CaloTrigger_Sim();
   }
@@ -501,7 +500,7 @@ int Fun4All_G4_EICDetector(
   // Jet reco
   //---------
 
-  if (do_jet_reco)
+  if (Enable::JETS)
   {
     Jet_Reco();
   }
@@ -511,7 +510,7 @@ int Fun4All_G4_EICDetector(
     HIJetReco();
   }
 
-  if (do_fwd_jet_reco)
+  if (Enable::FWDJETS)
   {
     Jet_FwdReco();
   }
@@ -533,9 +532,9 @@ int Fun4All_G4_EICDetector(
 
   if (do_EEMC_eval) EEMC_Eval(string(outputFile) + "_g4eemc_eval.root");
 
-  if (do_jet_eval) Jet_Eval(string(outputFile) + "_g4jet_eval.root");
+  if (Enable::JETS_EVAL) Jet_Eval(string(outputFile) + "_g4jet_eval.root");
 
-  if (do_fwd_jet_eval) Jet_FwdEval(string(outputFile) + "_g4fwdjet_eval.root");
+  if (Enable::FWDJETS_EVAL) Jet_FwdEval(string(outputFile) + "_g4fwdjet_eval.root");
 
   //--------------
   // IO management
