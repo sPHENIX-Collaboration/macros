@@ -20,14 +20,14 @@ namespace Enable
   bool MVTX_OVERLAPCHECK = false;
   int MVTX_VERBOSITY = 0;
 
-}
+}  // namespace Enable
 
 namespace G4MVTX
 {
   int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
   vector<int> N_staves = {18, 24, 30};
   vector<double> nom_radius = {36.4, 48.1, 59.8};
-}  // namespace MVTX
+}  // namespace G4MVTX
 
 void MvtxInit(int verbosity = 0)
 {
@@ -60,13 +60,13 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   if (G4MVTX::N_staves.size() < G4MVTX::n_maps_layer)
   {
     cout << "vector<int> N_staves too small: " << G4MVTX::N_staves.size()
-	 << " needs to be at least of size " << G4MVTX::n_maps_layer << endl;
+         << " needs to be at least of size " << G4MVTX::n_maps_layer << endl;
     gSystem->Exit(1);
   }
   if (G4MVTX::nom_radius.size() < G4MVTX::n_maps_layer)
   {
     cout << "vector<double> nom_radius too small: " << G4MVTX::nom_radius.size()
-	 << " needs to be at least of size " << G4MVTX::n_maps_layer << endl;
+         << " needs to be at least of size " << G4MVTX::n_maps_layer << endl;
     gSystem->Exit(1);
   }
   for (int ilyr = 0; ilyr < G4MVTX::n_maps_layer; ilyr++)
