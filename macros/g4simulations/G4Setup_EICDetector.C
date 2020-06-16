@@ -217,18 +217,14 @@ int G4Setup(const int absorberactive = 0,
   {
     radius = TPC(g4Reco, radius, absorberactive);
   }
-  if (Enable::TRACKING)
-  {
-    //    radius = Tracking(g4Reco, radius, absorberactive);
-  }
+
   //----------------------------------------
   // CEMC
   //
   if (Enable::CEMC)
   {
-    radius = CEmc(g4Reco, radius, 8);
+    radius = CEmc(g4Reco, radius);
   }
-  //  if (do_cemc) radius = CEmc_Vis(g4Reco, radius, 8, absorberactive);// for visualization substructure of SPACAL, slow to render
 
   //----------------------------------------
   // HCALIN
