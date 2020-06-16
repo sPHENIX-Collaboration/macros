@@ -231,28 +231,28 @@ int G4Setup(const int absorberactive = 0,
 
   if (Enable::HCALIN)
   {
-    radius = HCalInner(g4Reco, radius, 4, absorberactive);
+    radius = HCalInner(g4Reco, radius, 4);
   }
   //----------------------------------------
   // MAGNET
 
   if (Enable::MAGNET)
   {
-    radius = Magnet(g4Reco, radius, 0, absorberactive);
+    radius = Magnet(g4Reco, radius, 0);
   }
   //----------------------------------------
   // HCALOUT
 
   if (Enable::HCALOUT)
   {
-    radius = HCalOuter(g4Reco, radius, 4, absorberactive);
+    radius = HCalOuter(g4Reco, radius, 4);
   }
   //----------------------------------------
   // FEMC
 
   if (Enable::FEMC)
   {
-    FEMCSetup(g4Reco, absorberactive);
+    FEMCSetup(g4Reco);
   }
 
   //----------------------------------------
