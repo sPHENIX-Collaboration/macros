@@ -27,7 +27,7 @@ namespace Enable
   bool TRACKING = false;
   bool TRACKING_EVAL = false;
   int TRACKING_VERBOSITY = 0;
-}
+}  // namespace Enable
 
 namespace G4TRACKING
 {
@@ -35,14 +35,13 @@ namespace G4TRACKING
   bool PROJECTION_CEMC = false;
   bool PROJECTION_FEMC = false;
   bool PROJECTION_FHCAL = false;
-}
+}  // namespace G4TRACKING
 
 void TrackingInit() {}
 
 void Tracking_Reco()
 {
-
-int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   //---------------
   // Fun4All server
   //---------------
@@ -187,7 +186,7 @@ int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   }
   if (Enable::FHCAL && G4TRACKING::PROJECTION_FHCAL)
   {
-     kalman->add_state_name("FHCAL");
+    kalman->add_state_name("FHCAL");
   }
 
   if (Enable::CEMC && G4TRACKING::PROJECTION_CEMC)
@@ -201,7 +200,7 @@ int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
 void Tracking_Eval(const std::string &outputfile)
 {
-int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   //---------------
   // Fun4All server
   //---------------
