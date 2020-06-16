@@ -21,17 +21,17 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 namespace Enable
 {
-  static bool DIRC = false;
+  bool DIRC = false;
 }
 
 namespace G4DIRC
 {
-  const double radiator_R = 83.65;
-  const double length = 400;
-  const double z_shift = -75;  //115
-  const double z_start = z_shift + length / 2.;
-  const double z_end = z_shift - length / 2.;
-  const double outer_skin_radius = 89.25;
+  double radiator_R = 83.65;
+  double length = 400;
+  double z_shift = -75;  //115
+  double z_start = z_shift + length / 2.;
+  double z_end = z_shift - length / 2.;
+  double outer_skin_radius = 89.25;
 }  // namespace G4DIRC
 
 void DIRCInit()

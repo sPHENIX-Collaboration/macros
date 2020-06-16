@@ -12,10 +12,19 @@
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libg4eval.so)
 
+namespace Enable
+{
+  bool FWDJETS = false;
+  bool FWDJETS_EVAL = false;
+  int FWDJETS_VERBOSITY = 0;
+}
+
 void Jet_FwdRecoInit() {}
 
-void Jet_FwdReco(int verbosity = 0)
+void Jet_FwdReco()
 {
+int verbosity = std::max(Enable::VERBOSITY, Enable::FWDJETS_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   // truth particle level jets
@@ -55,9 +64,9 @@ void Jet_FwdReco(int verbosity = 0)
   return;
 }
 
-void Jet_FwdEval(std::string outfilename = "g4fwdjets_eval.root",
-                 int verbosity = 0)
+void Jet_FwdEval(const std::string &outfilename = "g4fwdjets_eval.root")
 {
+int verbosity = std::max(Enable::VERBOSITY, Enable::FWDJETS_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   JetEvaluator *eval = new JetEvaluator("JETEVALUATOR",

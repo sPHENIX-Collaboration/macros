@@ -20,7 +20,7 @@ R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
 {
-  static bool FEMC = false;
+  bool FEMC = false;
 }
 
 namespace G4FEMC

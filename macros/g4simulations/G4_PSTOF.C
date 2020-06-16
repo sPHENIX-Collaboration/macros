@@ -15,7 +15,7 @@ R__LOAD_LIBRARY(libg4detectors.so)
  */
 namespace Enable
 {
-  static bool PSTOF = false;
+  bool PSTOF = false;
 }
 
 void PSTOFInit()
