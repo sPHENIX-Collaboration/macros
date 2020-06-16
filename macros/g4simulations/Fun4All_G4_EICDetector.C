@@ -110,10 +110,12 @@ int Fun4All_G4_EICDetector(
   Enable::MVTX = true;
   Enable::TPC = true;
   Enable::TRACKING = true;
-  bool do_tracking_cell = Enable::TRACKING && true;
-  bool do_tracking_track = do_tracking_cell && true;
-  bool do_tracking_eval = do_tracking_track && true;
-  bool do_vertex_finding = false;  // this option exclude vertex in the track fitting and use RAVE to reconstruct primary and 2ndary vertexes
+  Enable::TRACKING_EVAL = Enable::TRACKING && true;
+  G4TRACKING::DISPLACED_VERTEX = false;  // this option exclude vertex in the track fitting and use RAVE to reconstruct primary and 2ndary vertexes
+// projections to calorimeters
+  G4TRACKING::PROJECTION_CEMC = false;
+  G4TRACKING::PROJECTION_FEMC = false;
+  G4TRACKING::PROJECTION_FHCAL = false;
 
   Enable::CEMC = true;
   //  Enable::CEMC_ABSORBER = true;
@@ -165,10 +167,6 @@ int Fun4All_G4_EICDetector(
   Enable::EEMC_TOWER = Enable::EEMC_CELL && true;
   Enable::EEMC_CLUSTER = Enable::EEMC_TOWER && true;
   Enable::EEMC_EVAL = Enable::EEMC_CLUSTER && true;
-  // bool do_EEMC_cell = Enable::EEMC && true;
-  // bool do_EEMC_twr = do_EEMC_cell && true;
-  // bool do_EEMC_cluster = do_EEMC_twr && true;
-  // bool do_EEMC_eval = do_EEMC_cluster && true;
 
   Enable::PLUGDOOR = true;
 
@@ -418,8 +416,6 @@ int Fun4All_G4_EICDetector(
   // Detector Division
   //------------------
 
-  if (do_tracking_cell) Svtx_Cells();
-
   if (Enable::CEMC_CELL) CEMC_Cells();
 
   if (Enable::HCALIN_CELL) HCALInner_Cells();
@@ -468,7 +464,7 @@ int Fun4All_G4_EICDetector(
   // SVTX tracking
   //--------------
 
-  if (do_tracking_track) Tracking_Reco(0, do_vertex_finding);
+  if (Enable::TRACKING) Tracking_Reco();
 
   //-----------------
   // Global Vertexing
@@ -514,7 +510,7 @@ int Fun4All_G4_EICDetector(
   //----------------------
   // Simulation evaluation
   //----------------------
-  if (do_tracking_eval) Tracking_Eval(string(outputFile) + "_g4tracking_eval.root");
+  if (Enable::TRACKING_EVAL) Tracking_Eval(string(outputFile) + "_g4tracking_eval.root");
 
   if (Enable::CEMC_EVAL) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
 
