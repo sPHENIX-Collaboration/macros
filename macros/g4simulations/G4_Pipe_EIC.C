@@ -35,9 +35,18 @@ namespace G4PIPE
 
 void PipeInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PIPE::be_pipe_radius + G4PIPE::be_pipe_thickness);
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PIPE::be_pipe_length_plus);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4PIPE::be_pipe_length_neg);
+  if (G4PIPE::use_forward_pipes)
+  {
+    BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 23.);
+    BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 450.);
+    BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -463.);
+  }
+  else
+  {
+    BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PIPE::be_pipe_radius + G4PIPE::be_pipe_thickness);
+    BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PIPE::be_pipe_length_plus);
+    BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4PIPE::be_pipe_length_neg);
+  }
 }
 
 //! construct beam pipe
