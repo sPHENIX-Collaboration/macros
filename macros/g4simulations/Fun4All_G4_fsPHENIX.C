@@ -194,6 +194,7 @@ int Fun4All_G4_fsPHENIX(
   Enable::FHCAL_CELL = Enable::FHCAL && true;
   Enable::FHCAL_TOWER = Enable::FHCAL_CELL && true;
   Enable::FHCAL_CLUSTER = Enable::FHCAL_TOWER && true;
+  Enable::FHCAL_EVAL = Enable::FHCAL_CLUSTER && true;
 
   //  Enable::PISTON = true;
   Enable::PISTON_ABSORBER = true;
@@ -342,6 +343,8 @@ int Fun4All_G4_fsPHENIX(
   if (Enable::HCALIN_EVAL) HCALInner_Eval("g4hcalin_eval.root");
 
   if (Enable::HCALOUT_EVAL) HCALOuter_Eval("g4hcalout_eval.root");
+
+  if (Enable::FHCAL_EVAL) FHCAL_Eval(string(outputFile) + "_g4fhcal_eval.root");
 
   if (Enable::JETS_EVAL) Jet_Eval("g4jet_eval.root");
 
