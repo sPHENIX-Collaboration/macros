@@ -82,7 +82,7 @@ int verbosity = std::max(Enable::VERBOSITY, Enable::JETS_VERBOSITY);
   
   // track jets
   JetReco *trackjetreco = new JetReco("TRACKJETRECO");
-  trackjetreco->add_input(new TrackJetInput(Jet::TRACK));
+  trackjetreco->add_input(new TrackJetInput(Jet::TRACK,TRACKING::TrackNodeName));
   trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.2),"AntiKt_Track_r02");
   trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.3),"AntiKt_Track_r03");
   trackjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT,0.4),"AntiKt_Track_r04");
