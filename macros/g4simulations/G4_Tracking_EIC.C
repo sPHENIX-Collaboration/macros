@@ -213,6 +213,7 @@ void Tracking_Eval(const std::string &outputfile)
   //----------------
 
   PHG4TrackFastSimEval *fast_sim_eval = new PHG4TrackFastSimEval("FastTrackingEval");
+  fast_sim_eval->set_trackmapname(TRACKING::TrackNodeName);
   fast_sim_eval->set_filename(outputfile);
   se->registerSubsystem(fast_sim_eval);
 }
