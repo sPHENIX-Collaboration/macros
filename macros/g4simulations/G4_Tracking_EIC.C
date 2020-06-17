@@ -37,7 +37,10 @@ namespace G4TRACKING
   bool PROJECTION_FHCAL = false;
 }  // namespace G4TRACKING
 
-void TrackingInit() {}
+void TrackingInit()
+{
+  TRACKING::TrackNodeName = "TrackMap";
+}
 
 void Tracking_Reco()
 {
@@ -67,10 +70,8 @@ void Tracking_Reco()
     kalman->set_vertex_z_resolution(50e-4);
   }
 
-  // kalman->set_sub_top_node_name("TRACKS");
-  // kalman->set_trackmap_out_name("TrackMap");
-  kalman->set_sub_top_node_name("SVTX");
-  kalman->set_trackmap_out_name("SvtxTrackMap");
+  kalman->set_sub_top_node_name("TRACKS");
+  kalman->set_trackmap_out_name(TRACKING::TrackNodeName);
 
   if (Enable::MVTX)
   {
@@ -90,7 +91,7 @@ void Tracking_Reco()
   if (Enable::TPC)
   {
     kalman->add_phg4hits(
-        "G4HIT_SVTX",                //      const std::string& phg4hitsNames,
+        "G4HIT_TPC",                //      const std::string& phg4hitsNames,
         PHG4TrackFastSim::Cylinder,  //      const DETECTOR_TYPE phg4dettype,
         1,                           //      const float radres,
         200e-4,                      //      const float phires,
