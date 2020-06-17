@@ -35,6 +35,11 @@ namespace INPUTSIMPLE
   double pmax = 50.;
   map<string, unsigned int> particles;
   void AddParticle(const string &name, const unsigned int num);
+  void set_eta_range(double d1, double d2) {etamin = d1; etamax=d2;}
+  void set_phi_range(double d1, double d2) {phimin = d1; phimax=d2;}
+  void set_p_range(double d1, double d2) {pmin = d1; pmax=d2;}
+  void set_vtx_mean(double dx, double dy, double dz) {vxmean = vx; vymean = vy; vzmean = vz;}
+  void set_vtx_width(double dx, double dy, double dz) {vxwidth = vx; vywidth = vy; vzwidth = vz;}
 }  // namespace INPUTSIMPLE
 
 void INPUTSIMPLE::AddParticle(const string &name, const unsigned int num)
