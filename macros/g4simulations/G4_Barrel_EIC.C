@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------*/
 #pragma once
 
-#include "G4_Mvtx.C"
 #include "GlobalVariables.C"
 #include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4tpc/PHG4TpcSpaceChargeDistortion.h>
@@ -64,7 +63,7 @@ double Barrel(PHG4Reco* g4Reco, double radius,
       cyl->set_double_param("length", 2.0*halfLength[i]);
       cyl->set_string_param("material", material[j].c_str());
       cyl->set_double_param("thickness", thickness[j]);
-      cyl->SuperDetector("Barrel");
+      cyl->SuperDetector("BARREL");
       if (j==0) cyl->SetActive();    //only the Silicon Sensor is active
 
       g4Reco->registerSubsystem(cyl);
