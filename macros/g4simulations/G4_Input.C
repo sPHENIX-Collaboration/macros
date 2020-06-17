@@ -44,6 +44,16 @@ namespace INPUTEMBED
   string filename;
 }
 
+namespace PYTHIA6
+{
+  string config_file = "phpythia6.cfg";
+}
+
+namespace PYTHIA8
+{
+  string config_file = "phpythia8.cfg";
+}
+
 void InputInit()
 {
   // first consistency checks - not all input generators play nice
@@ -63,14 +73,14 @@ void InputInit()
   if (Input::PYTHIA6)
   {
     PHPythia6 *pythia6 = new PHPythia6();
-    pythia6->set_config_file("phpythia6.cfg");
+    pythia6->set_config_file(PYTHIA6::config_file);
     se->registerSubsystem(pythia6);
   }
   if (Input::PYTHIA8)
   {
     PHPythia8 *pythia8 = new PHPythia8();
     // see coresoftware/generators/PHPythia8 for example config
-    pythia8->set_config_file("phpythia8.cfg");
+    pythia8->set_config_file(PYTHIA8::config_file);
     se->registerSubsystem(pythia8);
   }
   if (Input::SIMPLE)
