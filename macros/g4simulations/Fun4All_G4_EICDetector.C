@@ -187,7 +187,7 @@ int Fun4All_G4_EICDetector(
   // HI Jet Reco for jet simulations in Au+Au (default is false for
   // single particle / p+p simulations, or for Au+Au simulations which
   // don't care about jets)
-  bool do_HIjetreco = false &&  Enable::JETS && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
+  Enable::HIJETS = false &&  Enable::JETS && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
@@ -497,7 +497,7 @@ int Fun4All_G4_EICDetector(
     Jet_Reco();
   }
 
-  if (do_HIjetreco)
+  if (Enable::HIJETS)
   {
     HIJetReco();
   }
