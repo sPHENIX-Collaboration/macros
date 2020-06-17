@@ -41,3 +41,9 @@ namespace G4P6DECAYER
 {
   EDecayType decayType = EDecayType::kAll;
 }
+
+// our various tracking macro
+namespace TRACKING
+{
+  string TrackNodeName = "SvtxTrackMap";
+}
