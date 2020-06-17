@@ -10,6 +10,7 @@
 #include "G4_FwdJets.C"
 #include "G4_Global.C"
 #include "G4_HIJetReco.C"
+#include "G4_Input.C"
 #include "G4_Jets.C"
 
 #include <fun4all/Fun4AllDstInputManager.h>
@@ -31,15 +32,11 @@
 #include <g4main/ReadEICFiles.h>
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phool/recoConsts.h>
-#include <phpythia6/PHPythia6.h>
-#include <phpythia8/PHPythia8.h>
 #include <phsartre/PHSartre.h>
 #include <phsartre/PHSartreParticleTrigger.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
-R__LOAD_LIBRARY(libPHPythia6.so)
-R__LOAD_LIBRARY(libPHPythia8.so)
 R__LOAD_LIBRARY(libPHSartre.so)
 
 int Fun4All_G4_EICDetector(
@@ -67,10 +64,18 @@ int Fun4All_G4_EICDetector(
   const bool readeictree = false;
   // Or:
   // Use Pythia 8
-  const bool runpythia8 = false;
+  //  Input::PYTHIA8 = true;
   // Or:
   // Use Pythia 6
-  const bool runpythia6 = false;
+//   Input::PYTHIA6 = true;
+   PYTHIA6::config_file = "phpythia6_ep.cfg";
+  Input::SIMPLE = true;
+INPUTSIMPLE::AddParticle("pi-", 5);
+INPUTSIMPLE::set_eta_range(-3,3);
+INPUTSIMPLE::set_phi_range(-M_PI,M_PI);
+INPUTSIMPLE::set_p_range(0.1,20.);
+INPUTSIMPLE::set_vtx_mean(0.,0.,0.);
+INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   // Or:
   // Use HEPGen
   const bool runhepgen = false;
@@ -246,20 +251,6 @@ int Fun4All_G4_EICDetector(
 
     se->registerSubsystem(eicr);
   }
-  else if (runpythia8)
-  {
-    PHPythia8 *pythia8 = new PHPythia8();
-    // see coresoftware/generators/PHPythia8 for example config
-    pythia8->set_config_file("phpythia8.cfg");
-    se->registerSubsystem(pythia8);
-  }
-  else if (runpythia6)
-  {
-    PHPythia6 *pythia6 = new PHPythia6();
-    // see coresoftware/generators/PHPythia6 for example config
-    pythia6->set_config_file("phpythia6_ep.cfg");
-    se->registerSubsystem(pythia6);
-  }
   /*
   else if (runhepgen)
     {
@@ -294,12 +285,16 @@ int Fun4All_G4_EICDetector(
     se->registerSubsystem(mysartre);
   }
 
+  //-----------------
+  // Initialize the selected Input/Event generation
+  //-----------------
+  InputInit();
   // If "readhepMC" is also set, the particles will be embedded in Hijing events
-  if (particles)
+  if (particles && false)
   {
     // toss low multiplicity dummy events
     PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-    gen->add_particles("pi-", 1);  // mu+,e+,proton,pi+,Upsilon
+    gen->add_particles("pi-", 5);  // mu+,e+,proton,pi+,Upsilon
     //gen->add_particles("pi+",100); // 100 pion option
 
     if (readhepmc)
@@ -313,7 +308,7 @@ int Fun4All_G4_EICDetector(
                                             PHG4SimpleEventGenerator::Uniform,
                                             PHG4SimpleEventGenerator::Uniform);
       gen->set_vertex_distribution_mean(0.0, 0.0, 0.0);
-      gen->set_vertex_distribution_width(0.0, 0.0, 0.0);
+      gen->set_vertex_distribution_width(0.0, 0.0, 5.0);
     }
     gen->set_vertex_size_function(PHG4SimpleEventGenerator::Uniform);
     gen->set_vertex_size_parameters(0.0, 0.0);
@@ -391,6 +386,7 @@ int Fun4All_G4_EICDetector(
 
     cout << "Upsilon generator for istate = " << istate << " created and registered " << endl;
   }
+
 
   if (!readhits)
   {
