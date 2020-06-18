@@ -26,6 +26,7 @@ namespace INPUTGUN
   double vz = 0.;
   deque<tuple<string,double,double,double>> particles;
   void AddParticle(const string &name, const double px, const double py, const double pz);
+  void set_vtx(double x, double y, double z) {vx=x; vy = y; vz = z;}
 }
 
 void INPUTGUN::AddParticle(const string &name, const double px, const double py, const double pz)
