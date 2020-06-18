@@ -12,6 +12,7 @@
 #include "G4_GEM_EIC.C"
 #include "G4_HcalIn_ref.C"
 #include "G4_HcalOut_ref.C"
+#include "G4_Input.C"
 #include "G4_Magnet.C"
 #include "G4_Mvtx_EIC.C"
 #include "G4_PSTOF.C"
@@ -27,7 +28,6 @@
 
 #include <g4eval/PHG4DstCompressReco.h>
 
-#include <g4main/HepMCNodeReader.h>
 #include <g4main/PHG4Reco.h>
 #include <g4main/PHG4TruthSubsystem.h>
 
@@ -149,10 +149,6 @@ int G4Setup(const int absorberactive = 0,
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-
-  // read-in HepMC events to Geant4 if there is any
-  HepMCNodeReader *hr = new HepMCNodeReader();
-  se->registerSubsystem(hr);
 
   PHG4Reco *g4Reco = new PHG4Reco();
 

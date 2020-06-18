@@ -9,6 +9,8 @@
 
 #include <phpythia8/PHPythia8.h>
 
+#include <g4main/HepMCNodeReader.h>
+
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 
 #include <fun4all/Fun4AllDstInputManager.h>
@@ -90,6 +92,14 @@ void InputInit()
   if (Input::GUN)
   {
     InputGunInit();
+  }
+// here are the various utility modules which read particles and
+// put them onto the G4 particle stack
+  if (Input::HEPMC)
+  {
+    // read-in HepMC events to Geant4 if there is any
+    HepMCNodeReader *hr = new HepMCNodeReader();
+    se->registerSubsystem(hr);
   }
 }
 
