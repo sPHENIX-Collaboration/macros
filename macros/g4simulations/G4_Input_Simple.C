@@ -37,12 +37,30 @@ namespace INPUTSIMPLE
   double pmax = NAN;
   map<string, unsigned int> particles;
   void AddParticle(const string &name, const unsigned int num);
-  void set_eta_range(double d1, double d2) {etamin = d1; etamax=d2;}
-  void set_phi_range(double d1, double d2) {phimin = d1; phimax=d2;}
+  void set_eta_range(double d1, double d2)
+  {
+    etamin = d1;
+    etamax = d2;
+  }
+  void set_phi_range(double d1, double d2)
+  {
+    phimin = d1;
+    phimax = d2;
+  }
   void set_p_range(double d1, double d2);
   void set_pt_range(double d1, double d2);
-  void set_vtx_mean(double vx, double vy, double vz) {vxmean = vx; vymean = vy; vzmean = vz;}
-  void set_vtx_width(double vx, double vy, double vz) {vxwidth = vx; vywidth = vy; vzwidth = vz;}
+  void set_vtx_mean(double vx, double vy, double vz)
+  {
+    vxmean = vx;
+    vymean = vy;
+    vzmean = vz;
+  }
+  void set_vtx_width(double vx, double vy, double vz)
+  {
+    vxwidth = vx;
+    vywidth = vy;
+    vzwidth = vz;
+  }
 }  // namespace INPUTSIMPLE
 
 void INPUTSIMPLE::AddParticle(const string &name, const unsigned int num)
@@ -66,18 +84,18 @@ void INPUTSIMPLE::AddParticle(const string &name, const unsigned int num)
 
 void INPUTSIMPLE::set_p_range(double d1, double d2)
 {
-pmin = d1;
-pmax=d2;
-ptmin = NAN;
-ptmax=NAN;
+  pmin = d1;
+  pmax = d2;
+  ptmin = NAN;
+  ptmax = NAN;
 }
 
 void INPUTSIMPLE::set_pt_range(double d1, double d2)
 {
-pmin = NAN;
-pmax=NAN;
-ptmin = d1;
-ptmax=d2;
+  pmin = NAN;
+  pmax = NAN;
+  ptmin = d1;
+  ptmax = d2;
 }
 
 void InputSimpleInit()
