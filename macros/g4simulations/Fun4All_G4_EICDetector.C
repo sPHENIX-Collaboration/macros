@@ -20,17 +20,13 @@
 #include <fun4all/Fun4AllNoSyncDstInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
-#include <fun4all/SubsysReco.h>
-#include <g4detectors/PHG4DetectorSubsystem.h>
 #include <g4eval/PHG4DSTReader.h>
-#include <g4main/HepMCNodeReader.h>
 #include <g4main/PHG4ParticleGenerator.h>
 #include <g4main/PHG4ParticleGeneratorBase.h>
 #include <g4main/PHG4ParticleGeneratorVectorMeson.h>
 #include <g4main/PHG4ParticleGun.h>
 #include <g4main/PHG4SimpleEventGenerator.h>
 #include <g4main/ReadEICFiles.h>
-#include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phool/recoConsts.h>
 #include <phsartre/PHSartre.h>
 #include <phsartre/PHSartreParticleTrigger.h>
@@ -38,6 +34,8 @@
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHSartre.so)
+
+//#define OLD
 
 int Fun4All_G4_EICDetector(
     const int nEvents = 1,
@@ -78,7 +76,7 @@ int Fun4All_G4_EICDetector(
   const bool readeictree = false;
   // Or:
   // Use Pythia 8
-    Input::PYTHIA8 = true;
+  //  Input::PYTHIA8 = true;
   // Or:
   // Use Pythia 6
 //   Input::PYTHIA6 = true;
@@ -89,12 +87,16 @@ int Fun4All_G4_EICDetector(
 INPUTSIMPLE::AddParticle("pi-", 5);
 INPUTSIMPLE::set_eta_range(-3,3);
 INPUTSIMPLE::set_phi_range(-M_PI,M_PI);
-INPUTSIMPLE::set_p_range(0.1,20.);
+INPUTSIMPLE::set_pt_range(0.1,20.);
 INPUTSIMPLE::set_vtx_mean(0.,0.,0.);
 INPUTSIMPLE::set_vtx_width(0.,0.,5.);
-  // Or:
-  // Use HEPGen
-  const bool runhepgen = false;
+
+  Input::GUN = true;
+  Input::GUN_VERBOSITY = 0;
+  INPUTGUN::AddParticle("anti_proton", 10, 0, 0.01);
+  INPUTGUN::AddParticle("geantino",1.7776,-0.4335,0.);
+  //INPUTGUN::set_vtx(0,0,0);
+
   // Or:
   // Use Sartre
   const bool runsartre = false;
@@ -102,7 +104,6 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   // Besides the above flags. One can further choose to further put in following particles in Geant4 simulation
   // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
   // or gun/ very simple single particle gun generator
-  const bool usegun = false && !readhits;
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
   const bool upsilons = false && !readhits;
 
@@ -121,6 +122,10 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   //======================
   // What to run
   //======================
+  // Global options (enabled for all enables subsystems - if implemented)
+  //  Enable::ABSORBER = true;
+  //  Enable::OVERLAPCHECK = true;
+  //  Enable::VERBOSITY = 1;
 
   // sPHENIX barrel
   Enable::BBC = true;
@@ -251,20 +256,6 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
 
     se->registerSubsystem(eicr);
   }
-  /*
-  else if (runhepgen)
-    {
-      gSystem->Load("libsHEPGen.so");
-
-      sHEPGen *hepgen = new sHEPGen();
-      // see HEPGen source directory/share/vggdata for required .dat files
-      // see HEPGen source directory/share/datacards for required datacard files
-      hepgen->set_datacard_file("hepgen_dvcs.data");
-      hepgen->set_momentum_electron(-20);
-      hepgen->set_momentum_hadron(250);
-      se->registerSubsystem(hepgen);
-    }
-*/
   else if (runsartre)
   {
     // see coresoftware/generators/PHSartre/README for setup instructions
@@ -290,27 +281,6 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   //-----------------
 //  InputInit();
   // If "readhepMC" is also set, the particles will be embedded in Hijing events
-  if (usegun)
-  {
-    // PHG4ParticleGun *gun = new PHG4ParticleGun();
-    // gun->set_name("anti_proton");
-    // gun->set_name("geantino");
-    // gun->set_vtx(0, 0, 0);
-    // gun->set_mom(10, 0, 0.01);
-    // gun->AddParticle("geantino",1.7776,-0.4335,0.);
-    // gun->AddParticle("geantino",1.7709,-0.4598,0.);
-    // gun->AddParticle("geantino",2.5621,0.60964,0.);
-    // gun->AddParticle("geantino",1.8121,0.253,0.);
-    // se->registerSubsystem(gun);
-    PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator();
-    pgen->set_name("mu-");
-    pgen->set_z_range(0, 0);
-    pgen->set_eta_range(-4.0, 0.0);
-    pgen->set_mom_range(30, 30);
-    pgen->set_phi_range(-1.0 * TMath::Pi(), 1.0 * TMath::Pi());
-    se->registerSubsystem(pgen);
-  }
-
   // If "readhepMC" is also set, the Upsilons will be embedded in Hijing events, if 'particles" is set, the Upsilons will be embedded in whatever particles are thrown
   if (upsilons)
   {
@@ -509,6 +479,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
     // for single particle generators we just need something which drives
     // the event loop, the Dummy Input Mgr does just that
     Fun4AllInputManager *in = new Fun4AllDummyInputManager("JADE");
+    in->Verbosity(1);
     se->registerInputManager(in);
   }
 
@@ -516,7 +487,9 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   // Set up Input Managers
   //--------------
 
+#ifndef OLD
   InputManagers();
+#endif
 
   if (do_DSTReader)
   {
