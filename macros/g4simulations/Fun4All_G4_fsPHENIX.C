@@ -79,6 +79,11 @@ int Fun4All_G4_fsPHENIX(
   INPUTSIMPLE::AddParticle("pi-", 5);
   //  INPUTSIMPLE::AddParticle("e-",0);
   //  INPUTSIMPLE::AddParticle("pi-",10);
+INPUTSIMPLE::set_eta_range(-1,3);
+INPUTSIMPLE::set_phi_range(-M_PI,M_PI);
+INPUTSIMPLE::set_pt_range(0.5,50.);
+INPUTSIMPLE::set_vtx_mean(0.,0.,0.);
+INPUTSIMPLE::set_vtx_width(0.,0.,5.);
 
   //  Input::PYTHIA6 = true;
 
