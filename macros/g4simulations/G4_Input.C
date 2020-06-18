@@ -95,7 +95,7 @@ void InputInit()
   }
 // here are the various utility modules which read particles and
 // put them onto the G4 particle stack
-  if (Input::HEPMC)
+  if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6)
   {
     // read-in HepMC events to Geant4 if there is any
     HepMCNodeReader *hr = new HepMCNodeReader();
