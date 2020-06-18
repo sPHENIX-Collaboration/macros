@@ -63,9 +63,10 @@ int Fun4All_G4_EICDetector(
   // the simulations step completely. The G4Setup macro is only loaded to get information
   // about the number of layers used for the cell reco code
   //
+  Input::READHITS = true;
+  INPUTREADHITS::filename = inputFile;
   // In case reading production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
-  const bool readhits = false;
   // Or:
   // Or:
   // Or:
@@ -76,7 +77,7 @@ int Fun4All_G4_EICDetector(
 //   Input::PYTHIA6 = true;
    PYTHIA6::config_file = "phpythia6_ep.cfg";
 
-   Input::SARTRE = true;
+//   Input::SARTRE = true;
 
 //  Input::SIMPLE = true;
   Input::SIMPLE_VERBOSITY = 1;
@@ -87,7 +88,7 @@ INPUTSIMPLE::set_pt_range(0.1,20.);
 INPUTSIMPLE::set_vtx_mean(0.,0.,0.);
 INPUTSIMPLE::set_vtx_width(0.,0.,5.);
 
-  Input::GUN = true;
+//  Input::GUN = true;
   Input::GUN_VERBOSITY = 0;
   INPUTGUN::AddParticle("anti_proton", 10, 0, 0.01);
   INPUTGUN::AddParticle("geantino",1.7776,-0.4335,0.);
@@ -101,7 +102,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
   // or gun/ very simple single particle gun generator
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
-  const bool upsilons = false && !readhits;
+  const bool upsilons = false && !Input::READHITS;
 
 //  Input::HEPMC = true;
   Input::HEPMC_VERBOSITY = 1;
@@ -239,7 +240,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   // Event generation
   //-----------------
 
-  if (readhits)
+  if (!Input::READHITS)
   {
     // Get the hits from a file
     // The input manager is declared later
@@ -295,7 +296,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   }
 
 
-  if (!readhits)
+  if (!Input::READHITS)
   {
     //---------------------
     // Detector description
@@ -435,12 +436,12 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   // IO management
   //--------------
 
-  if (readhits)
+  if (Input::READHITS)
   {
-    // Hits file
-    Fun4AllInputManager *hitsin = new Fun4AllDstInputManager("DSTin");
-    hitsin->fileopen(inputFile);
-    se->registerInputManager(hitsin);
+    // // Hits file
+    // Fun4AllInputManager *hitsin = new Fun4AllDstInputManager("DSTin");
+    // hitsin->fileopen(inputFile);
+    // se->registerInputManager(hitsin);
   }
   else
   {
@@ -495,7 +496,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
     return 0;
   }
   // if we run the particle generator and use 0 it'll run forever
-  if (nEvents == 0 && !readhits && !Input::HEPMC)
+  if (nEvents == 0 && !Input::READHITS && !Input::HEPMC)
   {
     cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
     cout << "it will run forever, so I just return without running anything" << endl;
