@@ -10,8 +10,12 @@
 #include <phpythia8/PHPythia8.h>
 
 #include <g4main/HepMCNodeReader.h>
+#include <g4main/ReadEICFiles.h>
 
 #include <phhepmc/Fun4AllHepMCInputManager.h>
+
+#include <phsartre/PHSartre.h>
+#include <phsartre/PHSartreParticleTrigger.h>
 
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDummyInputManager.h>
@@ -23,15 +27,23 @@ R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
+R__LOAD_LIBRARY(libPHSartre.so)
 
 namespace Input
 {
   bool READHITS = false;
+  bool READEIC = false;
   bool PYTHIA6 = false;
   bool PYTHIA8 = false;
+  bool SARTRE = false;
 }  // namespace Input
 
 namespace INPUTHEPMC
+{
+  string filename;
+}
+
+namespace INPUTREADEIC
 {
   string filename;
 }
@@ -54,6 +66,11 @@ namespace PYTHIA6
 namespace PYTHIA8
 {
   string config_file = "phpythia8.cfg";
+}
+
+namespace SARTRE
+{
+  string config_file = "sartre.cfg";
 }
 
 void InputInit()
@@ -85,6 +102,20 @@ void InputInit()
     pythia8->set_config_file(PYTHIA8::config_file);
     se->registerSubsystem(pythia8);
   }
+  if (Input::SARTRE)
+  {
+    PHSartre *mysartre = new PHSartre();
+    mysartre->set_config_file(SARTRE::config_file);
+    // particle trigger to enhance forward J/Psi -> ee
+    PHSartreParticleTrigger *pTrig = new PHSartreParticleTrigger("MySartreTrigger");
+    pTrig->AddParticles(-11);
+    //pTrig->SetEtaHighLow(4.0,1.4);
+    pTrig->SetEtaHighLow(1.0, -1.1);  // central arm
+    pTrig->PrintConfig();
+    mysartre->register_trigger((PHSartreGenTrigger *) pTrig);
+    se->registerSubsystem(mysartre);
+  }
+
   if (Input::SIMPLE)
   {
     InputSimpleInit();
@@ -100,6 +131,12 @@ void InputInit()
     // read-in HepMC events to Geant4 if there is any
     HepMCNodeReader *hr = new HepMCNodeReader();
     se->registerSubsystem(hr);
+  }
+  if (Input::READEIC)
+  {
+    ReadEICFiles *eicr = new ReadEICFiles();
+    eicr->OpenInputFile(INPUTREADEIC::filename);
+    se->registerSubsystem(eicr);
   }
 }
 
