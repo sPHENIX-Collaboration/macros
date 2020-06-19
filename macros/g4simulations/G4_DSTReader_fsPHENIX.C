@@ -49,14 +49,11 @@ namespace G4DSTREADER
 void G4DSTreader_fsPHENIXInit() {}
 
 void
-G4DSTreader_fsPHENIX( const char * outputFile = "G4sPHENIXCells.root")
+G4DSTreader_fsPHENIX( const string &outputFile = "G4sPHENIXCells.root")
 {
 
   //! debug output on screen?
   int verbosity = max(Enable::VERBOSITY,Enable::DSTREADER_VERBOSITY);
-
-  //! save raw g4 hits
-  const bool save_g4_raw = true;
 
   // save a comprehensive  evaluation file
   PHG4DSTReader* ana = new PHG4DSTReader(string(outputFile) + string("_DSTReader.root"));
@@ -102,28 +99,28 @@ G4DSTreader_fsPHENIX( const char * outputFile = "G4sPHENIXCells.root")
 
       if (Enable::MAGNET)
         {
-          if (Enable::ABSORBER || Enable::MAGNET)
+          if (Enable::ABSORBER || Enable::MAGNET_ABSORBER)
             ana->AddNode("MAGNET");
         }
 
       if (Enable::HCALOUT)
         {
           ana->AddNode("HCALOUT");
-          if (Enable::ABSORBER || Enable::HCALOUT)
+          if (Enable::ABSORBER || Enable::HCALOUT_ABSORBER)
             ana->AddNode("ABSORBER_HCALOUT");
         }
 
       if (Enable::FHCAL)
         {
           ana->AddNode("FHCAL");
-          if (Enable::ABSORBER || Enable::FHCAL)
+          if (Enable::ABSORBER || Enable::FHCAL_ABSORBER)
             ana->AddNode("ABSORBER_FHCAL");
         }
 
       if (Enable::FEMC)
         {
           ana->AddNode("FEMC");
-          if (Enable::ABSORBER || Enable::FEMC)
+          if (Enable::ABSORBER || Enable::FEMC_ABSORBER)
             ana->AddNode("ABSORBER_FEMC");
         }
 
@@ -168,7 +165,7 @@ G4DSTreader_fsPHENIX( const char * outputFile = "G4sPHENIXCells.root")
       ana->AddTower("RAW_FHCAL");
       ana->AddTower("CALIB_FHCAL");
     }
-  if (Enable::FHCAL_TOWER)
+  if (Enable::FEMC_TOWER)
     {
       ana->AddTower("SIM_FEMC");
       ana->AddTower("RAW_FEMC");
