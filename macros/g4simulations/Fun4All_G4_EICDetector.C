@@ -31,8 +31,6 @@
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 
-//#define OLD
-
 int Fun4All_G4_EICDetector(
     const int nEvents = 1,
     const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
@@ -63,7 +61,7 @@ int Fun4All_G4_EICDetector(
   // the simulations step completely. The G4Setup macro is only loaded to get information
   // about the number of layers used for the cell reco code
   //
-  Input::READHITS = true;
+  //Input::READHITS = true;
   INPUTREADHITS::filename = inputFile;
   // In case reading production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
@@ -93,7 +91,9 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   INPUTGUN::AddParticle("anti_proton", 10, 0, 0.01);
   INPUTGUN::AddParticle("geantino",1.7776,-0.4335,0.);
   //INPUTGUN::set_vtx(0,0,0);
-
+  Input::UPSILON = true;
+  Input::UPSILON_VERBOSITY = 2;
+  INPUTUPSILON::AddDecayParticles("e+", "e-", 0);
 //  Input::READEIC = true;
   INPUTREADEIC::filename = inputFile;
   // Or:
@@ -102,7 +102,6 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
   // or gun/ very simple single particle gun generator
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
-  const bool upsilons = false && !Input::READHITS;
 
 //  Input::HEPMC = true;
   Input::HEPMC_VERBOSITY = 1;
@@ -240,62 +239,12 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   // Event generation
   //-----------------
 
-  if (!Input::READHITS)
-  {
-    // Get the hits from a file
-    // The input manager is declared later
-  }
   //-----------------
   // Initialize the selected Input/Event generation
   //-----------------
 //  InputInit();
   // If "readhepMC" is also set, the particles will be embedded in Hijing events
   // If "readhepMC" is also set, the Upsilons will be embedded in Hijing events, if 'particles" is set, the Upsilons will be embedded in whatever particles are thrown
-  if (upsilons)
-  {
-    // run upsilons for momentum, dca performance, alone or embedded in Hijing
-
-    PHG4ParticleGeneratorVectorMeson *vgen = new PHG4ParticleGeneratorVectorMeson();
-    vgen->add_decay_particles("e+", "e-", 0);  // i = decay id
-    // event vertex
-    if (Input::HEPMC || Input::SIMPLE)
-    {
-      vgen->set_reuse_existing_vertex(true);
-    }
-
-    // Note: this rapidity range completely fills the acceptance of eta = +/- 1 unit
-    vgen->set_rapidity_range(-1.0, +1.0);
-    vgen->set_pt_range(0.0, 10.0);
-
-    int istate = 1;
-
-    if (istate == 1)
-    {
-      // Upsilon(1S)
-      vgen->set_mass(9.46);
-      vgen->set_width(54.02e-6);
-    }
-    else if (istate == 2)
-    {
-      // Upsilon(2S)
-      vgen->set_mass(10.0233);
-      vgen->set_width(31.98e-6);
-    }
-    else
-    {
-      // Upsilon(3S)
-      vgen->set_mass(10.3552);
-      vgen->set_width(20.32e-6);
-    }
-
-    vgen->Verbosity(0);
-    vgen->Embed(2);
-    se->registerSubsystem(vgen);
-
-    cout << "Upsilon generator for istate = " << istate << " created and registered " << endl;
-  }
-
-
   if (!Input::READHITS)
   {
     //---------------------
@@ -433,32 +382,10 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   if (Enable::FWDJETS_EVAL) Jet_FwdEval(string(outputFile) + "_g4fwdjet_eval.root");
 
   //--------------
-  // IO management
-  //--------------
-
-  if (Input::READHITS)
-  {
-    // // Hits file
-    // Fun4AllInputManager *hitsin = new Fun4AllDstInputManager("DSTin");
-    // hitsin->fileopen(inputFile);
-    // se->registerInputManager(hitsin);
-  }
-  else
-  {
-    // for single particle generators we just need something which drives
-    // the event loop, the Dummy Input Mgr does just that
-    Fun4AllInputManager *in = new Fun4AllDummyInputManager("JADE");
-    in->Verbosity(1);
-    se->registerInputManager(in);
-  }
-
-  //--------------
   // Set up Input Managers
   //--------------
 
-#ifndef OLD
   InputManagers();
-#endif
 
   if (do_DSTReader)
   {

@@ -4,6 +4,7 @@
 
 #include "G4_Input_Gun.C"
 #include "G4_Input_Simple.C"
+#include "G4_Input_Upsilon.C"
 
 #include <phpythia6/PHPythia6.h>
 
@@ -124,6 +125,11 @@ void InputInit()
   {
     InputGunInit();
   }
+  if (Input::UPSILON)
+  {
+    InputUpsilonInit();
+  }
+
 // here are the various utility modules which read particles and
 // put them onto the G4 particle stack
   if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6)
