@@ -131,7 +131,14 @@ void InputSimpleInit()
   gen->set_vertex_size_parameters(0.0, 0.0);
   gen->set_eta_range(INPUTSIMPLE::etamin, INPUTSIMPLE::etamax);
   gen->set_phi_range(INPUTSIMPLE::phimin, INPUTSIMPLE::phimax);
+  if (isfinite(INPUTSIMPLE::ptmin) && isfinite(INPUTSIMPLE::ptmax))
+  {
+  gen->set_pt_range(INPUTSIMPLE::ptmin, INPUTSIMPLE::ptmax);
+  }
+  else if (isfinite(INPUTSIMPLE::pmin) && isfinite(INPUTSIMPLE::pmax))
+  {
   gen->set_p_range(INPUTSIMPLE::pmin, INPUTSIMPLE::pmax);
+  }
   gen->Embed(1);
   gen->Verbosity(Input::SIMPLE_VERBOSITY);
   se->registerSubsystem(gen);
