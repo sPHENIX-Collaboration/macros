@@ -35,7 +35,7 @@ void FGEM_Init()
 {
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 130.);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 280.);
-  TRACKING::TrackNodeName = "TrackMap"; // node name for tracks
+  TRACKING::TrackNodeName = "SvtxTrackMap"; // node name for tracks
 }
 
 void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
@@ -248,7 +248,7 @@ int verbosity = std::max(Enable::VERBOSITY, Enable::FGEM_VERBOSITY);
   kalman->set_vertex_xy_resolution(50E-4);
   kalman->set_vertex_z_resolution(50E-4);
 
-  kalman->set_sub_top_node_name("TRACKS");
+  kalman->set_sub_top_node_name("SVTX");
   kalman->set_trackmap_out_name(TRACKING::TrackNodeName);
 
   //   MAPS in MVTX detector
