@@ -13,6 +13,7 @@ namespace Input
   bool HEPMC = false;
   int HEPMC_VERBOSITY = 0;
   bool EMBED = false;
+  bool READEIC = false;
 }
 
 // Global settings affecting multiple subsystems
