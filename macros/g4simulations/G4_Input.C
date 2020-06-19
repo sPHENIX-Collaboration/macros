@@ -33,7 +33,6 @@ R__LOAD_LIBRARY(libPHSartre.so)
 namespace Input
 {
   bool READHITS = false;
-  bool READEIC = false;
   bool PYTHIA6 = false;
   bool PYTHIA8 = false;
   bool SARTRE = false;

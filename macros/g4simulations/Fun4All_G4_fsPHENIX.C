@@ -46,12 +46,8 @@ int Fun4All_G4_fsPHENIX(
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
   // PHRandomSeed() which reads /dev/urandom to get its seed
-  // if the RANDOMSEED flag is set its value is taken as seed
-  // You can either set this to a random value using PHRandomSeed()
-  // which will make all seeds identical (not sure what the point of
-  // this would be:
-  //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
-  // or set it to a fixed value so you can debug your code
+  // if the RANDOMSEED flag is set its value is taken as initial seed
+  // which will produce identical results so you can debug your code
   // rc->set_IntFlag("RANDOMSEED", 12345);
 
   //===============

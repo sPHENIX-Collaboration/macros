@@ -304,7 +304,7 @@ int G4Setup()
   return 0;
 }
 
-void ShowerCompress(int verbosity = 0)
+void ShowerCompress()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
 
