@@ -13,7 +13,6 @@
 #include "G4_Input.C"
 #include "G4_Jets.C"
 
-#include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllDummyInputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -228,17 +227,13 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   // establish the geometry and reconstruction setup
   G4Init();
 
-  //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
-  const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
-  const float magfield_rescale = -1.4 / 1.5;                                                         // scale the map to a 1.4 T field. Reverse field sign to get around a bug in RAVE
-
   //---------------
   // Magnet Settings
   //---------------
 
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
   //  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
-  //  G4MAGNET::magfield_rescale = -1.4 / 1.5;  // make consistent with expected Babar field strength of 1.4T
+  G4MAGNET::magfield_rescale = -1.4 / 1.5;  // make consistent with expected Babar field strength of 1.4T
 
   //---------------
   // Pythia Decayer
@@ -260,8 +255,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
     // Detector description
     //---------------------
 
-    G4Setup(magfield, EDecayType::kAll,
-            magfield_rescale);
+    G4Setup();
   }
 
   //---------
