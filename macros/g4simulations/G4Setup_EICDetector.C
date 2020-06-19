@@ -138,7 +138,6 @@ void G4Init()
 
 int G4Setup()
 {
-
   //---------------
   // Fun4All server
   //---------------

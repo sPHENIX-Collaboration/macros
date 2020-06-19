@@ -61,42 +61,42 @@ int Fun4All_G4_EICDetector(
   //  Input::PYTHIA8 = true;
 
   // Use Pythia 6
-//   Input::PYTHIA6 = true;
-//   PYTHIA6::config_file = "phpythia6_ep.cfg";
+  //   Input::PYTHIA6 = true;
+  //   PYTHIA6::config_file = "phpythia6_ep.cfg";
 
-// Use Sartre
-//   Input::SARTRE = true;
+  // Use Sartre
+  //   Input::SARTRE = true;
 
-// Simple multi particle generator in eta/phi/pt ranges
-//  Input::SIMPLE = true;
+  // Simple multi particle generator in eta/phi/pt ranges
+  //  Input::SIMPLE = true;
   Input::SIMPLE_VERBOSITY = 1;
-INPUTSIMPLE::AddParticle("pi-", 5);
-INPUTSIMPLE::set_eta_range(-3,3);
-INPUTSIMPLE::set_phi_range(-M_PI,M_PI);
-INPUTSIMPLE::set_pt_range(0.1,20.);
-INPUTSIMPLE::set_vtx_mean(0.,0.,0.);
-INPUTSIMPLE::set_vtx_width(0.,0.,5.);
+  INPUTSIMPLE::AddParticle("pi-", 5);
+  INPUTSIMPLE::set_eta_range(-3, 3);
+  INPUTSIMPLE::set_phi_range(-M_PI, M_PI);
+  INPUTSIMPLE::set_pt_range(0.1, 20.);
+  INPUTSIMPLE::set_vtx_mean(0., 0., 0.);
+  INPUTSIMPLE::set_vtx_width(0., 0., 5.);
 
-// Particle gun (same particles in always the same direction)
-//  Input::GUN = true;
+  // Particle gun (same particles in always the same direction)
+  //  Input::GUN = true;
   Input::GUN_VERBOSITY = 0;
   INPUTGUN::AddParticle("anti_proton", 10, 0, 0.01);
-  INPUTGUN::AddParticle("geantino",1.7776,-0.4335,0.);
+  INPUTGUN::AddParticle("geantino", 1.7776, -0.4335, 0.);
   //INPUTGUN::set_vtx(0,0,0);
 
-// Upsilon generator
+  // Upsilon generator
   Input::UPSILON = true;
   Input::UPSILON_VERBOSITY = 0;
   INPUTUPSILON::AddDecayParticles("e+", "e-", 0);
 
-// And/Or read generated particles from file
+  // And/Or read generated particles from file
 
-// eic-smear output
-//  Input::READEIC = true;
+  // eic-smear output
+  //  Input::READEIC = true;
   INPUTREADEIC::filename = inputFile;
 
-// HepMC2 files
-//  Input::HEPMC = true;
+  // HepMC2 files
+  //  Input::HEPMC = true;
   Input::HEPMC_VERBOSITY = 1;
   INPUTHEPMC::filename = inputFile;
 
@@ -110,7 +110,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   //======================
 
   Enable::DSTOUT = true;
-  Enable::DSTOUT_COMPRESS = false;// Compress DST files
+  Enable::DSTOUT_COMPRESS = false;  // Compress DST files
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   //Enable::DSTREADER = true;
 
@@ -137,7 +137,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   Enable::TRACKING = true;
   Enable::TRACKING_EVAL = Enable::TRACKING && true;
   G4TRACKING::DISPLACED_VERTEX = false;  // this option exclude vertex in the track fitting and use RAVE to reconstruct primary and 2ndary vertexes
-// projections to calorimeters
+                                         // projections to calorimeters
   G4TRACKING::PROJECTION_CEMC = false;
   G4TRACKING::PROJECTION_FEMC = false;
   G4TRACKING::PROJECTION_FHCAL = false;
@@ -173,14 +173,14 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   Enable::AEROGEL = true;
 
   Enable::FEMC = true;
-//  Enable::FEMC_ABSORBER = true;
+  //  Enable::FEMC_ABSORBER = true;
   Enable::FEMC_CELL = Enable::FEMC && true;
   Enable::FEMC_TOWER = Enable::FEMC_CELL && true;
   Enable::FEMC_CLUSTER = Enable::FEMC_TOWER && true;
   Enable::FEMC_EVAL = Enable::FEMC_CLUSTER && true;
 
   Enable::FHCAL = true;
-//  Enable::FHCAL_ABSORBER = true;
+  //  Enable::FHCAL_ABSORBER = true;
   Enable::FHCAL_CELL = Enable::FHCAL && true;
   Enable::FHCAL_TOWER = Enable::FHCAL_CELL && true;
   Enable::FHCAL_CLUSTER = Enable::FHCAL_TOWER && true;
@@ -199,7 +199,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   Enable::GLOBAL_RECO = true;
   Enable::GLOBAL_FASTSIM = true;
 
-  Enable::CALOTRIGGER = true &&  Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
+  Enable::CALOTRIGGER = true && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   // Select only one jet reconstruction- they currently use the same
   // output collections on the node tree!
@@ -212,7 +212,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   // HI Jet Reco for jet simulations in Au+Au (default is false for
   // single particle / p+p simulations, or for Au+Au simulations which
   // don't care about jets)
-  Enable::HIJETS = false &&  Enable::JETS && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
+  Enable::HIJETS = false && Enable::JETS && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
@@ -377,7 +377,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   //--------------
   // Set up Output Manager
   //--------------
-  if(Enable::DSTOUT)
+  if (Enable::DSTOUT)
   {
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
     if (Enable::DSTOUT_COMPRESS) DstCompress(out);
