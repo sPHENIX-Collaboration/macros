@@ -133,11 +133,11 @@ void InputSimpleInit()
   gen->set_phi_range(INPUTSIMPLE::phimin, INPUTSIMPLE::phimax);
   if (isfinite(INPUTSIMPLE::ptmin) && isfinite(INPUTSIMPLE::ptmax))
   {
-  gen->set_pt_range(INPUTSIMPLE::ptmin, INPUTSIMPLE::ptmax);
+    gen->set_pt_range(INPUTSIMPLE::ptmin, INPUTSIMPLE::ptmax);
   }
   else if (isfinite(INPUTSIMPLE::pmin) && isfinite(INPUTSIMPLE::pmax))
   {
-  gen->set_p_range(INPUTSIMPLE::pmin, INPUTSIMPLE::pmax);
+    gen->set_p_range(INPUTSIMPLE::pmin, INPUTSIMPLE::pmax);
   }
   gen->Embed(1);
   gen->Verbosity(Input::SIMPLE_VERBOSITY);
