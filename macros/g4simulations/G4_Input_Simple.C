@@ -37,18 +37,21 @@ namespace INPUTSIMPLE
   double pmax = NAN;
   map<string, unsigned int> particles;
   void AddParticle(const string &name, const unsigned int num);
+  void set_p_range(double d1, double d2);
+  void set_pt_range(double d1, double d2);
+
   void set_eta_range(double d1, double d2)
   {
     etamin = d1;
     etamax = d2;
   }
+
   void set_phi_range(double d1, double d2)
   {
     phimin = d1;
     phimax = d2;
   }
-  void set_p_range(double d1, double d2);
-  void set_pt_range(double d1, double d2);
+
   void set_vtx_mean(double vx, double vy, double vz)
   {
     vxmean = vx;
