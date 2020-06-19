@@ -14,17 +14,9 @@
 #include "G4_Jets.C"
 
 #include <fun4all/Fun4AllDstOutputManager.h>
-#include <fun4all/Fun4AllDummyInputManager.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllNoSyncDstInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
-#include <g4eval/PHG4DSTReader.h>
-#include <g4main/PHG4ParticleGenerator.h>
-#include <g4main/PHG4ParticleGeneratorBase.h>
-#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
-#include <g4main/PHG4ParticleGun.h>
-#include <g4main/PHG4SimpleEventGenerator.h>
+
 #include <phool/recoConsts.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
@@ -33,22 +25,21 @@ R__LOAD_LIBRARY(libg4testbench.so)
 int Fun4All_G4_EICDetector(
     const int nEvents = 1,
     const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
-    const char *outputFile = "G4EICDetector.root")
+    const string &outputFile = "G4EICDetector.root")
 {
+  //---------------
+  // Fun4All server
+  //---------------
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(1); // uncomment for batch production running with minimal output messages
+  // se->Verbosity(01); // uncomment for batch production running with minimal output messages
   // se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
 
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
   // PHRandomSeed() which reads /dev/urandom to get its seed
-  // if the RANDOMSEED flag is set its value is taken as seed
-  // You can either set this to a random value using PHRandomSeed()
-  // which will make all seeds identical (not sure what the point of
-  // this would be:
-  //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
-  // or set it to a fixed value so you can debug your code
+  // if the RANDOMSEED flag is set its value is taken as initial seed
+  // which will produce identical results so you can debug your code
   rc->set_IntFlag("RANDOMSEED", 12345);
 
   //===============
@@ -62,20 +53,21 @@ int Fun4All_G4_EICDetector(
   //
   //Input::READHITS = true;
   INPUTREADHITS::filename = inputFile;
-  // In case reading production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
-  // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
+
   // Or:
-  // Or:
-  // Or:
+  // Use one or more particle generators
+
   // Use Pythia 8
   //  Input::PYTHIA8 = true;
-  // Or:
+
   // Use Pythia 6
 //   Input::PYTHIA6 = true;
-   PYTHIA6::config_file = "phpythia6_ep.cfg";
+//   PYTHIA6::config_file = "phpythia6_ep.cfg";
 
+// Use Sartre
 //   Input::SARTRE = true;
 
+// Simple multi particle generator in eta/phi/pt ranges
 //  Input::SIMPLE = true;
   Input::SIMPLE_VERBOSITY = 1;
 INPUTSIMPLE::AddParticle("pi-", 5);
@@ -85,23 +77,25 @@ INPUTSIMPLE::set_pt_range(0.1,20.);
 INPUTSIMPLE::set_vtx_mean(0.,0.,0.);
 INPUTSIMPLE::set_vtx_width(0.,0.,5.);
 
+// Particle gun (same particles in always the same direction)
 //  Input::GUN = true;
   Input::GUN_VERBOSITY = 0;
   INPUTGUN::AddParticle("anti_proton", 10, 0, 0.01);
   INPUTGUN::AddParticle("geantino",1.7776,-0.4335,0.);
   //INPUTGUN::set_vtx(0,0,0);
+
+// Upsilon generator
   Input::UPSILON = true;
-  Input::UPSILON_VERBOSITY = 2;
+  Input::UPSILON_VERBOSITY = 0;
   INPUTUPSILON::AddDecayParticles("e+", "e-", 0);
+
+// And/Or read generated particles from file
+
+// eic-smear output
 //  Input::READEIC = true;
   INPUTREADEIC::filename = inputFile;
-  // Or:
 
-  // Besides the above flags. One can further choose to further put in following particles in Geant4 simulation
-  // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
-  // or gun/ very simple single particle gun generator
-  // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
-
+// HepMC2 files
 //  Input::HEPMC = true;
   Input::HEPMC_VERBOSITY = 1;
   INPUTHEPMC::filename = inputFile;
@@ -118,7 +112,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   Enable::DSTOUT = true;
   Enable::DSTOUT_COMPRESS = false;// Compress DST files
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  Enable::DSTREADER = true;
+  //Enable::DSTREADER = true;
 
   //======================
   // What to run
@@ -339,29 +333,19 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   // Calo Trigger Simulation
   //-----------------
 
-  if (Enable::CALOTRIGGER)
-  {
-    CaloTrigger_Sim();
-  }
+  if (Enable::CALOTRIGGER) CaloTrigger_Sim();
 
   //---------
   // Jet reco
   //---------
 
-  if (Enable::JETS)
-  {
-    Jet_Reco();
-  }
+  if (Enable::JETS) Jet_Reco();
 
-  if (Enable::HIJETS)
-  {
-    HIJetReco();
-  }
+  if (Enable::HIJETS) HIJetReco();
 
-  if (Enable::FWDJETS)
-  {
-    Jet_FwdReco();
-  }
+  if (Enable::FWDJETS) Jet_FwdReco();
+
+  if (Enable::DSTREADER) G4DSTreader_EICDetector(outputFile);
 
   //----------------------
   // Simulation evaluation
@@ -390,8 +374,9 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
 
   InputManagers();
 
-  if (Enable::DSTREADER) G4DSTreader_EICDetector(outputFile);
-
+  //--------------
+  // Set up Output Manager
+  //--------------
   if(Enable::DSTOUT)
   {
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
@@ -406,8 +391,8 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   {
     return 0;
   }
-  // if we run the particle generator and use 0 it'll run forever
-  if (nEvents == 0 && !Input::READHITS && !Input::HEPMC)
+  // if we run any of the particle generators and use 0 it'll run forever
+  if (nEvents == 0 && !Input::READHITS && !Input::HEPMC && !Input::READEIC)
   {
     cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
     cout << "it will run forever, so I just return without running anything" << endl;
