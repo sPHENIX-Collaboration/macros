@@ -35,7 +35,6 @@
 #include <g4decayer/EDecayType.hh>
 
 #include <fun4all/Fun4AllDstOutputManager.h>
-#include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libg4decayer.so)
@@ -137,9 +136,7 @@ void G4Init()
   }
 }
 
-int G4Setup(const string &field = "1.5",
-            const EDecayType decayType = EDecayType::kAll,
-            const float magfield_rescale = 1.0)
+int G4Setup()
 {
 
   //---------------
@@ -157,31 +154,31 @@ int G4Setup(const string &field = "1.5",
                                        // (default is QGSP_BERT for speed)
   //  g4Reco->SetPhysicsList("QGSP_BERT_HP");
 
-  if (decayType != EDecayType::kAll)
+  if (G4P6DECAYER::decayType != EDecayType::kAll)
   {
-    g4Reco->set_force_decay(decayType);
+    g4Reco->set_force_decay(G4P6DECAYER::decayType);
   }
 
   double fieldstrength;
-  istringstream stringline(field);
+  istringstream stringline(G4MAGNET::magfield);
   stringline >> fieldstrength;
   if (stringline.fail())
   {  // conversion to double fails -> we have a string
 
-    if (field.find("sPHENIX.root") != string::npos)
+    if (G4MAGNET::magfield.find("sPHENIX.root") != string::npos)
     {
-      g4Reco->set_field_map(field, PHFieldConfig::Field3DCartesian);
+      g4Reco->set_field_map(G4MAGNET::magfield, PHFieldConfig::Field3DCartesian);
     }
     else
     {
-      g4Reco->set_field_map(field, PHFieldConfig::kField2D);
+      g4Reco->set_field_map(G4MAGNET::magfield, PHFieldConfig::kField2D);
     }
   }
   else
   {
     g4Reco->set_field(fieldstrength);  // use const soleniodal field
   }
-  g4Reco->set_field_rescale(magfield_rescale);
+  g4Reco->set_field_rescale(G4MAGNET::magfield_rescale);
 
   double radius = 0.;
 
