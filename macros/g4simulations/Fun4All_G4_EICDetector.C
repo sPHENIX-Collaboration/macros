@@ -20,7 +20,6 @@
 #include <phool/recoConsts.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
-R__LOAD_LIBRARY(libg4testbench.so)
 
 int Fun4All_G4_EICDetector(
     const int nEvents = 1,
@@ -56,6 +55,8 @@ int Fun4All_G4_EICDetector(
 
   // Or:
   // Use one or more particle generators
+  // It is run if Input::<generator> is set to true
+  // all other options only play a role if it is active
 
   // Use Pythia 8
   //  Input::PYTHIA8 = true;
@@ -68,12 +69,14 @@ int Fun4All_G4_EICDetector(
   //   Input::SARTRE = true;
 
   // Simple multi particle generator in eta/phi/pt ranges
-  //  Input::SIMPLE = true;
+  Input::SIMPLE = true;
   Input::SIMPLE_VERBOSITY = 1;
   INPUTSIMPLE::AddParticle("pi-", 5);
   INPUTSIMPLE::set_eta_range(-3, 3);
   INPUTSIMPLE::set_phi_range(-M_PI, M_PI);
   INPUTSIMPLE::set_pt_range(0.1, 20.);
+// or if you want to set the momentum, not pt range
+//  INPUTSIMPLE::set_p_range(0.1, 20.);
   INPUTSIMPLE::set_vtx_mean(0., 0., 0.);
   INPUTSIMPLE::set_vtx_width(0., 0., 5.);
 
@@ -85,7 +88,7 @@ int Fun4All_G4_EICDetector(
   //INPUTGUN::set_vtx(0,0,0);
 
   // Upsilon generator
-  Input::UPSILON = true;
+  //Input::UPSILON = true;
   Input::UPSILON_VERBOSITY = 0;
   INPUTUPSILON::AddDecayParticles("e+", "e-", 0);
 
@@ -411,7 +414,3 @@ int Fun4All_G4_EICDetector(
   gSystem->Exit(0);
   return 0;
 }
-
-// This function is only used to test if we can load this as root6 macro
-// without running into unresolved libraries and include files
-void RunFFALoadTest() {}
