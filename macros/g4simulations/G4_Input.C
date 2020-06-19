@@ -130,8 +130,8 @@ void InputInit()
     InputUpsilonInit();
   }
 
-// here are the various utility modules which read particles and
-// put them onto the G4 particle stack
+  // here are the various utility modules which read particles and
+  // put them onto the G4 particle stack
   if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6)
   {
     // read-in HepMC events to Geant4 if there is any
