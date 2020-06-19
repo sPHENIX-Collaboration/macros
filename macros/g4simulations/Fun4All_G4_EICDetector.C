@@ -113,7 +113,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   // Compress DST files
   Enable::DSTOUT_COMPRESS = false;
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  const bool do_DSTReader = false;
+  Enable::DSTREADER = true;
 
   //======================
   // What to run
@@ -387,26 +387,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
 
   InputManagers();
 
-  if (do_DSTReader)
-  {
-    //Convert DST to human command readable TTree for quick poke around the outputs
-    G4DSTreader_EICDetector(outputFile,  //
-                            /*int*/ absorberactive,
-                            /*bool*/ Enable::TRACKING,
-                            /*bool*/ Enable::CEMC,
-                            /*bool*/ Enable::HCALIN,
-                            /*bool*/ Enable::MAGNET,
-                            /*bool*/ Enable::HCALOUT,
-                            /*bool*/ Enable::CEMC_TOWER,
-                            /*bool*/ Enable::HCALIN_TOWER,
-                            /*bool*/ Enable::HCALOUT_TOWER,
-                            /*bool*/ Enable::FHCAL,
-                            /*bool*/ Enable::FHCAL_TOWER,
-                            /*bool*/ Enable::FEMC,
-                            /*bool*/ Enable::FEMC_TOWER,
-                            /*bool*/ Enable::EEMC,
-                            /*bool*/ Enable::EEMC_TOWER);
-  }
+  if (Enable::DSTREADER) G4DSTreader_EICDetector(outputFile);
 
   if(Enable::DSTOUT)
   {
