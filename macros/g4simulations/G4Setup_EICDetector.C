@@ -137,8 +137,7 @@ void G4Init()
   }
 }
 
-int G4Setup(const int absorberactive = 0,
-            const string &field = "1.5",
+int G4Setup(const string &field = "1.5",
             const EDecayType decayType = EDecayType::kAll,
             const float magfield_rescale = 1.0)
 {
@@ -206,11 +205,11 @@ int G4Setup(const int absorberactive = 0,
 
   if (Enable::MVTX)
   {
-    radius = Mvtx(g4Reco, radius, absorberactive);
+    radius = Mvtx(g4Reco, radius);
   }
   if (Enable::TPC)
   {
-    radius = TPC(g4Reco, radius, absorberactive);
+    radius = TPC(g4Reco, radius);
   }
 
   //----------------------------------------

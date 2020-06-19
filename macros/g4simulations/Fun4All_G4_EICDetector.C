@@ -107,18 +107,24 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   Input::HEPMC_VERBOSITY = 1;
   INPUTHEPMC::filename = inputFile;
 
+  //-----------------
+  // Initialize the selected Input/Event generation
+  //-----------------
   InputInit();
+
+  //======================
   // Write the DST
+  //======================
+
   Enable::DSTOUT = true;
-  // Compress DST files
-  Enable::DSTOUT_COMPRESS = false;
+  Enable::DSTOUT_COMPRESS = false;// Compress DST files
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   Enable::DSTREADER = true;
 
   //======================
   // What to run
   //======================
-  // Global options (enabled for all enables subsystems - if implemented)
+  // Global options (enabled for all subsystems - if implemented)
   //  Enable::ABSORBER = true;
   //  Enable::OVERLAPCHECK = true;
   //  Enable::VERBOSITY = 1;
@@ -219,30 +225,33 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   Enable::BLACKHOLE = true;
   BlackHoleGeometry::visible = true;
 
-  //---------------
-  // Load libraries
-  //---------------
-
   // establish the geometry and reconstruction setup
   G4Init();
 
-  int absorberactive = 0;  // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
   const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
   const float magfield_rescale = -1.4 / 1.5;                                                         // scale the map to a 1.4 T field. Reverse field sign to get around a bug in RAVE
 
   //---------------
-  // Fun4All server
+  // Magnet Settings
   //---------------
+
+  //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
+  //  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
+  //  G4MAGNET::magfield_rescale = -1.4 / 1.5;  // make consistent with expected Babar field strength of 1.4T
+
+  //---------------
+  // Pythia Decayer
+  //---------------
+  // list of decay types in
+  // $OFFLINE_MAIN/include/g4decayer/EDecayType.hh
+  // default is All:
+  // G4P6DECAYER::decayType = EDecayType::kAll;
 
   //-----------------
   // Event generation
   //-----------------
 
-  //-----------------
-  // Initialize the selected Input/Event generation
-  //-----------------
-//  InputInit();
   // If "readhepMC" is also set, the particles will be embedded in Hijing events
   // If "readhepMC" is also set, the Upsilons will be embedded in Hijing events, if 'particles" is set, the Upsilons will be embedded in whatever particles are thrown
   if (!Input::READHITS)
@@ -251,7 +260,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
     // Detector description
     //---------------------
 
-    G4Setup(absorberactive, magfield, EDecayType::kAll,
+    G4Setup(magfield, EDecayType::kAll,
             magfield_rescale);
   }
 
