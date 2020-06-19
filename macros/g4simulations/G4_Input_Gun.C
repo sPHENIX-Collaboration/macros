@@ -39,12 +39,11 @@ void InputGunInit()
 {
   if (INPUTGUN::particles.empty())
   {
-    cout << "Input::GUN: particle map is empty use for e.g. 1 pi-" << endl;
-    cout << "INPUTGUN::particles.push_back(make_tuple(\"pi-\",0,1,0));" << endl; 
+    cout << "Input::GUN: particle map is empty use for e.g. 1 pi- with px=0, py=1GeV/c, pz=0" << endl;
+    cout << "INPUTGUN::AddParticle(\"pi-\",0,1,0);" << endl; 
     gSystem->Exit(-1);
   }
   Fun4AllServer *se = Fun4AllServer::instance();
-    // toss low multiplicity dummy events
       PHG4ParticleGun *gun = new PHG4ParticleGun();
       for (auto iter =  INPUTGUN::particles.begin(); iter != INPUTGUN::particles.end(); ++iter)
       {
