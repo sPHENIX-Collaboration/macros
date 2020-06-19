@@ -15,7 +15,6 @@
 #include "G4_Input.C"
 #include "G4_Magnet.C"
 #include "G4_Mvtx_EIC.C"
-#include "G4_PSTOF.C"
 #include "G4_Pipe_EIC.C"
 #include "G4_PlugDoor_EIC.C"
 #include "G4_RICH.C"
