@@ -92,6 +92,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   //  Input::GUN = true;
   //Input::GUN_VERBOSITY = 0;
   INPUTGUN::AddParticle("pi-", 0, 1, 0);
+  //INPUTGUN::set_vtx(0,0,0);
 
   //  Input::HEPMC = true;
   Input::HEPMC_VERBOSITY = 0;
@@ -219,7 +220,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
 
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
   //  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
-  //  G4MAGNET::magfield_rescale = -1.4 / 1.5;  // make consistent with expected Babar field strength of 1.4T
+  G4MAGNET::magfield_rescale = -1.4 / 1.5;  // make consistent with expected Babar field strength of 1.4T
 
   //---------------
   // Pythia Decayer
