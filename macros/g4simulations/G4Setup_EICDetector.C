@@ -309,7 +309,7 @@ void ShowerCompress()
 
   PHG4DstCompressReco *compress = new PHG4DstCompressReco("PHG4DstCompressReco");
   compress->AddHitContainer("G4HIT_PIPE");
-  compress->AddHitContainer("G4HIT_SVTXSUPPORT");
+  compress->AddHitContainer("G4HIT_FIELDCAGE");
   compress->AddHitContainer("G4HIT_CEMC_ELECTRONICS");
   compress->AddHitContainer("G4HIT_CEMC");
   compress->AddHitContainer("G4HIT_ABSORBER_CEMC");
