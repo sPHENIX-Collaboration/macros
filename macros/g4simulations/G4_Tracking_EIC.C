@@ -19,7 +19,6 @@
 
 #include <vector>
 
-class SubsysReco;
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libg4trackfastsim.so)
 
@@ -46,6 +45,7 @@ void TrackingInit()
 //-----------------------------------------------------------------------------//
 void Tracking_Reco()
 {
+
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   //---------------
   // Fun4All server
@@ -175,29 +175,33 @@ void Tracking_Reco()
   // FEMC
   //-------------------------
   // Saved track states (projections)
-  if (Enable::FEMC)
+  if (Enable::FEMC && G4TRACKING::PROJECTION_FEMC)
   {
-    //    kalman->add_state_name("FEMC");
+    kalman->add_state_name("FEMC");
   }
+
   //-------------------------
   // FHCAL
   //-------------------------
-  if (Enable::FHCAL)
+  if (Enable::FHCAL && G4TRACKING::PROJECTION_FHCAL)
   {
-    //    kalman->add_state_name("FHCAL");
+    kalman->add_state_name("FHCAL");
   }
   //-------------------------
   // CEMC
   //-------------------------
-  if (Enable::CEMC)
+
+  if (Enable::CEMC && G4TRACKING::PROJECTION_CEMC)
   {
-    //    kalman->add_state_name("CEMC");
+    kalman->add_state_name("CEMC");
   }
   se->registerSubsystem(kalman);
 
   return;
 }
+
 //-----------------------------------------------------------------------------//
+
 void Tracking_Eval(const std::string &outputfile)
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);

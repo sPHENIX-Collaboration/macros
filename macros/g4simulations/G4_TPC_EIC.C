@@ -1,7 +1,8 @@
 #pragma once
 
-#include "G4_Mvtx_EIC.C"
 #include "GlobalVariables.C"
+
+#include "G4_Mvtx_EIC.C"
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
@@ -64,12 +65,12 @@ double TPC(PHG4Reco* g4Reco, double radius,
   radius = G4TPC::inner_cage_radius;
 
   // inner field cage
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", G4MVTX::n_maps_layer);
+  cyl = new PHG4CylinderSubsystem("FIELDCAGE", G4MVTX::n_maps_layer);
   cyl->set_double_param("radius", radius);
   cyl->set_double_param("length", G4TPC::cage_length);
   cyl->set_string_param("material", "G4_KAPTON");
   cyl->set_double_param("thickness", G4TPC::cage_thickness);
-  cyl->SuperDetector("SVTXSUPPORT");
+  cyl->SuperDetector("FIELDCAGE");
   cyl->Verbosity(0);
   g4Reco->registerSubsystem(cyl);
 
@@ -91,13 +92,13 @@ double TPC(PHG4Reco* g4Reco, double radius,
     double tpc_layer_thickness = tpc_region_thickness[irange] / n_tpc_layers[irange];  // thickness per layer
     for (int ilayer = 0; ilayer < n_tpc_layers[irange]; ilayer++)
     {
-      cyl = new PHG4CylinderSubsystem("SVTX", nlayer);
+      cyl = new PHG4CylinderSubsystem("TPC", nlayer);
       cyl->set_double_param("radius", radius);
       cyl->set_double_param("length", G4TPC::cage_length);
       cyl->set_string_param("material", G4TPC::tpcgas);
       cyl->set_double_param("thickness", tpc_layer_thickness - 0.01);
       cyl->SetActive();
-      cyl->SuperDetector("SVTX");
+      cyl->SuperDetector("TPC");
       g4Reco->registerSubsystem(cyl);
 
       radius += tpc_layer_thickness;
@@ -106,13 +107,13 @@ double TPC(PHG4Reco* g4Reco, double radius,
   }
 
   // outer field cage
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", nlayer);
+  cyl = new PHG4CylinderSubsystem("FIELDCAGE", nlayer);
   cyl->set_double_param("radius", radius);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4TPC::cage_length);
   cyl->set_string_param("material", "G4_KAPTON");
   cyl->set_double_param("thickness", G4TPC::cage_thickness);  // Kapton X_0 = 28.6 cm
-  cyl->SuperDetector("SVTXSUPPORT");
+  cyl->SuperDetector("FIELDCAGE");
   g4Reco->registerSubsystem(cyl);
 
   radius += G4TPC::cage_thickness;

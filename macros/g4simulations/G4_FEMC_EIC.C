@@ -21,6 +21,13 @@ R__LOAD_LIBRARY(libg4eval.so)
 namespace Enable
 {
   bool FEMC = false;
+  bool FEMC_ABSORBER = false;
+  bool FEMC_CELL = false;
+  bool FEMC_TOWER = false;
+  bool FEMC_CLUSTER = false;
+  bool FEMC_EVAL = false;
+  bool FEMC_OVERLAPCHECK = false;
+  int FEMC_VERBOSITY = 0;
 }
 
 namespace G4FEMC
@@ -46,19 +53,11 @@ void FEMCInit()
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4FEMC::Gz0 + G4FEMC::Gdz / 2.);
 }
 
-void FEMC_Cells(int verbosity = 0)
+void FEMCSetup(PHG4Reco *g4Reco)
 {
-  Fun4AllServer *se = Fun4AllServer::instance();
+  bool AbsorberActive = Enable::ABSORBER || Enable::FEMC_ABSORBER;
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::FEMC_OVERLAPCHECK;
 
-  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("FEMCCellReco");
-  hc->Detector("FEMC");
-  se->registerSubsystem(hc);
-
-  return;
-}
-
-void FEMCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
-{
   Fun4AllServer *se = Fun4AllServer::instance();
 
   /** Use dedicated FEMC module */
@@ -75,16 +74,31 @@ void FEMCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 
   cout << mapping_femc.str() << endl;
   femc->SetTowerMappingFile(mapping_femc.str());
-  femc->OverlapCheck(overlapcheck);
+  femc->OverlapCheck(OverlapCheck);
   femc->SetActive();
   femc->SuperDetector("FEMC");
-  if (absorberactive) femc->SetAbsorberActive();
+  if (AbsorberActive) femc->SetAbsorberActive();
 
   g4Reco->registerSubsystem(femc);
 }
 
-void FEMC_Towers(int verbosity = 0)
+void FEMC_Cells()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::FEMC_VERBOSITY);
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("FEMCCellReco");
+  hc->Detector("FEMC");
+  se->registerSubsystem(hc);
+
+  return;
+}
+
+void FEMC_Towers()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::FEMC_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_femc;
@@ -205,8 +219,10 @@ void FEMC_Towers(int verbosity = 0)
   //  se->registerSubsystem( TowerCalibration6 );
 }
 
-void FEMC_Clusters(int verbosity = 0)
+void FEMC_Clusters()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::FEMC_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   if (G4FEMC::Femc_clusterizer == G4FEMC::kFemcTemplateClusterizer)
@@ -238,8 +254,10 @@ void FEMC_Clusters(int verbosity = 0)
   return;
 }
 
-void FEMC_Eval(std::string outputfile, int verbosity = 0)
+void FEMC_Eval(const std::string &outputfile)
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::FEMC_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("FEMCEVALUATOR", "FEMC", outputfile.c_str());
