@@ -12,6 +12,7 @@ namespace Enable
 {
   bool PLUGDOOR = false;
   bool PLUGDOOR_ABSORBER = false;
+  bool PLUGDOOR_OVERLAPCHECK = false;
 }
 
 namespace G4PLUGDOOR
@@ -36,8 +37,10 @@ void PlugDoorInit()
 void PlugDoor(PHG4Reco *g4Reco)
 {
   //----------------------------------------
-  const string material("Steel_1006");
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::PLUGDOOR_OVERLAPCHECK;
   const bool flux_door_active = Enable::ABSORBER || Enable::PLUGDOOR_ABSORBER;
+
+  const string material("Steel_1006");
 
   PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FLUXRET_ETA_MINUS", 0);
   flux_return_minus->set_int_param("lengthviarapidity", 0);
@@ -47,8 +50,8 @@ void PlugDoor(PHG4Reco *g4Reco)
   flux_return_minus->set_double_param("thickness", G4PLUGDOOR::r_2 - G4PLUGDOOR::r_1);
   flux_return_minus->set_string_param("material", material);
   flux_return_minus->SetActive(flux_door_active);
-  //  flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
-  flux_return_minus->OverlapCheck(overlapcheck);
+  flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
+  flux_return_minus->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(flux_return_minus);
 
   return;

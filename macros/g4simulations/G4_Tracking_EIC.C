@@ -19,19 +19,32 @@
 
 #include <vector>
 
-class SubsysReco;
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libg4trackfastsim.so)
 
 namespace Enable
 {
   bool TRACKING = false;
+  bool TRACKING_EVAL = false;
+  int TRACKING_VERBOSITY = 0;
+}  // namespace Enable
+
+namespace G4TRACKING
+{
+  bool DISPLACED_VERTEX = false;
+  bool PROJECTION_CEMC = false;
+  bool PROJECTION_FEMC = false;
+  bool PROJECTION_FHCAL = false;
+}  // namespace G4TRACKING
+
+void TrackingInit()
+{
+  TRACKING::TrackNodeName = "TrackMap";
 }
 
-void TrackingInit() {}
-
-void Tracking_Reco(int verbosity = 0, bool displaced_vertex = false)
+void Tracking_Reco()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   //---------------
   // Fun4All server
   //---------------
@@ -41,7 +54,7 @@ void Tracking_Reco(int verbosity = 0, bool displaced_vertex = false)
   PHG4TrackFastSim *kalman = new PHG4TrackFastSim("PHG4TrackFastSim");
   //  kalman->Verbosity();
   //  kalman->Smearing(false);
-  if (displaced_vertex)
+  if (G4TRACKING::DISPLACED_VERTEX)
   {
     //use very loose vertex constraint (1cm in sigma) to allow reco of displaced vertex
     kalman->set_use_vertex_in_fitting(true);
@@ -57,8 +70,8 @@ void Tracking_Reco(int verbosity = 0, bool displaced_vertex = false)
     kalman->set_vertex_z_resolution(50e-4);
   }
 
-  kalman->set_sub_top_node_name("SVTX");
-  kalman->set_trackmap_out_name("SvtxTrackMap");
+  kalman->set_sub_top_node_name("TRACKS");
+  kalman->set_trackmap_out_name(TRACKING::TrackNodeName);
 
   if (Enable::MVTX)
   {
@@ -78,7 +91,7 @@ void Tracking_Reco(int verbosity = 0, bool displaced_vertex = false)
   if (Enable::TPC)
   {
     kalman->add_phg4hits(
-        "G4HIT_SVTX",                //      const std::string& phg4hitsNames,
+        "G4HIT_TPC",                //      const std::string& phg4hitsNames,
         PHG4TrackFastSim::Cylinder,  //      const DETECTOR_TYPE phg4dettype,
         1,                           //      const float radres,
         200e-4,                      //      const float phires,
@@ -168,26 +181,27 @@ void Tracking_Reco(int verbosity = 0, bool displaced_vertex = false)
   }
 
   // Saved track states (projections)
-  if (Enable::FEMC)
+  if (Enable::FEMC && G4TRACKING::PROJECTION_FEMC)
   {
-    //    kalman->add_state_name("FEMC");
+    kalman->add_state_name("FEMC");
   }
-  if (Enable::FHCAL)
+  if (Enable::FHCAL && G4TRACKING::PROJECTION_FHCAL)
   {
-    //    kalman->add_state_name("FHCAL");
+    kalman->add_state_name("FHCAL");
   }
 
-  if (Enable::CEMC)
+  if (Enable::CEMC && G4TRACKING::PROJECTION_CEMC)
   {
-    //    kalman->add_state_name("CEMC");
+    kalman->add_state_name("CEMC");
   }
   se->registerSubsystem(kalman);
 
   return;
 }
 
-void Tracking_Eval(std::string outputfile, int verbosity = 0)
+void Tracking_Eval(const std::string &outputfile)
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   //---------------
   // Fun4All server
   //---------------
@@ -199,6 +213,7 @@ void Tracking_Eval(std::string outputfile, int verbosity = 0)
   //----------------
 
   PHG4TrackFastSimEval *fast_sim_eval = new PHG4TrackFastSimEval("FastTrackingEval");
-  fast_sim_eval->set_filename(outputfile.c_str());
+  fast_sim_eval->set_trackmapname(TRACKING::TrackNodeName);
+  fast_sim_eval->set_filename(outputfile);
   se->registerSubsystem(fast_sim_eval);
 }

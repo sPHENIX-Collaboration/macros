@@ -29,6 +29,7 @@ namespace Enable
   bool FHCAL_CELL = false;
   bool FHCAL_TOWER = false;
   bool FHCAL_CLUSTER = false;
+  bool FHCAL_EVAL = false;
   int FHCAL_VERBOSITY = 0;
 }
 

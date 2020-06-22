@@ -46,12 +46,8 @@ int Fun4All_G4_fsPHENIX(
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
   // PHRandomSeed() which reads /dev/urandom to get its seed
-  // if the RANDOMSEED flag is set its value is taken as seed
-  // You can either set this to a random value using PHRandomSeed()
-  // which will make all seeds identical (not sure what the point of
-  // this would be:
-  //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
-  // or set it to a fixed value so you can debug your code
+  // if the RANDOMSEED flag is set its value is taken as initial seed
+  // which will produce identical results so you can debug your code
   // rc->set_IntFlag("RANDOMSEED", 12345);
 
   //===============
@@ -79,6 +75,11 @@ int Fun4All_G4_fsPHENIX(
   INPUTSIMPLE::AddParticle("pi-", 5);
   //  INPUTSIMPLE::AddParticle("e-",0);
   //  INPUTSIMPLE::AddParticle("pi-",10);
+INPUTSIMPLE::set_eta_range(-1,3);
+INPUTSIMPLE::set_phi_range(-M_PI,M_PI);
+INPUTSIMPLE::set_pt_range(0.5,50.);
+INPUTSIMPLE::set_vtx_mean(0.,0.,0.);
+INPUTSIMPLE::set_vtx_width(0.,0.,5.);
 
   //  Input::PYTHIA6 = true;
 
@@ -87,6 +88,7 @@ int Fun4All_G4_fsPHENIX(
   //  Input::GUN = true;
   //Input::GUN_VERBOSITY = 0;
   INPUTGUN::AddParticle("pi-", 0, 1, 0);
+  //INPUTGUN::set_vtx(0,0,0);
 
   //  Input::HEPMC = true;
   Input::HEPMC_VERBOSITY = 0;
@@ -194,6 +196,7 @@ int Fun4All_G4_fsPHENIX(
   Enable::FHCAL_CELL = Enable::FHCAL && true;
   Enable::FHCAL_TOWER = Enable::FHCAL_CELL && true;
   Enable::FHCAL_CLUSTER = Enable::FHCAL_TOWER && true;
+  Enable::FHCAL_EVAL = Enable::FHCAL_CLUSTER && true;
 
   //  Enable::PISTON = true;
   Enable::PISTON_ABSORBER = true;
@@ -213,7 +216,7 @@ int Fun4All_G4_fsPHENIX(
 
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
   //  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
-  //  G4MAGNET::magfield_rescale = -1.4 / 1.5;  // make consistent with expected Babar field strength of 1.4T
+  G4MAGNET::magfield_rescale = -1.4 / 1.5;  // make consistent with expected Babar field strength of 1.4T
 
   //---------------
   // Pythia Decayer
@@ -342,6 +345,8 @@ int Fun4All_G4_fsPHENIX(
   if (Enable::HCALIN_EVAL) HCALInner_Eval("g4hcalin_eval.root");
 
   if (Enable::HCALOUT_EVAL) HCALOuter_Eval("g4hcalout_eval.root");
+
+  if (Enable::FHCAL_EVAL) FHCAL_Eval(string(outputFile) + "_g4fhcal_eval.root");
 
   if (Enable::JETS_EVAL) Jet_Eval("g4jet_eval.root");
 

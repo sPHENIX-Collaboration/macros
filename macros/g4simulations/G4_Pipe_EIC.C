@@ -15,6 +15,9 @@ R__LOAD_LIBRARY(libg4detectors.so)
 namespace Enable
 {
   bool PIPE = false;
+  bool PIPE_ABSORBER = false;
+  bool PIPE_OVERLAPCHECK = false;
+  int PIPE_VERBOSITY = 0;
 }
 
 namespace G4PIPE
@@ -27,26 +30,35 @@ namespace G4PIPE
   double be_pipe_thickness = 3.1762 - be_pipe_radius;  // 760 um for sPHENIX
   double be_pipe_length_plus = 66.8;                   // +z beam pipe extend.
   double be_pipe_length_neg = -79.8;                   // -z beam pipe extend.
+  bool use_forward_pipes = false;
 }  // namespace G4PIPE
 
 void PipeInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PIPE::be_pipe_radius + G4PIPE::be_pipe_thickness);
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PIPE::be_pipe_length_plus);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4PIPE::be_pipe_length_neg);
+  if (G4PIPE::use_forward_pipes)
+  {
+    BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 23.);
+    BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 450.);
+    BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -463.);
+  }
+  else
+  {
+    BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PIPE::be_pipe_radius + G4PIPE::be_pipe_thickness);
+    BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PIPE::be_pipe_length_plus);
+    BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4PIPE::be_pipe_length_neg);
+  }
 }
 
 //! construct beam pipe
-//! \param[in] use_forward_pipes whether to include the forward pipe extension beyond the Be section
 double Pipe(PHG4Reco* g4Reco,
-            double radius,
-            const int absorberactive = 0,
-            int verbosity = 0)
+            double radius)
 {
+  bool AbsorberActive = Enable::ABSORBER || Enable::PIPE_ABSORBER;
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::PIPE_OVERLAPCHECK;
+  int verbosity = std::max(Enable::VERBOSITY, Enable::PIPE_VERBOSITY);
   // process pipe extentions?
-  bool use_forward_pipes = false;
-  const bool do_pipe_hadron_forward_extension = use_forward_pipes && true;
-  const bool do_pipe_electron_forward_extension = use_forward_pipes && true;
+  const bool do_pipe_hadron_forward_extension = G4PIPE::use_forward_pipes && true;
+  const bool do_pipe_electron_forward_extension = G4PIPE::use_forward_pipes && true;
 
   const double be_pipe_length = G4PIPE::be_pipe_length_plus - G4PIPE::be_pipe_length_neg;  // pipe length
   const double be_pipe_center = 0.5 * (G4PIPE::be_pipe_length_plus + G4PIPE::be_pipe_length_neg);
@@ -67,8 +79,8 @@ double Pipe(PHG4Reco* g4Reco,
   cyl->set_string_param("material", "G4_Galactic");
   cyl->set_double_param("thickness", G4PIPE::be_pipe_radius);
   cyl->SuperDetector("PIPE");
-  cyl->OverlapCheck(overlapcheck);
-  if (absorberactive) cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
+  if (AbsorberActive) cyl->SetActive();
   g4Reco->registerSubsystem(cyl);
 
   cyl = new PHG4CylinderSubsystem("BE_PIPE", 1);
@@ -79,8 +91,8 @@ double Pipe(PHG4Reco* g4Reco,
   cyl->set_string_param("material", "G4_Be");
   cyl->set_double_param("thickness", G4PIPE::be_pipe_thickness);
   cyl->SuperDetector("PIPE");
-  cyl->OverlapCheck(overlapcheck);
-  if (absorberactive) cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
+  if (AbsorberActive) cyl->SetActive();
   g4Reco->registerSubsystem(cyl);
 
   radius = G4PIPE::be_pipe_radius + G4PIPE::be_pipe_thickness;
@@ -93,7 +105,7 @@ double Pipe(PHG4Reco* g4Reco,
     gdml->set_string_param("GDMPath", string(getenv("CALIBRATIONROOT")) + "/Beam/Detector chamber 3-20-20.G4Import.gdml");
     gdml->set_string_param("TopVolName", "ElectronForwardEnvelope");
     gdml->set_int_param("skip_DST_geometry_export", 1);  // do not export extended beam pipe as it is not supported by TGeo and outside Kalman filter acceptance
-    gdml->OverlapCheck(overlapcheck);
+    gdml->OverlapCheck(OverlapCheck);
     g4Reco->registerSubsystem(gdml);
   }
 
@@ -103,7 +115,7 @@ double Pipe(PHG4Reco* g4Reco,
     gdml->set_string_param("GDMPath", string(getenv("CALIBRATIONROOT")) + "/Beam/Detector chamber 3-20-20.G4Import.gdml");
     gdml->set_string_param("TopVolName", "HadronForwardEnvelope");
     gdml->set_int_param("skip_DST_geometry_export", 1);  // do not export extended beam pipe as it is not supported by TGeo and outside Kalman filter acceptance
-    gdml->OverlapCheck(overlapcheck);
+    gdml->OverlapCheck(OverlapCheck);
     g4Reco->registerSubsystem(gdml);
   }
 

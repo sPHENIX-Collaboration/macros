@@ -31,10 +31,39 @@ namespace INPUTSIMPLE
   double etamax = 3.;
   double phimin = -1. * M_PI;
   double phimax = 1. * M_PI;
-  double pmin = 0.5;
-  double pmax = 50.;
+  double ptmin = 0.5;
+  double ptmax = 50.;
+  double pmin = NAN;
+  double pmax = NAN;
   map<string, unsigned int> particles;
   void AddParticle(const string &name, const unsigned int num);
+  void set_p_range(double d1, double d2);
+  void set_pt_range(double d1, double d2);
+
+  void set_eta_range(double d1, double d2)
+  {
+    etamin = d1;
+    etamax = d2;
+  }
+
+  void set_phi_range(double d1, double d2)
+  {
+    phimin = d1;
+    phimax = d2;
+  }
+
+  void set_vtx_mean(double vx, double vy, double vz)
+  {
+    vxmean = vx;
+    vymean = vy;
+    vzmean = vz;
+  }
+  void set_vtx_width(double vx, double vy, double vz)
+  {
+    vxwidth = vx;
+    vywidth = vy;
+    vzwidth = vz;
+  }
 }  // namespace INPUTSIMPLE
 
 void INPUTSIMPLE::AddParticle(const string &name, const unsigned int num)
@@ -54,6 +83,22 @@ void INPUTSIMPLE::AddParticle(const string &name, const unsigned int num)
   {
     particles.insert(make_pair(name, num));
   }
+}
+
+void INPUTSIMPLE::set_p_range(double d1, double d2)
+{
+  pmin = d1;
+  pmax = d2;
+  ptmin = NAN;
+  ptmax = NAN;
+}
+
+void INPUTSIMPLE::set_pt_range(double d1, double d2)
+{
+  pmin = NAN;
+  pmax = NAN;
+  ptmin = d1;
+  ptmax = d2;
 }
 
 void InputSimpleInit()
@@ -89,7 +134,14 @@ void InputSimpleInit()
   gen->set_vertex_size_parameters(0.0, 0.0);
   gen->set_eta_range(INPUTSIMPLE::etamin, INPUTSIMPLE::etamax);
   gen->set_phi_range(INPUTSIMPLE::phimin, INPUTSIMPLE::phimax);
-  gen->set_p_range(INPUTSIMPLE::pmin, INPUTSIMPLE::pmax);
+  if (isfinite(INPUTSIMPLE::ptmin) && isfinite(INPUTSIMPLE::ptmax))
+  {
+    gen->set_pt_range(INPUTSIMPLE::ptmin, INPUTSIMPLE::ptmax);
+  }
+  else if (isfinite(INPUTSIMPLE::pmin) && isfinite(INPUTSIMPLE::pmax))
+  {
+    gen->set_p_range(INPUTSIMPLE::pmin, INPUTSIMPLE::pmax);
+  }
   gen->Embed(1);
   gen->Verbosity(Input::SIMPLE_VERBOSITY);
   se->registerSubsystem(gen);
