@@ -13,6 +13,7 @@ namespace Input
   bool HEPMC = false;
   int HEPMC_VERBOSITY = 0;
   bool EMBED = false;
+  bool READEIC = false;
 }
 
 // Global settings affecting multiple subsystems
@@ -40,4 +41,10 @@ namespace BlackHoleGeometry
 namespace G4P6DECAYER
 {
   EDecayType decayType = EDecayType::kAll;
+}
+
+// our various tracking macro
+namespace TRACKING
+{
+  string TrackNodeName = "SvtxTrackMap";
 }
