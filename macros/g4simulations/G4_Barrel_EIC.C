@@ -55,7 +55,7 @@ double Barrel(PHG4Reco* g4Reco, double radius)
     //if (i>2) continue;
     for (int j = 0; j < nSubLayer; j++)
     {
-      cyl = new PHG4CylinderSubsystem(Form("Barrel_%s", layerName[j].c_str()), k);
+      cyl = new PHG4CylinderSubsystem("Barrel_" + layerName[j], k);
       if (j == 0)
       {
         cyl->set_double_param("radius", r[i]);
@@ -65,7 +65,7 @@ double Barrel(PHG4Reco* g4Reco, double radius)
         cyl->set_double_param("radius", r[i] + thickness[j - 1]);
       }
       cyl->set_double_param("length", 2.0 * halfLength[i]);
-      cyl->set_string_param("material", material[j].c_str());
+      cyl->set_string_param("material", material[j]);
       cyl->set_double_param("thickness", thickness[j]);
       max_bh_radius = std::max(max_bh_radius, (r[i] + thickness[j - 1] + thickness[j]));
       cyl->SuperDetector("BARREL");
