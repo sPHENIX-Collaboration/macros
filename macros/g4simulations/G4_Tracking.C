@@ -45,7 +45,8 @@
 
 #include <trackbase/TrkrHitTruthAssoc.h>
 
-#include <PHTpcTracker/PHTpcTracker.h>
+#include <phtpctracker/PHTpcTracker.h>
+
 R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
