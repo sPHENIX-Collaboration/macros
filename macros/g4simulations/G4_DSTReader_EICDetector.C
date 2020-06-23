@@ -53,7 +53,7 @@ G4DSTreader_EICDetector( const string &outputFile = "G4sPHENIXCells.root")
 
 
   // save a comprehensive  evaluation file
-  PHG4DSTReader* ana = new PHG4DSTReader(outputFile + string("_DSTReader.root"));
+  PHG4DSTReader* ana = new PHG4DSTReader(outputFile);
   ana->set_save_particle(true);
   ana->set_load_all_particle(false);
   ana->set_load_active_particle(true);
