@@ -3,6 +3,8 @@
 #include "GlobalVariables.C"
 
 #include "G4_GEM_EIC.C"
+#include "G4_FST_EIC.C"
+#include "G4_Barrel_EIC.C"
 #include "G4_Mvtx_EIC.C"
 #include "G4_TPC_EIC.C"
 #include "G4_CEmc_EIC.C"
@@ -61,6 +63,10 @@ G4DSTreader_EICDetector( const string &outputFile = "G4sPHENIXCells.root")
 
   if (G4DSTREADER::save_g4_raw)
   {
+    if (Enable::BARREL)
+    {
+      ana->AddNode("BARREL");
+    }
     if (Enable::MVTX)
     {
       ana->AddNode("MVTX");
@@ -82,6 +88,9 @@ G4DSTreader_EICDetector( const string &outputFile = "G4sPHENIXCells.root")
       ana->AddNode("FGEM_2");
       ana->AddNode("FGEM_3");
       ana->AddNode("FGEM_4");
+    }
+    if (Enable::FST)
+    {
       ana->AddNode("FST_0");
       ana->AddNode("FST_1");
       ana->AddNode("FST_2");
