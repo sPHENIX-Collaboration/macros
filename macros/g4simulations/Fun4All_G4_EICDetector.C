@@ -125,7 +125,6 @@ int Fun4All_G4_EICDetector(
   //  Enable::OVERLAPCHECK = true;
   //  Enable::VERBOSITY = 1;
 
-  // sPHENIX barrel
   Enable::BBC = true;
 
   // whether to simulate the Be section of the beam pipe
@@ -133,12 +132,15 @@ int Fun4All_G4_EICDetector(
   // EIC beam pipe extension beyond the Be-section:
   //G4PIPE::use_forward_pipes = true;
 
-  Enable::EGEM = false;
-  Enable::FGEM = false;
-  Enable::FST = true;
-  Enable::BARREL = true;   //barrel tracker
-  Enable::MVTX = false;
-  Enable::TPC = false;
+  Enable::EGEM = true;
+  Enable::FGEM = true;
+// barrel tracker
+  Enable::BARREL = false;
+  Enable::FST = false;
+// mvtx/tpc tracker
+  Enable::MVTX = true;
+  Enable::TPC = true;
+
   Enable::TRACKING = true;
   Enable::TRACKING_EVAL = Enable::TRACKING && true;
   G4TRACKING::DISPLACED_VERTEX = false;  // this option exclude vertex in the track fitting and use RAVE to reconstruct primary and 2ndary vertexes
@@ -221,7 +223,7 @@ int Fun4All_G4_EICDetector(
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
-  BlackHoleGeometry::visible = true;
+  BlackHoleGeometry::visible = false;
 
   // establish the geometry and reconstruction setup
   G4Init();
