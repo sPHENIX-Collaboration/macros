@@ -42,10 +42,21 @@
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 
-void RunLoadTest() {}
-
 void G4Init()
 {
+// First some check for subsystems which do not go together
+
+  if (Enable::TPC && Enable::FST)
+  {
+    cout << "TPC and FST cannot be enabled together" << endl;
+    gSystem->Exit(1);
+  }
+  else if ((Enable::TPC || Enable::MVTX) && Enable::BARREL)
+  {
+    cout << "TPC/MVTX and BARREL cannot be enabled together" << endl;
+    gSystem->Exit(1);
+  }
+
   // load detector/material macros and execute Init() function
   if (Enable::PIPE)
   {
