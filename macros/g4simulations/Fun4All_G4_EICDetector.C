@@ -75,8 +75,8 @@ int Fun4All_G4_EICDetector(
   INPUTSIMPLE::set_eta_range(-3, 3);
   INPUTSIMPLE::set_phi_range(-M_PI, M_PI);
   INPUTSIMPLE::set_pt_range(0.1, 20.);
-// or if you want to set the momentum, not pt range
-//  INPUTSIMPLE::set_p_range(0.1, 20.);
+  // or if you want to set the momentum, not pt range
+  //  INPUTSIMPLE::set_p_range(0.1, 20.);
   INPUTSIMPLE::set_vtx_mean(0., 0., 0.);
   INPUTSIMPLE::set_vtx_width(0., 0., 5.);
 
@@ -134,10 +134,10 @@ int Fun4All_G4_EICDetector(
 
   Enable::EGEM = true;
   Enable::FGEM = true;
-// barrel tracker
+  // barrel tracker
   Enable::BARREL = false;
   Enable::FST = false;
-// mvtx/tpc tracker
+  // mvtx/tpc tracker
   Enable::MVTX = true;
   Enable::TPC = true;
 
@@ -356,7 +356,7 @@ int Fun4All_G4_EICDetector(
   size_t pos = outputroot.find(remove_this);
   if (pos != string::npos)
   {
-    outputroot.erase(pos,remove_this.length());
+    outputroot.erase(pos, remove_this.length());
   }
 
   if (Enable::DSTREADER) G4DSTreader_EICDetector(outputroot + "_DSTReader.root");

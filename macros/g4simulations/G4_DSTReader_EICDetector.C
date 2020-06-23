@@ -2,25 +2,24 @@
 
 #include "GlobalVariables.C"
 
-#include "G4_GEM_EIC.C"
-#include "G4_FST_EIC.C"
 #include "G4_Barrel_EIC.C"
-#include "G4_Mvtx_EIC.C"
-#include "G4_TPC_EIC.C"
 #include "G4_CEmc_EIC.C"
-#include "G4_HcalIn_ref.C"
-#include "G4_HcalOut_ref.C"
-#include "G4_Magnet.C"
 #include "G4_EEMC.C"
 #include "G4_FEMC_EIC.C"
 #include "G4_FHCAL.C"
+#include "G4_FST_EIC.C"
+#include "G4_GEM_EIC.C"
+#include "G4_HcalIn_ref.C"
+#include "G4_HcalOut_ref.C"
+#include "G4_Magnet.C"
+#include "G4_Mvtx_EIC.C"
+#include "G4_TPC_EIC.C"
 
 #include <g4eval/PHG4DSTReader.h>
 
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libg4eval.so)
-
 
 //////////////////////////////////////////////////////////////////
 /*!
@@ -35,25 +34,22 @@ namespace Enable
 {
   bool DSTREADER = false;
   int DSTREADER_VERBOSITY = 0;
-}
+}  // namespace Enable
 
 namespace G4DSTREADER
 {
   bool save_g4_raw = true;
   double tower_zero_supp = 1.e-6;
-}
+}  // namespace G4DSTREADER
 
 void G4DSTreader_EICDetectorInit() {}
-void
-G4DSTreader_EICDetector( const string &outputFile = "G4sPHENIXCells.root")
+void G4DSTreader_EICDetector(const string &outputFile = "G4sPHENIXCells.root")
 {
-
   //! debug output on screen?
-  int verbosity = max(Enable::VERBOSITY,Enable::DSTREADER_VERBOSITY);
-
+  int verbosity = max(Enable::VERBOSITY, Enable::DSTREADER_VERBOSITY);
 
   // save a comprehensive  evaluation file
-  PHG4DSTReader* ana = new PHG4DSTReader(outputFile);
+  PHG4DSTReader *ana = new PHG4DSTReader(outputFile);
   ana->set_save_particle(true);
   ana->set_load_all_particle(false);
   ana->set_load_active_particle(true);
@@ -195,17 +191,17 @@ G4DSTreader_EICDetector( const string &outputFile = "G4sPHENIXCells.root")
     ana->AddTower("CALIB_EEMC");
   }
 
-// Jets disabled for now
-//  if (do_jet_reco)
-//    {
-//
-//      ana->AddJet("AntiKt06JetsInPerfect");
-//      ana->AddJet("G4TowerJets_6");
-//    }
-//  if (embed_input_file && do_jet_reco)
-//    {
-//      ana->AddJet("G4TowerJets_combined_6");
-//    }
+  // Jets disabled for now
+  //  if (do_jet_reco)
+  //    {
+  //
+  //      ana->AddJet("AntiKt06JetsInPerfect");
+  //      ana->AddJet("G4TowerJets_6");
+  //    }
+  //  if (embed_input_file && do_jet_reco)
+  //    {
+  //      ana->AddJet("G4TowerJets_combined_6");
+  //    }
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->registerSubsystem(ana);
