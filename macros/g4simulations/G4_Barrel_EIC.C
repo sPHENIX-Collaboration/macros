@@ -57,10 +57,13 @@ double Barrel(PHG4Reco* g4Reco, double radius)
     {
       cyl = new PHG4CylinderSubsystem(Form("Barrel_%s", layerName[j].c_str()), k);
       if (j == 0)
+      {
         cyl->set_double_param("radius", r[i]);
+      }
       else
+      {
         cyl->set_double_param("radius", r[i] + thickness[j - 1]);
-
+      }
       cyl->set_double_param("length", 2.0 * halfLength[i]);
       cyl->set_string_param("material", material[j].c_str());
       cyl->set_double_param("thickness", thickness[j]);
@@ -83,7 +86,6 @@ double Barrel(PHG4Reco* g4Reco, double radius)
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, max_bh_radius);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, halfLength[nLayer - 1]);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -halfLength[nLayer - 1]);
-  //return radius;
   return max_bh_radius;
 }
 //---------------------------------------------------------------------//
