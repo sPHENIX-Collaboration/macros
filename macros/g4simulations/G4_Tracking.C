@@ -44,6 +44,8 @@
 #include <trackreco/PHGenFitTrackProjection.h>
 
 #include <trackbase/TrkrHitTruthAssoc.h>
+
+#include <PHTpcTracker/PHTpcTracker.h>
 R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
@@ -54,6 +56,7 @@ R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
+R__LOAD_LIBRARY(libPHTpcTracker.so)
 
 #endif
 
@@ -96,6 +99,10 @@ const int n_micromegas_layer = 2;
 // Tracking reconstruction setup parameters and flags
 //=====================================
 const int init_vertexing_min_zvtx_tracks = 2; // PHInitZvertexing parameter for reducing spurious vertices, use 2 for Pythia8 events, 5 for large multiplicity events
+//default seed is PHTpcTracker
+const bool use_hough_seeding = false; //choose seeding algo
+const bool use_ca_seeding  = false;
+
 const bool use_track_prop = true;   // true for normal track seeding, false to run with truth track seeding instead
 const bool g4eval_use_initial_vertex = false;   // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
 const bool use_primary_vertex = false;  // if true, refit tracks with primary vertex included - adds second node to node tree, adds second evaluator and outputs separate ntuples
@@ -507,6 +514,7 @@ void Tracking_Reco(int verbosity = 0)
   //---------------
   gSystem->Load("libfun4all.so");
   gSystem->Load("libtrack_reco.so");
+  gSystem->Load("libPHTpcTracker.so");
 
   //---------------
   // Fun4All server
@@ -543,14 +551,24 @@ void Tracking_Reco(int verbosity = 0)
 	    init_zvtx->Verbosity(0);
 	    se->registerSubsystem(init_zvtx);
 	}
-
-      // find seed tracks using a subset of TPC layers
-      int min_layers = 4;
-      int nlayers_seeds = 12;
-      auto track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer, nlayers_seeds, min_layers);
-      track_seed->Verbosity(0);
-      se->registerSubsystem(track_seed);
-
+      if(use_hough_seeding){
+	// find seed tracks using a subset of TPC layers
+	int min_layers = 4;
+	int nlayers_seeds = 12;
+	auto track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer, nlayers_seeds, min_layers);
+	track_seed->Verbosity(0);
+	se->registerSubsystem(track_seed);
+      }else if(use_ca_seeding){
+      }else{
+	PHTpcTracker* tracker = new PHTpcTracker("PHTpcTracker");
+	tracker->set_seed_finder_options( 3.0, M_PI / 8, 10, 6.0, M_PI / 8, 5, 1 ); // two-pass CA seed params
+	tracker->set_seed_finder_optimization_remove_loopers( true, 20.0, 10000.0 ); // true if loopers not needed
+	tracker->set_track_follower_optimization_helix( true ); // false for quality, true for speed
+	tracker->set_track_follower_optimization_precise_fit( false ); // true for quality, false for speed
+	tracker->enable_json_export( false ); // save event as json, filename is automatic and stamped by current time in ms
+	tracker->enable_vertexing( false ); // rave vertexing is pretty slow at large multiplicities...
+	se->registerSubsystem(tracker);
+      }
       // Find all clusters associated with each seed track
       auto track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", n_maps_layer, n_intt_layer, n_gas_layer, enable_micromegas ? n_micromegas_layer:0);
       track_prop->Verbosity(0);
