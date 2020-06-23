@@ -213,7 +213,7 @@ int G4Setup()
   }
   if (Enable::BARREL)
   {
-    Barrel(g4Reco, radius, absorberactive);
+    Barrel(g4Reco, radius);
   }
   if (Enable::MVTX)
   {
