@@ -1,11 +1,9 @@
 #pragma once
 
 #include "GlobalVariables.C"
-
 #include <g4detectors/PHG4SectorSubsystem.h>
-
 #include <g4main/PHG4Reco.h>
-
+#include <TMath.h>
 #include <string>
 
 R__LOAD_LIBRARY(libg4detectors.so)
@@ -189,7 +187,7 @@ int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
   if (zpos < 0)
   {
     zpos = -zpos;
-    polar_angle = M_PI;
+    polar_angle = TMath::Pi();
   }
   if (etamax < etamin)
   {

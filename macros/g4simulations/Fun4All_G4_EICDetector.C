@@ -75,8 +75,8 @@ int Fun4All_G4_EICDetector(
   INPUTSIMPLE::set_eta_range(-3, 3);
   INPUTSIMPLE::set_phi_range(-M_PI, M_PI);
   INPUTSIMPLE::set_pt_range(0.1, 20.);
-// or if you want to set the momentum, not pt range
-//  INPUTSIMPLE::set_p_range(0.1, 20.);
+  // or if you want to set the momentum, not pt range
+  //  INPUTSIMPLE::set_p_range(0.1, 20.);
   INPUTSIMPLE::set_vtx_mean(0., 0., 0.);
   INPUTSIMPLE::set_vtx_width(0., 0., 5.);
 
@@ -125,7 +125,6 @@ int Fun4All_G4_EICDetector(
   //  Enable::OVERLAPCHECK = true;
   //  Enable::VERBOSITY = 1;
 
-  // sPHENIX barrel
   Enable::BBC = true;
 
   // whether to simulate the Be section of the beam pipe
@@ -135,8 +134,13 @@ int Fun4All_G4_EICDetector(
 
   Enable::EGEM = true;
   Enable::FGEM = true;
+  // barrel tracker
+  Enable::BARREL = false;
+  Enable::FST = false;
+  // mvtx/tpc tracker
   Enable::MVTX = true;
   Enable::TPC = true;
+
   Enable::TRACKING = true;
   Enable::TRACKING_EVAL = Enable::TRACKING && true;
   G4TRACKING::DISPLACED_VERTEX = false;  // this option exclude vertex in the track fitting and use RAVE to reconstruct primary and 2ndary vertexes
@@ -219,7 +223,7 @@ int Fun4All_G4_EICDetector(
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
-  BlackHoleGeometry::visible = true;
+  BlackHoleGeometry::visible = false;
 
   // establish the geometry and reconstruction setup
   G4Init();
@@ -244,7 +248,6 @@ int Fun4All_G4_EICDetector(
   // Event generation
   //-----------------
 
-  // If "readhepMC" is also set, the particles will be embedded in Hijing events
   // If "readhepMC" is also set, the Upsilons will be embedded in Hijing events, if 'particles" is set, the Upsilons will be embedded in whatever particles are thrown
   if (!Input::READHITS)
   {
@@ -348,28 +351,36 @@ int Fun4All_G4_EICDetector(
 
   if (Enable::FWDJETS) Jet_FwdReco();
 
-  if (Enable::DSTREADER) G4DSTreader_EICDetector(outputFile);
+  string outputroot = outputFile;
+  string remove_this = ".root";
+  size_t pos = outputroot.find(remove_this);
+  if (pos != string::npos)
+  {
+    outputroot.erase(pos, remove_this.length());
+  }
+
+  if (Enable::DSTREADER) G4DSTreader_EICDetector(outputroot + "_DSTReader.root");
 
   //----------------------
   // Simulation evaluation
   //----------------------
-  if (Enable::TRACKING_EVAL) Tracking_Eval(string(outputFile) + "_g4tracking_eval.root");
+  if (Enable::TRACKING_EVAL) Tracking_Eval(outputroot + "_g4tracking_eval.root");
 
-  if (Enable::CEMC_EVAL) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
+  if (Enable::CEMC_EVAL) CEMC_Eval(outputroot + "_g4cemc_eval.root");
 
-  if (Enable::HCALIN_EVAL) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
+  if (Enable::HCALIN_EVAL) HCALInner_Eval(outputroot + "_g4hcalin_eval.root");
 
-  if (Enable::HCALOUT_EVAL) HCALOuter_Eval(string(outputFile) + "_g4hcalout_eval.root");
+  if (Enable::HCALOUT_EVAL) HCALOuter_Eval(outputroot + "_g4hcalout_eval.root");
 
-  if (Enable::FEMC_EVAL) FEMC_Eval(string(outputFile) + "_g4femc_eval.root");
+  if (Enable::FEMC_EVAL) FEMC_Eval(outputroot + "_g4femc_eval.root");
 
-  if (Enable::FHCAL_EVAL) FHCAL_Eval(string(outputFile) + "_g4fhcal_eval.root");
+  if (Enable::FHCAL_EVAL) FHCAL_Eval(outputroot + "_g4fhcal_eval.root");
 
-  if (Enable::EEMC_EVAL) EEMC_Eval(string(outputFile) + "_g4eemc_eval.root");
+  if (Enable::EEMC_EVAL) EEMC_Eval(outputroot + "_g4eemc_eval.root");
 
-  if (Enable::JETS_EVAL) Jet_Eval(string(outputFile) + "_g4jet_eval.root");
+  if (Enable::JETS_EVAL) Jet_Eval(outputroot + "_g4jet_eval.root");
 
-  if (Enable::FWDJETS_EVAL) Jet_FwdEval(string(outputFile) + "_g4fwdjet_eval.root");
+  if (Enable::FWDJETS_EVAL) Jet_FwdEval(outputroot + "_g4fwdjet_eval.root");
 
   //--------------
   // Set up Input Managers

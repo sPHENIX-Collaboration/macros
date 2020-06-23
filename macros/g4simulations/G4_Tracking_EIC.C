@@ -37,13 +37,15 @@ namespace G4TRACKING
   bool PROJECTION_FHCAL = false;
 }  // namespace G4TRACKING
 
+//-----------------------------------------------------------------------------//
 void TrackingInit()
 {
   TRACKING::TrackNodeName = "TrackMap";
 }
-
+//-----------------------------------------------------------------------------//
 void Tracking_Reco()
 {
+
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   //---------------
   // Fun4All server
@@ -73,6 +75,22 @@ void Tracking_Reco()
   kalman->set_sub_top_node_name("TRACKS");
   kalman->set_trackmap_out_name(TRACKING::TrackNodeName);
 
+  //-------------------------
+  // Barrel
+  //-------------------------
+  if (Enable::BARREL)
+  {
+    kalman->add_phg4hits("G4HIT_BARREL",              //      const std::string& phg4hitsNames,
+                         PHG4TrackFastSim::Cylinder,  //      const DETECTOR_TYPE phg4dettype,
+                         5e-4,                        //      const float radres,
+                         5e-4,                        //      const float phires,
+                         5e-4,                        //      const float lonres,
+                         1,                           //      const float eff,
+                         0);                          //      const float noise
+  }
+  //-------------------------
+  // MVTX
+  //-------------------------
   if (Enable::MVTX)
   {
     //   MAPS
@@ -86,12 +104,13 @@ void Tracking_Reco()
         0                            //      const float noise
     );
   }
-  //
+  //-------------------------
   // TPC
+  //-------------------------
   if (Enable::TPC)
   {
     kalman->add_phg4hits(
-        "G4HIT_TPC",                //      const std::string& phg4hitsNames,
+        "G4HIT_TPC",                 //      const std::string& phg4hitsNames,
         PHG4TrackFastSim::Cylinder,  //      const DETECTOR_TYPE phg4dettype,
         1,                           //      const float radres,
         200e-4,                      //      const float phires,
@@ -100,95 +119,77 @@ void Tracking_Reco()
         0                            //      const float noise
     );
   }
+  //-------------------------
+  // EGEM
+  //-------------------------
   if (Enable::EGEM)
   {
-    // GEM0, 70um azimuthal resolution, 1cm radial strips
-    kalman->add_phg4hits(
-        "G4HIT_EGEM_0",                    //      const std::string& phg4hitsNames,
-        PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-        1. / sqrt(12.),                    //      const float radres,
-        70e-4,                             //      const float phires,
-        100e-4,                            //      const float lonres,
-        1,                                 //      const float eff,
-        0                                  //      const float noise
-    );
-    // GEM1, 70um azimuthal resolution, 1cm radial strips
-    kalman->add_phg4hits(
-        "G4HIT_EGEM_1",                    //      const std::string& phg4hitsNames,
-        PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-        1. / sqrt(12.),                    //      const float radres,
-        70e-4,                             //      const float phires,
-        100e-4,                            //      const float lonres,
-        1,                                 //      const float eff,
-        0                                  //      const float noise
-    );
-    // GEM2, 70um azimuthal resolution, 1cm radial strips
-    kalman->add_phg4hits(
-        "G4HIT_EGEM_2",                    //      const std::string& phg4hitsNames,
-        PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-        1. / sqrt(12.),                    //      const float radres,
-        70e-4,                             //      const float phires,
-        100e-4,                            //      const float lonres,
-        1,                                 //      const float eff,
-        0                                  //      const float noise
-    );
-    // GEM3, 70um azimuthal resolution, 1cm radial strips
-    kalman->add_phg4hits(
-        "G4HIT_EGEM_3",                    //      const std::string& phg4hitsNames,
-        PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-        1. / sqrt(12.),                    //      const float radres,
-        70e-4,                             //      const float phires,
-        100e-4,                            //      const float lonres,
-        1,                                 //      const float eff,
-        0                                  //      const float noise
-    );
+    // GEM, 70um azimuthal resolution, 1cm radial strips
+    for (int i = 0; i < 4; i++)
+    {
+      kalman->add_phg4hits(
+          Form("G4HIT_EGEM_%d", i),          //      const std::string& phg4hitsNames,
+          PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
+          1. / sqrt(12.),                    //      const float radres,
+          70e-4,                             //      const float phires,
+          100e-4,                            //      const float lonres,
+          1,                                 //      const float eff,
+          0                                  //      const float noise
+      );
+    }
   }
-
+  //-------------------------
+  // FGEM
+  //-------------------------
   if (Enable::FGEM)
   {
-    bool do_FST = true;
-    bool do_FGEM = true;
-
-    if (do_FST)
+    // GEM2, 70um azimuthal resolution, 1cm radial strips
+    for (int i = 2; i < 5; i++)
     {
-      // LANL FST:   We could put the hit resolution at 5 micron with the 30 micron pixel pitch.
-      for (int i = 0; i < 6; i++)
-      {
-        kalman->add_phg4hits(Form("G4HIT_FST_%d", i),           //      const std::string& phg4hitsNames,
-                             PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-                             5e-4,                              //      const float radres,
-                             5e-4,                              //      const float phires,
-                             50e-4 / sqrt(12.),                 //      const float lonres,
-                             1,                                 //      const float eff,
-                             0);                                //      const float noise
-      }
-    }
-
-    if (do_FGEM)
-    {
-      // GEM2, 70um azimuthal resolution, 1cm radial strips
-      for (int i = 2; i < 5; i++)
-      {
-        kalman->add_phg4hits(Form("G4HIT_FGEM_%d", i),          //      const std::string& phg4hitsNames,
-                             PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-                             1. / sqrt(12.),                    //      const float radres,
-                             70e-4,                             //      const float phires,
-                             100e-4,                            //      const float lonres,
-                             1,                                 //      const float eff,
-                             0);                                //      const float noise
-      }
+      kalman->add_phg4hits(Form("G4HIT_FGEM_%d", i),          //      const std::string& phg4hitsNames,
+                           PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
+                           1. / sqrt(12.),                    //      const float radres,
+                           70e-4,                             //      const float phires,
+                           100e-4,                            //      const float lonres,
+                           1,                                 //      const float eff,
+                           0);                                //      const float noise
     }
   }
-
+  //-------------------------
+  // FST
+  //-------------------------
+  if (Enable::FST)
+  {
+    for (int i = 0; i < 5; i++)
+    {
+      kalman->add_phg4hits(Form("G4HIT_FST_%d", i),           //      const std::string& phg4hitsNames,
+                           PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
+                           5e-4,                              //      const float radres,
+                           5e-4,                              //      const float phires,
+                           50e-4 / sqrt(12.),                 //      const float lonres,
+                           1,                                 //      const float eff,
+                           0);                                //      const float noise
+    }
+  }
+  //-------------------------
+  // FEMC
+  //-------------------------
   // Saved track states (projections)
   if (Enable::FEMC && G4TRACKING::PROJECTION_FEMC)
   {
     kalman->add_state_name("FEMC");
   }
+
+  //-------------------------
+  // FHCAL
+  //-------------------------
   if (Enable::FHCAL && G4TRACKING::PROJECTION_FHCAL)
   {
     kalman->add_state_name("FHCAL");
   }
+  //-------------------------
+  // CEMC
+  //-------------------------
 
   if (Enable::CEMC && G4TRACKING::PROJECTION_CEMC)
   {
@@ -198,6 +199,8 @@ void Tracking_Reco()
 
   return;
 }
+
+//-----------------------------------------------------------------------------//
 
 void Tracking_Eval(const std::string &outputfile)
 {

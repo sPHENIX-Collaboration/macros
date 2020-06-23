@@ -3,12 +3,14 @@
 #include "GlobalVariables.C"
 
 #include "G4_Aerogel.C"
+#include "G4_Barrel_EIC.C"
 #include "G4_BlackHole.C"
 #include "G4_CEmc_EIC.C"
 #include "G4_DIRC.C"
 #include "G4_EEMC.C"
 #include "G4_FEMC_EIC.C"
 #include "G4_FHCAL.C"
+#include "G4_FST_EIC.C"
 #include "G4_GEM_EIC.C"
 #include "G4_HcalIn_ref.C"
 #include "G4_HcalOut_ref.C"
@@ -40,10 +42,21 @@
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 
-void RunLoadTest() {}
-
 void G4Init()
 {
+// First some check for subsystems which do not go together
+
+  if (Enable::TPC && Enable::FST)
+  {
+    cout << "TPC and FST cannot be enabled together" << endl;
+    gSystem->Exit(1);
+  }
+  else if ((Enable::TPC || Enable::MVTX) && Enable::BARREL)
+  {
+    cout << "TPC/MVTX and BARREL cannot be enabled together" << endl;
+    gSystem->Exit(1);
+  }
+
   // load detector/material macros and execute Init() function
   if (Enable::PIPE)
   {
@@ -59,10 +72,17 @@ void G4Init()
   {
     EGEM_Init();
   }
-
   if (Enable::FGEM)
   {
     FGEM_Init();
+  }
+  if (Enable::FST)
+  {
+    FST_Init();
+  }
+  if (Enable::BARREL)
+  {
+    BarrelInit();
   }
   if (Enable::MVTX)
   {
@@ -198,7 +218,14 @@ int G4Setup()
   {
     FGEMSetup(g4Reco);
   }
-
+  if (Enable::FST)
+  {
+    FSTSetup(g4Reco);
+  }
+  if (Enable::BARREL)
+  {
+    Barrel(g4Reco, radius);
+  }
   if (Enable::MVTX)
   {
     radius = Mvtx(g4Reco, radius);
