@@ -1,9 +1,11 @@
 #pragma once
 
 #include "GlobalVariables.C"
+
 #include <g4detectors/PHG4SectorSubsystem.h>
+
 #include <g4main/PHG4Reco.h>
-#include <TMath.h>
+
 #include <string>
 
 R__LOAD_LIBRARY(libg4detectors.so)
@@ -24,14 +26,6 @@ void FST_Init()
 //-----------------------------------------------------------------------------------//
 void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
 {
-  //const double tilt = .1;
-  /*
-  string name;
-  double etamax;
-  double etamin;
-  double zpos;
-  */
-
   //Design from Xuan Li @LANL
   make_LANL_FST_station("FST_0", g4Reco, 35,  4,   30);   //cm
   make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  35);
@@ -53,11 +47,11 @@ int make_LANL_FST_station(string name, PHG4Reco *g4Reco,
   double polar_angle = 0;
   if (zpos < 0) {
     zpos = -zpos;
-    polar_angle = TMath::Pi();
+    polar_angle = M_PI;
   }
 
-  double min_polar_angle = TMath::ATan2(Rmin, zpos);
-  double max_polar_angle = TMath::ATan2(Rmax, zpos);
+  double min_polar_angle = atan2(Rmin, zpos);
+  double max_polar_angle = atan2(Rmax, zpos);
 
   if (max_polar_angle < min_polar_angle) {
     double t = max_polar_angle;
@@ -66,19 +60,16 @@ int make_LANL_FST_station(string name, PHG4Reco *g4Reco,
   }
 
   PHG4SectorSubsystem *fst;
-  fst = new PHG4SectorSubsystem(name.c_str());
+  fst = new PHG4SectorSubsystem(name);
 
   fst->SuperDetector(name);
 
   fst->get_geometry().set_normal_polar_angle(polar_angle);
-  fst->get_geometry().set_normal_start(
-      zpos * PHG4Sector::Sector_Geometry::Unit_cm());
+  fst->get_geometry().set_normal_start(zpos * PHG4Sector::Sector_Geometry::Unit_cm());
   fst->get_geometry().set_min_polar_angle(min_polar_angle);
   fst->get_geometry().set_max_polar_angle(max_polar_angle);
-  fst->get_geometry().set_max_polar_edge(
-      PHG4Sector::Sector_Geometry::ConeEdge());
-  fst->get_geometry().set_min_polar_edge(
-      PHG4Sector::Sector_Geometry::ConeEdge());
+  fst->get_geometry().set_max_polar_edge(PHG4Sector::Sector_Geometry::ConeEdge());
+  fst->get_geometry().set_min_polar_edge(PHG4Sector::Sector_Geometry::ConeEdge());
   fst->get_geometry().set_N_Sector(1);
   fst->get_geometry().set_material("G4_AIR");
   fst->OverlapCheck(overlapcheck);
@@ -88,16 +79,6 @@ int make_LANL_FST_station(string name, PHG4Reco *g4Reco,
   const double um = 1e-3 * mm;
   // build up layers
 
-  /*
-  fst->get_geometry().AddLayer("SliconSensor", "G4_Si", 18 * um, true, 100);
-  fst->get_geometry().AddLayer("Metalconnection", "G4_Al", 15 * um, false, 100);
-  fst->get_geometry().AddLayer("SliconSupport", "G4_Al", 285 * um, false, 100);
-  fst->get_geometry().AddLayer("HDI", "G4_KAPTON", 20 * um, false, 100);
-  fst->get_geometry().AddLayer("Cooling", "G4_WATER", 100 * um, false, 100);
-  fst->get_geometry().AddLayer("Support", "G4_GRAPHITE", 50 * um, false, 100);
-  fst->get_geometry().AddLayer("Support_Gap", "G4_AIR", 1 * cm, false, 100);
-  fst->get_geometry().AddLayer("Support2", "G4_GRAPHITE", 50 * um, false, 100);
-  */
   fst->get_geometry().AddLayer("SiliconSensor",   "G4_Si",       285 * um, true,  100);
   fst->get_geometry().AddLayer("Metalconnection", "G4_Al",       15 * um,  false, 100);
   fst->get_geometry().AddLayer("HDI",             "G4_KAPTON",   20 * um,  false, 100);
