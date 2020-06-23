@@ -206,7 +206,7 @@ int G4Setup()
   if (Enable::FGEM)
   {
     FGEMSetup(g4Reco);
-   }
+  }
   if (Enable::FST)
   {
     FSTSetup(g4Reco);
