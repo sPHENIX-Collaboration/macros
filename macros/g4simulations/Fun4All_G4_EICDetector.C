@@ -351,28 +351,36 @@ int Fun4All_G4_EICDetector(
 
   if (Enable::FWDJETS) Jet_FwdReco();
 
-  if (Enable::DSTREADER) G4DSTreader_EICDetector(outputFile);
+  string outputroot = outputFile;
+  string remove_this = ".root";
+  size_t pos = outputroot.find(remove_this);
+  if (pos != string::npos)
+  {
+    outputroot.erase(pos,remove_this.length());
+  }
+
+  if (Enable::DSTREADER) G4DSTreader_EICDetector(outputroot + "_DSTReader.root");
 
   //----------------------
   // Simulation evaluation
   //----------------------
-  if (Enable::TRACKING_EVAL) Tracking_Eval(string(outputFile) + "_g4tracking_eval.root");
+  if (Enable::TRACKING_EVAL) Tracking_Eval(outputroot + "_g4tracking_eval.root");
 
-  if (Enable::CEMC_EVAL) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
+  if (Enable::CEMC_EVAL) CEMC_Eval(outputroot + "_g4cemc_eval.root");
 
-  if (Enable::HCALIN_EVAL) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
+  if (Enable::HCALIN_EVAL) HCALInner_Eval(outputroot + "_g4hcalin_eval.root");
 
-  if (Enable::HCALOUT_EVAL) HCALOuter_Eval(string(outputFile) + "_g4hcalout_eval.root");
+  if (Enable::HCALOUT_EVAL) HCALOuter_Eval(outputroot + "_g4hcalout_eval.root");
 
-  if (Enable::FEMC_EVAL) FEMC_Eval(string(outputFile) + "_g4femc_eval.root");
+  if (Enable::FEMC_EVAL) FEMC_Eval(outputroot + "_g4femc_eval.root");
 
-  if (Enable::FHCAL_EVAL) FHCAL_Eval(string(outputFile) + "_g4fhcal_eval.root");
+  if (Enable::FHCAL_EVAL) FHCAL_Eval(outputroot + "_g4fhcal_eval.root");
 
-  if (Enable::EEMC_EVAL) EEMC_Eval(string(outputFile) + "_g4eemc_eval.root");
+  if (Enable::EEMC_EVAL) EEMC_Eval(outputroot + "_g4eemc_eval.root");
 
-  if (Enable::JETS_EVAL) Jet_Eval(string(outputFile) + "_g4jet_eval.root");
+  if (Enable::JETS_EVAL) Jet_Eval(outputroot + "_g4jet_eval.root");
 
-  if (Enable::FWDJETS_EVAL) Jet_FwdEval(string(outputFile) + "_g4fwdjet_eval.root");
+  if (Enable::FWDJETS_EVAL) Jet_FwdEval(outputroot + "_g4fwdjet_eval.root");
 
   //--------------
   // Set up Input Managers
