@@ -42,6 +42,11 @@
 #include <trackreco/PHTruthVertexing.h>
 #include <trackreco/PHTruthTrackSeeding.h>
 #include <trackreco/PHGenFitTrackProjection.h>
+#include <trackreco/PHActsSourceLinks.h>
+#include <trackreco/PHActsTracks.h>
+#include <trackreco/PHActsTrkProp.h>
+#include <trackreco/PHActsTrkFitter.h>
+#include <trackreco/ActsEvaluator.h>
 
 #include <trackbase/TrkrHitTruthAssoc.h>
 
@@ -523,6 +528,11 @@ void Tracking_Reco(int verbosity = 0)
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
+
+  PHActsSourceLinks *sl = new PHActsSourceLinks();
+  sl->Verbosity(0);
+  se->registerSubsystem(sl);
+
   //-------------
   // Tracking
   //------------
@@ -603,6 +613,27 @@ void Tracking_Reco(int verbosity = 0)
   // Fitting of tracks using Kalman Filter
   //------------------------------------------------
 
+  PHActsTracks *actsTracks = new PHActsTracks();
+  actsTracks->Verbosity(0);
+  se->registerSubsystem(actsTracks);
+
+  /// Use either PHActsTrkFitter to run the ACTS
+  /// KF track fitter, or PHActsTrkProp to run the ACTS Combinatorial 
+  /// Kalman Filter which runs track finding and track fitting
+  /// Always run PHActsTracks first to take the SvtxTrack and convert it
+  /// to a form that Acts can process
+
+  /// If you run PHActsTrkProp, disable PHGenFitTrkProp
+  PHActsTrkProp *actsProp = new PHActsTrkProp();
+  actsProp->Verbosity(0);
+  //se->registerSubsystem(actsProp);
+
+  PHActsTrkFitter *actsFit = new PHActsTrkFitter();
+  actsFit->Verbosity(0);
+  actsFit->setTimeAnalysis(true);
+  se->registerSubsystem(actsFit);
+
+
 
   PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
   kalman->Verbosity(0);
@@ -613,14 +644,14 @@ void Tracking_Reco(int verbosity = 0)
   kalman->set_vertexing_method(vmethod);
   kalman->set_use_truth_vertex(false);
 
-  se->registerSubsystem(kalman);
+  //se->registerSubsystem(kalman);
 
   //------------------
   // Track Projections
   //------------------
   PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
   projection->Verbosity(verbosity);
-  se->registerSubsystem(projection);
+  //se->registerSubsystem(projection);
 
   return;
 }
@@ -658,6 +689,11 @@ void Tracking_Reco(int verbosity = 0)
   eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(0);
   se->registerSubsystem(eval);
+
+
+  ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
+  actsEval->Verbosity(0);
+  se->registerSubsystem(actsEval);
 
   if (use_primary_vertex)
   {
