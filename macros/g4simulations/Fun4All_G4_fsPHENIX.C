@@ -91,7 +91,7 @@ INPUTSIMPLE::set_vtx_width(0.,0.,5.);
   //INPUTGUN::set_vtx(0,0,0);
 
   //  Input::HEPMC = true;
-  Input::HEPMC_VERBOSITY = 0;
+  Input::VERBOSITY = 0;
   INPUTHEPMC::filename = inputFile;
 
   //-----------------

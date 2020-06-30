@@ -36,6 +36,7 @@ namespace Input
   bool PYTHIA6 = false;
   bool PYTHIA8 = false;
   bool SARTRE = false;
+  int VERBOSITY = 0;
 }  // namespace Input
 
 namespace INPUTHEPMC
@@ -159,7 +160,7 @@ void InputManagers()
   if (Input::HEPMC)
   {
     Fun4AllInputManager *in = new Fun4AllHepMCInputManager("HEPMCin");
-    in->Verbosity(Input::HEPMC_VERBOSITY);
+    in->Verbosity(Input::VERBOSITY);
     se->registerInputManager(in);
     se->fileopen(in->Name(), INPUTHEPMC::filename);
   }
@@ -167,13 +168,13 @@ void InputManagers()
   {
     Fun4AllInputManager *hitsin = new Fun4AllDstInputManager("DSTin");
     hitsin->fileopen(INPUTREADHITS::filename);
-    hitsin->Verbosity(1);
+    hitsin->Verbosity(Input::VERBOSITY);
     se->registerInputManager(hitsin);
   }
   else
   {
     Fun4AllInputManager *in = new Fun4AllDummyInputManager("JADE");
-    in->Verbosity(1);
+    in->Verbosity(Input::VERBOSITY);
     se->registerInputManager(in);
   }
 }

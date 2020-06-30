@@ -100,7 +100,7 @@ int Fun4All_G4_EICDetector(
 
   // HepMC2 files
   //  Input::HEPMC = true;
-  Input::HEPMC_VERBOSITY = 1;
+  Input::VERBOSITY = 1;
   INPUTHEPMC::filename = inputFile;
 
   //-----------------
