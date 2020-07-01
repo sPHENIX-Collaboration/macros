@@ -25,17 +25,13 @@
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 
-void G4Init(const bool do_tracking = true,
-	    const bool do_pipe = true,
-	    const bool do_plugdoor = false
-	    )
+void G4Init(const bool do_tracking = true)
   {
 
   // load detector/material macros and execute Init() function
 
-  if (do_pipe)
+    if (Enable::PIPE)
     {
-      gROOT->LoadMacro("G4_Pipe.C");
       PipeInit();
     }  
   if (do_tracking)
@@ -68,9 +64,8 @@ void G4Init(const bool do_tracking = true,
       HCalOuterInit();
     }
 
-  if (do_pipe)
+  if (Enable::PLUGDOOR)
     {
-      gROOT->LoadMacro("G4_PlugDoor.C");
       PlugDoorInit();
     }
   if (Enable::FEMC)
@@ -89,9 +84,6 @@ int G4Setup(const int absorberactive = 0,
 	    const EDecayType decayType = TPythia6Decayer::kAll,
 #endif
 	    const bool do_tracking = true,
-      const bool do_pipe = true,
-      const bool do_plugdoor = false,
-//	    const bool do_plugdoor = true,
 	    const float magfield_rescale = 1.0) {
   
   //---------------
@@ -140,7 +132,7 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // PIPE
-  if (do_pipe) radius = Pipe(g4Reco, radius, absorberactive);
+  if (Enable::PIPE) radius = Pipe(g4Reco, radius);
   
   //----------------------------------------
   // TRACKING
@@ -173,7 +165,7 @@ int G4Setup(const int absorberactive = 0,
 
   //----------------------------------------
   // sPHENIX forward flux return door
-  if (do_plugdoor) PlugDoor(g4Reco, absorberactive);
+  if (Enable::PLUGDOOR) PlugDoor(g4Reco);
 
   // forward EMC
   if(Enable::FEMC) FEMCSetup(g4Reco, absorberactive);

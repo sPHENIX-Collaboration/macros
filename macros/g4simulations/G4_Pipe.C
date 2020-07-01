@@ -34,11 +34,9 @@ void PipeInit()
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -(G4PIPE::be_pipe_length / 2. + G4PIPE::al_pipe_length));
 }
 
-double Pipe(PHG4Reco* g4Reco,
-            double radius,
-            const int absorberactive = 0)
+double Pipe(PHG4Reco* g4Reco, double radius)
 {
-  bool AbsorberActive = Enable::ABSORBER || Enable::PIPE_ABSORBER || absorberactive;
+  bool AbsorberActive = Enable::ABSORBER || Enable::PIPE_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::PIPE_OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY, Enable::PIPE_VERBOSITY);
 

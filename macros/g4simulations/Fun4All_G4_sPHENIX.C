@@ -148,7 +148,8 @@ int Fun4All_G4_sPHENIX(
 
 //  Enable::BBC = true;
 
-  bool do_pipe = true;
+  Enable::PIPE = true;
+  Enable::PIPE_ABSORBER = true;
 
   bool do_tracking = false;
   bool do_tracking_cell = do_tracking && false;
@@ -191,7 +192,8 @@ int Fun4All_G4_sPHENIX(
   Enable::FEMC_EVAL = Enable::FEMC_CLUSTER && true;
 
   //! forward flux return plug door. Out of acceptance and off by default.
-  bool do_plugdoor = false;
+  Enable::PLUGDOOR = true;
+  Enable::PLUGDOOR_ABSORBER = true;
 
   bool do_global = false;
   bool do_global_fastsim = false;
@@ -211,7 +213,7 @@ int Fun4All_G4_sPHENIX(
   // particle flow jet reconstruction - needs topoClusters!
   bool do_particle_flow = false && do_topoCluster;
 
-  G4Init(do_tracking, do_pipe, do_plugdoor);
+  G4Init(do_tracking);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -231,7 +233,7 @@ int Fun4All_G4_sPHENIX(
     //---------------------
 
     G4Setup(absorberactive, magfield, EDecayType::kAll,
-            do_tracking, do_pipe,do_plugdoor, magfield_rescale);
+            do_tracking, magfield_rescale);
   }
 
   //---------
