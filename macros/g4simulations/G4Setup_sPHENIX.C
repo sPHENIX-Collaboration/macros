@@ -27,11 +27,8 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 void G4Init(const bool do_tracking = true,
       const bool do_pstof = true,
-	    const bool do_magnet = true,
-	    const bool do_hcalout = true,
 	    const bool do_pipe = true,
-	    const bool do_plugdoor = false,
-	    const bool do_FEMC = false
+	    const bool do_plugdoor = false
 	    )
   {
 
@@ -64,14 +61,12 @@ void G4Init(const bool do_tracking = true,
       HCalInnerInit();
     }
 
-  if (do_magnet)
+  if (Enable::MAGNET)
     {
-      gROOT->LoadMacro("G4_Magnet.C");
       MagnetInit();
     }
-  if (do_hcalout)
+  if (Enable::HCALOUT)
     {
-      gROOT->LoadMacro("G4_HcalOut_ref.C");
       HCalOuterInit();
     }
 
@@ -80,9 +75,8 @@ void G4Init(const bool do_tracking = true,
       gROOT->LoadMacro("G4_PlugDoor.C");
       PlugDoorInit();
     }
-  if (do_FEMC)
+  if (Enable::FEMC)
     {
-      gROOT->LoadMacro("G4_FEMC.C");
       FEMCInit();
     }
 
@@ -98,12 +92,9 @@ int G4Setup(const int absorberactive = 0,
 #endif
 	    const bool do_tracking = true,
 	    const bool do_pstof = true,
-	    const bool do_magnet = true,
-	    const bool do_hcalout = true,
       const bool do_pipe = true,
       const bool do_plugdoor = false,
 //	    const bool do_plugdoor = true,
-	    const bool do_FEMC = false, 
 	    const float magfield_rescale = 1.0) {
   
   //---------------
@@ -177,19 +168,19 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // MAGNET
   
-  if (do_magnet) radius = Magnet(g4Reco, radius, 0, absorberactive);
+  if (Enable::MAGNET) radius = Magnet(g4Reco, radius, 0, absorberactive);
 
   //----------------------------------------
   // HCALOUT
   
-  if (do_hcalout) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
+  if (Enable::HCALOUT) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
 
   //----------------------------------------
   // sPHENIX forward flux return door
   if (do_plugdoor) PlugDoor(g4Reco, absorberactive);
 
   // forward EMC
-  if(do_FEMC) FEMCSetup(g4Reco, absorberactive);
+  if(Enable::FEMC) FEMCSetup(g4Reco, absorberactive);
 
   //----------------------------------------
   // BLACKHOLE

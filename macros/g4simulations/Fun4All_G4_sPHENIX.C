@@ -94,7 +94,7 @@ int Fun4All_G4_sPHENIX(
   INPUTSIMPLE::AddParticle("pi-", 5);
   //  INPUTSIMPLE::AddParticle("e-",0);
   //  INPUTSIMPLE::AddParticle("pi-",10);
-  INPUTSIMPLE::set_eta_range(-1, 1);
+  INPUTSIMPLE::set_eta_range(1, 2);
   INPUTSIMPLE::set_phi_range(-M_PI, M_PI);
   INPUTSIMPLE::set_pt_range(0.1, 20.);
   INPUTSIMPLE::set_vtx_mean(0., 0., 0.);
@@ -146,7 +146,7 @@ int Fun4All_G4_sPHENIX(
   // What to run
   //======================
 
-  Enable::BBC = true;
+//  Enable::BBC = true;
 
   bool do_pipe = true;
 
@@ -165,27 +165,30 @@ int Fun4All_G4_sPHENIX(
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
 
-  Enable::HCALIN = true;
+  //Enable::HCALIN = true;
   //  Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
   Enable::HCALIN_CLUSTER = Enable::HCALIN_TOWER && true;
   Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && true;
 
-  bool do_magnet = false;
+  Enable::MAGNET = true;
+  Enable::MAGNET_ABSORBER = true;
 
-  bool do_hcalout = false;
-  bool do_hcalout_cell = do_hcalout && false;
-  bool do_hcalout_twr = do_hcalout_cell && false;
-  bool do_hcalout_cluster = do_hcalout_twr && true;
-  bool do_hcalout_eval = do_hcalout_cluster && true;
+//  Enable::HCALOUT = true;
+  Enable::HCALOUT_ABSORBER = true;
+  Enable::HCALOUT_CELL = Enable::HCALOUT && true;
+  Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
+  Enable::HCALOUT_CLUSTER = Enable::HCALOUT_TOWER && true;
+  Enable::HCALOUT_EVAL = Enable::HCALOUT_CLUSTER && true;
 
   // forward EMC
-  bool do_femc = false;
-  bool do_femc_cell = do_femc && true;
-  bool do_femc_twr = do_femc_cell && true;
-  bool do_femc_cluster = do_femc_twr && true;
-  bool do_femc_eval = do_femc_cluster && true;
+  Enable::FEMC = true;
+  Enable::FEMC_ABSORBER = true;
+  Enable::FEMC_CELL = Enable::FEMC && true;
+  Enable::FEMC_TOWER = Enable::FEMC_CELL && true;
+  Enable::FEMC_CLUSTER = Enable::FEMC_TOWER && true;
+  Enable::FEMC_EVAL = Enable::FEMC_CLUSTER && true;
 
   //! forward flux return plug door. Out of acceptance and off by default.
   bool do_plugdoor = false;
@@ -193,7 +196,7 @@ int Fun4All_G4_sPHENIX(
   bool do_global = false;
   bool do_global_fastsim = false;
 
-  bool do_calotrigger = true && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && do_hcalout_twr;
+  bool do_calotrigger = true && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   bool do_jet_reco = false;
   bool do_jet_eval = do_jet_reco && true;
@@ -201,14 +204,14 @@ int Fun4All_G4_sPHENIX(
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
   // single particle / p+p-only simulations, or for p+Au / Au+Au
   // simulations which don't particularly care about jets)
-  bool do_HIjetreco = false && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && do_hcalout_twr;
+  bool do_HIjetreco = false && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   // 3-D topoCluster reconstruction, potentially in all calorimeter layers
-  bool do_topoCluster = false && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && do_hcalout_twr;
+  bool do_topoCluster = false && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
   // particle flow jet reconstruction - needs topoClusters!
   bool do_particle_flow = false && do_topoCluster;
 
-  G4Init(do_tracking, do_pstof, do_magnet, do_hcalout, do_pipe, do_plugdoor, do_femc);
+  G4Init(do_tracking, do_pstof, do_pipe, do_plugdoor);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -228,7 +231,7 @@ int Fun4All_G4_sPHENIX(
     //---------------------
 
     G4Setup(absorberactive, magfield, EDecayType::kAll,
-            do_tracking, do_pstof, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
+            do_tracking, do_pstof, do_pipe,do_plugdoor, magfield_rescale);
   }
 
   //---------
@@ -250,9 +253,9 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::HCALIN_CELL) HCALInner_Cells();
 
-  if (do_hcalout_cell) HCALOuter_Cells();
+  if (Enable::HCALOUT_CELL) HCALOuter_Cells();
 
-  if (do_femc_cell) FEMC_Cells();
+  if (Enable::FEMC_CELL) FEMC_Cells();
 
   //-----------------------------
   // CEMC towering and clustering
@@ -268,8 +271,8 @@ int Fun4All_G4_sPHENIX(
   if (Enable::HCALIN_TOWER) HCALInner_Towers();
   if (Enable::HCALIN_CLUSTER) HCALInner_Clusters();
 
-  if (do_hcalout_twr) HCALOuter_Towers();
-  if (do_hcalout_cluster) HCALOuter_Clusters();
+  if (Enable::HCALOUT_TOWER) HCALOuter_Towers();
+  if (Enable::HCALOUT_CLUSTER) HCALOuter_Clusters();
 
   // if enabled, do topoClustering early, upstream of any possible jet reconstruction
   if (do_topoCluster)
@@ -277,8 +280,8 @@ int Fun4All_G4_sPHENIX(
     TopoClusterReco();
   }
 
-  if (do_femc_twr) FEMC_Towers();
-  if (do_femc_cluster) FEMC_Clusters();
+  if (Enable::FEMC_TOWER) FEMC_Towers();
+  if (Enable::FEMC_CLUSTER) FEMC_Clusters();
 
   if (Enable::DSTOUT_COMPRESS) ShowerCompress();
 
@@ -334,18 +337,25 @@ int Fun4All_G4_sPHENIX(
   //----------------------
   // Simulation evaluation
   //----------------------
+  string outputroot = outputFile;
+  string remove_this = ".root";
+  size_t pos = outputroot.find(remove_this);
+  if (pos != string::npos)
+  {
+    outputroot.erase(pos, remove_this.length());
+  }
 
-  if (do_tracking_eval) Tracking_Eval(string(outputFile) + "_g4svtx_eval.root");
+  if (do_tracking_eval) Tracking_Eval(outputroot + "_g4svtx_eval.root");
 
-  if (Enable::CEMC_EVAL) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
+  if (Enable::CEMC_EVAL) CEMC_Eval(outputroot + "_g4cemc_eval.root");
 
-  if (Enable::HCALIN_EVAL) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
+  if (Enable::HCALIN_EVAL) HCALInner_Eval(outputroot + "_g4hcalin_eval.root");
 
-  if (do_hcalout_eval) HCALOuter_Eval(string(outputFile) + "_g4hcalout_eval.root");
+  if (Enable::HCALOUT_EVAL) HCALOuter_Eval(outputroot + "_g4hcalout_eval.root");
 
-  if (do_femc_eval) FEMC_Eval(string(outputFile) + "_g4femc_eval.root");
+  if (Enable::FEMC_EVAL) FEMC_Eval(outputroot + "_g4femc_eval.root");
 
-  if (do_jet_eval) Jet_Eval(string(outputFile) + "_g4jet_eval.root");
+  if (do_jet_eval) Jet_Eval(outputroot + "_g4jet_eval.root");
 
   //--------------
   // Set up Input Managers
@@ -396,11 +406,11 @@ int Fun4All_G4_sPHENIX(
                 /*bool*/ do_pstof,
                 /*bool*/ Enable::CEMC,
                 /*bool*/ Enable::HCALIN,
-                /*bool*/ do_magnet,
-                /*bool*/ do_hcalout,
+                /*bool*/ Enable::MAGNET,
+                /*bool*/ Enable::HCALOUT,
                 /*bool*/ Enable::CEMC_TOWER,
                 /*bool*/ Enable::HCALIN_TOWER,
-                /*bool*/ do_hcalout_twr);
+                /*bool*/ Enable::HCALOUT_TOWER);
   }
 
   if(Enable::DSTOUT) {

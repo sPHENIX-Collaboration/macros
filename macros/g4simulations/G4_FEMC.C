@@ -30,6 +30,8 @@ namespace Enable
   bool FEMC_CELL = false;
   bool FEMC_TOWER = false;
   bool FEMC_CLUSTER = false;
+  bool FEMC_EVAL = false;
+  bool FEMC_OVERLAPCHECK = false;
   int FEMC_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -61,6 +63,8 @@ void FEMCInit()
 void FEMCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::FEMC_ABSORBER || (absorberactive>0);
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::FEMC_OVERLAPCHECK;
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   /** Use dedicated FEMC module */
@@ -74,7 +78,7 @@ void FEMCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 
   //  cout << mapping_femc.str() << endl;
   femc->SetTowerMappingFile(mapping_femc.str());
-  femc->OverlapCheck(overlapcheck);
+  femc->OverlapCheck(OverlapCheck);
   femc->SetActive();
   femc->SuperDetector("FEMC");
   if (AbsorberActive) femc->SetAbsorberActive(AbsorberActive);
