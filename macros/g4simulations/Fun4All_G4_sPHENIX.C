@@ -94,7 +94,7 @@ int Fun4All_G4_sPHENIX(
   INPUTSIMPLE::AddParticle("pi-", 5);
   //  INPUTSIMPLE::AddParticle("e-",0);
   //  INPUTSIMPLE::AddParticle("pi-",10);
-  INPUTSIMPLE::set_eta_range(1, 2);
+  INPUTSIMPLE::set_eta_range(-1, 1);
   INPUTSIMPLE::set_phi_range(-M_PI, M_PI);
   INPUTSIMPLE::set_pt_range(0.1, 20.);
   INPUTSIMPLE::set_vtx_mean(0., 0., 0.);
@@ -156,12 +156,12 @@ int Fun4All_G4_sPHENIX(
   bool do_tracking_track = do_tracking_cluster && true;
   bool do_tracking_eval = do_tracking_track && true;
 
-  bool do_pstof = false;
+  Enable::PSTOF = true;
 
-//  Enable::CEMC = true;
+  Enable::CEMC = true;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
-  Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
+  Enable::CEMC_TOWER = Enable::CEMC_CELL && false;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
 
@@ -211,7 +211,7 @@ int Fun4All_G4_sPHENIX(
   // particle flow jet reconstruction - needs topoClusters!
   bool do_particle_flow = false && do_topoCluster;
 
-  G4Init(do_tracking, do_pstof, do_pipe, do_plugdoor);
+  G4Init(do_tracking, do_pipe, do_plugdoor);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -231,7 +231,7 @@ int Fun4All_G4_sPHENIX(
     //---------------------
 
     G4Setup(absorberactive, magfield, EDecayType::kAll,
-            do_tracking, do_pstof, do_pipe,do_plugdoor, magfield_rescale);
+            do_tracking, do_pipe,do_plugdoor, magfield_rescale);
   }
 
   //---------
@@ -403,7 +403,7 @@ int Fun4All_G4_sPHENIX(
     G4DSTreader(outputFile,  //
                 /*int*/ absorberactive,
                 /*bool*/ do_tracking,
-                /*bool*/ do_pstof,
+                /*bool*/ Enable::PSTOF,
                 /*bool*/ Enable::CEMC,
                 /*bool*/ Enable::HCALIN,
                 /*bool*/ Enable::MAGNET,

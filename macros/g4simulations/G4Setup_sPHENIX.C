@@ -26,7 +26,6 @@ R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 
 void G4Init(const bool do_tracking = true,
-      const bool do_pstof = true,
 	    const bool do_pipe = true,
 	    const bool do_plugdoor = false
 	    )
@@ -45,9 +44,8 @@ void G4Init(const bool do_tracking = true,
       TrackingInit();
     }
 
-  if (do_pstof) 
+  if (Enable::PSTOF)
     {
-      gROOT->LoadMacro("G4_PSTOF.C");
       PSTOFInit();
     }
 
@@ -91,7 +89,6 @@ int G4Setup(const int absorberactive = 0,
 	    const EDecayType decayType = TPythia6Decayer::kAll,
 #endif
 	    const bool do_tracking = true,
-	    const bool do_pstof = true,
       const bool do_pipe = true,
       const bool do_plugdoor = false,
 //	    const bool do_plugdoor = true,
@@ -152,13 +149,12 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // PSTOF
   
-  if (do_pstof) radius = PSTOF(g4Reco, radius, absorberactive);
+  if (Enable::PSTOF) radius = PSTOF(g4Reco, radius);
 
   //----------------------------------------
   // CEMC
-//
-  if (Enable::CEMC) radius = CEmc(g4Reco, radius, 8, absorberactive);
-//  if (do_cemc) radius = CEmc_Vis(g4Reco, radius, 8, absorberactive);// for visualization substructure of SPACAL, slow to render
+
+  if (Enable::CEMC) radius = CEmc(g4Reco, radius, 8);
   
   //----------------------------------------
   // HCALIN
