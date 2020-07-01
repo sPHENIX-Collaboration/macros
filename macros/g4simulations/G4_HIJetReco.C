@@ -29,8 +29,6 @@ namespace G4HIJETS
   bool do_CS = false;
 }  // namespace G4HIJETS
 
-void HIJetRecoInit() {}
-
 void HIJetReco()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
