@@ -1,5 +1,7 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+
+#include "GlobalVariables.C"
+
 #include "G4_Pipe.C"
 #include "G4_Tracking.C"
 #include "G4_PSTOF.C"
@@ -19,21 +21,12 @@
 #include <g4main/PHG4TruthSubsystem.h>
 #include <g4main/PHG4Reco.h>
 #include <phfield/PHFieldConfig.h>
-class SubsysReco;
+
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
-#else
-bool overlapcheck = false; // set to true if you want to check for overlaps
-double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
-#endif
-
-// This function is only used to test if we can load this as root6 macro
-// without running into unresolved libraries and include files
-void RunLoadTest() {}
 
 void G4Init(const bool do_tracking = true,
       const bool do_pstof = true,
-	    const bool do_hcalin = true,
 	    const bool do_magnet = true,
 	    const bool do_hcalout = true,
 	    const bool do_pipe = true,
@@ -66,9 +59,8 @@ void G4Init(const bool do_tracking = true,
       CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
     }
 
-  if (do_hcalin) 
+  if (Enable::HCALIN) 
     {
-      gROOT->LoadMacro("G4_HcalIn_ref.C");
       HCalInnerInit();
     }
 
@@ -106,7 +98,6 @@ int G4Setup(const int absorberactive = 0,
 #endif
 	    const bool do_tracking = true,
 	    const bool do_pstof = true,
-	    const bool do_hcalin = true,
 	    const bool do_magnet = true,
 	    const bool do_hcalout = true,
       const bool do_pipe = true,
@@ -181,7 +172,7 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // HCALIN
   
-  if (do_hcalin) radius = HCalInner(g4Reco, radius, 4, absorberactive);
+  if (Enable::HCALIN) radius = HCalInner(g4Reco, radius, 4, absorberactive);
 
   //----------------------------------------
   // MAGNET

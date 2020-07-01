@@ -1,9 +1,10 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#include "GlobalVariables.C"
+
 #include <fun4all/Fun4AllServer.h>
 #include <g4eval/PHG4DSTReader.h>
 R__LOAD_LIBRARY(libg4eval.so)
-#endif
+
 
 //////////////////////////////////////////////////////////////////
 /*!
@@ -15,7 +16,18 @@ R__LOAD_LIBRARY(libg4eval.so)
  */
 //////////////////////////////////////////////////////////////////
 
-#include <string>
+namespace Enable
+{
+  bool DSTREADER = false;
+  int DSTREADER_VERBOSITY = 0;
+}
+
+namespace G4DSTREADER
+{
+  bool save_g4_raw = true;
+  double tower_zero_supp = 1.e-6;
+}
+
 
 void G4DSTreaderInit() {}
 

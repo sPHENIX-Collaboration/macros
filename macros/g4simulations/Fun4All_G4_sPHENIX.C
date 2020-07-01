@@ -123,10 +123,21 @@ int Fun4All_G4_sPHENIX(
   //-----------------
   InputInit();
 
+  //======================
+  // Write the DST
+  //======================
+
+  Enable::DSTOUT = true;
+  Enable::DSTOUT_COMPRESS = false;
+  //Option to convert DST to human command readable TTree for quick poke around the outputs
+  //  Enable::DSTREADER = true;
+
+  // turn the display on (default off)
+  Enable::DISPLAY = false;
+
   // Event pile up simulation with collision rate in Hz MB collisions.
   // Note please follow up the macro to verify the settings for beam parameters
   const double pileup_collision_rate = 0;  // 100e3 for 100kHz nominal AuAu collision rate.
-  const bool do_write_output = true;
   // To write cluster files set do_write_output = true and set 
   // do_tracking = true, do_tracking_cell = true, do_tracking_cluster = true and 
   // leave the tracking for later do_tracking_track =  false,  do_tracking_eval = false
@@ -135,7 +146,7 @@ int Fun4All_G4_sPHENIX(
   // What to run
   //======================
 
-  bool do_bbc = false;
+  Enable::BBC = true;
 
   bool do_pipe = true;
 
@@ -147,24 +158,19 @@ int Fun4All_G4_sPHENIX(
 
   bool do_pstof = false;
 
-  Enable::CEMC = true;
+//  Enable::CEMC = true;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
-/*
-  bool do_cemc = true;
-  bool do_cemc_cell = do_cemc && true;
-  bool do_cemc_twr = do_cemc_cell && true;
-  bool do_cemc_cluster = do_cemc_twr && true;
-  bool do_cemc_eval = do_cemc_cluster && true;
-*/
-  bool do_hcalin = false;
-  bool do_hcalin_cell = do_hcalin && false;
-  bool do_hcalin_twr = do_hcalin_cell && true;
-  bool do_hcalin_cluster = do_hcalin_twr && true;
-  bool do_hcalin_eval = do_hcalin_cluster && true;
+
+  Enable::HCALIN = true;
+  //  Enable::HCALIN_ABSORBER = true;
+  Enable::HCALIN_CELL = Enable::HCALIN && true;
+  Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
+  Enable::HCALIN_CLUSTER = Enable::HCALIN_TOWER && true;
+  Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && true;
 
   bool do_magnet = false;
 
@@ -187,7 +193,7 @@ int Fun4All_G4_sPHENIX(
   bool do_global = false;
   bool do_global_fastsim = false;
 
-  bool do_calotrigger = true && Enable::CEMC_TOWER && do_hcalin_twr && do_hcalout_twr;
+  bool do_calotrigger = true && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && do_hcalout_twr;
 
   bool do_jet_reco = false;
   bool do_jet_eval = do_jet_reco && true;
@@ -195,19 +201,14 @@ int Fun4All_G4_sPHENIX(
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
   // single particle / p+p-only simulations, or for p+Au / Au+Au
   // simulations which don't particularly care about jets)
-  bool do_HIjetreco = false && Enable::CEMC_TOWER && do_hcalin_twr && do_hcalout_twr;
+  bool do_HIjetreco = false && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && do_hcalout_twr;
 
   // 3-D topoCluster reconstruction, potentially in all calorimeter layers
-  bool do_topoCluster = false && Enable::CEMC_TOWER && do_hcalin_twr && do_hcalout_twr;
+  bool do_topoCluster = false && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && do_hcalout_twr;
   // particle flow jet reconstruction - needs topoClusters!
   bool do_particle_flow = false && do_topoCluster;
 
-  bool do_dst_compress = false;
-
-  //Option to convert DST to human command readable TTree for quick poke around the outputs
-  bool do_DSTReader = false;
-
-  G4Init(do_tracking, do_pstof, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor, do_femc);
+  G4Init(do_tracking, do_pstof, do_magnet, do_hcalout, do_pipe, do_plugdoor, do_femc);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -226,20 +227,15 @@ int Fun4All_G4_sPHENIX(
     // Detector description
     //---------------------
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
     G4Setup(absorberactive, magfield, EDecayType::kAll,
-            do_tracking, do_pstof, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
-#else
-    G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-            do_tracking, do_pstof, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
-#endif
+            do_tracking, do_pstof, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
   }
 
   //---------
   // BBC Reco
   //---------
 
-  if (do_bbc)
+  if (Enable::BBC)
   {
     BbcInit();
     Bbc_Reco();
@@ -252,7 +248,7 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::CEMC_CELL) CEMC_Cells();
 
-  if (do_hcalin_cell) HCALInner_Cells();
+  if (Enable::HCALIN_CELL) HCALInner_Cells();
 
   if (do_hcalout_cell) HCALOuter_Cells();
 
@@ -269,8 +265,8 @@ int Fun4All_G4_sPHENIX(
   // HCAL towering and clustering
   //-----------------------------
 
-  if (do_hcalin_twr) HCALInner_Towers();
-  if (do_hcalin_cluster) HCALInner_Clusters();
+  if (Enable::HCALIN_TOWER) HCALInner_Towers();
+  if (Enable::HCALIN_CLUSTER) HCALInner_Clusters();
 
   if (do_hcalout_twr) HCALOuter_Towers();
   if (do_hcalout_cluster) HCALOuter_Clusters();
@@ -284,7 +280,7 @@ int Fun4All_G4_sPHENIX(
   if (do_femc_twr) FEMC_Towers();
   if (do_femc_cluster) FEMC_Clusters();
 
-  if (do_dst_compress) ShowerCompress();
+  if (Enable::DSTOUT_COMPRESS) ShowerCompress();
 
   //--------------
   // SVTX tracking
@@ -343,7 +339,7 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::CEMC_EVAL) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
 
-  if (do_hcalin_eval) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
+  if (Enable::HCALIN_EVAL) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
 
   if (do_hcalout_eval) HCALOuter_Eval(string(outputFile) + "_g4hcalout_eval.root");
 
@@ -389,7 +385,7 @@ int Fun4All_G4_sPHENIX(
          << " and time window " << time_window_minus << " to " << time_window_plus << endl;
   }
 
-  if (do_DSTReader)
+  if (Enable::DSTREADER)
   {
     //Convert DST to human command readable TTree for quick poke around the outputs
     gROOT->LoadMacro("G4_DSTReader.C");
@@ -399,17 +395,17 @@ int Fun4All_G4_sPHENIX(
                 /*bool*/ do_tracking,
                 /*bool*/ do_pstof,
                 /*bool*/ Enable::CEMC,
-                /*bool*/ do_hcalin,
+                /*bool*/ Enable::HCALIN,
                 /*bool*/ do_magnet,
                 /*bool*/ do_hcalout,
                 /*bool*/ Enable::CEMC_TOWER,
-                /*bool*/ do_hcalin_twr,
+                /*bool*/ Enable::HCALIN_TOWER,
                 /*bool*/ do_hcalout_twr);
   }
 
-  if(do_write_output) {
+  if(Enable::DSTOUT) {
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
-    if (do_dst_compress) DstCompress(out);
+    if (Enable::DSTOUT_COMPRESS) DstCompress(out);
     se->registerOutputManager(out);
   }
   //-----------------
