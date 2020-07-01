@@ -76,23 +76,9 @@ void G4Init(const bool do_tracking = true)
 }
 
 
-int G4Setup(const int absorberactive = 0,
-	    const string &field ="1.5",
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-	    const EDecayType decayType = EDecayType::kAll,
-#else
-	    const EDecayType decayType = TPythia6Decayer::kAll,
-#endif
-	    const bool do_tracking = true,
-	    const float magfield_rescale = 1.0) {
+int G4Setup(const bool do_tracking = true)
+{
   
-  //---------------
-  // Load libraries
-  //---------------
-
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4testbench.so");
-
   //---------------
   // Fun4All server
   //---------------
@@ -101,32 +87,28 @@ int G4Setup(const int absorberactive = 0,
 
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->set_rapidity_coverage(1.1); // according to drawings
+  if (G4P6DECAYER::decayType != EDecayType::kAll)
+  {
+    g4Reco->set_force_decay(G4P6DECAYER::decayType);
+  }
 // uncomment to set QGSP_BERT_HP physics list for productions 
 // (default is QGSP_BERT for speed)
   //  g4Reco->SetPhysicsList("QGSP_BERT_HP"); 
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-  if (decayType != EDecayType::kAll) 
-#else
-  if (decayType != TPythia6Decayer::kAll) 
-#endif
-  {
-    g4Reco->set_force_decay(decayType);
-  }
   
   double fieldstrength;
-  istringstream stringline(field);
+  istringstream stringline(G4MAGNET::magfield);
   stringline >> fieldstrength;
   if (stringline.fail()) { // conversion to double fails -> we have a string
 
-    if (field.find("sPHENIX.root") != string::npos) {
-      g4Reco->set_field_map(field, PHFieldConfig::Field3DCartesian);
+    if (G4MAGNET::magfield.find("sPHENIX.root") != string::npos) {
+      g4Reco->set_field_map(G4MAGNET::magfield, PHFieldConfig::Field3DCartesian);
     } else {
-      g4Reco->set_field_map(field, PHFieldConfig::kField2D);
+      g4Reco->set_field_map(G4MAGNET::magfield, PHFieldConfig::kField2D);
     }
   } else {
     g4Reco->set_field(fieldstrength); // use const soleniodal field
   }
-  g4Reco->set_field_rescale(magfield_rescale);
+  g4Reco->set_field_rescale(G4MAGNET::magfield_rescale);
   
   double radius = 0.;
 
@@ -136,7 +118,7 @@ int G4Setup(const int absorberactive = 0,
   
   //----------------------------------------
   // TRACKING
-  if (do_tracking) radius = Tracking(g4Reco, radius, absorberactive);
+  if (do_tracking) radius = Tracking(g4Reco, radius, 1);
 
   //----------------------------------------
   // PSTOF
@@ -151,24 +133,24 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // HCALIN
   
-  if (Enable::HCALIN) radius = HCalInner(g4Reco, radius, 4, absorberactive);
+  if (Enable::HCALIN) radius = HCalInner(g4Reco, radius, 4);
 
   //----------------------------------------
   // MAGNET
   
-  if (Enable::MAGNET) radius = Magnet(g4Reco, radius, 0, absorberactive);
+  if (Enable::MAGNET) radius = Magnet(g4Reco, radius);
 
   //----------------------------------------
   // HCALOUT
   
-  if (Enable::HCALOUT) radius = HCalOuter(g4Reco, radius, 4, absorberactive);
+  if (Enable::HCALOUT) radius = HCalOuter(g4Reco, radius, 4);
 
   //----------------------------------------
   // sPHENIX forward flux return door
   if (Enable::PLUGDOOR) PlugDoor(g4Reco);
 
   // forward EMC
-  if(Enable::FEMC) FEMCSetup(g4Reco, absorberactive);
+  if(Enable::FEMC) FEMCSetup(g4Reco);
 
   //----------------------------------------
   // BLACKHOLE

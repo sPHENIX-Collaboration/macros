@@ -145,6 +145,10 @@ int Fun4All_G4_sPHENIX(
   //======================
   // What to run
   //======================
+  // Global options (enabled for all enables subsystems - if implemented)
+  //  Enable::ABSORBER = true;
+  //  Enable::OVERLAPCHECK = true;
+  //  Enable::VERBOSITY = 1;
 
 //  Enable::BBC = true;
 
@@ -157,9 +161,9 @@ int Fun4All_G4_sPHENIX(
   bool do_tracking_track = do_tracking_cluster && true;
   bool do_tracking_eval = do_tracking_track && true;
 
-  Enable::PSTOF = true;
+  //Enable::PSTOF = true;
 
-  Enable::CEMC = true;
+  //Enable::CEMC = true;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && false;
@@ -184,7 +188,7 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALOUT_EVAL = Enable::HCALOUT_CLUSTER && true;
 
   // forward EMC
-  Enable::FEMC = true;
+  //Enable::FEMC = true;
   Enable::FEMC_ABSORBER = true;
   Enable::FEMC_CELL = Enable::FEMC && true;
   Enable::FEMC_TOWER = Enable::FEMC_CELL && true;
@@ -192,7 +196,7 @@ int Fun4All_G4_sPHENIX(
   Enable::FEMC_EVAL = Enable::FEMC_CLUSTER && true;
 
   //! forward flux return plug door. Out of acceptance and off by default.
-  Enable::PLUGDOOR = true;
+  //Enable::PLUGDOOR = true;
   Enable::PLUGDOOR_ABSORBER = true;
 
   bool do_global = false;
@@ -213,18 +217,30 @@ int Fun4All_G4_sPHENIX(
   // particle flow jet reconstruction - needs topoClusters!
   bool do_particle_flow = false && do_topoCluster;
 
-  G4Init(do_tracking);
 
-  int absorberactive = 1;  // set to 1 to make all absorbers active volumes
+  //---------------
+  // Magnet Settings
+  //---------------
+
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
-  const string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root"); // default map from the calibration database
-  const float magfield_rescale = -1.4 / 1.5;                                     // scale the map to a 1.4 T field
+  //  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
+  G4MAGNET::magfield_rescale = -1.4 / 1.5;  // make consistent with expected Babar field strength of 1.4T
+
+
+  //---------------
+  // Pythia Decayer
+  //---------------
+  // list of decay types in
+  // $OFFLINE_MAIN/include/g4decayer/EDecayType.hh
+  // default is All:
+  // G4P6DECAYER::decayType = EDecayType::kAll;
+
+  // Initialize the selected subsystems
+  G4Init(do_tracking);
 
   //---------------
   // Fun4All server
   //---------------
-
-  bool display_on = false;
 
   if (!Input::READHITS)
   {
@@ -232,8 +248,7 @@ int Fun4All_G4_sPHENIX(
     // Detector description
     //---------------------
 
-    G4Setup(absorberactive, magfield, EDecayType::kAll,
-            do_tracking, magfield_rescale);
+    G4Setup(do_tracking);
   }
 
   //---------
@@ -403,7 +418,7 @@ int Fun4All_G4_sPHENIX(
     gROOT->LoadMacro("G4_DSTReader.C");
 
     G4DSTreader(outputFile,  //
-                /*int*/ absorberactive,
+                /*int*/ 1,
                 /*bool*/ do_tracking,
                 /*bool*/ Enable::PSTOF,
                 /*bool*/ Enable::CEMC,
@@ -435,7 +450,7 @@ int Fun4All_G4_sPHENIX(
     return 0;
   }
 
-  if(display_on)
+  if(Enable::DISPLAY)
     {
       DisplayOn();
       // prevent macro from finishing so can see display

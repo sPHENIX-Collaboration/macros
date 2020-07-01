@@ -13,6 +13,7 @@ namespace Enable
   bool MAGNET = false;
   bool MAGNET_ABSORBER = false;
   bool MAGNET_OVERLAPCHECK = false;
+  int MAGNET_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4MAGNET
@@ -32,14 +33,11 @@ void MagnetInit()
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -G4MAGNET::magnet_length / 2.);
 }
 
-double Magnet(PHG4Reco* g4Reco,
-              double radius,
-              const int crossings = 0,
-              const int absorberactive = 0,
-              int verbosity = 0)
+double Magnet(PHG4Reco* g4Reco, double radius)
 {
-  bool AbsorberActive = Enable::ABSORBER || Enable::MAGNET_ABSORBER || absorberactive;
+  bool AbsorberActive = Enable::ABSORBER || Enable::MAGNET_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::MAGNET_OVERLAPCHECK;
+  int verbosity = std::max(Enable::VERBOSITY,Enable::MAGNET_VERBOSITY);
 
   double magnet_inner_cryostat_wall_radius = 142;
   double magnet_inner_cryostat_wall_thickness = 1;

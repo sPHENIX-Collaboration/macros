@@ -61,10 +61,9 @@ void HCalOuterInit()
 
 double HCalOuter(PHG4Reco *g4Reco,
                  double radius,
-                 const int crossings,
-                 const int absorberactive = 0)
+                 const int crossings)
 {
-  bool AbsorberActive = Enable::ABSORBER || Enable::HCALOUT_ABSORBER || absorberactive;
+  bool AbsorberActive = Enable::ABSORBER || Enable::HCALOUT_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALOUT_OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
 
