@@ -1,25 +1,7 @@
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include <phool/PHRandomSeed.h>
-#include <fun4all/SubsysReco.h>
-#include <fun4all/Fun4AllServer.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllDummyInputManager.h>
-#include <fun4all/Fun4AllOutputManager.h>
-#include <fun4all/Fun4AllDstInputManager.h>
-#include <fun4all/Fun4AllNoSyncDstInputManager.h>
-#include <fun4all/Fun4AllDstOutputManager.h>
-#include <g4main/PHG4ParticleGeneratorBase.h>
-#include <g4main/PHG4ParticleGenerator.h>
-#include <g4main/PHG4SimpleEventGenerator.h>
-#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
-#include <g4main/PHG4ParticleGun.h>
-#include <g4main/HepMCNodeReader.h>
-#include <g4detectors/PHG4DetectorSubsystem.h>
-#include <phool/recoConsts.h>
-#include <phpythia6/PHPythia6.h>
-#include <phpythia8/PHPythia8.h>
-#include <phhepmc/Fun4AllHepMCPileupInputManager.h>
-#include <phhepmc/Fun4AllHepMCInputManager.h>
+#pragma once
+
+#include "GlobalVariables.C"
+
 #include "G4Setup_sPHENIX.C"
 #include "G4_Bbc.C"
 #include "G4_Global.C"
@@ -30,14 +12,39 @@
 #include "G4_ParticleFlow.C"
 #include "G4_DSTReader.C"
 #include "DisplayOn.C"
+
+#include <g4detectors/PHG4DetectorSubsystem.h>
+
+#include <g4main/PHG4ParticleGeneratorBase.h>
+#include <g4main/PHG4ParticleGenerator.h>
+#include <g4main/PHG4SimpleEventGenerator.h>
+#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
+#include <g4main/PHG4ParticleGun.h>
+#include <g4main/HepMCNodeReader.h>
+
+#include <phpythia6/PHPythia6.h>
+#include <phpythia8/PHPythia8.h>
+#include <phhepmc/Fun4AllHepMCPileupInputManager.h>
+#include <phhepmc/Fun4AllHepMCInputManager.h>
+
+#include <fun4all/SubsysReco.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllDummyInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllNoSyncDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+
+#include <phool/PHRandomSeed.h>
+#include <phool/recoConsts.h>
+
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libphhepmc.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
-#endif
-
-using namespace std;
 
 
 int Fun4All_G4_sPHENIX(
@@ -84,7 +91,7 @@ int Fun4All_G4_sPHENIX(
   // Event pile up simulation with collision rate in Hz MB collisions.
   // Note please follow up the macro to verify the settings for beam parameters
   const double pileup_collision_rate = 0;  // 100e3 for 100kHz nominal AuAu collision rate.
-  const bool do_write_output = false;
+  const bool do_write_output = true;
   // To write cluster files set do_write_output = true and set 
   // do_tracking = true, do_tracking_cell = true, do_tracking_cluster = true and 
   // leave the tracking for later do_tracking_track =  false,  do_tracking_eval = false
@@ -157,18 +164,7 @@ int Fun4All_G4_sPHENIX(
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = false;
-  //---------------
-  // Load libraries
-  //---------------
 
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libphhepmc.so");
-  gSystem->Load("libg4testbench.so");
-  gSystem->Load("libg4eval.so");
-  gSystem->Load("libg4intt.so");
-  // establish the geometry and reconstruction setup
-  gROOT->LoadMacro("G4Setup_sPHENIX.C");
   G4Init(do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor, do_femc);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
@@ -181,10 +177,6 @@ int Fun4All_G4_sPHENIX(
   //---------------
 
   bool display_on = false;
-  if(display_on)
-    {
-      gROOT->LoadMacro("DisplayOn.C");
-    }
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
@@ -202,7 +194,7 @@ int Fun4All_G4_sPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  //  rc->set_IntFlag("RANDOMSEED", 12345);
+    rc->set_IntFlag("RANDOMSEED", 12345);
 
   //-----------------
   // Event generation
@@ -230,7 +222,6 @@ int Fun4All_G4_sPHENIX(
 
     if (runpythia8)
     {
-      gSystem->Load("libPHPythia8.so");
 
       PHPythia8 *pythia8 = new PHPythia8();
       // see coresoftware/generators/PHPythia8 for example config
@@ -243,7 +234,6 @@ int Fun4All_G4_sPHENIX(
 
     if (runpythia6)
     {
-      gSystem->Load("libPHPythia6.so");
 
       PHPythia6 *pythia6 = new PHPythia6();
       pythia6->set_config_file("phpythia6.cfg"); // example configure files : https://github.com/sPHENIX-Collaboration/coresoftware/tree/master/generators/PHPythia6
@@ -258,7 +248,7 @@ int Fun4All_G4_sPHENIX(
     {
       // toss low multiplicity dummy events
       PHG4SimpleEventGenerator *gen = new PHG4SimpleEventGenerator();
-      gen->add_particles("pi-", 1);  // mu+,e+,proton,pi+,Upsilon
+      gen->add_particles("pi-", 5);  // mu+,e+,proton,pi+,Upsilon
       //gen->add_particles("pi+",100); // 100 pion option
       if (readhepmc || do_embedding || runpythia8 || runpythia6)
       {
@@ -375,7 +365,6 @@ int Fun4All_G4_sPHENIX(
 
   if (do_bbc)
   {
-    gROOT->LoadMacro("G4_Bbc.C");
     BbcInit();
     Bbc_Reco();
   }
@@ -413,7 +402,6 @@ int Fun4All_G4_sPHENIX(
   // if enabled, do topoClustering early, upstream of any possible jet reconstruction
   if (do_topoCluster)
   {
-    gROOT->LoadMacro("G4_TopoClusterReco.C");
     TopoClusterReco();
   }
 
@@ -436,13 +424,11 @@ int Fun4All_G4_sPHENIX(
 
   if (do_global)
   {
-    gROOT->LoadMacro("G4_Global.C");
     Global_Reco();
   }
 
   else if (do_global_fastsim)
   {
-    gROOT->LoadMacro("G4_Global.C");
     Global_FastSim();
   }
 
@@ -452,7 +438,6 @@ int Fun4All_G4_sPHENIX(
 
   if (do_calotrigger)
   {
-    gROOT->LoadMacro("G4_CaloTrigger.C");
     CaloTrigger_Sim();
   }
 
@@ -462,18 +447,15 @@ int Fun4All_G4_sPHENIX(
 
   if (do_jet_reco)
   {
-    gROOT->LoadMacro("G4_Jets.C");
     Jet_Reco();
   }
 
   if (do_HIjetreco)
   {
-    gROOT->LoadMacro("G4_HIJetReco.C");
     HIJetReco();
   }
 
   if (do_particle_flow) {
-    gROOT->LoadMacro("G4_ParticleFlow.C");
     ParticleFlow();
   }
 
@@ -644,8 +626,3 @@ int Fun4All_G4_sPHENIX(
   gSystem->Exit(0);
   return 0;
 }
-
-
-// This function is only used to test if we can load this as root6 macro
-// without running into unresolved libraries and include files
-void RunFFALoadTest() {}
