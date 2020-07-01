@@ -1,23 +1,28 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include <fun4all/Fun4AllServer.h>
+
+#include "GlobalVariables.C"
+
+#include <g4jets/FastJetAlgo.h>
+
 #include <particleflowreco/ParticleFlowReco.h>
 #include <particleflowreco/ParticleFlowJetInput.h>
-#include <g4jets/FastJetAlgo.h>
+
+#include <fun4all/Fun4AllServer.h>
+
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libparticleflow.so)
-#endif
 
-void ParticleFlow(int verbosity = 0) {
-  
-  //---------------
-  // Load libraries
-  //---------------
+namespace Enable
+{
+  bool PARTICLEFLOW = false;
+int PARTICLEFLOW_VERBOSITY = 0;
+}
 
-  gSystem->Load("libg4jets.so");
-  gSystem->Load("libparticleflow.so");
+void ParticleFlow() {
 
+  int verbosity = max(Enable::VERBOSITY,Enable::PARTICLEFLOW_VERBOSITY);
   //---------------
   // Fun4All server
   //---------------
