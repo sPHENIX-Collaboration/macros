@@ -19,7 +19,6 @@
 #include <g4main/PHG4TruthSubsystem.h>
 #include <g4main/PHG4Reco.h>
 #include <phfield/PHFieldConfig.h>
-#include <g4main/HepMCNodeReader.h>
 class SubsysReco;
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
@@ -131,10 +130,6 @@ int G4Setup(const int absorberactive = 0,
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-
-  // read-in HepMC events to Geant4 if there is any
-  HepMCNodeReader *hr = new HepMCNodeReader();
-  se->registerSubsystem(hr);
 
   PHG4Reco* g4Reco = new PHG4Reco();
   g4Reco->set_rapidity_coverage(1.1); // according to drawings
