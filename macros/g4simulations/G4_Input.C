@@ -14,6 +14,7 @@
 #include <g4main/ReadEICFiles.h>
 
 #include <phhepmc/Fun4AllHepMCInputManager.h>
+#include <phhepmc/Fun4AllHepMCPileupInputManager.h>
 
 #include <phsartre/PHSartre.h>
 #include <phsartre/PHSartreParticleTrigger.h>
@@ -36,6 +37,7 @@ namespace Input
   bool PYTHIA6 = false;
   bool PYTHIA8 = false;
   bool SARTRE = false;
+  double PILEUPRATE = 0.;
   int VERBOSITY = 0;
 }  // namespace Input
 
@@ -72,6 +74,12 @@ namespace PYTHIA8
 namespace SARTRE
 {
   string config_file = "sartre.cfg";
+}
+
+namespace PILEUP
+{
+  string pileupfile = "/sphenix/sim/sim01/sHijing/sHijing_0-12fm.dat";
+  double TpcDriftVelocity = 8.0 / 1000.0;
 }
 
 void InputInit()
@@ -176,5 +184,15 @@ void InputManagers()
     Fun4AllInputManager *in = new Fun4AllDummyInputManager("JADE");
     in->Verbosity(Input::VERBOSITY);
     se->registerInputManager(in);
+  }
+  if (Input::PILEUPRATE > 0)
+  {
+    Fun4AllHepMCPileupInputManager *pileup = new Fun4AllHepMCPileupInputManager("HepMCPileupInput");
+    pileup->Verbosity(Input::VERBOSITY);
+    pileup->AddFile(PILEUP::pileupfile);
+    pileup->set_collision_rate(Input::PILEUPRATE);
+    double time_window = 105.5 / PILEUP::TpcDriftVelocity;
+    pileup->set_time_window(-time_window,time_window);
+    se->registerInputManager(pileup);
   }
 }

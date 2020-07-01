@@ -14,9 +14,6 @@
 #include "G4_Input.C"
 #include "DisplayOn.C"
 
-#include <phhepmc/Fun4AllHepMCPileupInputManager.h>
-#include <phhepmc/Fun4AllHepMCInputManager.h>
-
 #include <fun4all/SubsysReco.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -106,6 +103,9 @@ int Fun4All_G4_sPHENIX(
   Input::VERBOSITY = 0;
   INPUTHEPMC::filename = inputFile;
 
+  // Event pile up simulation with collision rate in Hz MB collisions.
+  //Input::PILEUPRATE = 100e3;
+
   //-----------------
   // Initialize the selected Input/Event generation
   //-----------------
@@ -123,12 +123,6 @@ int Fun4All_G4_sPHENIX(
   // turn the display on (default off)
   Enable::DISPLAY = false;
 
-  // Event pile up simulation with collision rate in Hz MB collisions.
-  // Note please follow up the macro to verify the settings for beam parameters
-  const double pileup_collision_rate = 0;  // 100e3 for 100kHz nominal AuAu collision rate.
-  // To write cluster files set do_write_output = true and set 
-  // do_tracking = true, do_tracking_cell = true, do_tracking_cluster = true and 
-  // leave the tracking for later do_tracking_track =  false,  do_tracking_eval = false
 
   //======================
   // What to run
@@ -143,11 +137,11 @@ int Fun4All_G4_sPHENIX(
   Enable::PIPE = true;
   Enable::PIPE_ABSORBER = true;
 
-  bool do_tracking = false;
-  bool do_tracking_cell = do_tracking && false;
+  bool do_tracking = true;
+  bool do_tracking_cell = do_tracking && true;
   bool do_tracking_cluster = do_tracking_cell && true;
   bool do_tracking_track = do_tracking_cluster && true;
-  bool do_tracking_eval = do_tracking_track && true;
+  bool do_tracking_eval = do_tracking_track && false;
 
   //Enable::PSTOF = true;
 
@@ -198,12 +192,12 @@ int Fun4All_G4_sPHENIX(
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
   // single particle / p+p-only simulations, or for p+Au / Au+Au
   // simulations which don't particularly care about jets)
-  Enable::HIJETS = false && Enable::JETS && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
+  Enable::HIJETS = true && Enable::JETS && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   // 3-D topoCluster reconstruction, potentially in all calorimeter layers
-  bool do_topoCluster = false && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
+  Enable::TOPOCLUSTER = true && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
   // particle flow jet reconstruction - needs topoClusters!
-  bool do_particle_flow = false && do_topoCluster;
+  Enable::PARTICLEFLOW = true && Enable::TOPOCLUSTER;
 
 
   //---------------
@@ -280,10 +274,7 @@ int Fun4All_G4_sPHENIX(
   if (Enable::HCALOUT_CLUSTER) HCALOuter_Clusters();
 
   // if enabled, do topoClustering early, upstream of any possible jet reconstruction
-  if (do_topoCluster)
-  {
-    TopoClusterReco();
-  }
+  if (Enable::TOPOCLUSTER) TopoClusterReco();
 
   if (Enable::FEMC_TOWER) FEMC_Towers();
   if (Enable::FEMC_CLUSTER) FEMC_Clusters();
@@ -332,9 +323,8 @@ int Fun4All_G4_sPHENIX(
   if (Enable::JETS) Jet_Reco();
   if (Enable::HIJETS) HIJetReco();
 
-  if (do_particle_flow) {
-    ParticleFlow();
-  }
+  if (Enable::PARTICLEFLOW) ParticleFlow();
+
 
   //----------------------
   // Simulation evaluation
@@ -365,55 +355,7 @@ int Fun4All_G4_sPHENIX(
 
   InputManagers();
 
-  if (pileup_collision_rate > 0)
-  {
-    // pile up simulation.
-    // add random beam collisions following a collision diamond and rate from a HepMC stream
-    Fun4AllHepMCPileupInputManager *pileup = new Fun4AllHepMCPileupInputManager("HepMCPileupInput");
-    se->registerInputManager(pileup);
-
-    const string pileupfile("/sphenix/sim/sim01/sHijing/sHijing_0-12fm.dat");
-    //background files for p+p pileup sim
-    //const string pileupfile("/gpfs/mnt/gpfs04/sphenix/user/shlim/04.InnerTrackerTaskForce/01.PythiaGen/list_pythia8_mb.dat");
-    pileup->AddFile(pileupfile);  // HepMC events used in pile up collisions. You can add multiple files, and the file list will be reused.
-    //pileup->set_vertex_distribution_width(100e-4,100e-4,30,5);//override collision smear in space time
-    //pileup->set_vertex_distribution_mean(0,0,0,0);//override collision central position shift in space time
-    pileup->set_collision_rate(pileup_collision_rate);
-
-    double time_window_minus = -35000;
-    double time_window_plus = 35000;
-
-    if (do_tracking)
-    {
-      // This gets the default drift velocity only! 
-      PHG4TpcElectronDrift *dr = (PHG4TpcElectronDrift *)se->getSubsysReco("PHG4TpcElectronDrift");
-      assert(dr);
-      double TpcDriftVelocity = dr->get_double_param("drift_velocity");
-      time_window_minus = -105.5 / TpcDriftVelocity;  // ns
-      time_window_plus = 105.5 / TpcDriftVelocity;    // ns;
-    }
-    pileup->set_time_window(time_window_minus, time_window_plus);  // override timing window in ns
-    cout << "Collision pileup enabled using file " << pileupfile << " with collision rate " << pileup_collision_rate
-         << " and time window " << time_window_minus << " to " << time_window_plus << endl;
-  }
-
-  if (Enable::DSTREADER)
-  {
-    //Convert DST to human command readable TTree for quick poke around the outputs
-    gROOT->LoadMacro("G4_DSTReader.C");
-
-    G4DSTreader(outputFile,  //
-                /*int*/ 1,
-                /*bool*/ do_tracking,
-                /*bool*/ Enable::PSTOF,
-                /*bool*/ Enable::CEMC,
-                /*bool*/ Enable::HCALIN,
-                /*bool*/ Enable::MAGNET,
-                /*bool*/ Enable::HCALOUT,
-                /*bool*/ Enable::CEMC_TOWER,
-                /*bool*/ Enable::HCALIN_TOWER,
-                /*bool*/ Enable::HCALOUT_TOWER);
-  }
+  if (Enable::DSTREADER) G4DSTreader(outputroot + "_DSTReader.root");
 
   if(Enable::DSTOUT) {
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
