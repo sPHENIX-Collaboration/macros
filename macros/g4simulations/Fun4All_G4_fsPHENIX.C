@@ -338,23 +338,33 @@ int Fun4All_G4_fsPHENIX(
   // Simulation evaluation
   //----------------------
 
-  if (Enable::TRACKING_EVAL) Tracking_Eval("g4tracking_eval.root");
+  string outputroot = outputFile;
+  string remove_this = ".root";
+  size_t pos = outputroot.find(remove_this);
+  if (pos != string::npos)
+  {
+    outputroot.erase(pos, remove_this.length());
+  }
 
-  if (Enable::CEMC_EVAL) CEMC_Eval("g4cemc_eval.root");
+  if (Enable::TRACKING_EVAL) Tracking_Eval(outputroot + "g4tracking_eval.root");
 
-  if (Enable::HCALIN_EVAL) HCALInner_Eval("g4hcalin_eval.root");
+  if (Enable::CEMC_EVAL) CEMC_Eval(outputroot + "g4cemc_eval.root");
 
-  if (Enable::HCALOUT_EVAL) HCALOuter_Eval("g4hcalout_eval.root");
+  if (Enable::HCALIN_EVAL) HCALInner_Eval(outputroot + "g4hcalin_eval.root");
 
-  if (Enable::FHCAL_EVAL) FHCAL_Eval(string(outputFile) + "_g4fhcal_eval.root");
+  if (Enable::HCALOUT_EVAL) HCALOuter_Eval(outputroot + "g4hcalout_eval.root");
 
-  if (Enable::JETS_EVAL) Jet_Eval("g4jet_eval.root");
+  if (Enable::FEMC_EVAL) FEMC_Eval(outputroot + "g4femc_eval.root");
 
-  if (Enable::FWDJETS_EVAL) Jet_FwdEval("g4fwdjet_eval.root");
+  if (Enable::FHCAL_EVAL) FHCAL_Eval(outputroot + "_g4fhcal_eval.root");
 
-  if (Enable::FGEM_EVAL) FGEM_FastSim_Eval("g4tracking_fgem_eval.root");
+  if (Enable::JETS_EVAL) Jet_Eval(outputroot + "g4jet_eval.root");
 
-  if (Enable::DSTREADER) G4DSTreader_fsPHENIX(outputFile);
+  if (Enable::FWDJETS_EVAL) Jet_FwdEval(outputroot + "g4fwdjet_eval.root");
+
+  if (Enable::FGEM_EVAL) FGEM_FastSim_Eval(outputroot + "g4tracking_fgem_eval.root");
+
+  if (Enable::DSTREADER) G4DSTreader_fsPHENIX(outputroot + "_DSTReader.root");
 
   //--------------
   // Set up Input Managers
