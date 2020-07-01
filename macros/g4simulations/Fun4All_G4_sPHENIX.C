@@ -163,15 +163,15 @@ int Fun4All_G4_sPHENIX(
 
   //Enable::PSTOF = true;
 
-  //Enable::CEMC = true;
+  Enable::CEMC = true;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && false;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
 
-  //Enable::HCALIN = true;
-  //  Enable::HCALIN_ABSORBER = true;
+  Enable::HCALIN = true;
+  Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
   Enable::HCALIN_CLUSTER = Enable::HCALIN_TOWER && true;
@@ -180,7 +180,7 @@ int Fun4All_G4_sPHENIX(
   Enable::MAGNET = true;
   Enable::MAGNET_ABSORBER = true;
 
-//  Enable::HCALOUT = true;
+  Enable::HCALOUT = true;
   Enable::HCALOUT_ABSORBER = true;
   Enable::HCALOUT_CELL = Enable::HCALOUT && true;
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
@@ -199,13 +199,13 @@ int Fun4All_G4_sPHENIX(
   //Enable::PLUGDOOR = true;
   Enable::PLUGDOOR_ABSORBER = true;
 
-  bool do_global = false;
-  bool do_global_fastsim = false;
+  Enable::GLOBAL_RECO = true;
+//  Enable::GLOBAL_FASTSIM = true;
 
-  bool do_calotrigger = true && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
+  Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && true;
 
-  bool do_jet_reco = false;
-  bool do_jet_eval = do_jet_reco && true;
+  Enable::JETS = true;
+  Enable::JETS_EVAL = Enable::JETS && true;
 
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
   // single particle / p+p-only simulations, or for p+Au / Au+Au
@@ -314,12 +314,16 @@ int Fun4All_G4_sPHENIX(
   // Global Vertexing
   //-----------------
 
-  if (do_global)
+  if (Enable::GLOBAL_RECO && Enable::GLOBAL_FASTSIM)
+  {
+    cout << "You can only enable Enable::GLOBAL_RECO or Enable::GLOBAL_FASTSIM, not both" << endl;
+    gSystem->Exit(1);
+  }
+  if (Enable::GLOBAL_RECO)
   {
     Global_Reco();
   }
-
-  else if (do_global_fastsim)
+  else if (Enable::GLOBAL_FASTSIM)
   {
     Global_FastSim();
   }
@@ -328,7 +332,7 @@ int Fun4All_G4_sPHENIX(
   // Calo Trigger Simulation
   //-----------------
 
-  if (do_calotrigger)
+  if (Enable::CALOTRIGGER)
   {
     CaloTrigger_Sim();
   }
@@ -337,10 +341,7 @@ int Fun4All_G4_sPHENIX(
   // Jet reco
   //---------
 
-  if (do_jet_reco)
-  {
-    Jet_Reco();
-  }
+  if (Enable::JETS) Jet_Reco();
 
   if (do_HIjetreco)
   {
@@ -372,7 +373,7 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::FEMC_EVAL) FEMC_Eval(outputroot + "_g4femc_eval.root");
 
-  if (do_jet_eval) Jet_Eval(outputroot + "_g4jet_eval.root");
+  if (Enable::JETS_EVAL) Jet_Eval(outputroot + "_g4jet_eval.root");
 
   //--------------
   // Set up Input Managers
