@@ -23,7 +23,8 @@ namespace G4GLOBAL
 
 void GlobalInit() {}
 
-void Global_Reco(int verbosity = 0) {
+void Global_Reco()
+{
   
 
   //---------------
@@ -38,7 +39,8 @@ void Global_Reco(int verbosity = 0) {
   return;
 }  
 
-void Global_FastSim(int verbosity = 0) {
+void Global_FastSim()
+ {
   
 
   //---------------
