@@ -14,25 +14,13 @@
 #include "G4_Input.C"
 #include "DisplayOn.C"
 
-#include <g4detectors/PHG4DetectorSubsystem.h>
-
-#include <g4main/PHG4ParticleGeneratorBase.h>
-#include <g4main/PHG4ParticleGenerator.h>
-#include <g4main/PHG4SimpleEventGenerator.h>
-#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
-#include <g4main/PHG4ParticleGun.h>
-#include <g4main/HepMCNodeReader.h>
-
 #include <phhepmc/Fun4AllHepMCPileupInputManager.h>
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 
 #include <fun4all/SubsysReco.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllDummyInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
-#include <fun4all/Fun4AllDstInputManager.h>
-#include <fun4all/Fun4AllNoSyncDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 
 #include <phool/PHRandomSeed.h>
@@ -150,7 +138,7 @@ int Fun4All_G4_sPHENIX(
   //  Enable::OVERLAPCHECK = true;
   //  Enable::VERBOSITY = 1;
 
-//  Enable::BBC = true;
+  Enable::BBC = true;
 
   Enable::PIPE = true;
   Enable::PIPE_ABSORBER = true;
@@ -210,7 +198,7 @@ int Fun4All_G4_sPHENIX(
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
   // single particle / p+p-only simulations, or for p+Au / Au+Au
   // simulations which don't particularly care about jets)
-  bool do_HIjetreco = false && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
+  Enable::HIJETS = false && Enable::JETS && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   // 3-D topoCluster reconstruction, potentially in all calorimeter layers
   bool do_topoCluster = false && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
@@ -342,11 +330,7 @@ int Fun4All_G4_sPHENIX(
   //---------
 
   if (Enable::JETS) Jet_Reco();
-
-  if (do_HIjetreco)
-  {
-    HIJetReco();
-  }
+  if (Enable::HIJETS) HIJetReco();
 
   if (do_particle_flow) {
     ParticleFlow();
