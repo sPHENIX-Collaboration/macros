@@ -147,12 +147,19 @@ int Fun4All_G4_sPHENIX(
 
   bool do_pstof = false;
 
+  Enable::CEMC = true;
+  Enable::CEMC_ABSORBER = true;
+  Enable::CEMC_CELL = Enable::CEMC && true;
+  Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
+  Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
+  Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
+/*
   bool do_cemc = true;
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
-
+*/
   bool do_hcalin = false;
   bool do_hcalin_cell = do_hcalin && false;
   bool do_hcalin_twr = do_hcalin_cell && true;
@@ -180,7 +187,7 @@ int Fun4All_G4_sPHENIX(
   bool do_global = false;
   bool do_global_fastsim = false;
 
-  bool do_calotrigger = true && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
+  bool do_calotrigger = true && Enable::CEMC_TOWER && do_hcalin_twr && do_hcalout_twr;
 
   bool do_jet_reco = false;
   bool do_jet_eval = do_jet_reco && true;
@@ -188,10 +195,10 @@ int Fun4All_G4_sPHENIX(
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
   // single particle / p+p-only simulations, or for p+Au / Au+Au
   // simulations which don't particularly care about jets)
-  bool do_HIjetreco = false && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
+  bool do_HIjetreco = false && Enable::CEMC_TOWER && do_hcalin_twr && do_hcalout_twr;
 
   // 3-D topoCluster reconstruction, potentially in all calorimeter layers
-  bool do_topoCluster = false && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
+  bool do_topoCluster = false && Enable::CEMC_TOWER && do_hcalin_twr && do_hcalout_twr;
   // particle flow jet reconstruction - needs topoClusters!
   bool do_particle_flow = false && do_topoCluster;
 
@@ -200,7 +207,7 @@ int Fun4All_G4_sPHENIX(
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   bool do_DSTReader = false;
 
-  G4Init(do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor, do_femc);
+  G4Init(do_tracking, do_pstof, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor, do_femc);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -221,10 +228,10 @@ int Fun4All_G4_sPHENIX(
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
     G4Setup(absorberactive, magfield, EDecayType::kAll,
-            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
+            do_tracking, do_pstof, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
 #else
     G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
+            do_tracking, do_pstof, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
 #endif
   }
 
@@ -243,7 +250,7 @@ int Fun4All_G4_sPHENIX(
 
   if (do_tracking_cell) Tracking_Cells();
 
-  if (do_cemc_cell) CEMC_Cells();
+  if (Enable::CEMC_CELL) CEMC_Cells();
 
   if (do_hcalin_cell) HCALInner_Cells();
 
@@ -255,8 +262,8 @@ int Fun4All_G4_sPHENIX(
   // CEMC towering and clustering
   //-----------------------------
 
-  if (do_cemc_twr) CEMC_Towers();
-  if (do_cemc_cluster) CEMC_Clusters();
+  if (Enable::CEMC_TOWER) CEMC_Towers();
+  if (Enable::CEMC_CLUSTER) CEMC_Clusters();
 
   //-----------------------------
   // HCAL towering and clustering
@@ -334,7 +341,7 @@ int Fun4All_G4_sPHENIX(
 
   if (do_tracking_eval) Tracking_Eval(string(outputFile) + "_g4svtx_eval.root");
 
-  if (do_cemc_eval) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
+  if (Enable::CEMC_EVAL) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
 
   if (do_hcalin_eval) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
 
@@ -391,11 +398,11 @@ int Fun4All_G4_sPHENIX(
                 /*int*/ absorberactive,
                 /*bool*/ do_tracking,
                 /*bool*/ do_pstof,
-                /*bool*/ do_cemc,
+                /*bool*/ Enable::CEMC,
                 /*bool*/ do_hcalin,
                 /*bool*/ do_magnet,
                 /*bool*/ do_hcalout,
-                /*bool*/ do_cemc_twr,
+                /*bool*/ Enable::CEMC_TOWER,
                 /*bool*/ do_hcalin_twr,
                 /*bool*/ do_hcalout_twr);
   }

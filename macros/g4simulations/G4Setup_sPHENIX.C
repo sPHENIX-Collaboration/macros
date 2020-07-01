@@ -33,7 +33,6 @@ void RunLoadTest() {}
 
 void G4Init(const bool do_tracking = true,
       const bool do_pstof = true,
-	    const bool do_cemc = true,
 	    const bool do_hcalin = true,
 	    const bool do_magnet = true,
 	    const bool do_hcalout = true,
@@ -62,9 +61,8 @@ void G4Init(const bool do_tracking = true,
       PSTOFInit();
     }
 
-  if (do_cemc)
+  if (Enable::CEMC)
     {
-      gROOT->LoadMacro("G4_CEmc_Spacal.C");
       CEmcInit(72); // make it 2*2*2*3*3 so we can try other combinations
     }
 
@@ -108,7 +106,6 @@ int G4Setup(const int absorberactive = 0,
 #endif
 	    const bool do_tracking = true,
 	    const bool do_pstof = true,
-	    const bool do_cemc = true,
 	    const bool do_hcalin = true,
 	    const bool do_magnet = true,
 	    const bool do_hcalout = true,
@@ -178,7 +175,7 @@ int G4Setup(const int absorberactive = 0,
   //----------------------------------------
   // CEMC
 //
-  if (do_cemc) radius = CEmc(g4Reco, radius, 8, absorberactive);
+  if (Enable::CEMC) radius = CEmc(g4Reco, radius, 8, absorberactive);
 //  if (do_cemc) radius = CEmc_Vis(g4Reco, radius, 8, absorberactive);// for visualization substructure of SPACAL, slow to render
   
   //----------------------------------------
