@@ -1,20 +1,22 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include <fun4all/Fun4AllServer.h>
+
+#include "GlobalVariables.C"
+
 #include <caloreco/RawClusterBuilderTopo.h>
-R__LOAD_LIBRARY(libfun4all.so)
+
+#include <fun4all/Fun4AllServer.h>
+
 R__LOAD_LIBRARY(libcalo_reco.so)
-#endif
 
-void TopoClusterRecoInit() {}
+namespace Enable
+{
+  bool TOPOCLUSTER = false;
+  int TOPOCLUSTER_VERBOSITY = 0;
+}
 
-void TopoClusterReco(int verbosity = 0) {
+void TopoClusterReco() {
   
-  //---------------
-  // Load libraries
-  //---------------
-
-  gSystem->Load("libcalo_reco.so");
+  int verbosity = max(Enable::VERBOSITY,Enable::TOPOCLUSTER_VERBOSITY);
 
   //---------------
   // Fun4All server
