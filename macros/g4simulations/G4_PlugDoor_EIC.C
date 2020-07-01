@@ -43,7 +43,6 @@ void PlugDoor(PHG4Reco *g4Reco)
   const string material("Steel_1006");
 
   PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FLUXRET_ETA_MINUS", 0);
-  flux_return_minus->set_int_param("lengthviarapidity", 0);
   flux_return_minus->set_double_param("length", G4PLUGDOOR::length);
   flux_return_minus->set_double_param("radius", G4PLUGDOOR::r_1);
   flux_return_minus->set_double_param("place_z", G4PLUGDOOR::place_z);
