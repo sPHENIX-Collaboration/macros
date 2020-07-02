@@ -15,7 +15,7 @@
 #include "G4_Piston.C"
 #include "G4_PlugDoor_fsPHENIX.C"
 #include "G4_TPC.C"
-#include "G4_Tracking_fsPHENIX.C"
+#include "G4_Tracking.C"
 #include "G4_User.C"
 #include "G4_World.C"
 
@@ -188,7 +188,7 @@ int G4Setup()
 
   if (Enable::MAGNET)
   {
-    radius = Magnet(g4Reco, radius, 0);
+    radius = Magnet(g4Reco, radius);
   }
 
   //----------------------------------------
