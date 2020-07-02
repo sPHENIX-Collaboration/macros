@@ -12,6 +12,7 @@
 #include "G4_ParticleFlow.C"
 #include "G4_DSTReader.C"
 #include "G4_Input.C"
+#include "G4_Tracking.C"
 #include "DisplayOn.C"
 
 #include <fun4all/SubsysReco.h>
@@ -140,25 +141,23 @@ int Fun4All_G4_sPHENIX(
   // central tracking
   Enable::MVTX = true;
   Enable::MVTX_CELL = Enable::MVTX && true;
-//  Enable::MVTX_CLUSTER = Enable::MVTX_CELL && true;
+  Enable::MVTX_CLUSTER = Enable::MVTX_CELL && true;
 
   Enable::INTT = true;
   Enable::INTT_CELL = Enable::INTT && true;
-//  Enable::INTT_CLUSTER = Enable::INTT_CELL && true;
+  Enable::INTT_CLUSTER = Enable::INTT_CELL && true;
 
   Enable::TPC = true;
   Enable::TPC_ABSORBER = true;
   Enable::TPC_CELL = Enable::TPC && true;
-  // Enable::TPC_CLUSTER = Enable::TPC_CELL && true;
+  Enable::TPC_CLUSTER = Enable::TPC_CELL && true;
 
   Enable::MICROMEGA = true;
   Enable::MICROMEGA_CELL = Enable::MICROMEGA && true;
+  Enable::MICROMEGA_CLUSTER = Enable::MICROMEGA_CELL && true;
 
-  bool do_tracking = true;
-  bool do_tracking_cell = do_tracking && true;
-  bool do_tracking_cluster = do_tracking_cell && true;
-  bool do_tracking_track = do_tracking_cluster && true;
-  bool do_tracking_eval = do_tracking_track && false;
+  Enable::TRACKING_TRACK = true;
+   Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && false;
 
   //Enable::PSTOF = true;
 
@@ -263,7 +262,6 @@ int Fun4All_G4_sPHENIX(
   if (Enable::INTT_CELL) Intt_Cells();
   if (Enable::TPC_CELL) TPC_Cells();
   if (Enable::MICROMEGA_CELL) MicroMega_Cells();
-//  if (do_tracking_cell) Tracking_Cells();
 
   if (Enable::CEMC_CELL) CEMC_Cells();
 
@@ -301,11 +299,16 @@ int Fun4All_G4_sPHENIX(
   //--------------
   // SVTX tracking
   //--------------
+  if (Enable::MVTX_CLUSTER) Mvtx_Clustering();
+  if (Enable::INTT_CLUSTER) Intt_Clustering();
+  if (Enable::TPC_CLUSTER) TPC_Clustering();
+  if (Enable::MICROMEGA_CLUSTER) MicroMega_Clustering();
 
-  if (do_tracking_cluster) Tracking_Clus();
-
-  if (do_tracking_track) Tracking_Reco();
-
+  if (Enable::TRACKING_TRACK)
+  {
+    TrackingInit();
+    Tracking_Reco();
+  }
   //-----------------
   // Global Vertexing
   //-----------------
@@ -354,7 +357,7 @@ int Fun4All_G4_sPHENIX(
     outputroot.erase(pos, remove_this.length());
   }
 
-  if (do_tracking_eval) Tracking_Eval(outputroot + "_g4svtx_eval.root");
+  if (Enable::TRACKING_EVAL) Tracking_Eval(outputroot + "_g4svtx_eval.root");
 
   if (Enable::CEMC_EVAL) CEMC_Eval(outputroot + "_g4cemc_eval.root");
 
