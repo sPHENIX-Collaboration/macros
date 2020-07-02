@@ -56,7 +56,7 @@ G4DSTreader_fsPHENIX( const string &outputFile = "G4sPHENIXCells.root")
   int verbosity = max(Enable::VERBOSITY,Enable::DSTREADER_VERBOSITY);
 
   // save a comprehensive  evaluation file
-  PHG4DSTReader* ana = new PHG4DSTReader(string(outputFile) + string("_DSTReader.root"));
+  PHG4DSTReader* ana = new PHG4DSTReader(outputFile);
   ana->set_save_particle(true);
   ana->set_load_all_particle(false);
   ana->set_load_active_particle(true);
