@@ -131,7 +131,7 @@ int Fun4All_G4_sPHENIX(
 
   Enable::BBC = true;
 
-  Enable::PIPE = true;
+//  Enable::PIPE = true;
   Enable::PIPE_ABSORBER = true;
 
   // central tracking
@@ -139,7 +139,7 @@ int Fun4All_G4_sPHENIX(
   Enable::MVTX_CELL = Enable::MVTX && true;
   Enable::MVTX_CLUSTER = Enable::MVTX_CELL && true;
 
-  Enable::INTT = true;
+//  Enable::INTT = true;
   Enable::INTT_CELL = Enable::INTT && true;
   Enable::INTT_CLUSTER = Enable::INTT_CELL && true;
 
@@ -171,7 +171,7 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALIN_CLUSTER = Enable::HCALIN_TOWER && true;
   Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && true;
 
-  Enable::MAGNET = true;
+  //Enable::MAGNET = true;
   Enable::MAGNET_ABSORBER = true;
 
   //  Enable::HCALOUT = true;
@@ -210,6 +210,10 @@ int Fun4All_G4_sPHENIX(
   Enable::TOPOCLUSTER = true && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
   // particle flow jet reconstruction - needs topoClusters!
   Enable::PARTICLEFLOW = true && Enable::TOPOCLUSTER;
+
+  // new settings using Enable namespace in GlobalVariables.C
+  Enable::BLACKHOLE = true;
+  BlackHoleGeometry::visible = true;
 
   //---------------
   // Magnet Settings
