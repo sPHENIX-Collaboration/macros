@@ -150,7 +150,7 @@ int Fun4All_G4_sPHENIX(
   Enable::TPC_CELL = Enable::TPC && true;
   Enable::TPC_CLUSTER = Enable::TPC_CELL && true;
 
-  Enable::MICROMEGA = true;
+//  Enable::MICROMEGA = true;
   Enable::MICROMEGA_CELL = Enable::MICROMEGA && true;
   Enable::MICROMEGA_CLUSTER = Enable::MICROMEGA_CELL && true;
 
