@@ -4,37 +4,12 @@
 
 #include "G4_Intt.C"
 #include "G4_Mvtx.C"
+#include "G4_TPC.C"
+#include "G4_MicroMega.C"
 
 #include <fun4all/Fun4AllServer.h>
 
 #include <g4eval/SvtxEvaluator.h>
-
-#include <g4intt/PHG4InttDefs.h>
-#include <g4intt/PHG4InttDigitizer.h>
-#include <g4intt/PHG4InttHitReco.h>
-#include <g4intt/PHG4InttSubsystem.h>
-
-#include <g4main/PHG4Reco.h>
-
-#include <g4micromegas/PHG4MicromegasDigitizer.h>
-#include <g4micromegas/PHG4MicromegasHitReco.h>
-#include <g4micromegas/PHG4MicromegasSubsystem.h>
-
-#include <g4mvtx/PHG4MvtxDefs.h>
-#include <g4mvtx/PHG4MvtxDigitizer.h>
-#include <g4mvtx/PHG4MvtxHitReco.h>
-#include <g4mvtx/PHG4MvtxSubsystem.h>
-
-#include <g4tpc/PHG4TpcDigitizer.h>
-#include <g4tpc/PHG4TpcElectronDrift.h>
-#include <g4tpc/PHG4TpcPadPlane.h>
-#include <g4tpc/PHG4TpcPadPlaneReadout.h>
-#include <g4tpc/PHG4TpcSubsystem.h>
-
-#include <intt/InttClusterizer.h>
-#include <micromegas/MicromegasClusterizer.h>
-#include <mvtx/MvtxClusterizer.h>
-#include <tpc/TpcClusterizer.h>
 
 #include <trackreco/PHGenFitTrackProjection.h>
 #include <trackreco/PHGenFitTrkFitter.h>
@@ -49,15 +24,7 @@
 
 #include <phtpctracker/PHTpcTracker.h>
 
-R__LOAD_LIBRARY(libg4tpc.so)
-R__LOAD_LIBRARY(libg4intt.so)
-R__LOAD_LIBRARY(libg4mvtx.so)
-R__LOAD_LIBRARY(libg4micromegas.so)
 R__LOAD_LIBRARY(libg4eval.so)
-R__LOAD_LIBRARY(libintt.so)
-R__LOAD_LIBRARY(libmvtx.so)
-R__LOAD_LIBRARY(libtpc.so)
-R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libPHTpcTracker.so)
 

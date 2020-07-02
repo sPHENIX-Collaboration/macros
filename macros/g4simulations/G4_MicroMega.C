@@ -12,15 +12,24 @@
 
 #include <g4main/PHG4Reco.h>
 
+#include <micromegas/MicromegasClusterizer.h>
+
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libmicromegas.so)
+R__LOAD_LIBRARY(libg4micromegas.so)
 
 namespace Enable
 {
   bool MICROMEGA = false;
   bool MICROMEGA_CELL = false;
+  bool MICROMEGA_CLUSTER = false;
 }  // namespace Enable
+
+namespace G4MICROMEGA
+{
+  int n_micromegas_layer = 2;
+}
 
 void MicroMegaInit()
 {
@@ -51,6 +60,7 @@ void MicroMega(PHG4Reco* g4Reco)
 
 void MicroMega_Cells()
 {
+  Fun4AllServer* se = Fun4AllServer::instance();
   // micromegas
   auto reco = new PHG4MicromegasHitReco;
   reco->Verbosity(0);
@@ -69,4 +79,11 @@ void MicroMega_Cells()
   reco->set_tiles(tiles);
 
   se->registerSubsystem(reco);
+}
+
+void MicroMega_Clustering()
+{
+  Fun4AllServer* se = Fun4AllServer::instance();
+se->registerSubsystem( new PHG4MicromegasDigitizer );
+se->registerSubsystem( new MicromegasClusterizer );
 }
