@@ -2,33 +2,31 @@
 
 #include "GlobalVariables.C"
 
+#include "DisplayOn.C"
 #include "G4Setup_sPHENIX.C"
 #include "G4_Bbc.C"
-#include "G4_Global.C"
 #include "G4_CaloTrigger.C"
-#include "G4_Jets.C"
-#include "G4_HIJetReco.C"
-#include "G4_TopoClusterReco.C"
-#include "G4_ParticleFlow.C"
 #include "G4_DSTReader.C"
+#include "G4_Global.C"
+#include "G4_HIJetReco.C"
 #include "G4_Input.C"
+#include "G4_Jets.C"
+#include "G4_ParticleFlow.C"
+#include "G4_TopoClusterReco.C"
 #include "G4_Tracking.C"
-#include "DisplayOn.C"
 
-#include <fun4all/SubsysReco.h>
-#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
-#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/SubsysReco.h>
 
 #include <phool/PHRandomSeed.h>
 #include <phool/recoConsts.h>
 
-
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libphhepmc.so)
-
 
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
@@ -52,8 +50,7 @@ int Fun4All_G4_sPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-    rc->set_IntFlag("RANDOMSEED", 12345);
-
+  rc->set_IntFlag("RANDOMSEED", 12345);
 
   //===============
   // Input options
@@ -62,7 +59,7 @@ int Fun4All_G4_sPHENIX(
   // read previously generated g4-hits files, in this case it opens a DST and skips
   // the simulations step completely. The G4Setup macro is only loaded to get information
   // about the number of layers used for the cell reco code
-//  Input::READHITS = true;
+  //  Input::READHITS = true;
   INPUTREADHITS::filename = inputFile;
 
   // Or:
@@ -72,7 +69,7 @@ int Fun4All_G4_sPHENIX(
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
 
-//  Input::EMBED = true;
+  //  Input::EMBED = true;
   INPUTEMBED::filename = embed_input_file;
 
   Input::SIMPLE = true;
@@ -100,7 +97,7 @@ int Fun4All_G4_sPHENIX(
   Input::UPSILON_VERBOSITY = 0;
   INPUTUPSILON::AddDecayParticles("e+", "e-", 0);
 
-//  Input::HEPMC = true;
+  //  Input::HEPMC = true;
   Input::VERBOSITY = 0;
   INPUTHEPMC::filename = inputFile;
 
@@ -123,7 +120,6 @@ int Fun4All_G4_sPHENIX(
 
   // turn the display on (default off)
   Enable::DISPLAY = false;
-
 
   //======================
   // What to run
@@ -157,18 +153,18 @@ int Fun4All_G4_sPHENIX(
   Enable::MICROMEGA_CLUSTER = Enable::MICROMEGA_CELL && true;
 
   Enable::TRACKING_TRACK = true;
-   Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && false;
+  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && false;
 
   //Enable::PSTOF = true;
 
-//  Enable::CEMC = true;
+  //  Enable::CEMC = true;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && false;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
 
-//  Enable::HCALIN = true;
+  //  Enable::HCALIN = true;
   Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
@@ -178,7 +174,7 @@ int Fun4All_G4_sPHENIX(
   Enable::MAGNET = true;
   Enable::MAGNET_ABSORBER = true;
 
-//  Enable::HCALOUT = true;
+  //  Enable::HCALOUT = true;
   Enable::HCALOUT_ABSORBER = true;
   Enable::HCALOUT_CELL = Enable::HCALOUT && true;
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
@@ -198,7 +194,7 @@ int Fun4All_G4_sPHENIX(
   Enable::PLUGDOOR_ABSORBER = true;
 
   Enable::GLOBAL_RECO = true;
-//  Enable::GLOBAL_FASTSIM = true;
+  //  Enable::GLOBAL_FASTSIM = true;
 
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && true;
 
@@ -215,7 +211,6 @@ int Fun4All_G4_sPHENIX(
   // particle flow jet reconstruction - needs topoClusters!
   Enable::PARTICLEFLOW = true && Enable::TOPOCLUSTER;
 
-
   //---------------
   // Magnet Settings
   //---------------
@@ -223,7 +218,6 @@ int Fun4All_G4_sPHENIX(
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
   //  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
   G4MAGNET::magfield_rescale = -1.4 / 1.5;  // make consistent with expected Babar field strength of 1.4T
-
 
   //---------------
   // Pythia Decayer
@@ -241,7 +235,6 @@ int Fun4All_G4_sPHENIX(
   //---------------------
   if (!Input::READHITS)
   {
-
     G4Setup();
   }
 
@@ -345,7 +338,6 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::PARTICLEFLOW) ParticleFlow();
 
-
   //----------------------
   // Simulation evaluation
   //----------------------
@@ -377,7 +369,8 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::DSTREADER) G4DSTreader(outputroot + "_DSTReader.root");
 
-  if(Enable::DSTOUT) {
+  if (Enable::DSTOUT)
+  {
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
     if (Enable::DSTOUT_COMPRESS) DstCompress(out);
     se->registerOutputManager(out);
@@ -397,21 +390,20 @@ int Fun4All_G4_sPHENIX(
     return 0;
   }
 
-  if(Enable::DISPLAY)
-    {
-      DisplayOn();
-      // prevent macro from finishing so can see display
-      int i;
-      cout << "***** Enter any integer to proceed" << endl;
-      cin >> i;
-    }
+  if (Enable::DISPLAY)
+  {
+    DisplayOn();
+    // prevent macro from finishing so can see display
+    int i;
+    cout << "***** Enter any integer to proceed" << endl;
+    cin >> i;
+  }
 
   se->run(nEvents);
 
   //-----
   // Exit
   //-----
-
 
   se->End();
   std::cout << "All done" << std::endl;
