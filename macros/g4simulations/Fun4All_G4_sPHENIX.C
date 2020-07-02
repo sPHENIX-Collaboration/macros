@@ -139,17 +139,20 @@ int Fun4All_G4_sPHENIX(
 
   // central tracking
   Enable::MVTX = true;
-//  Enable::MVTX_CELL = Enable::MVTX && true;
+  Enable::MVTX_CELL = Enable::MVTX && true;
 //  Enable::MVTX_CLUSTER = Enable::MVTX_CELL && true;
 
   Enable::INTT = true;
-//  Enable::INTT_CELL = Enable::INTT && true;
+  Enable::INTT_CELL = Enable::INTT && true;
 //  Enable::INTT_CLUSTER = Enable::INTT_CELL && true;
 
   Enable::TPC = true;
   Enable::TPC_ABSORBER = true;
-  // Enable::TPC_CELL = Enable::TPC && true;
+  Enable::TPC_CELL = Enable::TPC && true;
   // Enable::TPC_CLUSTER = Enable::TPC_CELL && true;
+
+  Enable::MICROMEGA = true;
+  Enable::MICROMEGA_CELL = Enable::MICROMEGA && true;
 
   bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
@@ -232,19 +235,15 @@ int Fun4All_G4_sPHENIX(
   // G4P6DECAYER::decayType = EDecayType::kAll;
 
   // Initialize the selected subsystems
-  G4Init(do_tracking);
+  G4Init();
 
-  //---------------
-  // Fun4All server
-  //---------------
-
+  //---------------------
+  // GEANT4 Detector description
+  //---------------------
   if (!Input::READHITS)
   {
-    //---------------------
-    // Detector description
-    //---------------------
 
-    G4Setup(do_tracking);
+    G4Setup();
   }
 
   //---------
@@ -260,7 +259,11 @@ int Fun4All_G4_sPHENIX(
   // Detector Division
   //------------------
 
-  if (do_tracking_cell) Tracking_Cells();
+  if (Enable::MVTX_CELL) Mvtx_Cells();
+  if (Enable::INTT_CELL) Intt_Cells();
+  if (Enable::TPC_CELL) TPC_Cells();
+  if (Enable::MICROMEGA_CELL) MicroMega_Cells();
+//  if (do_tracking_cell) Tracking_Cells();
 
   if (Enable::CEMC_CELL) CEMC_Cells();
 
