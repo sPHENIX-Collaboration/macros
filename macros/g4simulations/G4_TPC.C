@@ -37,7 +37,7 @@ namespace G4TPC
   int n_tpc_layer_mid = 16;
   int n_tpc_layer_outer = 16;
   int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
-  double tpc_outer_radius = 77. + 1.17;
+  double tpc_outer_radius = 77. + 2.;
 }  // namespace G4TPC
 
 void TPCInit()
