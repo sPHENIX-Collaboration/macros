@@ -296,7 +296,11 @@ int Fun4All_G4_fsPHENIX(
   if (Enable::INTT_CLUSTER) Intt_Clustering();
   if (Enable::TPC_CLUSTER) TPC_Clustering();
 
-  if (Enable::TRACKING_TRACK) Tracking_Reco();
+  if (Enable::TRACKING_TRACK)
+  {
+    TrackingInit();
+    Tracking_Reco();
+  }
 
   //--------------
   // FGEM tracking
