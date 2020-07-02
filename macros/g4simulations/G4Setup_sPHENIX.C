@@ -201,9 +201,6 @@ int G4Setup()
 
 void ShowerCompress(int verbosity = 0)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4eval.so");
-
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4DstCompressReco *compress = new PHG4DstCompressReco("PHG4DstCompressReco");
