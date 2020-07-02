@@ -255,7 +255,7 @@ int G4Setup()
 
   if (Enable::MAGNET)
   {
-    radius = Magnet(g4Reco, radius, 0);
+    radius = Magnet(g4Reco, radius);
   }
   //----------------------------------------
   // HCALOUT
