@@ -157,7 +157,6 @@ int Fun4All_G4_sPHENIX(
   Enable::TRACKING_TRACK = true;
   Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;
 
-
   Enable::CEMC = true;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
