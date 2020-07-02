@@ -39,7 +39,7 @@ int Fun4All_G4_EICDetector(
   // PHRandomSeed() which reads /dev/urandom to get its seed
   // if the RANDOMSEED flag is set its value is taken as initial seed
   // which will produce identical results so you can debug your code
-  rc->set_IntFlag("RANDOMSEED", 12345);
+  // rc->set_IntFlag("RANDOMSEED", 12345);
 
   //===============
   // Input options
