@@ -50,7 +50,7 @@ int Fun4All_G4_sPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  rc->set_IntFlag("RANDOMSEED", 12345);
+  // rc->set_IntFlag("RANDOMSEED", 12345);
 
   //===============
   // Input options
@@ -131,15 +131,17 @@ int Fun4All_G4_sPHENIX(
 
   Enable::BBC = true;
 
-//  Enable::PIPE = true;
+  Enable::PIPE = true;
   Enable::PIPE_ABSORBER = true;
+
+  //Enable::PSTOF = true;
 
   // central tracking
   Enable::MVTX = true;
   Enable::MVTX_CELL = Enable::MVTX && true;
   Enable::MVTX_CLUSTER = Enable::MVTX_CELL && true;
 
-//  Enable::INTT = true;
+  Enable::INTT = true;
   Enable::INTT_CELL = Enable::INTT && true;
   Enable::INTT_CLUSTER = Enable::INTT_CELL && true;
 
@@ -153,28 +155,27 @@ int Fun4All_G4_sPHENIX(
   Enable::MICROMEGA_CLUSTER = Enable::MICROMEGA_CELL && true;
 
   Enable::TRACKING_TRACK = true;
-  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && false;
+  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;
 
-  //Enable::PSTOF = true;
 
-  //  Enable::CEMC = true;
+  Enable::CEMC = true;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && false;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
 
-  //  Enable::HCALIN = true;
+  Enable::HCALIN = true;
   Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
   Enable::HCALIN_CLUSTER = Enable::HCALIN_TOWER && true;
   Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && true;
 
-  //Enable::MAGNET = true;
+  Enable::MAGNET = true;
   Enable::MAGNET_ABSORBER = true;
 
-  //  Enable::HCALOUT = true;
+  Enable::HCALOUT = true;
   Enable::HCALOUT_ABSORBER = true;
   Enable::HCALOUT_CELL = Enable::HCALOUT && true;
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
@@ -196,15 +197,15 @@ int Fun4All_G4_sPHENIX(
   Enable::GLOBAL_RECO = true;
   //  Enable::GLOBAL_FASTSIM = true;
 
-  Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && true;
+  Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && false;
 
-  //Enable::JETS = true;
+  Enable::JETS = true;
   Enable::JETS_EVAL = Enable::JETS && true;
 
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
   // single particle / p+p-only simulations, or for p+Au / Au+Au
   // simulations which don't particularly care about jets)
-  Enable::HIJETS = true && Enable::JETS && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
+  Enable::HIJETS = false && Enable::JETS && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
 
   // 3-D topoCluster reconstruction, potentially in all calorimeter layers
   Enable::TOPOCLUSTER = true && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
@@ -213,7 +214,7 @@ int Fun4All_G4_sPHENIX(
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
-  BlackHoleGeometry::visible = true;
+  //BlackHoleGeometry::visible = true;
 
   //---------------
   // Magnet Settings
