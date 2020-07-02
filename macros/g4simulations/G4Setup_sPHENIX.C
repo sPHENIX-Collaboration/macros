@@ -15,13 +15,19 @@
 #include "G4_PlugDoor.C"
 #include "G4_TPC.C"
 
-#include <fun4all/Fun4AllServer.h>
 #include <g4detectors/PHG4CylinderSubsystem.h>
+
 #include <g4eval/PHG4DstCompressReco.h>
+
 #include <g4main/PHG4Reco.h>
 #include <g4main/PHG4TruthSubsystem.h>
+
 #include <phfield/PHFieldConfig.h>
+
 #include <g4decayer/EDecayType.hh>
+
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
 
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
