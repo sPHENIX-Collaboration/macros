@@ -12,6 +12,7 @@
 #include "G4_Mvtx.C"
 #include "G4_HcalOut_ref.C"
 #include "G4_PlugDoor.C"
+#include "G4_MicroMega.C"
 #include "G4_FEMC.C"
 #include "G4_TPC.C"
 
@@ -28,7 +29,7 @@
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 
-void G4Init(const bool do_tracking = true)
+void G4Init()
   {
 
   // load detector/material macros and execute Init() function
@@ -40,11 +41,7 @@ void G4Init(const bool do_tracking = true)
   if (Enable::MVTX) MvtxInit();
   if (Enable::INTT) InttInit();
   if (Enable::TPC) TPCInit();
-
-  if (do_tracking)
-    {
-      TrackingInit();
-    }
+  if (Enable::MICROMEGA) MicroMegaInit();
 
   if (Enable::PSTOF)
     {
@@ -82,7 +79,7 @@ void G4Init(const bool do_tracking = true)
 }
 
 
-int G4Setup(const bool do_tracking = true)
+int G4Setup()
 {
   
   //---------------
@@ -122,15 +119,14 @@ int G4Setup(const bool do_tracking = true)
   // PIPE
   if (Enable::PIPE) radius = Pipe(g4Reco, radius);
 
+  //----------------------------------------
+  // TRACKING
   if (Enable::MVTX) radius = Mvtx(g4Reco, radius);
   if (Enable::INTT) radius = Intt(g4Reco, radius);
   if (Enable::TPC) radius = TPC(g4Reco, radius);
+  if (Enable::MICROMEGA) MicroMega(g4Reco);
 
   
-  //----------------------------------------
-  // TRACKING
-  if (do_tracking) radius = Tracking(g4Reco, radius, 1);
-
   //----------------------------------------
   // PSTOF
   
