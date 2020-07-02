@@ -137,6 +137,20 @@ int Fun4All_G4_sPHENIX(
   Enable::PIPE = true;
   Enable::PIPE_ABSORBER = true;
 
+  // central tracking
+  Enable::MVTX = true;
+//  Enable::MVTX_CELL = Enable::MVTX && true;
+//  Enable::MVTX_CLUSTER = Enable::MVTX_CELL && true;
+
+  Enable::INTT = true;
+//  Enable::INTT_CELL = Enable::INTT && true;
+//  Enable::INTT_CLUSTER = Enable::INTT_CELL && true;
+
+  Enable::TPC = true;
+  Enable::TPC_ABSORBER = true;
+  // Enable::TPC_CELL = Enable::TPC && true;
+  // Enable::TPC_CLUSTER = Enable::TPC_CELL && true;
+
   bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
   bool do_tracking_cluster = do_tracking_cell && true;
@@ -145,14 +159,14 @@ int Fun4All_G4_sPHENIX(
 
   //Enable::PSTOF = true;
 
-  Enable::CEMC = true;
+//  Enable::CEMC = true;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && false;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
 
-  Enable::HCALIN = true;
+//  Enable::HCALIN = true;
   Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
@@ -162,7 +176,7 @@ int Fun4All_G4_sPHENIX(
   Enable::MAGNET = true;
   Enable::MAGNET_ABSORBER = true;
 
-  Enable::HCALOUT = true;
+//  Enable::HCALOUT = true;
   Enable::HCALOUT_ABSORBER = true;
   Enable::HCALOUT_CELL = Enable::HCALOUT && true;
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
@@ -186,7 +200,7 @@ int Fun4All_G4_sPHENIX(
 
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && true;
 
-  Enable::JETS = true;
+  //Enable::JETS = true;
   Enable::JETS_EVAL = Enable::JETS && true;
 
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for

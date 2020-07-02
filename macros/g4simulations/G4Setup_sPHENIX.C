@@ -5,12 +5,15 @@
 #include "G4_Pipe.C"
 #include "G4_Tracking.C"
 #include "G4_PSTOF.C"
+#include "G4_Intt.C"
 #include "G4_CEmc_Spacal.C"
 #include "G4_HcalIn_ref.C"
 #include "G4_Magnet.C"
+#include "G4_Mvtx.C"
 #include "G4_HcalOut_ref.C"
 #include "G4_PlugDoor.C"
 #include "G4_FEMC.C"
+#include "G4_TPC.C"
 
 #include <g4eval/PHG4DstCompressReco.h>
 #include <fun4all/Fun4AllServer.h>
@@ -34,9 +37,12 @@ void G4Init(const bool do_tracking = true)
     {
       PipeInit();
     }  
+  if (Enable::MVTX) MvtxInit();
+  if (Enable::INTT) InttInit();
+  if (Enable::TPC) TPCInit();
+
   if (do_tracking)
     {
-      gROOT->LoadMacro("G4_Tracking.C"); 
       TrackingInit();
     }
 
@@ -115,6 +121,11 @@ int G4Setup(const bool do_tracking = true)
   //----------------------------------------
   // PIPE
   if (Enable::PIPE) radius = Pipe(g4Reco, radius);
+
+  if (Enable::MVTX) radius = Mvtx(g4Reco, radius);
+  if (Enable::INTT) radius = Intt(g4Reco, radius);
+  if (Enable::TPC) radius = TPC(g4Reco, radius);
+
   
   //----------------------------------------
   // TRACKING

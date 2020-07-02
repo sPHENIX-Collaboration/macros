@@ -1,6 +1,9 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 00, 0)
+
 #include "GlobalVariables.C"
+
+#include "G4_Mvtx.C"
+#include "G4_Intt.C"
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -59,10 +62,6 @@ R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libPHTpcTracker.so)
 
-#endif
-
-#include <vector>
-
 // Tracking simulation setup parameters and flag - leave them alone!
 //==============================================
 
@@ -70,21 +69,21 @@ R__LOAD_LIBRARY(libPHTpcTracker.so)
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
 
 /////////////// INTT
-int n_intt_layer = 4;  // must be 4 or 0, setting to zero removes INTT completely
-int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
-		       PHG4InttDefs::SEGMENTATION_PHI,
-		       PHG4InttDefs::SEGMENTATION_PHI,
-		       PHG4InttDefs::SEGMENTATION_PHI};
-int nladder[4] = {15,  15, 18, 18};
-double sensor_radius[4] = { 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
-double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3]};
-enum enu_InttDeadMapType      // Dead map options for INTT
-{
-  kInttNoDeadMap = 0,        // All channel in Intt is alive
-  kIntt4PercentDeadMap = 4,  // 4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
-  kIntt8PercentDeadMap = 8   // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
-};
-enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
+ int n_intt_layer = 4;  // must be 4 or 0, setting to zero removes INTT completely
+ int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
+ 		       PHG4InttDefs::SEGMENTATION_PHI,
+ 		       PHG4InttDefs::SEGMENTATION_PHI,
+ 		       PHG4InttDefs::SEGMENTATION_PHI};
+ int nladder[4] = {15,  15, 18, 18};
+ double sensor_radius[4] = { 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
+ double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3]};
+ enum enu_InttDeadMapType      // Dead map options for INTT
+ {
+   kInttNoDeadMap = 0,        // All channel in Intt is alive
+   kIntt4PercentDeadMap = 4,  // 4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
+   kIntt8PercentDeadMap = 8   // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
+ };
+ enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
 
 ///////////////// TPC
 int n_tpc_layer_inner = 16;
@@ -125,102 +124,75 @@ double Tracking(PHG4Reco* g4Reco, double radius,
                 const int absorberactive = 0,
                 int verbosity = 0)
 {
-  // create the three tracker subsystems
-  gSystem->Load("libg4mvtx.so");
+  // if (n_intt_layer > 0)
+  // {
+  //   //-------------------
+  //   // INTT ladders
+  //   //-------------------
 
-  if (n_maps_layer > 0)
-  {
-    bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
+  //   bool intt_overlapcheck = false;  // set to true if you want to check for overlaps
 
-    // MAPS inner barrel layers
-    //======================================================
-    // YCM (2020-01-08): Using default values from PHG4MvtxSubsystem and PHG4MvtxDefs....
+  //   // instantiate the INTT subsystem and register it
+  //   // We make one instance of PHG4INTTSubsystem for all four layers of tracker
+  //   // dimensions are in mm, angles are in radians
 
-    PHG4MvtxSubsystem* mvtx = new PHG4MvtxSubsystem("MVTX");
-    mvtx->Verbosity(verbosity);
+  //   // PHG4InttSubsystem creates the detetor layer using PHG4InttDetector
+  //   // and instantiates the appropriate PHG4SteppingAction
+  //   const double intt_radius_max = 140.;  // including stagger radius (mm)
 
-    for (int ilayer = 0; ilayer < n_maps_layer; ilayer++)
-    {
-      double radius_lyr = PHG4MvtxDefs::mvtxdat[ilayer][PHG4MvtxDefs::kRmd];
-      if (verbosity)
-        cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << endl;
-      radius = radius_lyr;
-    }
-    mvtx->set_string_param(PHG4MvtxDefs::GLOBAL ,"stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v1.gdml"));
-    mvtx->SetActive(1);
-    mvtx->OverlapCheck(maps_overlapcheck);
-    g4Reco->registerSubsystem(mvtx);
-  }
+  //   // The length of vpair is used to determine the number of layers
+  //   std::vector<std::pair<int, int>> vpair;  // (sphxlayer, inttlayer)
+  //   for (int i = 0; i < n_intt_layer; i++)
+  //   {
+  //     // We want the sPHENIX layer numbers for the Intt to be from n_maps_layer to n_maps_layer+n_intt_layer - 1
+  //     vpair.push_back(std::make_pair(n_maps_layer + i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
+  //     if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
+  //   }
 
-  if (n_intt_layer > 0)
-  {
-    //-------------------
-    // INTT ladders
-    //-------------------
+  //   PHG4InttSubsystem* sitrack = new PHG4InttSubsystem("INTT", vpair);
+  //   sitrack->Verbosity(verbosity);
+  //   sitrack->SetActive(1);
+  //   sitrack->OverlapCheck(intt_overlapcheck);
+  //   g4Reco->registerSubsystem(sitrack);
 
-    bool intt_overlapcheck = false;  // set to true if you want to check for overlaps
+  //   // Set the laddertype and ladder spacing configuration
 
-    // instantiate the INTT subsystem and register it
-    // We make one instance of PHG4INTTSubsystem for all four layers of tracker
-    // dimensions are in mm, angles are in radians
+  //   cout << "Intt has " << n_intt_layer << " layers with layer setup:" << endl;
+  //   for(int i=0;i<n_intt_layer;i++)
+  //     {
+  // 	cout << " Intt layer " << i << " laddertype " << laddertype[i] << " nladders " << nladder[i]
+  // 	     << " sensor radius " << sensor_radius[i] << " offsetphi " << offsetphi[i] << endl;
+  // 	sitrack->set_int_param(i, "laddertype", laddertype[i]);
+  // 	sitrack->set_int_param(i, "nladder", nladder[i]);
+  // 	sitrack->set_double_param(i,"sensor_radius", sensor_radius[i]);  // expecting cm
+  // 	sitrack->set_double_param(i,"offsetphi",offsetphi[i]);  // expecting degrees
+  //     }
 
-    // PHG4InttSubsystem creates the detetor layer using PHG4InttDetector
-    // and instantiates the appropriate PHG4SteppingAction
-    const double intt_radius_max = 140.;  // including stagger radius (mm)
-
-    // The length of vpair is used to determine the number of layers
-    std::vector<std::pair<int, int>> vpair;  // (sphxlayer, inttlayer)
-    for (int i = 0; i < n_intt_layer; i++)
-    {
-      // We want the sPHENIX layer numbers for the Intt to be from n_maps_layer to n_maps_layer+n_intt_layer - 1
-      vpair.push_back(std::make_pair(n_maps_layer + i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
-      if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
-    }
-
-    PHG4InttSubsystem* sitrack = new PHG4InttSubsystem("INTT", vpair);
-    sitrack->Verbosity(verbosity);
-    sitrack->SetActive(1);
-    sitrack->OverlapCheck(intt_overlapcheck);
-    g4Reco->registerSubsystem(sitrack);
-
-    // Set the laddertype and ladder spacing configuration
-
-    cout << "Intt has " << n_intt_layer << " layers with layer setup:" << endl;
-    for(int i=0;i<n_intt_layer;i++)
-      {
-	cout << " Intt layer " << i << " laddertype " << laddertype[i] << " nladders " << nladder[i]
-	     << " sensor radius " << sensor_radius[i] << " offsetphi " << offsetphi[i] << endl;
-	sitrack->set_int_param(i, "laddertype", laddertype[i]);
-	sitrack->set_int_param(i, "nladder", nladder[i]);
-	sitrack->set_double_param(i,"sensor_radius", sensor_radius[i]);  // expecting cm
-	sitrack->set_double_param(i,"offsetphi",offsetphi[i]);  // expecting degrees
-      }
-
-    // outer radius marker (translation back to cm)
-    radius = intt_radius_max * 0.1;
-  }
+  //   // outer radius marker (translation back to cm)
+  //   radius = intt_radius_max * 0.1;
+  // }
 
 
   // The Tpc - always present!
   //================================
-  gSystem->Load("libg4tpc.so");
+  // gSystem->Load("libg4tpc.so");
 
-  PHG4TpcSubsystem* tpc = new PHG4TpcSubsystem("TPC");
-  tpc->SetActive();
-  tpc->SuperDetector("TPC");
-  tpc->set_double_param("steplimits", 1);
-  // By default uses "sPHENIX_TPC_Gas", defined in PHG4Reco. That is 90:10 Ne:C4
+  // PHG4TpcSubsystem* tpc = new PHG4TpcSubsystem("TPC");
+  // tpc->SetActive();
+  // tpc->SuperDetector("TPC");
+  // tpc->set_double_param("steplimits", 1);
+  // // By default uses "sPHENIX_TPC_Gas", defined in PHG4Reco. That is 90:10 Ne:C4
 
-  if (absorberactive)
-  {
-    tpc->SetAbsorberActive();
-  }
-  tpc->OverlapCheck(overlapcheck);
+  // if (absorberactive)
+  // {
+  //   tpc->SetAbsorberActive();
+  // }
+  // tpc->OverlapCheck(overlapcheck);
 
-  g4Reco->registerSubsystem(tpc);
+  // g4Reco->registerSubsystem(tpc);
 
-  radius = 77. + 1.17;
-  radius += no_overlapp;
+  // radius = 77. + 1.17;
+  // radius += no_overlapp;
 
   // micromegas
   if( enable_micromegas )
