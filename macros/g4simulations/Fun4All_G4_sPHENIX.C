@@ -26,7 +26,6 @@
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
-R__LOAD_LIBRARY(libphhepmc.so)
 
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
