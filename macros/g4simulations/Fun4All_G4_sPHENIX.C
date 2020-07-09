@@ -16,10 +16,8 @@
 #include "G4_Tracking.C"
 
 #include <fun4all/Fun4AllDstOutputManager.h>
-#include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
-#include <fun4all/SubsysReco.h>
 
 #include <phool/PHRandomSeed.h>
 #include <phool/recoConsts.h>
@@ -99,7 +97,9 @@ int Fun4All_G4_sPHENIX(
   InputInit();
 
   //--------------
-  // Set generator specific options, can only be set after InputInit() is called
+  // Set generator specific options
+  //--------------
+  // can only be set after InputInit() is called
 
   // Simple Input generator:
   if (Input::SIMPLE)
@@ -140,6 +140,7 @@ int Fun4All_G4_sPHENIX(
 
   // register all input generators with Fun4All
   InputRegister();
+
   //======================
   // Write the DST
   //======================
