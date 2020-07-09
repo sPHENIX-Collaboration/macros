@@ -7,10 +7,10 @@
 #include <phpythia8/PHPythia8.h>
 
 #include <g4main/HepMCNodeReader.h>
-#include <g4main/ReadEICFiles.h>
 #include <g4main/PHG4ParticleGeneratorVectorMeson.h>
 #include <g4main/PHG4ParticleGun.h>
 #include <g4main/PHG4SimpleEventGenerator.h>
+#include <g4main/ReadEICFiles.h>
 
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phhepmc/Fun4AllHepMCPileupInputManager.h>
@@ -85,7 +85,7 @@ namespace PILEUP
 {
   string pileupfile = "/sphenix/sim/sim01/sHijing/sHijing_0-12fm.dat";
   double TpcDriftVelocity = 8.0 / 1000.0;
-}
+}  // namespace PILEUP
 
 // collection of pointers to particle generators we can grab in the Fun4All macro
 namespace INPUTGENERATOR
@@ -97,7 +97,7 @@ namespace INPUTGENERATOR
   PHPythia8 *Pythia8 = nullptr;
   PHSartre *Sartre = nullptr;
   PHSartreParticleTrigger *SartreTrigger = nullptr;
-}
+}  // namespace INPUTGENERATOR
 
 void InputInit()
 {
@@ -122,7 +122,7 @@ void InputInit()
   }
   if (Input::PYTHIA8)
   {
-   INPUTGENERATOR::Pythia8 = new PHPythia8();
+    INPUTGENERATOR::Pythia8 = new PHPythia8();
     // see coresoftware/generators/PHPythia8 for example config
     INPUTGENERATOR::Pythia8->set_config_file(PYTHIA8::config_file);
   }
@@ -144,13 +144,12 @@ void InputInit()
   }
   if (Input::GUN)
   {
-    INPUTGENERATOR::Gun = new  PHG4ParticleGun();
+    INPUTGENERATOR::Gun = new PHG4ParticleGun();
   }
   if (Input::UPSILON)
   {
     INPUTGENERATOR::VectorMesonGenerator = new PHG4ParticleGeneratorVectorMeson();
   }
-
 }
 
 void InputRegister()
@@ -171,6 +170,7 @@ void InputRegister()
   }
   if (Input::SIMPLE)
   {
+    INPUTGENERATOR::SimpleEventGenerator->Verbosity(Input::SIMPLE_VERBOSITY);
     se->registerSubsystem(INPUTGENERATOR::SimpleEventGenerator);
   }
   if (Input::UPSILON)
@@ -179,8 +179,8 @@ void InputRegister()
     {
       INPUTGENERATOR::VectorMesonGenerator->set_reuse_existing_vertex(true);
     }
-  INPUTGENERATOR::VectorMesonGenerator->Verbosity(Input::UPSILON_VERBOSITY);
-  INPUTGENERATOR::VectorMesonGenerator->Embed(2);
+    INPUTGENERATOR::VectorMesonGenerator->Verbosity(Input::UPSILON_VERBOSITY);
+    INPUTGENERATOR::VectorMesonGenerator->Embed(2);
     se->registerSubsystem(INPUTGENERATOR::VectorMesonGenerator);
   }
   if (Input::GUN)
@@ -242,7 +242,7 @@ void InputManagers()
     pileup->AddFile(PILEUP::pileupfile);
     pileup->set_collision_rate(Input::PILEUPRATE);
     double time_window = 105.5 / PILEUP::TpcDriftVelocity;
-    pileup->set_time_window(-time_window,time_window);
+    pileup->set_time_window(-time_window, time_window);
     se->registerInputManager(pileup);
   }
 }

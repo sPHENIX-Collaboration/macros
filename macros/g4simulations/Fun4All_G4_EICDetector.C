@@ -136,7 +136,7 @@ int Fun4All_G4_EICDetector(
     INPUTGENERATOR::Gun->AddParticle("pi-", 0, 1, 0);
     INPUTGENERATOR::Gun->set_vtx(0, 0, 0);
   }
-// pythia6
+  // pythia6
   if (Input::PYTHIA6)
   {
     INPUTGENERATOR::Pythia6->set_config_file("phpythia6_ep.cfg");
@@ -149,7 +149,7 @@ int Fun4All_G4_EICDetector(
   // Write the DST
   //======================
 
-//  Enable::DSTOUT = true;
+  //  Enable::DSTOUT = true;
   Enable::DSTOUT_COMPRESS = false;  // Compress DST files
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   //Enable::DSTREADER = true;
