@@ -5,7 +5,7 @@
 #include "G4_Intt.C"
 #include "G4_Mvtx.C"
 #include "G4_TPC.C"
-#include "G4_MicroMegas.C"
+#include "G4_Micromegas.C"
 
 #include <fun4all/Fun4AllServer.h>
 
