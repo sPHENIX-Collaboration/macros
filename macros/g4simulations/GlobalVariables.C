@@ -11,13 +11,13 @@ namespace Input
   bool HEPMC = false;
   bool EMBED = false;
   bool READEIC = false;
-}
+}  // namespace Input
 
 namespace DstOut
 {
   string OutputDir = ".";
   string OutputFile = "test.root";
-}
+}  // namespace DstOut
 
 // Global settings affecting multiple subsystems
 namespace Enable
@@ -27,7 +27,7 @@ namespace Enable
   bool DSTOUT = false;
   bool DSTOUT_COMPRESS = false;
   int VERBOSITY = 0;
-}
+}  // namespace Enable
 
 // every G4 subsystem needs to implement this
 // rather than forcing another include file,
