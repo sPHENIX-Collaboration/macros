@@ -31,7 +31,7 @@ namespace G4MICROMEGAS
   int n_micromegas_layer = 2;
 }
 
-void MicroMegasInit()
+void MicromegasInit()
 {
   if (!Enable::MVTX)
   {
@@ -51,7 +51,7 @@ void MicroMegasInit()
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -220. / 2.);
 }
 
-void MicroMegas(PHG4Reco* g4Reco)
+void Micromegas(PHG4Reco* g4Reco)
 {
   const int mm_layer = G4MVTX::n_maps_layer + G4INTT::n_intt_layer + G4TPC::n_gas_layer;
   auto mm = new PHG4MicromegasSubsystem("MICROMEGAS", mm_layer);
@@ -61,7 +61,7 @@ void MicroMegas(PHG4Reco* g4Reco)
   g4Reco->registerSubsystem(mm);
 }
 
-void MicroMegas_Cells()
+void Micromegas_Cells()
 {
   Fun4AllServer* se = Fun4AllServer::instance();
   // micromegas
@@ -84,7 +84,7 @@ void MicroMegas_Cells()
   se->registerSubsystem(reco);
 }
 
-void MicroMegas_Clustering()
+void Micromegas_Clustering()
 {
   Fun4AllServer* se = Fun4AllServer::instance();
   se->registerSubsystem(new PHG4MicromegasDigitizer);

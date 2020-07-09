@@ -46,7 +46,7 @@ void G4Init()
   if (Enable::MVTX) MvtxInit();
   if (Enable::INTT) InttInit();
   if (Enable::TPC) TPCInit();
-  if (Enable::MICROMEGAS) MicroMegasInit();
+  if (Enable::MICROMEGAS) MicromegasInit();
 
   if (Enable::PSTOF)
   {
@@ -142,7 +142,7 @@ int G4Setup()
   if (Enable::MVTX) radius = Mvtx(g4Reco, radius);
   if (Enable::INTT) radius = Intt(g4Reco, radius);
   if (Enable::TPC) radius = TPC(g4Reco, radius);
-  if (Enable::MICROMEGAS) MicroMegas(g4Reco);
+  if (Enable::MICROMEGAS) Micromegas(g4Reco);
 
   //----------------------------------------
   // PSTOF

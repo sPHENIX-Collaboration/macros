@@ -289,7 +289,7 @@ int Fun4All_G4_sPHENIX(
   if (Enable::MVTX_CELL) Mvtx_Cells();
   if (Enable::INTT_CELL) Intt_Cells();
   if (Enable::TPC_CELL) TPC_Cells();
-  if (Enable::MICROMEGAS_CELL) MicroMegas_Cells();
+  if (Enable::MICROMEGAS_CELL) Micromegas_Cells();
 
   if (Enable::CEMC_CELL) CEMC_Cells();
 
@@ -330,7 +330,7 @@ int Fun4All_G4_sPHENIX(
   if (Enable::MVTX_CLUSTER) Mvtx_Clustering();
   if (Enable::INTT_CLUSTER) Intt_Clustering();
   if (Enable::TPC_CLUSTER) TPC_Clustering();
-  if (Enable::MICROMEGAS_CLUSTER) MicroMegas_Clustering();
+  if (Enable::MICROMEGAS_CLUSTER) Micromegas_Clustering();
 
   if (Enable::TRACKING_TRACK)
   {
