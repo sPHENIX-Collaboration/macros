@@ -11,7 +11,6 @@ static double no_overlapp = 0.0001;  // added to radii to avoid overlapping volu
 namespace Input
 {
   bool HEPMC = false;
-  int HEPMC_VERBOSITY = 0;
   bool EMBED = false;
   bool READEIC = false;
 }
