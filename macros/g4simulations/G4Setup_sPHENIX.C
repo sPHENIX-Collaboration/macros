@@ -4,6 +4,7 @@
 
 #include "G4_BlackHole.C"
 #include "G4_CEmc_Spacal.C"
+#include "G4_CEmc_Albedo.C"
 #include "G4_FEMC.C"
 #include "G4_HcalIn_ref.C"
 #include "G4_HcalOut_ref.C"
@@ -53,9 +54,19 @@ void G4Init()
     PSTOFInit();
   }
 
+  if (Enable::CEMCALBEDO)
+  {
+    CEmcAlbedoInit();
+  }
+
   if (Enable::CEMC)
   {
-    CEmcInit(72);  // make it 2*2*2*3*3 so we can try other combinations
+    if (Enable::CEMCALBEDO)
+    {
+      cout << "Enable::CEMCALBEDO and Enable::CEMC cannot be set simultanously" << endl;
+      gSystem->Exit(1);
+    }
+    CEmcInit();  // make it 2*2*2*3*3 so we can try other combinations
   }
 
   if (Enable::HCALIN)
@@ -150,7 +161,8 @@ int G4Setup()
   if (Enable::PSTOF) radius = PSTOF(g4Reco, radius);
 
   //----------------------------------------
-  // CEMC
+  // CEMC (it is checked above that not both of them are set
+  if (Enable::CEMCALBEDO) CEmcAlbedo(g4Reco);
 
   if (Enable::CEMC) radius = CEmc(g4Reco, radius, 8);
 
