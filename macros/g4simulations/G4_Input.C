@@ -2,16 +2,15 @@
 
 #include "GlobalVariables.C"
 
-#include "G4_Input_Gun.C"
-#include "G4_Input_Simple.C"
-#include "G4_Input_Upsilon.C"
-
 #include <phpythia6/PHPythia6.h>
 
 #include <phpythia8/PHPythia8.h>
 
 #include <g4main/HepMCNodeReader.h>
 #include <g4main/ReadEICFiles.h>
+#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
+#include <g4main/PHG4ParticleGun.h>
+#include <g4main/PHG4SimpleEventGenerator.h>
 
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phhepmc/Fun4AllHepMCPileupInputManager.h>
@@ -33,10 +32,16 @@ R__LOAD_LIBRARY(libPHSartre.so)
 
 namespace Input
 {
+  bool GUN = false;
+  int GUN_VERBOSITY = 0;
   bool READHITS = false;
   bool PYTHIA6 = false;
   bool PYTHIA8 = false;
   bool SARTRE = false;
+  bool SIMPLE = false;
+  int SIMPLE_VERBOSITY = 0;
+  bool UPSILON = false;
+  int UPSILON_VERBOSITY = 0;
   double PILEUPRATE = 0.;
   int VERBOSITY = 0;
 }  // namespace Input
@@ -82,6 +87,18 @@ namespace PILEUP
   double TpcDriftVelocity = 8.0 / 1000.0;
 }
 
+// collection of pointers to particle generators we can grab in the Fun4All macro
+namespace INPUTGENERATOR
+{
+  PHG4ParticleGeneratorVectorMeson *VectorMesonGenerator = nullptr;
+  PHG4SimpleEventGenerator *SimpleEventGenerator = nullptr;
+  PHG4ParticleGun *Gun = nullptr;
+  PHPythia6 *Pythia6 = nullptr;
+  PHPythia8 *Pythia8 = nullptr;
+  PHSartre *Sartre = nullptr;
+  PHSartreParticleTrigger *SartreTrigger = nullptr;
+}
+
 void InputInit()
 {
   // first consistency checks - not all input generators play nice
@@ -100,44 +117,77 @@ void InputInit()
   Fun4AllServer *se = Fun4AllServer::instance();
   if (Input::PYTHIA6)
   {
-    PHPythia6 *pythia6 = new PHPythia6();
-    pythia6->set_config_file(PYTHIA6::config_file);
-    se->registerSubsystem(pythia6);
+    INPUTGENERATOR::Pythia6 = new PHPythia6();
+    INPUTGENERATOR::Pythia6->set_config_file(PYTHIA6::config_file);
   }
   if (Input::PYTHIA8)
   {
-    PHPythia8 *pythia8 = new PHPythia8();
+   INPUTGENERATOR::Pythia8 = new PHPythia8();
     // see coresoftware/generators/PHPythia8 for example config
-    pythia8->set_config_file(PYTHIA8::config_file);
-    se->registerSubsystem(pythia8);
+    INPUTGENERATOR::Pythia8->set_config_file(PYTHIA8::config_file);
   }
   if (Input::SARTRE)
   {
-    PHSartre *mysartre = new PHSartre();
-    mysartre->set_config_file(SARTRE::config_file);
+    INPUTGENERATOR::Sartre = new PHSartre();
+    INPUTGENERATOR::Sartre->set_config_file(SARTRE::config_file);
     // particle trigger to enhance forward J/Psi -> ee
-    PHSartreParticleTrigger *pTrig = new PHSartreParticleTrigger("MySartreTrigger");
-    pTrig->AddParticles(-11);
-    //pTrig->SetEtaHighLow(4.0,1.4);
-    pTrig->SetEtaHighLow(1.0, -1.1);  // central arm
-    pTrig->PrintConfig();
-    mysartre->register_trigger((PHSartreGenTrigger *) pTrig);
-    se->registerSubsystem(mysartre);
+    INPUTGENERATOR::SartreTrigger = new PHSartreParticleTrigger("MySartreTrigger");
+    INPUTGENERATOR::SartreTrigger->AddParticles(-11);
+    //INPUTGENERATOR::SartreTrigger->SetEtaHighLow(4.0,1.4);
+    INPUTGENERATOR::SartreTrigger->SetEtaHighLow(1.0, -1.1);  // central arm
+    INPUTGENERATOR::SartreTrigger->PrintConfig();
   }
 
   if (Input::SIMPLE)
   {
-    InputSimpleInit();
+    INPUTGENERATOR::SimpleEventGenerator = new PHG4SimpleEventGenerator();
   }
   if (Input::GUN)
   {
-    InputGunInit();
+    INPUTGENERATOR::Gun = new  PHG4ParticleGun();
   }
   if (Input::UPSILON)
   {
-    InputUpsilonInit();
+    INPUTGENERATOR::VectorMesonGenerator = new PHG4ParticleGeneratorVectorMeson();
   }
 
+}
+
+void InputRegister()
+{
+  Fun4AllServer *se = Fun4AllServer::instance();
+  if (Input::PYTHIA6)
+  {
+    se->registerSubsystem(INPUTGENERATOR::Pythia6);
+  }
+  if (Input::PYTHIA8)
+  {
+    se->registerSubsystem(INPUTGENERATOR::Pythia8);
+  }
+  if (Input::SARTRE)
+  {
+    INPUTGENERATOR::Sartre->register_trigger((PHSartreGenTrigger *) INPUTGENERATOR::SartreTrigger);
+    se->registerSubsystem(INPUTGENERATOR::Sartre);
+  }
+  if (Input::SIMPLE)
+  {
+    se->registerSubsystem(INPUTGENERATOR::SimpleEventGenerator);
+  }
+  if (Input::UPSILON)
+  {
+    if (Input::HEPMC || Input::SIMPLE)
+    {
+      INPUTGENERATOR::VectorMesonGenerator->set_reuse_existing_vertex(true);
+    }
+  INPUTGENERATOR::VectorMesonGenerator->Verbosity(Input::UPSILON_VERBOSITY);
+  INPUTGENERATOR::VectorMesonGenerator->Embed(2);
+    se->registerSubsystem(INPUTGENERATOR::VectorMesonGenerator);
+  }
+  if (Input::GUN)
+  {
+    INPUTGENERATOR::Gun->Verbosity(Input::GUN_VERBOSITY);
+    se->registerSubsystem(INPUTGENERATOR::Gun);
+  }
   // here are the various utility modules which read particles and
   // put them onto the G4 particle stack
   if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6)
