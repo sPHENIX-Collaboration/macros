@@ -44,7 +44,7 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 void G4Init()
 {
-// First some check for subsystems which do not go together
+  // First some check for subsystems which do not go together
 
   if (Enable::TPC && Enable::FST)
   {

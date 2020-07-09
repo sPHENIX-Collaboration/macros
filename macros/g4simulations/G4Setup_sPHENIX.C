@@ -29,8 +29,8 @@
 
 #include <g4decayer/EDecayType.hh>
 
-#include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
