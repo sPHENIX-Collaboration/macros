@@ -19,7 +19,6 @@
 #include <phool/recoConsts.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
-R__LOAD_LIBRARY(libg4testbench.so)
 
 // If using the default embedding file results in a error, try
 // TFile *f1 = TFile::Open("http://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/fsPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root")
@@ -82,7 +81,7 @@ int Fun4All_G4_fsPHENIX(
   //Input::GUN_VERBOSITY = 0;
 
   //  Input::HEPMC = true;
-  Input::VERBOSITY = 0;
+  //Input::VERBOSITY = 0;
   INPUTHEPMC::filename = inputFile;
 
   //-----------------

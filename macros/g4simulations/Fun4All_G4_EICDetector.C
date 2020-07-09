@@ -70,7 +70,7 @@ int Fun4All_G4_EICDetector(
 
   // Simple multi particle generator in eta/phi/pt ranges
   Input::SIMPLE = true;
-  Input::SIMPLE_VERBOSITY = 1;
+  // Input::SIMPLE_VERBOSITY = 1;
 
   // Particle gun (same particles in always the same direction)
   //  Input::GUN = true;

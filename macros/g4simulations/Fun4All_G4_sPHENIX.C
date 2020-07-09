@@ -23,7 +23,6 @@
 #include <phool/recoConsts.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
-R__LOAD_LIBRARY(libg4testbench.so)
 
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
@@ -70,14 +69,14 @@ int Fun4All_G4_sPHENIX(
   INPUTEMBED::filename = embed_input_file;
 
   Input::SIMPLE = true;
-  Input::SIMPLE_VERBOSITY = 1;
+  //Input::SIMPLE_VERBOSITY = 1;
 
   //  Input::PYTHIA6 = true;
 
   // Input::PYTHIA8 = true;
 
   //  Input::GUN = true;
-  Input::GUN_VERBOSITY = 1;
+  //Input::GUN_VERBOSITY = 1;
 
   // Upsilon generator
   //  Input::UPSILON = true;
