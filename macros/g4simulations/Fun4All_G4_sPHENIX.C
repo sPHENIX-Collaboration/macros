@@ -12,6 +12,7 @@
 #include "G4_Input.C"
 #include "G4_Jets.C"
 #include "G4_ParticleFlow.C"
+#include "G4_Production.C"
 #include "G4_TopoClusterReco.C"
 #include "G4_Tracking.C"
 
@@ -26,9 +27,11 @@ R__LOAD_LIBRARY(libfun4all.so)
 
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
-    const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
-    const char *outputFile = "G4sPHENIX.root",
-    const char *embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root")
+    const string &inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
+    const string &outputFile = "G4sPHENIX.root",
+    const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
+    const int skip = 0,
+    const string &outdir = ".")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
@@ -124,7 +127,7 @@ int Fun4All_G4_sPHENIX(
   // Upsilons
   if (Input::UPSILON)
   {
-    INPUTGENERATOR::VectorMesonGenerator->add_decay_particles("mu", 0);
+    INPUTGENERATOR::VectorMesonGenerator->add_decay_particles("e", 0);
     INPUTGENERATOR::VectorMesonGenerator->set_rapidity_range(-1, 1);
     INPUTGENERATOR::VectorMesonGenerator->set_pt_range(0., 10.);
     // Y species - select only one, last one wins
@@ -140,12 +143,17 @@ int Fun4All_G4_sPHENIX(
   // register all input generators with Fun4All
   InputRegister();
 
+// set up production relatedstuff
+//   Enable::PRODUCTION = true;
+
   //======================
   // Write the DST
   //======================
 
-  //  Enable::DSTOUT = true;
+  Enable::DSTOUT = true;
   Enable::DSTOUT_COMPRESS = false;
+  DstOut::OutputDir = outdir;
+  DstOut::OutputFile = outputFile;
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   //  Enable::DSTREADER = true;
 
@@ -404,9 +412,15 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::DSTREADER) G4DSTreader(outputroot + "_DSTReader.root");
 
+  if (Enable::PRODUCTION)
+  {
+    Production_CreateOutputDir();
+  }
+
   if (Enable::DSTOUT)
   {
-    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+    string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
+    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", FullOutFile);
     if (Enable::DSTOUT_COMPRESS) DstCompress(out);
     se->registerOutputManager(out);
   }
@@ -434,6 +448,7 @@ int Fun4All_G4_sPHENIX(
     cin >> i;
   }
 
+  se->skip(skip);
   se->run(nEvents);
 
   //-----
@@ -443,6 +458,11 @@ int Fun4All_G4_sPHENIX(
   se->End();
   std::cout << "All done" << std::endl;
   delete se;
+  if (Enable::PRODUCTION)
+  {
+    Production_MoveOutput();
+  }
+
   gSystem->Exit(0);
   return 0;
 }

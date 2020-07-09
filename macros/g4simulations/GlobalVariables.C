@@ -2,9 +2,7 @@
 
 #include <g4decayer/EDecayType.hh>
 
-static bool overlapcheck = false;
-static double no_overlapp = 0.0001;  // added to radii to avoid overlapping volumes
-
+double no_overlapp = 0.0001;
 
 // These Input settings are needed in multiple Input selections
 // Putting those here avoids include file ordering problems
@@ -13,6 +11,12 @@ namespace Input
   bool HEPMC = false;
   bool EMBED = false;
   bool READEIC = false;
+}
+
+namespace DstOut
+{
+  string OutputDir = ".";
+  string OutputFile = "test.root";
 }
 
 // Global settings affecting multiple subsystems
