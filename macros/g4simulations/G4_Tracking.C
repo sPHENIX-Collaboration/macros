@@ -5,7 +5,7 @@
 #include "G4_Intt.C"
 #include "G4_Mvtx.C"
 #include "G4_TPC.C"
-#include "G4_MicroMega.C"
+#include "G4_MicroMegas.C"
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -59,9 +59,9 @@ namespace G4TRACKING
 
 void TrackingInit()
 {
-  if (!Enable::MICROMEGA)
+  if (!Enable::MICROMEGAS)
   {
-    G4MICROMEGA::n_micromegas_layer = 0;
+    G4MICROMEGAS::n_micromegas_layer = 0;
   }
 }
 
@@ -129,7 +129,7 @@ void Tracking_Reco()
       se->registerSubsystem(tracker);
     }
     // Find all clusters associated with each seed track
-    auto track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer, G4MICROMEGA::n_micromegas_layer);
+    auto track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer, G4MICROMEGAS::n_micromegas_layer);
     track_prop->Verbosity(verbosity);
     se->registerSubsystem(track_prop);
     for (int i = 0; i < G4INTT::n_intt_layer; i++)
