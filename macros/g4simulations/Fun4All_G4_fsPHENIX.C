@@ -205,7 +205,7 @@ int Fun4All_G4_fsPHENIX(
   Enable::HCALOUT_EVAL = Enable::HCALOUT_CLUSTER && true;
 
   Enable::GLOBAL_RECO = true;
-//  Enable::GLOBAL_FASTSIM = true;
+  //  Enable::GLOBAL_FASTSIM = true;
 
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && true;
 
