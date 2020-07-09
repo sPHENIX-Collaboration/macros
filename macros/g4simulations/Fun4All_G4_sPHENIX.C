@@ -256,6 +256,7 @@ int Fun4All_G4_sPHENIX(
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
+  //Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
   //BlackHoleGeometry::visible = true;
 
   //---------------
