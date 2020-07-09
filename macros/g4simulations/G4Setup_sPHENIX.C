@@ -9,7 +9,7 @@
 #include "G4_HcalOut_ref.C"
 #include "G4_Intt.C"
 #include "G4_Magnet.C"
-#include "G4_MicroMega.C"
+#include "G4_MicroMegas.C"
 #include "G4_Mvtx.C"
 #include "G4_PSTOF.C"
 #include "G4_Pipe.C"
@@ -46,7 +46,7 @@ void G4Init()
   if (Enable::MVTX) MvtxInit();
   if (Enable::INTT) InttInit();
   if (Enable::TPC) TPCInit();
-  if (Enable::MICROMEGA) MicroMegaInit();
+  if (Enable::MICROMEGAS) MicroMegasInit();
 
   if (Enable::PSTOF)
   {
@@ -142,7 +142,7 @@ int G4Setup()
   if (Enable::MVTX) radius = Mvtx(g4Reco, radius);
   if (Enable::INTT) radius = Intt(g4Reco, radius);
   if (Enable::TPC) radius = TPC(g4Reco, radius);
-  if (Enable::MICROMEGA) MicroMega(g4Reco);
+  if (Enable::MICROMEGAS) MicroMegas(g4Reco);
 
   //----------------------------------------
   // PSTOF
