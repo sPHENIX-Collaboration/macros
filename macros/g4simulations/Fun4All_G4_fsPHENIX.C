@@ -40,15 +40,16 @@ int Fun4All_G4_fsPHENIX(
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  //  se->Verbosity(0); // uncomment for batch production running with minimal output messages
-  //  se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
+  se->Verbosity(0);
+  // Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
+  // PHRandomSeed::Verbosity(1);
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
   // PHRandomSeed() which reads /dev/urandom to get its seed
   // if the RANDOMSEED flag is set its value is taken as initial seed
   // which will produce identical results so you can debug your code
-  // rc->set_IntFlag("RANDOMSEED", 12345);
+  //  rc->set_IntFlag("RANDOMSEED", 12345);
 
   //===============
   // Input options
@@ -72,14 +73,6 @@ int Fun4All_G4_fsPHENIX(
 
   Input::SIMPLE = true;
   //Input::SIMPLE_VERBOSITY = 1;
-  INPUTSIMPLE::AddParticle("pi-", 5);
-  //  INPUTSIMPLE::AddParticle("e-",0);
-  //  INPUTSIMPLE::AddParticle("pi-",10);
-  INPUTSIMPLE::set_eta_range(-1, 3);
-  INPUTSIMPLE::set_phi_range(-M_PI, M_PI);
-  INPUTSIMPLE::set_pt_range(0.5, 50.);
-  INPUTSIMPLE::set_vtx_mean(0., 0., 0.);
-  INPUTSIMPLE::set_vtx_width(0., 0., 5.);
 
   //  Input::PYTHIA6 = true;
 
@@ -87,8 +80,6 @@ int Fun4All_G4_fsPHENIX(
 
   //  Input::GUN = true;
   //Input::GUN_VERBOSITY = 0;
-  INPUTGUN::AddParticle("pi-", 0, 1, 0);
-  //INPUTGUN::set_vtx(0,0,0);
 
   //  Input::HEPMC = true;
   Input::VERBOSITY = 0;
@@ -99,11 +90,56 @@ int Fun4All_G4_fsPHENIX(
   //-----------------
   InputInit();
 
+  //--------------
+  // Set generator specific options
+  //--------------
+  // can only be set after InputInit() is called
+
+  // Simple Input generator:
+  if (Input::SIMPLE)
+  {
+    INPUTGENERATOR::SimpleEventGenerator->add_particles("pi-", 5);
+    if (Input::HEPMC || Input::EMBED)
+    {
+      INPUTGENERATOR::SimpleEventGenerator->set_reuse_existing_vertex(true);
+      INPUTGENERATOR::SimpleEventGenerator->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+    }
+    else
+    {
+      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
+                                                                             PHG4SimpleEventGenerator::Uniform,
+                                                                             PHG4SimpleEventGenerator::Uniform);
+      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_mean(0., 0., 0.);
+      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_width(0., 0., 5.);
+    }
+    INPUTGENERATOR::SimpleEventGenerator->set_eta_range(-1, 3);
+    INPUTGENERATOR::SimpleEventGenerator->set_phi_range(-M_PI, M_PI);
+    INPUTGENERATOR::SimpleEventGenerator->set_pt_range(0.5, 50.);
+  }
+  // Upsilons
+  if (Input::UPSILON)
+  {
+    INPUTGENERATOR::VectorMesonGenerator->add_decay_particles("mu", 0);
+    INPUTGENERATOR::VectorMesonGenerator->set_rapidity_range(-1, 1);
+    INPUTGENERATOR::VectorMesonGenerator->set_pt_range(0., 10.);
+    // Y species - select only one, last one wins
+    INPUTGENERATOR::VectorMesonGenerator->set_upsilon_1s();
+  }
+  // particle gun
+  if (Input::GUN)
+  {
+    INPUTGENERATOR::Gun->AddParticle("pi-", 0, 1, 0);
+    INPUTGENERATOR::Gun->set_vtx(0, 0, 0);
+  }
+
+  // register all input generators with Fun4All
+  InputRegister();
+
   //======================
   // Write the DST
   //======================
 
-  Enable::DSTOUT = true;
+  //Enable::DSTOUT = true;
   Enable::DSTOUT_COMPRESS = false;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
