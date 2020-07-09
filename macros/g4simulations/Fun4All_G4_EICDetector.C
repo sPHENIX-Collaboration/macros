@@ -30,8 +30,9 @@ int Fun4All_G4_EICDetector(
   // Fun4All server
   //---------------
   Fun4AllServer *se = Fun4AllServer::instance();
-  // se->Verbosity(01); // uncomment for batch production running with minimal output messages
-  // se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
+  se->Verbosity(0);
+  //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
+  //PHRandomSeed::Verbosity(1);
 
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
@@ -39,7 +40,7 @@ int Fun4All_G4_EICDetector(
   // PHRandomSeed() which reads /dev/urandom to get its seed
   // if the RANDOMSEED flag is set its value is taken as initial seed
   // which will produce identical results so you can debug your code
-  // rc->set_IntFlag("RANDOMSEED", 12345);
+  //   rc->set_IntFlag("RANDOMSEED", 12345);
 
   //===============
   // Input options
@@ -63,7 +64,6 @@ int Fun4All_G4_EICDetector(
 
   // Use Pythia 6
   //   Input::PYTHIA6 = true;
-  //   PYTHIA6::config_file = "phpythia6_ep.cfg";
 
   // Use Sartre
   //   Input::SARTRE = true;
@@ -71,26 +71,14 @@ int Fun4All_G4_EICDetector(
   // Simple multi particle generator in eta/phi/pt ranges
   Input::SIMPLE = true;
   Input::SIMPLE_VERBOSITY = 1;
-  INPUTSIMPLE::AddParticle("pi-", 5);
-  INPUTSIMPLE::set_eta_range(-3, 3);
-  INPUTSIMPLE::set_phi_range(-M_PI, M_PI);
-  INPUTSIMPLE::set_pt_range(0.1, 20.);
-  // or if you want to set the momentum, not pt range
-  //  INPUTSIMPLE::set_p_range(0.1, 20.);
-  INPUTSIMPLE::set_vtx_mean(0., 0., 0.);
-  INPUTSIMPLE::set_vtx_width(0., 0., 5.);
 
   // Particle gun (same particles in always the same direction)
   //  Input::GUN = true;
   Input::GUN_VERBOSITY = 0;
-  INPUTGUN::AddParticle("anti_proton", 10, 0, 0.01);
-  INPUTGUN::AddParticle("geantino", 1.7776, -0.4335, 0.);
-  //INPUTGUN::set_vtx(0,0,0);
 
   // Upsilon generator
   //Input::UPSILON = true;
   Input::UPSILON_VERBOSITY = 0;
-  INPUTUPSILON::AddDecayParticles("e+", "e-", 0);
 
   // And/Or read generated particles from file
 
@@ -107,12 +95,61 @@ int Fun4All_G4_EICDetector(
   // Initialize the selected Input/Event generation
   //-----------------
   InputInit();
+  //--------------
+  // Set generator specific options
+  //--------------
+  // can only be set after InputInit() is called
+
+  // Simple Input generator:
+  if (Input::SIMPLE)
+  {
+    INPUTGENERATOR::SimpleEventGenerator->add_particles("pi-", 5);
+    if (Input::HEPMC || Input::EMBED)
+    {
+      INPUTGENERATOR::SimpleEventGenerator->set_reuse_existing_vertex(true);
+      INPUTGENERATOR::SimpleEventGenerator->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+    }
+    else
+    {
+      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
+                                                                             PHG4SimpleEventGenerator::Uniform,
+                                                                             PHG4SimpleEventGenerator::Uniform);
+      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_mean(0., 0., 0.);
+      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_width(0., 0., 5.);
+    }
+    INPUTGENERATOR::SimpleEventGenerator->set_eta_range(-3, 3);
+    INPUTGENERATOR::SimpleEventGenerator->set_phi_range(-M_PI, M_PI);
+    INPUTGENERATOR::SimpleEventGenerator->set_pt_range(0.1, 20.);
+  }
+  // Upsilons
+  if (Input::UPSILON)
+  {
+    INPUTGENERATOR::VectorMesonGenerator->add_decay_particles("mu", 0);
+    INPUTGENERATOR::VectorMesonGenerator->set_rapidity_range(-1, 1);
+    INPUTGENERATOR::VectorMesonGenerator->set_pt_range(0., 10.);
+    // Y species - select only one, last one wins
+    INPUTGENERATOR::VectorMesonGenerator->set_upsilon_1s();
+  }
+  // particle gun
+  if (Input::GUN)
+  {
+    INPUTGENERATOR::Gun->AddParticle("pi-", 0, 1, 0);
+    INPUTGENERATOR::Gun->set_vtx(0, 0, 0);
+  }
+// pythia6
+  if (Input::PYTHIA6)
+  {
+    INPUTGENERATOR::Pythia6->set_config_file("phpythia6_ep.cfg");
+  }
+
+  // register all input generators with Fun4All
+  InputRegister();
 
   //======================
   // Write the DST
   //======================
 
-  Enable::DSTOUT = true;
+//  Enable::DSTOUT = true;
   Enable::DSTOUT_COMPRESS = false;  // Compress DST files
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   //Enable::DSTREADER = true;
