@@ -50,11 +50,12 @@ int Fun4All_G4_sPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  // rc->set_IntFlag("RANDOMSEED", 12345);
+  rc->set_IntFlag("RANDOMSEED", 12345);
 
   //===============
   // Input options
   //===============
+// First enable the input generators
   // Either:
   // read previously generated g4-hits files, in this case it opens a DST and skips
   // the simulations step completely. The G4Setup macro is only loaded to get information
@@ -68,34 +69,23 @@ int Fun4All_G4_sPHENIX(
   // Further choose to embed newly simulated events to a previous simulation. Not compatible with `readhits = true`
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
-
-  //  Input::EMBED = true;
+//  Input::EMBED = true;
   INPUTEMBED::filename = embed_input_file;
 
-  Input::SIMPLE = true;
+
+  //Input::SIMPLE = true;
   //Input::SIMPLE_VERBOSITY = 1;
-  INPUTSIMPLE::AddParticle("pi-", 5);
-  //  INPUTSIMPLE::AddParticle("e-",0);
-  //  INPUTSIMPLE::AddParticle("pi-",10);
-  INPUTSIMPLE::set_eta_range(-1, 1);
-  INPUTSIMPLE::set_phi_range(-M_PI, M_PI);
-  INPUTSIMPLE::set_pt_range(0.1, 20.);
-  INPUTSIMPLE::set_vtx_mean(0., 0., 0.);
-  INPUTSIMPLE::set_vtx_width(0., 0., 5.);
 
   //  Input::PYTHIA6 = true;
 
-  //  Input::PYTHIA8 = true;
+   Input::PYTHIA8 = true;
 
-  //  Input::GUN = true;
-  //Input::GUN_VERBOSITY = 0;
-  INPUTGUN::AddParticle("pi-", 0, 1, 0);
-  //INPUTGUN::set_vtx(0,0,0);
+//  Input::GUN = true;
+  Input::GUN_VERBOSITY = 1;
 
   // Upsilon generator
-  //Input::UPSILON = true;
+//  Input::UPSILON = true;
   Input::UPSILON_VERBOSITY = 0;
-  INPUTUPSILON::AddDecayParticles("e+", "e-", 0);
 
   //  Input::HEPMC = true;
   Input::VERBOSITY = 0;
@@ -107,8 +97,51 @@ int Fun4All_G4_sPHENIX(
   //-----------------
   // Initialize the selected Input/Event generation
   //-----------------
+// This creates the input generator(s)
   InputInit();
 
+//--------------
+// Set generator specific options, can only be set after InputInit() is called
+
+// Simple Input generator:
+  if (Input::SIMPLE)
+  {
+    INPUTGENERATOR::SimpleEventGenerator->add_particles("pi-", 5);
+    if (Input::HEPMC || Input::EMBED)
+      {
+	INPUTGENERATOR::SimpleEventGenerator->set_reuse_existing_vertex(true);
+	INPUTGENERATOR::SimpleEventGenerator->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+      }
+      else
+      {
+	INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
+									       PHG4SimpleEventGenerator::Uniform,
+									       PHG4SimpleEventGenerator::Uniform);
+	INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_mean(0.,0.,0.);
+	INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_width(0.,0.,5.);
+      }
+      INPUTGENERATOR::SimpleEventGenerator->set_eta_range(-1, 1);
+      INPUTGENERATOR::SimpleEventGenerator->set_phi_range(-M_PI, M_PI);
+      INPUTGENERATOR::SimpleEventGenerator->set_pt_range(0.1, 20.);
+  }
+// Upsilons
+  if (Input::UPSILON)
+  {
+    INPUTGENERATOR::VectorMesonGenerator->add_decay_particles("mu", 0);
+    INPUTGENERATOR::VectorMesonGenerator->set_rapidity_range(-1, 1);
+    INPUTGENERATOR::VectorMesonGenerator->set_pt_range(0.,10.);
+// Y species - select only one, last one wins
+    INPUTGENERATOR::VectorMesonGenerator->set_upsilon_1s();
+  }
+// particle gun
+  if (Input::GUN)
+  {
+    INPUTGENERATOR::Gun->AddParticle("pi-", 0, 1, 0);
+    INPUTGENERATOR::Gun->set_vtx(0,0,0);
+  }
+
+// register all input generators with Fun4All
+  InputRegister();
   //======================
   // Write the DST
   //======================
@@ -150,9 +183,9 @@ int Fun4All_G4_sPHENIX(
   Enable::TPC_CELL = Enable::TPC && true;
   Enable::TPC_CLUSTER = Enable::TPC_CELL && true;
 
-//  Enable::MICROMEGA = true;
-  Enable::MICROMEGA_CELL = Enable::MICROMEGA && true;
-  Enable::MICROMEGA_CLUSTER = Enable::MICROMEGA_CELL && true;
+  //Enable::MICROMEGAS = true;
+  Enable::MICROMEGAS_CELL = Enable::MICROMEGAS && true;
+  Enable::MICROMEGAS_CLUSTER = Enable::MICROMEGAS_CELL && true;
 
   Enable::TRACKING_TRACK = true;
   Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;
@@ -258,7 +291,7 @@ int Fun4All_G4_sPHENIX(
   if (Enable::MVTX_CELL) Mvtx_Cells();
   if (Enable::INTT_CELL) Intt_Cells();
   if (Enable::TPC_CELL) TPC_Cells();
-  if (Enable::MICROMEGA_CELL) MicroMega_Cells();
+  if (Enable::MICROMEGAS_CELL) MicroMegas_Cells();
 
   if (Enable::CEMC_CELL) CEMC_Cells();
 
@@ -299,7 +332,7 @@ int Fun4All_G4_sPHENIX(
   if (Enable::MVTX_CLUSTER) Mvtx_Clustering();
   if (Enable::INTT_CLUSTER) Intt_Clustering();
   if (Enable::TPC_CLUSTER) TPC_Clustering();
-  if (Enable::MICROMEGA_CLUSTER) MicroMega_Clustering();
+  if (Enable::MICROMEGAS_CLUSTER) MicroMegas_Clustering();
 
   if (Enable::TRACKING_TRACK)
   {
