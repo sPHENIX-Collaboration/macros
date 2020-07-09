@@ -58,11 +58,13 @@ void Tracking_Reco()
   //  kalman->Smearing(false);
   if (G4TRACKING::DISPLACED_VERTEX)
   {
-    //use very loose vertex constraint (1cm in sigma) to allow reco of displaced vertex
-    kalman->set_use_vertex_in_fitting(true);
-    kalman->set_vertex_xy_resolution(1);
-    kalman->set_vertex_z_resolution(1);
-    kalman->enable_vertexing(true);
+    // do not use truth vertex in the track fitting,
+    // which would lead to worse momentum resolution for prompt tracks
+    // but this allows displaced track analysis including DCA and vertex finding
+    kalman->set_use_vertex_in_fitting(false);
+    kalman->set_vertex_xy_resolution(0);// do not smear the vertex used in the built-in DCA calculation
+    kalman->set_vertex_z_resolution(0); // do not smear the vertex used in the built-in DCA calculation
+    kalman->enable_vertexing(true);     // enable vertex finding and fitting
   }
   else
   {
