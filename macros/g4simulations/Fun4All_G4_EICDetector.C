@@ -12,6 +12,7 @@
 #include "G4_HIJetReco.C"
 #include "G4_Input.C"
 #include "G4_Jets.C"
+#include "G4_Production.C"
 
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
@@ -23,8 +24,11 @@ R__LOAD_LIBRARY(libfun4all.so)
 
 int Fun4All_G4_EICDetector(
     const int nEvents = 1,
-    const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
-    const string &outputFile = "G4EICDetector.root")
+    const string &inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
+    const string &outputFile = "G4EICDetector.root",
+    const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
+    const int skip = 0,
+    const string &outdir = ".")
 {
   //---------------
   // Fun4All server
@@ -58,7 +62,9 @@ int Fun4All_G4_EICDetector(
   // Use one or more particle generators
   // It is run if Input::<generator> is set to true
   // all other options only play a role if it is active
-
+  // In case embedding into a production output, please double check your G4Setup_EICDetector.C and G4_*.C consistent with those in the production macro folder
+  //  Input::EMBED = true;
+  INPUTEMBED::filename = embed_input_file;
   // Use Pythia 8
   //  Input::PYTHIA8 = true;
 
@@ -145,12 +151,18 @@ int Fun4All_G4_EICDetector(
   // register all input generators with Fun4All
   InputRegister();
 
+// set up production relatedstuff
+//   Enable::PRODUCTION = true;
+
   //======================
   // Write the DST
   //======================
 
   //  Enable::DSTOUT = true;
+  DstOut::OutputDir = outdir;
+  DstOut::OutputFile = outputFile;
   Enable::DSTOUT_COMPRESS = false;  // Compress DST files
+
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   //Enable::DSTREADER = true;
 
@@ -260,10 +272,14 @@ int Fun4All_G4_EICDetector(
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
-  BlackHoleGeometry::visible = false;
+  //Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
+  //BlackHoleGeometry::visible = true;
 
-  // establish the geometry and reconstruction setup
-  G4Init();
+  //---------------
+  // World Settings
+  //---------------
+  //  G4WORLD::PhysicsList = "QGSP_BERT"; //FTFP_BERT_HP best for calo
+  //  G4WORLD::WorldMaterial = "G4_AIR"; // set to G4_GALACTIC for material scans
 
   //---------------
   // Magnet Settings
@@ -281,17 +297,16 @@ int Fun4All_G4_EICDetector(
   // default is All:
   // G4P6DECAYER::decayType = EDecayType::kAll;
 
-  //-----------------
-  // Event generation
-  //-----------------
+  // Initialize the selected subsystems
+  G4Init();
+
+  //---------------------
+  // GEANT4 Detector description
+  //---------------------
 
   // If "readhepMC" is also set, the Upsilons will be embedded in Hijing events, if 'particles" is set, the Upsilons will be embedded in whatever particles are thrown
   if (!Input::READHITS)
   {
-    //---------------------
-    // Detector description
-    //---------------------
-
     G4Setup();
   }
 
@@ -428,9 +443,15 @@ int Fun4All_G4_EICDetector(
   //--------------
   // Set up Output Manager
   //--------------
+  if (Enable::PRODUCTION)
+  {
+    Production_CreateOutputDir();
+  }
+
   if (Enable::DSTOUT)
   {
-    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+    string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
+    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", FullOutFile);
     if (Enable::DSTOUT_COMPRESS) DstCompress(out);
     se->registerOutputManager(out);
   }
@@ -450,6 +471,7 @@ int Fun4All_G4_EICDetector(
     return 0;
   }
 
+  se->skip(skip);
   se->run(nEvents);
 
   //-----
@@ -459,6 +481,10 @@ int Fun4All_G4_EICDetector(
   se->End();
   std::cout << "All done" << std::endl;
   delete se;
+  if (Enable::PRODUCTION)
+  {
+    Production_MoveOutput();
+  }
   gSystem->Exit(0);
   return 0;
 }
