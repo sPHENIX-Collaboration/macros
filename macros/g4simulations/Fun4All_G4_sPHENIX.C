@@ -150,10 +150,11 @@ int Fun4All_G4_sPHENIX(
   // Write the DST
   //======================
 
-  Enable::DSTOUT = true;
+//  Enable::DSTOUT = true;
   Enable::DSTOUT_COMPRESS = false;
   DstOut::OutputDir = outdir;
   DstOut::OutputFile = outputFile;
+
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   //  Enable::DSTREADER = true;
 
@@ -258,6 +259,12 @@ int Fun4All_G4_sPHENIX(
   Enable::BLACKHOLE = true;
   //Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
   //BlackHoleGeometry::visible = true;
+
+  //---------------
+  // World Settings
+  //---------------
+  //  G4WORLD::PhysicsList = "QGSP_BERT"; //FTFP_BERT_HP best for calo
+  //  G4WORLD::WorldMaterial = "G4_AIR"; // set to G4_GALACTIC for material scans
 
   //---------------
   // Magnet Settings
@@ -409,13 +416,13 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::JETS_EVAL) Jet_Eval(outputroot + "_g4jet_eval.root");
 
+  if (Enable::DSTREADER) G4DSTreader(outputroot + "_DSTReader.root");
+
   //--------------
   // Set up Input Managers
   //--------------
 
   InputManagers();
-
-  if (Enable::DSTREADER) G4DSTreader(outputroot + "_DSTReader.root");
 
   if (Enable::PRODUCTION)
   {
