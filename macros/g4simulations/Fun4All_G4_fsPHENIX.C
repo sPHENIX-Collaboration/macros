@@ -11,6 +11,7 @@
 #include "G4_Global.C"
 #include "G4_Input.C"
 #include "G4_Jets.C"
+#include "G4_Production.C"
 
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
@@ -30,9 +31,11 @@ R__LOAD_LIBRARY(libfun4all.so)
 
 int Fun4All_G4_fsPHENIX(
     const int nEvents = 2,
-    const char *inputFile = "/sphenix/sim/sim01/production/2016-07-21/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
-    const char *outputFile = "G4fsPHENIX.root",
-    const char *embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/fsPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root")
+    const string &inputFile = "/sphenix/sim/sim01/production/2016-07-21/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
+    const string &outputFile = "G4fsPHENIX.root",
+    const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/fsPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
+    const int skip = 0,
+    const string &outdir = ".")
 {
   //---------------
   // Fun4All server
@@ -134,12 +137,17 @@ int Fun4All_G4_fsPHENIX(
   // register all input generators with Fun4All
   InputRegister();
 
+// set up production relatedstuff
+   Enable::PRODUCTION = true;
+
   //======================
   // Write the DST
   //======================
 
   //Enable::DSTOUT = true;
   Enable::DSTOUT_COMPRESS = false;
+  DstOut::OutputDir = outdir;
+  DstOut::OutputFile = outputFile;
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   //  Enable::DSTREADER = true;
@@ -159,7 +167,7 @@ int Fun4All_G4_fsPHENIX(
 
   Enable::PIPE = true;
   Enable::PIPE_ABSORBER = true;
-  //  Enable::PIPE_OVERLAPCHECK = false;
+  //  Enable::PIPE_OVERLAPCHECK = true;
 
   // central tracking
   Enable::MVTX = true;
@@ -243,7 +251,14 @@ int Fun4All_G4_fsPHENIX(
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
+  //Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
   //  BlackHoleGeometry::visible = true;
+
+  //---------------
+  // World Settings
+  //---------------
+  //  G4WORLD::PhysicsList = "QGSP_BERT"; // FTFP_BERT_HP best for calo
+  //  G4WORLD::WorldMaterial = "G4_AIR"; // set to G4_GALACTIC for material scans
 
   //---------------
   // Magnet Settings
@@ -418,10 +433,15 @@ int Fun4All_G4_fsPHENIX(
   //--------------
   // Set up Output Managers
   //--------------
+  if (Enable::PRODUCTION)
+  {
+    Production_CreateOutputDir();
+  }
 
   if (Enable::DSTOUT)
   {
-    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+    string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
+    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", FullOutFile);
     if (Enable::DSTOUT_COMPRESS) DstCompress(out);
     se->registerOutputManager(out);
   }
@@ -450,6 +470,7 @@ int Fun4All_G4_fsPHENIX(
     cin >> i;
   }
 
+  se->skip(skip);
   se->run(nEvents);
 
   //-----
@@ -459,6 +480,10 @@ int Fun4All_G4_fsPHENIX(
   se->End();
   std::cout << "All done" << std::endl;
   delete se;
+  if (Enable::PRODUCTION)
+  {
+    Production_MoveOutput();
+  }
   gSystem->Exit(0);
   return 0;
 }
