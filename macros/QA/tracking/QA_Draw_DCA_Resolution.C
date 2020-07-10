@@ -80,7 +80,7 @@ void QA_Draw_DCA_Resolution(
     p = (TPad *) c1->cd(idx++);
     c1->Update();
     p->SetLogx();
-    TH1 *frame = p->DrawFrame(0.1, -0.05, 50, 0.05,
+    TH1 *frame = p->DrawFrame(0.1, -0.01, 50, 0.01,
                               ";Truth p_{T} [GeV/c];<DCA (r #phi)> #pm #sigma(DCA (r #phi)) [cm]");
     gPad->SetLeftMargin(.2);
     frame->GetYaxis()->SetTitleOffset(2);
@@ -92,8 +92,7 @@ void QA_Draw_DCA_Resolution(
         prefix + "DCArPhi_pT", "TH2");
     assert(h_QAG4SimulationTracking_DCArPhi);
     
-    h_QAG4SimulationTracking_DCArPhi->Rebin2D(5, 1);
-    h_QAG4SimulationTracking_DCArPhi->GetYaxis()->SetRangeUser(-.05,.05);
+    h_QAG4SimulationTracking_DCArPhi->Rebin2D(20, 1);
 
     // h_QAG4SimulationTracking_DCArPhi->Draw("colz");
     TGraphErrors *ge_QAG4SimulationTracking_DCArPhi = FitProfile(h_QAG4SimulationTracking_DCArPhi);
@@ -106,8 +105,7 @@ void QA_Draw_DCA_Resolution(
           prefix + "DCArPhi_pT", "TH2");
       assert(h_QAG4SimulationTracking_DCArPhi);
       
-      h_QAG4SimulationTracking_DCArPhi->Rebin2D(5, 1);
-      h_QAG4SimulationTracking_DCArPhi->GetYaxis()->SetRangeUser(-.05,.05);
+      h_QAG4SimulationTracking_DCArPhi->Rebin2D(20, 1);
 
       h_ratio_ref = FitProfile(h_QAG4SimulationTracking_DCArPhi);
       ge_QAG4SimulationTracking_DCArPhi->Draw("pe");
@@ -121,7 +119,7 @@ void QA_Draw_DCA_Resolution(
     p = (TPad *) c1->cd(idx++);
     c1->Update();
     p->SetLogx();
-    TH1 *frame = p->DrawFrame(0.1, -0.05, 50, 0.05,
+    TH1 *frame = p->DrawFrame(0.1, -0.01, 50, 0.01,
                               ";Truth p_{T} [GeV/c];<DCA (Z)> #pm #sigma(DCA (Z)) [cm]");
     gPad->SetLeftMargin(.2);
     frame->GetYaxis()->SetTitleOffset(2);
@@ -133,10 +131,7 @@ void QA_Draw_DCA_Resolution(
         prefix + "DCAZ_pT", "TH2");
     assert(h_QAG4SimulationTracking_DCAZ);
  
-    h_QAG4SimulationTracking_DCAZ->Rebin2D(5, 1);
-    h_QAG4SimulationTracking_DCAZ->GetYaxis()->SetRangeUser(-.05,.05);
-
-    // h_QAG4SimulationTracking_DCAZ->Draw("colz");
+    h_QAG4SimulationTracking_DCAZ->Rebin2D(40, 1);
 
     TGraphErrors *ge_QAG4SimulationTracking_DCAZ = FitProfile(h_QAG4SimulationTracking_DCAZ);
     ge_QAG4SimulationTracking_DCAZ->Draw("pe");
@@ -148,8 +143,7 @@ void QA_Draw_DCA_Resolution(
           prefix + "DCAZ_pT", "TH2");
       assert(h_QAG4SimulationTracking_DCAZ);
       
-      h_QAG4SimulationTracking_DCAZ->Rebin2D(5, 1);
-      h_QAG4SimulationTracking_DCAZ->GetYaxis()->SetRangeUser(-.05,.05);
+      h_QAG4SimulationTracking_DCAZ->Rebin2D(40, 1);
 
       h_ratio_ref = FitProfile(h_QAG4SimulationTracking_DCAZ);
       ge_QAG4SimulationTracking_DCAZ->Draw("pe");
