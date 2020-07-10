@@ -30,8 +30,9 @@ namespace Enable
   bool FHCAL_TOWER = false;
   bool FHCAL_CLUSTER = false;
   bool FHCAL_EVAL = false;
+  bool FHCAL_OVERLAPCHECK = false;
   int FHCAL_VERBOSITY = 0;
-}
+}  // namespace Enable
 
 namespace G4FHCAL
 {
@@ -47,20 +48,10 @@ void FHCALInit()
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4FHCAL::Gz0 + G4FHCAL::Gdz / 2.);
 }
 
-void FHCAL_Cells(int verbosity = 0)
-{
-  Fun4AllServer *se = Fun4AllServer::instance();
-
-  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("FHCALCellReco");
-  hc->Detector("FHCAL");
-  se->registerSubsystem(hc);
-
-  return;
-}
-
 void FHCALSetup(PHG4Reco *g4Reco)
 {
   const bool AbsorberActive = Enable::ABSORBER || Enable::FHCAL_ABSORBER;
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::FHCAL_OVERLAPCHECK;
   Fun4AllServer *se = Fun4AllServer::instance();
 
   /** Use dedicated FHCAL module */
@@ -75,16 +66,27 @@ void FHCALSetup(PHG4Reco *g4Reco)
   //mapping_hhcal << "towerMap_FHCAL_latest.txt";
 
   hhcal->SetTowerMappingFile(mapping_hhcal.str());
-  hhcal->OverlapCheck(overlapcheck);
+  hhcal->OverlapCheck(OverlapCheck);
 
   if (AbsorberActive) hhcal->SetAbsorberActive();
 
   g4Reco->registerSubsystem(hhcal);
 }
 
+void FHCAL_Cells(int verbosity = 0)
+{
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("FHCALCellReco");
+  hc->Detector("FHCAL");
+  se->registerSubsystem(hc);
+
+  return;
+}
+
 void FHCAL_Towers()
 {
-int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
@@ -142,7 +144,7 @@ int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
 
 void FHCAL_Clusters()
 {
-int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("FHCALRawClusterBuilderFwd");
@@ -156,7 +158,7 @@ int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
 
 void FHCAL_Eval(const std::string &outputfile)
 {
-int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("FHCALEVALUATOR", "FHCAL", outputfile.c_str());
