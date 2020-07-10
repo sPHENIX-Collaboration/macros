@@ -69,8 +69,8 @@ void QA_Draw_DCA_Resolution(
     Nevent_ref = h_norm->GetBinContent(h_norm->GetXaxis()->FindBin("Event"));
   }
 
-  TCanvas *c1 = new TCanvas(TString("QA_Draw_DCA_Resolution") + TString("_") + hist_name_prefix,
-                            TString("QA_Draw_DCA_Resolution") + TString("_") + hist_name_prefix,
+  TCanvas *c1 = new TCanvas(TString("QA_Draw_Tracking_DCA_Resolution") + TString("_") + hist_name_prefix,
+                            TString("QA_Draw_Tracking_DCA_Resolution") + TString("_") + hist_name_prefix,
                             1800, 1000);
   c1->Divide(2, 1);
   int idx = 1;
