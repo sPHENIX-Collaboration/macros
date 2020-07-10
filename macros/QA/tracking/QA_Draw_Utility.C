@@ -436,7 +436,7 @@ FitProfile(const TH2 *h2)
     //      break;
 
     x[n] = p2->GetBinCenter(i);
-    ex[n] = (p2->GetBinCenter(2) - p2->GetBinCenter(1)) / 2;
+    ex[n] = p2->GetBinWidth(i) / 2;
     y[n] = fgaus.GetParameter(1);
     ey[n] = fgaus.GetParameter(2);
 
