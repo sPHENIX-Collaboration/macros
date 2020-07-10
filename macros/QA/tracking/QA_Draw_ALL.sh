@@ -26,6 +26,11 @@ root -b -q "QA_Draw_Intt.C(${q}QAG4SimulationIntt${q},$new_QA_file, $reference_Q
 # mvtx stuff
 root -b -q "QA_Draw_Mvtx.C(${q}QAG4SimulationMvtx${q},$new_QA_file, $reference_QA_file)"
 
+# DCA stuff
+root -b -q "QA_Draw_DCArPhi.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
+root -b -q "QA_Draw_DCAZ.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
+root -b -q "QA_Draw_DCA_Resolution.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
+
 # last all jet stuff
 root -b -q "QA_Draw_Tracking_TruthMatchingOverview.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
 root -b -q "QA_Draw_Tracking_pTRatio.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
