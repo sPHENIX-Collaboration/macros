@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4DSTREADER_C
+#define MACRO_G4DSTREADER_C
 
 #include "GlobalVariables.C"
 
@@ -153,3 +154,4 @@ void G4DSTreader(const string &outputFile = "G4sPHENIXCells.root")
   Fun4AllServer *se = Fun4AllServer::instance();
   se->registerSubsystem(ana);
 }
+#endif

@@ -1,5 +1,6 @@
 //Inner HCal reconstruction macro
-#pragma once
+#ifndef MACRO_G4HCALINREF_C
+#define MACRO_G4HCALINREF_C
 
 #include "GlobalVariables.C"
 
@@ -298,3 +299,4 @@ void HCALInner_Eval(const std::string &outputfile)
 
   return;
 }
+#endif

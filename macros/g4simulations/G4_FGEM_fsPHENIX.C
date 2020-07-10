@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4FGEMFSPHENIX_C
+#define MACRO_G4FGEMFSPHENIX_C
 
 #include "GlobalVariables.C"
 
@@ -350,3 +351,4 @@ int verbosity = std::max(Enable::VERBOSITY, Enable::FGEM_VERBOSITY);
 
   return;
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4PIPE_C
+#define MACRO_G4PIPE_C
 
 #include "GlobalVariables.C"
 
@@ -137,3 +138,4 @@ double Pipe(PHG4Reco* g4Reco, double radius)
 
   return radius;
 }
+#endif

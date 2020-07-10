@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4WORLD_C
+#define MACRO_G4WORLD_C
 
 #include "GlobalVariables.C"
 
@@ -30,3 +31,4 @@ void WorldSize(PHG4Reco *g4Reco, double radius)
   g4Reco->SetWorldSizeZ(std::max(g4Reco->GetWorldSizeZ(), 2 * (final_zval)));
   return;
 }
+#endif

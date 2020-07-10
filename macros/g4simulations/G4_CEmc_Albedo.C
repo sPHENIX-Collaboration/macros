@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4CEMCALBEDO_C
+#define MACRO_G4CEMCALBEDO_C
 
 #include "GlobalVariables.C"
 
@@ -42,3 +43,4 @@ void CEmcAlbedo(PHG4Reco *g4Reco)
   if (AbsorberActive) cyl->SetActive();
   g4Reco->registerSubsystem(cyl);
 }
+#endif

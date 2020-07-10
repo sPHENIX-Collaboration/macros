@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4HCALOUTREF_C
+#define MACRO_G4HCALOUTREF_C
 
 #include "GlobalVariables.C"
 
@@ -224,3 +225,4 @@ void HCALOuter_Eval(const std::string &outputfile)
 
   return;
 }
+#endif

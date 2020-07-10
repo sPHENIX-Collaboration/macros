@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4PLUGDOORFSPHENIX_C
+#define MACRO_G4PLUGDOORFSPHENIX_C
 
 #include "GlobalVariables.C"
 
@@ -65,3 +66,4 @@ void PlugDoor(PHG4Reco *g4Reco)
 
   return;
 }
+#endif

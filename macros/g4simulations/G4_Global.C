@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4GLOBAL_C
+#define MACRO_G4GLOBAL_C
 
 #include <g4vertex/GlobalVertexFastSimReco.h>
 #include <g4vertex/GlobalVertexReco.h>
@@ -54,3 +55,4 @@ void Global_FastSim()
 
   return;
 }
+#endif

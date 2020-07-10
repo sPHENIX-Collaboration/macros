@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4TRACKINGLBL_C
+#define MACRO_G4TRACKINGLBL_C
 
 #include "GlobalVariables.C"
 
@@ -168,3 +169,4 @@ void Tracking_Eval(const std::string &outputfile)
   fast_sim_eval->set_filename(outputfile);
   se->registerSubsystem(fast_sim_eval);
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4TPC_C
+#define MACRO_G4TPC_C
 
 #include "GlobalVariables.C"
 
@@ -147,3 +148,4 @@ void TPC_Clustering()
   tpcclusterizer->Verbosity(verbosity);
   se->registerSubsystem(tpcclusterizer);
 }
+#endif

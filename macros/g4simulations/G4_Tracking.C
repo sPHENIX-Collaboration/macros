@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4TRACKING_C
+#define MACRO_G4TRACKING_C
 
 #include "GlobalVariables.C"
 
@@ -225,3 +226,4 @@ void Tracking_Eval(const std::string& outputfile)
 
   return;
 }
+#endif

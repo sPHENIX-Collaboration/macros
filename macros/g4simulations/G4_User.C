@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4USER_C
+#define MACRO_G4USER_C
 
 namespace Enable
 {
@@ -25,3 +26,4 @@ void UserDetector(PHG4Reco *g4Reco)
 {
   return;
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4FHCAL_C
+#define MACRO_G4FHCAL_C
 
 #include "GlobalVariables.C"
 
@@ -167,3 +168,4 @@ void FHCAL_Eval(const std::string &outputfile)
 
   return;
 }
+#endif

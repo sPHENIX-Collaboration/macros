@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4MVTX_C
+#define MACRO_G4MVTX_C
 
 #include "GlobalVariables.C"
 
@@ -100,3 +101,4 @@ void Mvtx_Clustering()
   mvtxclusterizer->Verbosity(verbosity);
   se->registerSubsystem(mvtxclusterizer);
 }
+#endif

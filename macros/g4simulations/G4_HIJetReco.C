@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4HIJETRECO_C
+#define MACRO_G4HIJETRECO_C
 
 #include <g4jets/FastJetAlgo.h>
 #include <g4jets/JetReco.h>
@@ -131,3 +132,4 @@ void HIJetReco()
 
   return;
 }
+#endif

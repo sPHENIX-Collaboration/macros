@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4PLUGDOOR_C
+#define MACRO_G4PLUGDOOR_C
 
 #include "GlobalVariables.C"
 
@@ -67,3 +68,4 @@ void PlugDoor(PHG4Reco *g4Reco)
 
   return;
 }
+#endif

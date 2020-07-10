@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_FUN4ALLG4LBLDETECTOR_C
+#define MACRO_FUN4ALLG4LBLDETECTOR_C
 
 #include "GlobalVariables.C"
 
@@ -477,3 +478,4 @@ int Fun4All_G4_LBLDetector(
   gSystem->Exit(0);
   return 0;
 }
+#endif

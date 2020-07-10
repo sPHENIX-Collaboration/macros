@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4PRODUCTION_C
+#define MACRO_G4PRODUCTION_C
 
 #include "GlobalVariables.C"
 
@@ -29,3 +30,4 @@ void Production_MoveOutput()
     gSystem->Exec(mvcmd.c_str());
   }
 }
+#endif

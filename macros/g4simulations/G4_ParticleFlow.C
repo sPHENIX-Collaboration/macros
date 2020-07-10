@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4PARTICLEFLOW_C
+#define MACRO_G4PARTICLEFLOW_C
 
 #include "GlobalVariables.C"
 
@@ -43,3 +44,4 @@ void ParticleFlow()
 
   return;
 }
+#endif

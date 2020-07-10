@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4INTT_C
+#define MACRO_G4INTT_C
 
 #include "GlobalVariables.C"
 
@@ -183,3 +184,4 @@ void Intt_Clustering()
   }
   se->registerSubsystem(inttclusterizer);
 }
+#endif

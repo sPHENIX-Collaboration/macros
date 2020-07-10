@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_FUN4ALLG4SPHENIX_C
+#define MACRO_FUN4ALLG4SPHENIX_C
 
 #include "GlobalVariables.C"
 
@@ -478,3 +479,4 @@ int Fun4All_G4_sPHENIX(
   gSystem->Exit(0);
   return 0;
 }
+#endif

@@ -1,11 +1,9 @@
-/*!
- *  \file	    RunGenFit.C	
- *  \brief	    Example macro to run PHG4KalmanPatRec
- *  \author	    Haiwang Yu <yuhw@nmsu.edu>
- */
-#pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 00, 0)
+#ifndef MACRO_READCLUSTERSRUNTRACKING_C
+#define MACRO_READCLUSTERSRUNTRACKING_C
+
 #include "GlobalVariables.C"
+
+#include "G4Setup_sPHENIX.C"
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -58,44 +56,6 @@ R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
-#endif
-
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include <fun4all/SubsysReco.h>
-#include <fun4all/Fun4AllServer.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllDummyInputManager.h>
-#include <fun4all/Fun4AllOutputManager.h>
-#include <fun4all/Fun4AllDstInputManager.h>
-#include <fun4all/Fun4AllNoSyncDstInputManager.h>
-#include <fun4all/Fun4AllDstOutputManager.h>
-#include <g4main/PHG4ParticleGeneratorBase.h>
-#include <g4main/PHG4ParticleGenerator.h>
-#include <g4main/PHG4SimpleEventGenerator.h>
-#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
-#include <g4main/PHG4ParticleGun.h>
-#include <g4main/HepMCNodeReader.h>
-#include <g4detectors/PHG4DetectorSubsystem.h>
-#include <phool/recoConsts.h>
-#include <phpythia6/PHPythia6.h>
-#include <phpythia8/PHPythia8.h>
-#include <phhepmc/Fun4AllHepMCPileupInputManager.h>
-#include <phhepmc/Fun4AllHepMCInputManager.h>
-#include "G4Setup_sPHENIX.C"
-#include "G4_Bbc.C"
-#include "G4_Global.C"
-#include "G4_CaloTrigger.C"
-#include "G4_Jets.C"
-#include "G4_HIJetReco.C"
-#include "G4_DSTReader.C"
-#include "DisplayOn.C"
-R__LOAD_LIBRARY(libfun4all.so)
-R__LOAD_LIBRARY(libg4testbench.so)
-R__LOAD_LIBRARY(libphhepmc.so)
-R__LOAD_LIBRARY(libPHPythia6.so)
-R__LOAD_LIBRARY(libPHPythia8.so)
-#endif
-
 
 //#define _ONLY_SEEDING_
 void ReadClustersRunTracking(
@@ -104,9 +64,6 @@ void ReadClustersRunTracking(
      const char *outputFile = "G4sPHENIX_tracking.root")
 {
 
-  gSystem->Load("libtrack_reco.so");
-
-  gROOT->LoadMacro("G4Setup_sPHENIX.C");
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(10);
@@ -163,3 +120,4 @@ void ReadClustersRunTracking(
   
 }
 
+#endif

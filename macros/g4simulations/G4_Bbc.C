@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4BBC_C
+#define MACRO_G4BBC_C
 
 #include <g4bbc/BbcVertexFastSimReco.h>
 
@@ -35,3 +36,4 @@ void Bbc_Reco(int verbosity = 0) {
 
   return;
 }  
+#endif

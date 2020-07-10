@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4JETS_C
+#define MACRO_G4JETS_C
 
 #include "GlobalVariables.C"
 
@@ -113,3 +114,4 @@ int verbosity = std::max(Enable::VERBOSITY, Enable::JETS_VERBOSITY);
   
   return;
 }
+#endif

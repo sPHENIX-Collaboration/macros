@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4MAGNET_C
+#define MACRO_G4MAGNET_C
 
 #include "GlobalVariables.C"
 
@@ -102,3 +103,4 @@ double Magnet(PHG4Reco* g4Reco, double radius)
 
   return radius;
 }
+#endif

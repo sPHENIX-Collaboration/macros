@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_FUN4ALLG4FSPHENIX_C
+#define MACRO_FUN4ALLG4FSPHENIX_C
 
 #include "GlobalVariables.C"
 
@@ -494,3 +495,4 @@ void G4Cmd(const char *cmd)
   PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
   g4->ApplyCommand(cmd);
 }
+#endif

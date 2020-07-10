@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4MICROMEGAS_C
+#define MACRO_G4MICROMEGAS_C
 
 #include "GlobalVariables.C"
 
@@ -90,3 +91,4 @@ void Micromegas_Clustering()
   se->registerSubsystem(new PHG4MicromegasDigitizer);
   se->registerSubsystem(new MicromegasClusterizer);
 }
+#endif

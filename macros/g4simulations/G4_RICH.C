@@ -5,7 +5,8 @@
  * \version $Revision: 1.2 $
  * \date $Date: 2013/10/09 01:08:17 $
  */
-#pragma once
+#ifndef MACRO_G4RICH_C
+#define MACRO_G4RICH_C
 
 #include "GlobalVariables.C"
 
@@ -60,3 +61,4 @@ void RICHSetup(PHG4Reco* g4Reco,                   //
   /* Register RICH module */
   g4Reco->registerSubsystem(rich);
 }
+#endif

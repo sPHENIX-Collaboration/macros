@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4CEMCEIC_C
+#define MACRO_G4CEMCEIC_C
 
 #include "GlobalVariables.C"
 
@@ -314,3 +315,4 @@ void CEMC_Eval(const std::string &outputfile)
   se->registerSubsystem(eval);
   return;
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4SETUPEICDETECTOR_C
+#define MACRO_G4SETUPEICDETECTOR_C
 
 #include "GlobalVariables.C"
 
@@ -423,3 +424,4 @@ void DstCompress(Fun4AllDstOutputManager *out)
     out->StripNode("G4CELL_EEMC");
   }
 }
+#endif

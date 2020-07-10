@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4GEMEIC_C
+#define MACRO_G4GEMEIC_C
 
 #include "GlobalVariables.C"
 
@@ -218,3 +219,4 @@ int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
   g4Reco->registerSubsystem(gem);
   return 0;
 }
+#endif

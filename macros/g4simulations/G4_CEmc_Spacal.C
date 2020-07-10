@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4CEMCSPACAL_C
+#define MACRO_G4CEMCSPACAL_C
 
 #include "GlobalVariables.C"
 
@@ -465,3 +466,4 @@ void CEMC_Eval(const std::string &outputfile)
 
   return;
 }
+#endif

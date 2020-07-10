@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4ALLSILICON_C
+#define MACRO_G4ALLSILICON_C
 
 #include "GlobalVariables.C"
 
@@ -30,3 +31,4 @@ void AllSiliconSetup(PHG4Reco *g4Reco)
   if (AbsorberActive) allsili->SetAbsorberActive();  // this saves hits in all volumes (in the absorber node)
   g4Reco->registerSubsystem(allsili);
 }
+#endif

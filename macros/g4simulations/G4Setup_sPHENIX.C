@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4SETUPSPHENIX_C
+#define MACRO_G4SETUPSPHENIX_C
 
 #include "GlobalVariables.C"
 
@@ -278,3 +279,4 @@ void DstCompress(Fun4AllDstOutputManager *out)
     out->StripNode("G4CELL_FEMC");
   }
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4PSTOF_C
+#define MACRO_G4PSTOF_C
 
 #include <g4detectors/PHG4PSTOFSubsystem.h>
 #include <g4main/PHG4Reco.h>
@@ -34,3 +35,4 @@ double PSTOF(PHG4Reco* g4Reco, double radius)
   // returns the outer radius to check for overlaps with next detector
   return 90.;
 }
+#endif

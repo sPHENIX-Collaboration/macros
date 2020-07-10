@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4EEMC_C
+#define MACRO_G4EEMC_C
 
 #include "GlobalVariables.C"
 
@@ -166,3 +167,4 @@ void EEMC_Eval(const std::string &outputfile)
 
   return;
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4CALOTRIGGER_C
+#define MACRO_G4CALOTRIGGER_C
 
 #include "GlobalVariables.C"
 
@@ -30,3 +31,4 @@ void CaloTrigger_Sim()
 
   return;
 }
+#endif

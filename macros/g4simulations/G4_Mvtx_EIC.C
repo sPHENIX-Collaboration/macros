@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4MVTXEIC_C
+#define MACRO_G4MVTXEIC_C
 
 #include "GlobalVariables.C"
 
@@ -85,3 +86,4 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   g4Reco->registerSubsystem(mvtx);
   return G4MVTX::nom_radius[G4MVTX::n_maps_layer - 1] / 10.;  // return cm
 }
+#endif

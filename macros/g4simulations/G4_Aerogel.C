@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4AEROGEL_C
+#define MACRO_G4AEROGEL_C
 
 #include "GlobalVariables.C"
 
@@ -53,3 +54,4 @@ void AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8,  //
                                                expansion_length * PHG4Sector::Sector_Geometry::Unit_cm());
   g4Reco->registerSubsystem(ag);
 }
+#endif

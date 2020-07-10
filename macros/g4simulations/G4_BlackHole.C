@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4BLACKHOLE_C
+#define MACRO_G4BLACKHOLE_C
 
 #include "GlobalVariables.C"
 
@@ -93,3 +94,4 @@ void BlackHole(PHG4Reco *g4Reco, double radius)
   g4Reco->registerSubsystem(blackhole);
   return;
 }
+#endif

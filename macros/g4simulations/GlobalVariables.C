@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_GLOBALVARIABLES_C
+#define MACRO_GLOBALVARIABLES_C
 
 #include <g4decayer/EDecayType.hh>
 
@@ -51,3 +52,4 @@ namespace TRACKING
 {
   string TrackNodeName = "SvtxTrackMap";
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4BARRELEIC_C
+#define MACRO_G4BARRELEIC_C
 
 #include "GlobalVariables.C"
 
@@ -89,3 +90,4 @@ double Barrel(PHG4Reco* g4Reco, double radius)
   return max_bh_radius;
 }
 //---------------------------------------------------------------------//
+#endif

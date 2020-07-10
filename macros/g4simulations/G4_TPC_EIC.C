@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4TPCEIC_C
+#define MACRO_G4TPCEIC_C
 
 #include "GlobalVariables.C"
 
@@ -122,3 +123,4 @@ double TPC(PHG4Reco* g4Reco, double radius,
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, radius);
   return radius;
 }
+#endif

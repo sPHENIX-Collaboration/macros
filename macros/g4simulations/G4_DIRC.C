@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4DIRC_C
+#define MACRO_G4DIRC_C
 
 #include "GlobalVariables.C"
 
@@ -102,3 +103,4 @@ double DIRCSetup(PHG4Reco *g4Reco)
   // Done
   return G4DIRC::outer_skin_radius;
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4FWDJETS_C
+#define MACRO_G4FWDJETS_C
 
 #include <g4jets/FastJetAlgo.h>
 #include <g4jets/JetReco.h>
@@ -78,3 +79,4 @@ int verbosity = std::max(Enable::VERBOSITY, Enable::FWDJETS_VERBOSITY);
 
   return;
 }
+#endif

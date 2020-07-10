@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4PISTON_C
+#define MACRO_G4PISTON_C
 
 #include "GlobalVariables.C"
 
@@ -122,3 +123,4 @@ void Piston(PHG4Reco* g4Reco,
 
   return;
 }
+#endif

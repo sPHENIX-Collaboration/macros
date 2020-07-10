@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4DSTREADERFSPHENIX_C
+#define MACRO_G4DSTREADERFSPHENIX_C
 
 #include "GlobalVariables.C"
 
@@ -187,3 +188,4 @@ G4DSTreader_fsPHENIX( const string &outputFile = "G4sPHENIXCells.root")
   Fun4AllServer *se = Fun4AllServer::instance();
   se->registerSubsystem(ana);
 }
+#endif

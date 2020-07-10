@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4FEMC_C
+#define MACRO_G4FEMC_C
 
 #include "GlobalVariables.C"
 
@@ -263,3 +264,4 @@ void FEMC_Eval(std::string outputfile)
 
   return;
 }
+#endif

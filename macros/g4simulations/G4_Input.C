@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4INPUT_C
+#define MACRO_G4INPUT_C
 
 #include "GlobalVariables.C"
 
@@ -246,3 +247,4 @@ void InputManagers()
     se->registerInputManager(pileup);
   }
 }
+#endif
