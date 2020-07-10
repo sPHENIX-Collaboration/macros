@@ -8,9 +8,9 @@ R__LOAD_LIBRARY(libg4testbench.so)
 
 namespace G4WORLD
 {
-  static double AddSpace = 100.;            // add this much space in cm around edge of detector
-  static string WorldMaterial = "G4_AIR";   // default world material, use G4_Galactic for material scan
-  static string PhysicsList = "QGSP_BERT";  // for calorimeters use HP lists
+  double AddSpace = 100.;            // add this much space in cm around edge of detector
+  string WorldMaterial = "G4_AIR";   // default world material, use G4_Galactic for material scan
+  string PhysicsList = "QGSP_BERT";  // for calorimeters use HP lists
 }  // namespace G4WORLD
 
 void WorldInit(PHG4Reco *g4Reco)
