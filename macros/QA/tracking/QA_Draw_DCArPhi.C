@@ -86,8 +86,8 @@ void QA_Draw_DCArPhi(
     h_ref->Scale(Nevent_new / Nevent_ref);
   }
 
-  TCanvas *c1 = new TCanvas(TString("QA_Draw_DCArPhi") + TString("_") + hist_name_prefix,
-                            TString("QA_Draw_DCArPhi") + TString("_") + hist_name_prefix,
+  TCanvas *c1 = new TCanvas(TString("QA_Draw_Tracking_DCArPhi") + TString("_") + hist_name_prefix,
+                            TString("QA_Draw_Tracking_DCArPhi") + TString("_") + hist_name_prefix,
                             1800, 1000);
   c1->Divide(4, 2);
   int idx = 1;
