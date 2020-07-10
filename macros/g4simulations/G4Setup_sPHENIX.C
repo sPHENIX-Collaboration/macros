@@ -117,9 +117,6 @@ int G4Setup()
   {
     g4Reco->set_force_decay(G4P6DECAYER::decayType);
   }
-  // uncomment to set QGSP_BERT_HP physics list for productions
-  // (default is QGSP_BERT for speed)
-  //  g4Reco->SetPhysicsList("QGSP_BERT_HP");
 
   double fieldstrength;
   istringstream stringline(G4MAGNET::magfield);
