@@ -17,7 +17,8 @@
 namespace Enable
 {
   bool AEROGEL = false;
-}
+  bool AEROGEL_OVERLAPCHECK = false;
+}  // namespace Enable
 
 void AerogelInit()
 {
@@ -28,6 +29,8 @@ void AerogelInit()
 void AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8,  //
                   const double min_eta = 1.242)
 {
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::AEROGEL_OVERLAPCHECK;
+
   PHG4SectorSubsystem* ag = new PHG4SectorSubsystem("Aerogel");
 
   ag->get_geometry().set_normal_polar_angle((PHG4Sector::Sector_Geometry::eta_to_polar_angle(min_eta) +
@@ -40,7 +43,7 @@ void AerogelSetup(PHG4Reco* g4Reco, const int N_Sector = 8,  //
   ag->get_geometry().set_min_polar_edge(PHG4Sector::Sector_Geometry::FlatEdge());
   ag->get_geometry().set_material("G4_AIR");
   ag->get_geometry().set_N_Sector(N_Sector);
-  ag->OverlapCheck(overlapcheck);
+  ag->OverlapCheck(OverlapCheck);
 
   // Aerogel dimensions ins cm
   double radiator_length = 2.;

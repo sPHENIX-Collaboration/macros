@@ -15,8 +15,9 @@ int make_LANL_FST_station(string name, PHG4Reco *g4Reco, double zpos, double Rmi
 //-----------------------------------------------------------------------------------//
 namespace Enable
 {
-  static bool FST = false;
-}
+  bool FST = false;
+  bool FST_OVERLAPCHECK = false;
+}  // namespace Enable
 //-----------------------------------------------------------------------------------//
 void FST_Init()
 {
@@ -41,6 +42,8 @@ int make_LANL_FST_station(string name, PHG4Reco *g4Reco,
   //  cout
   //      << "make_GEM_station - GEM construction with PHG4SectorSubsystem - make_GEM_station_EdgeReadout  of "
   //      << name << endl;
+
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::FST_OVERLAPCHECK;
 
   // always facing the interaction point
   double polar_angle = 0;
@@ -73,7 +76,7 @@ int make_LANL_FST_station(string name, PHG4Reco *g4Reco,
   fst->get_geometry().set_min_polar_edge(PHG4Sector::Sector_Geometry::ConeEdge());
   fst->get_geometry().set_N_Sector(1);
   fst->get_geometry().set_material("G4_AIR");
-  fst->OverlapCheck(overlapcheck);
+  fst->OverlapCheck(OverlapCheck);
 
   const double cm = PHG4Sector::Sector_Geometry::Unit_cm();
   const double mm = .1 * cm;
