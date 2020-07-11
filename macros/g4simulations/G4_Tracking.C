@@ -67,7 +67,8 @@ R__LOAD_LIBRARY(libPHTpcTracker.so)
 //==============================================
 
 ////////////// MVTX
-const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
+//const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
+const int n_maps_layer = 0;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
 
 /////////////// INTT
 int n_intt_layer = 4;  // must be 4 or 0, setting to zero removes INTT completely
@@ -75,9 +76,15 @@ int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI};
-int nladder[4] = {15,  15, 18, 18};
-double sensor_radius[4] = { 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
+//int nladder[4] = {15,  15, 18, 18};
+//int nladder[4] = {1,  12, 16, 16}; // for debigging
+int nladder[4] = {12, 12, 16, 16}; // new 30/05/2020
+//double sensor_radius[4] = { 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
+double sensor_radius[4] = { 7.188, 7.732, 9.680, 10.262};  // radius of center of sensor for layer default, new 30/05/2020
+
 double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3]};
+//double offsetphi[4] = {90.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3]};
+
 enum enu_InttDeadMapType      // Dead map options for INTT
 {
   kInttNoDeadMap = 0,        // All channel in Intt is alive
@@ -116,14 +123,13 @@ const bool use_truth_vertex = true;   // set to false to get initial vertex from
 //const bool use_truth_vertex = false;   // set to false to get initial vertex from MVTX hits using PHInitZVertexing, true for using smeared truth vertex
 //std::string vmethod("avr-smoothing:1-minweight:0.5-primcut:9-seccut:9");  // seems to handle multi-vertex events.
 
-
 void TrackingInit(int verbosity = 0)
 {
 }
 
 double Tracking(PHG4Reco* g4Reco, double radius,
                 const int absorberactive = 0,
-                int verbosity = 0)
+                int verbosity = 1)
 {
   // create the three tracker subsystems
   gSystem->Load("libg4mvtx.so");
@@ -158,7 +164,8 @@ double Tracking(PHG4Reco* g4Reco, double radius,
     // INTT ladders
     //-------------------
 
-    bool intt_overlapcheck = false;  // set to true if you want to check for overlaps
+    //bool intt_overlapcheck = false;  // set to true if you want to check for overlaps
+    bool intt_overlapcheck = true;  // set to true if you want to check for overlaps
 
     // instantiate the INTT subsystem and register it
     // We make one instance of PHG4INTTSubsystem for all four layers of tracker
@@ -170,7 +177,9 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 
     // The length of vpair is used to determine the number of layers
     std::vector<std::pair<int, int>> vpair;  // (sphxlayer, inttlayer)
+
     for (int i = 0; i < n_intt_layer; i++)
+    //for (int i = 0; i < 1; i++) // for debigging
     {
       // We want the sPHENIX layer numbers for the Intt to be from n_maps_layer to n_maps_layer+n_intt_layer - 1
       vpair.push_back(std::make_pair(n_maps_layer + i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
@@ -188,7 +197,7 @@ double Tracking(PHG4Reco* g4Reco, double radius,
     cout << "Intt has " << n_intt_layer << " layers with layer setup:" << endl;
     for(int i=0;i<n_intt_layer;i++)
       {
-	cout << " Intt layer " << i << " laddertype " << laddertype[i] << " nladders " << nladder[i]
+	cout << "\tIntt layer " << i << " laddertype " << laddertype[i] << " nladders " << nladder[i]
 	     << " sensor radius " << sensor_radius[i] << " offsetphi " << offsetphi[i] << endl;
 	sitrack->set_int_param(i, "laddertype", laddertype[i]);
 	sitrack->set_int_param(i, "nladder", nladder[i]);
@@ -196,6 +205,9 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 	sitrack->set_double_param(i,"offsetphi",offsetphi[i]);  // expecting degrees
       }
 
+    //sitrack->set_int_param(0, "laddertype", laddertype[0]);
+    cout << string(100, '-' ) << endl << "End of INTT set init params" << endl;
+    
     // outer radius marker (translation back to cm)
     radius = intt_radius_max * 0.1;
   }

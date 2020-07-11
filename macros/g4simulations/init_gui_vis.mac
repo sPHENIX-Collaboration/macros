@@ -17,4 +17,5 @@
 #
 /vis/scene/create
 # open graphics (opengl QT)
-/vis/open OGL
+/vis/open OGL 1800x1200-500+500
+/vis/viewer/set/background white

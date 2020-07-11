@@ -93,9 +93,11 @@ int Fun4All_G4_sPHENIX(
   // What to run
   //======================
 
-  bool do_bbc = true;
+  //  bool do_bbc = true;
+  bool do_bbc = false;
 
   bool do_pipe = true;
+  do_pipe = false;
 
   bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
@@ -103,23 +105,28 @@ int Fun4All_G4_sPHENIX(
   bool do_tracking_track = do_tracking_cluster && true;
   bool do_tracking_eval = do_tracking_track && true;
 
+  //  bool do_pstof = false;
   bool do_pstof = false;
 
-  bool do_cemc = true;
+  //  bool do_cemc = true;
+  bool do_cemc = false;
   bool do_cemc_cell = do_cemc && true;
   bool do_cemc_twr = do_cemc_cell && true;
   bool do_cemc_cluster = do_cemc_twr && true;
   bool do_cemc_eval = do_cemc_cluster && true;
 
-  bool do_hcalin = true;
+  //  bool do_hcalin = true;
+  bool do_hcalin = false;
   bool do_hcalin_cell = do_hcalin && true;
   bool do_hcalin_twr = do_hcalin_cell && true;
   bool do_hcalin_cluster = do_hcalin_twr && true;
   bool do_hcalin_eval = do_hcalin_cluster && true;
 
-  bool do_magnet = true;
+  //  bool do_magnet = true;
+  bool do_magnet = false;
 
-  bool do_hcalout = true;
+  //  bool do_hcalout = true;
+  bool do_hcalout = false;
   bool do_hcalout_cell = do_hcalout && true;
   bool do_hcalout_twr = do_hcalout_cell && true;
   bool do_hcalout_cluster = do_hcalout_twr && true;
@@ -135,12 +142,14 @@ int Fun4All_G4_sPHENIX(
   //! forward flux return plug door. Out of acceptance and off by default.
   bool do_plugdoor = false;
 
-  bool do_global = true;
+  //bool do_global = true;
+  bool do_global = false;
   bool do_global_fastsim = true;
 
   bool do_calotrigger = true && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
 
-  bool do_jet_reco = true;
+  //  bool do_jet_reco = true;
+  bool do_jet_reco = false;
   bool do_jet_eval = do_jet_reco && true;
 
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
@@ -180,14 +189,16 @@ int Fun4All_G4_sPHENIX(
   // Fun4All server
   //---------------
 
-  bool display_on = false;
+  //  bool display_on = false;
+  bool display_on = true;
   if(display_on)
     {
       gROOT->LoadMacro("DisplayOn.C");
     }
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0);
+  //se->Verbosity(0);
+  se->Verbosity( 9999 );
 
   //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
   PHRandomSeed::Verbosity(1);
@@ -624,11 +635,12 @@ int Fun4All_G4_sPHENIX(
 
   if(display_on)
     {
-      DisplayOn();
+      //DisplayOn();
+      QTGui();
       // prevent macro from finishing so can see display
       int i;
-      cout << "***** Enter any integer to proceed" << endl;
-      cin >> i;
+      //      cout << "***** Enter any integer to proceed" << endl;
+      //      cin >> i;
     }
 
   se->run(nEvents);
