@@ -36,7 +36,7 @@ namespace Enable
   bool CEMC_CLUSTER = false;
   bool CEMC_EVAL = false;
   int CEMC_VERBOSITY = 0;
-}
+}  // namespace Enable
 
 namespace G4CEMC
 {

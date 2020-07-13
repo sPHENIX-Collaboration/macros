@@ -30,7 +30,6 @@ CEmc_1DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings);
 double
 CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings);
 
-
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)

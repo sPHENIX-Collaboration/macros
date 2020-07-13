@@ -26,7 +26,7 @@ R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 
-  void HCalInner_SupportRing(PHG4Reco *g4Reco);
+void HCalInner_SupportRing(PHG4Reco *g4Reco);
 
 namespace Enable
 {

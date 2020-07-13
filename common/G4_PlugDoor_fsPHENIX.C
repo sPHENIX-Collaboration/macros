@@ -33,8 +33,6 @@ void PlugDoorInit()
 
 void PlugDoor(PHG4Reco *g4Reco)
 {
-
-
   //----------------------------------------
   // fsPHENIX forward flux return(s)
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::PLUGDOOR_OVERLAPCHECK;

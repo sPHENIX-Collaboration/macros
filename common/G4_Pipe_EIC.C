@@ -19,7 +19,7 @@ namespace Enable
   bool PIPE_ABSORBER = false;
   bool PIPE_OVERLAPCHECK = false;
   int PIPE_VERBOSITY = 0;
-}
+}  // namespace Enable
 
 namespace G4PIPE
 {

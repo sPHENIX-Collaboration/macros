@@ -29,7 +29,7 @@ namespace Enable
   bool FEMC_EVAL = false;
   bool FEMC_OVERLAPCHECK = false;
   int FEMC_VERBOSITY = 0;
-}
+}  // namespace Enable
 
 namespace G4FEMC
 {

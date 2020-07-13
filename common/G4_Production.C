@@ -25,7 +25,7 @@ void Production_MoveOutput()
 {
   if (Enable::DSTOUT)
   {
-    string fulloutfile = DstOut::OutputDir + "/"  + DstOut::OutputFile;
+    string fulloutfile = DstOut::OutputDir + "/" + DstOut::OutputFile;
     string mvcmd = "mv " + fulloutfile + " " + PRODUCTION::SaveOutputDir;
     gSystem->Exec(mvcmd.c_str());
   }

@@ -23,7 +23,7 @@ namespace G4MAGNET
   double magnet_outer_cryostat_wall_thickness = 2.5;
   double magnet_length = 379.;
   double magfield_rescale = 1;
-  string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root"); 
+  string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");
 
 }  // namespace G4MAGNET
 
@@ -38,7 +38,7 @@ double Magnet(PHG4Reco* g4Reco, double radius)
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::MAGNET_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::MAGNET_OVERLAPCHECK;
-  int verbosity = std::max(Enable::VERBOSITY,Enable::MAGNET_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::MAGNET_VERBOSITY);
 
   double magnet_inner_cryostat_wall_radius = 142;
   double magnet_inner_cryostat_wall_thickness = 1;

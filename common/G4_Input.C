@@ -156,7 +156,7 @@ void InputInit()
   {
     INPUTGENERATOR::VectorMesonGenerator = new PHG4ParticleGeneratorVectorMeson();
   }
-// input managers for which we might need to set options
+  // input managers for which we might need to set options
   if (Input::HEPMC)
   {
     INPUTMANAGER::HepMCInputManager = new Fun4AllHepMCInputManager("HEPMCin");

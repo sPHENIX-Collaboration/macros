@@ -63,7 +63,7 @@ void FEMCInit()
 
 void FEMCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 {
-  bool AbsorberActive = Enable::ABSORBER || Enable::FEMC_ABSORBER || (absorberactive>0);
+  bool AbsorberActive = Enable::ABSORBER || Enable::FEMC_ABSORBER || (absorberactive > 0);
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::FEMC_OVERLAPCHECK;
 
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -100,7 +100,7 @@ void FEMC_Cells()
 
 void FEMC_Towers()
 {
-  int verbosity = std::max(Enable::VERBOSITY,Enable::FEMC_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::FEMC_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_femc;
@@ -220,7 +220,7 @@ void FEMC_Towers()
 
 void FEMC_Clusters()
 {
-  int verbosity = std::max(Enable::VERBOSITY,Enable::FEMC_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::FEMC_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
@@ -255,7 +255,7 @@ void FEMC_Clusters()
 
 void FEMC_Eval(std::string outputfile)
 {
-  int verbosity = std::max(Enable::VERBOSITY,Enable::FEMC_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::FEMC_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("FEMCEVALUATOR", "FEMC", outputfile.c_str());
