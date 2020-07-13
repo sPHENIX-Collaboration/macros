@@ -100,6 +100,11 @@ namespace INPUTGENERATOR
   PHSartreParticleTrigger *SartreTrigger = nullptr;
 }  // namespace INPUTGENERATOR
 
+namespace INPUTMANAGER
+{
+  Fun4AllHepMCInputManager *HepMCInputManager = nullptr;
+}
+
 void InputInit()
 {
   // first consistency checks - not all input generators play nice
@@ -150,6 +155,11 @@ void InputInit()
   if (Input::UPSILON)
   {
     INPUTGENERATOR::VectorMesonGenerator = new PHG4ParticleGeneratorVectorMeson();
+  }
+  // input managers for which we might need to set options
+  if (Input::HEPMC)
+  {
+    INPUTMANAGER::HepMCInputManager = new Fun4AllHepMCInputManager("HEPMCin");
   }
 }
 
@@ -218,10 +228,9 @@ void InputManagers()
   }
   if (Input::HEPMC)
   {
-    Fun4AllInputManager *in = new Fun4AllHepMCInputManager("HEPMCin");
-    in->Verbosity(Input::VERBOSITY);
-    se->registerInputManager(in);
-    se->fileopen(in->Name(), INPUTHEPMC::filename);
+    INPUTMANAGER::HepMCInputManager->Verbosity(Input::VERBOSITY);
+    se->registerInputManager(INPUTMANAGER::HepMCInputManager);
+    se->fileopen(INPUTMANAGER::HepMCInputManager->Name(), INPUTHEPMC::filename);
   }
   else if (Input::READHITS)
   {

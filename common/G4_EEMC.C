@@ -31,7 +31,7 @@ namespace Enable
   bool EEMC_EVAL = false;
   bool EEMC_OVERLAPCHECK = false;
   int EEMC_VERBOSITY = 0;
-}
+}  // namespace Enable
 
 namespace G4EEMC
 {

@@ -14,7 +14,7 @@ namespace Enable
   bool PLUGDOOR = false;
   bool PLUGDOOR_ABSORBER = false;
   bool PLUGDOOR_OVERLAPCHECK = false;
-}
+}  // namespace Enable
 
 namespace G4PLUGDOOR
 {

@@ -30,13 +30,13 @@ namespace Enable
   bool FGEM_TRACK = false;
   bool FGEM_EVAL = false;
   int FGEM_VERBOSITY = 0;
-}
+}  // namespace Enable
 
 void FGEM_Init()
 {
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 130.);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 280.);
-  TRACKING::TrackNodeName = "SvtxTrackMap"; // node name for tracks
+  TRACKING::TrackNodeName = "SvtxTrackMap";  // node name for tracks
 }
 
 void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
@@ -234,7 +234,7 @@ int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
 
 void FGEM_FastSim_Reco()
 {
-int verbosity = std::max(Enable::VERBOSITY, Enable::FGEM_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::FGEM_VERBOSITY);
 
   //---------------
   // Fun4All server
@@ -330,7 +330,7 @@ int verbosity = std::max(Enable::VERBOSITY, Enable::FGEM_VERBOSITY);
 
   if (Enable::FEMC)
   {
-  kalman->add_state_name("FEMC");
+    kalman->add_state_name("FEMC");
   }
   if (Enable::FHCAL)
   {
@@ -341,7 +341,7 @@ int verbosity = std::max(Enable::VERBOSITY, Enable::FGEM_VERBOSITY);
 
 void FGEM_FastSim_Eval(const std::string &outputfile)
 {
-int verbosity = std::max(Enable::VERBOSITY, Enable::FGEM_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::FGEM_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4TrackFastSimEval *fast_sim_eval = new PHG4TrackFastSimEval("FastTrackingEval");

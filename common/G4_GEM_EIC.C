@@ -107,7 +107,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   gem->get_geometry().AddLayers_HBD_GEM();
   gem->OverlapCheck(Enable::OVERLAPCHECK);
   g4Reco->registerSubsystem(gem);
-  
+
   ///////////////////////////////////////////////////////////////////////////
 
   name = "FGEM_4";
