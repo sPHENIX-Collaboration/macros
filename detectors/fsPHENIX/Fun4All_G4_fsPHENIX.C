@@ -135,11 +135,29 @@ int Fun4All_G4_fsPHENIX(
     INPUTGENERATOR::Gun->set_vtx(0, 0, 0);
   }
 
+  //--------------
+  // Set Input Manager specific options
+  //--------------
+  // can only be set after InputInit() is called
+
+  if (Input::HEPMC)
+  {
+    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4,100e-4,30,0);//optional collision smear in space, time
+//    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
+    // //optional choice of vertex distribution function in space, time
+    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus);
+    //! embedding ID for the event
+    //! positive ID is the embedded event of interest, e.g. jetty event from pythia
+    //! negative IDs are backgrounds, .e.g out of time pile up collisions
+    //! Usually, ID = 0 means the primary Au+Au collision background
+    //INPUTMANAGER::HepMCInputManager->set_embedding_id(2);
+  }
+
   // register all input generators with Fun4All
   InputRegister();
 
 // set up production relatedstuff
-   Enable::PRODUCTION = true;
+//   Enable::PRODUCTION = true;
 
   //======================
   // Write the DST
