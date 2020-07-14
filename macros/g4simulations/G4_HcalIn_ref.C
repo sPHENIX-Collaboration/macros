@@ -255,7 +255,6 @@ void HCALInner_Towers()
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
   TowerCalibration->set_calib_const_GeV_ADC(0.4e-3 / visible_sample_fraction_HCALIN);
   TowerCalibration->set_pedstal_ADC(0);
-  TowerCalibration->set_zero_suppression_GeV(-1);  // no-zero suppression
   se->registerSubsystem(TowerCalibration);
 
   return;
