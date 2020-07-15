@@ -112,7 +112,7 @@ int Fun4All_G4_EICDetector(
   // Write the DST
   //======================
 
-  Enable::DSTOUT = true;
+//  Enable::DSTOUT = true;
   Enable::DSTOUT_COMPRESS = false;  // Compress DST files
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   //Enable::DSTREADER = true;
