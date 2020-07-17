@@ -110,7 +110,6 @@ const bool use_hough_seeding = false; //choose seeding algo
 const bool use_ca_seeding  = false;
 
 const bool use_track_prop = true;   // true for normal track seeding, false to run with truth track seeding instead
-const bool useActsFitting = false; // true for PHActsTrkFitter, false for PHGenFitTrkFitter
 const bool g4eval_use_initial_vertex = false;   // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
 const bool use_primary_vertex = false;  // if true, refit tracks with primary vertex included - adds second node to node tree, adds second evaluator and outputs separate ntuples
 
@@ -529,12 +528,11 @@ void Tracking_Reco(int verbosity = 0)
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  if (useActsFitting)
-    {
-      PHActsSourceLinks *sl = new PHActsSourceLinks();
-      sl->Verbosity(0);
-      se->registerSubsystem(sl);
-    }
+
+  PHActsSourceLinks *sl = new PHActsSourceLinks();
+  sl->Verbosity(0);
+  se->registerSubsystem(sl);
+
   //-------------
   // Tracking
   //------------
@@ -614,49 +612,47 @@ void Tracking_Reco(int verbosity = 0)
   //------------------------------------------------
   // Fitting of tracks using Kalman Filter
   //------------------------------------------------
-  if (useActsFitting)
-    {
-      PHActsTracks *actsTracks = new PHActsTracks();
-      actsTracks->Verbosity(0);
-      se->registerSubsystem(actsTracks);
-      
-      /// Use either PHActsTrkFitter to run the ACTS
-      /// KF track fitter, or PHActsTrkProp to run the ACTS Combinatorial 
-      /// Kalman Filter which runs track finding and track fitting
-      /// Always run PHActsTracks first to take the SvtxTrack and convert it
-      /// to a form that Acts can process
-      
-      /// If you run PHActsTrkProp, disable PHGenFitTrkProp
-      PHActsTrkProp *actsProp = new PHActsTrkProp();
-      actsProp->Verbosity(0);
-      //se->registerSubsystem(actsProp);
-      
-      PHActsTrkFitter *actsFit = new PHActsTrkFitter();
-      actsFit->Verbosity(0);
-      actsFit->setTimeAnalysis(false);
-      se->registerSubsystem(actsFit);
-    }
-  else
-    {
-      PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
-      kalman->Verbosity(0);
-      
-      if (use_primary_vertex)
-	kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
-      
-      kalman->set_vertexing_method(vmethod);
-      kalman->set_use_truth_vertex(false);
-      
-      se->registerSubsystem(kalman);
-    
-      //------------------
-      // Track Projections
-      //------------------
-      PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
-      projection->Verbosity(verbosity);
-      se->registerSubsystem(projection);
-    }
-  
+
+  PHActsTracks *actsTracks = new PHActsTracks();
+  actsTracks->Verbosity(0);
+  se->registerSubsystem(actsTracks);
+
+  /// Use either PHActsTrkFitter to run the ACTS
+  /// KF track fitter, or PHActsTrkProp to run the ACTS Combinatorial 
+  /// Kalman Filter which runs track finding and track fitting
+  /// Always run PHActsTracks first to take the SvtxTrack and convert it
+  /// to a form that Acts can process
+
+  /// If you run PHActsTrkProp, disable PHGenFitTrkProp
+  PHActsTrkProp *actsProp = new PHActsTrkProp();
+  actsProp->Verbosity(0);
+  //se->registerSubsystem(actsProp);
+
+  PHActsTrkFitter *actsFit = new PHActsTrkFitter();
+  actsFit->Verbosity(0);
+  actsFit->setTimeAnalysis(true);
+  se->registerSubsystem(actsFit);
+
+
+
+  PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
+  kalman->Verbosity(0);
+
+  if (use_primary_vertex)
+    kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
+
+  kalman->set_vertexing_method(vmethod);
+  kalman->set_use_truth_vertex(false);
+
+  //se->registerSubsystem(kalman);
+
+  //------------------
+  // Track Projections
+  //------------------
+  PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
+  projection->Verbosity(verbosity);
+  //se->registerSubsystem(projection);
+
   return;
 }
 
@@ -694,13 +690,11 @@ void Tracking_Reco(int verbosity = 0)
   eval->Verbosity(0);
   se->registerSubsystem(eval);
 
-  if(useActsFitting)
-    {
-      ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
-      actsEval->Verbosity(0);
-      se->registerSubsystem(actsEval);
-    }
-  
+
+  ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
+  actsEval->Verbosity(0);
+  se->registerSubsystem(actsEval);
+
   if (use_primary_vertex)
   {
     // make a second evaluator that records tracks fitted with primary vertex included
