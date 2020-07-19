@@ -73,7 +73,7 @@ namespace
     auto hnew0 = static_cast<TH1*>( qa_file_new->GetObjectChecked( Form( "%s%s_0", prefix.Data(), tag.Data()), "TH1" ) );
     auto hnew1 = static_cast<TH1*>( qa_file_new->GetObjectChecked( Form( "%s%s_1", prefix.Data(), tag.Data()), "TH1" ) );
     
-    hnew1->Divide(hnew0);
+    hnew1->Divide(hnew1, hnew0, 1, 1, "B");
     hnew1->SetMinimum(0);
     
     // reference
@@ -81,14 +81,13 @@ namespace
     auto href1 = qa_file_ref ? static_cast<TH1*>( qa_file_ref->GetObjectChecked( Form( "%s%s_1", prefix.Data(), tag.Data()), "TH1" ) ) : nullptr;
     if( href0 )
       {
-	href1->Divide(href0);
-        href1->SetMinimum(0);
+	href1->Divide(href1, href0, 1, 1, "B");
+	href1->SetMinimum(0);
       }
     
     // draw
     DrawReference(hnew1, href1);
-    //DrawReference(hnew1, hnew0);
-    
+        
     auto line = HorizontalLine( gPad, 1 );
     line->Draw();
     
