@@ -101,7 +101,7 @@ namespace
 
 void QA_Draw_Tpc(
 		 const char *hist_name_prefix = "QAG4SimulationTpc",
-		 const char *qa_file_name_new =  "data/100evts_G4sPHENIX.root_qa.root",
+		 const char *qa_file_name_new =  "data/G4sPHENIX.root_qa.root",
 		 const char *qa_file_name_ref =  "data/200evts_G4sPHENIX.root_qa.root"
 		 )
 {
