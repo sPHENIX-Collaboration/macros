@@ -26,7 +26,8 @@ root -b -q "QA_Draw_Intt.C(${q}QAG4SimulationIntt${q},$new_QA_file, $reference_Q
 # mvtx stuff
 root -b -q "QA_Draw_Mvtx.C(${q}QAG4SimulationMvtx${q},$new_QA_file, $reference_QA_file)"
 
-# DCA stuff
+# tpc stuff
+root -b -q "QA_Draw_Tpc.C(${q}QAG4SimulationTpc${q},$new_QA_file, $reference_QA_file)"
 root -b -q "QA_Draw_DCArPhi.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
 root -b -q "QA_Draw_DCAZ.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
 root -b -q "QA_Draw_DCA_Resolution.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
