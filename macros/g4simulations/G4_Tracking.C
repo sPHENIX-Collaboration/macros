@@ -42,11 +42,14 @@
 #include <trackreco/PHTruthVertexing.h>
 #include <trackreco/PHTruthTrackSeeding.h>
 #include <trackreco/PHGenFitTrackProjection.h>
+
+#if __cplusplus >= 201703L
 #include <trackreco/PHActsSourceLinks.h>
 #include <trackreco/PHActsTracks.h>
 #include <trackreco/PHActsTrkProp.h>
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/ActsEvaluator.h>
+#endif
 
 #include <trackbase/TrkrHitTruthAssoc.h>
 
@@ -529,12 +532,16 @@ void Tracking_Reco(int verbosity = 0)
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
+
   if(useActsFitting)
     {
+      #if __cplusplus >= 201703L
       PHActsSourceLinks *sl = new PHActsSourceLinks();
       sl->Verbosity(0);
       se->registerSubsystem(sl);
+      #endif
     }
+
 
   //-------------
   // Tracking
@@ -615,8 +622,10 @@ void Tracking_Reco(int verbosity = 0)
   //------------------------------------------------
   // Fitting of tracks using Kalman Filter
   //------------------------------------------------
+
   if(useActsFitting)
     {
+      #if __cplusplus >= 201703L
       PHActsTracks *actsTracks = new PHActsTracks();
       actsTracks->Verbosity(0);
       se->registerSubsystem(actsTracks);
@@ -636,6 +645,7 @@ void Tracking_Reco(int verbosity = 0)
       actsFit->Verbosity(0);
       actsFit->setTimeAnalysis(true);
       se->registerSubsystem(actsFit);
+      #endif   
     }
   else
     {
@@ -698,10 +708,12 @@ void Tracking_Reco(int verbosity = 0)
 
   if(useActsFitting)
     {
+      #if __cplusplus >= 201703L
       ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
       actsEval->Verbosity(0);
       se->registerSubsystem(actsEval);
-    }
+      #endif
+      }
   if (use_primary_vertex)
   {
     // make a second evaluator that records tracks fitted with primary vertex included
