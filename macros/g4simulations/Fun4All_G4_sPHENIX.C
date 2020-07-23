@@ -1,6 +1,7 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 #include <qa_modules/QAG4SimulationUpsilon.h>
 #include <qa_modules/QAG4SimulationTracking.h>
+#include <qa_modules/QAG4SimulationVertex.h>
 #include <qa_modules/QAHistManagerDef.h>
 #include <qa_modules/QAG4SimulationIntt.h>
 #include <qa_modules/QAG4SimulationMvtx.h>
@@ -46,7 +47,7 @@ using namespace std;
 
 
 int Fun4All_G4_sPHENIX(
-    const int nEvents = 100,
+    const int nEvents = 50,
     const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
     const char *outputFile = "G4sPHENIX.root",
     const char *embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root")
@@ -86,6 +87,8 @@ int Fun4All_G4_sPHENIX(
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
   const bool upsilons = true && !readhits;
   const int num_upsilons_per_event = 1;  // can set more than 1 upsilon per event, each has a unique embed flag
+  // track vertices
+  const bool vertices = true && !readhits;
   // Event pile up simulation with collision rate in Hz MB collisions.
   // Note please follow up the macro to verify the settings for beam parameters
   const double pileup_collision_rate = 0;  // 100e3 for 100kHz nominal AuAu collision rate.
@@ -106,7 +109,8 @@ int Fun4All_G4_sPHENIX(
   bool do_tracking_cell = do_tracking && true;
   bool do_tracking_cluster = do_tracking_cell && true;
   bool do_tracking_track = do_tracking_cluster && true;
-  bool do_tracking_eval = do_tracking_track && false;
+  bool do_tracking_eval = do_tracking_track && true;
+  bool do_tracking_vertex = do_tracking_eval && true;
 
   bool do_pstof = false;
 
@@ -509,6 +513,8 @@ int Fun4All_G4_sPHENIX(
 
   if (do_tracking_eval) Tracking_Eval(string(outputFile) + "_g4svtx_eval.root");
 
+  // if (do_tracking_vertex) Tracking_Vertex(string(outputFile) + "_g4svtx_vertex_eval.root");
+
   if (do_cemc_eval) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
 
   if (do_hcalin_eval) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
@@ -645,6 +651,12 @@ int Fun4All_G4_sPHENIX(
         QAG4SimulationUpsilon * qa = new QAG4SimulationUpsilon();
         qa->addEmbeddingID(3);
         se->registerSubsystem(qa);
+      }
+      if ( vertices )
+      {
+	QAG4SimulationVertex * qa = new QAG4SimulationVertex();
+	// qa->addEmbeddingID(4);
+	se->registerSubsystem(qa);
       }
 
       se->registerSubsystem( new QAG4SimulationIntt );
