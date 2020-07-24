@@ -85,7 +85,7 @@ namespace G4MVTXSERVICE
      int n_staves_layer[] = {48}; //Number of staves associated to each layer
 
   double service_barrel_radius = 10.75; // [cm] From final design review
-  double service_barrel_start  = 10; //[cm] Approx (Straight barrel length (419mm) - 0.5*stave active length (270mm/2))
+  double service_barrel_start  = -35; //[cm] Approx (Straight barrel length (419mm) - 0.5*stave active length (270mm/2))
   double service_barrel_length = 150; // [cm] length of service barrel ~(to patch panel)
 }  // namespace G4MVTXSERVICE
 
@@ -130,7 +130,7 @@ double MVTXService(PHG4Reco* g4Reco, double radius)
   // Note, cables are all south
   //Setup layers
   double copper_OR[G4MVTXSERVICE::n_layers], water_OR[G4MVTXSERVICE::n_layers], plastic_OR[G4MVTXSERVICE::n_layers]; //Objects for material outer radii
-  int subsystem_layer = 0
+  int subsystem_layer = 0;
   std::string copper_name, water_name, plastic_name;
   PHG4CylinderSubsystem* cyl;
 
@@ -185,7 +185,7 @@ double MVTXService(PHG4Reco* g4Reco, double radius)
 
   cyl = new PHG4CylinderSubsystem("MVTX_Service_shell_layer", subsystem_layer);
   cyl->set_double_param("place_z", -1*(G4MVTXSERVICE::service_barrel_length + G4MVTXSERVICE::service_barrel_start) - no_overlapp);
-  cyl->set_double_param("radius", service_barrel_radius);
+  cyl->set_double_param("radius", G4MVTXSERVICE::service_barrel_radius);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4MVTXSERVICE::service_barrel_length);
   cyl->set_string_param("material", "PEEK"); //Service barrel is carbon fibre (peek?)
