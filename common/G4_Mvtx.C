@@ -20,8 +20,6 @@
 R__LOAD_LIBRARY(libg4mvtx.so)
 R__LOAD_LIBRARY(libmvtx.so)
 
-const double pi = 3.14159265358979323846;
-
 namespace Enable
 {
   bool MVTX = false;
@@ -30,7 +28,7 @@ namespace Enable
   bool MVTX_CLUSTER = false;
   bool MVTX_ABSORBER = false;
   bool MVTX_SERVICE = true;
-  int MVTX_VERBOSITY = 0;
+  int MVTX_VERBOSITY = 1;
 
 }  // namespace Enable
 
@@ -63,12 +61,12 @@ void MvtxInit()
 
 double calculateArea( double inner_radius, double outer_radius ) //Calculate the area of a disk
 {
-	return pi*( std::pow( outer_radius, 2 ) - std::pow( inner_radius, 2) );
+	return M_PI*( std::pow( outer_radius, 2 ) - std::pow( inner_radius, 2) );
 }
 
 double calculateOR( double inner_radius, double area ) //Calculate the outer radius of a disk, knowing the inner radius and the area
 {
-	return std::sqrt( area/pi + std::pow( inner_radius, 2 ) );
+	return std::sqrt( area/M_PI + std::pow( inner_radius, 2 ) );
 }
 
 void calculateMaterialBoundaries(int& service_layer_ID, double& outer_copper_radius, double& outer_water_radius, double& outer_plastic_radius) //Calculate where the transition between each material occurs
