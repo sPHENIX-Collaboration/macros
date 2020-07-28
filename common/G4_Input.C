@@ -69,17 +69,17 @@ namespace INPUTEMBED
 
 namespace PYTHIA6
 {
-  string config_file = "phpythia6.cfg";
+  string config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia6.cfg";
 }
 
 namespace PYTHIA8
 {
-  string config_file = "phpythia8.cfg";
+  string config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg";
 }
 
 namespace SARTRE
 {
-  string config_file = "sartre.cfg";
+  string config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/sartre.cfg";
 }
 
 namespace PILEUP
