@@ -146,7 +146,7 @@ int Fun4All_G4_EICDetector(
   // pythia6
   if (Input::PYTHIA6)
   {
-    INPUTGENERATOR::Pythia6->set_config_file("phpythia6_ep.cfg");
+    INPUTGENERATOR::Pythia6->set_config_file(string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia6_ep.cfg");
   }
 
   //--------------
