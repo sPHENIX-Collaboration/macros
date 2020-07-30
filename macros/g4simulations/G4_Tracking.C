@@ -624,13 +624,7 @@ void Tracking_Reco(int verbosity = 0)
   //------------------------------------------------
 
   if(useActsFitting)
-    {
-      // Rerun vertexing since the Hough seeding writes over the initial
-      // truth vertexing
-      PHInitVertexing* init_vtx  = new PHTruthVertexing("PHTruthVertexing");
-      init_vtx->Verbosity(0);
-      se->registerSubsystem(init_vtx);
-     
+    {    
       #if __cplusplus >= 201703L
       PHActsTracks *actsTracks = new PHActsTracks();
       actsTracks->Verbosity(0);
