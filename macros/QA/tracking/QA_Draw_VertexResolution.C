@@ -241,10 +241,10 @@ void QA_Draw_VertexResolution(
     // p->SetLogy();
 
     const double epsilon = 1e-6;
-    const int bin_start = h_new->GetXaxis()->FindBin(gvz_range.first + epsilon);
-    const int bin_end = h_new->GetXaxis()->FindBin(gvz_range.second - epsilon);
+    const int bin_start = h_new3->GetXaxis()->FindBin(gvz_range.first + epsilon);
+    const int bin_end = h_new3->GetXaxis()->FindBin(gvz_range.second - epsilon);
 
-    TH1 *h_proj_new3 = h_new->ProjectionY(
+    TH1 *h_proj_new3 = h_new3->ProjectionY(
         TString::Format(
             "%s_New_ProjX_%d_%d",
             h_new3->GetName(), bin_start, bin_end),

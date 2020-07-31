@@ -48,7 +48,7 @@ using namespace std;
 
 
 int Fun4All_G4_sPHENIX(
-    const int nEvents = 50,
+    const int nEvents = 200,
     const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
     const char *outputFile = "G4sPHENIX.root",
     const char *embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root")
@@ -111,7 +111,6 @@ int Fun4All_G4_sPHENIX(
   bool do_tracking_cluster = do_tracking_cell && true;
   bool do_tracking_track = do_tracking_cluster && true;
   bool do_tracking_eval = do_tracking_track && true;
-  bool do_tracking_vertex = do_tracking_eval && true;
 
   bool do_pstof = false;
 
@@ -514,8 +513,6 @@ int Fun4All_G4_sPHENIX(
 
   if (do_tracking_eval) Tracking_Eval(string(outputFile) + "_g4svtx_eval.root");
 
-  // if (do_tracking_vertex) Tracking_Vertex(string(outputFile) + "_g4svtx_vertex_eval.root");
-
   if (do_cemc_eval) CEMC_Eval(string(outputFile) + "_g4cemc_eval.root");
 
   if (do_hcalin_eval) HCALInner_Eval(string(outputFile) + "_g4hcalin_eval.root");
@@ -645,6 +642,10 @@ int Fun4All_G4_sPHENIX(
         QAG4SimulationTracking * qa = new QAG4SimulationTracking();
         qa->addEmbeddingID(2);
         se->registerSubsystem(qa);
+
+	QAG4SimulationVertex * qa2 = new QAG4SimulationVertex();
+	qa2->addEmbeddingID(2);
+	se->registerSubsystem(qa);
       }
       if ( upsilons )
       {
@@ -652,12 +653,6 @@ int Fun4All_G4_sPHENIX(
         QAG4SimulationUpsilon * qa = new QAG4SimulationUpsilon();
         qa->addEmbeddingID(3);
         se->registerSubsystem(qa);
-      }
-      if ( vertices )
-      {
-	QAG4SimulationVertex * qa = new QAG4SimulationVertex();
-	// qa->addEmbeddingID(4);
-	se->registerSubsystem(qa);
       }
 
       se->registerSubsystem( new QAG4SimulationIntt );
