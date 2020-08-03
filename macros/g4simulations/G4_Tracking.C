@@ -14,6 +14,10 @@
 
 #include <g4main/PHG4Reco.h>
 
+#include <g4micromegas/PHG4MicromegasDigitizer.h>
+#include <g4micromegas/PHG4MicromegasHitReco.h>
+#include <g4micromegas/PHG4MicromegasSubsystem.h>
+
 #include <g4mvtx/PHG4MvtxDefs.h>
 #include <g4mvtx/PHG4MvtxDigitizer.h>
 #include <g4mvtx/PHG4MvtxSubsystem.h>
@@ -26,6 +30,7 @@
 #include <g4tpc/PHG4TpcSubsystem.h>
 
 #include <intt/InttClusterizer.h>
+#include <micromegas/MicromegasClusterizer.h>
 #include <mvtx/MvtxClusterizer.h>
 #include <tpc/TpcClusterizer.h>
 
@@ -39,14 +44,20 @@
 #include <trackreco/PHGenFitTrackProjection.h>
 
 #include <trackbase/TrkrHitTruthAssoc.h>
+
+#include <phtpctracker/PHTpcTracker.h>
+
 R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
+R__LOAD_LIBRARY(libg4micromegas.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libtpc.so)
+R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
+R__LOAD_LIBRARY(libPHTpcTracker.so)
 
 #endif
 
@@ -82,9 +93,17 @@ int n_tpc_layer_mid = 16;
 int n_tpc_layer_outer = 16;
 int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
 
+///////////////// Micromegas
+bool enable_micromegas = false;
+const int n_micromegas_layer = 2;
+
 // Tracking reconstruction setup parameters and flags
 //=====================================
 const int init_vertexing_min_zvtx_tracks = 2; // PHInitZvertexing parameter for reducing spurious vertices, use 2 for Pythia8 events, 5 for large multiplicity events
+//default seed is PHTpcTracker
+const bool use_hough_seeding = false; //choose seeding algo
+const bool use_ca_seeding  = false;
+
 const bool use_track_prop = true;   // true for normal track seeding, false to run with truth track seeding instead
 const bool g4eval_use_initial_vertex = false;   // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
 const bool use_primary_vertex = false;  // if true, refit tracks with primary vertex included - adds second node to node tree, adds second evaluator and outputs separate ntuples
@@ -201,9 +220,19 @@ double Tracking(PHG4Reco* g4Reco, double radius,
   g4Reco->registerSubsystem(tpc);
 
   radius = 77. + 1.17;
-
   radius += no_overlapp;
 
+  // micromegas
+  if( enable_micromegas )
+  {
+    const int mm_layer = n_maps_layer + n_intt_layer + n_gas_layer;
+    auto mm = new PHG4MicromegasSubsystem( "MICROMEGAS", mm_layer );
+    mm->SetActive();
+    mm->set_double_param("mm_length", 220);
+    mm->set_double_param("mm_radius", 82);
+    g4Reco->registerSubsystem(mm);
+  }
+  
   return radius;
 }
 
@@ -287,6 +316,28 @@ void Tracking_Cells(int verbosity = 0)
   padplane->set_int_param("ntpc_layers_inner", n_tpc_layer_inner);
   padplane->set_int_param("ntpc_phibins_inner", tpc_layer_rphi_count_inner);
 
+  // micromegas
+  if( enable_micromegas )
+  {
+
+    // micromegas
+    auto reco = new PHG4MicromegasHitReco;
+    reco->Verbosity(0);
+
+    static constexpr double radius = 82;
+    static constexpr double tile_length = 50;
+    static constexpr double tile_width = 25;
+
+    // 12 tiles at mid rapidity, one in front of each TPC sector
+    static constexpr int ntiles = 12;
+    MicromegasTile::List tiles;
+    for( int i = 0; i < ntiles; ++i )
+    { tiles.push_back( {{ 2.*M_PI*(0.5+i)/ntiles, 0, tile_width/radius, tile_length }} ); }
+    reco->set_tiles( tiles );
+
+    se->registerSubsystem( reco );
+    
+  }
   return;
 }
 
@@ -416,6 +467,10 @@ void Tracking_Clus(int verbosity = 0)
 
   se->registerSubsystem(digitpc);
 
+  // micromegas
+  if(enable_micromegas)
+  { se->registerSubsystem( new PHG4MicromegasDigitizer ); }
+  
   //-------------
   // Cluster Hits
   //-------------
@@ -445,6 +500,10 @@ void Tracking_Clus(int verbosity = 0)
   tpcclusterizer->Verbosity(0);
   se->registerSubsystem(tpcclusterizer);
 
+  // Micromegas
+  if(enable_micromegas)
+  { se->registerSubsystem( new MicromegasClusterizer ); }
+  
 }
 
 void Tracking_Reco(int verbosity = 0)
@@ -456,6 +515,7 @@ void Tracking_Reco(int verbosity = 0)
   //---------------
   gSystem->Load("libfun4all.so");
   gSystem->Load("libtrack_reco.so");
+  gSystem->Load("libPHTpcTracker.so");
 
   //---------------
   // Fun4All server
@@ -492,16 +552,26 @@ void Tracking_Reco(int verbosity = 0)
 	    init_zvtx->Verbosity(0);
 	    se->registerSubsystem(init_zvtx);
 	}
-
-      // find seed tracks using a subset of TPC layers
-      int min_layers = 4;
-      int nlayers_seeds = 12;
-      PHHoughSeeding* track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer, nlayers_seeds, min_layers);
-      track_seed->Verbosity(0);
-      se->registerSubsystem(track_seed);
-
+      if(use_hough_seeding){
+	// find seed tracks using a subset of TPC layers
+	int min_layers = 4;
+	int nlayers_seeds = 12;
+	auto track_seed = new PHHoughSeeding("PHHoughSeeding", n_maps_layer, n_intt_layer, n_gas_layer, nlayers_seeds, min_layers);
+	track_seed->Verbosity(0);
+	se->registerSubsystem(track_seed);
+      }else if(use_ca_seeding){
+      }else{
+	PHTpcTracker* tracker = new PHTpcTracker("PHTpcTracker");
+	tracker->set_seed_finder_options( 3.0, M_PI / 8, 10, 6.0, M_PI / 8, 5, 1 ); // two-pass CA seed params
+	tracker->set_seed_finder_optimization_remove_loopers( true, 20.0, 10000.0 ); // true if loopers not needed
+	tracker->set_track_follower_optimization_helix( true ); // false for quality, true for speed
+	tracker->set_track_follower_optimization_precise_fit( false ); // true for quality, false for speed
+	tracker->enable_json_export( false ); // save event as json, filename is automatic and stamped by current time in ms
+	tracker->enable_vertexing( false ); // rave vertexing is pretty slow at large multiplicities...
+	se->registerSubsystem(tracker);
+      }
       // Find all clusters associated with each seed track
-      PHGenFitTrkProp* track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", n_maps_layer, n_intt_layer, n_gas_layer);
+      auto track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", n_maps_layer, n_intt_layer, n_gas_layer, enable_micromegas ? n_micromegas_layer:0);
       track_prop->Verbosity(0);
       se->registerSubsystem(track_prop);
       for(int i = 0;i<n_intt_layer;i++)

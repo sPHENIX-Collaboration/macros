@@ -1,81 +1,149 @@
+#pragma once
 
-void TPCInit() {}
+#include "GlobalVariables.C"
+
+#include "G4_Intt.C"
+#include "G4_Mvtx.C"
+
+#include <g4tpc/PHG4TpcDigitizer.h>
+#include <g4tpc/PHG4TpcElectronDrift.h>
+#include <g4tpc/PHG4TpcPadPlane.h>
+#include <g4tpc/PHG4TpcPadPlaneReadout.h>
+#include <g4tpc/PHG4TpcSubsystem.h>
+
+#include <g4main/PHG4Reco.h>
+
+#include <tpc/TpcClusterizer.h>
+
+#include <fun4all/Fun4AllServer.h>
+
+R__LOAD_LIBRARY(libg4tpc.so)
+R__LOAD_LIBRARY(libtpc.so)
+
+namespace Enable
+{
+  bool TPC = false;
+  bool TPC_ABSORBER = false;
+  bool TPC_OVERLAPCHECK = false;
+  bool TPC_CELL = false;
+  bool TPC_CLUSTER = false;
+  int TPC_VERBOSITY = 0;
+}  // namespace Enable
+
+namespace G4TPC
+{
+  int n_tpc_layer_inner = 16;
+  int tpc_layer_rphi_count_inner = 1152;
+  int n_tpc_layer_mid = 16;
+  int n_tpc_layer_outer = 16;
+  int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
+  double tpc_outer_radius = 77. + 2;
+}  // namespace G4TPC
+
+void TPCInit()
+{
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4TPC::tpc_outer_radius);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 211. / 2.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -211. / 2.);
+
+  // the mvtx is not called if disabled but the default number of layers is set to 3,
+  // so we need to set it to zero
+  if (!Enable::MVTX)
+  {
+    G4MVTX::n_maps_layer = 0;
+  }
+  // same for the INTT
+  if (!Enable::INTT)
+  {
+    G4INTT::n_intt_layer = 0;
+  }
+}
 
 double TPC(PHG4Reco* g4Reco,
-	    double radius,
-	    const int absorberactive = 0,
-	    int verbosity = 0) {
+           double radius)
+{
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::TPC_OVERLAPCHECK;
+  bool AbsorberActive = Enable::ABSORBER || Enable::TPC_ABSORBER;
 
-  overlappcheck = 1;  
-  if (radius > 21-1.17) {
-    cout << "inconsistency: radius: " << radius 
-	 << " larger than tpc inner  radius: " << 21-1.17 << endl;
-    gSystem->Exit(-1);
-  }
-  
-  gSystem->Load("libg4tpc.so");
-  gSystem->Load("libg4testbench.so");
-
-  PHG4TPCSubsystem *tpc = new PHG4TPCSubsystem("TPC");
+  PHG4TpcSubsystem* tpc = new PHG4TpcSubsystem("TPC");
   tpc->SetActive();
   tpc->SuperDetector("TPC");
-  // tpc_set_double_param("gas_inner_radius",21.);
-  // tpc_set_double_param("gas_outer_radius",77.);
-  // tpc_set_double_param("place_x", 0.);
-  // tpc_set_double_param("place_y", 0.);
-  // tpc_set_double_param("place_z", 0.);
-  // tpc_set_double_param("rot_x", 0.);
-  // tpc_set_double_param("rot_y", 0.);
-  // tpc_set_double_param("rot_z", 0.);
-  // tpc_set_double_param("tpc_length",211.);
+  tpc->set_double_param("steplimits", 1);  // 1cm steps
 
-  // tpc_set_double_param("steplimits", NAN);
+  if (AbsorberActive)
+  {
+    tpc->SetAbsorberActive();
+  }
+  tpc->OverlapCheck(OverlapCheck);
 
-  // tpc_set_string_param("tpc_gas", "sPHENIX_TPC_Gas");
+  g4Reco->registerSubsystem(tpc);
 
-// material budget:
-// Cu (all layers): 0.5 oz cu per square foot, 1oz == 0.0347mm --> 0.5 oz ==  0.00347cm/2. 
-// Kapton insulation 18 layers of * 5mil = 18*0.0127=0.2286
-// 250 um FR4 (Substrate for Cu layers)
-// HoneyComb (nomex) 1/2 inch=0.5*2.54 cm
-  // tpc_set_string_param("cage_layer_1_material","G4_Cu");
-  // tpc_set_double_param("cage_layer_1_thickness",0.00347/2.);
-
-  // tpc_set_string_param("cage_layer_2_material","FR4");
-  // tpc_set_double_param("cage_layer_2_thickness",0.025);
-
-  // tpc_set_string_param("cage_layer_3_material","NOMEX");
-  // tpc_set_double_param("cage_layer_3_thickness",0.5*2.54);
-
-  // tpc_set_string_param("cage_layer_4_material","G4_Cu");
-  // tpc_set_double_param("cage_layer_4_thickness",0.00347/2.);
-
-  // tpc_set_string_param("cage_layer_5_material","FR4");
-  // tpc_set_double_param("cage_layer_5_thickness",0.025);
-
-  // tpc_set_string_param("cage_layer_6_material","G4_KAPTON");
-  // tpc_set_double_param("cage_layer_6_thickness",0.2286);
-
-  // tpc_set_string_param("cage_layer_7_material","G4_Cu");
-  // tpc_set_double_param("cage_layer_7_thickness",0.00347/2.);
-
-  // tpc_set_string_param("cage_layer_8_material","G4_KAPTON");
-  // tpc_set_double_param("cage_layer_8_thickness",0.05); // 50 um
-
-  // tpc_set_string_param("cage_layer_9_material","G4_Cu");
-  // tpc_set_double_param("cage_layer_9_thickness",0.00347/2.);
-  if (absorberactive)  
-    {
-      tpc->SetAbsorberActive();
-    }
-  tpc->OverlapCheck(overlapcheck);
-
-  g4Reco->registerSubsystem( tpc );  
-
-  radius = 77.+1.17;
-  
+  radius = G4TPC::tpc_outer_radius;
 
   radius += no_overlapp;
-  
-  return radius; 
+
+  return radius;
+}
+
+void TPC_Cells()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
+  Fun4AllServer* se = Fun4AllServer::instance();
+
+  //=========================
+  // setup Tpc readout for filling cells
+  // g4tpc/PHG4TpcElectronDrift uses
+  // g4tpc/PHG4TpcPadPlaneReadout
+  //=========================
+
+  PHG4TpcPadPlane* padplane = new PHG4TpcPadPlaneReadout();
+  padplane->Verbosity(verbosity);
+
+  PHG4TpcElectronDrift* edrift = new PHG4TpcElectronDrift();
+  edrift->Detector("TPC");
+  edrift->Verbosity(verbosity);
+  // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
+  // They represent effects not due to ideal gas properties and ideal readout plane behavior
+  // defaults are 0.085 and 0.105, they can be changed here to get a different resolution
+  //edrift->set_double_param("added_smear_trans",0.085);
+  //edrift->set_double_param("added_smear_long",0.105);
+  edrift->registerPadPlane(padplane);
+  se->registerSubsystem(edrift);
+
+  // The pad plane readout default is set in PHG4TpcPadPlaneReadout
+  // We may want to change the number of inner layers, and can do that here
+  padplane->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);  // sPHENIX layer number of first Tpc readout layer
+  padplane->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
+  padplane->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
+}
+
+void TPC_Clustering()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
+
+  Fun4AllServer* se = Fun4AllServer::instance();
+
+  // Tpc
+  //====
+  PHG4TpcDigitizer* digitpc = new PHG4TpcDigitizer();
+  digitpc->SetTpcMinLayer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
+  double ENC = 670.0;  // standard
+  digitpc->SetENC(ENC);
+  double ADC_threshold = 4.0 * ENC;
+  digitpc->SetADCThreshold(ADC_threshold);  // 4 * ENC seems OK
+  digitpc->Verbosity(verbosity);
+  cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
+       << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << endl;
+
+  se->registerSubsystem(digitpc);
+
+  //-------------
+  // Cluster Hits
+  //-------------
+
+  // For the Tpc
+  //==========
+  TpcClusterizer* tpcclusterizer = new TpcClusterizer();
+  tpcclusterizer->Verbosity(verbosity);
+  se->registerSubsystem(tpcclusterizer);
 }
