@@ -28,7 +28,7 @@ namespace Enable
   bool MVTX_CLUSTER = false;
   bool MVTX_ABSORBER = false;
   bool MVTX_SERVICE = true;
-  int MVTX_VERBOSITY = 1;
+  int MVTX_VERBOSITY = 0;
 
 }  // namespace Enable
 
@@ -154,7 +154,7 @@ double MVTXService(PHG4Reco* g4Reco, double radius)
 
   if (verbosity > 0)
   {
-    cout << "=========================== G4_MVTXService.C::MVTXService() =============================" << endl;
+    cout << "=========================== MVTX Service Barrel =============================" << endl;
     cout << " MVTX Service Material Description:" << endl;
 
     cout << "  Single stave copper area  = " << G4MVTX::single_stave_service_copper_area << " cm^2" << endl;
@@ -170,7 +170,7 @@ double MVTXService(PHG4Reco* g4Reco, double radius)
     cout << "  Service barrel radius = " << G4MVTX::service_barrel_radius << " cm" << endl;
     cout << "  Service barrel start = " << G4MVTX::service_barrel_start << " cm" << endl;
     cout << "  Service barrel length = " << G4MVTX::service_barrel_length << " cm" << endl;
-    cout << "=========================================================================================" << endl;
+    cout << "===============================================================================" << endl;
   }
 
   radius += no_overlapp;
