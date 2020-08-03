@@ -1,5 +1,5 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 00, 0)
 #include <g4detectors/PHG4PSTOFSubsystem.h>
 #include <g4main/PHG4Reco.h>
 R__LOAD_LIBRARY(libg4detectors.so)
@@ -13,21 +13,25 @@ R__LOAD_LIBRARY(libg4detectors.so)
  * \version $Revision$
  * \date $Date$
  */
+namespace Enable
+{
+  bool PSTOF = false;
+}
 
 void PSTOFInit()
-{}
+{
+}
 
 double PSTOF(PHG4Reco* g4Reco, double radius, const int absorberactive = 0)
 {
   gSystem->Load("libg4detectors.so");
   gSystem->Load("libg4testbench.so");
-  
 
-  PHG4PSTOFSubsystem *pstof = new PHG4PSTOFSubsystem( "PSTOF" );
+  PHG4PSTOFSubsystem* pstof = new PHG4PSTOFSubsystem("PSTOF");
   pstof->SuperDetector("PSTOF");
-//  pstof->SetActive(-1,1); // set all modules active
-  g4Reco->registerSubsystem( pstof );
+  //  pstof->SetActive(-1,1); // set all modules active
+  g4Reco->registerSubsystem(pstof);
 
-// returns the outer radius to check for overlaps with next detector
-  return 90.; 
+  // returns the outer radius to check for overlaps with next detector
+  return 90.;
 }
