@@ -96,6 +96,7 @@ int Fun4All_G4_sPHENIX(
   bool do_bbc = true;
 
   bool do_pipe = true;
+  bool do_mvtxservice = true;
 
   bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
@@ -169,7 +170,7 @@ int Fun4All_G4_sPHENIX(
   gSystem->Load("libg4intt.so");
   // establish the geometry and reconstruction setup
   gROOT->LoadMacro("G4Setup_sPHENIX.C");
-  G4Init(do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor, do_femc);
+  G4Init(do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe, do_plugdoor, do_femc, do_mvtxservice);
 
   int absorberactive = 1;  // set to 1 to make all absorbers active volumes
   //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
@@ -197,12 +198,12 @@ int Fun4All_G4_sPHENIX(
   // By default every random number generator uses
   // PHRandomSeed() which reads /dev/urandom to get its seed
   // if the RANDOMSEED flag is set its value is taken as seed
-  // You ca neither set this to a random value using PHRandomSeed()
+  // You can either set this to a random value using PHRandomSeed()
   // which will make all seeds identical (not sure what the point of
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  //  rc->set_IntFlag("RANDOMSEED", 12345);
+  //rc->set_IntFlag("RANDOMSEED", 12345);
 
   //-----------------
   // Event generation
@@ -362,10 +363,10 @@ int Fun4All_G4_sPHENIX(
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
     G4Setup(absorberactive, magfield, EDecayType::kAll,
-            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
+            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, do_mvtxservice, magfield_rescale);
 #else
     G4Setup(absorberactive, magfield, TPythia6Decayer::kAll,
-            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, magfield_rescale);
+            do_tracking, do_pstof, do_cemc, do_hcalin, do_magnet, do_hcalout, do_pipe,do_plugdoor, do_femc, do_mvtxservice, magfield_rescale);
 #endif
   }
 
