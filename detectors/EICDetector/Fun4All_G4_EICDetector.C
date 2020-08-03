@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_FUN4ALLG4EICDETECTOR_C
+#define MACRO_FUN4ALLG4EICDETECTOR_C
 
 #include "GlobalVariables.C"
 
@@ -12,6 +13,7 @@
 #include "G4_HIJetReco.C"
 #include "G4_Input.C"
 #include "G4_Jets.C"
+#include "G4_Production.C"
 
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
@@ -23,15 +25,19 @@ R__LOAD_LIBRARY(libfun4all.so)
 
 int Fun4All_G4_EICDetector(
     const int nEvents = 1,
-    const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
-    const string &outputFile = "G4EICDetector.root")
+    const string &inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
+    const string &outputFile = "G4EICDetector.root",
+    const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
+    const int skip = 0,
+    const string &outdir = ".")
 {
   //---------------
   // Fun4All server
   //---------------
   Fun4AllServer *se = Fun4AllServer::instance();
-  // se->Verbosity(01); // uncomment for batch production running with minimal output messages
-  // se->Verbosity(Fun4AllServer::VERBOSITY_SOME); // uncomment for some info for interactive running
+  se->Verbosity(0);
+  //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
+  //PHRandomSeed::Verbosity(1);
 
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
@@ -57,40 +63,29 @@ int Fun4All_G4_EICDetector(
   // Use one or more particle generators
   // It is run if Input::<generator> is set to true
   // all other options only play a role if it is active
-
+  // In case embedding into a production output, please double check your G4Setup_EICDetector.C and G4_*.C consistent with those in the production macro folder
+  //  Input::EMBED = true;
+  INPUTEMBED::filename = embed_input_file;
   // Use Pythia 8
   //  Input::PYTHIA8 = true;
 
   // Use Pythia 6
   //   Input::PYTHIA6 = true;
-  //   PYTHIA6::config_file = "phpythia6_ep.cfg";
 
   // Use Sartre
   //   Input::SARTRE = true;
 
   // Simple multi particle generator in eta/phi/pt ranges
   Input::SIMPLE = true;
-  Input::SIMPLE_VERBOSITY = 0;
-  INPUTSIMPLE::AddParticle("pi-", 5);
-  INPUTSIMPLE::set_eta_range(-3, 3);
-  INPUTSIMPLE::set_phi_range(-M_PI, M_PI);
-  INPUTSIMPLE::set_pt_range(0.1, 20.);
-  // or if you want to set the momentum, not pt range
-  //  INPUTSIMPLE::set_p_range(0.1, 20.);
-  INPUTSIMPLE::set_vtx_mean(0., 0., 0.);
-  INPUTSIMPLE::set_vtx_width(0., 0., 5.);
+  // Input::SIMPLE_VERBOSITY = 1;
 
   // Particle gun (same particles in always the same direction)
   //  Input::GUN = true;
   Input::GUN_VERBOSITY = 0;
-  INPUTGUN::AddParticle("anti_proton", 10, 0, 0.01);
-  INPUTGUN::AddParticle("geantino", 1.7776, -0.4335, 0.);
-  //INPUTGUN::set_vtx(0,0,0);
 
   // Upsilon generator
   //Input::UPSILON = true;
   Input::UPSILON_VERBOSITY = 0;
-  INPUTUPSILON::AddDecayParticles("e+", "e-", 0);
 
   // And/Or read generated particles from file
 
@@ -107,13 +102,86 @@ int Fun4All_G4_EICDetector(
   // Initialize the selected Input/Event generation
   //-----------------
   InputInit();
+  //--------------
+  // Set generator specific options
+  //--------------
+  // can only be set after InputInit() is called
+
+  // Simple Input generator:
+  if (Input::SIMPLE)
+  {
+    INPUTGENERATOR::SimpleEventGenerator->add_particles("pi-", 5);
+    if (Input::HEPMC || Input::EMBED)
+    {
+      INPUTGENERATOR::SimpleEventGenerator->set_reuse_existing_vertex(true);
+      INPUTGENERATOR::SimpleEventGenerator->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+    }
+    else
+    {
+      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
+                                                                             PHG4SimpleEventGenerator::Uniform,
+                                                                             PHG4SimpleEventGenerator::Uniform);
+      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_mean(0., 0., 0.);
+      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_width(0., 0., 5.);
+    }
+    INPUTGENERATOR::SimpleEventGenerator->set_eta_range(-3, 3);
+    INPUTGENERATOR::SimpleEventGenerator->set_phi_range(-M_PI, M_PI);
+    INPUTGENERATOR::SimpleEventGenerator->set_pt_range(0.1, 20.);
+  }
+  // Upsilons
+  if (Input::UPSILON)
+  {
+    INPUTGENERATOR::VectorMesonGenerator->add_decay_particles("mu", 0);
+    INPUTGENERATOR::VectorMesonGenerator->set_rapidity_range(-1, 1);
+    INPUTGENERATOR::VectorMesonGenerator->set_pt_range(0., 10.);
+    // Y species - select only one, last one wins
+    INPUTGENERATOR::VectorMesonGenerator->set_upsilon_1s();
+  }
+  // particle gun
+  if (Input::GUN)
+  {
+    INPUTGENERATOR::Gun->AddParticle("pi-", 0, 1, 0);
+    INPUTGENERATOR::Gun->set_vtx(0, 0, 0);
+  }
+  // pythia6
+  if (Input::PYTHIA6)
+  {
+    INPUTGENERATOR::Pythia6->set_config_file(string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia6_ep.cfg");
+  }
+
+  //--------------
+  // Set Input Manager specific options
+  //--------------
+  // can only be set after InputInit() is called
+
+  if (Input::HEPMC)
+  {
+    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4,100e-4,30,0);//optional collision smear in space, time
+//    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
+    // //optional choice of vertex distribution function in space, time
+    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus);
+    //! embedding ID for the event
+    //! positive ID is the embedded event of interest, e.g. jetty event from pythia
+    //! negative IDs are backgrounds, .e.g out of time pile up collisions
+    //! Usually, ID = 0 means the primary Au+Au collision background
+    //INPUTMANAGER::HepMCInputManager->set_embedding_id(2);
+  }
+
+  // register all input generators with Fun4All
+  InputRegister();
+
+// set up production relatedstuff
+//   Enable::PRODUCTION = true;
 
   //======================
   // Write the DST
   //======================
 
-//  Enable::DSTOUT = true;
+  //  Enable::DSTOUT = true;
+  DstOut::OutputDir = outdir;
+  DstOut::OutputFile = outputFile;
   Enable::DSTOUT_COMPRESS = false;  // Compress DST files
+
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   //Enable::DSTREADER = true;
 
@@ -223,10 +291,14 @@ int Fun4All_G4_EICDetector(
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
-  BlackHoleGeometry::visible = false;
+  //Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
+  //BlackHoleGeometry::visible = true;
 
-  // establish the geometry and reconstruction setup
-  G4Init();
+  //---------------
+  // World Settings
+  //---------------
+  //  G4WORLD::PhysicsList = "QGSP_BERT"; //FTFP_BERT_HP best for calo
+  //  G4WORLD::WorldMaterial = "G4_AIR"; // set to G4_GALACTIC for material scans
 
   //---------------
   // Magnet Settings
@@ -244,17 +316,16 @@ int Fun4All_G4_EICDetector(
   // default is All:
   // G4P6DECAYER::decayType = EDecayType::kAll;
 
-  //-----------------
-  // Event generation
-  //-----------------
+  // Initialize the selected subsystems
+  G4Init();
+
+  //---------------------
+  // GEANT4 Detector description
+  //---------------------
 
   // If "readhepMC" is also set, the Upsilons will be embedded in Hijing events, if 'particles" is set, the Upsilons will be embedded in whatever particles are thrown
   if (!Input::READHITS)
   {
-    //---------------------
-    // Detector description
-    //---------------------
-
     G4Setup();
   }
 
@@ -391,9 +462,15 @@ int Fun4All_G4_EICDetector(
   //--------------
   // Set up Output Manager
   //--------------
+  if (Enable::PRODUCTION)
+  {
+    Production_CreateOutputDir();
+  }
+
   if (Enable::DSTOUT)
   {
-    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputFile);
+    string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
+    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", FullOutFile);
     if (Enable::DSTOUT_COMPRESS) DstCompress(out);
     se->registerOutputManager(out);
   }
@@ -413,6 +490,7 @@ int Fun4All_G4_EICDetector(
     return 0;
   }
 
+  se->skip(skip);
   se->run(nEvents);
 
   //-----
@@ -422,6 +500,11 @@ int Fun4All_G4_EICDetector(
   se->End();
   std::cout << "All done" << std::endl;
   delete se;
+  if (Enable::PRODUCTION)
+  {
+    Production_MoveOutput();
+  }
   gSystem->Exit(0);
   return 0;
 }
+#endif

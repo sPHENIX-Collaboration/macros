@@ -130,19 +130,20 @@ void InputInit()
     InputUpsilonInit();
   }
 
-  // here are the various utility modules which read particles and
-  // put them onto the G4 particle stack
-  if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6)
-  {
-    // read-in HepMC events to Geant4 if there is any
-    HepMCNodeReader *hr = new HepMCNodeReader();
-    se->registerSubsystem(hr);
-  }
   if (Input::READEIC)
   {
     ReadEICFiles *eicr = new ReadEICFiles();
     eicr->OpenInputFile(INPUTREADEIC::filename);
     se->registerSubsystem(eicr);
+  }
+
+  // here are the various utility modules which read particles and
+  // put them onto the G4 particle stack
+  if (Input::HEPMC or Input::PYTHIA8 or Input::PYTHIA6 or Input::READEIC)
+  {
+    // read-in HepMC events to Geant4 if there is any
+    HepMCNodeReader *hr = new HepMCNodeReader();
+    se->registerSubsystem(hr);
   }
 }
 
