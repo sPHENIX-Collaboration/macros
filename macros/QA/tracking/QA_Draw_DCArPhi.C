@@ -99,8 +99,7 @@ void QA_Draw_DCArPhi(
       {1, 1.5},
       {1.5, 2},
       {2, 4},
-      {4, 8},
-      {8, 16},
+      {4, 16},
       {16, 40}};
   for (auto pt_range : gpt_ranges)
   {
@@ -152,6 +151,105 @@ void QA_Draw_DCArPhi(
     
     DrawReference(h_proj_new, h_proj_ref);
   }
+  p = (TPad *) c1->cd(idx++);
+  c1->Update();
+  TPaveText *pt = new TPaveText(.05,.1,.95,.8);
+  pt->AddText("No cuts");
+  pt->Draw();
 
   SaveCanvas(c1, TString(qa_file_name_new) + TString("_") + TString(c1->GetName()), true);
+
+
+  TH2 *h_new2 = (TH2 *) qa_file_new->GetObjectChecked(
+      prefix + TString("DCArPhi_pT_cuts"), "TH2");
+  assert(h_new2);
+
+  //  h_new->Rebin(1, 2);
+  h_new2->Sumw2();
+  //  h_new->Scale(1. / Nevent_new);
+
+  TH2 *h_ref2 = NULL;
+  if (qa_file_ref)
+  {
+    h_ref2 = (TH2 *) qa_file_ref->GetObjectChecked(
+        prefix + TString("DCArPhi_pT_cuts"), "TH2");
+    assert(h_ref2);
+
+    //    h_ref->Rebin(1, 2);
+    h_ref2->Sumw2();
+    h_ref2->Scale(Nevent_new / Nevent_ref);
+  }
+
+  TCanvas *c2 = new TCanvas(TString("QA_Draw_Tracking_DCArPhi2") + TString("_") + hist_name_prefix,
+                            TString("QA_Draw_Tracking_DCArPhi2") + TString("_") + hist_name_prefix,
+                            1800, 1000);
+  c2->Divide(4, 2);
+  int idx2 = 1;
+  TPad *p2;
+
+  vector<pair<double, double>> gpt_ranges2{
+      {0, 0.5},
+      {0.5, 1},
+      {1, 1.5},
+      {1.5, 2},
+      {2, 4},
+      {4, 16},
+      {16, 40}};
+  for (auto pt_range : gpt_ranges2)
+  {
+    cout << __PRETTY_FUNCTION__ << " process " << pt_range.first << " - " << pt_range.second << " GeV/c";
+
+    p2 = (TPad *) c2->cd(idx2++);
+    c2->Update();
+    p2->SetLogy();
+
+    const double epsilon = 1e-6;
+    const int bin_start = h_new->GetXaxis()->FindBin(pt_range.first + epsilon);
+    const int bin_end = h_new->GetXaxis()->FindBin(pt_range.second - epsilon);
+
+    TH1 *h_proj_new2 = h_new2->ProjectionY(
+        TString::Format(
+            "%s_New_ProjX_%d_%d",
+            h_new2->GetName(), bin_start, bin_end),
+        bin_start, bin_end);
+    if (pt_range.first < 2.0)
+    {
+      h_proj_new2->GetXaxis()->SetRangeUser(-.05,.05);
+      h_proj_new2->Rebin(5);
+    }
+    else
+    {
+      h_proj_new2->GetXaxis()->SetRangeUser(-.01,.01);
+    }
+    h_proj_new2->SetTitle(TString(hist_name_prefix) + TString::Format(
+                                                         ": %.1f - %.1f GeV/c", pt_range.first, pt_range.second));
+    h_proj_new2->GetXaxis()->SetTitle(TString::Format(
+        "DCA (r #phi) [cm]"));
+    h_proj_new2->GetXaxis()->SetNdivisions(5,5);
+    
+    TH1 *h_proj_ref2 = nullptr;
+    if (h_ref2)
+    {
+      h_proj_ref2 =
+          h_ref2->ProjectionY(
+              TString::Format(
+                  "%s_Ref_ProjX_%d_%d",
+                  h_new2->GetName(), bin_start, bin_end),
+              bin_start, bin_end);
+      if (pt_range.first < 2.0)
+      {
+	//h_proj_ref->GetXaxis()->SetRangeUser(-.05,.05);
+	h_proj_ref2->Rebin(5);
+      }
+    }
+    DrawReference(h_proj_new2, h_proj_ref2);
+  }
+  p2 = (TPad *) c2->cd(idx2++);
+  c2->Update();
+  TPaveText *pt2 = new TPaveText(.05,.1,.95,.8);
+  pt2->AddText("Cuts: MVTX hits>=2, INTT hits>=1,");
+  pt2->AddText("TPC hits>=20");
+  pt2->Draw();
+
+  SaveCanvas(c2, TString(qa_file_name_new) + TString("_") + TString(c2->GetName()), true);
 }

@@ -161,4 +161,104 @@ void QA_Draw_Tracking_RecoTruthMatching(
   SaveCanvas(c1,
              TString(qa_file_name_new) + TString("_") + TString(c1->GetName()),
              true);
+
+
+  TCanvas *c2 = new TCanvas(TString("QA_Draw_Tracking_RecoTruthMatching_cuts") +
+                                TString("_") + hist_name_prefix,
+                            TString("QA_Draw_Tracking_RecoTruthMatching_cuts") +
+                                TString("_") + hist_name_prefix,
+                            1800, 1000);
+  c2->Divide(2, 1);
+  int idx2 = 1;
+  TPad *p2;
+
+  {
+    static const int nrebin2 = 5;
+
+    p2 = (TPad *)c2->cd(idx2++);
+    c2->Update();
+    p2->SetLogx();
+    p2->SetGridy();
+
+    TH1 *h_pass2 =
+        (TH1 *)qa_file_new->GetObjectChecked(prefix + "nGen_pTReco_cuts", "TH1");
+    TH1 *h_norm2 =
+        (TH1 *)qa_file_new->GetObjectChecked(prefix + "nReco_pTReco_cuts", "TH1");
+    assert(h_norm2);
+    assert(h_pass2);
+
+    h_norm2->Rebin(nrebin2);
+    h_pass2->Rebin(nrebin2);
+
+    TH1 *h_ratio2 = GetBinominalRatio(h_pass2, h_norm2);
+
+    //    h_ratio->GetXaxis()->SetRangeUser(min_Et, max_Et);
+    h_ratio2->GetYaxis()->SetTitle("Tracking Purity");
+    h_ratio2->GetYaxis()->SetRangeUser(-0, 1.);
+
+    TH1 *h_ratio_ref2 = NULL;
+    if (qa_file_ref) {
+      TH1 *h_pass2 =
+          (TH1 *)qa_file_ref->GetObjectChecked(prefix + "nGen_pTReco_cuts", "TH1");
+      TH1 *h_norm2 =
+          (TH1 *)qa_file_ref->GetObjectChecked(prefix + "nReco_pTReco_cuts", "TH1");
+      assert(h_norm2);
+      assert(h_pass2);
+      h_norm2->Rebin(nrebin2);
+      h_pass2->Rebin(nrebin2);
+      h_ratio_ref2 = GetBinominalRatio(h_pass2, h_norm2);
+    }
+
+    h_ratio2->SetTitle("Tracking Purity (#geq 2MVTX, #geq 1INTT, #geq 20 TPC)");
+
+    DrawReference(h_ratio2, h_ratio_ref2, false);
+  }
+
+  {
+    p2 = (TPad *)c2->cd(idx2++);
+    c2->Update();
+    //    p->SetLogx();
+    TH1 *frame2 = p2->DrawFrame(0, .9, 50, 1.1,
+                              ";Reco p_{T} [GeV/c];<p_{T,matched}/p_{T,reco}> "
+                              "#pm #sigma(p_{T,matched}/p_{T,reco})");
+    gPad->SetLeftMargin(.2);
+    frame2->GetYaxis()->SetTitleOffset(2);
+    TLine *l2 = new TLine(0, 1, 50, 1);
+    l2->SetLineColor(kGray);
+    l2->Draw();
+
+    TH2 *h_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts =
+        (TH2 *)qa_file_new->GetObjectChecked(
+            prefix + "pTRecoTruthMatchedRatio_pTReco_cuts", "TH2");
+    assert(h_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts);
+
+    h_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts->Rebin2D(16, 1);
+
+    TGraphErrors *ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts =
+        FitProfile(h_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts);
+    ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts->Draw("pe");
+
+    TGraphErrors *h_ratio_ref2 = NULL;
+    if (qa_file_ref) {
+      TH2 *h_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts =
+          (TH2 *)qa_file_ref->GetObjectChecked(
+              prefix + "pTRecoTruthMatchedRatio_pTReco_cuts", "TH2");
+      assert(h_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts);
+
+      h_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts->Rebin2D(16, 1);
+
+      h_ratio_ref2 =
+          FitProfile(h_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts);
+      ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts->Draw("pe");
+    }
+
+    ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts->SetTitle(
+        "Mean and sigma, p_{T,matched}/p_{T,reco}");
+    DrawReference(ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts,
+                  h_ratio_ref2, true);
+  }
+
+  SaveCanvas(c2,
+             TString(qa_file_name_new) + TString("_") + TString(c2->GetName()),
+             true);
 }
