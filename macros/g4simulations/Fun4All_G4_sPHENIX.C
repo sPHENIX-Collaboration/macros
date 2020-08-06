@@ -48,7 +48,7 @@ using namespace std;
 
 
 int Fun4All_G4_sPHENIX(
-    const int nEvents = 200,
+    const int nEvents = 25,
     const char *inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
     const char *outputFile = "G4sPHENIX.root",
     const char *embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root")
@@ -195,7 +195,7 @@ int Fun4All_G4_sPHENIX(
     }
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(01);
+  se->Verbosity(03);
 
   //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
   PHRandomSeed::Verbosity(1);
@@ -638,14 +638,13 @@ int Fun4All_G4_sPHENIX(
     {
       if ( particles )
       {
-
         QAG4SimulationTracking * qa = new QAG4SimulationTracking();
         qa->addEmbeddingID(2);
         se->registerSubsystem(qa);
 
 	QAG4SimulationVertex * qa2 = new QAG4SimulationVertex();
-	qa2->addEmbeddingID(2);
-	se->registerSubsystem(qa);
+	// qa2->addEmbeddingID(2);
+	se->registerSubsystem(qa2);
       }
       if ( upsilons )
       {
