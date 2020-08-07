@@ -94,7 +94,7 @@ void QA_Draw_Tracking_RecoTruthMatching(
 
     //    h_ratio->GetXaxis()->SetRangeUser(min_Et, max_Et);
     h_ratio->GetYaxis()->SetTitle("Tracking Purity");
-    h_ratio->GetYaxis()->SetRangeUser(-0, 1.);
+    h_ratio->GetYaxis()->SetRangeUser(-0, 1.1);
 
     TH1 *h_ratio_ref = NULL;
     if (qa_file_ref) {
@@ -119,13 +119,14 @@ void QA_Draw_Tracking_RecoTruthMatching(
     c1->Update();
     //    p->SetLogx();
     TH1 *frame = p->DrawFrame(0, .9, 50, 1.1,
-                              ";Reco p_{T} [GeV/c];<p_{T,matched}/p_{T,reco}> "
-                              "#pm #sigma(p_{T,matched}/p_{T,reco})");
-    gPad->SetLeftMargin(.2);
-    frame->GetYaxis()->SetTitleOffset(2);
-    TLine *l = new TLine(0, 1, 50, 1);
-    l->SetLineColor(kGray);
-    l->Draw();
+                              "Mean and sigma p_{Tmatched}/p_{Treco};Reco p_{T} [GeV/c];<p_{T,matched}/p_{T,reco}> #pm #sigma(p_{T,matched}/p_{T,reco})");
+    // gPad->SetLeftMargin(.2);
+    gPad->SetTopMargin(-1);
+    frame->GetYaxis()->SetTitleOffset(1.7);
+    // TLine *l = new TLine(0, 1, 50, 1);
+    // l->SetLineColor(kGray);
+    // l->Draw();
+    HorizontalLine( gPad, 1 )->Draw();
 
     TH2 *h_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco =
         (TH2 *)qa_file_new->GetObjectChecked(
@@ -137,6 +138,8 @@ void QA_Draw_Tracking_RecoTruthMatching(
     TGraphErrors *ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco =
         FitProfile(h_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco);
     ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco->Draw("pe");
+    ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco->SetTitle(
+       "Mean and sigma p_{Tmatched}/p_{Treco}");
 
     TGraphErrors *h_ratio_ref = NULL;
     if (qa_file_ref) {
@@ -152,8 +155,6 @@ void QA_Draw_Tracking_RecoTruthMatching(
       ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco->Draw("pe");
     }
 
-    ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco->SetTitle(
-        "Mean and sigma, p_{T,matched}/p_{T,reco}");
     DrawReference(ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco,
                   h_ratio_ref, true);
   }
@@ -219,13 +220,15 @@ void QA_Draw_Tracking_RecoTruthMatching(
     c2->Update();
     //    p->SetLogx();
     TH1 *frame2 = p2->DrawFrame(0, .9, 50, 1.1,
-                              ";Reco p_{T} [GeV/c];<p_{T,matched}/p_{T,reco}> "
-                              "#pm #sigma(p_{T,matched}/p_{T,reco})");
-    gPad->SetLeftMargin(.2);
-    frame2->GetYaxis()->SetTitleOffset(2);
-    TLine *l2 = new TLine(0, 1, 50, 1);
-    l2->SetLineColor(kGray);
-    l2->Draw();
+                              "Mean and sigma, p_{T,matched}/p_{T,reco};Reco p_{T} [GeV/c];<p_{T,matched}/p_{T,reco}> #pm #sigma(p_{T,matched}/p_{T,reco})");
+    // gPad->SetLeftMargin(.2);
+    gPad->SetTopMargin(-1);
+    frame2->GetYaxis()->SetTitleOffset(1.7);
+    //TLine *l2 = new TLine(0, 1, 50, 1);
+    //l2->SetLineColor(kGray);
+    //l2->Draw();
+    HorizontalLine( gPad, 1 )->Draw();
+    
 
     TH2 *h_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts =
         (TH2 *)qa_file_new->GetObjectChecked(
@@ -237,6 +240,8 @@ void QA_Draw_Tracking_RecoTruthMatching(
     TGraphErrors *ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts =
         FitProfile(h_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts);
     ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts->Draw("pe");
+     ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts->SetTitle(
+        "Mean and sigma, p_{T,matched}/p_{T,reco}");
 
     TGraphErrors *h_ratio_ref2 = NULL;
     if (qa_file_ref) {
@@ -252,8 +257,6 @@ void QA_Draw_Tracking_RecoTruthMatching(
       ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts->Draw("pe");
     }
 
-    ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts->SetTitle(
-        "Mean and sigma, p_{T,matched}/p_{T,reco}");
     DrawReference(ge_QAG4SimulationTracking_pTRecoTruthMatchedRatio_pTReco_cuts,
                   h_ratio_ref2, true);
   }

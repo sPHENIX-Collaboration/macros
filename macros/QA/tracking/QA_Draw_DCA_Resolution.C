@@ -120,12 +120,14 @@ void QA_Draw_DCA_Resolution(
     c1->Update();
     p->SetLogx();
     TH1 *frame = p->DrawFrame(0.1, -0.01, 50, 0.01,
-                              ";Truth p_{T} [GeV/c];<DCA (Z)> #pm #sigma(DCA (Z)) [cm]");
-    gPad->SetLeftMargin(.2);
-    frame->GetYaxis()->SetTitleOffset(2);
-    TLine *l = new TLine(0.1, 0, 50, 0);
-    l->SetLineColor(kGray);
-    l->Draw();
+                              "Mean and sigma, DCA (Z) [cm];Truth p_{T} [GeV/c];<DCA (Z)> #pm #sigma(DCA (Z)) [cm]");
+    // gPad->SetLeftMargin(.2);
+    gPad->SetTopMargin(-1);
+    frame->GetYaxis()->SetTitleOffset(1.7);
+    //TLine *l = new TLine(0.1, 0, 50, 0);
+    //l->SetLineColor(kGray);
+    //l->Draw();
+    HorizontalLine( gPad, 1 )->Draw();
 
     TH2 *h_QAG4SimulationTracking_DCAZ = (TH2 *) qa_file_new->GetObjectChecked(
         prefix + "DCAZ_pT", "TH2");
@@ -135,6 +137,7 @@ void QA_Draw_DCA_Resolution(
 
     TGraphErrors *ge_QAG4SimulationTracking_DCAZ = FitProfile(h_QAG4SimulationTracking_DCAZ);
     ge_QAG4SimulationTracking_DCAZ->Draw("pe");
+    ge_QAG4SimulationTracking_DCAZ->SetTitle("Mean and sigma, DCA (Z) [cm]");
 
     TGraphErrors *h_ratio_ref = NULL;
     if (qa_file_ref)
@@ -149,7 +152,6 @@ void QA_Draw_DCA_Resolution(
       ge_QAG4SimulationTracking_DCAZ->Draw("pe");
     }
 
-    ge_QAG4SimulationTracking_DCAZ->SetTitle("Mean and sigma, DCA (Z) [cm]");
     DrawReference(ge_QAG4SimulationTracking_DCAZ, h_ratio_ref, true);
   }
 
