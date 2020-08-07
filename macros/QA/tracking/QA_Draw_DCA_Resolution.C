@@ -89,7 +89,7 @@ void QA_Draw_DCA_Resolution(
     l->Draw();
 
     TH2 *h_QAG4SimulationTracking_DCArPhi = (TH2 *) qa_file_new->GetObjectChecked(
-        prefix + "DCArPhi_pT", "TH2");
+        prefix + "DCArPhi_pT_cuts", "TH2");
     assert(h_QAG4SimulationTracking_DCArPhi);
     
     h_QAG4SimulationTracking_DCArPhi->Rebin2D(20, 1);
@@ -102,7 +102,7 @@ void QA_Draw_DCA_Resolution(
     if (qa_file_ref)
     {
       TH2 *h_QAG4SimulationTracking_DCArPhi = (TH2 *) qa_file_ref->GetObjectChecked(
-          prefix + "DCArPhi_pT", "TH2");
+          prefix + "DCArPhi_pT_cuts", "TH2");
       assert(h_QAG4SimulationTracking_DCArPhi);
       
       h_QAG4SimulationTracking_DCArPhi->Rebin2D(20, 1);
@@ -111,7 +111,7 @@ void QA_Draw_DCA_Resolution(
       ge_QAG4SimulationTracking_DCArPhi->Draw("pe");
     }
 
-    ge_QAG4SimulationTracking_DCArPhi->SetTitle("Mean and sigma, DCA (r #phi) [cm]"); 
+    ge_QAG4SimulationTracking_DCArPhi->SetTitle("DCA (r #phi, #geq 2MVTX, #geq 1INTT, #geq 20TPC) [cm]"); 
     DrawReference(ge_QAG4SimulationTracking_DCArPhi, h_ratio_ref, true);
   }
 
@@ -120,7 +120,7 @@ void QA_Draw_DCA_Resolution(
     c1->Update();
     p->SetLogx();
     TH1 *frame = p->DrawFrame(0.1, -0.01, 50, 0.01,
-                              "Mean and sigma, DCA (Z) [cm];Truth p_{T} [GeV/c];<DCA (Z)> #pm #sigma(DCA (Z)) [cm]");
+                              "DCA (Z) [cm];Truth p_{T} [GeV/c];<DCA (Z)> #pm #sigma(DCA (Z)) [cm]");
     // gPad->SetLeftMargin(.2);
     gPad->SetTopMargin(-1);
     frame->GetYaxis()->SetTitleOffset(1.7);
@@ -130,20 +130,20 @@ void QA_Draw_DCA_Resolution(
     HorizontalLine( gPad, 1 )->Draw();
 
     TH2 *h_QAG4SimulationTracking_DCAZ = (TH2 *) qa_file_new->GetObjectChecked(
-        prefix + "DCAZ_pT", "TH2");
+        prefix + "DCAZ_pT_cuts", "TH2");
     assert(h_QAG4SimulationTracking_DCAZ);
  
     h_QAG4SimulationTracking_DCAZ->Rebin2D(40, 1);
 
     TGraphErrors *ge_QAG4SimulationTracking_DCAZ = FitProfile(h_QAG4SimulationTracking_DCAZ);
     ge_QAG4SimulationTracking_DCAZ->Draw("pe");
-    ge_QAG4SimulationTracking_DCAZ->SetTitle("Mean and sigma, DCA (Z) [cm]");
+    ge_QAG4SimulationTracking_DCAZ->SetTitle("DCA (Z) [cm]");
 
     TGraphErrors *h_ratio_ref = NULL;
     if (qa_file_ref)
     {
       TH2 *h_QAG4SimulationTracking_DCAZ = (TH2 *) qa_file_ref->GetObjectChecked(
-          prefix + "DCAZ_pT", "TH2");
+          prefix + "DCAZ_pT_cuts", "TH2");
       assert(h_QAG4SimulationTracking_DCAZ);
       
       h_QAG4SimulationTracking_DCAZ->Rebin2D(40, 1);
