@@ -161,13 +161,14 @@ void QA_Draw_Tracking_TruthMatchingOverview(
     c1->Update();
     //    p->SetLogx();
     TH1 *frame = p->DrawFrame(0, .9, 50, 1.1,
-                              ";Truth p_{T} [GeV/c];<p_{T,reco}/p_{T,truth}> "
-                              "#pm #sigma(p_{T,reco}/p_{T,truth})");
-    gPad->SetLeftMargin(.2);
-    frame->GetYaxis()->SetTitleOffset(2);
-    TLine *l = new TLine(0, 1, 50, 1);
-    l->SetLineColor(kGray);
-    l->Draw();
+                              "Mean and sigma, p_{T,reco}/p_{T,truth};Truth p_{T} [GeV/c];<p_{T,reco}/p_{T,truth}> #pm #sigma(p_{T,reco}/p_{T,truth})");
+    //gPad->SetLeftMargin(.2);
+    gPad->SetTopMargin(-1);
+    frame->GetYaxis()->SetTitleOffset(1.7);
+    //TLine *l = new TLine(0, 1, 50, 1);
+    //l->SetLineColor(kGray);
+    //l->Draw();
+    HorizontalLine( gPad, 1 )->Draw();
 
     TH2 *h_QAG4SimulationTracking_pTRecoGenRatio_pTGen =
         (TH2 *)qa_file_new->GetObjectChecked(prefix + "pTRecoGenRatio_pTGen",
@@ -179,6 +180,8 @@ void QA_Draw_Tracking_TruthMatchingOverview(
     TGraphErrors *ge_QAG4SimulationTracking_pTRecoGenRatio_pTGen =
         FitProfile(h_QAG4SimulationTracking_pTRecoGenRatio_pTGen);
     ge_QAG4SimulationTracking_pTRecoGenRatio_pTGen->Draw("pe");
+    ge_QAG4SimulationTracking_pTRecoGenRatio_pTGen->SetTitle(
+        "Mean and sigma, p_{T,reco}/p_{T,truth}");
 
     TGraphErrors *h_ratio_ref = NULL;
     if (qa_file_ref) {
@@ -193,8 +196,6 @@ void QA_Draw_Tracking_TruthMatchingOverview(
       ge_QAG4SimulationTracking_pTRecoGenRatio_pTGen->Draw("pe");
     }
 
-    ge_QAG4SimulationTracking_pTRecoGenRatio_pTGen->SetTitle(
-        "Mean and sigma, p_{T,reco}/p_{T,truth}");
     DrawReference(ge_QAG4SimulationTracking_pTRecoGenRatio_pTGen, h_ratio_ref,
                   true);
   }

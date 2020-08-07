@@ -31,6 +31,11 @@ root -b -q "QA_Draw_Tpc.C(${q}QAG4SimulationTpc${q},$new_QA_file, $reference_QA_
 root -b -q "QA_Draw_DCArPhi.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
 root -b -q "QA_Draw_DCAZ.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
 root -b -q "QA_Draw_DCA_Resolution.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
+root -b -q "QA_Draw_SigmalizedDCA.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
+
+# vertex stuff
+root -b -q "QA_Draw_nVertex.C(${q}QAG4SimulationVertex${q}, $new_QA_file, $reference_QA_file)"
+root -b -q "QA_Draw_VertexResolution.C(${q}QAG4SimulationVertex${q}, $new_QA_file, $reference_QA_file)"
 
 # last all jet stuff
 root -b -q "QA_Draw_Tracking_TruthMatchingOverview.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
@@ -43,4 +48,3 @@ root -b -q "QA_Draw_Tracking_UpsilonOverview.C(${q}QAG4SimulationUpsilon${q},$ne
 
 echo "$0 - Output plots:";
 ls -lh $1*.png;
-
