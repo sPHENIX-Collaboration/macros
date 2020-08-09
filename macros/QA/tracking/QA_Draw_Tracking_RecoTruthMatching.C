@@ -109,7 +109,7 @@ void QA_Draw_Tracking_RecoTruthMatching(
       h_ratio_ref = GetBinominalRatio(h_pass, h_norm);
     }
 
-    h_ratio->SetTitle(TString(hist_name_prefix) + ": Tracking Purity");
+    h_ratio->SetTitle("Tracking Purity (matched truth-reco pairs)");
 
     DrawReference(h_ratio, h_ratio_ref, false);
   }

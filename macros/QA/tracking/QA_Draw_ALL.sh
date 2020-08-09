@@ -32,6 +32,7 @@ root -b -q "QA_Draw_DCArPhi.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $ref
 root -b -q "QA_Draw_DCAZ.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
 root -b -q "QA_Draw_DCA_Resolution.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
 root -b -q "QA_Draw_SigmalizedDCA.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
+root -b -q "QA_Draw_SigmalizedDCA_Resolution.C(${q}QAG4SimulationTracking${q}, $new_QA_file, $reference_QA_file)"
 
 # vertex stuff
 root -b -q "QA_Draw_nVertex.C(${q}QAG4SimulationVertex${q}, $new_QA_file, $reference_QA_file)"
