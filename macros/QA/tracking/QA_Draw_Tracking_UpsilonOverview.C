@@ -166,6 +166,7 @@ void QA_Draw_Tracking_UpsilonOverview(
     f_eLineshape->SetLineColor(kRed);
     f_eLineshape->SetLineWidth(3);
     f_eLineshape->SetLineStyle(kSolid);
+    f_eLineshape->SetNpx(1000);
 
     h_proj_new->Fit(f_eLineshape);
 
@@ -237,6 +238,7 @@ void QA_Draw_Tracking_UpsilonOverview(
     f1S->SetLineColor(kRed);
     f1S->SetLineWidth(3);
     f1S->SetLineStyle(kSolid);
+    f1S->SetNpx(1000);
 
     h_new->Fit(f1S);
 
