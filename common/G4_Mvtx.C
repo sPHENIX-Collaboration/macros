@@ -3,6 +3,7 @@
 
 #include "GlobalVariables.C"
 
+#include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4mvtx/PHG4MvtxDefs.h>
 #include <g4mvtx/PHG4MvtxDigitizer.h>
 #include <g4mvtx/PHG4MvtxHitReco.h>
