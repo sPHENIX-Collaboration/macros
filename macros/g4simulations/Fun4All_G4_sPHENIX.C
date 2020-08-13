@@ -34,6 +34,7 @@
 #include "G4_Jets.C"
 #include "G4_HIJetReco.C"
 #include "G4_TopoClusterReco.C"
+#include "G4_ParticleFlow.C"
 #include "G4_DSTReader.C"
 #include "DisplayOn.C"
 R__LOAD_LIBRARY(libqa_modules.so)
@@ -159,6 +160,8 @@ int Fun4All_G4_sPHENIX(
 
   // 3-D topoCluster reconstruction, potentially in all calorimeter layers
   bool do_topoCluster = false && do_cemc_twr && do_hcalin_twr && do_hcalout_twr;
+  // particle flow jet reconstruction - needs topoClusters!
+  bool do_particle_flow = false && do_topoCluster;
 
   bool do_dst_compress = false;
 
@@ -505,6 +508,11 @@ int Fun4All_G4_sPHENIX(
   {
     gROOT->LoadMacro("G4_HIJetReco.C");
     HIJetReco();
+  }
+
+  if (do_particle_flow) {
+    gROOT->LoadMacro("G4_ParticleFlow.C");
+    ParticleFlow();
   }
 
   //----------------------

@@ -1,8 +1,16 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include <fun4all/Fun4AllServer.h>
+
 #include <g4main/PHG4Reco.h>
-#endif
+
+#include <fun4all/Fun4AllServer.h>
+
+R__LOAD_LIBRARY(libfun4all.so)
+R__LOAD_LIBRARY(libg4testbench.so)
+
+namespace Enable
+{
+  bool DISPLAY = false;
+}
 
 // This starts the QT based G4 gui which takes control
 // when x'ed out it will return a pointer to PHG4Reco so

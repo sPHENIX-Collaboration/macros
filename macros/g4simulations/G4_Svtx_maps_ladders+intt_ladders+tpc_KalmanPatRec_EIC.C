@@ -1,38 +1,36 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 00, 0)
-#include <TMath.h>
-#include <fun4all/Fun4AllServer.h>
+
+#include "GlobalVariables.C"
+
 #include <g4detectors/PHG4CylinderSubsystem.h>
-#include <g4eval/SvtxEvaluator.h>
-#include <g4main/PHG4Reco.h>
+
 #include <g4mvtx/PHG4MvtxDefs.h>
 #include <g4mvtx/PHG4MvtxSubsystem.h>
-#include <g4tpc/PHG4TpcSpaceChargeDistortion.h>
-#include "GlobalVariables.C"
-R__LOAD_LIBRARY(libg4eval.so)
-R__LOAD_LIBRARY(libg4mvtx.so)
-#endif
 
+#include <g4tpc/PHG4TpcSpaceChargeDistortion.h>
+
+#include <g4eval/SvtxEvaluator.h>
+
+#include <g4main/PHG4Reco.h>
+
+#include <fun4all/Fun4AllServer.h>
+
+//#include <TMath.h>
+
+#include <cmath>
 #include <vector>
 
-// ONLY if backward compatibility with hits files already generated with 8 inner TPC layers is needed, you can set this to "true"
-bool tpc_layers_40 = false;
+R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libg4mvtx.so)
 
-// if true, refit tracks with primary vertex included in track fit  - good for analysis of prompt tracks only
-// Adds second node to node tree, keeps original track node undisturbed
-// Adds second evaluator to process refitted tracks and outputs separate ntuples
-bool use_primary_vertex = false;
 
+namespace TrackingEicMvtxMacro
+{
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
+}
 
-// default setup for the INTT - please don't change this. The configuration can be redone later in the nacro if desired
-int n_intt_layer = 0;
-// default layer configuration
-int laddertype[4] = {0, 1, 1, 1};                                // default
-int nladder[4] = {34, 30, 36, 42};                               // default
-double sensor_radius_inner[4] = {6.876, 8.987, 10.835, 12.676};  // inner staggered radius for layer default
-double sensor_radius_outer[4] = {7.462, 9.545, 11.361, 13.179};  // outer staggered radius for layer  default
-
+namespace TrackingEicTpcMacro
+{
 int n_tpc_layer_inner = 16;
 double tpc_layer_thick_inner = 1.25;  // EIC- recover default inner radius of TPC vol.
 int tpc_layer_rphi_count_inner = 1152;
@@ -44,8 +42,7 @@ int tpc_layer_rphi_count_mid = 1536;
 int n_tpc_layer_outer = 16;
 double tpc_layer_thick_outer = 1.125;  // outer later reach from 60-78 cm (instead of 80 cm), that leads to radial thickness of 1.125 cm
 int tpc_layer_rphi_count_outer = 2304;
-
-int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
+}
 
 double inner_cage_radius = 20.;
 // double inner_readout_radius = 30.; - deprecated for EIC simulation
@@ -102,11 +99,10 @@ double tpc_cell_z;
 double TPC_SmearRPhi;
 double TPC_SmearZ;
 
-int Max_si_layer;
+//}
 
 void SvtxInit(int verbosity = 0)
 {
-  Max_si_layer = n_maps_layer + n_intt_layer + n_gas_layer;
 
   switch (ether)
   {
@@ -219,7 +215,8 @@ double Svtx(PHG4Reco* g4Reco, double radius,
             int verbosity = 0)
 {
   gSystem->Load("libg4mvtx.so");
-  if (n_maps_layer > 0)
+  int n_gas_layer = TrackingEicTpcMacro::n_tpc_layer_inner + TrackingEicTpcMacro::n_tpc_layer_mid + TrackingEicTpcMacro::n_tpc_layer_outer;
+  if (TrackingEicMvtxMacro::n_maps_layer > 0)
   {
     bool maps_overlapcheck = false;  // set to true if you want to check for overlaps
 
@@ -237,61 +234,28 @@ double Svtx(PHG4Reco* g4Reco, double radius,
     //    ALICE outer 840 mm  4 mm  180 6.0 deg 0.8 % X0  21
 
 
-    static const double Degree2Rad = 180. / TMath::Pi();
-    int ilyr = 0;
-    mvtx->set_int_param(ilyr, "active", 1);  //non-automatic initialization in PHG4DetectorGroupSubsystem
-    mvtx->set_int_param(ilyr, "layer", ilyr);
-    mvtx->set_int_param(ilyr, "N_staves", 18);
-    mvtx->set_double_param(ilyr, "layer_nominal_radius", 36.4); // mm
-    mvtx->set_double_param(ilyr, "phitilt", 12.0 * Degree2Rad + TMath::Pi());
-    mvtx->set_double_param(ilyr, "phi0", 0);
-
-    // Then add a new mid layer that is extrapolation of the inner two.
-    ++ilyr;
-    mvtx->set_int_param(ilyr, "active", 1);  //non-automatic initialization in PHG4DetectorGroupSubsystem
-    mvtx->set_int_param(ilyr, "layer", ilyr);
-    mvtx->set_int_param(ilyr, "N_staves", 24);
-    mvtx->set_double_param(ilyr, "layer_nominal_radius", 48.1 ); // mm
-    mvtx->set_double_param(ilyr, "phitilt", 12.0 * Degree2Rad + TMath::Pi());
-    mvtx->set_double_param(ilyr, "phi0", 0);
-
-    ++ilyr;
-    mvtx->set_int_param(ilyr, "active", 1);  //non-automatic initialization in PHG4DetectorGroupSubsystem
-    mvtx->set_int_param(ilyr, "layer", ilyr);
-    mvtx->set_int_param(ilyr, "N_staves", 30);
-    mvtx->set_double_param(ilyr, "layer_nominal_radius", 59.8 ); // mm
-    mvtx->set_double_param(ilyr, "phitilt", 12.0 * Degree2Rad + TMath::Pi());
-    mvtx->set_double_param(ilyr, "phi0", 0);
-
-//    // Then add a new 3rd layer that is extrapolation of the inner two.
-//    ++ilyr;
-//    mvtx->set_int_param(ilyr, "active", 1);  //non-automatic initialization in PHG4DetectorGroupSubsystem
-//    mvtx->set_int_param(ilyr, "layer", ilyr);
-//    mvtx->set_int_param(ilyr, "N_staves", 42);
-//    mvtx->set_double_param(ilyr, "layer_nominal_radius", 83.2 ); // mm
-//    mvtx->set_double_param(ilyr, "phitilt", 12.0 * Degree2Rad + TMath::Pi());
-//    mvtx->set_double_param(ilyr, "phi0", 0);
+    static const double Degree2Rad = 180. /M_PI;
+    int N_staves[3] = {18, 24, 30};
+    double nom_radius[3] = {36.4, 48.1,  59.8};
+    for (int ilyr = 0; ilyr<3; ilyr++)
+    {
+      mvtx->set_int_param(ilyr, "active", 1);  //non-automatic initialization in PHG4DetectorGroupSubsystem
+      mvtx->set_int_param(ilyr, "layer", ilyr);
+      mvtx->set_int_param(ilyr, "N_staves", N_staves[ilyr]);
+      mvtx->set_double_param(ilyr, "layer_nominal_radius", nom_radius[ilyr]); // mm
+      mvtx->set_double_param(ilyr, "phitilt", 12.0 * Degree2Rad +M_PI);
+      mvtx->set_double_param(ilyr, "phi0", 0);
+    }
 
     mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v1.gdml"));
     mvtx->SetActive(1);
     mvtx->OverlapCheck(maps_overlapcheck);
     g4Reco->registerSubsystem(mvtx);
-  }  //   if (n_maps_layer > 0)
-
-  assert(n_intt_layer == 0);
+  }  //   if (TrackingEicMvtxMacro::n_maps_layer > 0)
 
   //  int verbosity = 1;
 
   // time projection chamber layers --------------------------------------------
-
-  // switch ONLY for backward compatibility with 40 layer hits files!
-  if (tpc_layers_40)
-  {
-    n_tpc_layer_inner = 8;
-    tpc_layer_thick_inner = 1.25;
-    tpc_layer_rphi_count_inner = 1152;
-    cout << "Using 8 inner_layers for backward comatibility" << endl;
-  }
 
   PHG4CylinderSubsystem* cyl;
 
@@ -302,9 +266,8 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   double cage_thickness = 28.6 * n_rad_length_cage;  // Kapton X_0 = 28.6 cm  // mocks up Kapton + carbon fiber structure
 
   // inner field cage
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_maps_layer + n_intt_layer);
+  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", TrackingEicMvtxMacro::n_maps_layer);
   cyl->set_double_param("radius", radius);
-  cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", cage_length);
   cyl->set_string_param("material", "G4_KAPTON");
   cyl->set_double_param("thickness", cage_thickness);
@@ -319,88 +282,35 @@ double Svtx(PHG4Reco* g4Reco, double radius,
   //
   string tpcgas = "sPHENIX_TPC_Gas";  //  Ne(90%) CF4(10%) - defined in g4main/PHG4Reco.cc
                                       //
-                                      //  // Layer of inert TPC gas from 20-30 cm
-                                      //  if (inner_readout_radius - radius > 0)
-                                      //  {
-                                      //    cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_maps_layer + n_intt_layer + 1);
-                                      //    cyl->set_double_param("radius", radius);
-                                      //    cyl->set_int_param("lengthviarapidity", 0);
-                                      //    cyl->set_double_param("length", cage_length);
-                                      //    cyl->set_string_param("material", tpcgas.c_str());
-                                      //    cyl->set_double_param("thickness", inner_readout_radius - radius);
-                                      //    cyl->SuperDetector("SVTXSUPPORT");
-                                      //    g4Reco->registerSubsystem(cyl);
-                                      //  }
-                                      //
-                                      //  radius = inner_readout_radius;
-
   double outer_radius = 78.;
 
+  int n_tpc_layers[3] = {16,16,16};
+  int  tpc_layer_rphi_count[3] = {1152, 1536, 2304};
+
+  double tpc_region_thickness[3] = { 20.,  20., 18.};
   // Active layers of the TPC (inner layers)
-
-  for (int ilayer = n_maps_layer + n_intt_layer; ilayer < (n_maps_layer + n_intt_layer + n_tpc_layer_inner); ++ilayer)
+int nlayer = TrackingEicMvtxMacro::n_maps_layer;
+for (int irange=0; irange<3; irange++)
+{
+  double tpc_layer_thickness = tpc_region_thickness[irange]/n_tpc_layers[irange]; // thickness per layer
+  for (int ilayer = 0; ilayer < n_tpc_layers[irange]; ilayer++)
   {
-    if (verbosity)
-      cout << "Create TPC gas layer " << ilayer << " with inner radius " << radius << " cm "
-           << " thickness " << tpc_layer_thick_inner - 0.01 << " length " << cage_length << endl;
-
-    cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
+    cyl = new PHG4CylinderSubsystem("SVTX", nlayer);
     cyl->set_double_param("radius", radius);
-    cyl->set_int_param("lengthviarapidity", 0);
     cyl->set_double_param("length", cage_length);
     cyl->set_string_param("material", tpcgas.c_str());
-    cyl->set_double_param("thickness", tpc_layer_thick_inner - 0.01);
+    cyl->set_double_param("thickness", tpc_layer_thickness - 0.01);
     cyl->SetActive();
     cyl->SuperDetector("SVTX");
     g4Reco->registerSubsystem(cyl);
 
-    radius += tpc_layer_thick_inner;
+    radius += tpc_layer_thickness;
+    nlayer++;
   }
-
-  // Active layers of the TPC from 40-60 cm (mid layers)
-
-  for (int ilayer = n_maps_layer + n_intt_layer + n_tpc_layer_inner; ilayer < (n_maps_layer + n_intt_layer + n_tpc_layer_inner + n_tpc_layer_mid); ++ilayer)
-  {
-    if (verbosity)
-      cout << "Create TPC gas layer " << ilayer << " with inner radius " << radius << " cm "
-           << " thickness " << tpc_layer_thick_mid - 0.01 << " length " << cage_length << endl;
-
-    cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
-    cyl->set_double_param("radius", radius);
-    cyl->set_int_param("lengthviarapidity", 0);
-    cyl->set_double_param("length", cage_length);
-    cyl->set_string_param("material", tpcgas.c_str());
-    cyl->set_double_param("thickness", tpc_layer_thick_mid - 0.01);
-    cyl->SetActive();
-    cyl->SuperDetector("SVTX");
-    g4Reco->registerSubsystem(cyl);
-
-    radius += tpc_layer_thick_mid;
-  }
-
-  // Active layers of the TPC from 60-80 cm (outer layers)
-
-  for (int ilayer = n_maps_layer + n_intt_layer + n_tpc_layer_inner + n_tpc_layer_mid; ilayer < (n_maps_layer + n_intt_layer + n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer); ++ilayer)
-  {
-    if (verbosity)
-      cout << "Create TPC gas layer " << ilayer << " with inner radius " << radius << " cm "
-           << " thickness " << tpc_layer_thick_outer - 0.01 << " length " << cage_length << endl;
-
-    cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
-    cyl->set_double_param("radius", radius);
-    cyl->set_int_param("lengthviarapidity", 0);
-    cyl->set_double_param("length", cage_length);
-    cyl->set_string_param("material", tpcgas.c_str());
-    cyl->set_double_param("thickness", tpc_layer_thick_outer - 0.01);
-    cyl->SetActive();
-    cyl->SuperDetector("SVTX");
-    g4Reco->registerSubsystem(cyl);
-
-    radius += tpc_layer_thick_outer;
-  }
+}
 
   // outer field cage
-  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", n_maps_layer + n_intt_layer + n_gas_layer);
+  cyl = new PHG4CylinderSubsystem("SVTXSUPPORT", nlayer);
   cyl->set_double_param("radius", radius);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", cage_length);
