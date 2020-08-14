@@ -41,9 +41,9 @@ void QA_Draw_nVertex(
     assert(qa_file_ref->IsOpen());
   }
 
-  TCanvas *c1 = new TCanvas(TString("QA_Draw_nVertex") +
+  TCanvas *c1 = new TCanvas(TString("QA_Draw_Vertex_nVertex") +
                                 TString("_") + hist_name_prefix,
-                            TString("QA_Draw_nVertex") +
+                            TString("QA_Draw_Vertex_nVertex") +
                                 TString("_") + hist_name_prefix,
                             1800, 1000);
   c1->Divide(3, 1);
