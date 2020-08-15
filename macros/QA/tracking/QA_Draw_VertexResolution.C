@@ -68,8 +68,8 @@ void QA_Draw_VertexResolution(
     // h_ref->Scale(Nevent_new / Nevent_ref);
   }
 
-  TCanvas *c1 = new TCanvas(TString("QA_Draw_VertexResolution_x") + TString("_") + hist_name_prefix,
-                            TString("QA_Draw_VertexResolution_x") + TString("_") + hist_name_prefix,
+  TCanvas *c1 = new TCanvas(TString("QA_Draw_Vertex_Resolution_x") + TString("_") + hist_name_prefix,
+                            TString("QA_Draw_Vertex_Resolution_x") + TString("_") + hist_name_prefix,
                             1800, 1000);
   c1->Divide(2,1);
   int idx = 1;
@@ -146,8 +146,8 @@ void QA_Draw_VertexResolution(
     // h_ref->Scale(Nevent_new / Nevent_ref);
   }
 
-  TCanvas *c2 = new TCanvas(TString("QA_Draw_VertexResolution_y") + TString("_") + hist_name_prefix,
-                            TString("QA_Draw_VertexResolution_y") + TString("_") + hist_name_prefix,
+  TCanvas *c2 = new TCanvas(TString("QA_Draw_Vertex_Resolution_y") + TString("_") + hist_name_prefix,
+                            TString("QA_Draw_Vertex_Resolution_y") + TString("_") + hist_name_prefix,
                             1800, 1000);
   c2->Divide(2,1);
   int idx2 = 1;
@@ -223,8 +223,8 @@ void QA_Draw_VertexResolution(
     // h_ref->Scale(Nevent_new / Nevent_ref);
   }
 
-  TCanvas *c3 = new TCanvas(TString("QA_Draw_VertexResolution_z") + TString("_") + hist_name_prefix,
-                            TString("QA_Draw_VertexResolution_z") + TString("_") + hist_name_prefix,
+  TCanvas *c3 = new TCanvas(TString("QA_Draw_Vertex_Resolution_z") + TString("_") + hist_name_prefix,
+                            TString("QA_Draw_Vertex_Resolution_z") + TString("_") + hist_name_prefix,
                             1800, 1000);
   c3->Divide(2,1);
   int idx3 = 1;
