@@ -46,7 +46,7 @@ void QA_Draw_nVertex(
                             TString("QA_Draw_Vertex_nVertex") +
                                 TString("_") + hist_name_prefix,
                             1800, 1000);
-  c1->Divide(3, 1);
+  c1->Divide(2, 2);
   int idx = 1;
   TPad *p;
 
@@ -142,6 +142,38 @@ void QA_Draw_nVertex(
     }
 
     h_pass->SetTitle(TString(hist_name_prefix) + ": ntracks");
+
+    DrawReference(h_pass, h_ref, false);
+  }
+
+  {
+    static const int nrebin = 1;
+    
+    p = (TPad *)c1->cd(idx++);
+    c1->Update();
+    // p->SetLogx();
+    p->SetGridy();
+
+    TH1 *h_pass =
+        (TH1 *)qa_file_new->GetObjectChecked(prefix + "ntracks_cuts", "TH1");
+    assert(h_pass);
+
+    h_pass->Rebin(nrebin);
+
+    //    h_ratio->GetXaxis()->SetRangeUser(min_Et, max_Et);
+    h_pass->GetYaxis()->SetTitle("Counts");
+    // h_pass->GetYaxis()->SetRangeUser(-0, 1.);
+
+    TH1 *h_ref = NULL;
+    if (qa_file_ref) {
+      TH1 *h_ref =
+          (TH1 *)qa_file_ref->GetObjectChecked(prefix + "ntracks_cuts", "TH1");
+      assert(h_pass);
+
+      h_ref->Rebin(nrebin);
+    }
+
+    h_pass->SetTitle(TString(hist_name_prefix) + ": ntracks (#geq 2 MVTX)");
 
     DrawReference(h_pass, h_ref, false);
   }
