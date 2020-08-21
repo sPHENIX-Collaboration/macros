@@ -5,6 +5,7 @@
 
 #include "G4_Barrel_EIC.C"
 #include "G4_CEmc_EIC.C"
+#include "G4_DIRC.C"
 #include "G4_EEMC.C"
 #include "G4_FEMC_EIC.C"
 #include "G4_FHCAL.C"
@@ -14,6 +15,7 @@
 #include "G4_HcalOut_ref.C"
 #include "G4_Magnet.C"
 #include "G4_Mvtx_EIC.C"
+#include "G4_RICH.C"
 #include "G4_TPC_EIC.C"
 
 #include <g4eval/PHG4DSTReader.h>
@@ -60,6 +62,10 @@ void G4DSTreader_EICDetector(const string &outputFile = "G4sPHENIXCells.root")
 
   if (G4DSTREADER::save_g4_raw)
   {
+    if (Enable::PIPE && Enable::PIPE_ABSORBER)
+    {
+      ana->AddNode("PIPE");
+    }
     if (Enable::BARREL)
     {
       ana->AddNode("BARREL");
@@ -95,63 +101,73 @@ void G4DSTreader_EICDetector(const string &outputFile = "G4sPHENIXCells.root")
       ana->AddNode("FST_4");
       ana->AddNode("FST_5");
     }
-  }
 
-  if (Enable::CEMC)
-  {
-    ana->AddNode("CEMC");
-    if (Enable::ABSORBER || Enable::CEMC_ABSORBER)
+    if (Enable::CEMC)
     {
-      ana->AddNode("ABSORBER_CEMC");
-      ana->AddNode("CEMC_ELECTRONICS");
-      ana->AddNode("CEMC_SPT");
+      ana->AddNode("CEMC");
+      if (Enable::ABSORBER || Enable::CEMC_ABSORBER)
+      {
+        ana->AddNode("ABSORBER_CEMC");
+        ana->AddNode("CEMC_ELECTRONICS_0");
+      }
     }
-  }
 
-  if (Enable::HCALIN)
-  {
-    ana->AddNode("HCALIN");
-    if (Enable::ABSORBER || Enable::HCALIN_ABSORBER)
-      ana->AddNode("ABSORBER_HCALIN");
-  }
+    if (Enable::HCALIN)
+    {
+      ana->AddNode("HCALIN");
+      if (Enable::ABSORBER || Enable::HCALIN_ABSORBER)
+      {
+        ana->AddNode("ABSORBER_HCALIN");
+        ana->AddNode("HCALIN_SPT");
+      }
+    }
 
-  if (Enable::MAGNET)
-  {
-    if (Enable::ABSORBER || Enable::MAGNET_ABSORBER)
-      ana->AddNode("MAGNET");
-  }
+    if (Enable::MAGNET)
+    {
+      if (Enable::ABSORBER || Enable::MAGNET_ABSORBER)
+        ana->AddNode("MAGNET");
+    }
 
-  if (Enable::HCALOUT)
-  {
-    ana->AddNode("HCALOUT");
-    if (Enable::ABSORBER || Enable::HCALOUT_ABSORBER)
-      ana->AddNode("ABSORBER_HCALOUT");
-  }
+    if (Enable::HCALOUT)
+    {
+      ana->AddNode("HCALOUT");
+      if (Enable::ABSORBER || Enable::HCALOUT_ABSORBER)
+        ana->AddNode("ABSORBER_HCALOUT");
+    }
 
-  if (Enable::FHCAL)
-  {
-    ana->AddNode("FHCAL");
-    if (Enable::ABSORBER || Enable::FHCAL_ABSORBER)
-      ana->AddNode("ABSORBER_FHCAL");
-  }
+    if (Enable::FHCAL)
+    {
+      ana->AddNode("FHCAL");
+      if (Enable::ABSORBER || Enable::FHCAL_ABSORBER)
+        ana->AddNode("ABSORBER_FHCAL");
+    }
 
-  if (Enable::FEMC)
-  {
-    ana->AddNode("FEMC");
-    if (Enable::ABSORBER || Enable::FEMC_ABSORBER)
-      ana->AddNode("ABSORBER_FEMC");
-  }
+    if (Enable::FEMC)
+    {
+      ana->AddNode("FEMC");
+      if (Enable::ABSORBER || Enable::FEMC_ABSORBER)
+        ana->AddNode("ABSORBER_FEMC");
+    }
 
-  if (Enable::EEMC)
-  {
-    ana->AddNode("EEMC");
-  }
+    if (Enable::EEMC)
+    {
+      ana->AddNode("EEMC");
+    }
+    if (Enable::DIRC)
+    {
+      ana->AddNode("DIRC");
+    }
+    if (Enable::RICH)
+    {
+      ana->AddNode("RICH");
+    }
 
-  if (Enable::BLACKHOLE)
-  {
-    ana->AddNode("BH_1");
-    ana->AddNode("BH_FORWARD_PLUS");
-    ana->AddNode("BH_FORWARD_NEG");
+    if (Enable::BLACKHOLE)
+    {
+      ana->AddNode("BH_1");
+      ana->AddNode("BH_FORWARD_PLUS");
+      ana->AddNode("BH_FORWARD_NEG");
+    }
   }
 
   ana->set_tower_zero_sup(G4DSTREADER::tower_zero_supp);
@@ -185,7 +201,7 @@ void G4DSTreader_EICDetector(const string &outputFile = "G4sPHENIXCells.root")
     ana->AddTower("RAW_FEMC");
     ana->AddTower("CALIB_FEMC");
   }
-  if (Enable::FEMC_TOWER)
+  if (Enable::EEMC_TOWER)
   {
     ana->AddTower("SIM_EEMC");
     ana->AddTower("RAW_EEMC");
