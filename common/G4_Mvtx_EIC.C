@@ -4,7 +4,7 @@
 #include "GlobalVariables.C"
 
 #include <g4mvtx/PHG4MvtxDefs.h>
-#include <g4mvtx/PHG4MvtxSubsystem.h>
+#include <g4mvtx/PHG4EICMvtxSubsystem.h>
 
 #include <g4main/PHG4Reco.h>
 
@@ -45,7 +45,7 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
 
   // Update EIC MAPS layer structure based on inner two layers of U. Birmingham tracker
 
-  PHG4MvtxSubsystem* mvtx = new PHG4MvtxSubsystem("MVTX");
+  PHG4EICMvtxSubsystem* mvtx = new PHG4EICMvtxSubsystem("MVTX");
   mvtx->Verbosity(verbosity);
 
   // H?kan Wennl?f <hwennlof@kth.se> :
