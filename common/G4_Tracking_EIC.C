@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4TRACKINGEIC_C
+#define MACRO_G4TRACKINGEIC_C
 
 #include "GlobalVariables.C"
 
@@ -45,7 +46,6 @@ void TrackingInit()
 //-----------------------------------------------------------------------------//
 void Tracking_Reco()
 {
-
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   //---------------
   // Fun4All server
@@ -62,9 +62,9 @@ void Tracking_Reco()
     // which would lead to worse momentum resolution for prompt tracks
     // but this allows displaced track analysis including DCA and vertex finding
     kalman->set_use_vertex_in_fitting(false);
-    kalman->set_vertex_xy_resolution(0);// do not smear the vertex used in the built-in DCA calculation
-    kalman->set_vertex_z_resolution(0); // do not smear the vertex used in the built-in DCA calculation
-    kalman->enable_vertexing(true);     // enable vertex finding and fitting
+    kalman->set_vertex_xy_resolution(0);  // do not smear the vertex used in the built-in DCA calculation
+    kalman->set_vertex_z_resolution(0);   // do not smear the vertex used in the built-in DCA calculation
+    kalman->enable_vertexing(true);       // enable vertex finding and fitting
   }
   else
   {
@@ -222,3 +222,4 @@ void Tracking_Eval(const std::string &outputfile)
   fast_sim_eval->set_filename(outputfile);
   se->registerSubsystem(fast_sim_eval);
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4HCALOUTREF_C
+#define MACRO_G4HCALOUTREF_C
 
 #include "GlobalVariables.C"
 
@@ -61,12 +62,11 @@ void HCalOuterInit()
 
 double HCalOuter(PHG4Reco *g4Reco,
                  double radius,
-                 const int crossings,
-                 const int absorberactive = 0)
+                 const int crossings)
 {
-  bool AbsorberActive = Enable::ABSORBER || Enable::HCALOUT_ABSORBER || absorberactive;
+  bool AbsorberActive = Enable::ABSORBER || Enable::HCALOUT_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALOUT_OVERLAPCHECK;
-  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
 
   PHG4OuterHcalSubsystem *hcal = new PHG4OuterHcalSubsystem("HCALOUT");
   // hcal->set_double_param("inner_radius", 183.3);
@@ -124,7 +124,7 @@ double HCalOuter(PHG4Reco *g4Reco,
 
 void HCALOuter_Cells()
 {
-  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
@@ -146,7 +146,7 @@ void HCALOuter_Cells()
 
 void HCALOuter_Towers()
 {
-  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
@@ -184,7 +184,7 @@ void HCALOuter_Towers()
 
 void HCALOuter_Clusters()
 {
-  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
@@ -214,7 +214,7 @@ void HCALOuter_Clusters()
 
 void HCALOuter_Eval(const std::string &outputfile)
 {
-  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
@@ -224,3 +224,4 @@ void HCALOuter_Eval(const std::string &outputfile)
 
   return;
 }
+#endif

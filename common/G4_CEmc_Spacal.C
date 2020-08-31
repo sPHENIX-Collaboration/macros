@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4CEMCSPACAL_C
+#define MACRO_G4CEMCSPACAL_C
 
 #include "GlobalVariables.C"
 
@@ -24,10 +25,10 @@
 #include <fun4all/Fun4AllServer.h>
 
 double
-CEmc_1DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings, const int absorberactive = 0);
+CEmc_1DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings);
+
 double
-CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings,
-                        const int absorberactive = 0);
+CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings);
 
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
@@ -79,18 +80,15 @@ void CEmcInit(const int i = 0)
 
 //! EMCal main setup macro
 double
-CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
-     const int absorberactive = 0)
+CEmc(PHG4Reco *g4Reco, double radius, const int crossings)
 {
   if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal)
   {
-    return CEmc_1DProjectiveSpacal(/*PHG4Reco**/ g4Reco, /*double*/ radius, /*const int */
-                                   crossings, /*const int*/ absorberactive);
+    return CEmc_1DProjectiveSpacal(/*PHG4Reco**/ g4Reco, /*double*/ radius, /*const int */ crossings);
   }
   else if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal)
   {
-    return CEmc_2DProjectiveSpacal(/*PHG4Reco**/ g4Reco, /*double*/ radius, /*const int */
-                                   crossings, /*const int*/ absorberactive);
+    return CEmc_2DProjectiveSpacal(/*PHG4Reco**/ g4Reco, /*double*/ radius, /*const int */ crossings);
   }
   else
   {
@@ -104,9 +102,9 @@ CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
 
 //! EMCal setup macro - 1D azimuthal projective SPACAL
 double
-CEmc_1DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings, const int absorberactive = 0)
+CEmc_1DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
 {
-  bool AbsorberActive = Enable::ABSORBER || Enable::CEMC_ABSORBER || absorberactive;
+  bool AbsorberActive = Enable::ABSORBER || Enable::CEMC_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::CEMC_OVERLAPCHECK;
 
   double emc_inner_radius = 95.;  // emc inner radius from engineering drawing
@@ -183,10 +181,9 @@ CEmc_1DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings, co
 
 //! 2D full projective SPACAL
 double
-CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings,
-                        const int absorberactive = 0)
+CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
 {
-  bool AbsorberActive = Enable::ABSORBER || Enable::CEMC_ABSORBER || absorberactive;
+  bool AbsorberActive = Enable::ABSORBER || Enable::CEMC_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::CEMC_OVERLAPCHECK;
 
   double emc_inner_radius = 92;  // emc inner radius from engineering drawing
@@ -474,3 +471,4 @@ void CEMC_Eval(const std::string &outputfile)
 
   return;
 }
+#endif
