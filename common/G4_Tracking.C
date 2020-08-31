@@ -20,6 +20,7 @@
 #include <trackreco/PHTrackSeeding.h>
 #include <trackreco/PHTruthTrackSeeding.h>
 #include <trackreco/PHTruthVertexing.h>
+#include <trackreco/PHCASeeding.h>
 
 #if __cplusplus >= 201703L
 #include <trackreco/PHActsSourceLinks.h>
@@ -127,6 +128,9 @@ void Tracking_Reco()
       init_zvtx->Verbosity(verbosity);
       se->registerSubsystem(init_zvtx);
     }
+
+
+
     if (G4TRACKING::use_hough_seeding)
     {
       // find seed tracks using a subset of TPC layers
@@ -138,6 +142,8 @@ void Tracking_Reco()
     }
     else if (G4TRACKING::use_ca_seeding)
     {
+      auto seeder = new PHCASeeding("PHCASeeding");
+      se->registerSubsystem(seeder);
     }
     else
     {
@@ -199,12 +205,21 @@ void Tracking_Reco()
       /// If you run PHActsTrkProp, disable PHGenFitTrkProp
       PHActsTrkProp *actsProp = new PHActsTrkProp();
       actsProp->Verbosity(0);
-      //se->registerSubsystem(actsProp);
+      actsProp->doTimeAnalysis(false);
+      actsProp->resetCovariance(true);
+      actsProp->setVolumeMaxChi2(7,60); /// MVTX 
+      actsProp->setVolumeMaxChi2(9,60); /// INTT
+      actsProp->setVolumeMaxChi2(11,60); /// TPC
+      actsProp->setVolumeLayerMaxChi2(9, 2, 100); /// INTT first few layers
+      actsProp->setVolumeLayerMaxChi2(9, 4, 100);
+      actsProp->setVolumeLayerMaxChi2(11,2, 200); /// TPC first few layers
+      actsProp->setVolumeLayerMaxChi2(11,4,200);
+
+      se->registerSubsystem(actsProp);
       
       PHActsTrkFitter *actsFit = new PHActsTrkFitter();
       actsFit->Verbosity(0);
-      actsFit->setTimeAnalysis(true);
-      se->registerSubsystem(actsFit);
+      //se->registerSubsystem(actsFit);
 
       PHActsVertexFitter *vtxFit = new PHActsVertexFitter();
       vtxFit->Verbosity(0);
@@ -267,6 +282,7 @@ void Tracking_Eval(const std::string& outputfile)
       #if __cplusplus >= 201703L
       ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
       actsEval->Verbosity(0);
+      actsEval->setEvalCKF(true);
       se->registerSubsystem(actsEval);
       #endif
     }
