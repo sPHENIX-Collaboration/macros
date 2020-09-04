@@ -643,7 +643,7 @@ void Tracking_Reco(int verbosity = 0)
       
       PHActsTrkFitter *actsFit = new PHActsTrkFitter();
       actsFit->Verbosity(0);
-      actsFit->setTimeAnalysis(true);
+      actsFit->doTimeAnalysis(true);
       se->registerSubsystem(actsFit);
       #endif   
     }
