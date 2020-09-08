@@ -9,6 +9,7 @@
  */
 
 #include <TFile.h>
+#include <TFunction.h>
 #include <TH2.h>
 #include <TLine.h>
 #include <TString.h>
@@ -77,6 +78,12 @@ void QA_Draw_VertexResolution(
 
   vector<pair<double, double>> gvz_ranges{
       {-10.0, 10.0}};
+  TF1 *f1 = nullptr;
+  TF1 *fit = nullptr;
+  Double_t sigma = 0;
+  Double_t sigma_unc = 0;
+  char resstr[500];
+  TLatex *res = nullptr;
   for (auto gvz_range : gvz_ranges)
   {
     cout << __PRETTY_FUNCTION__ << " process " << gvz_range.first << " - " << gvz_range.second << " cm";
@@ -102,6 +109,13 @@ void QA_Draw_VertexResolution(
     h_proj_new->GetXaxis()->SetNdivisions(5,5);
     h_proj_new->GetXaxis()->SetRangeUser(-0.002,0.002);
 
+    f1 = new TF1("f1","gaus",-.002,.002);
+    h_proj_new->Fit(f1);
+    fit = h_proj_new->GetFunction("f1");
+    sigma = fit->GetParameter(2);
+    sigma_unc = fit->GetParError(2);
+
+
     TH1 *h_proj_ref = nullptr;
     if (h_ref)
     {
@@ -115,12 +129,19 @@ void QA_Draw_VertexResolution(
     }
     
     DrawReference(h_proj_new, h_proj_ref);
+    sprintf(resstr,"#sigma = %.5f #pm %.5f cm", sigma, sigma_unc);
+    res = new TLatex(0.325,0.825,resstr);
+    res->SetNDC();
+    res->SetTextSize(0.05);
+    res->SetTextAlign(13);
+    res->Draw();
   }
   p = (TPad *) c1->cd(idx++);
   c1->Update();
   gPad->SetLeftMargin(.2);
   h_new->GetYaxis()->SetTitleOffset(2);
   h_new->Draw("colz");
+  
 
   SaveCanvas(c1, TString(qa_file_name_new) + TString("_") + TString(c1->GetName()), true);
 
@@ -155,6 +176,12 @@ void QA_Draw_VertexResolution(
 
   vector<pair<double, double>> gvz_ranges2{
       {-10.0, 10.0}};
+  TF1 *f2 = nullptr;
+  TF1 *fit2 = nullptr;
+  Double_t sigma2 = 0;
+  Double_t sigma_unc2 = 0;
+  char resstr2[500];
+  TLatex *res2 = nullptr;
   for (auto gvz_range : gvz_ranges2)
   {
     cout << __PRETTY_FUNCTION__ << " process " << gvz_range.first << " - " << gvz_range.second << " cm";
@@ -180,6 +207,12 @@ void QA_Draw_VertexResolution(
     h_proj_new2->GetXaxis()->SetNdivisions(5,5);
     h_proj_new2->GetXaxis()->SetRangeUser(-0.002,0.002);
     
+    f2 = new TF1("f2","gaus",-.002,.002);
+    h_proj_new2->Fit(f2);
+    fit2 = h_proj_new2->GetFunction("f2");
+    sigma2 = fit2->GetParameter(2);
+    sigma_unc2 = fit2->GetParError(2);
+
     TH1 *h_proj_ref2 = nullptr;
     if (h_ref2)
     {
@@ -192,6 +225,12 @@ void QA_Draw_VertexResolution(
     }
     
     DrawReference(h_proj_new2, h_proj_ref2);
+    sprintf(resstr2,"#sigma = %.5f #pm %.5f cm", sigma2, sigma_unc2);
+    res2 = new TLatex(0.325,0.825,resstr2);
+    res2->SetNDC();
+    res2->SetTextSize(0.05);
+    res2->SetTextAlign(13);
+    res2->Draw();
   }
   p2 = (TPad *) c2->cd(idx2++);
   c2->Update();
@@ -232,6 +271,12 @@ void QA_Draw_VertexResolution(
 
   vector<pair<double, double>> gvz_ranges3{
       {-10.0, 10.0}};
+  TF1 *f3 = nullptr;
+  TF1 *fit3 = nullptr;
+  Double_t sigma3 = 0;
+  Double_t sigma_unc3 = 0;
+  char resstr3[500];
+  TLatex *res3 = nullptr;
   for (auto gvz_range : gvz_ranges3)
   {
     cout << __PRETTY_FUNCTION__ << " process " << gvz_range.first << " - " << gvz_range.second << " cm";
@@ -257,6 +302,12 @@ void QA_Draw_VertexResolution(
     h_proj_new3->GetXaxis()->SetNdivisions(5,5);
     h_proj_new3->GetXaxis()->SetRangeUser(-0.002,0.002);
     
+    f3 = new TF1("f3","gaus",-.002,.002);
+    h_proj_new3->Fit(f3);
+    fit3 = h_proj_new3->GetFunction("f3");
+    sigma3 = fit3->GetParameter(2);
+    sigma_unc3 = fit3->GetParError(2);
+
     TH1 *h_proj_ref3 = nullptr;
     if (h_ref3)
     {
@@ -269,6 +320,12 @@ void QA_Draw_VertexResolution(
     }
     
     DrawReference(h_proj_new3, h_proj_ref3);
+    sprintf(resstr3,"#sigma = %.5f #pm %.5f cm", sigma3, sigma_unc3);
+    res3 = new TLatex(0.325,0.825,resstr3);
+    res3->SetNDC();
+    res3->SetTextSize(0.05);
+    res3->SetTextAlign(13);
+    res3->Draw();
   }
   p3 = (TPad *) c3->cd(idx3++);
   c3->Update();

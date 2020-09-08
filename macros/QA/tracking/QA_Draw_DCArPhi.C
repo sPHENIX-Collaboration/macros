@@ -101,6 +101,13 @@ void QA_Draw_DCArPhi(
       {2, 4},
       {4, 16},
       {16, 40}};
+
+  TF1 *f1 = nullptr;
+  TF1 *fit = nullptr;
+  Double_t sigma = 0;
+  Double_t sigma_unc = 0;
+  char resstr[500];
+  TLatex *res = nullptr;
   for (auto pt_range : gpt_ranges)
   {
     cout << __PRETTY_FUNCTION__ << " process " << pt_range.first << " - " << pt_range.second << " GeV/c";
@@ -132,7 +139,12 @@ void QA_Draw_DCArPhi(
     h_proj_new->GetXaxis()->SetTitle(TString::Format(
         "DCA (r #phi) [cm]"));
     h_proj_new->GetXaxis()->SetNdivisions(5,5);
-    
+    f1 = new TF1("f1","gaus",-.01,.01);
+    h_proj_new->Fit(f1);
+    fit = h_proj_new->GetFunction("f1");
+    sigma = fit->GetParameter(2);
+    sigma_unc = fit->GetParError(2);
+
     TH1 *h_proj_ref = nullptr;
     if (h_ref)
     {
@@ -150,6 +162,13 @@ void QA_Draw_DCArPhi(
     }
     
     DrawReference(h_proj_new, h_proj_ref);
+
+    sprintf(resstr,"#sigma = %.5f #pm %.5f cm", sigma, sigma_unc);
+    res = new TLatex(0.325,0.825,resstr);
+    res->SetNDC();
+    res->SetTextSize(0.05);
+    res->SetTextAlign(13);
+    res->Draw();
   }
   p = (TPad *) c1->cd(idx++);
   c1->Update();
@@ -195,6 +214,12 @@ void QA_Draw_DCArPhi(
       {2, 4},
       {4, 16},
       {16, 40}};
+  TF1 *f2 = nullptr;
+  TF1 *fit2 = nullptr;
+  Double_t sigma2 = 0;
+  Double_t sigma_unc2 = 0;
+  char resstr2[500];
+  TLatex *res2 = nullptr;
   for (auto pt_range : gpt_ranges2)
   {
     cout << __PRETTY_FUNCTION__ << " process " << pt_range.first << " - " << pt_range.second << " GeV/c";
@@ -226,7 +251,12 @@ void QA_Draw_DCArPhi(
     h_proj_new2->GetXaxis()->SetTitle(TString::Format(
         "DCA (r #phi) [cm]"));
     h_proj_new2->GetXaxis()->SetNdivisions(5,5);
-    
+    f2 = new TF1("f2","gaus",-.01,.01);
+    h_proj_new2->Fit(f2);
+    fit2 = h_proj_new2->GetFunction("f2");
+    sigma2 = fit2->GetParameter(2);
+    sigma_unc2 = fit2->GetParError(2);
+
     TH1 *h_proj_ref2 = nullptr;
     if (h_ref2)
     {
@@ -243,6 +273,13 @@ void QA_Draw_DCArPhi(
       }
     }
     DrawReference(h_proj_new2, h_proj_ref2);
+
+    sprintf(resstr2,"#sigma = %.5f #pm %.5f cm", sigma2, sigma_unc2);
+    res2 = new TLatex(0.325,0.825,resstr2);
+    res2->SetNDC();
+    res2->SetTextSize(0.05);
+    res2->SetTextAlign(13);
+    res2->Draw();
   }
   p2 = (TPad *) c2->cd(idx2++);
   c2->Update();
