@@ -102,6 +102,12 @@ void QA_Draw_Tracking_pTRatio(
       {30, 40},
       {40, 45},
       {45, 50}};
+  TF1 *f1 = nullptr;
+  TF1 *fit = nullptr;
+  Double_t sigma = 0;
+  Double_t sigma_unc = 0;
+  char resstr[500];
+  TLatex *res = nullptr;
   for (auto pt_range : gpt_ranges)
   {
     cout << __PRETTY_FUNCTION__ << " process " << pt_range.first << " - " << pt_range.second << " GeV/c";
@@ -126,6 +132,12 @@ void QA_Draw_Tracking_pTRatio(
     h_proj_new->GetXaxis()->SetTitle(TString::Format(
         "Reco p_{T}/Truth p_{T}"));
 
+    f1 = new TF1("f1","gaus",-.85,1.15);
+    h_proj_new->Fit(f1);
+    fit = h_proj_new->GetFunction("f1");
+    sigma = fit->GetParameter(2);
+    sigma_unc = fit->GetParError(2);
+
     TH1 *h_proj_ref = nullptr;
     if (h_ref)
       h_proj_ref =
@@ -136,6 +148,12 @@ void QA_Draw_Tracking_pTRatio(
               bin_start, bin_end);
 
     DrawReference(h_proj_new, h_proj_ref);
+    sprintf(resstr,"#sigma = %.5f #pm %.5f", sigma, sigma_unc);
+    res = new TLatex(0.325,0.825,resstr);
+    res->SetNDC();
+    res->SetTextSize(0.05);
+    res->SetTextAlign(13);
+    res->Draw();
   }
 
   SaveCanvas(c1, TString(qa_file_name_new) + TString("_") + TString(c1->GetName()), true);
