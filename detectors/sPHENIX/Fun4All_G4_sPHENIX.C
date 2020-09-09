@@ -251,6 +251,8 @@ int Fun4All_G4_sPHENIX(
   Enable::FEMC_CLUSTER = Enable::FEMC_TOWER && true;
   Enable::FEMC_EVAL = Enable::FEMC_CLUSTER && true;
 
+  Enable::EPD = false;
+
   //! forward flux return plug door. Out of acceptance and off by default.
   //Enable::PLUGDOOR = true;
   Enable::PLUGDOOR_ABSORBER = true;
