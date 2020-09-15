@@ -9,6 +9,7 @@
 #include "G4_HcalOut_ref.C"
 #include "G4_PlugDoor.C"
 #include "G4_FEMC.C"
+#include "G4_EPD.C"
 #include "G4_MvtxService.C"
 
 #include <g4eval/PHG4DstCompressReco.h>
@@ -42,6 +43,7 @@ void G4Init(const bool do_tracking = true,
 	    const bool do_pipe = true,
 	    const bool do_plugdoor = false,
 	    const bool do_FEMC = false,
+	    const bool do_epd = false,
             const bool do_mvtxservice = false
 	    )
   {
@@ -98,6 +100,11 @@ void G4Init(const bool do_tracking = true,
       gROOT->LoadMacro("G4_FEMC.C");
       FEMCInit();
     }
+  if (do_epd)
+    {
+      gROOT->LoadMacro("G4_EPD.C");
+      EPDInit();
+    }
   if (do_mvtxservice)
     {
       gROOT->LoadMacro("G4_MvtxService.C");
@@ -124,6 +131,7 @@ int G4Setup(const int absorberactive = 0,
       const bool do_plugdoor = false,
 //	    const bool do_plugdoor = true,
 	    const bool do_FEMC = false, 
+	    const bool do_epd = true,
             const bool do_mvtxservice = false,
 	    const float magfield_rescale = 1.0) {
   
@@ -215,6 +223,8 @@ int G4Setup(const int absorberactive = 0,
 
   // forward EMC
   if(do_FEMC) FEMCSetup(g4Reco, absorberactive);
+
+  if (do_epd) EPDSetup(g4Reco);
 
   //MVTX service barrel
   if(do_mvtxservice) radius = MVTXService(g4Reco, radius);

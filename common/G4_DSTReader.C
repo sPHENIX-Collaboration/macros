@@ -5,6 +5,7 @@
 
 #include "G4_BlackHole.C"
 #include "G4_CEmc_Spacal.C"
+#include "G4_EPD.C"
 #include "G4_HcalIn_ref.C"
 #include "G4_HcalOut_ref.C"
 #include "G4_Intt.C"
@@ -110,6 +111,11 @@ void G4DSTreader(const string &outputFile = "G4sPHENIXCells.root")
       {
         ana->AddNode("ABSORBER_HCALOUT");
       }
+    }
+
+    if (Enable::EPD)
+    {
+      ana->AddNode("EPD");
     }
 
     if (Enable::BLACKHOLE)
