@@ -472,10 +472,17 @@ int Fun4All_G4_sPHENIX(
   if (Enable::DISPLAY)
   {
     DisplayOn();
-    // prevent macro from finishing so can see display
-    int i;
-    cout << "***** Enter any integer to proceed" << endl;
-    cin >> i;
+
+    gROOT->ProcessLine("Fun4AllServer *se = Fun4AllServer::instance();");
+    gROOT->ProcessLine("PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco(\"PHG4RECO\");");
+
+    cout <<"-------------------------------------------------"<<endl;
+    cout <<"You are in event display mode. Run one event with"<<endl;
+    cout <<"se->run(1)"<<endl;
+    cout <<"Run Geant4 command with following examples"<<endl;
+    gROOT->ProcessLine("displaycmd()");
+
+    return 0;
   }
 
   se->skip(skip);
