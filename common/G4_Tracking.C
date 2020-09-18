@@ -28,6 +28,7 @@
 #include <trackreco/PHActsTrkProp.h>
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsVertexFitter.h>
+#include <trackreco/PHActsVertexFinder.h>
 #include <trackreco/ActsEvaluator.h>
 #endif
 
@@ -58,7 +59,7 @@ namespace G4TRACKING
   bool use_track_prop = true;              // true for normal track seeding, false to run with truth track seeding instead
 
   bool useActsFitting = false; // if true, acts KF is run with PHGenFitTrkProp
-
+  bool useActsProp = useActsFitting and false;  // if true, runs Acts CKF with only a seeder
   bool g4eval_use_initial_vertex = false;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
   bool use_primary_vertex = false;         // if true, refit tracks with primary vertex included - adds second node to node tree, adds second evaluator and outputs separate ntuples
 
@@ -156,18 +157,22 @@ void Tracking_Reco()
       tracker->enable_vertexing(false);                                           // rave vertexing is pretty slow at large multiplicities...
       se->registerSubsystem(tracker);
     }
-    // Find all clusters associated with each seed track
-    auto track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer, G4MICROMEGAS::n_micromegas_layer);
-    track_prop->Verbosity(verbosity);
-    se->registerSubsystem(track_prop);
-    for (int i = 0; i < G4INTT::n_intt_layer; i++)
-    {
-      // strip length is along theta
-      track_prop->set_max_search_win_theta_intt(i, 0.200);
-      track_prop->set_min_search_win_theta_intt(i, 0.200);
-      track_prop->set_max_search_win_phi_intt(i, 0.0050);
-      track_prop->set_min_search_win_phi_intt(i, 0.000);
-    }
+
+    if(!G4TRACKING::useActsProp)
+      {
+	// Find all clusters associated with each seed track
+	auto track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer, G4MICROMEGAS::n_micromegas_layer);
+	track_prop->Verbosity(verbosity);
+	se->registerSubsystem(track_prop);
+	for (int i = 0; i < G4INTT::n_intt_layer; i++)
+	  {
+	    // strip length is along theta
+	    track_prop->set_max_search_win_theta_intt(i, 0.200);
+	    track_prop->set_min_search_win_theta_intt(i, 0.200);
+	    track_prop->set_max_search_win_phi_intt(i, 0.0050);
+	    track_prop->set_min_search_win_phi_intt(i, 0.000);
+	  }
+      }
   }
   else
   {
@@ -201,30 +206,30 @@ void Tracking_Reco()
       /// Kalman Filter which runs track finding and track fitting
       /// Always run PHActsTracks first to take the SvtxTrack and convert it
       /// to a form that Acts can process
+      if(G4TRACKING::useActsProp)
+	{
+	  PHActsTrkProp *actsProp = new PHActsTrkProp();
+	  actsProp->Verbosity(0);
+	  actsProp->doTimeAnalysis(true);
+	  actsProp->resetCovariance(true);
+	  actsProp->setVolumeMaxChi2(7,60); /// MVTX 
+	  actsProp->setVolumeMaxChi2(9,60); /// INTT
+	  actsProp->setVolumeMaxChi2(11,60); /// TPC
+	  actsProp->setVolumeLayerMaxChi2(9, 2, 100); /// INTT first few layers
+	  actsProp->setVolumeLayerMaxChi2(9, 4, 100);
+	  actsProp->setVolumeLayerMaxChi2(11,2, 200); /// TPC first few layers 
+	  actsProp->setVolumeLayerMaxChi2(11,4, 200);
+	  
+	  se->registerSubsystem(actsProp);
+	}
+      else
+	{
+	  PHActsTrkFitter *actsFit = new PHActsTrkFitter();
+	  actsFit->Verbosity(0);
+	  actsFit->doTimeAnalysis(true);
+	  se->registerSubsystem(actsFit);
+	}
       
-      /// If you run PHActsTrkProp, disable PHGenFitTrkProp
-      PHActsTrkProp *actsProp = new PHActsTrkProp();
-      actsProp->Verbosity(0);
-      actsProp->doTimeAnalysis(false);
-      actsProp->resetCovariance(true);
-      actsProp->setVolumeMaxChi2(7,60); /// MVTX 
-      actsProp->setVolumeMaxChi2(9,60); /// INTT
-      actsProp->setVolumeMaxChi2(11,60); /// TPC
-      actsProp->setVolumeLayerMaxChi2(9, 2, 100); /// INTT first few layers
-      actsProp->setVolumeLayerMaxChi2(9, 4, 100);
-      actsProp->setVolumeLayerMaxChi2(11,2, 200); /// TPC first few layers
-      actsProp->setVolumeLayerMaxChi2(11,4,200);
-
-      se->registerSubsystem(actsProp);
-      
-      PHActsTrkFitter *actsFit = new PHActsTrkFitter();
-      actsFit->Verbosity(0);
-      //se->registerSubsystem(actsFit);
-
-      PHActsVertexFitter *vtxFit = new PHActsVertexFitter();
-      vtxFit->Verbosity(0);
-      //se->registerSubsystem(vtxFit);
-
       #endif   
     }
   else
@@ -282,7 +287,7 @@ void Tracking_Eval(const std::string& outputfile)
       #if __cplusplus >= 201703L
       ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
       actsEval->Verbosity(0);
-      actsEval->setEvalCKF(true);
+      actsEval->setEvalCKF(false);
       se->registerSubsystem(actsEval);
       #endif
     }
