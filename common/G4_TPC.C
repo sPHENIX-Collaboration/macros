@@ -8,6 +8,7 @@
 
 #include <g4tpc/PHG4TpcDigitizer.h>
 #include <g4tpc/PHG4TpcElectronDrift.h>
+#include <g4tpc/PHG4TpcEndCapSubsystem.h>
 #include <g4tpc/PHG4TpcPadPlane.h>
 #include <g4tpc/PHG4TpcPadPlaneReadout.h>
 #include <g4tpc/PHG4TpcSubsystem.h>
@@ -28,6 +29,9 @@ namespace Enable
   bool TPC_OVERLAPCHECK = false;
   bool TPC_CELL = false;
   bool TPC_CLUSTER = false;
+
+  bool TPC_ENDCAP = true;
+
   int TPC_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -44,8 +48,17 @@ namespace G4TPC
 void TPCInit()
 {
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4TPC::tpc_outer_radius);
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 211. / 2.);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -211. / 2.);
+
+  if (Enable::TPC_ENDCAP)
+  {
+    BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 130.);
+    BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -130.);
+  }
+  else
+  {
+    BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 211. / 2.);
+    BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -211. / 2.);
+  }
 
   // the mvtx is not called if disabled but the default number of layers is set to 3,
   // so we need to set it to zero
@@ -58,6 +71,25 @@ void TPCInit()
   {
     G4INTT::n_intt_layer = 0;
   }
+}
+
+//! TPC end cap, wagon wheel, electronics
+void TPC_Endcaps(PHG4Reco* g4Reco)
+{
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::TPC_OVERLAPCHECK;
+  bool AbsorberActive = Enable::ABSORBER || Enable::TPC_ABSORBER;
+
+  PHG4TpcEndCapSubsystem* tpc_endcap = new PHG4TpcEndCapSubsystem("TPC_ENDCAP");
+  tpc_endcap->SuperDetector("TPC_ENDCAP");
+
+  if (AbsorberActive) tpc_endcap->SetActive();
+  tpc_endcap->OverlapCheck(OverlapCheck);
+
+  //  tpc_endcap->set_int_param("construction_verbosity", 2);
+
+  g4Reco->registerSubsystem(tpc_endcap);
+
+  return;
 }
 
 double TPC(PHG4Reco* g4Reco,
@@ -78,6 +110,11 @@ double TPC(PHG4Reco* g4Reco,
   tpc->OverlapCheck(OverlapCheck);
 
   g4Reco->registerSubsystem(tpc);
+
+  if (Enable::TPC_ENDCAP)
+  {
+    TPC_Endcaps(g4Reco);
+  }
 
   radius = G4TPC::tpc_outer_radius;
 
