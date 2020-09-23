@@ -101,6 +101,8 @@ void Tracking_Reco(const std::string outputFile)
       #if __cplusplus >= 201703L
       PHActsSourceLinks *sl = new PHActsSourceLinks();
       sl->Verbosity(0);
+      sl->setMagField(G4MAGNET::magfield);
+      sl->setMagFieldRescale(G4MAGNET::magfield_rescale);
       se->registerSubsystem(sl);
       #endif
     }
@@ -157,6 +159,9 @@ void Tracking_Reco(const std::string outputFile)
       {
 	/// Match the silicon and TPC track stubs
 	auto stubMatcher = new PHSiliconTpcTrackMatching("PHSiliconTpcTrackMatching");
+	stubMatcher->set_phi_search_window(0.02);  // tune8 - optimum
+	stubMatcher->set_eta_search_window(0.015);   // tune8 - optimum
+	stubMatcher->Verbosity(0);
 	se->registerSubsystem(stubMatcher);
       }
     else
