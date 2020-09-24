@@ -162,6 +162,8 @@ void Tracking_Reco(const std::string outputFile)
 	stubMatcher->set_phi_search_window(0.02);  // tune8 - optimum
 	stubMatcher->set_eta_search_window(0.015);   // tune8 - optimum
 	stubMatcher->Verbosity(0);
+	stubMatcher->set_field_dir(G4MAGNET::magfield_rescale);
+	stubMatcher->set_field(G4MAGNET::magfield);
 	se->registerSubsystem(stubMatcher);
       }
     else
