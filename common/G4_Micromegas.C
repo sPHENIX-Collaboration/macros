@@ -30,6 +30,14 @@ namespace Enable
 namespace G4MICROMEGAS
 {
   int n_micromegas_layer = 2;
+  enum Config
+  {
+    CONFIG_MINIMAL,
+    CONFIG_PHI_ONE_RING,
+    CONFIG_Z_ONE_SECTOR
+  };
+
+  Config CONFIG = CONFIG_Z_ONE_SECTOR;
 }
 
 void MicromegasInit()
@@ -64,30 +72,64 @@ void Micromegas(PHG4Reco* g4Reco)
 
 void Micromegas_Cells()
 {
-  Fun4AllServer* se = Fun4AllServer::instance();
+  auto se = Fun4AllServer::instance();
   // micromegas
   auto reco = new PHG4MicromegasHitReco;
   reco->Verbosity(0);
 
   static constexpr double radius = 82;
+  static constexpr double length = 210;
+  static constexpr int nsectors = 12;
   static constexpr double tile_length = 50;
   static constexpr double tile_width = 25;
 
-  // 12 tiles at mid rapidity, one in front of each TPC sector
-  static constexpr int ntiles = 12;
-  MicromegasTile::List tiles;
-  for (int i = 0; i < ntiles; ++i)
+  switch( G4MICROMEGAS::CONFIG )
   {
-    tiles.push_back({{2. * M_PI * (0.5 + i) / ntiles, 0, tile_width / radius, tile_length}});
+    case G4MICROMEGAS::CONFIG_MINIMAL:
+    {
+      // one tile at mid rapidity in front of TPC sector
+      std::cout << "Micromegas_Cells - Tiles configuration: CONFIG_MINIMAL" << std::endl;
+      static constexpr double phi0 = M_PI*(0.5 + 1./nsectors);
+      reco->set_tiles( {{{ phi0, 0, tile_width/radius, tile_length }}} );
+      break;
+    }
+
+    case G4MICROMEGAS::CONFIG_PHI_ONE_RING:
+    {
+      // 12 tiles at mid rapidity, one in front of each TPC sector
+      std::cout << "Micromegas_Cells - Tiles configuration: CONFIG_PHI_ONE_RING" << std::endl;
+      static constexpr int ntiles = 12;
+      MicromegasTile::List tiles;
+      for (int i = 0; i < ntiles; ++i)
+      {
+        tiles.push_back({{2. * M_PI * (0.5 + i) / ntiles, 0, tile_width / radius, tile_length}});
+      }
+      reco->set_tiles(tiles);
+      break;
+    }
+
+    case G4MICROMEGAS::CONFIG_Z_ONE_SECTOR:
+    {
+      // 4 tiles with full z coverage in front of one TPC sector
+      std::cout << "Micromegas_Cells - Tiles configuration: CONFIG_Z_ONE_SECTOR" << std::endl;
+      static constexpr double phi0 = M_PI*(0.5 + 1./nsectors);
+      static constexpr int ntiles = 4;
+      MicromegasTile::List tiles;
+      for( int i = 0; i < ntiles; ++i )
+      {
+        tiles.push_back( {{ phi0, length*((0.5+i)/ntiles-0.5), tile_width/radius, tile_length }} );
+      }
+      reco->set_tiles( tiles );
+      break;
+    }
   }
-  reco->set_tiles(tiles);
 
   se->registerSubsystem(reco);
 }
 
 void Micromegas_Clustering()
 {
-  Fun4AllServer* se = Fun4AllServer::instance();
+  auto se = Fun4AllServer::instance();
   se->registerSubsystem(new PHG4MicromegasDigitizer);
   se->registerSubsystem(new MicromegasClusterizer);
 }

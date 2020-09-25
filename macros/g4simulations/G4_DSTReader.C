@@ -28,6 +28,7 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
     bool do_hcalin = true, //
     bool do_magnet = true, //
     bool do_hcalout = true, //
+    bool do_epd = true, //
     bool do_cemc_twr = true, //
     bool do_hcalin_twr = true, //
     bool do_hcalout_twr = true //
@@ -96,6 +97,10 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
             ana->AddNode("ABSORBER_HCALOUT");
         }
 
+      if (do_epd)
+        {
+          ana->AddNode("EPD");
+        }
 
       ana->AddNode("BH_1");
       ana->AddNode("BH_FORWARD_PLUS");
