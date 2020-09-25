@@ -81,7 +81,7 @@ void TrackingInit()
   }
 }
 
-void Tracking_Reco(const std::string outputFile)
+void Tracking_Reco()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   // processes the TrkrHits to make clusters, then reconstruct tracks and vertices
