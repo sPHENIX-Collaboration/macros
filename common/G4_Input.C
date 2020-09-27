@@ -60,11 +60,13 @@ namespace INPUTREADEIC
 namespace INPUTREADHITS
 {
   string filename;
+  string listfile;
 }
 
 namespace INPUTEMBED
 {
   string filename;
+  string listfile;
 }
 
 namespace PYTHIA6
@@ -221,8 +223,20 @@ void InputManagers()
   if (Input::EMBED)
   {
     gSystem->Load("libg4dst.so");
-    Fun4AllDstInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTinEmbed");
-    in1->AddFile(INPUTEMBED::filename);  // if one use a single input file
+    Fun4AllInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTinEmbed");
+    if (!INPUTEMBED::filename.empty() && INPUTEMBED::listfile.empty())
+    {
+      in1->fileopen(INPUTEMBED::filename);
+    }
+    else if (!INPUTEMBED::listfile.empty())
+    {
+      in1->AddListFile(INPUTEMBED::listfile);
+    }
+    else
+    {
+      cout << "no filename INPUTEMBED::filename or listfile INPUTEMBED::listfile given" << endl;
+      gSystem->Exit(1);
+    }
     in1->Repeat();                       // if file(or filelist) is exhausted, start from beginning
     se->registerInputManager(in1);
   }
@@ -235,7 +249,19 @@ void InputManagers()
   else if (Input::READHITS)
   {
     Fun4AllInputManager *hitsin = new Fun4AllDstInputManager("DSTin");
-    hitsin->fileopen(INPUTREADHITS::filename);
+    if (!INPUTREADHITS::filename.empty() && INPUTREADHITS::listfile.empty())
+    {
+      hitsin->fileopen(INPUTREADHITS::filename);
+    }
+    else if (!INPUTREADHITS::listfile.empty())
+    {
+      hitsin->AddListFile(INPUTREADHITS::listfile);
+    }
+    else
+    {
+      cout << "no filename INPUTREADHITS::filename or listfile INPUTREADHITS::listfile given" << endl;
+      gSystem->Exit(1);
+    }
     hitsin->Verbosity(Input::VERBOSITY);
     se->registerInputManager(hitsin);
   }
