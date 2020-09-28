@@ -105,6 +105,7 @@ namespace INPUTGENERATOR
 namespace INPUTMANAGER
 {
   Fun4AllHepMCInputManager *HepMCInputManager = nullptr;
+  Fun4AllHepMCPileupInputManager *HepMCPileupInputManager = nullptr;
 }
 
 void InputInit()
@@ -162,6 +163,10 @@ void InputInit()
   if (Input::HEPMC)
   {
     INPUTMANAGER::HepMCInputManager = new Fun4AllHepMCInputManager("HEPMCin");
+  }
+  if (Input::PILEUPRATE > 0)
+  {
+    INPUTMANAGER::HepMCPileupInputManager = new Fun4AllHepMCPileupInputManager("HepMCPileupInput");
   }
 }
 
@@ -273,13 +278,13 @@ void InputManagers()
   }
   if (Input::PILEUPRATE > 0)
   {
-    Fun4AllHepMCPileupInputManager *pileup = new Fun4AllHepMCPileupInputManager("HepMCPileupInput");
-    pileup->Verbosity(Input::VERBOSITY);
-    pileup->AddFile(PILEUP::pileupfile);
-    pileup->set_collision_rate(Input::PILEUPRATE);
+    INPUTMANAGER::HepMCPileupInputManager->SignalInputManager(INPUTMANAGER::HepMCInputManager);
+    INPUTMANAGER::HepMCPileupInputManager->Verbosity(Input::VERBOSITY);
+    INPUTMANAGER::HepMCPileupInputManager->AddFile(PILEUP::pileupfile);
+    INPUTMANAGER::HepMCPileupInputManager->set_collision_rate(Input::PILEUPRATE);
     double time_window = 105.5 / PILEUP::TpcDriftVelocity;
-    pileup->set_time_window(-time_window, time_window);
-    se->registerInputManager(pileup);
+    INPUTMANAGER::HepMCPileupInputManager->set_time_window(-time_window, time_window);
+    se->registerInputManager(INPUTMANAGER::HepMCPileupInputManager);
   }
 }
 #endif
