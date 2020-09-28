@@ -55,7 +55,7 @@ int Fun4All_G4_sPHENIX(
   //===============
   // Input options
   //===============
-// verbosity setting (applies to all input managers)
+  // verbosity setting (applies to all input managers)
   Input::VERBOSITY = 0;
   // First enable the input generators
   // Either:
@@ -149,10 +149,10 @@ int Fun4All_G4_sPHENIX(
 
   if (Input::HEPMC)
   {
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4,100e-4,8,0);//optional collision smear in space, time
-//    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
+    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4, 100e-4, 8, 0);  //optional collision smear in space, time
+                                                                                           //    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
     // //optional choice of vertex distribution function in space, time
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus);
+    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
     //! embedding ID for the event
     //! positive ID is the embedded event of interest, e.g. jetty event from pythia
     //! negative IDs are backgrounds, .e.g out of time pile up collisions
@@ -169,14 +169,14 @@ int Fun4All_G4_sPHENIX(
   // register all input generators with Fun4All
   InputRegister();
 
-// set up production relatedstuff
-//   Enable::PRODUCTION = true;
+  // set up production relatedstuff
+  //   Enable::PRODUCTION = true;
 
   //======================
   // Write the DST
   //======================
 
-//  Enable::DSTOUT = true;
+  //  Enable::DSTOUT = true;
   Enable::DSTOUT_COMPRESS = false;
   DstOut::OutputDir = outdir;
   DstOut::OutputFile = outputFile;
@@ -223,9 +223,9 @@ int Fun4All_G4_sPHENIX(
   Enable::TRACKING_TRACK = true;
   Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;
 
-//  cemc electronics + thin layer of W-epoxy to get albedo from cemc 
-//  into the tracking, cannot run together with CEMC
-//  Enable::CEMCALBEDO = true;
+  //  cemc electronics + thin layer of W-epoxy to get albedo from cemc
+  //  into the tracking, cannot run together with CEMC
+  //  Enable::CEMCALBEDO = true;
 
   Enable::CEMC = true;
   Enable::CEMC_ABSORBER = true;
@@ -486,10 +486,10 @@ int Fun4All_G4_sPHENIX(
     gROOT->ProcessLine("Fun4AllServer *se = Fun4AllServer::instance();");
     gROOT->ProcessLine("PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco(\"PHG4RECO\");");
 
-    cout <<"-------------------------------------------------"<<endl;
-    cout <<"You are in event display mode. Run one event with"<<endl;
-    cout <<"se->run(1)"<<endl;
-    cout <<"Run Geant4 command with following examples"<<endl;
+    cout << "-------------------------------------------------" << endl;
+    cout << "You are in event display mode. Run one event with" << endl;
+    cout << "se->run(1)" << endl;
+    cout << "Run Geant4 command with following examples" << endl;
     gROOT->ProcessLine("displaycmd()");
 
     return 0;
