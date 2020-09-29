@@ -15,6 +15,7 @@
 #include "G4_Jets.C"
 #include "G4_Production.C"
 
+#include <TROOT.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
@@ -146,7 +147,7 @@ int Fun4All_G4_EICDetector(
   // pythia6
   if (Input::PYTHIA6)
   {
-    INPUTGENERATOR::Pythia6->set_config_file("phpythia6_ep.cfg");
+    INPUTGENERATOR::Pythia6->set_config_file(string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia6_ep.cfg");
   }
 
   //--------------
@@ -184,6 +185,9 @@ int Fun4All_G4_EICDetector(
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   //Enable::DSTREADER = true;
+
+  // turn the display on (default off)
+  Enable::DISPLAY = false;
 
   //======================
   // What to run
@@ -478,8 +482,19 @@ int Fun4All_G4_EICDetector(
   //-----------------
   // Event processing
   //-----------------
-  if (nEvents < 0)
+  if (Enable::DISPLAY)
   {
+    DisplayOn();
+
+    gROOT->ProcessLine("Fun4AllServer *se = Fun4AllServer::instance();");
+    gROOT->ProcessLine("PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco(\"PHG4RECO\");");
+
+    cout <<"-------------------------------------------------"<<endl;
+    cout <<"You are in event display mode. Run one event with"<<endl;
+    cout <<"se->run(1)"<<endl;
+    cout <<"Run Geant4 command with following examples"<<endl;
+    gROOT->ProcessLine("displaycmd()");
+
     return 0;
   }
   // if we run any of the particle generators and use 0 it'll run forever

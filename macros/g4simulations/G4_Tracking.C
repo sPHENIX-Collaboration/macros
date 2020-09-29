@@ -53,6 +53,14 @@
 #include <trackreco/PHActsTrkProp.h>
 #include <trackreco/ActsEvaluator.h>
 
+#if __cplusplus >= 201703L
+#include <trackreco/PHActsSourceLinks.h>
+#include <trackreco/PHActsTracks.h>
+#include <trackreco/PHActsTrkProp.h>
+#include <trackreco/PHActsTrkFitter.h>
+#include <trackreco/ActsEvaluator.h>
+#endif
+
 #include <trackbase/TrkrHitTruthAssoc.h>
 
 #include <phtpctracker/PHTpcTracker.h>
@@ -73,7 +81,6 @@ R__LOAD_LIBRARY(libPHTpcTracker.so)
 
 #include <vector>
 
-const bool use_acts = true;
 const bool use_hough_seeding = false; //choose seeding algo   //default seed is PHTpcTracker
 const bool use_ca_seeding  = false;
 const bool use_stub_matcher = true;
@@ -85,14 +92,20 @@ const bool use_stub_matcher = true;
 const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
 
 /////////////// INTT
+bool flag_ladder_debug = false; // false: run as usual, true: only single ladder in the innermost layer is shoen
 int n_intt_layer = 4;  // must be 4 or 0, setting to zero removes INTT completely
 int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI};
-int nladder[4] = {15,  15, 18, 18};
-double sensor_radius[4] = { 8.987, 9.545, 10.835, 11.361};  // radius of center of sensor for layer default
+
+int nladder[4] = {12, 12, 16, 16};
+// Radius of center of sensor for layer default, the subtractions of 14 um is due to the difference of the glue thickness for the sensors(14 um) and FPHX chips (50um)
+// The ladder volume is defined using t_FPHXglue but not t_Siglue to contain everything, the surface of FPHX chips are placed at the planned position. So subtraction of (50-14) um is needed.
+double sensor_radius[4] = { 7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
+
 double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1] , 0.0, 0.5 * 360.0 / nladder[3]};
+
 enum enu_InttDeadMapType      // Dead map options for INTT
 {
   kInttNoDeadMap = 0,        // All channel in Intt is alive
@@ -109,7 +122,7 @@ int n_tpc_layer_outer = 16;
 int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
 
 ///////////////// Micromegas
-bool enable_micromegas = true;
+bool enable_micromegas = false;
 const int n_micromegas_layer = 2;
 
 // Tracking reconstruction setup parameters and flags
@@ -118,6 +131,7 @@ const int n_micromegas_layer = 2;
 const int init_vertexing_min_zvtx_tracks = 5; // PHInitZvertexing parameter for reducing spurious vertices, use 2 for Pythia8 events, 5 for large multiplicity events
 
 const bool use_track_prop = true;   // true for normal track seeding, false to run with truth track seeding instead
+const bool useActsFitting = true;  // true to use PHActsTrkFitter, false to use PHGenFitTrkFitter
 const bool g4eval_use_initial_vertex = false;   // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
 const bool use_primary_vertex = false;  // if true, refit tracks with primary vertex included - adds second node to node tree, adds second evaluator and outputs separate ntuples
 
@@ -128,7 +142,6 @@ std::string vmethod("avf-smoothing:1");  // only good for 1 vertex events // vme
 // This is the setup that uses PHInitZvertexing to find initial vertices, and allows for multiple collisions per event
 const bool use_truth_vertex = true;   // set to false to get initial vertex from MVTX hits using PHInitZVertexing, true for using smeared truth vertex
 //std::string vmethod("avr-smoothing:1-minweight:0.5-primcut:9-seccut:9");  // seems to handle multi-vertex events.
-
 
 void TrackingInit(int verbosity = 0)
 {
@@ -171,6 +184,13 @@ double Tracking(PHG4Reco* g4Reco, double radius,
     // INTT ladders
     //-------------------
 
+    if( flag_ladder_debug == true )
+      {
+	nladder[0] = 1; //  number of ladder in the innermost layer
+	offsetphi[0] = 90.0; // put the first ladder in the innermost layer on the top
+
+      }
+
     bool intt_overlapcheck = false;  // set to true if you want to check for overlaps
 
     // instantiate the INTT subsystem and register it
@@ -183,8 +203,15 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 
     // The length of vpair is used to determine the number of layers
     std::vector<std::pair<int, int>> vpair;  // (sphxlayer, inttlayer)
+
     for (int i = 0; i < n_intt_layer; i++)
     {
+      // make only the innermost layer if the flag is true
+      if( flag_ladder_debug == true && i >= 1 )
+	{
+	  break;
+	}
+      
       // We want the sPHENIX layer numbers for the Intt to be from n_maps_layer to n_maps_layer+n_intt_layer - 1
       vpair.push_back(std::make_pair(n_maps_layer + i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
       if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
@@ -201,7 +228,7 @@ double Tracking(PHG4Reco* g4Reco, double radius,
     cout << "Intt has " << n_intt_layer << " layers with layer setup:" << endl;
     for(int i=0;i<n_intt_layer;i++)
       {
-	cout << " Intt layer " << i << " laddertype " << laddertype[i] << " nladders " << nladder[i]
+	cout << "\tIntt layer " << i << " laddertype " << laddertype[i] << " nladders " << nladder[i]
 	     << " sensor radius " << sensor_radius[i] << " offsetphi " << offsetphi[i] << endl;
 	sitrack->set_int_param(i, "laddertype", laddertype[i]);
 	sitrack->set_int_param(i, "nladder", nladder[i]);
@@ -209,6 +236,8 @@ double Tracking(PHG4Reco* g4Reco, double radius,
 	sitrack->set_double_param(i,"offsetphi",offsetphi[i]);  // expecting degrees
       }
 
+    cout << string(100, '-' ) << endl << "End of INTT set init params" << endl;
+    
     // outer radius marker (translation back to cm)
     radius = intt_radius_max * 0.1;
   }
@@ -536,12 +565,15 @@ void Tracking_Reco(int verbosity = 0)
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  if(use_acts)
+  if(useActsFitting)
     {
-      PHActsSourceLinks *srcLinks = new PHActsSourceLinks();
-      srcLinks->Verbosity(0);
-      se->registerSubsystem(srcLinks);
+      #if __cplusplus >= 201703L
+      PHActsSourceLinks *sl = new PHActsSourceLinks();
+      sl->Verbosity(1);
+      se->registerSubsystem(sl);
+      #endif
     }
+
 
   //-------------
   // Tracking
@@ -625,7 +657,7 @@ void Tracking_Reco(int verbosity = 0)
       se->registerSubsystem(pat_rec);
     }
 
-  if(use_acts)
+  if(useActsFitting)
     {
       if(use_stub_matcher)
 	{
@@ -639,6 +671,7 @@ void Tracking_Reco(int verbosity = 0)
 	  silicon_match ->Verbosity(0);
 	  silicon_match->set_phi_search_window(0.02);  // tune8 - optimum
 	  silicon_match->set_eta_search_window(0.015);   // tune8 - optimum
+	  se->registerSubsystem(silicon_match);
 
 	  // Match TPC track stubs from CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
 	  PHMicromegasTpcTrackMatching *mm_match = new PHMicromegasTpcTrackMatching();
@@ -681,8 +714,33 @@ void Tracking_Reco(int verbosity = 0)
   // Fitting of tracks using Kalman Filter
   //------------------------------------------------
 
-  if(!use_acts)
+  if(useActsFitting)
+    {    
+      #if __cplusplus >= 201703L
+      PHActsTracks *actsTracks = new PHActsTracks();
+      actsTracks->Verbosity(0);
+      se->registerSubsystem(actsTracks);
+      
+      /// Use either PHActsTrkFitter to run the ACTS
+      /// KF track fitter, or PHActsTrkProp to run the ACTS Combinatorial 
+      /// Kalman Filter which runs track finding and track fitting
+      /// Always run PHActsTracks first to take the SvtxTrack and convert it
+      /// to a form that Acts can process
+      
+      /// If you run PHActsTrkProp, disable PHGenFitTrkProp
+      //PHActsTrkProp *actsProp = new PHActsTrkProp();
+      //actsProp->Verbosity(0);
+      //se->registerSubsystem(actsProp);
+      
+      PHActsTrkFitter *actsFit = new PHActsTrkFitter();
+      actsFit->Verbosity(0);
+      actsFit->doTimeAnalysis(true);
+      se->registerSubsystem(actsFit);
+      #endif   
+    }
+  else
     {
+      
       PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
       kalman->Verbosity(0);
       
@@ -693,7 +751,6 @@ void Tracking_Reco(int verbosity = 0)
       kalman->set_use_truth_vertex(false);
       
       se->registerSubsystem(kalman);
-
 
       //------------------
       // Track Projections
@@ -742,13 +799,21 @@ void Tracking_Reco(int verbosity = 0)
   eval->Verbosity(0);
   //se->registerSubsystem(eval);
 
-  if(use_acts)
+  if(useActsFitting)
     {  
       ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
       actsEval->Verbosity(0);
       //se->registerSubsystem(actsEval);
     }
 
+  if(useActsFitting)
+    {
+      #if __cplusplus >= 201703L
+      ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
+      actsEval->Verbosity(0);
+      se->registerSubsystem(actsEval);
+      #endif
+      }
   if (use_primary_vertex)
   {
     // make a second evaluator that records tracks fitted with primary vertex included

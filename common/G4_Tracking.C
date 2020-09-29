@@ -20,6 +20,17 @@
 #include <trackreco/PHTrackSeeding.h>
 #include <trackreco/PHTruthTrackSeeding.h>
 #include <trackreco/PHTruthVertexing.h>
+#include <trackreco/PHCASeeding.h>
+
+#if __cplusplus >= 201703L
+#include <trackreco/PHActsSourceLinks.h>
+#include <trackreco/PHActsTracks.h>
+#include <trackreco/PHActsTrkProp.h>
+#include <trackreco/PHActsTrkFitter.h>
+#include <trackreco/PHActsVertexFitter.h>
+#include <trackreco/PHActsVertexFinder.h>
+#include <trackreco/ActsEvaluator.h>
+#endif
 
 #include <trackbase/TrkrHitTruthAssoc.h>
 
@@ -46,6 +57,9 @@ namespace G4TRACKING
   bool use_ca_seeding = false;
 
   bool use_track_prop = true;              // true for normal track seeding, false to run with truth track seeding instead
+
+  bool useActsFitting = false; // if true, acts KF is run with PHGenFitTrkProp
+  bool useActsProp = useActsFitting and false;  // if true, runs Acts CKF with only a seeder
   bool g4eval_use_initial_vertex = false;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
   bool use_primary_vertex = false;         // if true, refit tracks with primary vertex included - adds second node to node tree, adds second evaluator and outputs separate ntuples
 
@@ -81,6 +95,15 @@ void Tracking_Reco()
   // Tracking
   //------------
 
+  if(G4TRACKING::useActsFitting)
+    {
+      #if __cplusplus >= 201703L
+      PHActsSourceLinks *sl = new PHActsSourceLinks();
+      sl->Verbosity(0);
+      se->registerSubsystem(sl);
+      #endif
+    }
+
   if (G4TRACKING::use_track_prop)
   {
     //--------------------------------------------------
@@ -106,6 +129,9 @@ void Tracking_Reco()
       init_zvtx->Verbosity(verbosity);
       se->registerSubsystem(init_zvtx);
     }
+
+
+
     if (G4TRACKING::use_hough_seeding)
     {
       // find seed tracks using a subset of TPC layers
@@ -117,6 +143,8 @@ void Tracking_Reco()
     }
     else if (G4TRACKING::use_ca_seeding)
     {
+      auto seeder = new PHCASeeding("PHCASeeding");
+      se->registerSubsystem(seeder);
     }
     else
     {
@@ -129,18 +157,22 @@ void Tracking_Reco()
       tracker->enable_vertexing(false);                                           // rave vertexing is pretty slow at large multiplicities...
       se->registerSubsystem(tracker);
     }
-    // Find all clusters associated with each seed track
-    auto track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer, G4MICROMEGAS::n_micromegas_layer);
-    track_prop->Verbosity(verbosity);
-    se->registerSubsystem(track_prop);
-    for (int i = 0; i < G4INTT::n_intt_layer; i++)
-    {
-      // strip length is along theta
-      track_prop->set_max_search_win_theta_intt(i, 0.200);
-      track_prop->set_min_search_win_theta_intt(i, 0.200);
-      track_prop->set_max_search_win_phi_intt(i, 0.0050);
-      track_prop->set_min_search_win_phi_intt(i, 0.000);
-    }
+
+    if(!G4TRACKING::useActsProp)
+      {
+	// Find all clusters associated with each seed track
+	auto track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer, G4MICROMEGAS::n_micromegas_layer);
+	track_prop->Verbosity(verbosity);
+	se->registerSubsystem(track_prop);
+	for (int i = 0; i < G4INTT::n_intt_layer; i++)
+	  {
+	    // strip length is along theta
+	    track_prop->set_max_search_win_theta_intt(i, 0.200);
+	    track_prop->set_min_search_win_theta_intt(i, 0.200);
+	    track_prop->set_max_search_win_phi_intt(i, 0.0050);
+	    track_prop->set_min_search_win_phi_intt(i, 0.000);
+	  }
+      }
   }
   else
   {
@@ -162,25 +194,66 @@ void Tracking_Reco()
   // Fitting of tracks using Kalman Filter
   //------------------------------------------------
 
-  PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
-  kalman->Verbosity(verbosity);
-
-  if (G4TRACKING::use_primary_vertex)
-  {
-    kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
-  }
-  kalman->set_vertexing_method(G4TRACKING::vmethod);
-  kalman->set_use_truth_vertex(false);
-
-  se->registerSubsystem(kalman);
-
-  //------------------
-  // Track Projections
-  //------------------
-  PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
-  projection->Verbosity(verbosity);
-  se->registerSubsystem(projection);
-
+  if(G4TRACKING::useActsFitting)
+    {
+      #if __cplusplus >= 201703L
+      PHActsTracks *actsTracks = new PHActsTracks();
+      actsTracks->Verbosity(0);
+      se->registerSubsystem(actsTracks);
+      
+      /// Use either PHActsTrkFitter to run the ACTS
+      /// KF track fitter, or PHActsTrkProp to run the ACTS Combinatorial 
+      /// Kalman Filter which runs track finding and track fitting
+      /// Always run PHActsTracks first to take the SvtxTrack and convert it
+      /// to a form that Acts can process
+      if(G4TRACKING::useActsProp)
+	{
+	  PHActsTrkProp *actsProp = new PHActsTrkProp();
+	  actsProp->Verbosity(0);
+	  actsProp->doTimeAnalysis(true);
+	  actsProp->resetCovariance(true);
+	  actsProp->setVolumeMaxChi2(7,60); /// MVTX 
+	  actsProp->setVolumeMaxChi2(9,60); /// INTT
+	  actsProp->setVolumeMaxChi2(11,60); /// TPC
+	  actsProp->setVolumeLayerMaxChi2(9, 2, 100); /// INTT first few layers
+	  actsProp->setVolumeLayerMaxChi2(9, 4, 100);
+	  actsProp->setVolumeLayerMaxChi2(11,2, 200); /// TPC first few layers 
+	  actsProp->setVolumeLayerMaxChi2(11,4, 200);
+	  
+	  se->registerSubsystem(actsProp);
+	}
+      else
+	{
+	  PHActsTrkFitter *actsFit = new PHActsTrkFitter();
+	  actsFit->Verbosity(0);
+	  actsFit->doTimeAnalysis(true);
+	  se->registerSubsystem(actsFit);
+	}
+      
+      #endif   
+    }
+  else
+    {
+      PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
+      kalman->Verbosity(verbosity);
+      
+      if (G4TRACKING::use_primary_vertex)
+	{
+	  kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
+	}
+      kalman->set_vertexing_method(G4TRACKING::vmethod);
+      kalman->set_use_truth_vertex(false);
+      
+      se->registerSubsystem(kalman);
+      
+      //------------------
+      // Track Projections
+      //------------------
+      PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
+      projection->Verbosity(verbosity);
+      se->registerSubsystem(projection);
+    }
+  
   return;
 }
 
@@ -208,6 +281,17 @@ void Tracking_Eval(const std::string& outputfile)
   eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
+
+  if(G4TRACKING::useActsFitting)
+    {
+      #if __cplusplus >= 201703L
+      ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
+      actsEval->Verbosity(0);
+      actsEval->setEvalCKF(false);
+      se->registerSubsystem(actsEval);
+      #endif
+    }
+  
 
   if (G4TRACKING::use_primary_vertex)
   {

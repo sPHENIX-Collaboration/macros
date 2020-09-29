@@ -60,26 +60,28 @@ namespace INPUTREADEIC
 namespace INPUTREADHITS
 {
   string filename;
+  string listfile;
 }
 
 namespace INPUTEMBED
 {
   string filename;
+  string listfile;
 }
 
 namespace PYTHIA6
 {
-  string config_file = "phpythia6.cfg";
+  string config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia6.cfg";
 }
 
 namespace PYTHIA8
 {
-  string config_file = "phpythia8.cfg";
+  string config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg";
 }
 
 namespace SARTRE
 {
-  string config_file = "sartre.cfg";
+  string config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/sartre.cfg";
 }
 
 namespace PILEUP
@@ -103,6 +105,7 @@ namespace INPUTGENERATOR
 namespace INPUTMANAGER
 {
   Fun4AllHepMCInputManager *HepMCInputManager = nullptr;
+  Fun4AllHepMCPileupInputManager *HepMCPileupInputManager = nullptr;
 }
 
 void InputInit()
@@ -161,6 +164,10 @@ void InputInit()
   {
     INPUTMANAGER::HepMCInputManager = new Fun4AllHepMCInputManager("HEPMCin");
   }
+  if (Input::PILEUPRATE > 0)
+  {
+    INPUTMANAGER::HepMCPileupInputManager = new Fun4AllHepMCPileupInputManager("HepMCPileupInput");
+  }
 }
 
 void InputRegister()
@@ -199,19 +206,19 @@ void InputRegister()
     INPUTGENERATOR::Gun->Verbosity(Input::GUN_VERBOSITY);
     se->registerSubsystem(INPUTGENERATOR::Gun);
   }
-  // here are the various utility modules which read particles and
-  // put them onto the G4 particle stack
-  if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6)
-  {
-    // read-in HepMC events to Geant4 if there is any
-    HepMCNodeReader *hr = new HepMCNodeReader();
-    se->registerSubsystem(hr);
-  }
   if (Input::READEIC)
   {
     ReadEICFiles *eicr = new ReadEICFiles();
     eicr->OpenInputFile(INPUTREADEIC::filename);
     se->registerSubsystem(eicr);
+  }
+  // here are the various utility modules which read particles and
+  // put them onto the G4 particle stack
+  if (Input::HEPMC or Input::PYTHIA8 or Input::PYTHIA6 or Input::READEIC)
+  {
+    // read-in HepMC events to Geant4 if there is any
+    HepMCNodeReader *hr = new HepMCNodeReader();
+    se->registerSubsystem(hr);
   }
 }
 
@@ -221,8 +228,20 @@ void InputManagers()
   if (Input::EMBED)
   {
     gSystem->Load("libg4dst.so");
-    Fun4AllDstInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTinEmbed");
-    in1->AddFile(INPUTEMBED::filename);  // if one use a single input file
+    Fun4AllInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTinEmbed");
+    if (!INPUTEMBED::filename.empty() && INPUTEMBED::listfile.empty())
+    {
+      in1->fileopen(INPUTEMBED::filename);
+    }
+    else if (!INPUTEMBED::listfile.empty())
+    {
+      in1->AddListFile(INPUTEMBED::listfile);
+    }
+    else
+    {
+      cout << "no filename INPUTEMBED::filename or listfile INPUTEMBED::listfile given" << endl;
+      gSystem->Exit(1);
+    }
     in1->Repeat();                       // if file(or filelist) is exhausted, start from beginning
     se->registerInputManager(in1);
   }
@@ -235,7 +254,19 @@ void InputManagers()
   else if (Input::READHITS)
   {
     Fun4AllInputManager *hitsin = new Fun4AllDstInputManager("DSTin");
-    hitsin->fileopen(INPUTREADHITS::filename);
+    if (!INPUTREADHITS::filename.empty() && INPUTREADHITS::listfile.empty())
+    {
+      hitsin->fileopen(INPUTREADHITS::filename);
+    }
+    else if (!INPUTREADHITS::listfile.empty())
+    {
+      hitsin->AddListFile(INPUTREADHITS::listfile);
+    }
+    else
+    {
+      cout << "no filename INPUTREADHITS::filename or listfile INPUTREADHITS::listfile given" << endl;
+      gSystem->Exit(1);
+    }
     hitsin->Verbosity(Input::VERBOSITY);
     se->registerInputManager(hitsin);
   }
@@ -247,13 +278,13 @@ void InputManagers()
   }
   if (Input::PILEUPRATE > 0)
   {
-    Fun4AllHepMCPileupInputManager *pileup = new Fun4AllHepMCPileupInputManager("HepMCPileupInput");
-    pileup->Verbosity(Input::VERBOSITY);
-    pileup->AddFile(PILEUP::pileupfile);
-    pileup->set_collision_rate(Input::PILEUPRATE);
+    INPUTMANAGER::HepMCPileupInputManager->SignalInputManager(INPUTMANAGER::HepMCInputManager);
+    INPUTMANAGER::HepMCPileupInputManager->Verbosity(Input::VERBOSITY);
+    INPUTMANAGER::HepMCPileupInputManager->AddFile(PILEUP::pileupfile);
+    INPUTMANAGER::HepMCPileupInputManager->set_collision_rate(Input::PILEUPRATE);
     double time_window = 105.5 / PILEUP::TpcDriftVelocity;
-    pileup->set_time_window(-time_window, time_window);
-    se->registerInputManager(pileup);
+    INPUTMANAGER::HepMCPileupInputManager->set_time_window(-time_window, time_window);
+    se->registerInputManager(INPUTMANAGER::HepMCPileupInputManager);
   }
 }
 #endif
