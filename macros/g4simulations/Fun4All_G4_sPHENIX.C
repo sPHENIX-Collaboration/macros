@@ -560,8 +560,10 @@ int Fun4All_G4_sPHENIX(
     // pile up simulation.
     // add random beam collisions following a collision diamond and rate from a HepMC stream
     Fun4AllHepMCPileupInputManager *pileup = new Fun4AllHepMCPileupInputManager("HepMCPileupInput");
+    pileup->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
+    pileup->set_vertex_distribution_mean(0, 0, 0, 0);
+    pileup->set_vertex_distribution_width(100e-4, 100e-4, 30, 5);
     se->registerInputManager(pileup);
-
     const string pileupfile("/sphenix/sim/sim01/sHijing/sHijing_0-12fm.dat");
     //background files for p+p pileup sim
     //const string pileupfile("/gpfs/mnt/gpfs04/sphenix/user/shlim/04.InnerTrackerTaskForce/01.PythiaGen/list_pythia8_mb.dat");
