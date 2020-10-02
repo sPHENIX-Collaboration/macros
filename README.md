@@ -26,11 +26,11 @@ remote: Total 1125 (delta 0), reused 0 (delta 0), pack-reused 1125
 Receiving objects: 100% (1125/1125), 181.75 KiB | 0 bytes/s, done.
 Resolving deltas: 100% (471/471), done.
 Checking connectivity... done.
-[jinhuang@rcas2073 test]$ cd macros/macros/g4simulations/
-[jinhuang@rcas2073 g4simulations]$ # here is all the macros to run fsPHENIX and sPHENIX simulations
+[jinhuang@rcas2073 test]$ cd macros/detectors
+[jinhuang@rcas2073 detectors]$ # here are all the subdirectories with macros to run sPHENIX, fsPHENIX and EIC detector simulations
 ```
 
-The default sPHENIX simulation + reconstruction macro is [Fun4All_G4_sPHENIX.C](https://www.phenix.bnl.gov/WWW/sPHENIX/doxygen/html/d5/d2c/macros_2blob_2master_2macros_2g4simulations_2Fun4All__G4__sPHENIX_8C_source.html#l00001), which is self-explanatory. It is not a black box!. You are welcome to open/edit it to work for your purpose of study.
+The default sPHENIX simulation + reconstruction macro is Fun4All_G4_sPHENIX.C, which is self-explanatory. It is not a black box!. You are welcome to open/edit it to work for your purpose of study.
 
 # Try an event display
 
@@ -63,4 +63,4 @@ Now you are able to run the whole sPHENIX simulation + reconstruction chain. Man
 
 * Checkout the [evaluator Ntuples](https://wiki.bnl.gov/sPHENIX/index.php/Tracking) output from your 10 events for a generic look of the reconstructed data.
 * Run [sPHENIX software tutorials](https://github.com/sPHENIX-Collaboration/tutorials).
-* [Write your analysis module for more dedicated analysis](https://wiki.bnl.gov/sPHENIX/index.php/Example_of_using_DST_nodes), for which the module produced the evaluator NTuple ([CaloEvaluator](https://www.phenix.bnl.gov/WWW/sPHENIX/doxygen/html/dd/d59/classCaloEvaluator.html), [JetEvaluator](https://www.phenix.bnl.gov/WWW/sPHENIX/doxygen/html/d1/df4/classJetEvaluator.html), [SvtxEvaluator](https://www.phenix.bnl.gov/WWW/sPHENIX/doxygen/html/d6/d11/classSvtxEvaluator.html)) can usually serve as good examples.
+* [Write your analysis module for more dedicated analysis](https://wiki.bnl.gov/sPHENIX/index.php/Example_of_using_DST_nodes), for which the module produced the evaluator NTuple ([CaloEvaluator](https://sphenix-collaboration.github.io/doxygen/dd/d59/classCaloEvaluator.html), [JetEvaluator](https://sphenix-collaboration.github.io/doxygen/dd/d59/classCaloEvaluator.html), [SvtxEvaluator](https://sphenix-collaboration.github.io/doxygen/d6/d11/classSvtxEvaluator.html)) can usually serve as good examples.

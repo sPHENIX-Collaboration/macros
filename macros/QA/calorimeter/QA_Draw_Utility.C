@@ -156,7 +156,7 @@ double DrawReference(TH1 *hnew, TH1 *href, bool draw_href_error = false)
 
   hnew->Draw();  // set scale
 
-  double ks_test = NAN;
+  double ks_test = numeric_limits<double>::signaling_NaN();
 
   if (href)
   {
@@ -199,7 +199,7 @@ double DrawReference(TH1 *hnew, TH1 *href, bool draw_href_error = false)
   }
   else
   {
-    gPad->SetTopMargin(.7);
+    gPad->SetTopMargin(.07);
     TLegend *legend = new TLegend(0, .93, 0, 1, hnew->GetTitle(), "NB NDC");
     legend->Draw();
   }
