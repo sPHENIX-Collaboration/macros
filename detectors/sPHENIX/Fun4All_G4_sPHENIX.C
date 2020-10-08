@@ -467,18 +467,6 @@ int Fun4All_G4_sPHENIX(
   //-----------------
   // Event processing
   //-----------------
-  if (nEvents < 0)
-  {
-    return 0;
-  }
-  // if we run the particle generator and use 0 it'll run forever
-  if (nEvents == 0 && !Input::HEPMC && !Input::READHITS)
-  {
-    cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
-    cout << "it will run forever, so I just return without running anything" << endl;
-    return 0;
-  }
-
   if (Enable::DISPLAY)
   {
     DisplayOn();
@@ -494,6 +482,20 @@ int Fun4All_G4_sPHENIX(
 
     return 0;
   }
+
+// if we use a negative number of events we go back to the command line here
+  if (nEvents < 0)
+  {
+    return 0;
+  }
+  // if we run the particle generator and use 0 it'll run forever
+  if (nEvents == 0 && !Input::HEPMC && !Input::READHITS)
+  {
+    cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
+    cout << "it will run forever, so I just return without running anything" << endl;
+    return 0;
+  }
+
 
   se->skip(skip);
   se->run(nEvents);
