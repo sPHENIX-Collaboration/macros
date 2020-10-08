@@ -479,6 +479,23 @@ int Fun4All_G4_fsPHENIX(
   //-----------------
   // Event processing
   //-----------------
+  if (Enable::DISPLAY)
+  {
+    DisplayOn();
+
+    gROOT->ProcessLine("Fun4AllServer *se = Fun4AllServer::instance();");
+    gROOT->ProcessLine("PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco(\"PHG4RECO\");");
+
+    cout << "-------------------------------------------------" << endl;
+    cout << "You are in event display mode. Run one event with" << endl;
+    cout << "se->run(1)" << endl;
+    cout << "Run Geant4 command with following examples" << endl;
+    gROOT->ProcessLine("displaycmd()");
+
+    return 0;
+  }
+
+// if we use a negative number of events we go back to the command line here
   if (nEvents < 0)
   {
     return 0;
@@ -489,15 +506,6 @@ int Fun4All_G4_fsPHENIX(
     cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
     cout << "it will run forever, so I just return without running anything" << endl;
     return 0;
-  }
-
-  if (Enable::DISPLAY)
-  {
-    DisplayOn();
-    // prevent macro from finishing so can see display
-    int i;
-    cout << "***** Enter any integer to proceed" << endl;
-    cin >> i;
   }
 
   se->skip(skip);

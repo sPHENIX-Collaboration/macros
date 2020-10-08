@@ -212,6 +212,7 @@ int Fun4All_G4_EICDetector(
   // mvtx/tpc tracker
   Enable::MVTX = true;
   Enable::TPC = true;
+//  Enable::TPC_ENDCAP = true;
 
   Enable::TRACKING = true;
   Enable::TRACKING_EVAL = Enable::TRACKING && true;
@@ -495,6 +496,11 @@ int Fun4All_G4_EICDetector(
     cout <<"Run Geant4 command with following examples"<<endl;
     gROOT->ProcessLine("displaycmd()");
 
+    return 0;
+  }
+// if we use a negative number of events we go back to the command line here
+  if (nEvents < 0)
+  {
     return 0;
   }
   // if we run any of the particle generators and use 0 it'll run forever
