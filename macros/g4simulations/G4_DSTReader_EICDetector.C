@@ -1,9 +1,25 @@
 #pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include <fun4all/Fun4AllServer.h>
+
+#include "GlobalVariables.C"
+
+#include "G4_Barrel_EIC.C"
+#include "G4_CEmc_EIC.C"
+#include "G4_EEMC.C"
+#include "G4_FEMC_EIC.C"
+#include "G4_FHCAL.C"
+#include "G4_FST_EIC.C"
+#include "G4_GEM_EIC.C"
+#include "G4_HcalIn_ref.C"
+#include "G4_HcalOut_ref.C"
+#include "G4_Magnet.C"
+#include "G4_Mvtx_EIC.C"
+#include "G4_TPC_EIC.C"
+
 #include <g4eval/PHG4DSTReader.h>
+
+#include <fun4all/Fun4AllServer.h>
+
 R__LOAD_LIBRARY(libg4eval.so)
-#endif
 
 //////////////////////////////////////////////////////////////////
 /*!
@@ -14,167 +30,166 @@ R__LOAD_LIBRARY(libg4eval.so)
   \date    $Date: $
 */
 //////////////////////////////////////////////////////////////////
+namespace Enable
+{
+  bool DSTREADER = false;
+  int DSTREADER_VERBOSITY = 0;
+}  // namespace Enable
 
-#include <string>
+namespace G4DSTREADER
+{
+  bool save_g4_raw = true;
+  double tower_zero_supp = 1.e-6;
+}  // namespace G4DSTREADER
 
 void G4DSTreader_EICDetectorInit() {}
-void
-G4DSTreader_EICDetector( const char * outputFile = "G4sPHENIXCells.root",//
-                         int absorberactive = 1, //
-                         bool do_svtx = true, //
-                         bool do_cemc = true, //
-                         bool do_hcalin = true, //
-                         bool do_magnet = true, //
-                         bool do_hcalout = true, //
-                         bool do_cemc_twr = true, //
-                         bool do_hcalin_twr = true, //
-                         bool do_hcalout_twr = true, //
-                         bool do_FHCAL = true, //
-                         bool do_FHCAL_twr = true, //
-                         bool do_FEMC = true, //
-                         bool do_FEMC_twr = true, //
-                         bool do_EEMC = true, //
-                         bool do_EEMC_twr = true //
-                         )
+void G4DSTreader_EICDetector(const string &outputFile = "G4sPHENIXCells.root")
 {
-
   //! debug output on screen?
-  const bool debug = false;
-
-  //! save raw g4 hits
-  const bool save_g4_raw = true;
+  int verbosity = max(Enable::VERBOSITY, Enable::DSTREADER_VERBOSITY);
 
   // save a comprehensive  evaluation file
-  PHG4DSTReader* ana = new PHG4DSTReader(
-                                         string(outputFile) + string("_DSTReader.root"));
+  PHG4DSTReader *ana = new PHG4DSTReader(outputFile);
   ana->set_save_particle(true);
   ana->set_load_all_particle(false);
   ana->set_load_active_particle(true);
   ana->set_save_vertex(true);
 
-  if (debug)
+  ana->Verbosity(verbosity);
+
+  if (G4DSTREADER::save_g4_raw)
+  {
+    if (Enable::BARREL)
     {
-      ana->Verbosity(2);
+      ana->AddNode("BARREL");
+    }
+    if (Enable::MVTX)
+    {
+      ana->AddNode("MVTX");
+    }
+    if (Enable::TPC)
+    {
+      ana->AddNode("TPC");
     }
 
-  if (save_g4_raw)
+    if (Enable::EGEM)
     {
-      if (do_svtx)
-        {
-          ana->AddNode("SVTX");
-          ana->AddNode("MVTX");
-
-          ana->AddNode("EGEM_0");
-          ana->AddNode("EGEM_1");
-          ana->AddNode("EGEM_2");
-          ana->AddNode("EGEM_3");
-
-          ana->AddNode("FGEM_2");
-          ana->AddNode("FGEM_3");
-          ana->AddNode("FGEM_4");
-
-          ana->AddNode("FST_0");
-          ana->AddNode("FST_1");
-          ana->AddNode("FST_2");
-          ana->AddNode("FST_3");
-          ana->AddNode("FST_4");
-        }
-
-      if (do_cemc)
-        {
-          ana->AddNode("CEMC");
-          if (absorberactive)
-            {
-              ana->AddNode("ABSORBER_CEMC");
-              ana->AddNode("CEMC_ELECTRONICS");
-              ana->AddNode("CEMC_SPT");
-            }
-        }
-
-      if (do_hcalin)
-        {
-          ana->AddNode("HCALIN");
-          if (absorberactive)
-            ana->AddNode("ABSORBER_HCALIN");
-        }
-
-      if (do_magnet)
-        {
-          if (absorberactive)
-            ana->AddNode("MAGNET");
-        }
-
-      if (do_hcalout)
-        {
-          ana->AddNode("HCALOUT");
-          if (absorberactive)
-            ana->AddNode("ABSORBER_HCALOUT");
-        }
-
-      if (do_FHCAL)
-        {
-          ana->AddNode("FHCAL");
-          if (absorberactive)
-            ana->AddNode("ABSORBER_FHCAL");
-        }
-
-      if (do_FEMC)
-        {
-          ana->AddNode("FEMC");
-          if (absorberactive)
-            ana->AddNode("ABSORBER_FEMC");
-        }
-
-      if (do_EEMC)
-        {
-          ana->AddNode("EEMC");
-          if (absorberactive)
-            ana->AddNode("ABSORBER_EEMC");
-        }
-
-      ana->AddNode("BH_1");
-      ana->AddNode("BH_FORWARD_PLUS");
-      ana->AddNode("BH_FORWARD_NEG");
-
+      ana->AddNode("EGEM_0");
+      ana->AddNode("EGEM_1");
+      ana->AddNode("EGEM_2");
+      ana->AddNode("EGEM_3");
     }
-
-  ana->set_tower_zero_sup(1e-6);
-  if (do_cemc_twr)
+    if (Enable::FGEM)
     {
-      ana->AddTower("SIM_CEMC");
-      ana->AddTower("RAW_CEMC");
-      ana->AddTower("CALIB_CEMC");
+      ana->AddNode("FGEM_2");
+      ana->AddNode("FGEM_3");
+      ana->AddNode("FGEM_4");
     }
-  if (do_hcalin_twr)
+    if (Enable::FST)
     {
-      ana->AddTower("SIM_HCALIN");
-      ana->AddTower("RAW_HCALIN");
-      ana->AddTower("CALIB_HCALIN");
+      ana->AddNode("FST_0");
+      ana->AddNode("FST_1");
+      ana->AddNode("FST_2");
+      ana->AddNode("FST_3");
+      ana->AddNode("FST_4");
+      ana->AddNode("FST_5");
     }
-  if (do_hcalout_twr)
+  }
+
+  if (Enable::CEMC)
+  {
+    ana->AddNode("CEMC");
+    if (Enable::ABSORBER || Enable::CEMC_ABSORBER)
     {
-      ana->AddTower("SIM_HCALOUT");
-      ana->AddTower("RAW_HCALOUT");
-      ana->AddTower("CALIB_HCALOUT");
+      ana->AddNode("ABSORBER_CEMC");
+      ana->AddNode("CEMC_ELECTRONICS");
+      ana->AddNode("CEMC_SPT");
     }
-  if (do_FHCAL_twr)
-    {
-      ana->AddTower("SIM_FHCAL");
-      ana->AddTower("RAW_FHCAL");
-      ana->AddTower("CALIB_FHCAL");
-    }
-  if (do_FEMC_twr)
-    {
-      ana->AddTower("SIM_FEMC");
-      ana->AddTower("RAW_FEMC");
-      ana->AddTower("CALIB_FEMC");
-    }
-  if (do_EEMC_twr)
-    {
-      ana->AddTower("SIM_EEMC");
-      ana->AddTower("RAW_EEMC");
-      ana->AddTower("CALIB_EEMC");
-    }
+  }
+
+  if (Enable::HCALIN)
+  {
+    ana->AddNode("HCALIN");
+    if (Enable::ABSORBER || Enable::HCALIN_ABSORBER)
+      ana->AddNode("ABSORBER_HCALIN");
+  }
+
+  if (Enable::MAGNET)
+  {
+    if (Enable::ABSORBER || Enable::MAGNET_ABSORBER)
+      ana->AddNode("MAGNET");
+  }
+
+  if (Enable::HCALOUT)
+  {
+    ana->AddNode("HCALOUT");
+    if (Enable::ABSORBER || Enable::HCALOUT_ABSORBER)
+      ana->AddNode("ABSORBER_HCALOUT");
+  }
+
+  if (Enable::FHCAL)
+  {
+    ana->AddNode("FHCAL");
+    if (Enable::ABSORBER || Enable::FHCAL_ABSORBER)
+      ana->AddNode("ABSORBER_FHCAL");
+  }
+
+  if (Enable::FEMC)
+  {
+    ana->AddNode("FEMC");
+    if (Enable::ABSORBER || Enable::FEMC_ABSORBER)
+      ana->AddNode("ABSORBER_FEMC");
+  }
+
+  if (Enable::EEMC)
+  {
+    ana->AddNode("EEMC");
+  }
+
+  if (Enable::BLACKHOLE)
+  {
+    ana->AddNode("BH_1");
+    ana->AddNode("BH_FORWARD_PLUS");
+    ana->AddNode("BH_FORWARD_NEG");
+  }
+
+  ana->set_tower_zero_sup(G4DSTREADER::tower_zero_supp);
+  if (Enable::CEMC_TOWER)
+  {
+    ana->AddTower("SIM_CEMC");
+    ana->AddTower("RAW_CEMC");
+    ana->AddTower("CALIB_CEMC");
+  }
+  if (Enable::HCALIN_TOWER)
+  {
+    ana->AddTower("SIM_HCALIN");
+    ana->AddTower("RAW_HCALIN");
+    ana->AddTower("CALIB_HCALIN");
+  }
+  if (Enable::HCALOUT_TOWER)
+  {
+    ana->AddTower("SIM_HCALOUT");
+    ana->AddTower("RAW_HCALOUT");
+    ana->AddTower("CALIB_HCALOUT");
+  }
+  if (Enable::FHCAL_TOWER)
+  {
+    ana->AddTower("SIM_FHCAL");
+    ana->AddTower("RAW_FHCAL");
+    ana->AddTower("CALIB_FHCAL");
+  }
+  if (Enable::FEMC_TOWER)
+  {
+    ana->AddTower("SIM_FEMC");
+    ana->AddTower("RAW_FEMC");
+    ana->AddTower("CALIB_FEMC");
+  }
+  if (Enable::FEMC_TOWER)
+  {
+    ana->AddTower("SIM_EEMC");
+    ana->AddTower("RAW_EEMC");
+    ana->AddTower("CALIB_EEMC");
+  }
 
   // Jets disabled for now
   //  if (do_jet_reco)

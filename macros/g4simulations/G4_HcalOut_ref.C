@@ -25,13 +25,20 @@ R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
 {
-  static bool HCALOUT = false;
-}
+  bool HCALOUT = false;
+  bool HCALOUT_ABSORBER = false;
+  bool HCALOUT_OVERLAPCHECK = false;
+  bool HCALOUT_CELL = false;
+  bool HCALOUT_TOWER = false;
+  bool HCALOUT_CLUSTER = false;
+  bool HCALOUT_EVAL = false;
+  int HCALOUT_VERBOSITY = 0;
+}  // namespace Enable
 
 namespace G4HCALOUT
 {
-  const double outer_radius = 264.71;
-  const double size_z = 304.91 * 2;
+  double outer_radius = 264.71;
+  double size_z = 304.91 * 2;
   enum enu_HCalOut_clusterizer
   {
     kHCalOutGraphClusterizer,
@@ -55,11 +62,11 @@ void HCalOuterInit()
 double HCalOuter(PHG4Reco *g4Reco,
                  double radius,
                  const int crossings,
-                 const int absorberactive = 0,
-                 int verbosity = 0)
+                 const int absorberactive = 0)
 {
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4testbench.so");
+  bool AbsorberActive = Enable::ABSORBER || Enable::HCALOUT_ABSORBER || absorberactive;
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALOUT_OVERLAPCHECK;
+  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
 
   PHG4OuterHcalSubsystem *hcal = new PHG4OuterHcalSubsystem("HCALOUT");
   // hcal->set_double_param("inner_radius", 183.3);
@@ -101,11 +108,11 @@ double HCalOuter(PHG4Reco *g4Reco,
 
   hcal->SetActive();
   hcal->SuperDetector("HCALOUT");
-  if (absorberactive)
+  if (AbsorberActive)
   {
     hcal->SetAbsorberActive();
   }
-  hcal->OverlapCheck(overlapcheck);
+  hcal->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(hcal);
 
   radius = hcal->get_double_param("outer_radius");
@@ -115,10 +122,10 @@ double HCalOuter(PHG4Reco *g4Reco,
   return radius;
 }
 
-void HCALOuter_Cells(int verbosity = 0)
+void HCALOuter_Cells()
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4detectors.so");
+  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4HcalCellReco *hc = new PHG4HcalCellReco("HCALOUT_CELLRECO");
@@ -137,10 +144,10 @@ void HCALOuter_Cells(int verbosity = 0)
   return;
 }
 
-void HCALOuter_Towers(int verbosity = 0)
+void HCALOuter_Towers()
 {
-  gSystem->Load("libg4calo.so");
-  gSystem->Load("libcalo_reco.so");
+  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalOutRawTowerBuilder");
@@ -153,8 +160,7 @@ void HCALOuter_Towers(int verbosity = 0)
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalOutRawTowerDigitizer");
   TowerDigitizer->Detector("HCALOUT");
   //  TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
-  TowerDigitizer->set_digi_algorithm(
-      RawTowerDigitizer::kSimple_photon_digitalization);
+  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitalization);
   TowerDigitizer->set_pedstal_central_ADC(0);
   TowerDigitizer->set_pedstal_width_ADC(1);  // From Jin's guess. No EMCal High Gain data yet! TODO: update
   TowerDigitizer->set_photonelec_ADC(16. / 5.);
@@ -171,15 +177,14 @@ void HCALOuter_Towers(int verbosity = 0)
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
   TowerCalibration->set_calib_const_GeV_ADC(0.2e-3 / visible_sample_fraction_HCALOUT);
   TowerCalibration->set_pedstal_ADC(0);
-  TowerCalibration->set_zero_suppression_GeV(-1);  // no-zero suppression
   se->registerSubsystem(TowerCalibration);
 
   return;
 }
 
-void HCALOuter_Clusters(int verbosity = 0)
+void HCALOuter_Clusters()
 {
-  gSystem->Load("libcalo_reco.so");
+  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
@@ -207,13 +212,13 @@ void HCALOuter_Clusters(int verbosity = 0)
   return;
 }
 
-void HCALOuter_Eval(std::string outputfile, int verbosity = 0)
+void HCALOuter_Eval(const std::string &outputfile)
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4eval.so");
+  int verbosity = std::max(Enable::VERBOSITY,Enable::HCALOUT_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  CaloEvaluator *eval = new CaloEvaluator("HCALOUTEVALUATOR", "HCALOUT", outputfile.c_str());
+  CaloEvaluator *eval = new CaloEvaluator("HCALOUTEVALUATOR", "HCALOUT", outputfile);
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 

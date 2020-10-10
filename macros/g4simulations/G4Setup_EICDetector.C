@@ -2,46 +2,62 @@
 
 #include "GlobalVariables.C"
 
-#include <fun4all/Fun4AllDstOutputManager.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllServer.h>
-#include <g4detectors/PHG4CylinderSubsystem.h>
-#include <g4eval/PHG4DstCompressReco.h>
-#include <g4main/HepMCNodeReader.h>
-#include <g4main/PHG4Reco.h>
-#include <g4main/PHG4TruthSubsystem.h>
-#include <phfield/PHFieldConfig.h>
-#include <g4decayer/EDecayType.hh>
 #include "G4_Aerogel.C"
+#include "G4_Barrel_EIC.C"
 #include "G4_BlackHole.C"
 #include "G4_CEmc_EIC.C"
 #include "G4_DIRC.C"
 #include "G4_EEMC.C"
 #include "G4_FEMC_EIC.C"
 #include "G4_FHCAL.C"
+#include "G4_FST_EIC.C"
 #include "G4_GEM_EIC.C"
 #include "G4_HcalIn_ref.C"
 #include "G4_HcalOut_ref.C"
+#include "G4_Input.C"
 #include "G4_Magnet.C"
-#include "G4_Mvtx.C"
-#include "G4_PSTOF.C"
+#include "G4_Mvtx_EIC.C"
 #include "G4_Pipe_EIC.C"
 #include "G4_PlugDoor_EIC.C"
 #include "G4_RICH.C"
 #include "G4_TPC_EIC.C"
 #include "G4_Tracking_EIC.C"
 #include "G4_User.C"
-#include "G4_WorldSize.C"
+#include "G4_World.C"
+
+#include <g4detectors/PHG4CylinderSubsystem.h>
+
+#include <g4eval/PHG4DstCompressReco.h>
+
+#include <g4main/PHG4Reco.h>
+#include <g4main/PHG4TruthSubsystem.h>
+
+#include <phfield/PHFieldConfig.h>
+
+#include <g4decayer/EDecayType.hh>
+
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 
-void RunLoadTest() {}
-
 void G4Init()
 {
-  // load detector/material macros and execute Init() function
+// First some check for subsystems which do not go together
 
+  if (Enable::TPC && Enable::FST)
+  {
+    cout << "TPC and FST cannot be enabled together" << endl;
+    gSystem->Exit(1);
+  }
+  else if ((Enable::TPC || Enable::MVTX) && Enable::BARREL)
+  {
+    cout << "TPC/MVTX and BARREL cannot be enabled together" << endl;
+    gSystem->Exit(1);
+  }
+
+  // load detector/material macros and execute Init() function
   if (Enable::PIPE)
   {
     PipeInit();
@@ -56,10 +72,17 @@ void G4Init()
   {
     EGEM_Init();
   }
-
   if (Enable::FGEM)
   {
     FGEM_Init();
+  }
+  if (Enable::FST)
+  {
+    FST_Init();
+  }
+  if (Enable::BARREL)
+  {
+    BarrelInit();
   }
   if (Enable::MVTX)
   {
@@ -133,59 +156,48 @@ void G4Init()
   }
 }
 
-int G4Setup(const int absorberactive = 0,
-            const string &field = "1.5",
-            const EDecayType decayType = EDecayType::kAll,
-            const float magfield_rescale = 1.0)
+int G4Setup()
 {
-  //---------------
-  // Load libraries
-  //---------------
-
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4testbench.so");
-
   //---------------
   // Fun4All server
   //---------------
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  // read-in HepMC events to Geant4 if there is any
-  HepMCNodeReader *hr = new HepMCNodeReader();
-  se->registerSubsystem(hr);
-
   PHG4Reco *g4Reco = new PHG4Reco();
+
+  WorldInit(g4Reco);
+
   g4Reco->set_rapidity_coverage(1.1);  // according to drawings
                                        // uncomment to set QGSP_BERT_HP physics list for productions
                                        // (default is QGSP_BERT for speed)
   //  g4Reco->SetPhysicsList("QGSP_BERT_HP");
 
-  if (decayType != EDecayType::kAll)
+  if (G4P6DECAYER::decayType != EDecayType::kAll)
   {
-    g4Reco->set_force_decay(decayType);
+    g4Reco->set_force_decay(G4P6DECAYER::decayType);
   }
 
   double fieldstrength;
-  istringstream stringline(field);
+  istringstream stringline(G4MAGNET::magfield);
   stringline >> fieldstrength;
   if (stringline.fail())
   {  // conversion to double fails -> we have a string
 
-    if (field.find("sPHENIX.root") != string::npos)
+    if (G4MAGNET::magfield.find("sPHENIX.root") != string::npos)
     {
-      g4Reco->set_field_map(field, PHFieldConfig::Field3DCartesian);
+      g4Reco->set_field_map(G4MAGNET::magfield, PHFieldConfig::Field3DCartesian);
     }
     else
     {
-      g4Reco->set_field_map(field, PHFieldConfig::kField2D);
+      g4Reco->set_field_map(G4MAGNET::magfield, PHFieldConfig::kField2D);
     }
   }
   else
   {
     g4Reco->set_field(fieldstrength);  // use const soleniodal field
   }
-  g4Reco->set_field_rescale(magfield_rescale);
+  g4Reco->set_field_rescale(G4MAGNET::magfield_rescale);
 
   double radius = 0.;
 
@@ -193,7 +205,7 @@ int G4Setup(const int absorberactive = 0,
   // PIPE
   if (Enable::PIPE)
   {
-    radius = Pipe(g4Reco, radius, absorberactive);
+    radius = Pipe(g4Reco, radius);
   }
   //----------------------------------------
 
@@ -206,55 +218,58 @@ int G4Setup(const int absorberactive = 0,
   {
     FGEMSetup(g4Reco);
   }
-
+  if (Enable::FST)
+  {
+    FSTSetup(g4Reco);
+  }
+  if (Enable::BARREL)
+  {
+    Barrel(g4Reco, radius);
+  }
   if (Enable::MVTX)
   {
-    radius = Mvtx(g4Reco, radius, absorberactive);
+    radius = Mvtx(g4Reco, radius);
   }
   if (Enable::TPC)
   {
-    radius = TPC(g4Reco, radius, absorberactive);
+    radius = TPC(g4Reco, radius);
   }
-  if (Enable::TRACKING)
-  {
-    //    radius = Tracking(g4Reco, radius, absorberactive);
-  }
+
   //----------------------------------------
   // CEMC
   //
   if (Enable::CEMC)
   {
-    radius = CEmc(g4Reco, radius, 8, absorberactive);
+    radius = CEmc(g4Reco, radius);
   }
-  //  if (do_cemc) radius = CEmc_Vis(g4Reco, radius, 8, absorberactive);// for visualization substructure of SPACAL, slow to render
 
   //----------------------------------------
   // HCALIN
 
   if (Enable::HCALIN)
   {
-    radius = HCalInner(g4Reco, radius, 4, absorberactive);
+    radius = HCalInner(g4Reco, radius, 4);
   }
   //----------------------------------------
   // MAGNET
 
   if (Enable::MAGNET)
   {
-    radius = Magnet(g4Reco, radius, 0, absorberactive);
+    radius = Magnet(g4Reco, radius, 0);
   }
   //----------------------------------------
   // HCALOUT
 
   if (Enable::HCALOUT)
   {
-    radius = HCalOuter(g4Reco, radius, 4, absorberactive);
+    radius = HCalOuter(g4Reco, radius, 4);
   }
   //----------------------------------------
   // FEMC
 
   if (Enable::FEMC)
   {
-    FEMCSetup(g4Reco, absorberactive);
+    FEMCSetup(g4Reco);
   }
 
   //----------------------------------------
@@ -262,14 +277,14 @@ int G4Setup(const int absorberactive = 0,
 
   if (Enable::FHCAL)
   {
-    FHCALSetup(g4Reco, absorberactive);
+    FHCALSetup(g4Reco);
   }
   //----------------------------------------
   // EEMC
 
   if (Enable::EEMC)
   {
-    EEMCSetup(g4Reco, absorberactive);
+    EEMCSetup(g4Reco);
   }
 
   //----------------------------------------
@@ -293,7 +308,7 @@ int G4Setup(const int absorberactive = 0,
   // sPHENIX forward flux return door
   if (Enable::PLUGDOOR)
   {
-    PlugDoor(g4Reco, absorberactive);
+    PlugDoor(g4Reco);
   }
   if (Enable::USER)
   {
@@ -315,16 +330,13 @@ int G4Setup(const int absorberactive = 0,
   return 0;
 }
 
-void ShowerCompress(int verbosity = 0)
+void ShowerCompress()
 {
-  gSystem->Load("libfun4all.so");
-  gSystem->Load("libg4eval.so");
-
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4DstCompressReco *compress = new PHG4DstCompressReco("PHG4DstCompressReco");
   compress->AddHitContainer("G4HIT_PIPE");
-  compress->AddHitContainer("G4HIT_SVTXSUPPORT");
+  compress->AddHitContainer("G4HIT_FIELDCAGE");
   compress->AddHitContainer("G4HIT_CEMC_ELECTRONICS");
   compress->AddHitContainer("G4HIT_CEMC");
   compress->AddHitContainer("G4HIT_ABSORBER_CEMC");

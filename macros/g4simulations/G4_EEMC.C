@@ -23,14 +23,20 @@ R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
 {
-  static bool EEMC = false;
+  bool EEMC = false;
+  bool EEMC_CELL = false;
+  bool EEMC_TOWER = false;
+  bool EEMC_CLUSTER = false;
+  bool EEMC_EVAL = false;
+  bool EEMC_OVERLAPCHECK = false;
+  int EEMC_VERBOSITY = 0;
 }
 
 namespace G4EEMC
 {
-  const int use_projective_geometry = 0;
-  const double Gdz = 18. + 0.0001;
-  const double Gz0 = -170.;
+  int use_projective_geometry = 0;
+  double Gdz = 18. + 0.0001;
+  double Gz0 = -170.;
 }  // namespace G4EEMC
 
 void EEMCInit()
@@ -39,8 +45,10 @@ void EEMCInit()
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4EEMC::Gz0 - G4EEMC::Gdz / 2.);
 }
 
-void EEMCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
+void EEMCSetup(PHG4Reco *g4Reco)
 {
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::EEMC_OVERLAPCHECK;
+
   /** Use dedicated EEMC module */
   PHG4CrystalCalorimeterSubsystem *eemc = new PHG4CrystalCalorimeterSubsystem("EEMC");
 
@@ -64,17 +72,19 @@ void EEMCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
     eemc->SetProjectiveGeometry(mapping_eemc.str(), mapping_eemc_4x4construct.str());
   }
 
-  eemc->OverlapCheck(overlapcheck);
+  eemc->OverlapCheck(OverlapCheck);
 
   // SetAbsorberActive method not implemented
-  //  if (absorberactive)  eemc->SetAbsorberActive();
+  //  if (AbsorberActive)  eemc->SetAbsorberActive();
 
   /* register Ecal module */
   g4Reco->registerSubsystem(eemc);
 }
 
-void EEMC_Cells(int verbosity = 0)
+void EEMC_Cells()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::EEMC_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("EEMCCellReco");
@@ -84,8 +94,10 @@ void EEMC_Cells(int verbosity = 0)
   return;
 }
 
-void EEMC_Towers(int verbosity = 0)
+void EEMC_Towers()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::EEMC_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_eemc;
@@ -128,8 +140,10 @@ void EEMC_Towers(int verbosity = 0)
   se->registerSubsystem(TowerCalibration_EEMC);
 }
 
-void EEMC_Clusters(int verbosity = 0)
+void EEMC_Clusters()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::EEMC_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("EEMCRawClusterBuilderFwd");
@@ -140,8 +154,10 @@ void EEMC_Clusters(int verbosity = 0)
   return;
 }
 
-void EEMC_Eval(std::string outputfile, int verbosity = 0)
+void EEMC_Eval(const std::string &outputfile)
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::EEMC_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("EEMCEVALUATOR", "EEMC", outputfile.c_str());

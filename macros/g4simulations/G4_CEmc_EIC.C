@@ -27,7 +27,14 @@ R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
 {
-  static bool CEMC = false;
+  bool CEMC = false;
+  bool CEMC_ABSORBER = false;
+  bool CEMC_OVERLAPCHECK = false;
+  bool CEMC_CELL = false;
+  bool CEMC_TOWER = false;
+  bool CEMC_CLUSTER = false;
+  bool CEMC_EVAL = false;
+  int CEMC_VERBOSITY = 0;
 }
 
 namespace G4CEMC
@@ -66,13 +73,16 @@ namespace G4CEMC
   // enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
 }  // namespace G4CEMC
 
+// Black hole and size parameters set in CEmc function
 void CEmcInit(const int nslats = 1)
 {
 }
 
-double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
-            const int absorberactive = 0)
+double CEmc(PHG4Reco *g4Reco, double radius)
 {
+  bool AbsorberActive = Enable::ABSORBER || Enable::CEMC_ABSORBER;
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::CEMC_OVERLAPCHECK;
+
   if (radius > 95)
   {
     cout << "inconsistency, radius: " << radius
@@ -81,9 +91,6 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
   }
 
   radius = 95;
-
-  gSystem->Load("libg4detectors.so");
-  gSystem->Load("libg4testbench.so");
 
   PHG4CylinderSubsystem *cemc;
 
@@ -137,8 +144,8 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     cemc->set_double_param("place_z", layer_shift);
 
     cemc->SuperDetector("ABSORBER_CEMC");
-    if (absorberactive) cemc->SetActive();
-    cemc->OverlapCheck(overlapcheck);
+    if (AbsorberActive) cemc->SetActive();
+    cemc->OverlapCheck(OverlapCheck);
 
     g4Reco->registerSubsystem(cemc);
 
@@ -168,7 +175,7 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
     cemc->SuperDetector("CEMC");
 
     cemc->SetActive();
-    cemc->OverlapCheck(overlapcheck);
+    cemc->OverlapCheck(OverlapCheck);
     g4Reco->registerSubsystem(cemc);
 
     radius += G4CEMC::scint_width;
@@ -194,8 +201,8 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
   layer_shift = -1. * ((l2 - l1) / 2.);
   cemc_cyl->set_double_param("place_z", layer_shift);
 
-  if (absorberactive) cemc_cyl->SetActive();
-  cemc_cyl->OverlapCheck(overlapcheck);
+  if (AbsorberActive) cemc_cyl->SetActive();
+  cemc_cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(cemc_cyl);
   // update black hole settings since we have the values here
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, radius + G4CEMC::electronics_width);
@@ -205,8 +212,10 @@ double CEmc(PHG4Reco *g4Reco, double radius, const int crossings,
   return radius;
 }
 
-void CEMC_Cells(int verbosity = 0)
+void CEMC_Cells()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::CEMC_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   PHG4CylinderCellReco *cemc_cells = new PHG4CylinderCellReco("CEMCCYLCELLRECO");
@@ -226,8 +235,10 @@ void CEMC_Cells(int verbosity = 0)
   return;
 }
 
-void CEMC_Towers(int verbosity = 0)
+void CEMC_Towers()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::CEMC_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   RawTowerBuilder *CemcTowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
@@ -262,8 +273,10 @@ void CEMC_Towers(int verbosity = 0)
   return;
 }
 
-void CEMC_Clusters(int verbosity = 0)
+void CEMC_Clusters()
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::CEMC_VERBOSITY);
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
   if (G4CEMC::Cemc_clusterizer == G4CEMC::kCemcTemplateClusterizer)
@@ -275,7 +288,7 @@ void CEMC_Clusters(int verbosity = 0)
     cemc_clusterbuilder->set_threshold_energy(0.030);  // This threshold should be the same as in CEMCprof_Thresh**.root file below
     std::string femc_prof = getenv("CALIBRATIONROOT");
     femc_prof += "/EmcProfile/CEMCprof_Thresh30MeV.root";
-    cemc_clusterbuilder->LoadProfile(femc_prof.c_str());
+    cemc_clusterbuilder->LoadProfile(femc_prof);
     se->registerSubsystem(cemc_clusterbuilder);
   }
   else if (G4CEMC::Cemc_clusterizer == G4CEMC::kCemcGraphClusterizer)
@@ -292,8 +305,9 @@ void CEMC_Clusters(int verbosity = 0)
   }
   return;
 }
-void CEMC_Eval(std::string outputfile, int verbosity = 0)
+void CEMC_Eval(const std::string &outputfile)
 {
+  int verbosity = std::max(Enable::VERBOSITY, Enable::CEMC_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
   CaloEvaluator *eval = new CaloEvaluator("CEMCEVALUATOR", "CEMC", outputfile.c_str());
   eval->Verbosity(verbosity);

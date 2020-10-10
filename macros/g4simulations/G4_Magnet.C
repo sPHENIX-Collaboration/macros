@@ -10,14 +10,19 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 namespace Enable
 {
-  static bool MAGNET = false;
-}
+  bool MAGNET = false;
+  bool MAGNET_ABSORBER = false;
+  bool MAGNET_OVERLAPCHECK = false;
+}  // namespace Enable
 
 namespace G4MAGNET
 {
-  static double magnet_outer_cryostat_wall_radius = 174.5;
-  static double magnet_outer_cryostat_wall_thickness = 2.5;
-  static double magnet_length = 379.;
+  double magnet_outer_cryostat_wall_radius = 174.5;
+  double magnet_outer_cryostat_wall_thickness = 2.5;
+  double magnet_length = 379.;
+  double magfield_rescale = 1;
+  string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root"); 
+
 }  // namespace G4MAGNET
 
 void MagnetInit()
@@ -33,6 +38,9 @@ double Magnet(PHG4Reco* g4Reco,
               const int absorberactive = 0,
               int verbosity = 0)
 {
+  bool AbsorberActive = Enable::ABSORBER || Enable::MAGNET_ABSORBER || absorberactive;
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::MAGNET_OVERLAPCHECK;
+
   double magnet_inner_cryostat_wall_radius = 142;
   double magnet_inner_cryostat_wall_thickness = 1;
   double magnet_coil_radius = 150.8;
@@ -54,7 +62,8 @@ double Magnet(PHG4Reco* g4Reco,
   cyl->set_double_param("thickness", magnet_inner_cryostat_wall_thickness);
   cyl->set_string_param("material", "Al5083");  // use 1 radiation length Al for magnet thickness
   cyl->SuperDetector("MAGNET");
-  if (absorberactive) cyl->SetActive();
+  if (AbsorberActive) cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(cyl);
 
   cyl = new PHG4CylinderSubsystem("MAGNET", 1);
@@ -64,7 +73,8 @@ double Magnet(PHG4Reco* g4Reco,
   cyl->set_double_param("thickness", magnet_coil_thickness);
   cyl->set_string_param("material", "Al5083");  // use 1 radiation length Al for magnet thickness
   cyl->SuperDetector("MAGNET");
-  if (absorberactive) cyl->SetActive();
+  if (AbsorberActive) cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(cyl);
 
   cyl = new PHG4CylinderSubsystem("MAGNET", 2);
@@ -74,7 +84,8 @@ double Magnet(PHG4Reco* g4Reco,
   cyl->set_double_param("thickness", G4MAGNET::magnet_outer_cryostat_wall_thickness);
   cyl->set_string_param("material", "Al5083");  // use 1 radiation length Al for magnet thickness
   cyl->SuperDetector("MAGNET");
-  if (absorberactive) cyl->SetActive();
+  if (AbsorberActive) cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(cyl);
 
   radius = G4MAGNET::magnet_outer_cryostat_wall_radius + G4MAGNET::magnet_outer_cryostat_wall_thickness;  // outside of magnet
