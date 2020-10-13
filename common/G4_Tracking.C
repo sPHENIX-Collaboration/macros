@@ -21,6 +21,8 @@
 #include <trackreco/PHTruthTrackSeeding.h>
 #include <trackreco/PHTruthVertexing.h>
 #include <trackreco/PHCASeeding.h>
+#include <trackreco/PHSiliconTruthTrackSeeding.h>
+#include <trackreco/PHSiliconTpcTrackMatching.h>
 
 #if __cplusplus >= 201703L
 #include <trackreco/PHActsSourceLinks.h>
@@ -53,12 +55,11 @@ namespace G4TRACKING
   //=====================================
   int init_vertexing_min_zvtx_tracks = 2;  // PHInitZvertexing parameter for reducing spurious vertices, use 2 for Pythia8 events, 5 for large multiplicity events
                                            //default seed is PHTpcTracker
-  bool use_hough_seeding = false;          //choose seeding algo
   bool use_ca_seeding = false;
 
   bool use_track_prop = true;              // true for normal track seeding, false to run with truth track seeding instead
 
-  bool useActsFitting = false; // if true, acts KF is run with PHGenFitTrkProp
+  bool useActsFitting = true; // if true, acts KF is run with PHGenFitTrkProp
   bool useActsProp = useActsFitting and false;  // if true, runs Acts CKF with only a seeder
   bool g4eval_use_initial_vertex = false;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
   bool use_primary_vertex = false;         // if true, refit tracks with primary vertex included - adds second node to node tree, adds second evaluator and outputs separate ntuples
@@ -100,6 +101,8 @@ void Tracking_Reco()
       #if __cplusplus >= 201703L
       PHActsSourceLinks *sl = new PHActsSourceLinks();
       sl->Verbosity(0);
+      sl->setMagField(G4MAGNET::magfield);
+      sl->setMagFieldRescale(G4MAGNET::magfield_rescale);
       se->registerSubsystem(sl);
       #endif
     }
@@ -130,18 +133,12 @@ void Tracking_Reco()
       se->registerSubsystem(init_zvtx);
     }
 
-
-
-    if (G4TRACKING::use_hough_seeding)
-    {
-      // find seed tracks using a subset of TPC layers
-      int min_layers = 4;
-      int nlayers_seeds = 12;
-      auto track_seed = new PHHoughSeeding("PHHoughSeeding", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer, nlayers_seeds, min_layers);
-      track_seed->Verbosity(verbosity);
-      se->registerSubsystem(track_seed);
-    }
-    else if (G4TRACKING::use_ca_seeding)
+    /// Create silicon track stubs
+    auto siliconSeeder = new PHSiliconTruthTrackSeeding("PHSiliconTruthTrackSeeding");
+    se->registerSubsystem(siliconSeeder);
+    
+    /// Pick which TPC seeder to use
+    if (G4TRACKING::use_ca_seeding)
     {
       auto seeder = new PHCASeeding("PHCASeeding");
       se->registerSubsystem(seeder);
@@ -158,9 +155,20 @@ void Tracking_Reco()
       se->registerSubsystem(tracker);
     }
 
-    if(!G4TRACKING::useActsProp)
+    if(G4TRACKING::useActsFitting)
       {
-	// Find all clusters associated with each seed track
+	/// Match the silicon and TPC track stubs
+	auto stubMatcher = new PHSiliconTpcTrackMatching("PHSiliconTpcTrackMatching");
+	stubMatcher->set_phi_search_window(0.02);  // tune8 - optimum
+	stubMatcher->set_eta_search_window(0.015);   // tune8 - optimum
+	stubMatcher->Verbosity(0);
+	stubMatcher->set_field_dir(G4MAGNET::magfield_rescale);
+	stubMatcher->set_field(G4MAGNET::magfield);
+	se->registerSubsystem(stubMatcher);
+      }
+    else
+      {
+	// Use GenFit to find all clusters associated with each seed track
 	auto track_prop = new PHGenFitTrkProp("PHGenFitTrkProp", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer, G4MICROMEGAS::n_micromegas_layer);
 	track_prop->Verbosity(verbosity);
 	se->registerSubsystem(track_prop);
@@ -226,7 +234,7 @@ void Tracking_Reco()
 	{
 	  PHActsTrkFitter *actsFit = new PHActsTrkFitter();
 	  actsFit->Verbosity(0);
-	  actsFit->doTimeAnalysis(true);
+	  actsFit->doTimeAnalysis(false);
 	  se->registerSubsystem(actsFit);
 	}
       

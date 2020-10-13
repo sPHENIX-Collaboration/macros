@@ -31,12 +31,17 @@ void ParticleFlow()
 
   // note: assumes topoCluster input already configured
   ParticleFlowReco *pfr = new ParticleFlowReco();
+  pfr->set_energy_match_Nsigma( 1.5 );
+  pfr->set_emulated_efficiency( 1.0 );
   pfr->Verbosity(verbosity);
   se->registerSubsystem(pfr);
 
   JetReco *particleflowjetreco = new JetReco("PARTICLEFLOWJETRECO");
   particleflowjetreco->add_input(new ParticleFlowJetInput());
+  particleflowjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.2), "AntiKt_ParticleFlow_r02");
+  particleflowjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.3), "AntiKt_ParticleFlow_r03");
   particleflowjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.4), "AntiKt_ParticleFlow_r04");
+  particleflowjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.3), "AntiKt_ParticleFlow_r03");
   particleflowjetreco->set_algo_node("ANTIKT");
   particleflowjetreco->set_input_node("PARTICLEFLOW");
   particleflowjetreco->Verbosity(verbosity);

@@ -612,8 +612,12 @@ void Tracking_Reco(int verbosity = 0)
 	track_seed->Verbosity(0);
 	se->registerSubsystem(track_seed);
       }else if(use_ca_seeding){
-	PHCASeeding *ca_seeder = new PHCASeeding();
-	se->registerSubsystem(ca_seeder);
+        auto ca_seed = new PHCASeeding();
+        ca_seed->SetLayerRange(7,55);
+        ca_seed->SetSearchWindow(0.01,0.02); // (eta width, phi width)
+        ca_seed->SetMinHitsPerCluster(2);
+        ca_seed->SetMinClustersPerTrack(20);
+        se->registerSubsystem(ca_seed);
       }else{
 	PHTpcTracker* tracker = new PHTpcTracker("PHTpcTracker");
 	tracker->set_seed_finder_options( 3.0, M_PI / 8, 10, 6.0, M_PI / 8, 5, 1 ); // two-pass CA seed params

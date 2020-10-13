@@ -7,6 +7,7 @@
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
+#include <g4tpc/PHG4TpcEndCapSubsystem.h>
 #include <g4tpc/PHG4TpcSpaceChargeDistortion.h>
 
 #include <g4main/PHG4Reco.h>
@@ -18,11 +19,15 @@
 
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
+R__LOAD_LIBRARY(libg4tpc.so)
 
 namespace Enable
 {
   bool TPC = false;
-}
+  bool TPC_ENDCAP = false;
+  bool TPC_ABSORBER = false;
+  bool TPC_OVERLAPCHECK = false;
+}  // namespace Enable
 
 namespace G4TPC
 {
@@ -48,11 +53,30 @@ namespace G4TPC
 
 }  // namespace G4TPC
 
-void TPCInit(int verbosity = 0)
+void TPCInit()
 {
   //  BlackHoleGeometry::max_radius set at the end of the TPC function
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4TPC::cage_length / 2.);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -G4TPC::cage_length / 2.);
+}
+
+//! TPC end cap, wagon wheel, electronics
+void TPC_Endcaps(PHG4Reco* g4Reco)
+{
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::TPC_OVERLAPCHECK;
+  bool AbsorberActive = Enable::ABSORBER || Enable::TPC_ABSORBER;
+
+  PHG4TpcEndCapSubsystem* tpc_endcap = new PHG4TpcEndCapSubsystem("TPC_ENDCAP");
+  tpc_endcap->SuperDetector("TPC_ENDCAP");
+
+  if (AbsorberActive) tpc_endcap->SetActive();
+  tpc_endcap->OverlapCheck(OverlapCheck);
+
+  //  tpc_endcap->set_int_param("construction_verbosity", 2);
+
+  g4Reco->registerSubsystem(tpc_endcap);
+
+  return;
 }
 
 double TPC(PHG4Reco* g4Reco, double radius,
@@ -119,8 +143,13 @@ double TPC(PHG4Reco* g4Reco, double radius,
 
   radius += G4TPC::cage_thickness;
 
+  if (Enable::TPC_ENDCAP)
+  {
+    TPC_Endcaps(g4Reco);
+  }
   // update now that we know the outer radius
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, radius);
   return radius;
 }
+
 #endif
