@@ -86,7 +86,7 @@ namespace SARTRE
 
 namespace PILEUP
 {
-  string pileupfile = "/sphenix/sim/sim01/sHijing/sHijing_0-12fm.dat";
+  string pileupfile = "/sphenix/sim/sim01/sphnxpro/sHijing_HepMC/sHijing_0-12fm.dat";
   double TpcDriftVelocity = 8.0 / 1000.0;
 }  // namespace PILEUP
 
