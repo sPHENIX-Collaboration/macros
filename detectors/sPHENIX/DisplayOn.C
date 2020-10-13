@@ -1,5 +1,4 @@
-#ifndef MACRO_DISPLAYON_C
-#define MACRO_DISPLAYON_C
+#pragma once
 
 #include <g4main/PHG4Reco.h>
 
@@ -34,7 +33,7 @@ PHG4Reco *QTGui()
 // start up the visualization, the next event will
 // be displayed. Do not execute this macro
 // before PHG4Reco was registered with Fun4All
-PHG4Reco * DisplayOn(const char *mac = "vis.mac")
+PHG4Reco *DisplayOn(const char *mac = "vis.mac")
 {
   char cmd[100];
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -61,4 +60,3 @@ void displaycmd()
   cout << "set background color:" << endl;
   cout << " g4->ApplyCommand(\"/vis/viewer/set/background white\")" << endl;
 }
-#endif
