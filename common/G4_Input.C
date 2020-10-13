@@ -117,6 +117,12 @@ void InputInit()
     cout << "Reading Hits and Embedding into background at the same time is not supported" << endl;
     gSystem->Exit(1);
   }
+  if (Input::READHITS && (Input::PYTHIA6 || Input::PYTHIA8 || Input::SARTRE || Input::SIMPLE || Input::GUN || Input::UPSILON || Input::HEPMC))
+  {
+    cout << "Reading Hits and running G4 simultanously is not supported" << endl;
+    gSystem->Exit(1);
+  }
+
   if (Input::PYTHIA6 && Input::PYTHIA8)
   {
     cout << "Pythia6 and Pythia8 cannot be run together - might be possible but needs R&D" << endl;
