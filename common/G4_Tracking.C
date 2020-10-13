@@ -91,7 +91,7 @@ void TrackingInit()
 #if __cplusplus < 201703L
   std::cout << "Cannot run tracking without gcc-8 environment. Please run:" << std::endl;
   std::cout << "source /cvmfs/sphenix.sdcc.bnl.gov/gcc-8.3/opt/sphenix/core/bin/sphenix_setup.csh -n" << std::endl;
-  gSystem->Exit(1);
+  gSystem->Exit(0);
 #endif
 
   if (!Enable::MICROMEGAS)
