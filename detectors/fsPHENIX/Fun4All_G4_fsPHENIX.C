@@ -86,7 +86,7 @@ int Fun4All_G4_fsPHENIX(
   //  Input::GUN = true;
   //Input::GUN_VERBOSITY = 0;
 
-  Input::HEPMC = true;
+//  Input::HEPMC = true;
   INPUTHEPMC::filename = inputFile;
 
   // Event pile up simulation with collision rate in Hz MB collisions.
