@@ -89,9 +89,31 @@ namespace G4TRACKING
 void TrackingInit()
 {
 #if __cplusplus < 201703L
-  std::cout << "Cannot run tracking without gcc-8 environment. Please run:" << std::endl;
-  std::cout << "source /cvmfs/sphenix.sdcc.bnl.gov/gcc-8.3/opt/sphenix/core/bin/sphenix_setup.csh -n" << std::endl;
-  gSystem->Exit(0);
+  std::cout << std::endl << "Cannot run tracking without gcc-8.3 (c++17) environment. Please run:" << std::endl;
+//
+// the following gymnastics is needed to print out the correct shell script to source
+// We have three cvmfs volumes:
+//          /cvmfs/sphenix.sdcc.bnl.gov (BNL internal)
+//          /cvmfs/sphenix.opensciencegrid.org (worldwide readable)
+//          /cvmfs/eic.opensciencegrid.org (Fun4All@EIC)
+// We support tcsh and bash
+//
+  std::string current_opt = getenv("OPT_SPHENIX");
+  std::string x8664_sl7 = "x8664_sl7";
+  std::string gcc83 = "gcc-8.3";
+  size_t x8664pos = current_opt.find(x8664_sl7);
+  current_opt.replace(x8664pos,x8664_sl7.size(),gcc83);
+  std::string setupscript = "sphenix_setup";
+  std::string setupscript_ext = ".csh";
+  if (current_opt.find("eic") != string::npos)
+    setupscript = "eic_setup";
+  std::string shell = getenv("SHELL");
+  if (shell.find("tcsh") == string::npos)
+    setupscript_ext = ".sh";
+  std::cout << "source " << current_opt << "/bin/"
+            << setupscript << setupscript_ext << " -n" << std::endl;
+  std::cout << "to set it up and try again" << std::endl;
+  gSystem->Exit(1);
 #endif
 
   if (!Enable::MICROMEGAS)
