@@ -269,8 +269,10 @@ void Tracking_Reco()
 	    silicon_match->set_seeder(true);    // defaults to PHTpcTracker seeding, use true for PHCASeeding
 	  silicon_match->set_field(G4MAGNET::magfield);
 	  silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
-	  silicon_match->set_phi_search_window(0.02);  // tune8 - optimum
-	  silicon_match->set_eta_search_window(0.015);   // tune8 - optimum
+	  // default tuned values are 0.02 and 0.015
+	  silicon_match->set_phi_search_window(0.10);  
+	  silicon_match->set_eta_search_window(0.15); 
+	  silicon_match->set_test_windows(true);
 	  se->registerSubsystem(silicon_match);
 	}
       
@@ -283,12 +285,12 @@ void Tracking_Reco()
 	  PHMicromegasTpcTrackMatching *mm_match = new PHMicromegasTpcTrackMatching();
 	  mm_match ->Verbosity(0);
 	  // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
-	  mm_match-> set_rphi_search_window_lyr1(0.2);
+	  mm_match-> set_rphi_search_window_lyr1(0.6);
 	  mm_match-> set_rphi_search_window_lyr2(13.0);
 	  mm_match-> set_z_search_window_lyr1(26.0);
-	  mm_match-> set_z_search_window_lyr2(0.2);
+	  mm_match-> set_z_search_window_lyr2(0.6);
 	  mm_match->set_min_tpc_layer(38);   // layer in TPC to start projection fit
-	  mm_match->print_test_windows_data(false);   // normally false
+	  mm_match->set_test_windows(true);   // normally false
 	  se->registerSubsystem(mm_match);
 	}
     }
@@ -338,7 +340,7 @@ void Tracking_Reco()
 	  PHActsTrkFitter *actsFit = new PHActsTrkFitter();
 	  actsFit->Verbosity(0);
 	  actsFit->doTimeAnalysis(true);
-	  se->registerSubsystem(actsFit);
+	  //se->registerSubsystem(actsFit);
 	}
 #endif   
     }
@@ -381,7 +383,7 @@ void Tracking_Eval(const std::string& outputfile)
       ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
       actsEval->Verbosity(0);
       actsEval->setEvalCKF(false);
-      se->registerSubsystem(actsEval);
+      //se->registerSubsystem(actsEval);
 #endif
     }
 
