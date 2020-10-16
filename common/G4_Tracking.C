@@ -330,47 +330,47 @@ void Tracking_Reco()
     geom->setMagField(G4MAGNET::magfield);
     geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
     se->registerSubsystem(geom);
-      
+    
     /// Always run PHActsSourceLinks and PHActsTracks first, to convert TrkRClusters and SvtxTracks to the Acts equivalent
     PHActsSourceLinks *sl = new PHActsSourceLinks();
     sl->Verbosity(0);
     sl->setMagField(G4MAGNET::magfield);
     sl->setMagFieldRescale(G4MAGNET::magfield_rescale);
     se->registerSubsystem(sl);
-      
+    
     PHActsTracks *actsTracks = new PHActsTracks();
     actsTracks->Verbosity(0);
     se->registerSubsystem(actsTracks);
-      
+    
     /// Use either PHActsTrkFitter to run the ACTS
     /// KF track fitter, or PHActsTrkProp to run the ACTS Combinatorial 
     /// Kalman Filter which runs track finding and track fitting
     if(G4TRACKING::useActsProp)
-	  {
-	   // Not fully functional yet
-	   PHActsTrkProp *actsProp = new PHActsTrkProp();
-	   actsProp->Verbosity(0);
-	   actsProp->doTimeAnalysis(true);
-	   actsProp->resetCovariance(true);
-	   actsProp->setVolumeMaxChi2(7,60); /// MVTX 
-	   actsProp->setVolumeMaxChi2(9,60); /// INTT
-	   actsProp->setVolumeMaxChi2(11,60); /// TPC
-	   actsProp->setVolumeLayerMaxChi2(9, 2, 100); /// INTT first few layers
-	   actsProp->setVolumeLayerMaxChi2(9, 4, 100);
-	   actsProp->setVolumeLayerMaxChi2(11,2, 200); /// TPC first few layers 
-	   actsProp->setVolumeLayerMaxChi2(11,4, 200);
-	  
-	   se->registerSubsystem(actsProp);
-	  }
-  else
-	  {
-	    PHActsTrkFitter *actsFit = new PHActsTrkFitter();
-	    actsFit->Verbosity(0);
-	    actsFit->doTimeAnalysis(true);
-	    se->registerSubsystem(actsFit);
-	  }
+      {
+	// Not fully functional yet
+	PHActsTrkProp *actsProp = new PHActsTrkProp();
+	actsProp->Verbosity(0);
+	actsProp->doTimeAnalysis(true);
+	actsProp->resetCovariance(true);
+	actsProp->setVolumeMaxChi2(7,60); /// MVTX 
+	actsProp->setVolumeMaxChi2(9,60); /// INTT
+	actsProp->setVolumeMaxChi2(11,60); /// TPC
+	actsProp->setVolumeLayerMaxChi2(9, 2, 100); /// INTT first few layers
+	actsProp->setVolumeLayerMaxChi2(9, 4, 100);
+	actsProp->setVolumeLayerMaxChi2(11,2, 200); /// TPC first few layers 
+	actsProp->setVolumeLayerMaxChi2(11,4, 200);
+	
+	se->registerSubsystem(actsProp);
+      }
+    else
+      {
+	PHActsTrkFitter *actsFit = new PHActsTrkFitter();
+	actsFit->Verbosity(0);
+	actsFit->doTimeAnalysis(false);
+	se->registerSubsystem(actsFit);
+      }
 #endif   
-
+    
   }
 
   return;
