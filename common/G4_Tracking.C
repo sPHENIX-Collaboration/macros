@@ -53,6 +53,10 @@ namespace Enable
 
 namespace G4TRACKING
 {
+  // Space Charge calibration flag
+  bool SC_CALIBMODE = true;
+  double SC_COLLISIONRATE = 50e3;
+
   // Tracking reconstruction setup parameters and flags
   //=====================================
 
@@ -262,42 +266,67 @@ void Tracking_Reco()
 	  silicon_seeding->Verbosity(0);
 	  se->registerSubsystem(silicon_seeding);
 	  
-	  // Match the TPC track stubs from Cthe A seeder to silicon track stubs from PHSiliconTruthTrackSeeding
+	  // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
 	  PHSiliconTpcTrackMatching *silicon_match = new PHSiliconTpcTrackMatching();
 	  silicon_match ->Verbosity(0);
 	  if(!G4TRACKING::use_PHTpcTracker_seeding)
-	    silicon_match->set_seeder(true);    // defaults to PHTpcTracker seeding, use true for PHCASeeding
+	    silicon_match->set_seeder(true);    // module defaults to PHCASeeding, use true for PHTpcTracker seeding
 	  silicon_match->set_field(G4MAGNET::magfield);
 	  silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
-	  // default tuned values are 0.02 and 0.015
-	  silicon_match->set_phi_search_window(0.10);  
-	  silicon_match->set_eta_search_window(0.15); 
-	  silicon_match->set_test_windows(true);
+	  silicon_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
+	  if(G4TRACKING::SC_CALIBMODE)
+	    {
+	      silicon_match->set_collision_rate(G4TRACKING::SC_COLLISIONRATE);
+	      // search windows for initial matching with distortions  default tuned values are 0.01 and 0.004
+	      silicon_match->set_phi_search_window(0.02);  
+	      silicon_match->set_eta_search_window(0.004); 
+	    }
+	  else
+	    {
+	      // after distortion corrections, default tuned values are 0.01 and 0.004
+	      silicon_match->set_phi_search_window(0.01);  
+	      silicon_match->set_eta_search_window(0.004); 
+	    }
+	  silicon_match->set_test_windows_printout(true);
 	  se->registerSubsystem(silicon_match);
 	}
-      
-      // Associate Micromegas clusters with the tracks
-      if(G4MICROMEGAS::n_micromegas_layer > 0)
-	{
-	  std::cout << "      Using Micromegas matching " << std::endl;
-	  
-	  // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-	  PHMicromegasTpcTrackMatching *mm_match = new PHMicromegasTpcTrackMatching();
-	  mm_match ->Verbosity(0);
-	  // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
-	  mm_match-> set_rphi_search_window_lyr1(0.6);
-	  mm_match-> set_rphi_search_window_lyr2(13.0);
-	  mm_match-> set_z_search_window_lyr1(26.0);
-	  mm_match-> set_z_search_window_lyr2(0.6);
-	  mm_match->set_min_tpc_layer(38);   // layer in TPC to start projection fit
-	  mm_match->set_test_windows(true);   // normally false
-	  se->registerSubsystem(mm_match);
-	}
+     
+     // Associate Micromegas clusters with the tracks
+     if(G4MICROMEGAS::n_micromegas_layer > 0)
+       {
+	 std::cout << "      Using Micromegas matching " << std::endl;
+	 
+	 // Match TPC track stubs from CA seeder to clusters in the micromegas layers
+	 PHMicromegasTpcTrackMatching *mm_match = new PHMicromegasTpcTrackMatching();
+	 mm_match ->Verbosity(0);
+	 mm_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
+	 if(G4TRACKING::SC_CALIBMODE)
+	   {
+	     // calibration pass with distorted tracks
+	     mm_match->set_collision_rate(G4TRACKING::SC_COLLISIONRATE);
+	     // configuration is potentially with different search windows
+	     mm_match-> set_rphi_search_window_lyr1(0.15);
+	     mm_match-> set_rphi_search_window_lyr2(13.0);
+	     mm_match-> set_z_search_window_lyr1(26.0);
+	     mm_match-> set_z_search_window_lyr2(0.2);
+	   }
+	 else
+	   {
+	     // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
+	     mm_match-> set_rphi_search_window_lyr1(0.15);
+	     mm_match-> set_rphi_search_window_lyr2(13.0);
+	     mm_match-> set_z_search_window_lyr1(26.0);
+	     mm_match-> set_z_search_window_lyr2(0.2);
+	   }
+	 mm_match->set_min_tpc_layer(38);   // layer in TPC to start projection fit
+	 mm_match->set_test_windows_printout(true);   // normally false
+	 se->registerSubsystem(mm_match);
+       }
     }
-
+  
   // Final fitting of tracks using Acts Kalman Filter
   //=================================    
-  if(!G4TRACKING::use_Genfit)
+  if(!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
     {
       std::cout << "   Using Acts track fitting " << std::endl;
 
@@ -340,7 +369,7 @@ void Tracking_Reco()
 	  PHActsTrkFitter *actsFit = new PHActsTrkFitter();
 	  actsFit->Verbosity(0);
 	  actsFit->doTimeAnalysis(true);
-	  //se->registerSubsystem(actsFit);
+	  se->registerSubsystem(actsFit);
 	}
 #endif   
     }
@@ -377,13 +406,13 @@ void Tracking_Eval(const std::string& outputfile)
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
-  if(!G4TRACKING::use_Genfit)
+  if(!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
     {
 #if __cplusplus >= 201703L
       ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
       actsEval->Verbosity(0);
       actsEval->setEvalCKF(false);
-      //se->registerSubsystem(actsEval);
+      se->registerSubsystem(actsEval);
 #endif
     }
 
