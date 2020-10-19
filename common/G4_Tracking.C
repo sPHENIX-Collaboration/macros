@@ -348,10 +348,10 @@ void Tracking_Reco()
 	 se->registerSubsystem(mm_match);
        }
     }
- 
+
   // Final fitting of tracks using Acts Kalman Filter
   //=================================
-  if (!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
+  if (!G4TRACKING::use_Genfit)
     {
     std::cout << "   Using Acts track fitting " << std::endl;
 
@@ -373,7 +373,7 @@ void Tracking_Reco()
     PHActsTracks *actsTracks = new PHActsTracks();
     actsTracks->Verbosity(0);
     se->registerSubsystem(actsTracks);
- 
+
     PHActsTrkFitter *actsFit = new PHActsTrkFitter();
     actsFit->Verbosity(10);
     actsFit->doTimeAnalysis(false);
