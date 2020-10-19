@@ -344,35 +344,15 @@ void Tracking_Reco()
 	     mm_match-> set_z_search_window_lyr2(0.2);
 	   }
 	 mm_match->set_min_tpc_layer(38);   // layer in TPC to start projection fit
-	 mm_match->set_test_windows_printout(true);   // normally false
+	 mm_match->set_test_windows_printout(false);   // normally false
 	 se->registerSubsystem(mm_match);
        }
     }
-  
-  // Final fitting of tracks using Acts Kalman Filter
-  //=================================    
-  if(!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
-    {
-      std::cout << "      Using Micromegas matching " << std::endl;
-
-      // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-      PHMicromegasTpcTrackMatching* mm_match = new PHMicromegasTpcTrackMatching();
-      mm_match->Verbosity(0);
-      // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
-      mm_match->set_rphi_search_window_lyr1(0.2);
-      mm_match->set_rphi_search_window_lyr2(13.0);
-      mm_match->set_z_search_window_lyr1(26.0);
-      mm_match->set_z_search_window_lyr2(0.2);
-      mm_match->set_min_tpc_layer(38);           // layer in TPC to start projection fit
-      mm_match->print_test_windows_data(false);  // normally false
-      se->registerSubsystem(mm_match);
-    }
-  }
-
+ 
   // Final fitting of tracks using Acts Kalman Filter
   //=================================
-  if (!G4TRACKING::use_Genfit)
-  {
+  if (!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
+    {
     std::cout << "   Using Acts track fitting " << std::endl;
 
 #if __cplusplus >= 201703L
@@ -393,34 +373,20 @@ void Tracking_Reco()
     PHActsTracks *actsTracks = new PHActsTracks();
     actsTracks->Verbosity(0);
     se->registerSubsystem(actsTracks);
-    
-    /// Use either PHActsTrkFitter to run the ACTS
-    /// KF track fitter, or PHActsTrkProp to run the ACTS Combinatorial 
-    /// Kalman Filter which runs track finding and track fitting
-    if(G4TRACKING::useActsProp)
+ 
+    PHActsTrkFitter *actsFit = new PHActsTrkFitter();
+    actsFit->Verbosity(10);
+    actsFit->doTimeAnalysis(false);
+    /// If running with distortions, fit only the silicon+MMs first
+    actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
+    se->registerSubsystem(actsFit);
+      
+
+    if(G4TRACKING::SC_CALIBMODE)
       {
-	// Not fully functional yet
-	PHActsTrkProp *actsProp = new PHActsTrkProp();
-	actsProp->Verbosity(0);
-	actsProp->doTimeAnalysis(true);
-	actsProp->resetCovariance(true);
-	actsProp->setVolumeMaxChi2(7,60); /// MVTX 
-	actsProp->setVolumeMaxChi2(9,60); /// INTT
-	actsProp->setVolumeMaxChi2(11,60); /// TPC
-	actsProp->setVolumeLayerMaxChi2(9, 2, 100); /// INTT first few layers
-	actsProp->setVolumeLayerMaxChi2(9, 4, 100);
-	actsProp->setVolumeLayerMaxChi2(11,2, 200); /// TPC first few layers 
-	actsProp->setVolumeLayerMaxChi2(11,4, 200);
-	
-	se->registerSubsystem(actsProp);
+	/// run tpc residual determination with silicon+MM track fit
       }
-    else
-      {
-	PHActsTrkFitter *actsFit = new PHActsTrkFitter();
-	actsFit->Verbosity(0);
-	actsFit->doTimeAnalysis(false);
-	se->registerSubsystem(actsFit);
-      }
+
 
 #endif   
     
