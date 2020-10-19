@@ -458,15 +458,6 @@ void Tracking_Eval(const std::string& outputfile)
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
-<<<<<<< HEAD
-  if (!G4TRACKING::use_Genfit)
-  {
-#if __cplusplus >= 201703L
-    ActsEvaluator* actsEval = new ActsEvaluator(outputfile + "_acts.root", eval);
-    actsEval->Verbosity(0);
-    actsEval->setEvalCKF(false);
-    se->registerSubsystem(actsEval);
-=======
   if(!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
     {
 #if __cplusplus >= 201703L
@@ -474,7 +465,6 @@ void Tracking_Eval(const std::string& outputfile)
       actsEval->Verbosity(0);
       actsEval->setEvalCKF(false);
       se->registerSubsystem(actsEval);
->>>>>>> 5d6ac83abb2420c41ec4da17a7fb63877036711d
 #endif
   }
 
