@@ -73,7 +73,6 @@ namespace G4TRACKING
   bool use_truth_track_seeding = false;    // false for normal track seeding, use true to run with truth track seeding instead  ***** WORKS FOR GENFIT ONLY
   bool use_Genfit = false;                 // if false, acts KF is run on proto tracks assembled above, if true, use Genfit track propagation and fitting
   bool use_init_vertexing = false;         // false for using smeared truth vertex, set to true to get initial vertex from MVTX hits using PHInitZVertexing
-  bool useActsProp = false;                // if true, runs Acts CKF with only a seeder  ***** NOT FULLY FUNCTIONAL YET
   bool g4eval_use_initial_vertex = false;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
   bool use_primary_vertex = false;         // refit Genfit tracks (only) with primary vertex included - adds second node to node tree, adds second evaluator, outputs separate ntuples
 
@@ -342,33 +341,11 @@ void Tracking_Reco()
     actsTracks->Verbosity(0);
     se->registerSubsystem(actsTracks);
     
-    /// Use either PHActsTrkFitter to run the ACTS
-    /// KF track fitter, or PHActsTrkProp to run the ACTS Combinatorial 
-    /// Kalman Filter which runs track finding and track fitting
-    if(G4TRACKING::useActsProp)
-      {
-	// Not fully functional yet
-	PHActsTrkProp *actsProp = new PHActsTrkProp();
-	actsProp->Verbosity(0);
-	actsProp->doTimeAnalysis(true);
-	actsProp->resetCovariance(true);
-	actsProp->setVolumeMaxChi2(7,60); /// MVTX 
-	actsProp->setVolumeMaxChi2(9,60); /// INTT
-	actsProp->setVolumeMaxChi2(11,60); /// TPC
-	actsProp->setVolumeLayerMaxChi2(9, 2, 100); /// INTT first few layers
-	actsProp->setVolumeLayerMaxChi2(9, 4, 100);
-	actsProp->setVolumeLayerMaxChi2(11,2, 200); /// TPC first few layers 
-	actsProp->setVolumeLayerMaxChi2(11,4, 200);
-	
-	se->registerSubsystem(actsProp);
-      }
-    else
-      {
-	PHActsTrkFitter *actsFit = new PHActsTrkFitter();
-	actsFit->Verbosity(0);
-	actsFit->doTimeAnalysis(false);
-	se->registerSubsystem(actsFit);
-      }
+    PHActsTrkFitter *actsFit = new PHActsTrkFitter();
+    actsFit->Verbosity(0);
+    actsFit->doTimeAnalysis(false);
+    se->registerSubsystem(actsFit);
+      
 #endif   
     
   }
