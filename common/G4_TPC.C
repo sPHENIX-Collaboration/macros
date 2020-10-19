@@ -43,6 +43,15 @@ namespace G4TPC
   int n_tpc_layer_outer = 16;
   int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
   double tpc_outer_radius = 77. + 2.;
+
+  // distortions
+  bool ENABLE_DISTORTIONS = true;
+  std::string distortion_filename = "fluct_average.rev3.1side.3d.file0.h_negz.real_B1.4_E-400.0.ross_phi1_sphenix_phislice_lookup_r26xp40xz40.distortion_map.hist.root";
+  unsigned int distortion_coordinates =
+    PHG4TpcElectronDrift::COORD_PHI|
+    PHG4TpcElectronDrift::COORD_R|
+    PHG4TpcElectronDrift::COORD_Z;
+
 }  // namespace G4TPC
 
 void TPCInit()
@@ -102,24 +111,24 @@ double TPC(PHG4Reco* g4Reco,
   tpc->SetActive();
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);  // 1cm steps
-
+  
   if (AbsorberActive)
-  {
-    tpc->SetAbsorberActive();
-  }
+    {
+      tpc->SetAbsorberActive();
+    }
   tpc->OverlapCheck(OverlapCheck);
-
+  
   g4Reco->registerSubsystem(tpc);
-
+  
   if (Enable::TPC_ENDCAP)
-  {
-    TPC_Endcaps(g4Reco);
-  }
-
+    {
+      TPC_Endcaps(g4Reco);
+    }
+  
   radius = G4TPC::tpc_outer_radius;
-
+  
   radius += no_overlapp;
-
+  
   return radius;
 }
 
@@ -140,11 +149,16 @@ void TPC_Cells()
   PHG4TpcElectronDrift* edrift = new PHG4TpcElectronDrift();
   edrift->Detector("TPC");
   edrift->Verbosity(verbosity);
+  edrift->set_enable_distortions( G4TPC::ENABLE_DISTORTIONS);
+  if( G4TPC::ENABLE_DISTORTIONS )
+    {
+      edrift->set_distortion_filename( G4TPC::distortion_filename );  
+      edrift->set_coordinates( G4TPC::distortion_coordinates );
+    }
+  
   // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
   // They represent effects not due to ideal gas properties and ideal readout plane behavior
   // defaults are 0.085 and 0.105, they can be changed here to get a different resolution
-  //edrift->set_double_param("added_smear_trans",0.085);
-  //edrift->set_double_param("added_smear_long",0.105);
   edrift->registerPadPlane(padplane);
   se->registerSubsystem(edrift);
 

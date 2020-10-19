@@ -344,7 +344,7 @@ void Tracking_Reco()
 	     mm_match-> set_z_search_window_lyr2(0.2);
 	   }
 	 mm_match->set_min_tpc_layer(38);   // layer in TPC to start projection fit
-	 mm_match->set_test_windows_printout(false);   // normally false 
+	 mm_match->set_test_windows_printout(true);   // normally false 
 	 se->registerSubsystem(mm_match);
        }
     }
