@@ -344,14 +344,14 @@ void Tracking_Reco()
 	     mm_match-> set_z_search_window_lyr2(0.2);
 	   }
 	 mm_match->set_min_tpc_layer(38);   // layer in TPC to start projection fit
-	 mm_match->set_test_windows_printout(false);   // normally false
+	 mm_match->set_test_windows_printout(false);   // normally false 
 	 se->registerSubsystem(mm_match);
        }
     }
 
   // Final fitting of tracks using Acts Kalman Filter
   //=================================
-  if (!G4TRACKING::use_Genfit)
+  if (!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
     {
     std::cout << "   Using Acts track fitting " << std::endl;
 
@@ -378,7 +378,8 @@ void Tracking_Reco()
     actsFit->Verbosity(10);
     actsFit->doTimeAnalysis(false);
     /// If running with distortions, fit only the silicon+MMs first
-    actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
+    //actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
+    actsFit->fitSiliconMMs(true);
     se->registerSubsystem(actsFit);
       
 
