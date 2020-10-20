@@ -35,6 +35,7 @@
 #include <trackreco/PHActsTrkProp.h>
 #include <trackreco/PHActsVertexFinder.h>
 #include <trackreco/PHActsVertexFitter.h>
+#include <trackreco/PHTpcResiduals.h>
 #endif
 
 #include <trackbase/TrkrHitTruthAssoc.h>
@@ -312,7 +313,7 @@ void Tracking_Reco()
 	      silicon_match->set_phi_search_window(0.01);  
 	      silicon_match->set_eta_search_window(0.004); 
 	    }
-	  silicon_match->set_test_windows_printout(true);
+	  silicon_match->set_test_windows_printout(false);
 	  se->registerSubsystem(silicon_match);
 	}
      
@@ -344,14 +345,14 @@ void Tracking_Reco()
 	     mm_match-> set_z_search_window_lyr2(0.2);
 	   }
 	 mm_match->set_min_tpc_layer(38);   // layer in TPC to start projection fit
-	 mm_match->set_test_windows_printout(true);   // normally false 
+	 mm_match->set_test_windows_printout(false);   // normally false 
 	 se->registerSubsystem(mm_match);
        }
     }
 
   // Final fitting of tracks using Acts Kalman Filter
   //=================================
-  if (!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
+  if (!G4TRACKING::use_Genfit)
     {
     std::cout << "   Using Acts track fitting " << std::endl;
 
@@ -375,17 +376,20 @@ void Tracking_Reco()
     se->registerSubsystem(actsTracks);
 
     PHActsTrkFitter *actsFit = new PHActsTrkFitter();
-    actsFit->Verbosity(10);
+    actsFit->Verbosity(0);
     actsFit->doTimeAnalysis(false);
     /// If running with distortions, fit only the silicon+MMs first
-    //actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-    actsFit->fitSiliconMMs(true);
+    actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
     se->registerSubsystem(actsFit);
       
 
     if(G4TRACKING::SC_CALIBMODE)
       {
 	/// run tpc residual determination with silicon+MM track fit
+	PHTpcResiduals *residuals = new PHTpcResiduals();
+	residuals->Verbosity(0);
+	se->registerSubsystem(residuals);
+
       }
 
 
