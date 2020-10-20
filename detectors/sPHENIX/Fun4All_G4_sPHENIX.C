@@ -128,6 +128,7 @@ int Fun4All_G4_sPHENIX(
     INPUTGENERATOR::SimpleEventGenerator->set_eta_range(-1, 1);
     INPUTGENERATOR::SimpleEventGenerator->set_phi_range(-M_PI, M_PI);
     INPUTGENERATOR::SimpleEventGenerator->set_pt_range(0.1, 20.);
+    INPUTGENERATOR::SimpleEventGenerator->Embed(2);
   }
   // Upsilons
   if (Input::UPSILON)
