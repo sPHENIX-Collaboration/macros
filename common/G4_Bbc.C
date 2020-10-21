@@ -2,8 +2,9 @@
 #define MACRO_G4BBC_C
 
 #include <g4bbc/BbcVertexFastSimReco.h>
-
 #include <fun4all/Fun4AllServer.h>
+#include <g4detectors/PHG4BbcSubsystem.h>
+
 
 R__LOAD_LIBRARY(libg4bbc.so)
 
@@ -18,7 +19,11 @@ namespace G4BBC
   double t_smearing = 0.002;  // 20ps timing resolution
 }  // namespace G4BBC
 
-void BbcInit() {}
+void BbcInit()
+{
+  cout << "In BbcInit()" << endl;
+  // Nothing to Init for now
+}
 
 void Bbc_Reco(int verbosity = 0)
 {
@@ -28,10 +33,15 @@ void Bbc_Reco(int verbosity = 0)
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  BbcVertexFastSimReco* bbcvertex = new BbcVertexFastSimReco();
-  bbcvertex->set_z_smearing(G4BBC::z_smearing);  // 6 mm, temporarily perfect for TPC initial vertexing
-  bbcvertex->set_t_smearing(G4BBC::t_smearing);  // 20 ps
-  se->registerSubsystem(bbcvertex);
+  // disable fast sim for now
+  int do_bbcfast = 0;
+  if ( do_bbcfast )
+  {
+    BbcVertexFastSimReco* bbcvertex = new BbcVertexFastSimReco();
+    bbcvertex->set_z_smearing(G4BBC::z_smearing);  // 6 mm, temporarily perfect for TPC initial vertexing
+    bbcvertex->set_t_smearing(G4BBC::t_smearing);  // 20 ps
+    se->registerSubsystem(bbcvertex);
+  }
 
   return;
 }
