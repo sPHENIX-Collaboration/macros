@@ -182,6 +182,56 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(cyl);
 
+  /* north aluminum pipe (conical part) [vacuum] */
+  cone = new PHG4ConeSubsystem("VAC_N_AL_PIPE_CONE", 10);
+  cone->SetR1(0., G4PIPE::al_pipe_radius);
+  cone->SetR2(0., G4PIPE::al_pipe_ext_radius);
+  cone->SetZlength(G4PIPE::al_pipe_cone_length / 2);
+  cone->SetPlaceZ(cone_position + no_overlapp);
+  cone->SetMaterial("G4_Galactic");
+  cone->SuperDetector("PIPE");
+  if (AbsorberActive) cone->SetActive();
+  cone->OverlapCheck(OverlapCheck);
+  g4Reco->registerSubsystem(cone);
+
+  /* north aluminum pipe (extension) [vacuum] */
+  cyl = new PHG4CylinderSubsystem("VAC_N_AL_PIPE_EXT", 11);
+  cyl->set_double_param("place_z", ext_position + no_overlapp);
+  cyl->set_double_param("radius", 0.);
+  cyl->set_int_param("lengthviarapidity", 0);
+  cyl->set_double_param("length", G4PIPE::al_pipe_ext_length);
+  cyl->set_string_param("material", "G4_Galactic");
+  cyl->set_double_param("thickness", G4PIPE::al_pipe_ext_radius);
+  cyl->SuperDetector("PIPE");
+  if (AbsorberActive) cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
+  g4Reco->registerSubsystem(cyl);
+
+  /* south aluminum pipe (conical part) [vacuum] */
+  cone = new PHG4ConeSubsystem("VAC_S_AL_PIPE_CONE", 12);
+  cone->SetR1(0., G4PIPE::al_pipe_ext_radius);
+  cone->SetR2(0., G4PIPE::al_pipe_radius);
+  cone->SetZlength(G4PIPE::al_pipe_cone_length / 2);
+  cone->SetPlaceZ(-cone_position - no_overlapp);
+  cone->SetMaterial("G4_Galactic");
+  cone->SuperDetector("PIPE");
+  if (AbsorberActive) cone->SetActive();
+  cone->OverlapCheck(OverlapCheck);
+  g4Reco->registerSubsystem(cone);
+
+  /* south aluminum pipe (extension) [vacuum] */
+  cyl = new PHG4CylinderSubsystem("VAC_S_AL_PIPE_EXT", 13);
+  cyl->set_double_param("place_z", -ext_position - no_overlapp);
+  cyl->set_double_param("radius", 0.);
+  cyl->set_int_param("lengthviarapidity", 0);
+  cyl->set_double_param("length", G4PIPE::al_pipe_ext_length);
+  cyl->set_string_param("material", "G4_Galactic");
+  cyl->set_double_param("thickness", G4PIPE::al_pipe_ext_radius);
+  cyl->SuperDetector("PIPE");
+  if (AbsorberActive) cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
+  g4Reco->registerSubsystem(cyl);
+
   radius = G4PIPE::al_pipe_ext_radius + G4PIPE::al_pipe_thickness;
 
   if (verbosity > 0)
