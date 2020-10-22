@@ -1,7 +1,7 @@
 #ifndef MACRO_G4FEMCEIC_C
 #define MACRO_G4FEMCEIC_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <caloreco/RawClusterBuilderFwd.h>
 #include <caloreco/RawClusterBuilderTemplate.h>

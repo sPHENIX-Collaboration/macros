@@ -1,7 +1,7 @@
 #ifndef MACRO_G4INPUT_C
 #define MACRO_G4INPUT_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <phpythia6/PHPythia6.h>
 

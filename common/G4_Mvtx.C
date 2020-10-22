@@ -1,7 +1,7 @@
 #ifndef MACRO_G4MVTX_C
 #define MACRO_G4MVTX_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4mvtx/PHG4MvtxDefs.h>

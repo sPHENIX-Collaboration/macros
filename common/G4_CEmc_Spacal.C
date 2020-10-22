@@ -1,7 +1,7 @@
 #ifndef MACRO_G4CEMCSPACAL_C
 #define MACRO_G4CEMCSPACAL_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4detectors/PHG4CylinderCellReco.h>
 #include <g4detectors/PHG4CylinderGeom_Spacalv1.h>

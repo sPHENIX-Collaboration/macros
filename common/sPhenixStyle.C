@@ -3,7 +3,7 @@
 //
 
 
-#include "sPhenixStyle.h"
+#include <sPhenixStyle.h>
 
 #include <TROOT.h>
 #include <TColor.h>

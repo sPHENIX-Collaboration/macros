@@ -1,7 +1,7 @@
 #ifndef MACRO_G4EEMC_C
 #define MACRO_G4EEMC_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4calo/RawTowerBuilderByHitIndex.h>
 #include <g4calo/RawTowerDigitizer.h>

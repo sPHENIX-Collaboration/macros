@@ -1,11 +1,11 @@
 #ifndef MACRO_G4MICROMEGAS_C
 #define MACRO_G4MICROMEGAS_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_Intt.C"
-#include "G4_Mvtx.C"
-#include "G4_TPC.C"
+#include <G4_Intt.C>
+#include <G4_Mvtx.C>
+#include <G4_TPC.C>
 
 #include <g4micromegas/PHG4MicromegasDigitizer.h>
 #include <g4micromegas/PHG4MicromegasHitReco.h>

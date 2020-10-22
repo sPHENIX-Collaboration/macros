@@ -1,7 +1,7 @@
 #ifndef MACRO_G4WORLD_C
 #define MACRO_G4WORLD_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4main/PHG4Reco.h>
 

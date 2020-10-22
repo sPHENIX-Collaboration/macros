@@ -1,9 +1,9 @@
 #ifndef MACRO_G4INTT_C
 #define MACRO_G4INTT_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_Mvtx.C"
+#include <G4_Mvtx.C>
 
 #include <g4intt/PHG4InttDefs.h>
 #include <g4intt/PHG4InttDigitizer.h>

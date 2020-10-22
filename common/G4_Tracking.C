@@ -1,12 +1,12 @@
 #ifndef MACRO_G4TRACKING_C
 #define MACRO_G4TRACKING_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_Intt.C"
-#include "G4_Micromegas.C"
-#include "G4_Mvtx.C"
-#include "G4_TPC.C"
+#include <G4_Intt.C>
+#include <G4_Micromegas.C>
+#include <G4_Mvtx.C>
+#include <G4_TPC.C>
 
 #include <fun4all/Fun4AllServer.h>
 
