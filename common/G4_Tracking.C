@@ -27,8 +27,8 @@
 #include <trackreco/PHTruthVertexing.h>
 
 #if __cplusplus >= 201703L
-#include <trackreco/MakeActsGeometry.h>
 #include <trackreco/ActsEvaluator.h>
+#include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSourceLinks.h>
 #include <trackreco/PHActsTracks.h>
 #include <trackreco/PHActsTrkFitter.h>
@@ -324,30 +324,29 @@ void Tracking_Reco()
 
 #if __cplusplus >= 201703L
     /// Geometry must be built before any Acts modules
-    MakeActsGeometry *geom = new MakeActsGeometry();
+    MakeActsGeometry* geom = new MakeActsGeometry();
     geom->Verbosity(0);
     geom->setMagField(G4MAGNET::magfield);
     geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
     se->registerSubsystem(geom);
-    
+
     /// Always run PHActsSourceLinks and PHActsTracks first, to convert TrkRClusters and SvtxTracks to the Acts equivalent
-    PHActsSourceLinks *sl = new PHActsSourceLinks();
+    PHActsSourceLinks* sl = new PHActsSourceLinks();
     sl->Verbosity(0);
     sl->setMagField(G4MAGNET::magfield);
     sl->setMagFieldRescale(G4MAGNET::magfield_rescale);
     se->registerSubsystem(sl);
-    
-    PHActsTracks *actsTracks = new PHActsTracks();
+
+    PHActsTracks* actsTracks = new PHActsTracks();
     actsTracks->Verbosity(0);
     se->registerSubsystem(actsTracks);
-    
-    PHActsTrkFitter *actsFit = new PHActsTrkFitter();
+
+    PHActsTrkFitter* actsFit = new PHActsTrkFitter();
     actsFit->Verbosity(0);
     actsFit->doTimeAnalysis(false);
     se->registerSubsystem(actsFit);
-      
-#endif   
-    
+
+#endif
   }
 
   return;
