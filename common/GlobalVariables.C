@@ -52,4 +52,10 @@ namespace TRACKING
 {
   string TrackNodeName = "SvtxTrackMap";
 }
+
+namespace G4MAGNET
+{
+  double magfield_rescale = 1;
+  string magfield= string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");
+}
 #endif

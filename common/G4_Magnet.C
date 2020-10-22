@@ -22,9 +22,6 @@ namespace G4MAGNET
   double magnet_outer_cryostat_wall_radius = 174.5;
   double magnet_outer_cryostat_wall_thickness = 2.5;
   double magnet_length = 379.;
-  double magfield_rescale = 1;
-  string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");
-
 }  // namespace G4MAGNET
 
 void MagnetInit()
