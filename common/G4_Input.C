@@ -35,14 +35,17 @@ namespace Input
 {
   bool GUN = false;
   int GUN_VERBOSITY = 0;
+  int GUN_NUMBER = 1;
   bool READHITS = false;
   bool PYTHIA6 = false;
   bool PYTHIA8 = false;
   bool SARTRE = false;
   bool SIMPLE = false;
   int SIMPLE_VERBOSITY = 0;
+  int SIMPLE_NUMBER = 1;
   bool UPSILON = false;
   int UPSILON_VERBOSITY = 0;
+  int UPSILON_NUMBER = 1;
   double PILEUPRATE = 0.;
   int VERBOSITY = 0;
 }  // namespace Input
@@ -93,9 +96,9 @@ namespace PILEUP
 // collection of pointers to particle generators we can grab in the Fun4All macro
 namespace INPUTGENERATOR
 {
-  PHG4ParticleGeneratorVectorMeson *VectorMesonGenerator = nullptr;
-  PHG4SimpleEventGenerator *SimpleEventGenerator = nullptr;
-  PHG4ParticleGun *Gun = nullptr;
+  std::vector<PHG4ParticleGeneratorVectorMeson *> VectorMesonGenerator;
+  std::vector<PHG4SimpleEventGenerator *> SimpleEventGenerator;
+  std::vector<PHG4ParticleGun *> Gun;
   PHPythia6 *Pythia6 = nullptr;
   PHPythia8 *Pythia8 = nullptr;
   PHSartre *Sartre = nullptr;
@@ -155,15 +158,33 @@ void InputInit()
 
   if (Input::SIMPLE)
   {
-    INPUTGENERATOR::SimpleEventGenerator = new PHG4SimpleEventGenerator();
+    for (int i=0; i<Input::SIMPLE_NUMBER; ++i)
+    {
+      std::string name = "EVTGENERATOR_" + std::to_string(i);
+      PHG4SimpleEventGenerator *simple = new PHG4SimpleEventGenerator(name);
+      simple->Embed(2);
+      INPUTGENERATOR::SimpleEventGenerator.push_back(simple);
+    }
   }
   if (Input::GUN)
   {
-    INPUTGENERATOR::Gun = new PHG4ParticleGun();
+    for (int i=0; i<Input::GUN_NUMBER; ++i)
+    {
+      std::string name = "GUN_" + std::to_string(i);
+      PHG4ParticleGun *gun = new PHG4ParticleGun(name);
+      gun->Embed(2);
+      INPUTGENERATOR::Gun.push_back(gun);
+    }
   }
   if (Input::UPSILON)
   {
-    INPUTGENERATOR::VectorMesonGenerator = new PHG4ParticleGeneratorVectorMeson();
+    for (int i=0; i<Input::UPSILON_NUMBER; ++i)
+    {
+      std::string name = "UPSILON_" + std::to_string(i);
+      PHG4ParticleGeneratorVectorMeson *upsilon = new PHG4ParticleGeneratorVectorMeson(name);
+      upsilon->Embed(2);
+      INPUTGENERATOR::VectorMesonGenerator.push_back(upsilon);
+    }
   }
   // input managers for which we might need to set options
   if (Input::HEPMC)
@@ -194,23 +215,32 @@ void InputRegister()
   }
   if (Input::SIMPLE)
   {
-    INPUTGENERATOR::SimpleEventGenerator->Verbosity(Input::SIMPLE_VERBOSITY);
-    se->registerSubsystem(INPUTGENERATOR::SimpleEventGenerator);
+    for (size_t icnt = 0; icnt < INPUTGENERATOR::SimpleEventGenerator.size(); ++icnt)
+    {
+      INPUTGENERATOR::SimpleEventGenerator[icnt]->Verbosity(Input::SIMPLE_VERBOSITY);
+      se->registerSubsystem(INPUTGENERATOR::SimpleEventGenerator[icnt]);
+    }
   }
   if (Input::UPSILON)
   {
+    for (size_t icnt = 0; icnt < INPUTGENERATOR::VectorMesonGenerator.size(); ++icnt)
+    {
     if (Input::HEPMC || Input::SIMPLE)
     {
-      INPUTGENERATOR::VectorMesonGenerator->set_reuse_existing_vertex(true);
+      INPUTGENERATOR::VectorMesonGenerator[icnt]->set_reuse_existing_vertex(true);
     }
-    INPUTGENERATOR::VectorMesonGenerator->Verbosity(Input::UPSILON_VERBOSITY);
-    INPUTGENERATOR::VectorMesonGenerator->Embed(2);
-    se->registerSubsystem(INPUTGENERATOR::VectorMesonGenerator);
+    INPUTGENERATOR::VectorMesonGenerator[icnt]->Verbosity(Input::UPSILON_VERBOSITY);
+    INPUTGENERATOR::VectorMesonGenerator[icnt]->Embed(2);
+    se->registerSubsystem(INPUTGENERATOR::VectorMesonGenerator[icnt]);
+    }
   }
   if (Input::GUN)
   {
-    INPUTGENERATOR::Gun->Verbosity(Input::GUN_VERBOSITY);
-    se->registerSubsystem(INPUTGENERATOR::Gun);
+    for (size_t icnt = 0; icnt < INPUTGENERATOR::Gun.size(); ++icnt)
+    {
+      INPUTGENERATOR::Gun[icnt]->Verbosity(Input::GUN_VERBOSITY);
+      se->registerSubsystem(INPUTGENERATOR::Gun[icnt]);
+    }
   }
   if (Input::READEIC)
   {
