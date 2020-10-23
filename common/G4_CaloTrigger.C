@@ -1,7 +1,7 @@
 #ifndef MACRO_G4CALOTRIGGER_C
 #define MACRO_G4CALOTRIGGER_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <calotrigger/CaloTriggerSim.h>
 

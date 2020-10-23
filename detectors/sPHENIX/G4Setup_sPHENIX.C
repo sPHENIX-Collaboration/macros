@@ -1,25 +1,26 @@
 #ifndef MACRO_G4SETUPSPHENIX_C
 #define MACRO_G4SETUPSPHENIX_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_Bbc.C"
-#include "G4_BlackHole.C"
-#include "G4_CEmc_Spacal.C"
-#include "G4_CEmc_Albedo.C"
-#include "G4_EPD.C"
-#include "G4_FEMC.C"
-#include "G4_HcalIn_ref.C"
-#include "G4_HcalOut_ref.C"
-#include "G4_Intt.C"
-#include "G4_Magnet.C"
-#include "G4_Micromegas.C"
-#include "G4_Mvtx.C"
-#include "G4_Pipe.C"
-#include "G4_PlugDoor.C"
-#include "G4_TPC.C"
-#include "G4_User.C"
-#include "G4_World.C"
+#include <G4_Bbc.C>
+#include <G4_BlackHole.C>
+#include <G4_CEmc_Albedo.C>
+#include <G4_CEmc_Spacal.C>
+#include <G4_EPD.C>
+#include <G4_FEMC.C>
+#include <G4_HcalIn_ref.C>
+#include <G4_HcalOut_ref.C>
+#include <G4_Intt.C>
+#include <G4_Magnet.C>
+#include <G4_Micromegas.C>
+#include <G4_Mvtx.C>
+#include <G4_PSTOF.C>
+#include <G4_Pipe.C>
+#include <G4_PlugDoor.C>
+#include <G4_TPC.C>
+#include <G4_User.C>
+#include <G4_World.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 

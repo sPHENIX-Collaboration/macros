@@ -1,10 +1,10 @@
 #ifndef MACRO_G4TPC_C
 #define MACRO_G4TPC_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_Intt.C"
-#include "G4_Mvtx.C"
+#include <G4_Intt.C>
+#include <G4_Mvtx.C>
 
 #include <g4tpc/PHG4TpcDigitizer.h>
 #include <g4tpc/PHG4TpcElectronDrift.h>

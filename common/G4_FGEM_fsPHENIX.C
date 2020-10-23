@@ -1,10 +1,10 @@
 #ifndef MACRO_G4FGEMFSPHENIX_C
 #define MACRO_G4FGEMFSPHENIX_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_FEMC.C"
-#include "G4_FHCAL.C"
+#include <G4_FEMC.C>
+#include <G4_FHCAL.C>
 
 #include <g4detectors/PHG4SectorSubsystem.h>
 

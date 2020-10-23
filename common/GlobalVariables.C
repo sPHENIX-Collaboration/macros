@@ -52,4 +52,13 @@ namespace TRACKING
 {
   string TrackNodeName = "SvtxTrackMap";
 }
+
+namespace G4MAGNET
+{
+  // initialize to garbage values - the override is done in the respective
+  // MagnetInit() functions. If used standalone (without the G4_Magnet include)
+  // like in the tracking - those need to be set in the Fun4All macro
+  double magfield_rescale = NAN;
+  string magfield;
+}  // namespace G4MAGNET
 #endif

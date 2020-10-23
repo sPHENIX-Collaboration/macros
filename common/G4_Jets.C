@@ -1,7 +1,7 @@
 #ifndef MACRO_G4JETS_C
 #define MACRO_G4JETS_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4jets/ClusterJetInput.h>
 #include <g4jets/FastJetAlgo.h>
