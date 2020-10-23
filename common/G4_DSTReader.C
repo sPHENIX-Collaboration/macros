@@ -71,9 +71,9 @@ void G4DSTreader(const string &outputFile = "G4sPHENIXCells.root")
       ana->AddNode("TPC");
     }
 
-    if (Enable::PSTOF)
+    if (Enable::BBC)
     {
-      ana->AddNode("PSTOF_0");
+      ana->AddNode("BBC");
     }
 
     if (Enable::CEMC)

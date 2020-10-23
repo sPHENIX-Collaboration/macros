@@ -209,12 +209,11 @@ int Fun4All_G4_sPHENIX(
   //  Enable::OVERLAPCHECK = true;
   //  Enable::VERBOSITY = 1;
 
-  Enable::BBC = true;
+  Enable::BBC = false;
+  Enable::BBCFAKE = true; // Smeared vtx and t0, use if you don't want real BBC in simulation
 
   Enable::PIPE = true;
   Enable::PIPE_ABSORBER = true;
-
-  //Enable::PSTOF = true;
 
   // central tracking
   Enable::MVTX = true;
@@ -342,7 +341,7 @@ int Fun4All_G4_sPHENIX(
   // BBC Reco
   //---------
 
-  if (Enable::BBC)
+  if (Enable::BBC || Enable::BBCFAKE)
   {
     BbcInit();
     Bbc_Reco();

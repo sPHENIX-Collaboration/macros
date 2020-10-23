@@ -3,6 +3,7 @@
 
 #include <GlobalVariables.C>
 
+#include <G4_Bbc.C>
 #include <G4_BlackHole.C>
 #include <G4_CEmc_Albedo.C>
 #include <G4_CEmc_Spacal.C>
@@ -40,6 +41,7 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 void G4Init()
 {
+  cout << "IN NEW INIT" << endl;
   // load detector/material macros and execute Init() function
 
   if (Enable::PIPE)
@@ -51,9 +53,9 @@ void G4Init()
   if (Enable::TPC) TPCInit();
   if (Enable::MICROMEGAS) MicromegasInit();
 
-  if (Enable::PSTOF)
+  if (Enable::BBC)
   {
-    PSTOFInit();
+    BbcInit();
   }
 
   if (Enable::CEMCALBEDO)
@@ -159,9 +161,9 @@ int G4Setup()
   if (Enable::MICROMEGAS) Micromegas(g4Reco);
 
   //----------------------------------------
-  // PSTOF
+  // BBC
 
-  if (Enable::PSTOF) radius = PSTOF(g4Reco, radius);
+  if (Enable::BBC) radius = Bbc(g4Reco, radius);
 
   //----------------------------------------
   // CEMC (it is checked above that not both of them are set
@@ -236,6 +238,7 @@ void ShowerCompress(int verbosity = 0)
   compress->AddHitContainer("G4HIT_BH_1");
   compress->AddHitContainer("G4HIT_BH_FORWARD_PLUS");
   compress->AddHitContainer("G4HIT_BH_FORWARD_NEG");
+  compress->AddHitContainer("G4HIT_BBC");
   compress->AddCellContainer("G4CELL_CEMC");
   compress->AddCellContainer("G4CELL_HCALIN");
   compress->AddCellContainer("G4CELL_HCALOUT");
@@ -278,6 +281,7 @@ void DstCompress(Fun4AllDstOutputManager *out)
     out->StripNode("G4HIT_BH_1");
     out->StripNode("G4HIT_BH_FORWARD_PLUS");
     out->StripNode("G4HIT_BH_FORWARD_NEG");
+    out->StripNode("G4HIT_BBC");
     out->StripNode("G4CELL_CEMC");
     out->StripNode("G4CELL_HCALIN");
     out->StripNode("G4CELL_HCALOUT");
