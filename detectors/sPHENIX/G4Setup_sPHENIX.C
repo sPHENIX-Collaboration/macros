@@ -43,19 +43,13 @@ void G4Init()
 {
   // load detector/material macros and execute Init() function
 
-  if (Enable::PIPE)
-  {
-    PipeInit();
-  }
+  if (Enable::PIPE) PipeInit();
   if (Enable::MVTX) MvtxInit();
   if (Enable::INTT) InttInit();
   if (Enable::TPC) TPCInit();
   if (Enable::MICROMEGAS) MicromegasInit();
 
-  if (Enable::BBC)
-  {
-    BbcInit();
-  }
+  if (Enable::BBC) BbcInit();
 
   if (Enable::CEMCALBEDO)
   {
@@ -162,7 +156,7 @@ int G4Setup()
   //----------------------------------------
   // BBC
 
-  if (Enable::BBC) radius = Bbc(g4Reco, radius);
+  if (Enable::BBC) Bbc(g4Reco);
 
   //----------------------------------------
   // CEMC (it is checked above that not both of them are set

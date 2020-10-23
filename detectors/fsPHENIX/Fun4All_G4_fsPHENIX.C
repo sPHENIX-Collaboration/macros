@@ -208,7 +208,8 @@ int Fun4All_G4_fsPHENIX(
   //  Enable::OVERLAPCHECK = true;
   //  Enable::VERBOSITY = 1;
 
-  Enable::BBC = true;
+  //  Enable::BBC = true;
+  Enable::BBCFAKE = true; // Smeared vtx and t0, use if you don't want real BBC in simulation
 
   Enable::PIPE = true;
   Enable::PIPE_ABSORBER = true;
@@ -335,19 +336,11 @@ int Fun4All_G4_fsPHENIX(
     G4Setup();
   }
 
-  //---------
-  // BBC Reco, just smeared vertex
-  //---------
-
-  if (Enable::BBC)
-  {
-    BbcInit();
-    Bbc_Reco();
-  }
-
   //------------------
   // Detector Division
   //------------------
+
+  if (Enable::BBC || Enable::BBCFAKE) Bbc_Reco();
 
   if (Enable::MVTX_CELL) Mvtx_Cells();
   if (Enable::INTT_CELL) Intt_Cells();
