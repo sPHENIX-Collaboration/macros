@@ -1,6 +1,12 @@
 #ifndef MACRO_G4USER_C
 #define MACRO_G4USER_C
 
+#include <fun4all/Fun4AllServer.h>
+
+R__LOAD_LIBRARY(libfun4all.so)
+
+class PHG4Reco;
+
 namespace Enable
 {
 // if you want this to run by default, initialize this to true
@@ -39,6 +45,8 @@ void UserDetector(PHG4Reco *g4Reco)
 // Any analysis goes here (registering your module with Fun4All)
 void UserAnalysisInit()
 {
+  Fun4AllServer* se = Fun4AllServer::instance();
+
   return;
 }
 
