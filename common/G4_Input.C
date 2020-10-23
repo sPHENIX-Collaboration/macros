@@ -64,13 +64,13 @@ namespace INPUTREADHITS
 {
   string filename;
   string listfile;
-}
+}  // namespace INPUTREADHITS
 
 namespace INPUTEMBED
 {
   string filename;
   string listfile;
-}
+}  // namespace INPUTEMBED
 
 namespace PYTHIA6
 {
@@ -109,7 +109,7 @@ namespace INPUTMANAGER
 {
   Fun4AllHepMCInputManager *HepMCInputManager = nullptr;
   Fun4AllHepMCPileupInputManager *HepMCPileupInputManager = nullptr;
-}
+}  // namespace INPUTMANAGER
 
 void InputInit()
 {
@@ -158,7 +158,7 @@ void InputInit()
 
   if (Input::SIMPLE)
   {
-    for (int i=0; i<Input::SIMPLE_NUMBER; ++i)
+    for (int i = 0; i < Input::SIMPLE_NUMBER; ++i)
     {
       std::string name = "EVTGENERATOR_" + std::to_string(i);
       PHG4SimpleEventGenerator *simple = new PHG4SimpleEventGenerator(name);
@@ -168,7 +168,7 @@ void InputInit()
   }
   if (Input::GUN)
   {
-    for (int i=0; i<Input::GUN_NUMBER; ++i)
+    for (int i = 0; i < Input::GUN_NUMBER; ++i)
     {
       std::string name = "GUN_" + std::to_string(i);
       PHG4ParticleGun *gun = new PHG4ParticleGun(name);
@@ -178,7 +178,7 @@ void InputInit()
   }
   if (Input::UPSILON)
   {
-    for (int i=0; i<Input::UPSILON_NUMBER; ++i)
+    for (int i = 0; i < Input::UPSILON_NUMBER; ++i)
     {
       std::string name = "UPSILON_" + std::to_string(i);
       PHG4ParticleGeneratorVectorMeson *upsilon = new PHG4ParticleGeneratorVectorMeson(name);
@@ -225,13 +225,13 @@ void InputRegister()
   {
     for (size_t icnt = 0; icnt < INPUTGENERATOR::VectorMesonGenerator.size(); ++icnt)
     {
-    if (Input::HEPMC || Input::SIMPLE)
-    {
-      INPUTGENERATOR::VectorMesonGenerator[icnt]->set_reuse_existing_vertex(true);
-    }
-    INPUTGENERATOR::VectorMesonGenerator[icnt]->Verbosity(Input::UPSILON_VERBOSITY);
-    INPUTGENERATOR::VectorMesonGenerator[icnt]->Embed(2);
-    se->registerSubsystem(INPUTGENERATOR::VectorMesonGenerator[icnt]);
+      if (Input::HEPMC || Input::SIMPLE)
+      {
+        INPUTGENERATOR::VectorMesonGenerator[icnt]->set_reuse_existing_vertex(true);
+      }
+      INPUTGENERATOR::VectorMesonGenerator[icnt]->Verbosity(Input::UPSILON_VERBOSITY);
+      INPUTGENERATOR::VectorMesonGenerator[icnt]->Embed(2);
+      se->registerSubsystem(INPUTGENERATOR::VectorMesonGenerator[icnt]);
     }
   }
   if (Input::GUN)
@@ -278,7 +278,7 @@ void InputManagers()
       cout << "no filename INPUTEMBED::filename or listfile INPUTEMBED::listfile given" << endl;
       gSystem->Exit(1);
     }
-    in1->Repeat();                       // if file(or filelist) is exhausted, start from beginning
+    in1->Repeat();  // if file(or filelist) is exhausted, start from beginning
     se->registerInputManager(in1);
   }
   if (Input::HEPMC)

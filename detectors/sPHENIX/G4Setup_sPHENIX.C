@@ -4,8 +4,8 @@
 #include <GlobalVariables.C>
 
 #include <G4_BlackHole.C>
-#include <G4_CEmc_Spacal.C>
 #include <G4_CEmc_Albedo.C>
+#include <G4_CEmc_Spacal.C>
 #include <G4_EPD.C>
 #include <G4_FEMC.C>
 #include <G4_HcalIn_ref.C>

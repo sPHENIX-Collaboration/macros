@@ -112,8 +112,8 @@ int Fun4All_G4_sPHENIX(
   // can only be set after InputInit() is called
 
   // Simple Input generator:
-// if you run more than one of these Input::SIMPLE_NUMBER > 1
-// add the settings for other with [1], next with [2]...
+  // if you run more than one of these Input::SIMPLE_NUMBER > 1
+  // add the settings for other with [1], next with [2]...
   if (Input::SIMPLE)
   {
     INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 5);
@@ -125,8 +125,8 @@ int Fun4All_G4_sPHENIX(
     else
     {
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
-                                                                             PHG4SimpleEventGenerator::Uniform,
-                                                                             PHG4SimpleEventGenerator::Uniform);
+                                                                                PHG4SimpleEventGenerator::Uniform,
+                                                                                PHG4SimpleEventGenerator::Uniform);
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_mean(0., 0., 0.);
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0., 0., 5.);
     }
@@ -136,8 +136,8 @@ int Fun4All_G4_sPHENIX(
     INPUTGENERATOR::SimpleEventGenerator[0]->Embed(2);
   }
   // Upsilons
-// if you run more than one of these Input::UPSILON_NUMBER > 1
-// add the settings for other with [1], next with [2]...
+  // if you run more than one of these Input::UPSILON_NUMBER > 1
+  // add the settings for other with [1], next with [2]...
   if (Input::UPSILON)
   {
     INPUTGENERATOR::VectorMesonGenerator[0]->add_decay_particles("e", 0);
@@ -147,8 +147,8 @@ int Fun4All_G4_sPHENIX(
     INPUTGENERATOR::VectorMesonGenerator[0]->set_upsilon_1s();
   }
   // particle gun
-// if you run more than one of these Input::GUN_NUMBER > 1
-// add the settings for other with [1], next with [2]...
+  // if you run more than one of these Input::GUN_NUMBER > 1
+  // add the settings for other with [1], next with [2]...
   if (Input::GUN)
   {
     INPUTGENERATOR::Gun[0]->AddParticle("pi-", 0, 1, 0);
@@ -496,7 +496,7 @@ int Fun4All_G4_sPHENIX(
     return 0;
   }
 
-// if we use a negative number of events we go back to the command line here
+  // if we use a negative number of events we go back to the command line here
   if (nEvents < 0)
   {
     return 0;
@@ -508,7 +508,6 @@ int Fun4All_G4_sPHENIX(
     cout << "it will run forever, so I just return without running anything" << endl;
     return 0;
   }
-
 
   se->skip(skip);
   se->run(nEvents);

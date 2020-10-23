@@ -3,8 +3,8 @@
 
 #include <GlobalVariables.C>
 
-#include <g4mvtx/PHG4MvtxDefs.h>
 #include <g4mvtx/PHG4EICMvtxSubsystem.h>
+#include <g4mvtx/PHG4MvtxDefs.h>
 
 #include <g4main/PHG4Reco.h>
 

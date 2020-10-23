@@ -125,8 +125,8 @@ int Fun4All_G4_EICDetector(
     else
     {
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
-                                                                             PHG4SimpleEventGenerator::Uniform,
-                                                                             PHG4SimpleEventGenerator::Uniform);
+                                                                                PHG4SimpleEventGenerator::Uniform,
+                                                                                PHG4SimpleEventGenerator::Uniform);
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_mean(0., 0., 0.);
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0., 0., 5.);
     }
@@ -166,10 +166,10 @@ int Fun4All_G4_EICDetector(
 
   if (Input::HEPMC)
   {
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4,100e-4,30,0);//optional collision smear in space, time
-//    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
+    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4, 100e-4, 30, 0);  //optional collision smear in space, time
+                                                                                            //    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
     // //optional choice of vertex distribution function in space, time
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus);
+    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
     //! embedding ID for the event
     //! positive ID is the embedded event of interest, e.g. jetty event from pythia
     //! negative IDs are backgrounds, .e.g out of time pile up collisions
@@ -180,8 +180,8 @@ int Fun4All_G4_EICDetector(
   // register all input generators with Fun4All
   InputRegister();
 
-// set up production relatedstuff
-//   Enable::PRODUCTION = true;
+  // set up production relatedstuff
+  //   Enable::PRODUCTION = true;
 
   //======================
   // Write the DST
@@ -221,7 +221,7 @@ int Fun4All_G4_EICDetector(
   // mvtx/tpc tracker
   Enable::MVTX = true;
   Enable::TPC = true;
-//  Enable::TPC_ENDCAP = true;
+  //  Enable::TPC_ENDCAP = true;
 
   Enable::TRACKING = true;
   Enable::TRACKING_EVAL = Enable::TRACKING && true;
@@ -499,15 +499,15 @@ int Fun4All_G4_EICDetector(
     gROOT->ProcessLine("Fun4AllServer *se = Fun4AllServer::instance();");
     gROOT->ProcessLine("PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco(\"PHG4RECO\");");
 
-    cout <<"-------------------------------------------------"<<endl;
-    cout <<"You are in event display mode. Run one event with"<<endl;
-    cout <<"se->run(1)"<<endl;
-    cout <<"Run Geant4 command with following examples"<<endl;
+    cout << "-------------------------------------------------" << endl;
+    cout << "You are in event display mode. Run one event with" << endl;
+    cout << "se->run(1)" << endl;
+    cout << "Run Geant4 command with following examples" << endl;
     gROOT->ProcessLine("displaycmd()");
 
     return 0;
   }
-// if we use a negative number of events we go back to the command line here
+  // if we use a negative number of events we go back to the command line here
   if (nEvents < 0)
   {
     return 0;

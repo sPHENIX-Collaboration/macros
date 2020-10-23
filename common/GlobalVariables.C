@@ -56,6 +56,6 @@ namespace TRACKING
 namespace G4MAGNET
 {
   double magfield_rescale = 1;
-  string magfield= string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");
-}
+  string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");
+}  // namespace G4MAGNET
 #endif

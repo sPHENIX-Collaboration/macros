@@ -31,8 +31,8 @@ void ParticleFlow()
 
   // note: assumes topoCluster input already configured
   ParticleFlowReco *pfr = new ParticleFlowReco();
-  pfr->set_energy_match_Nsigma( 1.5 );
-  pfr->set_emulated_efficiency( 1.0 );
+  pfr->set_energy_match_Nsigma(1.5);
+  pfr->set_emulated_efficiency(1.0);
   pfr->Verbosity(verbosity);
   se->registerSubsystem(pfr);
 
