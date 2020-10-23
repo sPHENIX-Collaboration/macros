@@ -16,6 +16,7 @@
 #include <G4_Production.C>
 #include <G4_TopoClusterReco.C>
 #include <G4_Tracking.C>
+#include <G4_User.C>
 
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
@@ -301,6 +302,9 @@ int Fun4All_G4_sPHENIX(
   //Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
   //BlackHoleGeometry::visible = true;
 
+  // run user provided code (from local G4_User.C)
+  //Enable::USER = true;
+
   //---------------
   // World Settings
   //---------------
@@ -458,6 +462,8 @@ int Fun4All_G4_sPHENIX(
   if (Enable::JETS_EVAL) Jet_Eval(outputroot + "_g4jet_eval.root");
 
   if (Enable::DSTREADER) G4DSTreader(outputroot + "_DSTReader.root");
+
+  if (Enable::USER) UserAnalysisInit();
 
   //--------------
   // Set up Input Managers

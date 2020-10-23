@@ -310,6 +310,7 @@ int Fun4All_G4_EICDetector(
   //BlackHoleGeometry::visible = true;
 
   //Enable::USER = true;
+
   //---------------
   // World Settings
   //---------------
@@ -469,10 +470,8 @@ int Fun4All_G4_EICDetector(
 
   if (Enable::FWDJETS_EVAL) Jet_FwdEval(outputroot + "_g4fwdjet_eval.root");
 
-  if (Enable::USER)
-  {
-    UserAnalysisInit();
-  }
+  if (Enable::USER) UserAnalysisInit();
+
   //--------------
   // Set up Input Managers
   //--------------

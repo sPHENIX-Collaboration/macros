@@ -13,6 +13,7 @@
 #include <G4_Input.C>
 #include <G4_Jets.C>
 #include <G4_Production.C>
+#include <G4_User.C>
 
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
@@ -298,6 +299,9 @@ int Fun4All_G4_fsPHENIX(
   //Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
   //  BlackHoleGeometry::visible = true;
 
+  // run user provided code (from local G4_User.C)
+  //Enable::USER = true;
+
   //---------------
   // World Settings
   //---------------
@@ -467,6 +471,8 @@ int Fun4All_G4_fsPHENIX(
   if (Enable::FGEM_EVAL) FGEM_FastSim_Eval(outputroot + "g4tracking_fgem_eval.root");
 
   if (Enable::DSTREADER) G4DSTreader_fsPHENIX(outputroot + "_DSTReader.root");
+
+  if (Enable::USER) UserAnalysisInit();
 
   //--------------
   // Set up Input Managers
