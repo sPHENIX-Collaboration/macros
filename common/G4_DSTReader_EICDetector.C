@@ -1,22 +1,22 @@
 #ifndef MACRO_G4DSTREADEREICDETECTOR_C
 #define MACRO_G4DSTREADEREICDETECTOR_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_Barrel_EIC.C"
-#include "G4_CEmc_EIC.C"
-#include "G4_DIRC.C"
-#include "G4_EEMC.C"
-#include "G4_FEMC_EIC.C"
-#include "G4_FHCAL.C"
-#include "G4_FST_EIC.C"
-#include "G4_GEM_EIC.C"
-#include "G4_HcalIn_ref.C"
-#include "G4_HcalOut_ref.C"
-#include "G4_Magnet.C"
-#include "G4_Mvtx_EIC.C"
-#include "G4_RICH.C"
-#include "G4_TPC_EIC.C"
+#include <G4_Barrel_EIC.C>
+#include <G4_CEmc_EIC.C>
+#include <G4_DIRC.C>
+#include <G4_EEMC.C>
+#include <G4_FEMC_EIC.C>
+#include <G4_FHCAL.C>
+#include <G4_FST_EIC.C>
+#include <G4_GEM_EIC.C>
+#include <G4_HcalIn_ref.C>
+#include <G4_HcalOut_ref.C>
+#include <G4_Magnet.C>
+#include <G4_Mvtx_EIC.C>
+#include <G4_RICH.C>
+#include <G4_TPC_EIC.C>
 
 #include <g4eval/PHG4DSTReader.h>
 

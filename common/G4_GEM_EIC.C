@@ -1,7 +1,7 @@
 #ifndef MACRO_G4GEMEIC_C
 #define MACRO_G4GEMEIC_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4detectors/PHG4SectorSubsystem.h>
 

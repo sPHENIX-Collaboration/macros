@@ -1,7 +1,7 @@
 #ifndef MACRO_G4DIRC_C
 #define MACRO_G4DIRC_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4detectors/PHG4SectorSubsystem.h>

@@ -1,7 +1,7 @@
 #ifndef MACRO_G4PIPEEIC_C
 #define MACRO_G4PIPEEIC_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4detectors/PHG4GDMLSubsystem.h>

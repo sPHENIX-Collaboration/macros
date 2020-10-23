@@ -1,7 +1,7 @@
 #ifndef MACRO_G4PIPE_C
 #define MACRO_G4PIPE_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4detectors/PHG4ConeSubsystem.h>
 #include <g4detectors/PHG4CylinderSubsystem.h>
@@ -31,7 +31,7 @@ namespace G4PIPE
   double al_pipe_cone_length = 8.56;
 
   double al_pipe_ext_radius = 2.5005;
-  double al_pipe_ext_length = 60.0;   // extension beyond conical part
+  double al_pipe_ext_length = 60.0;  // extension beyond conical part
 }  // namespace G4PIPE
 
 void PipeInit()

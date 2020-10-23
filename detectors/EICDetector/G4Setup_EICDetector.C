@@ -1,30 +1,30 @@
 #ifndef MACRO_G4SETUPEICDETECTOR_C
 #define MACRO_G4SETUPEICDETECTOR_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_Aerogel.C"
-#include "G4_Barrel_EIC.C"
-#include "G4_BlackHole.C"
-#include "G4_CEmc_EIC.C"
-#include "G4_DIRC.C"
-#include "G4_EEMC.C"
-#include "G4_FEMC_EIC.C"
-#include "G4_FHCAL.C"
-#include "G4_FST_EIC.C"
-#include "G4_GEM_EIC.C"
-#include "G4_HcalIn_ref.C"
-#include "G4_HcalOut_ref.C"
-#include "G4_Input.C"
-#include "G4_Magnet.C"
-#include "G4_Mvtx_EIC.C"
-#include "G4_Pipe_EIC.C"
-#include "G4_PlugDoor_EIC.C"
-#include "G4_RICH.C"
-#include "G4_TPC_EIC.C"
-#include "G4_Tracking_EIC.C"
-#include "G4_User.C"
-#include "G4_World.C"
+#include <G4_Aerogel.C>
+#include <G4_Barrel_EIC.C>
+#include <G4_BlackHole.C>
+#include <G4_CEmc_EIC.C>
+#include <G4_DIRC.C>
+#include <G4_EEMC.C>
+#include <G4_FEMC_EIC.C>
+#include <G4_FHCAL.C>
+#include <G4_FST_EIC.C>
+#include <G4_GEM_EIC.C>
+#include <G4_HcalIn_ref.C>
+#include <G4_HcalOut_ref.C>
+#include <G4_Input.C>
+#include <G4_Magnet.C>
+#include <G4_Mvtx_EIC.C>
+#include <G4_Pipe_EIC.C>
+#include <G4_PlugDoor_EIC.C>
+#include <G4_RICH.C>
+#include <G4_TPC_EIC.C>
+#include <G4_Tracking_EIC.C>
+#include <G4_User.C>
+#include <G4_World.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
