@@ -1,24 +1,24 @@
 #ifndef MACRO_G4SETUPFSPHENIX_C
 #define MACRO_G4SETUPFSPHENIX_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_BlackHole.C"
-#include "G4_CEmc_Spacal.C"
-#include "G4_FEMC.C"
-#include "G4_FGEM_fsPHENIX.C"
-#include "G4_FHCAL.C"
-#include "G4_HcalIn_ref.C"
-#include "G4_HcalOut_ref.C"
-#include "G4_Magnet.C"
-#include "G4_Mvtx.C"
-#include "G4_Pipe.C"
-#include "G4_Piston.C"
-#include "G4_PlugDoor_fsPHENIX.C"
-#include "G4_TPC.C"
-#include "G4_Tracking.C"
-#include "G4_User.C"
-#include "G4_World.C"
+#include <G4_BlackHole.C>
+#include <G4_CEmc_Spacal.C>
+#include <G4_FEMC.C>
+#include <G4_FGEM_fsPHENIX.C>
+#include <G4_FHCAL.C>
+#include <G4_HcalIn_ref.C>
+#include <G4_HcalOut_ref.C>
+#include <G4_Magnet.C>
+#include <G4_Mvtx.C>
+#include <G4_Pipe.C>
+#include <G4_Piston.C>
+#include <G4_PlugDoor_fsPHENIX.C>
+#include <G4_TPC.C>
+#include <G4_Tracking.C>
+#include <G4_User.C>
+#include <G4_World.C>
 
 #include <g4eval/PHG4DstCompressReco.h>
 
