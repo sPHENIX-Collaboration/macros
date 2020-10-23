@@ -40,6 +40,7 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 void G4Init()
 {
+  cout << "IN NEW INIT" << endl;
   // load detector/material macros and execute Init() function
 
   if (Enable::PIPE)

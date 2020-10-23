@@ -16,8 +16,8 @@ namespace Enable
 
 namespace G4BBC
 {
-  double z_smearing = 0.;     // should be 6mm, temporary to 0 for TPC
-  double t_smearing = 0.002;  // 20ps timing resolution
+  double z_smearing = 0.;     // should be 6 mm, temporarily perfect for TPC initial vertexing
+  double t_smearing = 0.02;   // 20ps timing resolution
 }  // namespace G4BBC
 
 void BbcInit()
@@ -25,9 +25,12 @@ void BbcInit()
   //cout << "In BbcInit()" << endl;
 
   // Set boundary of tracked particles to include BBC (values in cm)
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 300.);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -300.);
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 15.0);
+  if ( Enable::BBC == true )
+  {
+    BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 300.);
+    BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -300.);
+    BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 15.0);
+  }
 
 }
 
@@ -38,11 +41,15 @@ double Bbc(PHG4Reco* g4Reco, double radius)
 
   gSystem->Load("libg4detectors.so");
 
-  PHG4BbcSubsystem *bbc = new PHG4BbcSubsystem( "BBC" );
-  bbc->SuperDetector( "BBC" );
-  g4Reco->registerSubsystem( bbc );
+  if ( Enable::BBC == true )
+  {
+    PHG4BbcSubsystem *bbc = new PHG4BbcSubsystem( "BBC" );
+    bbc->SuperDetector( "BBC" );
+    g4Reco->registerSubsystem( bbc );
 
-  radius = 15.;  // outer shell is 15 cm
+    radius = 15.;  // outer shell is 15 cm
+  }
+
   return radius; 
 }
 
@@ -55,12 +62,14 @@ void Bbc_Reco(int verbosity = 0)
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  //if ( Enable::BBCFAKE == true )
-  if ( Enable::BBC == true )
+  // If BBC is enabled, it overrides the BBCFAKE
+  if ( Enable::BBCFAKE == true && Enable::BBC == false )
   {
+    cout << "BBCFAKE: Using smeared vtx and t0 resolutions of "
+      << G4BBC::z_smearing << " cm and " << G4BBC::t_smearing*1000 << " ps" << endl;
     BbcVertexFastSimReco* bbcvertex = new BbcVertexFastSimReco();
-    bbcvertex->set_z_smearing(G4BBC::z_smearing);  // 6 mm, temporarily perfect for TPC initial vertexing
-    bbcvertex->set_t_smearing(G4BBC::t_smearing);  // 20 ps
+    bbcvertex->set_z_smearing(G4BBC::z_smearing);  
+    bbcvertex->set_t_smearing(G4BBC::t_smearing);
     se->registerSubsystem(bbcvertex);
   }
 
