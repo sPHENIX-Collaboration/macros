@@ -14,6 +14,7 @@
 #include <G4_Input.C>
 #include <G4_Jets.C>
 #include <G4_Production.C>
+#include <G4_User.C>
 
 #include <TROOT.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -308,6 +309,8 @@ int Fun4All_G4_EICDetector(
   //Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
   //BlackHoleGeometry::visible = true;
 
+  //Enable::USER = true;
+
   //---------------
   // World Settings
   //---------------
@@ -466,6 +469,8 @@ int Fun4All_G4_EICDetector(
   if (Enable::JETS_EVAL) Jet_Eval(outputroot + "_g4jet_eval.root");
 
   if (Enable::FWDJETS_EVAL) Jet_FwdEval(outputroot + "_g4fwdjet_eval.root");
+
+  if (Enable::USER) UserAnalysisInit();
 
   //--------------
   // Set up Input Managers
