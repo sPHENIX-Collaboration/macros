@@ -209,7 +209,7 @@ int Fun4All_G4_sPHENIX(
   //  Enable::OVERLAPCHECK = true;
   //  Enable::VERBOSITY = 1;
 
-  Enable::BBC = false;
+  // Enable::BBC = true;
   Enable::BBCFAKE = true; // Smeared vtx and t0, use if you don't want real BBC in simulation
 
   Enable::PIPE = true;
@@ -337,18 +337,11 @@ int Fun4All_G4_sPHENIX(
     G4Setup();
   }
 
-  //---------
-  // BBC Reco
-  //---------
-
-  if (Enable::BBC || Enable::BBCFAKE)
-  {
-    BbcInit();
-    Bbc_Reco();
-  }
   //------------------
   // Detector Division
   //------------------
+
+  if (Enable::BBC || Enable::BBCFAKE) Bbc_Reco();
 
   if (Enable::MVTX_CELL) Mvtx_Cells();
   if (Enable::INTT_CELL) Intt_Cells();

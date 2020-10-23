@@ -3,6 +3,7 @@
 
 #include <GlobalVariables.C>
 
+#include <G4_Bbc.C>
 #include <G4_BlackHole.C>
 #include <G4_CEmc_Spacal.C>
 #include <G4_FEMC.C>
@@ -41,73 +42,22 @@ void G4Init()
 {
   // load detector/material macros and execute Init() function
 
-  if (Enable::PIPE)
-  {
-    PipeInit();
-  }
-  if (Enable::MVTX)
-  {
-    MvtxInit();
-  }
-  if (Enable::INTT)
-  {
-    InttInit();
-  }
-  if (Enable::TPC)
-  {
-    TPCInit();
-  }
-  if (Enable::CEMC)
-  {
-    CEmcInit();
-  }
-
-  if (Enable::HCALIN)
-  {
-    HCalInnerInit();
-  }
-
-  if (Enable::MAGNET)
-  {
-    MagnetInit();
-  }
-  if (Enable::HCALOUT)
-  {
-    HCalOuterInit();
-  }
-
-  if (Enable::FGEM)
-  {
-    FGEM_Init();
-  }
-
-  if (Enable::FEMC)
-  {
-    FEMCInit();
-  }
-
-  if (Enable::FHCAL)
-  {
-    FHCALInit();
-  }
-  if (Enable::PISTON)
-  {
-    PistonInit();
-  }
-
-  if (Enable::PLUGDOOR)
-  {
-    PlugDoorInit();
-  }
-  if (Enable::USER)
-  {
-    UserInit();
-  }
-
-  if (Enable::BLACKHOLE)
-  {
-    BlackHoleInit();
-  }
+  if (Enable::PIPE) PipeInit();
+  if (Enable::MVTX) MvtxInit();
+  if (Enable::INTT) InttInit();
+  if (Enable::TPC) TPCInit();
+  if (Enable::BBC) BbcInit();
+  if (Enable::CEMC) CEmcInit();
+  if (Enable::HCALIN) HCalInnerInit();
+  if (Enable::MAGNET) MagnetInit();
+  if (Enable::HCALOUT) HCalOuterInit();
+  if (Enable::FGEM) FGEM_Init();
+  if (Enable::FEMC) FEMCInit();
+  if (Enable::FHCAL) FHCALInit();
+  if (Enable::PISTON) PistonInit();
+  if (Enable::PLUGDOOR) PlugDoorInit();
+  if (Enable::USER) UserInit();
+  if (Enable::BLACKHOLE) BlackHoleInit();
 }
 
 int G4Setup()
@@ -168,6 +118,12 @@ int G4Setup()
   {
     radius = TPC(g4Reco, radius);
   }
+
+  //----------------------------------------
+  // BBC
+
+  if (Enable::BBC) Bbc(g4Reco);
+
   //----------------------------------------
   // CEMC
   //
