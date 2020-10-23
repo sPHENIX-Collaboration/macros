@@ -55,7 +55,10 @@ namespace TRACKING
 
 namespace G4MAGNET
 {
-  double magfield_rescale = 1;
-  string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");
+  // initialize to garbage values - the override is done in the respective
+  // MagnetInit() functions. If used standalone (without the G4_Magnet include)
+  // like in the tracking - those need to be set in the Fun4All macro
+  double magfield_rescale = NAN;
+  string magfield;
 }  // namespace G4MAGNET
 #endif
