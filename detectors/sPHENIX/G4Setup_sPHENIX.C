@@ -64,8 +64,8 @@ void G4Init()
   if (Enable::PLUGDOOR) PlugDoorInit();
   if (Enable::FEMC) FEMCInit();
   if (Enable::EPD) EPDInit();
-  if (Enable::BLACKHOLE) BlackHoleInit();
   if (Enable::USER) UserInit();
+  if (Enable::BLACKHOLE) BlackHoleInit();
 }
 
 int G4Setup()
