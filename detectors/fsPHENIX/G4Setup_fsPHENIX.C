@@ -50,6 +50,8 @@ void G4Init()
   if (Enable::CEMC) CEmcInit();
   if (Enable::HCALIN) HCalInnerInit();
   if (Enable::MAGNET) MagnetInit();
+// We want the field - even if the magnet volume is disabled
+  MagnetFieldInit();
   if (Enable::HCALOUT) HCalOuterInit();
   if (Enable::FGEM) FGEM_Init();
   if (Enable::FEMC) FEMCInit();

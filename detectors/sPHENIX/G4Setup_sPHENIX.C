@@ -41,6 +41,12 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 void G4Init()
 {
+  // Check on invalid combinations
+  if (Enable::CEMC && Enable::CEMCALBEDO)
+  {
+      cout << "Enable::CEMCALBEDO and Enable::CEMC cannot be set simultanously" << endl;
+      gSystem->Exit(1);
+  }
   // load detector/material macros and execute Init() function
 
   if (Enable::PIPE) PipeInit();
@@ -48,61 +54,18 @@ void G4Init()
   if (Enable::INTT) InttInit();
   if (Enable::TPC) TPCInit();
   if (Enable::MICROMEGAS) MicromegasInit();
-
   if (Enable::BBC) BbcInit();
-
-  if (Enable::CEMCALBEDO)
-  {
-    CEmcAlbedoInit();
-  }
-
-  if (Enable::CEMC)
-  {
-    if (Enable::CEMCALBEDO)
-    {
-      cout << "Enable::CEMCALBEDO and Enable::CEMC cannot be set simultanously" << endl;
-      gSystem->Exit(1);
-    }
-    CEmcInit();  // make it 2*2*2*3*3 so we can try other combinations
-  }
-
-  if (Enable::HCALIN)
-  {
-    HCalInnerInit();
-  }
-
-  if (Enable::MAGNET)
-  {
-    MagnetInit();
-  }
-// We want the field - even if the magnet volume is disabled
-  MagnetFieldInit();
-  if (Enable::HCALOUT)
-  {
-    HCalOuterInit();
-  }
-
-  if (Enable::PLUGDOOR)
-  {
-    PlugDoorInit();
-  }
-  if (Enable::FEMC)
-  {
-    FEMCInit();
-  }
-  if (Enable::EPD)
-  {
-    EPDInit();
-  }
-  if (Enable::USER)
-  {
-    UserInit();
-  }
-
-  if (Enable::BLACKHOLE)
-  {
-    BlackHoleInit();
-  }
+  if (Enable::CEMCALBEDO) CEmcAlbedoInit();
+  if (Enable::CEMC) CEmcInit();
+  if (Enable::HCALIN) HCalInnerInit();
+  if (Enable::MAGNET) MagnetInit();
+  MagnetFieldInit(); // We want the field - even if the magnet volume is disabled
+  if (Enable::HCALOUT) HCalOuterInit();
+  if (Enable::PLUGDOOR) PlugDoorInit();
+  if (Enable::FEMC) FEMCInit();
+  if (Enable::EPD) EPDInit();
+  if (Enable::BLACKHOLE) BlackHoleInit();
+  if (Enable::USER) UserInit();
 }
 
 int G4Setup()
@@ -142,66 +105,31 @@ int G4Setup()
   }
   g4Reco->set_field_rescale(G4MAGNET::magfield_rescale);
 
+// the radius is an older protection against overlaps, it is not
+// clear how well this works nowadays but it doesn't hurt either
   double radius = 0.;
 
-  //----------------------------------------
-  // PIPE
   if (Enable::PIPE) radius = Pipe(g4Reco, radius);
-
-  //----------------------------------------
-  // TRACKING
   if (Enable::MVTX) radius = Mvtx(g4Reco, radius);
   if (Enable::INTT) radius = Intt(g4Reco, radius);
   if (Enable::TPC) radius = TPC(g4Reco, radius);
   if (Enable::MICROMEGAS) Micromegas(g4Reco);
-
-  //----------------------------------------
-  // BBC
-
   if (Enable::BBC) Bbc(g4Reco);
-
-  //----------------------------------------
-  // CEMC (it is checked above that not both of them are set
   if (Enable::CEMCALBEDO) CEmcAlbedo(g4Reco);
-
   if (Enable::CEMC) radius = CEmc(g4Reco, radius, 8);
-
-  //----------------------------------------
-  // HCALIN
-
   if (Enable::HCALIN) radius = HCalInner(g4Reco, radius, 4);
-
-  //----------------------------------------
-  // MAGNET
-
   if (Enable::MAGNET) radius = Magnet(g4Reco, radius);
-
-  //----------------------------------------
-  // HCALOUT
-
   if (Enable::HCALOUT) radius = HCalOuter(g4Reco, radius, 4);
-
-  //----------------------------------------
-  // sPHENIX forward flux return door
   if (Enable::PLUGDOOR) PlugDoor(g4Reco);
-
-  // forward EMC
   if (Enable::FEMC) FEMCSetup(g4Reco);
-
   if (Enable::EPD) EPD(g4Reco);
+  if (Enable::USER) UserDetector(g4Reco);
 
-  if (Enable::USER)
-  {
-    UserDetector(g4Reco);
-  }
 
   //----------------------------------------
   // BLACKHOLE
 
-  if (Enable::BLACKHOLE)
-  {
-    BlackHole(g4Reco, radius);
-  }
+  if (Enable::BLACKHOLE) BlackHole(g4Reco, radius);
 
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);
