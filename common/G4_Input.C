@@ -48,6 +48,7 @@ namespace Input
   int UPSILON_NUMBER = 1;
   double PILEUPRATE = 0.;
   int VERBOSITY = 0;
+  int EmbedId = 1;
 }  // namespace Input
 
 namespace INPUTHEPMC
@@ -125,7 +126,6 @@ void InputInit()
     cout << "Reading Hits and running G4 simultanously is not supported" << endl;
     gSystem->Exit(1);
   }
-  int embedid = 1; // need to be uniq across generators, start with 1
   if (Input::PYTHIA6 && Input::PYTHIA8)
   {
     cout << "Pythia6 and Pythia8 cannot be run together - might be possible but needs R&D" << endl;
@@ -162,8 +162,8 @@ void InputInit()
     {
       std::string name = "EVTGENERATOR_" + std::to_string(i);
       PHG4SimpleEventGenerator *simple = new PHG4SimpleEventGenerator(name);
-      simple->Embed(embedid);
-      embedid++;
+      simple->Embed(Input::EmbedId);
+      Input::EmbedId++;
       INPUTGENERATOR::SimpleEventGenerator.push_back(simple);
     }
   }
@@ -173,8 +173,8 @@ void InputInit()
     {
       std::string name = "GUN_" + std::to_string(i);
       PHG4ParticleGun *gun = new PHG4ParticleGun(name);
-      gun->Embed(embedid);
-      embedid++;
+      gun->Embed(Input::EmbedId);
+      Input::EmbedId++;
       INPUTGENERATOR::Gun.push_back(gun);
     }
   }
@@ -184,8 +184,8 @@ void InputInit()
     {
       std::string name = "UPSILON_" + std::to_string(i);
       PHG4ParticleGeneratorVectorMeson *upsilon = new PHG4ParticleGeneratorVectorMeson(name);
-      upsilon->Embed(embedid);
-      embedid++;
+      upsilon->Embed(Input::EmbedId);
+      Input::EmbedId++;
       INPUTGENERATOR::VectorMesonGenerator.push_back(upsilon);
     }
   }

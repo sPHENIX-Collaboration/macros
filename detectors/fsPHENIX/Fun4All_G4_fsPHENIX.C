@@ -132,7 +132,6 @@ int Fun4All_G4_fsPHENIX(
     INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1, 3);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.5, 50.);
-    INPUTGENERATOR::SimpleEventGenerator[0]->Embed(2);
   }
   // Upsilons
   // if you run more than one of these Input::UPSILON_NUMBER > 1
@@ -169,7 +168,7 @@ int Fun4All_G4_fsPHENIX(
     //! positive ID is the embedded event of interest, e.g. jetty event from pythia
     //! negative IDs are backgrounds, .e.g out of time pile up collisions
     //! Usually, ID = 0 means the primary Au+Au collision background
-    //INPUTMANAGER::HepMCInputManager->set_embedding_id(2);
+    //INPUTMANAGER::HepMCInputManager->set_embedding_id(Input::EmbedID);
     if (Input::PILEUPRATE > 0)
     {
       // Copy vertex settings from foreground hepmc input
