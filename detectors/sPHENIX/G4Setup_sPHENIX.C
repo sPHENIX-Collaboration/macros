@@ -75,6 +75,8 @@ void G4Init()
   {
     MagnetInit();
   }
+// We want the field - even if the magnet volume is disabled
+  MagnetFieldInit();
   if (Enable::HCALOUT)
   {
     HCalOuterInit();
