@@ -160,7 +160,7 @@ int G4Setup()
   if (Enable::PLUGDOOR) PlugDoor(g4Reco);
 
   if (Enable::USER) UserDetector(g4Reco);
-  }
+  
   //----------------------------------------
   // BLACKHOLE if enabled, needs info from all previous sub detectors for dimensions
   if (Enable::BLACKHOLE) BlackHole(g4Reco, radius);
