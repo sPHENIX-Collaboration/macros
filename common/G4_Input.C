@@ -44,7 +44,7 @@ namespace Input
 // Single/multiple particle generators
   bool DZERO = false;
   int DZERO_NUMBER = 1;
-  int DZERO_VERBOSITY = 1;
+  int DZERO_VERBOSITY = 0;
 
   bool GUN = false;
   int GUN_NUMBER = 1;
