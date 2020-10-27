@@ -37,8 +37,8 @@ namespace G4PIPE
 void PipeInit()
 {
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PIPE::al_pipe_ext_radius + G4PIPE::al_pipe_thickness);
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PIPE::be_pipe_length / 2. + G4PIPE::al_pipe_length + G4PIPE::al_pipe_cone_length + G4PIPE::al_pipe_ext_length);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -(G4PIPE::be_pipe_length / 2. + G4PIPE::al_pipe_length + G4PIPE::al_pipe_cone_length + G4PIPE::al_pipe_ext_length));
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PIPE::be_pipe_length / 2. + G4PIPE::al_pipe_length + G4PIPE::al_pipe_cone_length + G4PIPE::al_pipe_ext_length +no_overlapp );
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -(G4PIPE::be_pipe_length / 2. + G4PIPE::al_pipe_length + G4PIPE::al_pipe_cone_length + G4PIPE::al_pipe_ext_length) - no_overlapp);
 }
 
 double Pipe(PHG4Reco* g4Reco, double radius)
