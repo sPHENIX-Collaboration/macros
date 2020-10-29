@@ -1,12 +1,12 @@
 #ifndef MACRO_G4TRACKING_C
 #define MACRO_G4TRACKING_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_Intt.C"
-#include "G4_Micromegas.C"
-#include "G4_Mvtx.C"
-#include "G4_TPC.C"
+#include <G4_Intt.C>
+#include <G4_Micromegas.C>
+#include <G4_Mvtx.C>
+#include <G4_TPC.C>
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -27,8 +27,8 @@
 #include <trackreco/PHTruthVertexing.h>
 
 #if __cplusplus >= 201703L
-#include <trackreco/MakeActsGeometry.h>
 #include <trackreco/ActsEvaluator.h>
+#include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSourceLinks.h>
 #include <trackreco/PHActsTracks.h>
 #include <trackreco/PHActsTrkFitter.h>
@@ -56,9 +56,9 @@ namespace Enable
 namespace G4TRACKING
 {
   // Space Charge calibration flag
-  bool SC_CALIBMODE = true;
-  double SC_COLLISIONRATE = 50e3;
-
+  bool SC_CALIBMODE = true;  // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
+  double SC_COLLISIONRATE = 50e3;  // leave at 50 KHz for now, scaling of distortion map not implemented yet
+  
   // Tracking reconstruction setup parameters and flags
   //=====================================
 
@@ -72,14 +72,14 @@ namespace G4TRACKING
   //   PHActsTracks                                  // convert SvtxTracks to Acts tracks
   //   PHActsTrkFitter                               // Kalman fitter makes final fit to assembled tracks
 
+  bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
+
   // Possible variations - these are normally false
   bool use_PHTpcTracker_seeding = false;   // false for using the default PHCASeeding to get TPC track seeds, true to use PHTpcTracker
   bool use_truth_si_matching = false;      // if true, associates silicon clusters using best truth track match to TPC seed tracks - for diagnostics only
   bool use_truth_track_seeding = false;    // false for normal track seeding, use true to run with truth track seeding instead  ***** WORKS FOR GENFIT ONLY
   bool use_Genfit = false;                 // if false, acts KF is run on proto tracks assembled above, if true, use Genfit track propagation and fitting
   bool use_init_vertexing = false;         // false for using smeared truth vertex, set to true to get initial vertex from MVTX hits using PHInitZVertexing
-  bool useActsProp = false;                // if true, runs Acts CKF with only a seeder  ***** NOT FULLY FUNCTIONAL YET
-  bool g4eval_use_initial_vertex = false;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
   bool use_primary_vertex = false;         // refit Genfit tracks (only) with primary vertex included - adds second node to node tree, adds second evaluator, outputs separate ntuples
 
   int init_vertexing_min_zvtx_tracks = 2;  // PHInitZvertexing parameter for reducing spurious vertices, use 2 for Pythia8 events, 5 for large multiplicity events
@@ -127,6 +127,14 @@ void TrackingInit()
   {
     G4MICROMEGAS::n_micromegas_layer = 0;
   }
+
+  // SC_CALIBMODE makes no sense if distortions are not present
+  G4TRACKING::SC_CALIBMODE = G4TPC::ENABLE_DISTORTIONS && G4TRACKING::SC_CALIBMODE;
+
+  // Genfit does final vertexing, Acts does not
+  if(G4TRACKING::use_Genfit)
+    G4TRACKING::g4eval_use_initial_vertex = false;    
+
 }
 
 void Tracking_Reco()
@@ -150,7 +158,7 @@ void Tracking_Reco()
   {
     // We cheat to get the initial vertex for the full track reconstruction case
     PHInitVertexing* init_vtx = new PHTruthVertexing("PHTruthVertexing");
-    init_vtx->Verbosity(verbosity);
+    init_vtx->Verbosity(0);
     se->registerSubsystem(init_vtx);
   }
   else
@@ -262,22 +270,21 @@ void Tracking_Reco()
     projection->Verbosity(verbosity);
     se->registerSubsystem(projection);
   }
-
+  
   // Acts tracking chain (starts from TPC track seeds)
   //===================================
-
-  if(!G4TRACKING::use_truth_track_seeding && !G4TRACKING::use_Genfit)
-    {		
+  if (!G4TRACKING::use_truth_track_seeding && !G4TRACKING::use_Genfit)
+    {
       std::cout << "   Using normal Acts matching chain for silicon and MM's " << std::endl;
       
       // Silicon cluster matching to TPC track seeds
-     if(G4TRACKING::use_truth_si_matching)
+      if (G4TRACKING::use_truth_si_matching)
 	{
 	  std::cout << "      Using truth Si matching " << std::endl;
 	  // use truth particle matching in TPC to assign clusters in silicon to TPC tracks from CA seeder
-	  // intended only for diagnostics 
-	  PHTruthSiliconAssociation *silicon_assoc = new PHTruthSiliconAssociation();
-	  silicon_assoc ->Verbosity(0);
+	  // intended only for diagnostics
+	  PHTruthSiliconAssociation* silicon_assoc = new PHTruthSiliconAssociation();
+	  silicon_assoc->Verbosity(0);
 	  se->registerSubsystem(silicon_assoc);
 	}
       else
@@ -288,7 +295,7 @@ void Tracking_Reco()
 	  // start with a complete TPC track seed from one of the CA seeders
 	  
 	  // use truth information to assemble silicon clusters into track stubs for now
-	  PHSiliconTruthTrackSeeding *silicon_seeding = new PHSiliconTruthTrackSeeding();
+	  PHSiliconTruthTrackSeeding* silicon_seeding = new PHSiliconTruthTrackSeeding();
 	  silicon_seeding->Verbosity(0);
 	  se->registerSubsystem(silicon_seeding);
 	  
@@ -303,100 +310,98 @@ void Tracking_Reco()
 	  if(G4TRACKING::SC_CALIBMODE)
 	    {
 	      silicon_match->set_collision_rate(G4TRACKING::SC_COLLISIONRATE);
-	      // search windows for initial matching with distortions  default tuned values are 0.01 and 0.004
-	      silicon_match->set_phi_search_window(0.02);  
-	      silicon_match->set_eta_search_window(0.004); 
+	      // search windows for initial matching with distortions
+	      // tuned values are 0.04 and 0.008 in distorted events
+	      silicon_match->set_phi_search_window(0.04);  
+	      silicon_match->set_eta_search_window(0.008); 
 	    }
 	  else
 	    {
-	      // after distortion corrections, default tuned values are 0.01 and 0.004
-	      silicon_match->set_phi_search_window(0.01);  
+	      // after distortion corrections and rerunning clustering, default tuned values are 0.02 and 0.004 in low occupancy events
+	      silicon_match->set_phi_search_window(0.02);  
 	      silicon_match->set_eta_search_window(0.004); 
 	    }
-	  silicon_match->set_test_windows_printout(false);
+	  silicon_match->set_test_windows_printout(false);  // used for tuning search windows only
 	  se->registerSubsystem(silicon_match);
+	}	  
+      
+      // Associate Micromegas clusters with the tracks
+      if(G4MICROMEGAS::n_micromegas_layer > 0)
+	{
+	  std::cout << "      Using Micromegas matching " << std::endl;
+	  
+	  // Match TPC track stubs from CA seeder to clusters in the micromegas layers
+	  PHMicromegasTpcTrackMatching *mm_match = new PHMicromegasTpcTrackMatching();
+	  mm_match ->Verbosity(0);
+	  mm_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
+	  if(G4TRACKING::SC_CALIBMODE)
+	    {
+	      // calibration pass with distorted tracks
+	      mm_match->set_collision_rate(G4TRACKING::SC_COLLISIONRATE);
+	      // configuration is potentially with different search windows
+	      mm_match-> set_rphi_search_window_lyr1(0.2);
+	      mm_match-> set_rphi_search_window_lyr2(13.0);
+	      mm_match-> set_z_search_window_lyr1(26.0);
+	      mm_match-> set_z_search_window_lyr2(0.2);
+	    }
+	  else
+	    {
+	      // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
+	      mm_match-> set_rphi_search_window_lyr1(0.2);
+	      mm_match-> set_rphi_search_window_lyr2(13.0);
+	      mm_match-> set_z_search_window_lyr1(26.0);
+	      mm_match-> set_z_search_window_lyr2(0.2);
+	    }
+	  mm_match->set_min_tpc_layer(38);   // layer in TPC to start projection fit
+	  mm_match->set_test_windows_printout(false);   // used for tuning search windows only
+	  se->registerSubsystem(mm_match);
 	}
-     
-     // Associate Micromegas clusters with the tracks
-     if(G4MICROMEGAS::n_micromegas_layer > 0)
-       {
-	 std::cout << "      Using Micromegas matching " << std::endl;
-	 
-	 // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-	 PHMicromegasTpcTrackMatching *mm_match = new PHMicromegasTpcTrackMatching();
-	 mm_match ->Verbosity(0);
-	 mm_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
-	 if(G4TRACKING::SC_CALIBMODE)
-	   {
-	     // calibration pass with distorted tracks
-	     mm_match->set_collision_rate(G4TRACKING::SC_COLLISIONRATE);
-	     // configuration is potentially with different search windows
-	     mm_match-> set_rphi_search_window_lyr1(0.15);
-	     mm_match-> set_rphi_search_window_lyr2(13.0);
-	     mm_match-> set_z_search_window_lyr1(26.0);
-	     mm_match-> set_z_search_window_lyr2(0.2);
-	   }
-	 else
-	   {
-	     // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
-	     mm_match-> set_rphi_search_window_lyr1(0.15);
-	     mm_match-> set_rphi_search_window_lyr2(13.0);
-	     mm_match-> set_z_search_window_lyr1(26.0);
-	     mm_match-> set_z_search_window_lyr2(0.2);
-	   }
-	 mm_match->set_min_tpc_layer(38);   // layer in TPC to start projection fit
-	 mm_match->set_test_windows_printout(false);   // normally false 
-	 se->registerSubsystem(mm_match);
-       }
     }
-
+  
   // Final fitting of tracks using Acts Kalman Filter
   //=================================
-  if (!G4TRACKING::use_Genfit)
+  if(!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
     {
-    std::cout << "   Using Acts track fitting " << std::endl;
-
+      std::cout << "   Using Acts track fitting " << std::endl;
+      
 #if __cplusplus >= 201703L
-    /// Geometry must be built before any Acts modules
-    MakeActsGeometry *geom = new MakeActsGeometry();
-    geom->Verbosity(0);
-    geom->setMagField(G4MAGNET::magfield);
-    geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
-    se->registerSubsystem(geom);
-    
-    /// Always run PHActsSourceLinks and PHActsTracks first, to convert TrkRClusters and SvtxTracks to the Acts equivalent
-    PHActsSourceLinks *sl = new PHActsSourceLinks();
-    sl->Verbosity(0);
-    sl->setMagField(G4MAGNET::magfield);
-    sl->setMagFieldRescale(G4MAGNET::magfield_rescale);
-    se->registerSubsystem(sl);
-    
-    PHActsTracks *actsTracks = new PHActsTracks();
-    actsTracks->Verbosity(0);
-    se->registerSubsystem(actsTracks);
-
-    PHActsTrkFitter *actsFit = new PHActsTrkFitter();
-    actsFit->Verbosity(0);
-    actsFit->doTimeAnalysis(false);
-    /// If running with distortions, fit only the silicon+MMs first
-    actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-    se->registerSubsystem(actsFit);
+      /// Geometry must be built before any Acts modules
+      MakeActsGeometry* geom = new MakeActsGeometry();
+      geom->Verbosity(0);
+      geom->setMagField(G4MAGNET::magfield);
+      geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
+      se->registerSubsystem(geom);
+      
+      /// Always run PHActsSourceLinks and PHActsTracks first, to convert TrkRClusters and SvtxTracks to the Acts equivalent
+      PHActsSourceLinks* sl = new PHActsSourceLinks();
+      sl->Verbosity(0);
+      sl->setMagField(G4MAGNET::magfield);
+      sl->setMagFieldRescale(G4MAGNET::magfield_rescale);
+      se->registerSubsystem(sl);
+      
+      PHActsTracks* actsTracks = new PHActsTracks();
+      actsTracks->Verbosity(0);
+      se->registerSubsystem(actsTracks);
+      
+      PHActsTrkFitter* actsFit = new PHActsTrkFitter();
+      actsFit->Verbosity(0);
+      actsFit->doTimeAnalysis(false);
+      /// If running with distortions, fit only the silicon+MMs first
+      actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
+      se->registerSubsystem(actsFit);
       
 
-    if(G4TRACKING::SC_CALIBMODE)
-      {
-	/// run tpc residual determination with silicon+MM track fit
-	PHTpcResiduals *residuals = new PHTpcResiduals();
-	residuals->Verbosity(0);
-	se->registerSubsystem(residuals);
+      if(G4TRACKING::SC_CALIBMODE)
+	{
+	  /// run tpc residual determination with silicon+MM track fit
+	  PHTpcResiduals *residuals = new PHTpcResiduals();
+	  residuals->Verbosity(0);
+	  se->registerSubsystem(residuals);
 
-      }
-
-
-#endif   
-    
-  }
-
+	}
+#endif
+    }
+  
   return;
 }
 
@@ -430,7 +435,7 @@ void Tracking_Eval(const std::string& outputfile)
   se->registerSubsystem(eval);
 
   if(!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
-    {
+  {
 #if __cplusplus >= 201703L
       ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
       actsEval->Verbosity(0);
@@ -439,21 +444,21 @@ void Tracking_Eval(const std::string& outputfile)
 #endif
   }
 
-  if (G4TRACKING::use_primary_vertex)
-  {
-    // make a second evaluator that records tracks fitted with primary vertex included
-    // good for analysis of prompt tracks, particularly if Mvtx is not present
-    SvtxEvaluator* evalp;
-    evalp = new SvtxEvaluator("SVTXEVALUATOR", outputfile + "_primary_eval.root", "PrimaryTrackMap", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer);
-    evalp->do_cluster_eval(true);
-    evalp->do_g4hit_eval(true);
-    evalp->do_hit_eval(false);
-    evalp->do_gpoint_eval(false);
-    evalp->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
-    evalp->Verbosity(verbosity);
-    se->registerSubsystem(evalp);
-  }
-
+ if (G4TRACKING::use_primary_vertex)
+   {
+      // make a second evaluator that records tracks fitted with primary vertex included
+      // good for analysis of prompt tracks, particularly if Mvtx is not present
+      SvtxEvaluator* evalp;
+      evalp = new SvtxEvaluator("SVTXEVALUATOR", outputfile + "_primary_eval.root", "PrimaryTrackMap", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer);
+      evalp->do_cluster_eval(true);
+      evalp->do_g4hit_eval(true);
+      evalp->do_hit_eval(false);
+      evalp->do_gpoint_eval(false);
+      evalp->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
+      evalp->Verbosity(verbosity);
+      se->registerSubsystem(evalp);
+    }
+  
   return;
 }
 #endif

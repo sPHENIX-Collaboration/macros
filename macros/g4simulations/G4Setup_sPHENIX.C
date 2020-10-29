@@ -2,7 +2,7 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
 #include "G4_Pipe.C"
 #include "G4_Tracking.C"
-#include "G4_PSTOF.C"
+#include "G4_Bbc.C"
 #include "G4_CEmc_Spacal.C"
 #include "G4_HcalIn_ref.C"
 #include "G4_Magnet.C"
@@ -35,7 +35,7 @@ double no_overlapp = 0.0001; // added to radii to avoid overlapping volumes
 void RunLoadTest() {}
 
 void G4Init(const bool do_tracking = true,
-      const bool do_pstof = true,
+            const bool do_bbc = true,
 	    const bool do_cemc = true,
 	    const bool do_hcalin = true,
 	    const bool do_magnet = true,
@@ -61,10 +61,10 @@ void G4Init(const bool do_tracking = true,
       TrackingInit();
     }
 
-  if (do_pstof) 
+  if (do_bbc) 
     {
-      gROOT->LoadMacro("G4_PSTOF.C");
-      PSTOFInit();
+      gROOT->LoadMacro("G4_Bbc.C");
+      BbcInit();
     }
 
   if (do_cemc)
@@ -121,20 +121,19 @@ int G4Setup(const int absorberactive = 0,
 #else
 	    const EDecayType decayType = TPythia6Decayer::kAll,
 #endif
-	    const bool do_tracking = true,
-	    const bool do_pstof = true,
-	    const bool do_cemc = true,
-	    const bool do_hcalin = true,
-	    const bool do_magnet = true,
-	    const bool do_hcalout = true,
-      const bool do_pipe = true,
-      const bool do_plugdoor = false,
-//	    const bool do_plugdoor = true,
-	    const bool do_FEMC = false, 
-	    const bool do_epd = true,
+            const bool do_tracking = true,
+            const bool do_bbc = true,
+            const bool do_cemc = true,
+            const bool do_hcalin = true,
+            const bool do_magnet = true,
+            const bool do_hcalout = true,
+            const bool do_pipe = true,
+            const bool do_plugdoor = true,
+            const bool do_FEMC = false, 
+            const bool do_epd = true,
             const bool do_mvtxservice = false,
-	    const float magfield_rescale = 1.0) {
-  
+            const float magfield_rescale = 1.0) {
+
   //---------------
   // Load libraries
   //---------------
@@ -192,9 +191,12 @@ int G4Setup(const int absorberactive = 0,
   if (do_tracking) radius = Tracking(g4Reco, radius, absorberactive);
 
   //----------------------------------------
-  // PSTOF
-  
-  if (do_pstof) radius = PSTOF(g4Reco, radius, absorberactive);
+  // BBC
+  if (do_bbc)
+  {
+    cout << "IN DO_BBC" << endl;
+    radius = Bbc(g4Reco, radius, absorberactive);
+  }
 
   //----------------------------------------
   // CEMC
@@ -234,7 +236,7 @@ int G4Setup(const int absorberactive = 0,
   
   // swallow all particles coming out of the backend of sPHENIX
   PHG4CylinderSubsystem *blackhole = new PHG4CylinderSubsystem("BH", 1);
-blackhole->set_double_param("radius",radius + 10); // add 10 cm
+  blackhole->set_double_param("radius",radius + 10); // add 10 cm
 
   blackhole->set_int_param("lengthviarapidity",0);
   blackhole->set_double_param("length",g4Reco->GetWorldSizeZ() - no_overlapp); // make it cover the world in length
@@ -300,6 +302,7 @@ void ShowerCompress(int verbosity = 0) {
   compress->AddHitContainer("G4HIT_BH_1");
   compress->AddHitContainer("G4HIT_BH_FORWARD_PLUS");
   compress->AddHitContainer("G4HIT_BH_FORWARD_NEG");
+  compress->AddHitContainer("G4HIT_BBC");
   compress->AddCellContainer("G4CELL_CEMC");
   compress->AddCellContainer("G4CELL_HCALIN");
   compress->AddCellContainer("G4CELL_HCALOUT");
@@ -344,6 +347,7 @@ void DstCompress(Fun4AllDstOutputManager* out) {
     out->StripNode("G4CELL_CEMC");
     out->StripNode("G4CELL_HCALIN");
     out->StripNode("G4CELL_HCALOUT");
+    out->StripNode("G4HIT_BBC");
     out->StripNode("G4HIT_FEMC");
     out->StripNode("G4HIT_ABSORBER_FEMC");
     out->StripNode("G4CELL_FEMC");

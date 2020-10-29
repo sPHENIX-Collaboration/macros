@@ -1,7 +1,7 @@
 #ifndef MACRO_G4FHCAL_C
 #define MACRO_G4FHCAL_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4calo/RawTowerBuilderByHitIndex.h>
 #include <g4calo/RawTowerDigitizer.h>

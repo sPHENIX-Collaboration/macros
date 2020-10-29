@@ -1,21 +1,22 @@
 #ifndef MACRO_FUN4ALLG4SPHENIX_C
 #define MACRO_FUN4ALLG4SPHENIX_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "DisplayOn.C"
-#include "G4Setup_sPHENIX.C"
-#include "G4_Bbc.C"
-#include "G4_CaloTrigger.C"
-#include "G4_DSTReader.C"
-#include "G4_Global.C"
-#include "G4_HIJetReco.C"
-#include "G4_Input.C"
-#include "G4_Jets.C"
-#include "G4_ParticleFlow.C"
-#include "G4_Production.C"
-#include "G4_TopoClusterReco.C"
-#include "G4_Tracking.C"
+#include <DisplayOn.C>
+#include <G4Setup_sPHENIX.C>
+#include <G4_Bbc.C>
+#include <G4_CaloTrigger.C>
+#include <G4_DSTReader.C>
+#include <G4_Global.C>
+#include <G4_HIJetReco.C>
+#include <G4_Input.C>
+#include <G4_Jets.C>
+#include <G4_ParticleFlow.C>
+#include <G4_Production.C>
+#include <G4_TopoClusterReco.C>
+#include <G4_Tracking.C>
+#include <G4_User.C>
 
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
@@ -78,18 +79,21 @@ int Fun4All_G4_sPHENIX(
   INPUTEMBED::filename = embed_input_file;
 
   Input::SIMPLE = true;
-  //Input::SIMPLE_VERBOSITY = 1;
+  // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
+  // Input::SIMPLE_VERBOSITY = 1;
 
   //  Input::PYTHIA6 = true;
 
   // Input::PYTHIA8 = true;
 
   //  Input::GUN = true;
-  //Input::GUN_VERBOSITY = 1;
+  //  Input::GUN_NUMBER = 3; // if you need 3 of them
+  // Input::GUN_VERBOSITY = 1;
 
   // Upsilon generator
   //  Input::UPSILON = true;
-  Input::UPSILON_VERBOSITY = 0;
+  // Input::UPSILON_NUMBER = 3; // if you need 3 of them
+  // Input::UPSILON_VERBOSITY = 0;
 
   //  Input::HEPMC = true;
   INPUTHEPMC::filename = inputFile;
@@ -109,40 +113,46 @@ int Fun4All_G4_sPHENIX(
   // can only be set after InputInit() is called
 
   // Simple Input generator:
+  // if you run more than one of these Input::SIMPLE_NUMBER > 1
+  // add the settings for other with [1], next with [2]...
   if (Input::SIMPLE)
   {
-    INPUTGENERATOR::SimpleEventGenerator->add_particles("pi-", 5);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 5);
     if (Input::HEPMC || Input::EMBED)
     {
-      INPUTGENERATOR::SimpleEventGenerator->set_reuse_existing_vertex(true);
-      INPUTGENERATOR::SimpleEventGenerator->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_reuse_existing_vertex(true);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
     }
     else
     {
-      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
-                                                                             PHG4SimpleEventGenerator::Uniform,
-                                                                             PHG4SimpleEventGenerator::Uniform);
-      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_mean(0., 0., 0.);
-      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_width(0., 0., 5.);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
+                                                                                PHG4SimpleEventGenerator::Uniform,
+                                                                                PHG4SimpleEventGenerator::Uniform);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_mean(0., 0., 0.);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0., 0., 5.);
     }
-    INPUTGENERATOR::SimpleEventGenerator->set_eta_range(-1, 1);
-    INPUTGENERATOR::SimpleEventGenerator->set_phi_range(-M_PI, M_PI);
-    INPUTGENERATOR::SimpleEventGenerator->set_pt_range(0.1, 20.);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1, 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.1, 20.);
   }
   // Upsilons
+  // if you run more than one of these Input::UPSILON_NUMBER > 1
+  // add the settings for other with [1], next with [2]...
   if (Input::UPSILON)
   {
-    INPUTGENERATOR::VectorMesonGenerator->add_decay_particles("e", 0);
-    INPUTGENERATOR::VectorMesonGenerator->set_rapidity_range(-1, 1);
-    INPUTGENERATOR::VectorMesonGenerator->set_pt_range(0., 10.);
+    INPUTGENERATOR::VectorMesonGenerator[0]->add_decay_particles("e", 0);
+    INPUTGENERATOR::VectorMesonGenerator[0]->set_rapidity_range(-1, 1);
+    INPUTGENERATOR::VectorMesonGenerator[0]->set_pt_range(0., 10.);
     // Y species - select only one, last one wins
-    INPUTGENERATOR::VectorMesonGenerator->set_upsilon_1s();
+    INPUTGENERATOR::VectorMesonGenerator[0]->set_upsilon_1s();
   }
   // particle gun
+  // if you run more than one of these Input::GUN_NUMBER > 1
+  // add the settings for other with [1], next with [2]...
   if (Input::GUN)
   {
-    INPUTGENERATOR::Gun->AddParticle("pi-", 0, 1, 0);
-    INPUTGENERATOR::Gun->set_vtx(0, 0, 0);
+    INPUTGENERATOR::Gun[0]->AddParticle("pi-", 0, 1, 0);
+    INPUTGENERATOR::Gun[0]->set_vtx(0, 0, 0);
   }
 
   //--------------
@@ -160,7 +170,7 @@ int Fun4All_G4_sPHENIX(
     //! positive ID is the embedded event of interest, e.g. jetty event from pythia
     //! negative IDs are backgrounds, .e.g out of time pile up collisions
     //! Usually, ID = 0 means the primary Au+Au collision background
-    //INPUTMANAGER::HepMCInputManager->set_embedding_id(2);
+    //INPUTMANAGER::HepMCInputManager->set_embedding_id(Input::EmbedID);
     if (Input::PILEUPRATE > 0)
     {
       // Copy vertex settings from foreground hepmc input
@@ -198,12 +208,11 @@ int Fun4All_G4_sPHENIX(
   //  Enable::OVERLAPCHECK = true;
   //  Enable::VERBOSITY = 1;
 
-  Enable::BBC = true;
+  // Enable::BBC = true;
+  Enable::BBCFAKE = true; // Smeared vtx and t0, use if you don't want real BBC in simulation
 
   Enable::PIPE = true;
   Enable::PIPE_ABSORBER = true;
-
-  //Enable::PSTOF = true;
 
   // central tracking
   Enable::MVTX = true;
@@ -233,7 +242,7 @@ int Fun4All_G4_sPHENIX(
   Enable::CEMC = true;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
-  Enable::CEMC_TOWER = Enable::CEMC_CELL && false;
+  Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
 
@@ -291,6 +300,9 @@ int Fun4All_G4_sPHENIX(
   //Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
   //BlackHoleGeometry::visible = true;
 
+  // run user provided code (from local G4_User.C)
+  //Enable::USER = true;
+
   //---------------
   // World Settings
   //---------------
@@ -324,18 +336,11 @@ int Fun4All_G4_sPHENIX(
     G4Setup();
   }
 
-  //---------
-  // BBC Reco
-  //---------
-
-  if (Enable::BBC)
-  {
-    BbcInit();
-    Bbc_Reco();
-  }
   //------------------
   // Detector Division
   //------------------
+
+  if (Enable::BBC || Enable::BBCFAKE) Bbc_Reco();
 
   if (Enable::MVTX_CELL) Mvtx_Cells();
   if (Enable::INTT_CELL) Intt_Cells();
@@ -449,6 +454,8 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::DSTREADER) G4DSTreader(outputroot + "_DSTReader.root");
 
+  if (Enable::USER) UserAnalysisInit();
+
   //--------------
   // Set up Input Managers
   //--------------
@@ -486,7 +493,7 @@ int Fun4All_G4_sPHENIX(
     return 0;
   }
 
-// if we use a negative number of events we go back to the command line here
+  // if we use a negative number of events we go back to the command line here
   if (nEvents < 0)
   {
     return 0;
@@ -498,7 +505,6 @@ int Fun4All_G4_sPHENIX(
     cout << "it will run forever, so I just return without running anything" << endl;
     return 0;
   }
-
 
   se->skip(skip);
   se->run(nEvents);

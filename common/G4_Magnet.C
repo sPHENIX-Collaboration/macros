@@ -1,7 +1,7 @@
 #ifndef MACRO_G4MAGNET_C
 #define MACRO_G4MAGNET_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
@@ -22,13 +22,23 @@ namespace G4MAGNET
   double magnet_outer_cryostat_wall_radius = 174.5;
   double magnet_outer_cryostat_wall_thickness = 2.5;
   double magnet_length = 379.;
-  double magfield_rescale = 1;
-  string magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");
-
 }  // namespace G4MAGNET
+
+void MagnetFieldInit()
+{
+  if (!isfinite(G4MAGNET::magfield_rescale))
+  {
+    G4MAGNET::magfield_rescale = 1.;
+  }
+  if (G4MAGNET::magfield.empty())
+  {
+    G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");
+  }
+}
 
 void MagnetInit()
 {
+  MagnetFieldInit();
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4MAGNET::magnet_outer_cryostat_wall_radius + G4MAGNET::magnet_outer_cryostat_wall_thickness);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4MAGNET::magnet_length / 2.);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -G4MAGNET::magnet_length / 2.);

@@ -1,7 +1,7 @@
 #ifndef MACRO_G4CEMCEIC_C
 #define MACRO_G4CEMCEIC_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4calo/RawTowerBuilder.h>
 #include <g4calo/RawTowerDigitizer.h>

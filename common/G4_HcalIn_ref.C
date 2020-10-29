@@ -2,7 +2,7 @@
 #ifndef MACRO_G4HCALINREF_C
 #define MACRO_G4HCALINREF_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4calo/HcalRawTowerBuilder.h>
 #include <g4calo/RawTowerDigitizer.h>

@@ -1,10 +1,10 @@
 #ifndef MACRO_G4TPC_C
 #define MACRO_G4TPC_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_Intt.C"
-#include "G4_Mvtx.C"
+#include <G4_Intt.C>
+#include <G4_Mvtx.C>
 
 #include <g4tpc/PHG4TpcDigitizer.h>
 #include <g4tpc/PHG4TpcElectronDrift.h>
@@ -45,7 +45,7 @@ namespace G4TPC
   double tpc_outer_radius = 77. + 2.;
 
   // distortions
-  bool ENABLE_DISTORTIONS = true;
+  bool ENABLE_DISTORTIONS = false;
   std::string distortion_filename = "fluct_average.rev3.1side.3d.file0.h_negz.real_B1.4_E-400.0.ross_phi1_sphenix_phislice_lookup_r26xp40xz40.distortion_map.hist.root";
   unsigned int distortion_coordinates =
     PHG4TpcElectronDrift::COORD_PHI|
