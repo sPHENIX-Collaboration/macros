@@ -51,7 +51,7 @@ namespace G4TPC
     PHG4TpcElectronDrift::COORD_PHI|
     PHG4TpcElectronDrift::COORD_R|
     PHG4TpcElectronDrift::COORD_Z;
-  
+
 }  // namespace G4TPC
 
 void TPCInit()
@@ -111,24 +111,24 @@ double TPC(PHG4Reco* g4Reco,
   tpc->SetActive();
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);  // 1cm steps
-
+  
   if (AbsorberActive)
-  {
-    tpc->SetAbsorberActive();
-  }
+    {
+      tpc->SetAbsorberActive();
+    }
   tpc->OverlapCheck(OverlapCheck);
-
+  
   g4Reco->registerSubsystem(tpc);
-
+  
   if (Enable::TPC_ENDCAP)
-  {
-    TPC_Endcaps(g4Reco);
-  }
-
+    {
+      TPC_Endcaps(g4Reco);
+    }
+  
   radius = G4TPC::tpc_outer_radius;
-
+  
   radius += no_overlapp;
-
+  
   return radius;
 }
 
@@ -155,11 +155,10 @@ void TPC_Cells()
       edrift->set_distortion_filename( G4TPC::distortion_filename );  
       edrift->set_coordinates( G4TPC::distortion_coordinates );
     }
+  
   // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
   // They represent effects not due to ideal gas properties and ideal readout plane behavior
   // defaults are 0.085 and 0.105, they can be changed here to get a different resolution
-  //edrift->set_double_param("added_smear_trans",0.085);
-  //edrift->set_double_param("added_smear_long",0.105);
   edrift->registerPadPlane(padplane);
   se->registerSubsystem(edrift);
 

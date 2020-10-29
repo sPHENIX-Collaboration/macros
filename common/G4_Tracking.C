@@ -35,6 +35,7 @@
 #include <trackreco/PHActsTrkProp.h>
 #include <trackreco/PHActsVertexFinder.h>
 #include <trackreco/PHActsVertexFitter.h>
+#include <trackreco/PHTpcResiduals.h>
 #endif
 
 #include <trackbase/TrkrHitTruthAssoc.h>
@@ -385,8 +386,19 @@ void Tracking_Reco()
       PHActsTrkFitter* actsFit = new PHActsTrkFitter();
       actsFit->Verbosity(0);
       actsFit->doTimeAnalysis(false);
+      /// If running with distortions, fit only the silicon+MMs first
+      actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
       se->registerSubsystem(actsFit);
       
+
+      if(G4TRACKING::SC_CALIBMODE)
+	{
+	  /// run tpc residual determination with silicon+MM track fit
+	  PHTpcResiduals *residuals = new PHTpcResiduals();
+	  residuals->Verbosity(0);
+	  se->registerSubsystem(residuals);
+
+	}
 #endif
     }
   
@@ -422,13 +434,13 @@ void Tracking_Eval(const std::string& outputfile)
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
- if(!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
-   {
+  if(!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
+  {
 #if __cplusplus >= 201703L
-    ActsEvaluator* actsEval = new ActsEvaluator(outputfile + "_acts.root", eval);
-    actsEval->Verbosity(0);
-    actsEval->setEvalCKF(false);
-    se->registerSubsystem(actsEval);
+      ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
+      actsEval->Verbosity(0);
+      actsEval->setEvalCKF(false);
+      se->registerSubsystem(actsEval);
 #endif
   }
 
