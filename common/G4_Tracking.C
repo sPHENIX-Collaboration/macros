@@ -437,7 +437,7 @@ void Tracking_Eval(const std::string& outputfile)
   if(!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
   {
 #if __cplusplus >= 201703L
-    if(use_acts_evaluator)
+    if(G4TRACKING::use_acts_evaluator)
       {
 	ActsEvaluator *actsEval = new ActsEvaluator(outputfile+"_acts.root", eval);
 	actsEval->Verbosity(0);
