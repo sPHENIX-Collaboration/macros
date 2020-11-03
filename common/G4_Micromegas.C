@@ -39,7 +39,7 @@ namespace G4MICROMEGAS
     CONFIG_MAXIMAL
   };
 
-  Config CONFIG = CONFIG_Z_ONE_SECTOR;
+  Config CONFIG = CONFIG_BASELINE;
 }  // namespace G4MICROMEGAS
 
 void MicromegasInit()
