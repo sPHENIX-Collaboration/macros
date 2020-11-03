@@ -39,7 +39,7 @@ namespace G4MICROMEGAS
     CONFIG_MAXIMAL
   };
 
-  Config CONFIG = CONFIG_Z_ONE_SECTOR;
+  Config CONFIG = CONFIG_BASELINE;
 }  // namespace G4MICROMEGAS
 
 void MicromegasInit()
@@ -126,7 +126,7 @@ void Micromegas_Cells()
 
   case G4MICROMEGAS::CONFIG_BASELINE:
   {
-    std::cout << "Micromegas_Cells - Tiles configuration: CONFIG_Z_ONE_SECTOR" << std::endl;
+    std::cout << "Micromegas_Cells - Tiles configuration: CONFIG_BASELINE" << std::endl;
     MicromegasTile::List tiles;
 
     // for the first sector we put 4 tiles with full z coverage
@@ -138,11 +138,12 @@ void Micromegas_Cells()
     }
 
     // for the other sectors we put two tiles on either side of the central membrane
+    static constexpr double zoffset = 7;
     for (int i = 1; i < nsectors; ++i)
     {
-      const double phi = phi0 + 2. * M_PI * i / nsectors;
-      tiles.emplace_back(phi, length * (1.5 / 4 - 0.5), tile_width / radius, tile_length);
-      tiles.emplace_back(phi, length * (2.5 / 4 - 0.5), tile_width / radius, tile_length);
+      const double phi = phi0 + 2.*M_PI*i/nsectors;
+      tiles.emplace_back( phi, length*(1.5/4-0.5) - zoffset, tile_width/radius, tile_length );
+      tiles.emplace_back( phi, length*(2.5/4-0.5) + zoffset, tile_width/radius, tile_length );
     }
     reco->set_tiles(tiles);
     break;
