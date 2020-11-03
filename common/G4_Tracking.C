@@ -263,12 +263,6 @@ void Tracking_Reco()
 
     se->registerSubsystem(kalman);
 
-    //------------------
-    // Track Projections
-    //------------------
-    PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
-    projection->Verbosity(verbosity);
-    se->registerSubsystem(projection);
   }
   
   // Acts tracking chain (starts from TPC track seeds)
@@ -401,6 +395,13 @@ void Tracking_Reco()
 	}
 #endif
     }
+
+  //------------------
+  // Track Projections
+  //------------------
+  PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
+  projection->Verbosity(verbosity);
+  se->registerSubsystem(projection);
   
   return;
 }
