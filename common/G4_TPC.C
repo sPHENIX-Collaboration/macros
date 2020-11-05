@@ -16,6 +16,7 @@
 #include <g4main/PHG4Reco.h>
 
 #include <tpc/TpcClusterizer.h>
+#include <tpc/TpcSpaceChargeCorrection.h>
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -51,6 +52,14 @@ namespace G4TPC
     PHG4TpcElectronDrift::COORD_PHI|
     PHG4TpcElectronDrift::COORD_R|
     PHG4TpcElectronDrift::COORD_Z;
+
+  // distortion corrections
+  bool ENABLE_CORRECTIONS = false;
+  std::string correction_filename = "fluct_average.rev3.1side.3d.file0.h_negz.real_B1.4_E-400.0.ross_phi1_sphenix_phislice_lookup_r26xp40xz40.distortion_map.hist.root";
+  unsigned int correction_coordinates =
+    TpcSpaceChargeCorrection::COORD_PHI|
+    TpcSpaceChargeCorrection::COORD_R|
+    TpcSpaceChargeCorrection::COORD_Z;
 
 }  // namespace G4TPC
 
@@ -195,8 +204,18 @@ void TPC_Clustering()
 
   // For the Tpc
   //==========
-  TpcClusterizer* tpcclusterizer = new TpcClusterizer();
+  auto tpcclusterizer = new TpcClusterizer;
   tpcclusterizer->Verbosity(verbosity);
   se->registerSubsystem(tpcclusterizer);
+
+  // space charge correction
+  if( G4TPC::ENABLE_CORRECTIONS )
+  {
+    auto tpcSpaceChargeCorrection = new TpcSpaceChargeCorrection;
+    tpcSpaceChargeCorrection->set_distortion_filename( G4TPC::correction_filename );
+    tpcSpaceChargeCorrection->set_coordinates( G4TPC::correction_coordinates );
+    se->registerSubsystem(tpcSpaceChargeCorrection);
+  }
+
 }
 #endif
