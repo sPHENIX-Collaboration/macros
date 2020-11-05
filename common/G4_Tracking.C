@@ -135,6 +135,12 @@ void TrackingInit()
   if(G4TRACKING::use_Genfit)
     G4TRACKING::g4eval_use_initial_vertex = false;    
 
+  // For now the TpcSpaceChargeCorrection module only works with the GenFit tracking chain
+  if(G4TPC::ENABLE_CORRECTIONS && !G4TRACKING::use_Genfit)
+  {
+    std::cout << "Cannot enable space charge correction if not using GenFit tracking chain" << std::endl;
+    G4TPC::ENABLE_CORRECTIONS = false;
+  }
 }
 
 void Tracking_Reco()
