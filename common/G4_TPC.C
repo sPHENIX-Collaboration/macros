@@ -47,7 +47,7 @@ namespace G4TPC
 
   // distortions
   bool ENABLE_DISTORTIONS = false;
-  std::string distortion_filename = "fluct_average.rev3.1side.3d.file0.h_negz.real_B1.4_E-400.0.ross_phi1_sphenix_phislice_lookup_r26xp40xz40.distortion_map.hist.root";
+  auto distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/TPC/DistortionMaps/fluct_average.rev3.1side.3d.file0.h_negz.real_B1.4_E-400.0.ross_phi1_sphenix_phislice_lookup_r26xp40xz40.distortion_map.hist.root";
   unsigned int distortion_coordinates =
     PHG4TpcElectronDrift::COORD_PHI|
     PHG4TpcElectronDrift::COORD_R|
@@ -55,7 +55,7 @@ namespace G4TPC
 
   // distortion corrections
   bool ENABLE_CORRECTIONS = false;
-  std::string correction_filename = "fluct_average.rev3.1side.3d.file0.h_negz.real_B1.4_E-400.0.ross_phi1_sphenix_phislice_lookup_r26xp40xz40.distortion_map.hist.root";
+  auto correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/TPC/DistortionMaps/fluct_average.rev3.1side.3d.file0.h_negz.real_B1.4_E-400.0.ross_phi1_sphenix_phislice_lookup_r26xp40xz40.distortion_map.hist.root";
   unsigned int correction_coordinates =
     TpcSpaceChargeCorrection::COORD_PHI|
     TpcSpaceChargeCorrection::COORD_R|
