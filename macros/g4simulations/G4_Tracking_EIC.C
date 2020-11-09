@@ -58,13 +58,12 @@ void Tracking_Reco()
   //  kalman->Smearing(false);
   if (G4TRACKING::DISPLACED_VERTEX)
   {
-    // do not use truth vertex in the track fitting,
-    // which would lead to worse momentum resolution for prompt tracks
-    // but this allows displaced track analysis including DCA and vertex finding
+    //use very loose vertex constraint (1cm in sigma) to allow reco of displaced vertex
     kalman->set_use_vertex_in_fitting(false);
-    kalman->set_vertex_xy_resolution(0);// do not smear the vertex used in the built-in DCA calculation
-    kalman->set_vertex_z_resolution(0); // do not smear the vertex used in the built-in DCA calculation
-    kalman->enable_vertexing(true);     // enable vertex finding and fitting
+    kalman->set_vertex_xy_resolution(0);
+    kalman->set_vertex_z_resolution(0);
+    kalman->enable_vertexing(true);
+    kalman->set_vertex_min_ndf(1);
   }
   else
   {
@@ -82,12 +81,19 @@ void Tracking_Reco()
   //-------------------------
   if (Enable::BARREL)
   {
-    kalman->add_phg4hits("G4HIT_BARREL",              //      const std::string& phg4hitsNames,
+    kalman->add_phg4hits("G4HIT_BARREL0",              //      const std::string& phg4hitsNames,
                          PHG4TrackFastSim::Cylinder,  //      const DETECTOR_TYPE phg4dettype,
-                         5e-4,                        //      const float radres,
-                         5e-4,                        //      const float phires,
-                         5e-4,                        //      const float lonres,
-                         1,                           //      const float eff,
+                         5e-4,                        //      const float radres,   *ignored in cylindrical detector*
+                         20e-4/sqrt(12),              //      const float phires,
+                         20e-4/sqrt(12),              //      const float lonres,
+                         0.95,                        //      const float eff,
+                         0);                          //      const float noise
+    kalman->add_phg4hits("G4HIT_BARREL1",             //      const std::string& phg4hitsNames,
+                         PHG4TrackFastSim::Cylinder,  //      const DETECTOR_TYPE phg4dettype,
+                         5e-4,                        //      const float radres,   *ignored in cylindrical detector*
+                         36.4e-4/sqrt(12),            //      const float phires,
+                         36.4e-4/sqrt(12),            //      const float lonres,
+                         0.95,                        //      const float eff,
                          0);                          //      const float noise
   }
   //-------------------------
@@ -150,7 +156,8 @@ void Tracking_Reco()
     {
       kalman->add_phg4hits(Form("G4HIT_FGEM_%d", i),          //      const std::string& phg4hitsNames,
                            PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-                           1. / sqrt(12.),                    //      const float radres,
+                           100e-4,                            //      const float radres,
+			   //100. / sqrt(12.),                    //      const float radres,
                            70e-4,                             //      const float phires,
                            100e-4,                            //      const float lonres,
                            1,                                 //      const float eff,
@@ -160,16 +167,20 @@ void Tracking_Reco()
   //-------------------------
   // FST
   //-------------------------
+  float pitch=20e-4;
   if (Enable::FST)
   {
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 6; i++)
     {
+      if (i>=3) pitch=36.4e-4;
+      else pitch=20e-4;
+
       kalman->add_phg4hits(Form("G4HIT_FST_%d", i),           //      const std::string& phg4hitsNames,
                            PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-                           5e-4,                              //      const float radres,
-                           5e-4,                              //      const float phires,
-                           50e-4 / sqrt(12.),                 //      const float lonres,
-                           1,                                 //      const float eff,
+                           pitch/sqrt(12),                    //      const float radres,
+                           pitch/sqrt(12),                    //      const float phires,
+                           50e-4 / sqrt(12.),                 //      const float lonres, *ignored in plane detector*
+                           0.95,                              //      const float eff,
                            0);                                //      const float noise
     }
   }
