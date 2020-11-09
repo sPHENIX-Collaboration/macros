@@ -11,7 +11,7 @@
 R__LOAD_LIBRARY(libg4detectors.so)
 
 int make_LANL_FST_station(string name, PHG4Reco *g4Reco, double zpos, double Rmin,
-                          double Rmax);
+                          double Rmax,double tSilicon);
 //-----------------------------------------------------------------------------------//
 namespace Enable
 {
@@ -26,17 +26,21 @@ void FST_Init()
 //-----------------------------------------------------------------------------------//
 void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
 {
+  const double cm = PHG4Sector::Sector_Geometry::Unit_cm();
+  const double mm = .1 * cm;
+  const double um = 1e-3 * mm;
+
   //Design from Xuan Li @LANL
-  make_LANL_FST_station("FST_0", g4Reco, 35, 4, 30);  //cm
-  make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 35);
-  make_LANL_FST_station("FST_2", g4Reco, 77, 5, 40);
-  make_LANL_FST_station("FST_3", g4Reco, 101, 6, 40);
-  make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 43);
-  //make_LANL_FST_station("FST_5", g4Reco, 280, 17, 41);
+  make_LANL_FST_station("FST_0", g4Reco, 35,   4,   25, 35*um);  //cm
+  make_LANL_FST_station("FST_1", g4Reco, 62.3, 4.5, 42, 35*um);
+  make_LANL_FST_station("FST_2", g4Reco, 90,   5.2, 43, 35*um);
+  make_LANL_FST_station("FST_3", g4Reco, 115,  6,   44, 85*um);
+  make_LANL_FST_station("FST_4", g4Reco, 125,  6.5, 45, 85*um);
+  make_LANL_FST_station("FST_5", g4Reco, 300,  15,  45, 85*um);
 }
 //-----------------------------------------------------------------------------------//
 int make_LANL_FST_station(string name, PHG4Reco *g4Reco,
-                          double zpos, double Rmin, double Rmax)
+			  double zpos, double Rmin, double Rmax,double tSilicon) //silicon thickness
 {
   //  cout
   //      << "make_GEM_station - GEM construction with PHG4SectorSubsystem - make_GEM_station_EdgeReadout  of "
@@ -80,7 +84,7 @@ int make_LANL_FST_station(string name, PHG4Reco *g4Reco,
   const double um = 1e-3 * mm;
   // build up layers
 
-  fst->get_geometry().AddLayer("SiliconSensor", "G4_Si", 285 * um, true, 100);
+  fst->get_geometry().AddLayer("SiliconSensor", "G4_Si", tSilicon, true, 100);
   fst->get_geometry().AddLayer("Metalconnection", "G4_Al", 15 * um, false, 100);
   fst->get_geometry().AddLayer("HDI", "G4_KAPTON", 20 * um, false, 100);
   fst->get_geometry().AddLayer("Cooling", "G4_WATER", 100 * um, false, 100);
