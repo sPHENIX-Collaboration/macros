@@ -16,6 +16,7 @@
 #include <G4_Production.C>
 #include <G4_TopoClusterReco.C>
 #include <G4_Tracking.C>
+#include <QA.C>
 #include <G4_User.C>
 
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -300,6 +301,9 @@ int Fun4All_G4_sPHENIX(
   //Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
   //BlackHoleGeometry::visible = true;
 
+  // disable QA which otherwise run by default
+  //Enable::QA = false;
+
   // run user provided code (from local G4_User.C)
   //Enable::USER = true;
 
@@ -456,6 +460,12 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::USER) UserAnalysisInit();
 
+  //----------------------
+  // Standard QAs
+  //----------------------
+
+  if (Enable::TRACKING_TRACK and Enable::QA) QA_G4CaloTracking();
+
   //--------------
   // Set up Input Managers
   //--------------
@@ -508,6 +518,12 @@ int Fun4All_G4_sPHENIX(
 
   se->skip(skip);
   se->run(nEvents);
+
+  //-----
+  // QA output
+  //-----
+
+  if (Enable::QA) QA_EndRun(outputroot + "_qa.root");
 
   //-----
   // Exit
