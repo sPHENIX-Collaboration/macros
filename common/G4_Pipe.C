@@ -129,8 +129,8 @@ double Pipe(PHG4Reco* g4Reco, double radius)
 
   PHG4ConeSubsystem* cone = nullptr;
 
-  G4double cone_position = 0.5 * G4PIPE::be_pipe_length + G4PIPE::al_pipe_length + 0.5 * G4PIPE::al_pipe_cone_length;
-  G4double ext_position = 0.5 * G4PIPE::be_pipe_length + G4PIPE::al_pipe_length + G4PIPE::al_pipe_cone_length + 0.5 * G4PIPE::al_pipe_ext_length + no_overlapp;
+  double cone_position = 0.5 * G4PIPE::be_pipe_length + G4PIPE::al_pipe_length + 0.5 * G4PIPE::al_pipe_cone_length;
+  double ext_position = 0.5 * G4PIPE::be_pipe_length + G4PIPE::al_pipe_length + G4PIPE::al_pipe_cone_length + 0.5 * G4PIPE::al_pipe_ext_length + no_overlapp;
 
   /* north aluminum pipe (conical part) */
   cone = new PHG4ConeSubsystem("N_AL_PIPE_CONE", 6);
