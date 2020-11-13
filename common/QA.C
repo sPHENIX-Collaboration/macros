@@ -12,7 +12,7 @@ namespace Enable
 {
   // if you want this to run by default, initialize this to true
   // Otherwise you have to use Enable::USER = true; in your macro
-  bool QA = true;
+  bool QA = false;
   int QA_VERBOSITY = 0;
 }  // namespace Enable
 
