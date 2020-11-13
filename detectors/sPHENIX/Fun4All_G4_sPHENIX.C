@@ -246,6 +246,7 @@ int Fun4All_G4_sPHENIX(
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
+  Enable::CEMC_QA = Enable::CEMC_CLUSTER && true;
 
   Enable::HCALIN = true;
   Enable::HCALIN_ABSORBER = true;
@@ -253,6 +254,7 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
   Enable::HCALIN_CLUSTER = Enable::HCALIN_TOWER && true;
   Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && true;
+  Enable::HCALIN_QA = Enable::HCALIN_CLUSTER && true;
 
   Enable::MAGNET = true;
   Enable::MAGNET_ABSORBER = true;
@@ -263,6 +265,7 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
   Enable::HCALOUT_CLUSTER = Enable::HCALOUT_TOWER && true;
   Enable::HCALOUT_EVAL = Enable::HCALOUT_CLUSTER && true;
+  Enable::HCALOUT_QA = Enable::HCALOUT_CLUSTER && true;
 
   // forward EMC
   //Enable::FEMC = true;
@@ -464,7 +467,14 @@ int Fun4All_G4_sPHENIX(
   // Standard QAs
   //----------------------
 
-  if (Enable::TRACKING_TRACK and Enable::QA) QA_G4CaloTracking();
+
+  if (Enable::CEMC_QA and Enable::QA) CEMC_Eval(outputroot + "_g4cemc_eval.root");
+
+  if (Enable::HCALIN_QA and Enable::QA) HCALInner_Eval(outputroot + "_g4hcalin_eval.root");
+
+  if (Enable::HCALOUT_QA and Enable::QA) HCALOuter_Eval(outputroot + "_g4hcalout_eval.root");
+
+  if (Enable::TRACKING_TRACK and Enable::CEMC_QA and Enable::HCALIN_QA and Enable::HCALOUT_QA  and Enable::QA) QA_G4CaloTracking();
 
   //--------------
   // Set up Input Managers
