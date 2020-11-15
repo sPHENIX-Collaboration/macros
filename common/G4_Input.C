@@ -9,9 +9,9 @@
 
 #include <g4main/HepMCNodeReader.h>
 #include <g4main/PHG4IonGun.h>
+#include <g4main/PHG4ParticleGenerator.h>
 #include <g4main/PHG4ParticleGeneratorD0.h>
 #include <g4main/PHG4ParticleGeneratorVectorMeson.h>
-#include <g4main/PHG4ParticleGenerator.h>
 #include <g4main/PHG4ParticleGun.h>
 #include <g4main/PHG4SimpleEventGenerator.h>
 #include <g4main/ReadEICFiles.h>
@@ -36,27 +36,36 @@ R__LOAD_LIBRARY(libPHSartre.so)
 
 namespace Input
 {
-// Real Event generators
+  // Real Event generators
   bool PYTHIA6 = false;
-  bool PYTHIA8 = false;
-  bool SARTRE = false;
+  int PYTHIA6_EmbedId = 0;
 
-// Single/multiple particle generators
+  bool PYTHIA8 = false;
+  int PYTHIA8_EmbedId = 0;
+
+  bool SARTRE = false;
+  int SARTRE_EmbedId = 0;
+
+  // Single/multiple particle generators
   bool DZERO = false;
   int DZERO_NUMBER = 1;
   int DZERO_VERBOSITY = 0;
+  int DZERO_FirstEmbedId = 0;
 
   bool GUN = false;
   int GUN_NUMBER = 1;
   int GUN_VERBOSITY = 0;
+  int GUN_FirstEmbedId = 0;
 
   bool IONGUN = false;
   int IONGUN_NUMBER = 1;
   int IONGUN_VERBOSITY = 0;
+  int IONGUN_FirstEmbedId = 0;
 
   bool PGEN = false;
   int PGEN_NUMBER = 1;
   int PGEN_VERBOSITY = 0;
+  int PGEN_FirstEmbedId = 0;
 
   bool SIMPLE = false;
   int SIMPLE_NUMBER = 1;
@@ -65,6 +74,7 @@ namespace Input
   bool UPSILON = false;
   int UPSILON_NUMBER = 1;
   int UPSILON_VERBOSITY = 0;
+  int UPSILON_FirstEmbedId = 0;
 
   double PILEUPRATE = 0.;
   bool READHITS = false;
@@ -156,19 +166,27 @@ void InputInit()
     gSystem->Exit(1);
   }
 
-// done with consistency checks, create generators in no specific order
+  // done with consistency checks, create generators in no specific order
 
   Fun4AllServer *se = Fun4AllServer::instance();
   if (Input::PYTHIA6)
   {
     INPUTGENERATOR::Pythia6 = new PHPythia6();
     INPUTGENERATOR::Pythia6->set_config_file(PYTHIA6::config_file);
+
+    INPUTGENERATOR::Pythia6->set_embedding_id(Input::EmbedId);
+    Input::PYTHIA6_EmbedId = Input::EmbedId;
+    Input::EmbedId++;
   }
   if (Input::PYTHIA8)
   {
     INPUTGENERATOR::Pythia8 = new PHPythia8();
     // see coresoftware/generators/PHPythia8 for example config
     INPUTGENERATOR::Pythia8->set_config_file(PYTHIA8::config_file);
+
+    INPUTGENERATOR::Pythia8->set_embedding_id(Input::EmbedId);
+    Input::PYTHIA8_EmbedId = Input::EmbedId;
+    Input::EmbedId++;
   }
   if (Input::SARTRE)
   {
@@ -180,8 +198,12 @@ void InputInit()
     //INPUTGENERATOR::SartreTrigger->SetEtaHighLow(4.0,1.4);
     INPUTGENERATOR::SartreTrigger->SetEtaHighLow(1.0, -1.1);  // central arm
     INPUTGENERATOR::SartreTrigger->PrintConfig();
+
+    INPUTGENERATOR::Sartre->set_embedding_id(Input::EmbedId);
+    Input::SARTRE_EmbedId = Input::EmbedId;
+    Input::EmbedId++;
   }
-// single particle generators
+  // single particle generators
   if (Input::DZERO)
   {
     for (int i = 0; i < Input::DZERO_NUMBER; ++i)
@@ -189,6 +211,7 @@ void InputInit()
       std::string name = "DZERO_" + std::to_string(i);
       PHG4ParticleGeneratorD0 *dzero = new PHG4ParticleGeneratorD0(name);
       dzero->Embed(Input::EmbedId);
+      if (i == 0) Input::DZERO_FirstEmbedId = Input::EmbedId;
       Input::EmbedId++;
       INPUTGENERATOR::DZeroMesonGenerator.push_back(dzero);
     }
@@ -200,6 +223,7 @@ void InputInit()
       std::string name = "GUN_" + std::to_string(i);
       PHG4ParticleGun *gun = new PHG4ParticleGun(name);
       gun->Embed(Input::EmbedId);
+      if (i == 0) Input::GUN_FirstEmbedId = Input::EmbedId;
       Input::EmbedId++;
       INPUTGENERATOR::Gun.push_back(gun);
     }
@@ -211,6 +235,7 @@ void InputInit()
       std::string name = "IONGUN_" + std::to_string(i);
       PHG4IonGun *iongun = new PHG4IonGun(name);
       iongun->Embed(Input::EmbedId);
+      if (i == 0) Input::IONGUN_FirstEmbedId = Input::EmbedId;
       Input::EmbedId++;
       INPUTGENERATOR::IonGun.push_back(iongun);
     }
@@ -233,6 +258,7 @@ void InputInit()
       std::string name = "EVTGENERATOR_" + std::to_string(i);
       PHG4SimpleEventGenerator *simple = new PHG4SimpleEventGenerator(name);
       simple->Embed(Input::EmbedId);
+      if (i == 0) Input::PGEN_FirstEmbedId = Input::EmbedId;
       Input::EmbedId++;
       INPUTGENERATOR::SimpleEventGenerator.push_back(simple);
     }
@@ -244,6 +270,7 @@ void InputInit()
       std::string name = "UPSILON_" + std::to_string(i);
       PHG4ParticleGeneratorVectorMeson *upsilon = new PHG4ParticleGeneratorVectorMeson(name);
       upsilon->Embed(Input::EmbedId);
+      if (i == 0) Input::UPSILON_FirstEmbedId = Input::EmbedId;
       Input::EmbedId++;
       INPUTGENERATOR::VectorMesonGenerator.push_back(upsilon);
     }
@@ -278,7 +305,7 @@ void InputRegister()
   }
   if (Input::DZERO)
   {
-    int verbosity = max(Input::DZERO_VERBOSITY,Input::VERBOSITY);
+    int verbosity = max(Input::DZERO_VERBOSITY, Input::VERBOSITY);
     for (size_t icnt = 0; icnt < INPUTGENERATOR::DZeroMesonGenerator.size(); ++icnt)
     {
       INPUTGENERATOR::DZeroMesonGenerator[icnt]->Verbosity(verbosity);
@@ -287,7 +314,7 @@ void InputRegister()
   }
   if (Input::GUN)
   {
-    int verbosity = max(Input::GUN_VERBOSITY,Input::VERBOSITY);
+    int verbosity = max(Input::GUN_VERBOSITY, Input::VERBOSITY);
     for (size_t icnt = 0; icnt < INPUTGENERATOR::Gun.size(); ++icnt)
     {
       INPUTGENERATOR::Gun[icnt]->Verbosity(verbosity);
@@ -296,7 +323,7 @@ void InputRegister()
   }
   if (Input::IONGUN)
   {
-      int verbosity = max(Input::IONGUN_VERBOSITY,Input::VERBOSITY);
+    int verbosity = max(Input::IONGUN_VERBOSITY, Input::VERBOSITY);
     for (size_t icnt = 0; icnt < INPUTGENERATOR::IonGun.size(); ++icnt)
     {
       INPUTGENERATOR::IonGun[icnt]->Verbosity(verbosity);
@@ -305,7 +332,7 @@ void InputRegister()
   }
   if (Input::PGEN)
   {
-    int verbosity = max(Input::PGEN_VERBOSITY,Input::VERBOSITY);
+    int verbosity = max(Input::PGEN_VERBOSITY, Input::VERBOSITY);
     for (size_t icnt = 0; icnt < INPUTGENERATOR::ParticleGenerator.size(); ++icnt)
     {
       INPUTGENERATOR::ParticleGenerator[icnt]->Verbosity(verbosity);
@@ -314,7 +341,7 @@ void InputRegister()
   }
   if (Input::SIMPLE)
   {
-    int verbosity = max(Input::SIMPLE_VERBOSITY,Input::VERBOSITY);
+    int verbosity = max(Input::SIMPLE_VERBOSITY, Input::VERBOSITY);
     for (size_t icnt = 0; icnt < INPUTGENERATOR::SimpleEventGenerator.size(); ++icnt)
     {
       INPUTGENERATOR::SimpleEventGenerator[icnt]->Verbosity(verbosity);
@@ -325,7 +352,7 @@ void InputRegister()
   {
     for (size_t icnt = 0; icnt < INPUTGENERATOR::VectorMesonGenerator.size(); ++icnt)
     {
-      int verbosity = max(Input::UPSILON_VERBOSITY,Input::VERBOSITY);
+      int verbosity = max(Input::UPSILON_VERBOSITY, Input::VERBOSITY);
       if (Input::HEPMC || Input::SIMPLE)
       {
         INPUTGENERATOR::VectorMesonGenerator[icnt]->set_reuse_existing_vertex(true);

@@ -32,7 +32,7 @@ void QA_G4CaloTracking()
 }
 
 // run this after se->run() to output QA histogram file for all QA modules
-void QA_EndRun(const std::string& qaOutputFileName)
+void QA_Output(const std::string& qaOutputFileName)
 {
   Fun4AllServer* se = Fun4AllServer::instance();
   QAHistManagerDef::saveQARootFile(qaOutputFileName);
