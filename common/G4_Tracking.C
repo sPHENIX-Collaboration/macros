@@ -81,6 +81,7 @@ namespace G4TRACKING
   bool use_Genfit = false;                 // if false, acts KF is run on proto tracks assembled above, if true, use Genfit track propagation and fitting
   bool use_init_vertexing = false;         // false for using smeared truth vertex, set to true to get initial vertex from MVTX hits using PHInitZVertexing
   bool use_primary_vertex = false;         // refit Genfit tracks (only) with primary vertex included - adds second node to node tree, adds second evaluator, outputs separate ntuples
+  bool use_acts_vertexing = true;          // Turn to true for acts final vertexing tool
   bool use_acts_evaluator = false;         // Turn to true for an acts evaluator which outputs acts specific information in a tuple
   int init_vertexing_min_zvtx_tracks = 2;  // PHInitZvertexing parameter for reducing spurious vertices, use 2 for Pythia8 events, 5 for large multiplicity events
                                            //default seed is PHTpcTracker
@@ -399,6 +400,15 @@ void Tracking_Reco()
 	  se->registerSubsystem(residuals);
 
 	}
+
+      if(G4TRACKING::use_acts_vertexing)
+	{
+	  PHActsVertexFinder *vtxer = new PHActsVertexFinder();
+	  vtxer->Verbosity(0);
+	  se->registerSubsystem(vtxer);
+	}
+
+
 #endif
     }
 
