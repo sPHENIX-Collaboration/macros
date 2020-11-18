@@ -164,7 +164,11 @@ void InputInit()
     cout << "Pythia6 and Pythia8 cannot be run together - might be possible but needs R&D" << endl;
     gSystem->Exit(1);
   }
-
+  if (INPUTHEPMC::FLOW && Input::PILEUPRATE > 0)
+  {
+    cout << "Flow Afterburner and Pileup cannot be run simultanously" << endl;
+    gSystem->Exit(1);
+  }
 // done with consistency checks, create generators in no specific order
 
   Fun4AllServer *se = Fun4AllServer::instance();
