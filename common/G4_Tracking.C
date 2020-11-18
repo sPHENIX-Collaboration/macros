@@ -87,6 +87,7 @@ namespace G4TRACKING
   bool use_truth_track_seeding = false;    // false for normal track seeding, use true to run with truth track seeding instead  ***** WORKS FOR GENFIT ONLY
   bool use_Genfit = false;                 // if false, acts KF is run on proto tracks assembled above, if true, use Genfit track propagation and fitting
   bool use_init_vertexing = false;         // false for using smeared truth vertex, set to true to get initial vertex from MVTX hits using PHInitZVertexing
+  bool use_rave_vertexing = true;          // Use Rave to find and fit for vertex after track fitting
   bool use_primary_vertex = false;         // refit Genfit tracks (only) with primary vertex included - adds second node to node tree, adds second evaluator, outputs separate ntuples
   bool use_acts_evaluator = false;         // Turn to true for an acts evaluator which outputs acts specific information in a tuple
   int init_vertexing_min_zvtx_tracks = 2;  // PHInitZvertexing parameter for reducing spurious vertices, use 2 for Pythia8 events, 5 for large multiplicity events
@@ -406,6 +407,18 @@ void Tracking_Reco()
 #endif
   }
 
+  // Final vertex finding and fitting with RAVE
+  //=================================
+  if (G4TRACKING::use_rave_vertexing)
+  {
+    PHRaveVertexing* rave = new PHRaveVertexing();
+//    rave->set_vertexing_method("kalman-smoothing:1");
+    rave->set_over_write_svtxvertexmap(false);
+    rave->set_svtxvertexmaprefit_node_name("SvtxVertexMapRave");
+//    rave->Verbosity(0);
+    se->registerSubsystem(rave);
+  }
+
   //------------------
   // Track Projections
   //------------------
@@ -495,6 +508,18 @@ void Tracking_QA()
   // qa2->addEmbeddingID(2);
   qa2->Verbosity(verbosity);
   se->registerSubsystem(qa2);
+
+
+  if (G4TRACKING::use_rave_vertexing)
+  {
+
+    QAG4SimulationVertex* qav = new QAG4SimulationVertex();
+    // qav->addEmbeddingID(2);
+    qav->Verbosity(verbosity);
+    qav->setVertexMapName("SvtxVertexMapRave");
+    se->registerSubsystem(qav);
+
+  }
 
   if (Input::UPSILON)
   {
