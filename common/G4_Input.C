@@ -16,6 +16,10 @@
 #include <g4main/PHG4SimpleEventGenerator.h>
 #include <g4main/ReadEICFiles.h>
 
+#include <fermimotionafterburner/FermimotionAfterburner.h>
+
+#include <phhepmc/HepMCFlowAfterBurner.h>
+#include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phhepmc/Fun4AllHepMCPileupInputManager.h>
 
@@ -75,6 +79,11 @@ namespace Input
 namespace INPUTHEPMC
 {
   string filename;
+  string listfile;
+  bool FLOW = false;
+  int FLOW_VERBOSITY = 0;
+  bool FERMIMOTION = false;
+
 }
 
 namespace INPUTREADEIC
@@ -172,6 +181,7 @@ void InputInit()
   }
   if (Input::SARTRE)
   {
+    gSystem->Load("libPHSartre.so");
     INPUTGENERATOR::Sartre = new PHSartre();
     INPUTGENERATOR::Sartre->set_config_file(SARTRE::config_file);
     // particle trigger to enhance forward J/Psi -> ee
@@ -347,6 +357,20 @@ void InputRegister()
     // read-in HepMC events to Geant4 if there is any
     HepMCNodeReader *hr = new HepMCNodeReader();
     se->registerSubsystem(hr);
+    if (Input::HEPMC)
+    {
+      if(INPUTHEPMC::FLOW)
+      {
+	HepMCFlowAfterBurner *burn = new HepMCFlowAfterBurner();
+	burn->Verbosity(INPUTHEPMC::FLOW_VERBOSITY);
+	se->registerSubsystem(burn);
+      }
+      if (INPUTHEPMC::FERMIMOTION)
+      {
+	FermimotionAfterburner *fermi = new FermimotionAfterburner();
+	se->registerSubsystem(fermi);
+      }
+    }
   }
 }
 
@@ -377,7 +401,19 @@ void InputManagers()
   {
     INPUTMANAGER::HepMCInputManager->Verbosity(Input::VERBOSITY);
     se->registerInputManager(INPUTMANAGER::HepMCInputManager);
-    se->fileopen(INPUTMANAGER::HepMCInputManager->Name(), INPUTHEPMC::filename);
+    if (!INPUTHEPMC::filename.empty() && INPUTHEPMC::listfile.empty())
+    {
+      INPUTMANAGER::HepMCInputManager->fileopen(INPUTHEPMC::filename);
+    }
+    else if (!INPUTHEPMC::listfile.empty())
+    {
+      INPUTMANAGER::HepMCInputManager->AddListFile(INPUTHEPMC::listfile);
+    }
+    else
+    {
+      cout << "no filename INPUTHEPMC::filename or listfile INPUTHEPMC::listfile given" << endl;
+      gSystem->Exit(1);
+    }
   }
   else if (Input::READHITS)
   {
