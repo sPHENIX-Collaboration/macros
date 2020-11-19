@@ -388,11 +388,10 @@ void InputRegister()
   // put them onto the G4 particle stack
   if (Input::HEPMC or Input::PYTHIA8 or Input::PYTHIA6 or Input::READEIC)
   {
-    // read-in HepMC events to Geant4 if there is any
-    HepMCNodeReader *hr = new HepMCNodeReader();
-    se->registerSubsystem(hr);
     if (Input::HEPMC)
     {
+      // these need to be applied before the HepMCNodeReader since they
+      // work on the hepmc records
       if (INPUTHEPMC::FLOW)
       {
         HepMCFlowAfterBurner *burn = new HepMCFlowAfterBurner();
@@ -405,6 +404,9 @@ void InputRegister()
         se->registerSubsystem(fermi);
       }
     }
+    // copy HepMC records into G4
+    HepMCNodeReader *hr = new HepMCNodeReader();
+    se->registerSubsystem(hr);
   }
 }
 
