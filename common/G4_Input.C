@@ -57,17 +57,17 @@ namespace Input
   bool GUN = false;
   int GUN_NUMBER = 1;
   int GUN_VERBOSITY = 0;
-  std::set<int> GUN_EmbedIds = 0;
+  std::set<int> GUN_EmbedIds;
 
   bool IONGUN = false;
   int IONGUN_NUMBER = 1;
   int IONGUN_VERBOSITY = 0;
-  std::set<int> IONGUN_EmbedIds = 0;
+  std::set<int> IONGUN_EmbedIds;
 
   bool PGEN = false;
   int PGEN_NUMBER = 1;
   int PGEN_VERBOSITY = 0;
-  std::set<int> PGEN_EmbedIds = 0;
+  std::set<int> PGEN_EmbedIds;
 
   bool SIMPLE = false;
   int SIMPLE_NUMBER = 1;
@@ -76,7 +76,7 @@ namespace Input
   bool UPSILON = false;
   int UPSILON_NUMBER = 1;
   int UPSILON_VERBOSITY = 0;
-  std::set<int> UPSILON_EmbedIds = 0;
+  std::set<int> UPSILON_EmbedIds;
 
   double PILEUPRATE = 0.;
   bool READHITS = false;
