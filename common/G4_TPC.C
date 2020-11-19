@@ -2,6 +2,7 @@
 #define MACRO_G4TPC_C
 
 #include <GlobalVariables.C>
+#include <QA.C>
 
 #include <G4_Intt.C>
 #include <G4_Mvtx.C>
@@ -17,11 +18,13 @@
 
 #include <tpc/TpcClusterizer.h>
 #include <tpc/TpcSpaceChargeCorrection.h>
+#include <qa_modules/QAG4SimulationTpc.h>
 
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libtpc.so)
+R__LOAD_LIBRARY(libqa_modules.so)
 
 namespace Enable
 {
@@ -30,6 +33,7 @@ namespace Enable
   bool TPC_OVERLAPCHECK = false;
   bool TPC_CELL = false;
   bool TPC_CLUSTER = false;
+  bool TPC_QA = false;
 
   bool TPC_ENDCAP = true;
 
@@ -218,4 +222,17 @@ void TPC_Clustering()
   }
 
 }
+
+
+void TPC_QA()
+{
+  int verbosity = std::max(Enable::QA_VERBOSITY, Enable::TPC_VERBOSITY);
+
+  Fun4AllServer* se = Fun4AllServer::instance();
+  QAG4SimulationTpc * qa =  new QAG4SimulationTpc;
+  qa->Verbosity(verbosity);
+  se->registerSubsystem(qa);
+}
+
+
 #endif

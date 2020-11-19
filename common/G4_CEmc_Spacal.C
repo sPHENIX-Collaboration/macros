@@ -2,6 +2,7 @@
 #define MACRO_G4CEMCSPACAL_C
 
 #include <GlobalVariables.C>
+#include <QA.C>
 
 #include <g4detectors/PHG4CylinderCellReco.h>
 #include <g4detectors/PHG4CylinderGeom_Spacalv1.h>
@@ -21,6 +22,7 @@
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawClusterPositionCorrection.h>
 #include <caloreco/RawTowerCalibration.h>
+#include <qa_modules/QAG4SimulationCalorimeter.h>
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -34,6 +36,7 @@ R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libqa_modules.so)
 
 namespace Enable
 {
@@ -44,6 +47,7 @@ namespace Enable
   bool CEMC_TOWER = false;
   bool CEMC_CLUSTER = false;
   bool CEMC_EVAL = false;
+  bool CEMC_QA = false;
   int CEMC_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -471,4 +475,17 @@ void CEMC_Eval(const std::string &outputfile)
 
   return;
 }
+
+void CEMC_QA()
+{
+  int verbosity = std::max(Enable::QA_VERBOSITY, Enable::CEMC_VERBOSITY);
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+  QAG4SimulationCalorimeter *qa = new QAG4SimulationCalorimeter("CEMC");
+  qa->Verbosity(verbosity);
+  se->registerSubsystem(qa);
+
+  return;
+}
+
 #endif

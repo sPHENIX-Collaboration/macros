@@ -17,6 +17,7 @@
 #include <G4_TopoClusterReco.C>
 #include <G4_Tracking.C>
 #include <G4_User.C>
+#include <QA.C>
 
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
@@ -203,13 +204,17 @@ int Fun4All_G4_sPHENIX(
   //======================
   // What to run
   //======================
+
+  // QA, main switch
+  Enable::QA = true;
+
   // Global options (enabled for all enables subsystems - if implemented)
   //  Enable::ABSORBER = true;
   //  Enable::OVERLAPCHECK = true;
   //  Enable::VERBOSITY = 1;
 
   // Enable::BBC = true;
-  Enable::BBCFAKE = true; // Smeared vtx and t0, use if you don't want real BBC in simulation
+  Enable::BBCFAKE = true;  // Smeared vtx and t0, use if you don't want real BBC in simulation
 
   Enable::PIPE = true;
   Enable::PIPE_ABSORBER = true;
@@ -218,15 +223,18 @@ int Fun4All_G4_sPHENIX(
   Enable::MVTX = true;
   Enable::MVTX_CELL = Enable::MVTX && true;
   Enable::MVTX_CLUSTER = Enable::MVTX_CELL && true;
+  Enable::MVTX_QA = Enable::MVTX_CLUSTER and Enable::QA && true;
 
   Enable::INTT = true;
   Enable::INTT_CELL = Enable::INTT && true;
   Enable::INTT_CLUSTER = Enable::INTT_CELL && true;
+  Enable::INTT_QA = Enable::INTT_CLUSTER and Enable::QA && true;
 
   Enable::TPC = true;
   Enable::TPC_ABSORBER = true;
   Enable::TPC_CELL = Enable::TPC && true;
   Enable::TPC_CLUSTER = Enable::TPC_CELL && true;
+  Enable::TPC_QA = Enable::TPC_CLUSTER and Enable::QA && true;
 
   //Enable::MICROMEGAS = true;
   Enable::MICROMEGAS_CELL = Enable::MICROMEGAS && true;
@@ -234,6 +242,7 @@ int Fun4All_G4_sPHENIX(
 
   Enable::TRACKING_TRACK = true;
   Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;
+  Enable::TRACKING_QA = Enable::TRACKING_TRACK and Enable::QA && true;
 
   //  cemc electronics + thin layer of W-epoxy to get albedo from cemc
   //  into the tracking, cannot run together with CEMC
@@ -245,6 +254,7 @@ int Fun4All_G4_sPHENIX(
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
+  Enable::CEMC_QA = Enable::CEMC_CLUSTER and Enable::QA && true;
 
   Enable::HCALIN = true;
   Enable::HCALIN_ABSORBER = true;
@@ -252,6 +262,7 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
   Enable::HCALIN_CLUSTER = Enable::HCALIN_TOWER && true;
   Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && true;
+  Enable::HCALIN_QA = Enable::HCALIN_CLUSTER and Enable::QA && true;
 
   Enable::MAGNET = true;
   Enable::MAGNET_ABSORBER = true;
@@ -262,6 +273,7 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
   Enable::HCALOUT_CLUSTER = Enable::HCALOUT_TOWER && true;
   Enable::HCALOUT_EVAL = Enable::HCALOUT_CLUSTER && true;
+  Enable::HCALOUT_QA = Enable::HCALOUT_CLUSTER and Enable::QA && true;
 
   // forward EMC
   //Enable::FEMC = true;
@@ -269,7 +281,7 @@ int Fun4All_G4_sPHENIX(
   Enable::FEMC_CELL = Enable::FEMC && true;
   Enable::FEMC_TOWER = Enable::FEMC_CELL && true;
   Enable::FEMC_CLUSTER = Enable::FEMC_TOWER && true;
-  Enable::FEMC_EVAL = Enable::FEMC_CLUSTER && true;
+  Enable::FEMC_EVAL = Enable::FEMC_CLUSTER and Enable::QA && true;
 
   Enable::EPD = false;
 
@@ -284,6 +296,7 @@ int Fun4All_G4_sPHENIX(
 
   Enable::JETS = true;
   Enable::JETS_EVAL = Enable::JETS && true;
+  Enable::JETS_QA = Enable::JETS and Enable::QA && true;
 
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
   // single particle / p+p-only simulations, or for p+Au / Au+Au
@@ -456,6 +469,23 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::USER) UserAnalysisInit();
 
+  //----------------------
+  // Standard QAs
+  //----------------------
+
+  if (Enable::CEMC_QA) CEMC_QA();
+  if (Enable::HCALIN_QA) HCALInner_QA();
+  if (Enable::HCALOUT_QA) HCALOuter_QA();
+
+  if (Enable::JETS_QA) Jet_QA();
+
+  if (Enable::MVTX_QA) Mvtx_QA();
+  if (Enable::INTT_QA) Intt_QA();
+  if (Enable::TPC_QA) TPC_QA();
+  if (Enable::TRACKING_QA) Tracking_QA();
+
+  if (Enable::TRACKING_QA and Enable::CEMC_QA and Enable::HCALIN_QA and Enable::HCALOUT_QA) QA_G4CaloTracking();
+
   //--------------
   // Set up Input Managers
   //--------------
@@ -508,6 +538,12 @@ int Fun4All_G4_sPHENIX(
 
   se->skip(skip);
   se->run(nEvents);
+
+  //-----
+  // QA output
+  //-----
+
+  if (Enable::QA) QA_Output(outputroot + "_qa.root");
 
   //-----
   // Exit
