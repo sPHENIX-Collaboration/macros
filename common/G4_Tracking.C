@@ -375,24 +375,24 @@ void Tracking_Reco()
 #if __cplusplus >= 201703L
     /// Geometry must be built before any Acts modules
     MakeActsGeometry* geom = new MakeActsGeometry();
-    geom->Verbosity(0);
+    geom->Verbosity(verbosity);
     geom->setMagField(G4MAGNET::magfield);
     geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
     se->registerSubsystem(geom);
 
     /// Always run PHActsSourceLinks and PHActsTracks first, to convert TrkRClusters and SvtxTracks to the Acts equivalent
     PHActsSourceLinks* sl = new PHActsSourceLinks();
-    sl->Verbosity(0);
+    sl->Verbosity(verbosity);
     sl->setMagField(G4MAGNET::magfield);
     sl->setMagFieldRescale(G4MAGNET::magfield_rescale);
     se->registerSubsystem(sl);
 
     PHActsTracks* actsTracks = new PHActsTracks();
-    actsTracks->Verbosity(0);
+    actsTracks->Verbosity(verbosity);
     se->registerSubsystem(actsTracks);
 
     PHActsTrkFitter* actsFit = new PHActsTrkFitter();
-    actsFit->Verbosity(0);
+    actsFit->Verbosity(verbosity);
     actsFit->doTimeAnalysis(false);
     /// If running with distortions, fit only the silicon+MMs first
     actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
@@ -402,9 +402,14 @@ void Tracking_Reco()
     {
       /// run tpc residual determination with silicon+MM track fit
       PHTpcResiduals* residuals = new PHTpcResiduals();
-      residuals->Verbosity(0);
+      residuals->Verbosity(verbosity);
       se->registerSubsystem(residuals);
     }
+
+    PHActsVertexFinder* vtxer = new PHActsVertexFinder();
+    vtxer->Verbosity(verbosity);
+    se->registerSubsystem(vtxer);
+
 #endif
   }
 
@@ -416,7 +421,7 @@ void Tracking_Reco()
     //    rave->set_vertexing_method("kalman-smoothing:1");
     rave->set_over_write_svtxvertexmap(false);
     rave->set_svtxvertexmaprefit_node_name("SvtxVertexMapRave");
-    //    rave->Verbosity(0);
+    rave->Verbosity(verbosity);
     se->registerSubsystem(rave);
   }
 
@@ -517,6 +522,24 @@ void Tracking_QA()
     qav->Verbosity(verbosity);
     qav->setVertexMapName("SvtxVertexMapRave");
     se->registerSubsystem(qav);
+  }
+
+  //  Acts Kalman Filter vertex finder
+  //=================================
+  if (!G4TRACKING::use_Genfit)
+  {
+#if __cplusplus >= 201703L
+
+    //    PHActsVertexFinder* vtxer = new PHActsVertexFinder();
+    //    vtxer->Verbosity(verbosity);
+    //    se->registerSubsystem(vtxer);
+
+    QAG4SimulationVertex* qav = new QAG4SimulationVertex();
+    // qav->addEmbeddingID(2);
+    qav->Verbosity(verbosity);
+    qav->setVertexMapName("SvtxVertexMapActs");
+    se->registerSubsystem(qav);
+#endif
   }
 
   if (Input::UPSILON)
