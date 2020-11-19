@@ -17,10 +17,10 @@
 #include <trackreco/PHGenFitTrackProjection.h>
 #include <trackreco/PHGenFitTrkFitter.h>
 #include <trackreco/PHGenFitTrkProp.h>
-#include <trackreco/PHRaveVertexing.h>
 #include <trackreco/PHHoughSeeding.h>
 #include <trackreco/PHInitZVertexing.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
+#include <trackreco/PHRaveVertexing.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSiliconTruthTrackSeeding.h>
 #include <trackreco/PHTrackSeeding.h>
@@ -413,10 +413,10 @@ void Tracking_Reco()
   if (G4TRACKING::use_rave_vertexing)
   {
     PHRaveVertexing* rave = new PHRaveVertexing();
-//    rave->set_vertexing_method("kalman-smoothing:1");
+    //    rave->set_vertexing_method("kalman-smoothing:1");
     rave->set_over_write_svtxvertexmap(false);
     rave->set_svtxvertexmaprefit_node_name("SvtxVertexMapRave");
-//    rave->Verbosity(0);
+    //    rave->Verbosity(0);
     se->registerSubsystem(rave);
   }
 
@@ -510,25 +510,22 @@ void Tracking_QA()
   qa2->Verbosity(verbosity);
   se->registerSubsystem(qa2);
 
-
   if (G4TRACKING::use_rave_vertexing)
   {
-
     QAG4SimulationVertex* qav = new QAG4SimulationVertex();
     // qav->addEmbeddingID(2);
     qav->Verbosity(verbosity);
     qav->setVertexMapName("SvtxVertexMapRave");
     se->registerSubsystem(qav);
-
   }
 
   if (Input::UPSILON)
   {
     QAG4SimulationUpsilon* qa = new QAG4SimulationUpsilon();
 
-    for (int i = 0; i < Input::UPSILON_NUMBER; ++i)
+    for (int id : Input::UPSILON_EmbedIds)
     {
-      qa->addEmbeddingID(Input::UPSILON_FirstEmbedId + i);
+      qa->addEmbeddingID(id);
     }
     se->registerSubsystem(qa);
   }

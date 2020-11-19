@@ -28,6 +28,8 @@
 #include <fun4all/Fun4AllNoSyncDstInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 
+#include <set>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
@@ -50,22 +52,22 @@ namespace Input
   bool DZERO = false;
   int DZERO_NUMBER = 1;
   int DZERO_VERBOSITY = 0;
-  int DZERO_FirstEmbedId = 0;
+  std::set<int> DZERO_EmbedIds;
 
   bool GUN = false;
   int GUN_NUMBER = 1;
   int GUN_VERBOSITY = 0;
-  int GUN_FirstEmbedId = 0;
+  std::set<int> GUN_EmbedIds = 0;
 
   bool IONGUN = false;
   int IONGUN_NUMBER = 1;
   int IONGUN_VERBOSITY = 0;
-  int IONGUN_FirstEmbedId = 0;
+  std::set<int> IONGUN_EmbedIds = 0;
 
   bool PGEN = false;
   int PGEN_NUMBER = 1;
   int PGEN_VERBOSITY = 0;
-  int PGEN_FirstEmbedId = 0;
+  std::set<int> PGEN_EmbedIds = 0;
 
   bool SIMPLE = false;
   int SIMPLE_NUMBER = 1;
@@ -74,7 +76,7 @@ namespace Input
   bool UPSILON = false;
   int UPSILON_NUMBER = 1;
   int UPSILON_VERBOSITY = 0;
-  int UPSILON_FirstEmbedId = 0;
+  std::set<int> UPSILON_EmbedIds = 0;
 
   double PILEUPRATE = 0.;
   bool READHITS = false;
@@ -211,7 +213,7 @@ void InputInit()
       std::string name = "DZERO_" + std::to_string(i);
       PHG4ParticleGeneratorD0 *dzero = new PHG4ParticleGeneratorD0(name);
       dzero->Embed(Input::EmbedId);
-      if (i == 0) Input::DZERO_FirstEmbedId = Input::EmbedId;
+      Input::DZERO_EmbedIds.insert(Input::EmbedId);
       Input::EmbedId++;
       INPUTGENERATOR::DZeroMesonGenerator.push_back(dzero);
     }
@@ -223,7 +225,7 @@ void InputInit()
       std::string name = "GUN_" + std::to_string(i);
       PHG4ParticleGun *gun = new PHG4ParticleGun(name);
       gun->Embed(Input::EmbedId);
-      if (i == 0) Input::GUN_FirstEmbedId = Input::EmbedId;
+      Input::GUN_EmbedIds.insert(Input::EmbedId);
       Input::EmbedId++;
       INPUTGENERATOR::Gun.push_back(gun);
     }
@@ -235,7 +237,7 @@ void InputInit()
       std::string name = "IONGUN_" + std::to_string(i);
       PHG4IonGun *iongun = new PHG4IonGun(name);
       iongun->Embed(Input::EmbedId);
-      if (i == 0) Input::IONGUN_FirstEmbedId = Input::EmbedId;
+      Input::IONGUN_EmbedIds.insert(Input::EmbedId);
       Input::EmbedId++;
       INPUTGENERATOR::IonGun.push_back(iongun);
     }
@@ -247,6 +249,7 @@ void InputInit()
       std::string name = "PGEN_" + std::to_string(i);
       PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator(name);
       pgen->Embed(Input::EmbedId);
+      Input::PGEN_EmbedIds.insert(Input::EmbedId);
       Input::EmbedId++;
       INPUTGENERATOR::ParticleGenerator.push_back(pgen);
     }
@@ -258,7 +261,7 @@ void InputInit()
       std::string name = "EVTGENERATOR_" + std::to_string(i);
       PHG4SimpleEventGenerator *simple = new PHG4SimpleEventGenerator(name);
       simple->Embed(Input::EmbedId);
-      if (i == 0) Input::PGEN_FirstEmbedId = Input::EmbedId;
+      Input::PGEN_EmbedIds.insert(Input::EmbedId);
       Input::EmbedId++;
       INPUTGENERATOR::SimpleEventGenerator.push_back(simple);
     }
@@ -270,7 +273,7 @@ void InputInit()
       std::string name = "UPSILON_" + std::to_string(i);
       PHG4ParticleGeneratorVectorMeson *upsilon = new PHG4ParticleGeneratorVectorMeson(name);
       upsilon->Embed(Input::EmbedId);
-      if (i == 0) Input::UPSILON_FirstEmbedId = Input::EmbedId;
+      Input::UPSILON_EmbedIds.insert(Input::EmbedId);
       Input::EmbedId++;
       INPUTGENERATOR::VectorMesonGenerator.push_back(upsilon);
     }
