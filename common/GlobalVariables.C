@@ -2,6 +2,7 @@
 #define MACRO_GLOBALVARIABLES_C
 
 #include <g4decayer/EDecayType.hh>
+#include <set>
 
 double no_overlapp = 0.0001;
 
@@ -12,6 +13,9 @@ namespace Input
   bool HEPMC = false;
   bool EMBED = false;
   bool READEIC = false;
+
+  bool UPSILON = false;
+  std::set<int> UPSILON_EmbedIds;
 }  // namespace Input
 
 namespace DstOut

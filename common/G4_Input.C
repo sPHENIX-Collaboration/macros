@@ -76,10 +76,10 @@ namespace Input
   int SIMPLE_NUMBER = 1;
   int SIMPLE_VERBOSITY = 0;
 
-  bool UPSILON = false;
+//  bool UPSILON = false; // moved to GlobalVariables.C, as used in downstream vairables
   int UPSILON_NUMBER = 1;
   int UPSILON_VERBOSITY = 0;
-  std::set<int> UPSILON_EmbedIds;
+//  std::set<int> UPSILON_EmbedIds; // moved to GlobalVariables.C, as used in downstream vairables
 
   double PILEUPRATE = 0.;
   bool READHITS = false;
