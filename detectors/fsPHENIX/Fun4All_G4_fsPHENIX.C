@@ -11,6 +11,7 @@
 #include <G4_FwdJets.C>
 #include <G4_Global.C>
 #include <G4_Input.C>
+#include <G4_Tracking.C>
 #include <G4_Jets.C>
 #include <G4_Production.C>
 #include <G4_User.C>
