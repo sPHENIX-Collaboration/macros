@@ -12,6 +12,7 @@ namespace Enable
 {
   bool BLACKHOLE = false;
   bool BLACKHOLE_SAVEHITS = true;
+  bool BLACKHOLE_FORWARD_SAVEHITS = true;
 }  // namespace Enable
 
 void BlackHoleInit() {}
@@ -65,7 +66,7 @@ void BlackHole(PHG4Reco *g4Reco, double radius)
     blackhole->set_color(1, 0, 0, 0.7);
   }
   blackhole->BlackHole();
-  if (Enable::BLACKHOLE_SAVEHITS)
+  if (Enable::BLACKHOLE_SAVEHITS && Enable::BLACKHOLE_FORWARD_SAVEHITS)
   {
     blackhole->SetActive();  // see what leaks out
   }
@@ -86,7 +87,7 @@ void BlackHole(PHG4Reco *g4Reco, double radius)
     blackhole->set_color(1, 0, 0, 0.7);
   }
   blackhole->BlackHole();
-  if (Enable::BLACKHOLE_SAVEHITS)
+  if (Enable::BLACKHOLE_SAVEHITS && Enable::BLACKHOLE_FORWARD_SAVEHITS)
   {
     blackhole->SetActive();  // always see what leaks out
   }
