@@ -138,7 +138,7 @@ void TrackingInit()
   }
 
   // SC_CALIBMODE makes no sense if distortions are not present
-  G4TRACKING::SC_CALIBMODE = G4TPC::ENABLE_DISTORTIONS && G4TRACKING::SC_CALIBMODE;
+  G4TRACKING::SC_CALIBMODE = (G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS ) && G4TRACKING::SC_CALIBMODE;
 
   // Genfit does final vertexing, Acts does not
   if (G4TRACKING::use_Genfit)

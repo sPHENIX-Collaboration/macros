@@ -8,6 +8,7 @@
 #include <G4_Mvtx.C>
 
 #include <g4tpc/PHG4TpcDigitizer.h>
+#include <g4tpc/PHG4TpcDistortion.h>
 #include <g4tpc/PHG4TpcElectronDrift.h>
 #include <g4tpc/PHG4TpcEndCapSubsystem.h>
 #include <g4tpc/PHG4TpcPadPlane.h>
@@ -50,12 +51,16 @@ namespace G4TPC
   double tpc_outer_radius = 77. + 2.;
 
   // distortions
-  bool ENABLE_DISTORTIONS = false;
-  auto distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/TPC/DistortionMaps/fluct_average.rev3.1side.3d.file0.h_negz.real_B1.4_E-400.0.ross_phi1_sphenix_phislice_lookup_r26xp40xz40.distortion_map.hist.root";
-  unsigned int distortion_coordinates =
-    PHG4TpcElectronDrift::COORD_PHI|
-    PHG4TpcElectronDrift::COORD_R|
-    PHG4TpcElectronDrift::COORD_Z;
+  bool ENABLE_STATIC_DISTORTIONS = false;
+  auto static_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/TPC/DistortionMaps/fluct_average.rev3.1side.3d.file0.h_negz.real_B1.4_E-400.0.ross_phi1_sphenix_phislice_lookup_r26xp40xz40.distortion_map.hist.root";
+
+  bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
+  std::string time_ordered_distortion_filename = "/gpfs/mnt/gpfs02/sphenix/user/klest/TimeOrderedDistortions.root";
+
+//   unsigned int distortion_coordinates =
+//     PHG4TpcElectronDrift::COORD_PHI|
+//     PHG4TpcElectronDrift::COORD_R|
+//     PHG4TpcElectronDrift::COORD_Z;
 
   // distortion corrections
   bool ENABLE_CORRECTIONS = false;
@@ -162,13 +167,19 @@ void TPC_Cells()
   PHG4TpcElectronDrift* edrift = new PHG4TpcElectronDrift();
   edrift->Detector("TPC");
   edrift->Verbosity(verbosity);
-  edrift->set_enable_distortions( G4TPC::ENABLE_DISTORTIONS);
-  if( G4TPC::ENABLE_DISTORTIONS )
-    {
-      edrift->set_distortion_filename( G4TPC::distortion_filename );  
-      edrift->set_coordinates( G4TPC::distortion_coordinates );
-    }
-  
+  if( G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS )
+  {
+    auto distortionMap = new PHG4TpcDistortion;
+    distortionMap->set_do_static_distortions( G4TPC::ENABLE_STATIC_DISTORTIONS );
+    distortionMap->set_static_distortion_filename( G4TPC::static_distortion_filename );
+
+    distortionMap->set_do_time_ordered_distortions( G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS );
+    distortionMap->set_time_ordered_distortion_filename( G4TPC::time_ordered_distortion_filename );
+
+    distortionMap->Init();
+    edrift->setTpcDistortion( distortionMap );
+  }
+
   // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
   // They represent effects not due to ideal gas properties and ideal readout plane behavior
   // defaults are 0.085 and 0.105, they can be changed here to get a different resolution
