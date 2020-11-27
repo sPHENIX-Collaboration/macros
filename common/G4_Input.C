@@ -38,6 +38,7 @@ R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
 R__LOAD_LIBRARY(libPHSartre.so)
+R__LOAD_LIBRARY(libFermimotionAfterburner.so)
 
 namespace Input
 {
