@@ -45,11 +45,11 @@ void EEMCInit()
 {
   if (G4EEMC::use_projective_geometry)
   {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 81.);
+    BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 81.);
   }
-else
+  else
   {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 65.6);
+    BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 65.6);
   }
   // from towerMap_EEMC_v006.txt
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4EEMC::Gz0 - G4EEMC::Gdz / 2.);
@@ -69,7 +69,7 @@ void EEMCSetup(PHG4Reco *g4Reco)
   {
     eemc->SetAbsorberActive();
   }
- 
+
   /* path to central copy of calibrations repositry */
   ostringstream mapping_eemc;
 
