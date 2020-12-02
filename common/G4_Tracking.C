@@ -32,6 +32,7 @@
 #include <trackreco/ActsEvaluator.h>
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSourceLinks.h>
+#include <trackreco/PHActsSiliconSeeding.h>
 #include <trackreco/PHActsTracks.h>
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsTrkProp.h>
@@ -306,6 +307,23 @@ void Tracking_Reco()
       PHSiliconTruthTrackSeeding* silicon_seeding = new PHSiliconTruthTrackSeeding();
       silicon_seeding->Verbosity(0);
       se->registerSubsystem(silicon_seeding);
+  /// qGeometry must be built before any Acts modules
+      MakeActsGeometry* geom = new MakeActsGeometry();
+      geom->Verbosity(verbosity);
+      geom->setMagField(G4MAGNET::magfield);
+      geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
+      se->registerSubsystem(geom);
+      
+      /// Always run PHActsSourceLinks and PHActsTracks first, to convert TrkRClusters and SvtxTracks to the Acts equivalent
+      PHActsSourceLinks* sl = new PHActsSourceLinks();
+      sl->Verbosity(verbosity);
+      sl->setMagField(G4MAGNET::magfield);
+      sl->setMagFieldRescale(G4MAGNET::magfield_rescale);
+      se->registerSubsystem(sl);
+      
+      PHActsSiliconSeeding* silicon_Seeding = new PHActsSiliconSeeding();
+      silicon_Seeding->Verbosity(10);
+      se->registerSubsystem(silicon_Seeding);
 
       // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
       PHSiliconTpcTrackMatching* silicon_match = new PHSiliconTpcTrackMatching();
@@ -373,19 +391,7 @@ void Tracking_Reco()
     std::cout << "   Using Acts track fitting " << std::endl;
 
 #if __cplusplus >= 201703L
-    /// Geometry must be built before any Acts modules
-    MakeActsGeometry* geom = new MakeActsGeometry();
-    geom->Verbosity(verbosity);
-    geom->setMagField(G4MAGNET::magfield);
-    geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
-    se->registerSubsystem(geom);
-
-    /// Always run PHActsSourceLinks and PHActsTracks first, to convert TrkRClusters and SvtxTracks to the Acts equivalent
-    PHActsSourceLinks* sl = new PHActsSourceLinks();
-    sl->Verbosity(verbosity);
-    sl->setMagField(G4MAGNET::magfield);
-    sl->setMagFieldRescale(G4MAGNET::magfield_rescale);
-    se->registerSubsystem(sl);
+  
 
     PHActsTracks* actsTracks = new PHActsTracks();
     actsTracks->Verbosity(verbosity);
