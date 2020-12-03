@@ -1,20 +1,22 @@
 #ifndef MACRO_FUN4ALLG4EICDETECTOR_C
 #define MACRO_FUN4ALLG4EICDETECTOR_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "DisplayOn.C"
-#include "G4Setup_EICDetector.C"
-#include "G4_Bbc.C"
-#include "G4_CaloTrigger.C"
-#include "G4_DSTReader_EICDetector.C"
-#include "G4_FwdJets.C"
-#include "G4_Global.C"
-#include "G4_HIJetReco.C"
-#include "G4_Input.C"
-#include "G4_Jets.C"
-#include "G4_Production.C"
+#include <DisplayOn.C>
+#include <G4Setup_EICDetector.C>
+#include <G4_Bbc.C>
+#include <G4_CaloTrigger.C>
+#include <G4_DSTReader_EICDetector.C>
+#include <G4_FwdJets.C>
+#include <G4_Global.C>
+#include <G4_HIJetReco.C>
+#include <G4_Input.C>
+#include <G4_Jets.C>
+#include <G4_Production.C>
+#include <G4_User.C>
 
+#include <TROOT.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
@@ -25,7 +27,7 @@ R__LOAD_LIBRARY(libfun4all.so)
 
 int Fun4All_G4_EICDetector(
     const int nEvents = 1,
-    const string &inputFile = "/sphenix/data/data02/review_2017-08-02/single_particle/spacal2d/fieldmap/G4Hits_sPHENIX_e-_eta0_8GeV-0002.root",
+    const string &inputFile = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const string &outputFile = "G4EICDetector.root",
     const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const int skip = 0,
@@ -77,15 +79,18 @@ int Fun4All_G4_EICDetector(
 
   // Simple multi particle generator in eta/phi/pt ranges
   Input::SIMPLE = true;
+  // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
   // Particle gun (same particles in always the same direction)
-  //  Input::GUN = true;
-  Input::GUN_VERBOSITY = 0;
+  // Input::GUN = true;
+  // Input::GUN_NUMBER = 3; // if you need 3 of them
+  // Input::GUN_VERBOSITY = 0;
 
   // Upsilon generator
-  //Input::UPSILON = true;
-  Input::UPSILON_VERBOSITY = 0;
+  // Input::UPSILON = true;
+  // Input::UPSILON_NUMBER = 3; // if you need 3 of them
+  // Input::UPSILON_VERBOSITY = 0;
 
   // And/Or read generated particles from file
 
@@ -108,40 +113,46 @@ int Fun4All_G4_EICDetector(
   // can only be set after InputInit() is called
 
   // Simple Input generator:
+  // if you run more than one of these Input::SIMPLE_NUMBER > 1
+  // add the settings for other with [1], next with [2]...
   if (Input::SIMPLE)
   {
-    INPUTGENERATOR::SimpleEventGenerator->add_particles("pi-", 5);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 5);
     if (Input::HEPMC || Input::EMBED)
     {
-      INPUTGENERATOR::SimpleEventGenerator->set_reuse_existing_vertex(true);
-      INPUTGENERATOR::SimpleEventGenerator->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_reuse_existing_vertex(true);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
     }
     else
     {
-      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
-                                                                             PHG4SimpleEventGenerator::Uniform,
-                                                                             PHG4SimpleEventGenerator::Uniform);
-      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_mean(0., 0., 0.);
-      INPUTGENERATOR::SimpleEventGenerator->set_vertex_distribution_width(0., 0., 5.);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
+                                                                                PHG4SimpleEventGenerator::Uniform,
+                                                                                PHG4SimpleEventGenerator::Uniform);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_mean(0., 0., 0.);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0., 0., 5.);
     }
-    INPUTGENERATOR::SimpleEventGenerator->set_eta_range(-3, 3);
-    INPUTGENERATOR::SimpleEventGenerator->set_phi_range(-M_PI, M_PI);
-    INPUTGENERATOR::SimpleEventGenerator->set_pt_range(0.1, 20.);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-3, 3);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.1, 20.);
   }
   // Upsilons
+  // if you run more than one of these Input::UPSILON_NUMBER > 1
+  // add the settings for other with [1], next with [2]...
   if (Input::UPSILON)
   {
-    INPUTGENERATOR::VectorMesonGenerator->add_decay_particles("mu", 0);
-    INPUTGENERATOR::VectorMesonGenerator->set_rapidity_range(-1, 1);
-    INPUTGENERATOR::VectorMesonGenerator->set_pt_range(0., 10.);
+    INPUTGENERATOR::VectorMesonGenerator[0]->add_decay_particles("mu", 0);
+    INPUTGENERATOR::VectorMesonGenerator[0]->set_rapidity_range(-1, 1);
+    INPUTGENERATOR::VectorMesonGenerator[0]->set_pt_range(0., 10.);
     // Y species - select only one, last one wins
-    INPUTGENERATOR::VectorMesonGenerator->set_upsilon_1s();
+    INPUTGENERATOR::VectorMesonGenerator[0]->set_upsilon_1s();
   }
   // particle gun
+  // if you run more than one of these Input::GUN_NUMBER > 1
+  // add the settings for other with [1], next with [2]...
   if (Input::GUN)
   {
-    INPUTGENERATOR::Gun->AddParticle("pi-", 0, 1, 0);
-    INPUTGENERATOR::Gun->set_vtx(0, 0, 0);
+    INPUTGENERATOR::Gun[0]->AddParticle("pi-", 0, 1, 0);
+    INPUTGENERATOR::Gun[0]->set_vtx(0, 0, 0);
   }
   // pythia6
   if (Input::PYTHIA6)
@@ -156,10 +167,10 @@ int Fun4All_G4_EICDetector(
 
   if (Input::HEPMC)
   {
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4,100e-4,30,0);//optional collision smear in space, time
-//    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
+    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4, 100e-4, 30, 0);  //optional collision smear in space, time
+                                                                                            //    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
     // //optional choice of vertex distribution function in space, time
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus,PHHepMCGenHelper::Gaus);
+    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
     //! embedding ID for the event
     //! positive ID is the embedded event of interest, e.g. jetty event from pythia
     //! negative IDs are backgrounds, .e.g out of time pile up collisions
@@ -170,8 +181,8 @@ int Fun4All_G4_EICDetector(
   // register all input generators with Fun4All
   InputRegister();
 
-// set up production relatedstuff
-//   Enable::PRODUCTION = true;
+  // set up production relatedstuff
+  //   Enable::PRODUCTION = true;
 
   //======================
   // Write the DST
@@ -185,6 +196,9 @@ int Fun4All_G4_EICDetector(
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   //Enable::DSTREADER = true;
 
+  // turn the display on (default off)
+  Enable::DISPLAY = false;
+
   //======================
   // What to run
   //======================
@@ -193,7 +207,8 @@ int Fun4All_G4_EICDetector(
   //  Enable::OVERLAPCHECK = true;
   //  Enable::VERBOSITY = 1;
 
-  Enable::BBC = true;
+  //  Enable::BBC = true;
+  Enable::BBCFAKE = true; // Smeared vtx and t0, use if you don't want real BBC in simulation
 
   // whether to simulate the Be section of the beam pipe
   Enable::PIPE = true;
@@ -208,6 +223,7 @@ int Fun4All_G4_EICDetector(
   // mvtx/tpc tracker
   Enable::MVTX = true;
   Enable::TPC = true;
+  //  Enable::TPC_ENDCAP = true;
 
   Enable::TRACKING = true;
   Enable::TRACKING_EVAL = Enable::TRACKING && true;
@@ -294,6 +310,8 @@ int Fun4All_G4_EICDetector(
   //Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
   //BlackHoleGeometry::visible = true;
 
+  //Enable::USER = true;
+
   //---------------
   // World Settings
   //---------------
@@ -329,19 +347,11 @@ int Fun4All_G4_EICDetector(
     G4Setup();
   }
 
-  //---------
-  // BBC Reco
-  //---------
-
-  if (Enable::BBC)
-  {
-    BbcInit();
-    Bbc_Reco();
-  }
-
   //------------------
   // Detector Division
   //------------------
+
+  if (Enable::BBC || Enable::BBCFAKE) Bbc_Reco();
 
   if (Enable::CEMC_CELL) CEMC_Cells();
 
@@ -453,6 +463,8 @@ int Fun4All_G4_EICDetector(
 
   if (Enable::FWDJETS_EVAL) Jet_FwdEval(outputroot + "_g4fwdjet_eval.root");
 
+  if (Enable::USER) UserAnalysisInit();
+
   //--------------
   // Set up Input Managers
   //--------------
@@ -478,6 +490,22 @@ int Fun4All_G4_EICDetector(
   //-----------------
   // Event processing
   //-----------------
+  if (Enable::DISPLAY)
+  {
+    DisplayOn();
+
+    gROOT->ProcessLine("Fun4AllServer *se = Fun4AllServer::instance();");
+    gROOT->ProcessLine("PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco(\"PHG4RECO\");");
+
+    cout << "-------------------------------------------------" << endl;
+    cout << "You are in event display mode. Run one event with" << endl;
+    cout << "se->run(1)" << endl;
+    cout << "Run Geant4 command with following examples" << endl;
+    gROOT->ProcessLine("displaycmd()");
+
+    return 0;
+  }
+  // if we use a negative number of events we go back to the command line here
   if (nEvents < 0)
   {
     return 0;

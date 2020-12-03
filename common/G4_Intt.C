@@ -1,9 +1,10 @@
 #ifndef MACRO_G4INTT_C
 #define MACRO_G4INTT_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
+#include <QA.C>
 
-#include "G4_Mvtx.C"
+#include <G4_Mvtx.C>
 
 #include <g4intt/PHG4InttDefs.h>
 #include <g4intt/PHG4InttDigitizer.h>
@@ -13,6 +14,7 @@
 #include <g4main/PHG4Reco.h>
 
 #include <intt/InttClusterizer.h>
+#include <qa_modules/QAG4SimulationIntt.h>
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -21,6 +23,7 @@
 
 R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libintt.so)
+R__LOAD_LIBRARY(libqa_modules.so)
 
 namespace Enable
 {
@@ -28,6 +31,7 @@ namespace Enable
   bool INTT_OVERLAPCHECK = false;
   bool INTT_CELL = false;
   bool INTT_CLUSTER = false;
+  bool INTT_QA = false;
   int INTT_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -40,7 +44,7 @@ namespace G4INTT
                        PHG4InttDefs::SEGMENTATION_PHI,
                        PHG4InttDefs::SEGMENTATION_PHI};
   int nladder[4] = {12, 12, 16, 16};
-  double sensor_radius[4] = { 7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
+  double sensor_radius[4] = {7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
 
   double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
 
@@ -186,4 +190,16 @@ void Intt_Clustering()
   }
   se->registerSubsystem(inttclusterizer);
 }
+
+
+void Intt_QA()
+{
+  int verbosity = std::max(Enable::QA_VERBOSITY, Enable::INTT_VERBOSITY);
+
+  Fun4AllServer* se = Fun4AllServer::instance();
+  QAG4SimulationIntt* qa = new QAG4SimulationIntt;
+  qa->Verbosity(verbosity);
+  se->registerSubsystem(qa);
+}
+
 #endif

@@ -1,30 +1,31 @@
 #ifndef MACRO_G4SETUPEICDETECTOR_C
 #define MACRO_G4SETUPEICDETECTOR_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_Aerogel.C"
-#include "G4_Barrel_EIC.C"
-#include "G4_BlackHole.C"
-#include "G4_CEmc_EIC.C"
-#include "G4_DIRC.C"
-#include "G4_EEMC.C"
-#include "G4_FEMC_EIC.C"
-#include "G4_FHCAL.C"
-#include "G4_FST_EIC.C"
-#include "G4_GEM_EIC.C"
-#include "G4_HcalIn_ref.C"
-#include "G4_HcalOut_ref.C"
-#include "G4_Input.C"
-#include "G4_Magnet.C"
-#include "G4_Mvtx_EIC.C"
-#include "G4_Pipe_EIC.C"
-#include "G4_PlugDoor_EIC.C"
-#include "G4_RICH.C"
-#include "G4_TPC_EIC.C"
-#include "G4_Tracking_EIC.C"
-#include "G4_User.C"
-#include "G4_World.C"
+#include <G4_Aerogel.C>
+#include <G4_Barrel_EIC.C>
+#include <G4_Bbc.C>
+#include <G4_BlackHole.C>
+#include <G4_CEmc_EIC.C>
+#include <G4_DIRC.C>
+#include <G4_EEMC.C>
+#include <G4_FEMC_EIC.C>
+#include <G4_FHCAL.C>
+#include <G4_FST_EIC.C>
+#include <G4_GEM_EIC.C>
+#include <G4_HcalIn_ref.C>
+#include <G4_HcalOut_ref.C>
+#include <G4_Input.C>
+#include <G4_Magnet.C>
+#include <G4_Mvtx_EIC.C>
+#include <G4_Pipe_EIC.C>
+#include <G4_PlugDoor_EIC.C>
+#include <G4_RICH.C>
+#include <G4_TPC_EIC.C>
+#include <G4_Tracking_EIC.C>
+#include <G4_User.C>
+#include <G4_World.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
@@ -59,102 +60,29 @@ void G4Init()
   }
 
   // load detector/material macros and execute Init() function
-  if (Enable::PIPE)
-  {
-    PipeInit();
-  }
-
-  if (Enable::PLUGDOOR)
-  {
-    PlugDoorInit();
-  }
-
-  if (Enable::EGEM)
-  {
-    EGEM_Init();
-  }
-  if (Enable::FGEM)
-  {
-    FGEM_Init();
-  }
-  if (Enable::FST)
-  {
-    FST_Init();
-  }
-  if (Enable::BARREL)
-  {
-    BarrelInit();
-  }
-  if (Enable::MVTX)
-  {
-    MvtxInit();
-  }
-  if (Enable::TPC)
-  {
-    TPCInit();
-  }
-  if (Enable::TRACKING)
-  {
-    TrackingInit();
-  }
-
-  if (Enable::CEMC)
-  {
-    CEmcInit(72);  // make it 2*2*2*3*3 so we can try other combinations
-  }
-
-  if (Enable::HCALIN)
-  {
-    HCalInnerInit(1);
-  }
-
-  if (Enable::MAGNET)
-  {
-    MagnetInit();
-  }
-  if (Enable::HCALOUT)
-  {
-    HCalOuterInit();
-  }
-
-  if (Enable::FEMC)
-  {
-    FEMCInit();
-  }
-
-  if (Enable::FHCAL)
-  {
-    FHCALInit();
-  }
-
-  if (Enable::EEMC)
-  {
-    EEMCInit();
-  }
-
-  if (Enable::DIRC)
-  {
-    DIRCInit();
-  }
-
-  if (Enable::RICH)
-  {
-    RICHInit();
-  }
-
-  if (Enable::AEROGEL)
-  {
-    AerogelInit();
-  }
-  if (Enable::USER)
-  {
-    UserInit();
-  }
-
-  if (Enable::BLACKHOLE)
-  {
-    BlackHoleInit();
-  }
+  if (Enable::PIPE) PipeInit();
+  if (Enable::PLUGDOOR) PlugDoorInit();
+  if (Enable::EGEM) EGEM_Init();
+  if (Enable::FGEM) FGEM_Init();
+  if (Enable::FST) FST_Init();
+  if (Enable::BARREL) BarrelInit();
+  if (Enable::MVTX) MvtxInit();
+  if (Enable::TPC) TPCInit();
+  if (Enable::TRACKING) TrackingInit();
+  if (Enable::BBC) BbcInit();
+  if (Enable::CEMC) CEmcInit(72);  // make it 2*2*2*3*3 so we can try other combinations
+  if (Enable::HCALIN) HCalInnerInit(1);
+  if (Enable::MAGNET) MagnetInit();
+  MagnetFieldInit(); // We want the field - even if the magnet volume is disabled
+  if (Enable::HCALOUT) HCalOuterInit();
+  if (Enable::FEMC) FEMCInit();
+  if (Enable::FHCAL) FHCALInit();
+  if (Enable::EEMC) EEMCInit();
+  if (Enable::DIRC) DIRCInit();
+  if (Enable::RICH) RICHInit();
+  if (Enable::AEROGEL) AerogelInit();
+  if (Enable::USER) UserInit();
+  if (Enable::BLACKHOLE) BlackHoleInit();
 }
 
 int G4Setup()
@@ -200,127 +128,42 @@ int G4Setup()
   }
   g4Reco->set_field_rescale(G4MAGNET::magfield_rescale);
 
+// the radius is an older protection against overlaps, it is not
+// clear how well this works nowadays but it doesn't hurt either
   double radius = 0.;
 
-  //----------------------------------------
-  // PIPE
-  if (Enable::PIPE)
-  {
-    radius = Pipe(g4Reco, radius);
-  }
-  //----------------------------------------
-
-  if (Enable::EGEM)
-  {
-    EGEMSetup(g4Reco);
-  }
-
-  if (Enable::FGEM)
-  {
-    FGEMSetup(g4Reco);
-  }
-  if (Enable::FST)
-  {
-    FSTSetup(g4Reco);
-  }
-  if (Enable::BARREL)
-  {
-    Barrel(g4Reco, radius);
-  }
-  if (Enable::MVTX)
-  {
-    radius = Mvtx(g4Reco, radius);
-  }
-  if (Enable::TPC)
-  {
-    radius = TPC(g4Reco, radius);
-  }
-
-  //----------------------------------------
-  // CEMC
-  //
-  if (Enable::CEMC)
-  {
-    radius = CEmc(g4Reco, radius);
-  }
-
-  //----------------------------------------
-  // HCALIN
-
-  if (Enable::HCALIN)
-  {
-    radius = HCalInner(g4Reco, radius, 4);
-  }
-  //----------------------------------------
-  // MAGNET
-
-  if (Enable::MAGNET)
-  {
-    radius = Magnet(g4Reco, radius);
-  }
-  //----------------------------------------
-  // HCALOUT
-
-  if (Enable::HCALOUT)
-  {
-    radius = HCalOuter(g4Reco, radius, 4);
-  }
-  //----------------------------------------
-  // FEMC
-
-  if (Enable::FEMC)
-  {
-    FEMCSetup(g4Reco);
-  }
-
-  //----------------------------------------
-  // FHCAL
-
-  if (Enable::FHCAL)
-  {
-    FHCALSetup(g4Reco);
-  }
-  //----------------------------------------
-  // EEMC
-
-  if (Enable::EEMC)
-  {
-    EEMCSetup(g4Reco);
-  }
+  if (Enable::PIPE) radius = Pipe(g4Reco, radius);
+  if (Enable::EGEM) EGEMSetup(g4Reco);
+  if (Enable::FGEM) FGEMSetup(g4Reco);
+  if (Enable::FST) FSTSetup(g4Reco);
+  if (Enable::BARREL) Barrel(g4Reco, radius);
+  if (Enable::MVTX) radius = Mvtx(g4Reco, radius);
+  if (Enable::TPC) radius = TPC(g4Reco, radius);
+  if (Enable::BBC) Bbc(g4Reco);
+  if (Enable::CEMC) radius = CEmc(g4Reco, radius);
+  if (Enable::HCALIN) radius = HCalInner(g4Reco, radius, 4);
+  if (Enable::MAGNET) radius = Magnet(g4Reco, radius);
+  if (Enable::HCALOUT) radius = HCalOuter(g4Reco, radius, 4);
+  if (Enable::FEMC) FEMCSetup(g4Reco);
+  if (Enable::FHCAL) FHCALSetup(g4Reco);
+  if (Enable::EEMC) EEMCSetup(g4Reco);
 
   //----------------------------------------
   // PID
 
-  if (Enable::DIRC)
-  {
-    DIRCSetup(g4Reco);
-  }
+  if (Enable::DIRC) DIRCSetup(g4Reco);
+  if (Enable::RICH) RICHSetup(g4Reco);
+  if (Enable::AEROGEL) AerogelSetup(g4Reco);
 
-  if (Enable::RICH)
-  {
-    RICHSetup(g4Reco);
-  }
-
-  if (Enable::AEROGEL)
-  {
-    AerogelSetup(g4Reco);
-  }
   //----------------------------------------
   // sPHENIX forward flux return door
-  if (Enable::PLUGDOOR)
-  {
-    PlugDoor(g4Reco);
-  }
-  if (Enable::USER)
-  {
-    UserDetector(g4Reco);
-  }
+  if (Enable::PLUGDOOR) PlugDoor(g4Reco);
+
+  if (Enable::USER) UserDetector(g4Reco);
+  
   //----------------------------------------
   // BLACKHOLE if enabled, needs info from all previous sub detectors for dimensions
-  if (Enable::BLACKHOLE)
-  {
-    BlackHole(g4Reco, radius);
-  }
+  if (Enable::BLACKHOLE) BlackHole(g4Reco, radius);
 
   PHG4TruthSubsystem *truth = new PHG4TruthSubsystem();
   g4Reco->registerSubsystem(truth);

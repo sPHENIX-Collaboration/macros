@@ -1,7 +1,8 @@
 #ifndef MACRO_G4JETS_C
 #define MACRO_G4JETS_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
+#include <QA.C>
 
 #include <g4jets/ClusterJetInput.h>
 #include <g4jets/FastJetAlgo.h>
@@ -11,16 +12,19 @@
 #include <g4jets/TruthJetInput.h>
 
 #include <g4eval/JetEvaluator.h>
+#include <qa_modules/QAG4SimulationJet.h>
 
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libqa_modules.so)
 
 namespace Enable
 {
   bool JETS = false;
   bool JETS_EVAL = false;
+  bool JETS_QA = false;
   int JETS_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -114,4 +118,40 @@ void Jet_Eval(const std::string &outfilename = "g4jets_eval.root")
 
   return;
 }
+
+
+void Jet_QA()
+{
+  int verbosity = std::max(Enable::QA_VERBOSITY, Enable::JETS_VERBOSITY);
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  QAG4SimulationJet *calo_jet7 = new QAG4SimulationJet(
+      "AntiKt_Truth_r07");
+  calo_jet7->add_reco_jet("AntiKt_Tower_r07");
+  calo_jet7->add_reco_jet("AntiKt_Cluster_r07");
+  calo_jet7->add_reco_jet("AntiKt_Track_r07");
+  calo_jet7->Verbosity(verbosity);
+  se->registerSubsystem(calo_jet7);
+
+  QAG4SimulationJet *calo_jet4 = new QAG4SimulationJet(
+      "AntiKt_Truth_r04");
+  calo_jet4->add_reco_jet("AntiKt_Tower_r04");
+  calo_jet4->add_reco_jet("AntiKt_Cluster_r04");
+  calo_jet4->add_reco_jet("AntiKt_Track_r04");
+  calo_jet4->Verbosity(verbosity);
+  se->registerSubsystem(calo_jet4);
+
+  QAG4SimulationJet *calo_jet2 = new QAG4SimulationJet(
+      "AntiKt_Truth_r02");
+  calo_jet2->add_reco_jet("AntiKt_Tower_r02");
+  calo_jet2->add_reco_jet("AntiKt_Cluster_r02");
+  calo_jet2->add_reco_jet("AntiKt_Track_r02");
+  calo_jet2->Verbosity(verbosity);
+  se->registerSubsystem(calo_jet2);
+
+  return;
+}
+
+
 #endif

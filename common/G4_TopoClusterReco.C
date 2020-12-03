@@ -1,7 +1,7 @@
 #ifndef MACRO_G4TOPOCLUSTERRECO_C
 #define MACRO_G4TOPOCLUSTERRECO_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <caloreco/RawClusterBuilderTopo.h>
 

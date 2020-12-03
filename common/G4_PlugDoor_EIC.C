@@ -1,7 +1,7 @@
 #ifndef MACRO_G4PLUGDOOREIC_C
 #define MACRO_G4PLUGDOOREIC_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 

@@ -29,11 +29,13 @@
 /vis/open OGL 1200x900-0+0
 # increase display limit for more complex detectors
 /vis/ogl/set/displayListLimit 500000
-/vis/viewer/set/viewpointThetaPhi 240 -10
-/vis/viewer/addCutawayPlane 0 0 0 m 1 0 0
+/vis/viewer/set/viewpointThetaPhi -100  -10
+#/vis/viewer/set/viewpointThetaPhi 10 -10
+/vis/viewer/addCutawayPlane -0.5 0 0 m 1 0 0
 # our world is 4x4 meters, the detector is about 1m across
 # zooming by 4 makes it fill the display
-/vis/viewer/zoom 1.5
+#/vis/viewer/panTo 0.5 0 
+/vis/viewer/zoom 2
 #
 # Use this open statement instead to get a HepRep version 1 file
 # suitable for viewing in WIRED.
@@ -52,7 +54,7 @@
 /vis/modeling/trajectories/create/drawByCharge
 /vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
 /vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
-# (if too many tracks cause core dump => /tracking/storeTrajectory 0)
+#(if too many tracks cause core dump => /tracking/storeTrajectory 0)
 #
 # To draw gammas only
 #/vis/filtering/trajectories/create/particleFilter

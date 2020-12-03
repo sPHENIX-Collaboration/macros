@@ -1,9 +1,9 @@
 #ifndef MACRO_G4PISTON_C
 #define MACRO_G4PISTON_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_Pipe.C"
+#include <G4_Pipe.C>
 
 #include <g4detectors/PHG4ConeSubsystem.h>
 #include <g4detectors/PHG4CylinderSubsystem.h>
