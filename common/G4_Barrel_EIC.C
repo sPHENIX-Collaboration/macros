@@ -5,8 +5,6 @@
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
-#include <g4tpc/PHG4TpcSpaceChargeDistortion.h>
-
 #include <g4main/PHG4Reco.h>
 
 #include <fun4all/Fun4AllServer.h>
