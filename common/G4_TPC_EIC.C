@@ -8,7 +8,6 @@
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
 #include <g4tpc/PHG4TpcEndCapSubsystem.h>
-#include <g4tpc/PHG4TpcSpaceChargeDistortion.h>
 
 #include <g4main/PHG4Reco.h>
 
