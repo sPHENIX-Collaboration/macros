@@ -25,6 +25,7 @@ R__LOAD_LIBRARY(libg4eval.so)
 namespace Enable
 {
   bool EEMC = false;
+  bool EEMC_ABSORBER = false;
   bool EEMC_CELL = false;
   bool EEMC_TOWER = false;
   bool EEMC_CLUSTER = false;
@@ -42,16 +43,32 @@ namespace G4EEMC
 
 void EEMCInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 65.6);  // from towerMap_EEMC_v006.txt
+  if (G4EEMC::use_projective_geometry)
+  {
+    BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 81.);
+  }
+  else
+  {
+    BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 65.6);
+  }
+  // from towerMap_EEMC_v006.txt
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4EEMC::Gz0 - G4EEMC::Gdz / 2.);
 }
 
 void EEMCSetup(PHG4Reco *g4Reco)
 {
+  bool AbsorberActive = Enable::ABSORBER || Enable::EEMC_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::EEMC_OVERLAPCHECK;
+  int verbosity = std::max(Enable::VERBOSITY, Enable::EEMC_VERBOSITY);
 
   /** Use dedicated EEMC module */
   PHG4CrystalCalorimeterSubsystem *eemc = new PHG4CrystalCalorimeterSubsystem("EEMC");
+  eemc->SuperDetector("EEMC");
+  eemc->SetActive();
+  if (AbsorberActive)
+  {
+    eemc->SetAbsorberActive();
+  }
 
   /* path to central copy of calibrations repositry */
   ostringstream mapping_eemc;
@@ -74,9 +91,6 @@ void EEMCSetup(PHG4Reco *g4Reco)
   }
 
   eemc->OverlapCheck(OverlapCheck);
-
-  // SetAbsorberActive method not implemented
-  //  if (AbsorberActive)  eemc->SetAbsorberActive();
 
   /* register Ecal module */
   g4Reco->registerSubsystem(eemc);
