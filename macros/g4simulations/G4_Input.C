@@ -36,6 +36,7 @@ namespace Input
   bool PYTHIA6 = false;
   bool PYTHIA8 = false;
   bool SARTRE = false;
+  int VERBOSITY = 0;
 }  // namespace Input
 
 namespace INPUTHEPMC
@@ -129,19 +130,20 @@ void InputInit()
     InputUpsilonInit();
   }
 
-  // here are the various utility modules which read particles and
-  // put them onto the G4 particle stack
-  if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6)
-  {
-    // read-in HepMC events to Geant4 if there is any
-    HepMCNodeReader *hr = new HepMCNodeReader();
-    se->registerSubsystem(hr);
-  }
   if (Input::READEIC)
   {
     ReadEICFiles *eicr = new ReadEICFiles();
     eicr->OpenInputFile(INPUTREADEIC::filename);
     se->registerSubsystem(eicr);
+  }
+
+  // here are the various utility modules which read particles and
+  // put them onto the G4 particle stack
+  if (Input::HEPMC or Input::PYTHIA8 or Input::PYTHIA6 or Input::READEIC)
+  {
+    // read-in HepMC events to Geant4 if there is any
+    HepMCNodeReader *hr = new HepMCNodeReader();
+    se->registerSubsystem(hr);
   }
 }
 
@@ -159,7 +161,7 @@ void InputManagers()
   if (Input::HEPMC)
   {
     Fun4AllInputManager *in = new Fun4AllHepMCInputManager("HEPMCin");
-    in->Verbosity(Input::HEPMC_VERBOSITY);
+    in->Verbosity(Input::VERBOSITY);
     se->registerInputManager(in);
     se->fileopen(in->Name(), INPUTHEPMC::filename);
   }
@@ -167,13 +169,13 @@ void InputManagers()
   {
     Fun4AllInputManager *hitsin = new Fun4AllDstInputManager("DSTin");
     hitsin->fileopen(INPUTREADHITS::filename);
-    hitsin->Verbosity(1);
+    hitsin->Verbosity(Input::VERBOSITY);
     se->registerInputManager(hitsin);
   }
   else
   {
     Fun4AllInputManager *in = new Fun4AllDummyInputManager("JADE");
-    in->Verbosity(1);
+    in->Verbosity(Input::VERBOSITY);
     se->registerInputManager(in);
   }
 }

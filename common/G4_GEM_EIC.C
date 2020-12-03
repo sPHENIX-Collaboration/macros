@@ -1,9 +1,12 @@
-#pragma once
+#ifndef MACRO_G4GEMEIC_C
+#define MACRO_G4GEMEIC_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
+
 #include <g4detectors/PHG4SectorSubsystem.h>
+
 #include <g4main/PHG4Reco.h>
-#include <TMath.h>
+
 #include <string>
 
 R__LOAD_LIBRARY(libg4detectors.so)
@@ -104,7 +107,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   gem->get_geometry().AddLayers_HBD_GEM();
   gem->OverlapCheck(Enable::OVERLAPCHECK);
   g4Reco->registerSubsystem(gem);
-  
+
   ///////////////////////////////////////////////////////////////////////////
 
   name = "FGEM_4";
@@ -187,7 +190,7 @@ int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
   if (zpos < 0)
   {
     zpos = -zpos;
-    polar_angle = TMath::Pi();
+    polar_angle = M_PI;
   }
   if (etamax < etamin)
   {
@@ -216,3 +219,4 @@ int make_GEM_station(string name, PHG4Reco *g4Reco, double zpos, double etamin,
   g4Reco->registerSubsystem(gem);
   return 0;
 }
+#endif

@@ -39,7 +39,7 @@ int Fun4All_G4_EICDetector(
   // PHRandomSeed() which reads /dev/urandom to get its seed
   // if the RANDOMSEED flag is set its value is taken as initial seed
   // which will produce identical results so you can debug your code
-  rc->set_IntFlag("RANDOMSEED", 12345);
+  // rc->set_IntFlag("RANDOMSEED", 12345);
 
   //===============
   // Input options
@@ -70,7 +70,7 @@ int Fun4All_G4_EICDetector(
 
   // Simple multi particle generator in eta/phi/pt ranges
   Input::SIMPLE = true;
-  Input::SIMPLE_VERBOSITY = 1;
+  Input::SIMPLE_VERBOSITY = 0;
   INPUTSIMPLE::AddParticle("pi-", 5);
   INPUTSIMPLE::set_eta_range(-3, 3);
   INPUTSIMPLE::set_phi_range(-M_PI, M_PI);
@@ -100,7 +100,7 @@ int Fun4All_G4_EICDetector(
 
   // HepMC2 files
   //  Input::HEPMC = true;
-  Input::HEPMC_VERBOSITY = 1;
+  Input::VERBOSITY = 0;
   INPUTHEPMC::filename = inputFile;
 
   //-----------------
@@ -112,7 +112,7 @@ int Fun4All_G4_EICDetector(
   // Write the DST
   //======================
 
-  Enable::DSTOUT = true;
+//  Enable::DSTOUT = true;
   Enable::DSTOUT_COMPRESS = false;  // Compress DST files
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   //Enable::DSTREADER = true;

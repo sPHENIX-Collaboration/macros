@@ -23,11 +23,12 @@ void
 G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
     int absorberactive = 1, //
     bool do_svtx = true, //
-    bool do_pstof = true, //
+    bool do_bbc = true, //
     bool do_cemc = true, //
     bool do_hcalin = true, //
     bool do_magnet = true, //
     bool do_hcalout = true, //
+    bool do_epd = true, //
     bool do_cemc_twr = true, //
     bool do_hcalin_twr = true, //
     bool do_hcalout_twr = true //
@@ -41,8 +42,7 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
   const bool save_g4_raw = true;
 
   // save a comprehensive  evaluation file
-  PHG4DSTReader* ana = new PHG4DSTReader(
-      string(outputFile) + string("_DSTReader.root"));
+  PHG4DSTReader* ana = new PHG4DSTReader( string(outputFile) + string("_DSTReader.root") );
   ana->set_save_particle(true);
   ana->set_load_all_particle(false);
   ana->set_load_active_particle(true);
@@ -60,9 +60,9 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
           ana->AddNode("SVTX");
         }
 
-      if (do_pstof)
+      if (do_bbc)
         {
-          ana->AddNode("PSTOF_0");
+          ana->AddNode("BBC");
         }
 
       if (do_cemc)
@@ -96,6 +96,10 @@ G4DSTreader( const char * outputFile = "G4sPHENIXCells.root",//
             ana->AddNode("ABSORBER_HCALOUT");
         }
 
+      if (do_epd)
+        {
+          ana->AddNode("EPD");
+        }
 
       ana->AddNode("BH_1");
       ana->AddNode("BH_FORWARD_PLUS");
