@@ -36,6 +36,7 @@
 #include <trackreco/PHActsTracks.h>
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsTrkProp.h>
+#include <trackreco/PHActsInitialVertexFinder.h>
 #include <trackreco/PHActsVertexFinder.h>
 #include <trackreco/PHActsVertexFitter.h>
 #include <trackreco/PHTpcResiduals.h>
@@ -306,8 +307,9 @@ void Tracking_Reco()
       // use truth information to assemble silicon clusters into track stubs for now
       PHSiliconTruthTrackSeeding* silicon_seeding = new PHSiliconTruthTrackSeeding();
       silicon_seeding->Verbosity(0);
-      se->registerSubsystem(silicon_seeding);
-  /// qGeometry must be built before any Acts modules
+      //se->registerSubsystem(silicon_seeding);
+      
+      /// qGeometry must be built before any Acts modules
       MakeActsGeometry* geom = new MakeActsGeometry();
       geom->Verbosity(verbosity);
       geom->setMagField(G4MAGNET::magfield);
@@ -322,8 +324,13 @@ void Tracking_Reco()
       se->registerSubsystem(sl);
       
       PHActsSiliconSeeding* silicon_Seeding = new PHActsSiliconSeeding();
-      silicon_Seeding->Verbosity(10);
+      silicon_Seeding->Verbosity(0);
       se->registerSubsystem(silicon_Seeding);
+
+      PHActsInitialVertexFinder *initFinder = new
+	PHActsInitialVertexFinder();
+      initFinder->Verbosity(0);
+      se->registerSubsystem(initFinder);
 
       // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
       PHSiliconTpcTrackMatching* silicon_match = new PHSiliconTpcTrackMatching();
