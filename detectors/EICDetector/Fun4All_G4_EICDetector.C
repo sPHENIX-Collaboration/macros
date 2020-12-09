@@ -279,8 +279,7 @@ int Fun4All_G4_EICDetector(
 
   // EICDetector geometry - 'electron' direction
   Enable::EEMC = true;
-  Enable::EEMC_CELL = Enable::EEMC && true;
-  Enable::EEMC_TOWER = Enable::EEMC_CELL && true;
+  Enable::EEMC_TOWER = Enable::EEMC && true;
   Enable::EEMC_CLUSTER = Enable::EEMC_TOWER && true;
   Enable::EEMC_EVAL = Enable::EEMC_CLUSTER && true;
 
@@ -362,8 +361,6 @@ int Fun4All_G4_EICDetector(
   if (Enable::FEMC_CELL) FEMC_Cells();
 
   if (Enable::FHCAL_CELL) FHCAL_Cells();
-
-  if (Enable::EEMC_CELL) EEMC_Cells();
 
   //-----------------------------
   // CEMC towering and clustering
