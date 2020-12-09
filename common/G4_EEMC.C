@@ -70,19 +70,23 @@ void EEMCSetup(PHG4Reco *g4Reco)
     eemc->SetAbsorberActive();
   }
 
-  /* path to central copy of calibrations repositry */
+  /* path to central copy of calibrations repository */
   ostringstream mapping_eemc;
 
   /* Use non-projective geometry */
   if (!G4EEMC::use_projective_geometry)
   {
     mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v006.txt";
-    eemc->SetTowerMappingFile(mapping_eemc.str());
+    eemc->set_string_param("mappingtower", mapping_eemc.str());
   }
 
   /* use projective geometry */
   else
   {
+    cout << "The projective version has serious problems with overlaps" << endl;
+    cout << "Do Not Use!" << endl;
+    cout << "If you insist, copy G4_EEMC.C locally and comment out this exit" << endl;
+    gSystem->Exit(1);
     ostringstream mapping_eemc_4x4construct;
 
     mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/crystals_v005.txt";
@@ -98,15 +102,6 @@ void EEMCSetup(PHG4Reco *g4Reco)
 
 void EEMC_Cells()
 {
-  int verbosity = std::max(Enable::VERBOSITY, Enable::EEMC_VERBOSITY);
-
-  Fun4AllServer *se = Fun4AllServer::instance();
-
-  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("EEMCCellReco");
-  hc->Detector("EEMC");
-  se->registerSubsystem(hc);
-
-  return;
 }
 
 void EEMC_Towers()
