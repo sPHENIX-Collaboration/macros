@@ -153,20 +153,20 @@ void FHCAL_Clusters()
 
   if (G4FHCAL::FHcal_clusterizer == G4FHCAL::kFHcalTemplateClusterizer)
   {
-RawClusterBuilderTemplate* ClusterBuilder = new RawClusterBuilderTemplate("FHCALRawClusterBuilderTemplate");
-  ClusterBuilder->Detector("FHCAL");
-  ClusterBuilder->SetPlanarGeometry(); // has to be called after Detector()
-  ClusterBuilder->Verbosity(verbosity);
-  ClusterBuilder->set_threshold_energy(0.100);
-  se->registerSubsystem(ClusterBuilder);
+    RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("FHCALRawClusterBuilderTemplate");
+    ClusterBuilder->Detector("FHCAL");
+    ClusterBuilder->SetPlanarGeometry();  // has to be called after Detector()
+    ClusterBuilder->Verbosity(verbosity);
+    ClusterBuilder->set_threshold_energy(0.100);
+    se->registerSubsystem(ClusterBuilder);
   }
   else if (G4FHCAL::FHcal_clusterizer == G4FHCAL::kFHcalTemplateClusterizer)
   {
-  RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("FHCALRawClusterBuilderFwd");
-  ClusterBuilder->Detector("FHCAL");
-  ClusterBuilder->Verbosity(verbosity);
-  ClusterBuilder->set_threshold_energy(0.100);
-  se->registerSubsystem(ClusterBuilder);
+    RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("FHCALRawClusterBuilderFwd");
+    ClusterBuilder->Detector("FHCAL");
+    ClusterBuilder->Verbosity(verbosity);
+    ClusterBuilder->set_threshold_energy(0.100);
+    se->registerSubsystem(ClusterBuilder);
   }
   else
   {

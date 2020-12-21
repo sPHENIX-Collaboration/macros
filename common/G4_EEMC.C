@@ -169,19 +169,19 @@ void EEMC_Clusters()
 
   if (G4EEMC::Eemc_clusterizer == G4EEMC::kEemcTemplateClusterizer)
   {
-RawClusterBuilderTemplate* ClusterBuilder = new RawClusterBuilderTemplate("EEMCRawClusterBuilderTemplate");
+    RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("EEMCRawClusterBuilderTemplate");
 
-  ClusterBuilder->Detector("EEMC");
-  ClusterBuilder->Verbosity(verbosity);
-  se->registerSubsystem(ClusterBuilder);
+    ClusterBuilder->Detector("EEMC");
+    ClusterBuilder->Verbosity(verbosity);
+    se->registerSubsystem(ClusterBuilder);
   }
   else if (G4EEMC::Eemc_clusterizer == G4EEMC::kEemcGraphClusterizer)
   {
-RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("EEMCRawClusterBuilderFwd");
+    RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("EEMCRawClusterBuilderFwd");
 
-  ClusterBuilder->Detector("EEMC");
-  ClusterBuilder->Verbosity(verbosity);
-  se->registerSubsystem(ClusterBuilder);
+    ClusterBuilder->Detector("EEMC");
+    ClusterBuilder->Verbosity(verbosity);
+    se->registerSubsystem(ClusterBuilder);
   }
   else
   {
