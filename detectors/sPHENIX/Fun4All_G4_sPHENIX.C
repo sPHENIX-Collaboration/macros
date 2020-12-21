@@ -278,8 +278,7 @@ int Fun4All_G4_sPHENIX(
   // forward EMC
   //Enable::FEMC = true;
   Enable::FEMC_ABSORBER = true;
-  Enable::FEMC_CELL = Enable::FEMC && true;
-  Enable::FEMC_TOWER = Enable::FEMC_CELL && true;
+  Enable::FEMC_TOWER = Enable::FEMC && true;
   Enable::FEMC_CLUSTER = Enable::FEMC_TOWER && true;
   Enable::FEMC_EVAL = Enable::FEMC_CLUSTER and Enable::QA && true;
 
@@ -365,8 +364,6 @@ int Fun4All_G4_sPHENIX(
   if (Enable::HCALIN_CELL) HCALInner_Cells();
 
   if (Enable::HCALOUT_CELL) HCALOuter_Cells();
-
-  if (Enable::FEMC_CELL) FEMC_Cells();
 
   //-----------------------------
   // CEMC towering and clustering
