@@ -196,7 +196,7 @@ void HCALOuter_Clusters()
   {
     RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("HcalOutRawClusterBuilderTemplate");
     ClusterBuilder->Detector("HCALOUT");
-    ClusterBuilder->SetCylindricalGeometry();
+    ClusterBuilder->SetCylindricalGeometry();  // has to be called after Detector()
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem(ClusterBuilder);
   }

@@ -13,6 +13,7 @@
 #include <g4main/PHG4Reco.h>
 
 #include <caloreco/RawClusterBuilderFwd.h>
+#include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
 
 #include <fun4all/Fun4AllServer.h>
@@ -39,6 +40,16 @@ namespace G4EEMC
   int use_projective_geometry = 0;
   double Gdz = 18. + 0.0001;
   double Gz0 = -170.;
+  enum enu_Eemc_clusterizer
+  {
+    kEemcGraphClusterizer,
+    kEemcTemplateClusterizer
+  };
+  //default template clusterizer, as developed by Sasha Bazilevsky
+  enu_Eemc_clusterizer Eemc_clusterizer = kEemcTemplateClusterizer;
+  // graph clusterizer
+  //enu_Eemc_clusterizer Eemc_clusterizer = kEemcGraphClusterizer;
+
 }  // namespace G4EEMC
 
 void EEMCInit()
@@ -156,11 +167,27 @@ void EEMC_Clusters()
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("EEMCRawClusterBuilderFwd");
-  ClusterBuilder->Detector("EEMC");
-  ClusterBuilder->Verbosity(verbosity);
-  se->registerSubsystem(ClusterBuilder);
+  if (G4EEMC::Eemc_clusterizer == G4EEMC::kEemcTemplateClusterizer)
+  {
+    RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("EEMCRawClusterBuilderTemplate");
 
+    ClusterBuilder->Detector("EEMC");
+    ClusterBuilder->Verbosity(verbosity);
+    se->registerSubsystem(ClusterBuilder);
+  }
+  else if (G4EEMC::Eemc_clusterizer == G4EEMC::kEemcGraphClusterizer)
+  {
+    RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("EEMCRawClusterBuilderFwd");
+
+    ClusterBuilder->Detector("EEMC");
+    ClusterBuilder->Verbosity(verbosity);
+    se->registerSubsystem(ClusterBuilder);
+  }
+  else
+  {
+    cout << "EEMC_Clusters - unknown clusterizer setting " << G4EEMC::Eemc_clusterizer << endl;
+    gSystem->Exit(1);
+  }
   return;
 }
 
