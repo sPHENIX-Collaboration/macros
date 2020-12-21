@@ -265,15 +265,13 @@ int Fun4All_G4_EICDetector(
 
   Enable::FEMC = true;
   //  Enable::FEMC_ABSORBER = true;
-  Enable::FEMC_CELL = Enable::FEMC && true;
-  Enable::FEMC_TOWER = Enable::FEMC_CELL && true;
+  Enable::FEMC_TOWER = Enable::FEMC && true;
   Enable::FEMC_CLUSTER = Enable::FEMC_TOWER && true;
   Enable::FEMC_EVAL = Enable::FEMC_CLUSTER && true;
 
   Enable::FHCAL = true;
   //  Enable::FHCAL_ABSORBER = true;
-  Enable::FHCAL_CELL = Enable::FHCAL && true;
-  Enable::FHCAL_TOWER = Enable::FHCAL_CELL && true;
+  Enable::FHCAL_TOWER = Enable::FHCAL && true;
   Enable::FHCAL_CLUSTER = Enable::FHCAL_TOWER && true;
   Enable::FHCAL_EVAL = Enable::FHCAL_CLUSTER && true;
 
@@ -357,10 +355,6 @@ int Fun4All_G4_EICDetector(
   if (Enable::HCALIN_CELL) HCALInner_Cells();
 
   if (Enable::HCALOUT_CELL) HCALOuter_Cells();
-
-  if (Enable::FEMC_CELL) FEMC_Cells();
-
-  if (Enable::FHCAL_CELL) FHCAL_Cells();
 
   //-----------------------------
   // CEMC towering and clustering
