@@ -12,6 +12,7 @@
 #include <G4_HIJetReco.C>
 #include <G4_Input.C>
 #include <G4_Jets.C>
+#include <G4_KFParticle.C>
 #include <G4_ParticleFlow.C>
 #include <G4_Production.C>
 #include <G4_TopoClusterReco.C>
@@ -91,10 +92,16 @@ int Fun4All_G4_sPHENIX(
   //  Input::GUN_NUMBER = 3; // if you need 3 of them
   // Input::GUN_VERBOSITY = 1;
 
+  //D0 generator
+  //Input::DZERO = false;
+  //Input::DZERO_VERBOSITY = 0;
+  //Lambda_c generator //Not ready yet
+  //Input::LAMBDAC = false;
+  //Input::LAMBDAC_VERBOSITY = 0;
   // Upsilon generator
-  //  Input::UPSILON = true;
-  // Input::UPSILON_NUMBER = 3; // if you need 3 of them
-  // Input::UPSILON_VERBOSITY = 0;
+  //Input::UPSILON = true;
+  //Input::UPSILON_NUMBER = 3; // if you need 3 of them
+  //Input::UPSILON_VERBOSITY = 0;
 
   //  Input::HEPMC = true;
   INPUTHEPMC::filename = inputFile;
@@ -190,7 +197,7 @@ int Fun4All_G4_sPHENIX(
   // Write the DST
   //======================
 
-  //  Enable::DSTOUT = true;
+  //Enable::DSTOUT = true;
   Enable::DSTOUT_COMPRESS = false;
   DstOut::OutputDir = outdir;
   DstOut::OutputFile = outputFile;
@@ -466,6 +473,17 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::USER) UserAnalysisInit();
 
+  //======================
+  // Run KFParticle on evt
+  //======================
+  Enable::KFPARTICLE = false;
+  Enable::KFPARTICLE_VERBOSITY = 0;
+  //Enable::KFPARTICLE_TRUTH_MATCH = true;
+  //Enable::KFPARTICLE_SAVE_NTUPLE = true;
+  if (Enable::KFPARTICLE && Input::UPSILON) KFParticle_Upsilon_Reco();
+  if (Enable::KFPARTICLE && Input::DZERO) KFParticle_D0_Reco();
+  //if (Enable::KFPARTICLE && Input::LAMBDAC) KFParticle_Lambdac_Reco();
+     
   //----------------------
   // Standard QAs
   //----------------------
