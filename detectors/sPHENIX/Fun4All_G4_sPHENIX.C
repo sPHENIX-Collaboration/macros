@@ -296,7 +296,11 @@ int Fun4All_G4_sPHENIX(
   Enable::PLUGDOOR_ABSORBER = true;
 
   Enable::GLOBAL_RECO = true;
-  //  Enable::GLOBAL_FASTSIM = true;
+  //Enable::GLOBAL_FASTSIM = true;
+  //Enable::KFPARTICLE = true;
+  //Enable::KFPARTICLE_VERBOSITY = 1;
+  //Enable::KFPARTICLE_TRUTH_MATCH = true;
+  //Enable::KFPARTICLE_SAVE_NTUPLE = true;
 
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && false;
 
@@ -476,10 +480,6 @@ int Fun4All_G4_sPHENIX(
   //======================
   // Run KFParticle on evt
   //======================
-  Enable::KFPARTICLE = false;
-  Enable::KFPARTICLE_VERBOSITY = 0;
-  //Enable::KFPARTICLE_TRUTH_MATCH = true;
-  //Enable::KFPARTICLE_SAVE_NTUPLE = true;
   if (Enable::KFPARTICLE && Input::UPSILON) KFParticle_Upsilon_Reco();
   if (Enable::KFPARTICLE && Input::DZERO) KFParticle_D0_Reco();
   //if (Enable::KFPARTICLE && Input::LAMBDAC) KFParticle_Lambdac_Reco();
