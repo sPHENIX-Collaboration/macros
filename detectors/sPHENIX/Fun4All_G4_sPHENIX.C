@@ -399,8 +399,6 @@ int Fun4All_G4_sPHENIX(
   if (Enable::FEMC_TOWER) FEMC_Towers();
   if (Enable::FEMC_CLUSTER) FEMC_Clusters();
 
-  if (Enable::DSTOUT_COMPRESS) ShowerCompress();
-
   //--------------
   // SVTX tracking
   //--------------
@@ -516,7 +514,11 @@ int Fun4All_G4_sPHENIX(
   {
     string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", FullOutFile);
-    if (Enable::DSTOUT_COMPRESS) DstCompress(out);
+    if (Enable::DSTOUT_COMPRESS)
+      {
+        ShowerCompress();
+        DstCompress(out);
+      }
     se->registerOutputManager(out);
   }
   //-----------------
