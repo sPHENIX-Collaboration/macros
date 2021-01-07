@@ -84,7 +84,7 @@ int Fun4All_G4_sPHENIX(
   //INPUTEMBED::listfile[0] = embed_input_file;
 
   Input::SIMPLE = true;
-  // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
+  Input::SIMPLE_NUMBER = 2; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
   //  Input::PYTHIA6 = true;
@@ -128,7 +128,9 @@ int Fun4All_G4_sPHENIX(
   // add the settings for other with [1], next with [2]...
   if (Input::SIMPLE)
   {
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 5);
+    // low pT pions
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 10);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi+", 10);
     if (Input::HEPMC || Input::EMBED)
     {
       INPUTGENERATOR::SimpleEventGenerator[0]->set_reuse_existing_vertex(true);
@@ -140,11 +142,31 @@ int Fun4All_G4_sPHENIX(
                                                                                 PHG4SimpleEventGenerator::Uniform,
                                                                                 PHG4SimpleEventGenerator::Uniform);
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_mean(0., 0., 0.);
-      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0., 0., 5.);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0., 0., 10.);
     }
     INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1, 1);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
-    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.1, 20.);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.1, 2.);
+
+    // high pT pions
+    INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi-", 10);
+    INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi+", 10);
+    if (Input::HEPMC || Input::EMBED)
+    {
+      INPUTGENERATOR::SimpleEventGenerator[1]->set_reuse_existing_vertex(true);
+      INPUTGENERATOR::SimpleEventGenerator[1]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+    }
+    else
+    {
+      INPUTGENERATOR::SimpleEventGenerator[1]->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
+                                                                                PHG4SimpleEventGenerator::Uniform,
+                                                                                PHG4SimpleEventGenerator::Uniform);
+      INPUTGENERATOR::SimpleEventGenerator[1]->set_vertex_distribution_mean(0., 0., 0.);
+      INPUTGENERATOR::SimpleEventGenerator[1]->set_vertex_distribution_width(0., 0., 10.);
+    }
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_eta_range(-1, 1);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_phi_range(-M_PI, M_PI);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_pt_range(2, 50.);
   }
   // Upsilons
   // if you run more than one of these Input::UPSILON_NUMBER > 1
