@@ -102,8 +102,8 @@ int Fun4All_G4_sPHENIX(
   //Input::LAMBDAC = false;
   //Input::LAMBDAC_VERBOSITY = 0;
   // Upsilon generator
-  //Input::UPSILON = true;
-  //Input::UPSILON_NUMBER = 3; // if you need 3 of them
+  Input::UPSILON = true;
+  Input::UPSILON_NUMBER = 1; // if you need 3 of them
   //Input::UPSILON_VERBOSITY = 0;
 
   //  Input::HEPMC = true;
@@ -278,14 +278,14 @@ int Fun4All_G4_sPHENIX(
   Enable::MICROMEGAS_CLUSTER = Enable::MICROMEGAS_CELL && true;
 
   Enable::TRACKING_TRACK = true;
-  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;
+  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && false;
   Enable::TRACKING_QA = Enable::TRACKING_TRACK and Enable::QA && true;
 
   //  cemc electronics + thin layer of W-epoxy to get albedo from cemc
   //  into the tracking, cannot run together with CEMC
   //  Enable::CEMCALBEDO = true;
 
-  Enable::CEMC = true;
+  Enable::CEMC = false;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
@@ -293,7 +293,7 @@ int Fun4All_G4_sPHENIX(
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
   Enable::CEMC_QA = Enable::CEMC_CLUSTER and Enable::QA && true;
 
-  Enable::HCALIN = true;
+  Enable::HCALIN = false;
   Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
@@ -301,10 +301,10 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && true;
   Enable::HCALIN_QA = Enable::HCALIN_CLUSTER and Enable::QA && true;
 
-  Enable::MAGNET = true;
-  Enable::MAGNET_ABSORBER = true;
+  Enable::MAGNET = false;
+  Enable::MAGNET_ABSORBER = false;
 
-  Enable::HCALOUT = true;
+  Enable::HCALOUT = false;
   Enable::HCALOUT_ABSORBER = true;
   Enable::HCALOUT_CELL = Enable::HCALOUT && true;
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
@@ -327,7 +327,7 @@ int Fun4All_G4_sPHENIX(
 
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && false;
 
-  Enable::JETS = true;
+  Enable::JETS = false;
   Enable::JETS_EVAL = Enable::JETS && true;
   Enable::JETS_QA = Enable::JETS and Enable::QA && true;
 
