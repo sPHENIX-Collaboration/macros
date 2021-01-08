@@ -151,19 +151,8 @@ int Fun4All_G4_sPHENIX(
     // high pT pions
     INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi-", 10);
     INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi+", 10);
-    if (Input::HEPMC || Input::EMBED)
-    {
-      INPUTGENERATOR::SimpleEventGenerator[1]->set_reuse_existing_vertex(true);
-      INPUTGENERATOR::SimpleEventGenerator[1]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
-    }
-    else
-    {
-      INPUTGENERATOR::SimpleEventGenerator[1]->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
-                                                                                PHG4SimpleEventGenerator::Uniform,
-                                                                                PHG4SimpleEventGenerator::Uniform);
-      INPUTGENERATOR::SimpleEventGenerator[1]->set_vertex_distribution_mean(0., 0., 0.);
-      INPUTGENERATOR::SimpleEventGenerator[1]->set_vertex_distribution_width(0., 0., 10.);
-    }
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_reuse_existing_vertex(true);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
     INPUTGENERATOR::SimpleEventGenerator[1]->set_eta_range(-1, 1);
     INPUTGENERATOR::SimpleEventGenerator[1]->set_phi_range(-M_PI, M_PI);
     INPUTGENERATOR::SimpleEventGenerator[1]->set_pt_range(2, 50.);
