@@ -38,9 +38,9 @@ The default sPHENIX simulation + reconstruction macro is Fun4All_G4_sPHENIX.C, w
 
 Then let's see what is implemented by firing up one event:
 ```
-[jinhuang@rcas2072 macros]$ source /opt/sphenix/core/bin/sphenix_setup.csh -n   # setup sPHENIX environment if not already done so
+[jinhuang@rcas2072 sPHENIX]$ source /opt/sphenix/core/bin/sphenix_setup.csh -n   # setup sPHENIX environment if not already done so
 # Note, for bash users, please use /opt/sphenix/core/bin/sphenix_setup.sh instead
-[jinhuang@rcas2072 macros]$ root
+[jinhuang@rcas2072 sPHENIX]$ root
 root [] .x Fun4All_G4_sPHENIX.C(-1) // here negative value in event number start an event display of one event
 root [] .L DisplayOn.C 
 root [] PHG4Reco* g4 = DisplayOn()
@@ -54,8 +54,8 @@ root [] displaycmd() # this one show more Geant4 command we can run from the ROO
 
 This is simpler, just run with first parameter as the intended number of event:
 ```
-[jinhuang@rcas2072 macros]$ source /opt/sphenix/core/bin/sphenix_setup.csh -n   # setup sPHENIX environment if not already done so
-[jinhuang@rcas2072 macros]$ root
+[jinhuang@rcas2072 sPHENIX]$ source /opt/sphenix/core/bin/sphenix_setup.csh -n   # setup sPHENIX environment if not already done so
+[jinhuang@rcas2072 sPHENIX]$ root
 root [] .x Fun4All_G4_sPHENIX.C(10) // run 10 events
 ```
 
