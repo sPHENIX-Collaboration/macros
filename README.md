@@ -5,6 +5,8 @@ This is the standard macros respository for [sPHENIX collaboration](https://www.
 
 [![Build Status](https://web.sdcc.bnl.gov/jenkins-sphenix/buildStatus/icon?job=sPHENIX/sPHENIX_CoreSoftware_MasterBranch)](https://web.sdcc.bnl.gov/jenkins-sphenix/job/sPHENIX/job/sPHENIX_CoreSoftware_MasterBranch/)
 [![Doxygen](https://img.shields.io/badge/code%20reference-Doxygen-green.svg)](https://www.phenix.bnl.gov/WWW/sPHENIX/doxygen/html/)
+[![Singularity](https://img.shields.io/badge/container-Singularity%20via%20CVMFS-green.svg)](https://github.com/sPHENIX-Collaboration/Singularity)
+
 [![Open Issues](https://img.shields.io/github/issues/sPHENIX-Collaboration/macros.svg)](https://github.com/sPHENIX-Collaboration/macros/issues)
 [![Open Pull Request](https://img.shields.io/github/issues-pr/sPHENIX-Collaboration/macros.svg)](https://github.com/sPHENIX-Collaboration/macros/pulls)
 [![Monthly Commits](https://img.shields.io/github/commit-activity/m/sPHENIX-Collaboration/macros.svg)](https://github.com/sPHENIX-Collaboration/macros/commits/master)
