@@ -242,42 +242,22 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
   int ilayer = 0;
   PHG4SpacalSubsystem *cemc;
 
-  const bool use_2015_design = false;
-  if (use_2015_design)
-  {
-    cemc = new PHG4SpacalSubsystem("CEMC", ilayer);
+  cemc = new PHG4SpacalSubsystem("CEMC", ilayer);
 
-    cemc->set_int_param("config", PHG4CylinderGeom_Spacalv1::kFullProjective_2DTaper_SameLengthFiberPerTower);
-    cemc->set_double_param("radius", radius);            // overwrite minimal radius
-    cemc->set_double_param("thickness", cemcthickness);  // overwrite thickness
-    cemc->set_int_param("azimuthal_n_sec", 32);
-    //    cemc->set_int_param("construction_verbose", 2);
+  cemc->set_int_param("virualize_fiber", 0);
+  cemc->set_int_param("azimuthal_seg_visible", 1);
+  cemc->set_int_param("construction_verbose", 0);
+  cemc->Verbosity(0);
 
-    cemc->SetActive();
-    cemc->SuperDetector("CEMC");
-    if (AbsorberActive) cemc->SetAbsorberActive();
-    cemc->OverlapCheck(OverlapCheck);
-  }
+  cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
+  cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2018ProjTilted/"));
+  cemc->set_double_param("radius", radius);            // overwrite minimal radius
+  cemc->set_double_param("thickness", cemcthickness);  // overwrite thickness
 
-  else
-  {
-    cemc = new PHG4SpacalSubsystem("CEMC", ilayer);
-
-    cemc->set_int_param("virualize_fiber", 0);
-    cemc->set_int_param("azimuthal_seg_visible", 1);
-    cemc->set_int_param("construction_verbose", 0);
-    cemc->Verbosity(0);
-
-    cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
-    cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2018ProjTilted/"));
-    cemc->set_double_param("radius", radius);            // overwrite minimal radius
-    cemc->set_double_param("thickness", cemcthickness);  // overwrite thickness
-
-    cemc->SetActive();
-    cemc->SuperDetector("CEMC");
-    if (AbsorberActive) cemc->SetAbsorberActive();
-    cemc->OverlapCheck(OverlapCheck);
-  }
+  cemc->SetActive();
+  cemc->SuperDetector("CEMC");
+  if (AbsorberActive) cemc->SetAbsorberActive();
+  cemc->OverlapCheck(OverlapCheck);
 
   g4Reco->registerSubsystem(cemc);
 
