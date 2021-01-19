@@ -18,6 +18,7 @@
 #include <g4main/PHG4Reco.h>
 
 #include <tpc/TpcClusterizer.h>
+#include <tpc/TpcClusterCleaner.h>
 #include <tpc/TpcSpaceChargeCorrection.h>
 #include <qa_modules/QAG4SimulationTpc.h>
 
@@ -222,6 +223,10 @@ void TPC_Clustering()
   auto tpcclusterizer = new TpcClusterizer;
   tpcclusterizer->Verbosity(verbosity);
   se->registerSubsystem(tpcclusterizer);
+
+  auto tpcclustercleaner = new TpcClusterCleaner;
+  tpcclustercleaner->Verbosity(verbosity);
+  se->registerSubsystem(tpcclustercleaner);
 
   // space charge correction
   if( G4TPC::ENABLE_CORRECTIONS )
