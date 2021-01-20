@@ -178,6 +178,11 @@ void Tracking_Reco()
       geom->Verbosity(verbosity);
       geom->setMagField(G4MAGNET::magfield);
       geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
+
+      /// Need a flip of the sign for constant field in tpc tracker
+      if(G4TRACKING::use_PHTpcTracker_seeding 
+	 && G4MAGNET::magfield.find(".root") == std::string::npos)
+	geom->setMagFieldRescale(-1 * G4MAGNET::magfield_rescale);
       se->registerSubsystem(geom);
       
       /// Always run PHActsSourceLinks first, to convert TrkrClusters 
@@ -219,7 +224,6 @@ void Tracking_Reco()
   else
   {
     // We cheat to get the initial vertex for the full track reconstruction case
-    std::cout << "JOE TRUTH VERTEXING"<<std::endl;
     PHInitVertexing* init_vtx = new PHTruthVertexing("PHTruthVertexing");
     init_vtx->Verbosity(verbosity);
     se->registerSubsystem(init_vtx);
@@ -256,7 +260,7 @@ void Tracking_Reco()
       tracker->set_track_follower_optimization_precise_fit(false);                // true for quality, false for speed
       tracker->enable_json_export(false);                                         // save event as json, filename is automatic and stamped by current time in ms
       tracker->enable_vertexing(false);                                           // rave vertexing is pretty slow at large multiplicities...
-      tracker->Verbosity(0);
+      tracker->Verbosity(verbosity);
       se->registerSubsystem(tracker);
     }
     else
@@ -265,7 +269,7 @@ void Tracking_Reco()
 
       auto seeder = new PHCASeeding("PHCASeeding");
       seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
-      seeder->Verbosity(0);
+      seeder->Verbosity(verbosity);
       seeder->SetLayerRange(7, 55);
       seeder->SetSearchWindow(0.01, 0.02);  // (eta width, phi width)
       seeder->SetMinHitsPerCluster(2);
@@ -343,14 +347,14 @@ void Tracking_Reco()
       if(!G4TRACKING::use_acts_init_vertexing)
 	{
 	  PHSiliconTruthTrackSeeding* silicon_seeding = new PHSiliconTruthTrackSeeding();
-	  silicon_seeding->Verbosity(0);
+	  silicon_seeding->Verbosity(verbosity);
 	  se->registerSubsystem(silicon_seeding);
-	  std::cout << "JOE SILICON TRUTH TRACK SEEDING"<<std::endl;
+	  
 	}
 
       // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
       PHSiliconTpcTrackMatching* silicon_match = new PHSiliconTpcTrackMatching();
-      silicon_match->Verbosity(0);
+      silicon_match->Verbosity(verbosity);
       if (!G4TRACKING::use_PHTpcTracker_seeding)
         silicon_match->set_seeder(true);  // module defaults to PHCASeeding, use true for PHTpcTracker seeding
       silicon_match->set_field(G4MAGNET::magfield);
@@ -381,7 +385,7 @@ void Tracking_Reco()
 
       // Match TPC track stubs from CA seeder to clusters in the micromegas layers
       PHMicromegasTpcTrackMatching* mm_match = new PHMicromegasTpcTrackMatching();
-      mm_match->Verbosity(0);
+      mm_match->Verbosity(verbosity);
       mm_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
       if (G4TRACKING::SC_CALIBMODE)
       {
@@ -499,7 +503,7 @@ void Tracking_Eval(const std::string& outputfile)
     if (G4TRACKING::use_acts_evaluator)
     {
       ActsEvaluator* actsEval = new ActsEvaluator(outputfile + "_acts.root", eval);
-      actsEval->Verbosity(0);
+      actsEval->Verbosity(verbosity);
       actsEval->setEvalCKF(false);
       se->registerSubsystem(actsEval);
     }
