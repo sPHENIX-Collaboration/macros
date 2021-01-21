@@ -14,6 +14,7 @@
 #include <g4eval/SvtxEvaluator.h>
 
 #include <trackreco/PHCASeeding.h>
+#include <trackreco/PHHybridSeeding.h>
 #include <trackreco/PHGenFitTrackProjection.h>
 #include <trackreco/PHGenFitTrkFitter.h>
 #include <trackreco/PHGenFitTrkProp.h>
@@ -86,10 +87,11 @@ namespace G4TRACKING
 
   // Possible variations - these are normally false
   bool use_PHTpcTracker_seeding = false;   // false for using the default PHCASeeding to get TPC track seeds, true to use PHTpcTracker
+  bool use_hybrid_seeding = false;         // false for using the default PHCASeeding, true to use PHHybridSeeding (STAR core, ALICE KF)
   bool use_truth_si_matching = false;      // if true, associates silicon clusters using best truth track match to TPC seed tracks - for diagnostics only
   bool use_truth_track_seeding = false;    // false for normal track seeding, use true to run with truth track seeding instead  ***** WORKS FOR GENFIT ONLY
   bool use_Genfit = false;                 // if false, acts KF is run on proto tracks assembled above, if true, use Genfit track propagation and fitting
-  bool use_acts_init_vertexing = true;    // if true runs acts silicon seeding+initial vertexing 
+  bool use_acts_init_vertexing = false;    // if true runs acts silicon seeding+initial vertexing 
   bool use_phinit_vertexing = false && !use_acts_init_vertexing;         // false for using smeared truth vertex, set to true to get initial vertex from MVTX hits using PHInitZVertexing
   bool use_rave_vertexing = true;          // Use Rave to find and fit for vertex after track fitting
   bool use_primary_vertex = false;         // refit Genfit tracks (only) with primary vertex included - adds second node to node tree, adds second evaluator, outputs separate ntuples
@@ -195,6 +197,7 @@ void Tracking_Reco()
   if(G4TRACKING::use_acts_init_vertexing && !G4TRACKING::use_Genfit)
     {
       #if __cplusplus >= 201703L
+
       PHActsSiliconSeeding* silicon_Seeding = new PHActsSiliconSeeding();
       silicon_Seeding->Verbosity(verbosity);
       se->registerSubsystem(silicon_Seeding);
@@ -202,6 +205,7 @@ void Tracking_Reco()
       PHActsInitialVertexFinder *initFinder = new PHActsInitialVertexFinder();
       initFinder->Verbosity(verbosity);
       se->registerSubsystem(initFinder);
+
       #endif
     }
   else if (G4TRACKING::use_phinit_vertexing)
@@ -245,7 +249,7 @@ void Tracking_Reco()
     std::cout << "Using normal TPC track seeding " << std::endl;
 
     // TPC track seeding from data
-    if (G4TRACKING::use_PHTpcTracker_seeding)
+    if (G4TRACKING::use_PHTpcTracker_seeding && !G4TRACKING::use_hybrid_seeding)
     {
       std::cout << "   Using PHTpcTracker track seeding " << std::endl;
 
@@ -259,8 +263,25 @@ void Tracking_Reco()
       tracker->Verbosity(0);
       se->registerSubsystem(tracker);
     }
+    else if(G4TRACKING::use_hybrid_seeding && !G4TRACKING::use_PHTpcTracker_seeding)
+    {
+      std::cout << "   Using PHHybridSeeding track seeding " << std::endl;
+      PHHybridSeeding* hseeder = new PHHybridSeeding("PHHybridSeeding");
+      hseeder->setSearchRadius(3.,6.); // mm (iter1, iter2)
+      hseeder->setSearchAngle(M_PI/8.,M_PI/8.); // radians (iter1, iter2)
+      hseeder->setMinTrackSize(10,5); // (iter1, iter2)
+      hseeder->setNThreads(1);
+      hseeder->Verbosity(0);
+      se->registerSubsystem(hseeder);
+    }
     else
     {
+      if(G4TRACKING::use_hybrid_seeding && G4TRACKING::use_PHTpcTracker_seeding)
+      {
+        std::cerr << "***WARNING: MULTIPLE SEEDER OPTIONS SELECTED!***" << std::endl;
+        std::cerr << "  Current config selects both PHTpcTracker and PHHybridSeeding." << std::endl;
+        std::cerr << "  Since config doesn't make sense, reverting to default..." << std::endl;
+      }
       std::cout << "   Using PHCASeeding track seeding " << std::endl;
 
       auto seeder = new PHCASeeding("PHCASeeding");
