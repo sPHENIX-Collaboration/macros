@@ -207,9 +207,10 @@ void Tracking_Reco()
       silicon_Seeding->Verbosity(verbosity);
       se->registerSubsystem(silicon_Seeding);
 
-      PHActsInitialVertexFinder *initFinder = new PHActsInitialVertexFinder();
-      initFinder->Verbosity(verbosity);
-      se->registerSubsystem(initFinder);
+      PHTruthVertexing* init_vtx = new PHTruthVertexing("PHTruthVertexing");
+      init_vtx->Verbosity(verbosity);
+      init_vtx->set_acts_silicon(true);
+      se->registerSubsystem(init_vtx);
 
       #endif
     }
