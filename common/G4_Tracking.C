@@ -271,6 +271,7 @@ void Tracking_Reco()
     {
       std::cout << "   Using PHHybridSeeding track seeding " << std::endl;
       PHHybridSeeding* hseeder = new PHHybridSeeding("PHHybridSeeding");
+      hseeder->set_field_dir(G4MAGNET::magfield_rescale);
       hseeder->setSearchRadius(3.,6.); // mm (iter1, iter2)
       hseeder->setSearchAngle(M_PI/8.,M_PI/8.); // radians (iter1, iter2)
       hseeder->setMinTrackSize(10,5); // (iter1, iter2)
