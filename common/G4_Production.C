@@ -1,7 +1,7 @@
 #ifndef MACRO_G4PRODUCTION_C
 #define MACRO_G4PRODUCTION_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 namespace Enable
 {

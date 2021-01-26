@@ -1,18 +1,18 @@
 #ifndef MACRO_G4DSTREADERFSPHENIX_C
 #define MACRO_G4DSTREADERFSPHENIX_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_CEmc_Spacal.C"
-#include "G4_FEMC.C"
-#include "G4_FGEM_fsPHENIX.C"
-#include "G4_FHCAL.C"
-#include "G4_HcalIn_ref.C"
-#include "G4_HcalOut_ref.C"
-#include "G4_Intt.C"
-#include "G4_Magnet.C"
-#include "G4_Mvtx.C"
-#include "G4_TPC.C"
+#include <G4_CEmc_Spacal.C>
+#include <G4_FEMC.C>
+#include <G4_FGEM_fsPHENIX.C>
+#include <G4_FHCAL.C>
+#include <G4_HcalIn_ref.C>
+#include <G4_HcalOut_ref.C>
+#include <G4_Intt.C>
+#include <G4_Magnet.C>
+#include <G4_Mvtx.C>
+#include <G4_TPC.C>
 
 #include <g4eval/PHG4DSTReader.h>
 

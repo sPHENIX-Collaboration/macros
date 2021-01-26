@@ -1,7 +1,7 @@
 #ifndef MACRO_G4FHCAL_C
 #define MACRO_G4FHCAL_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4calo/RawTowerBuilderByHitIndex.h>
 #include <g4calo/RawTowerDigitizer.h>
@@ -14,6 +14,7 @@
 #include <g4main/PHG4Reco.h>
 
 #include <caloreco/RawClusterBuilderFwd.h>
+#include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
 
 #include <fun4all/Fun4AllServer.h>
@@ -41,6 +42,15 @@ namespace G4FHCAL
   double Gz0 = 400.;
   double Gdz = 100.;
   double outer_radius = 262.;
+  enum enu_FHcal_clusterizer
+  {
+    kFHcalGraphClusterizer,
+    kFHcalTemplateClusterizer
+  };
+  //template clusterizer, as developed by Sasha Bazilevsky
+  enu_FHcal_clusterizer FHcal_clusterizer = kFHcalTemplateClusterizer;
+  // graph clusterizer
+  //enu_FHcal_clusterizer FHcal_clusterizer = kFHcalGraphClusterizer;
 }  // namespace G4FHCAL
 
 void FHCALInit()
@@ -76,12 +86,6 @@ void FHCALSetup(PHG4Reco *g4Reco)
 
 void FHCAL_Cells(int verbosity = 0)
 {
-  Fun4AllServer *se = Fun4AllServer::instance();
-
-  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("FHCALCellReco");
-  hc->Detector("FHCAL");
-  se->registerSubsystem(hc);
-
   return;
 }
 
@@ -94,7 +98,6 @@ void FHCAL_Towers()
   ostringstream mapping_fhcal;
   mapping_fhcal << getenv("CALIBRATIONROOT")
                 << "/ForwardHcal/mapping/towerMap_FHCAL_v005.txt";
-  //mapping_fhcal << "towerMap_FHCAL_latest.txt";
 
   RawTowerBuilderByHitIndex *tower_FHCAL = new RawTowerBuilderByHitIndex("TowerBuilder_FHCAL");
   tower_FHCAL->Detector("FHCAL");
@@ -148,11 +151,28 @@ void FHCAL_Clusters()
   int verbosity = std::max(Enable::VERBOSITY, Enable::FHCAL_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("FHCALRawClusterBuilderFwd");
-  ClusterBuilder->Detector("FHCAL");
-  ClusterBuilder->Verbosity(verbosity);
-  ClusterBuilder->set_threshold_energy(0.100);
-  se->registerSubsystem(ClusterBuilder);
+  if (G4FHCAL::FHcal_clusterizer == G4FHCAL::kFHcalTemplateClusterizer)
+  {
+    RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("FHCALRawClusterBuilderTemplate");
+    ClusterBuilder->Detector("FHCAL");
+    ClusterBuilder->SetPlanarGeometry();  // has to be called after Detector()
+    ClusterBuilder->Verbosity(verbosity);
+    ClusterBuilder->set_threshold_energy(0.100);
+    se->registerSubsystem(ClusterBuilder);
+  }
+  else if (G4FHCAL::FHcal_clusterizer == G4FHCAL::kFHcalTemplateClusterizer)
+  {
+    RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("FHCALRawClusterBuilderFwd");
+    ClusterBuilder->Detector("FHCAL");
+    ClusterBuilder->Verbosity(verbosity);
+    ClusterBuilder->set_threshold_energy(0.100);
+    se->registerSubsystem(ClusterBuilder);
+  }
+  else
+  {
+    cout << "FHCAL_Clusters - unknown clusterizer setting " << G4FHCAL::FHcal_clusterizer << endl;
+    gSystem->Exit(1);
+  }
 
   return;
 }

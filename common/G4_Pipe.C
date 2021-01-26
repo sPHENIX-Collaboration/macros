@@ -1,8 +1,9 @@
 #ifndef MACRO_G4PIPE_C
 #define MACRO_G4PIPE_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
+#include <g4detectors/PHG4ConeSubsystem.h>
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
 #include <g4main/PHG4Reco.h>
@@ -25,14 +26,19 @@ namespace G4PIPE
 
   double al_pipe_radius = 2.0005;     // same as Be pipe
   double al_pipe_thickness = 0.1600;  // 1.6 mm based on spec
-  double al_pipe_length = 88.3;       // extension beyond +/- 40 cm
+  double al_pipe_length = 171.44;     // extension beyond +/- 40 cm
+
+  double al_pipe_cone_length = 8.56;
+
+  double al_pipe_ext_radius = 2.5005;
+  double al_pipe_ext_length = 60.0;  // extension beyond conical part
 }  // namespace G4PIPE
 
 void PipeInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PIPE::be_pipe_length / 2. + G4PIPE::al_pipe_length);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -(G4PIPE::be_pipe_length / 2. + G4PIPE::al_pipe_length));
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PIPE::al_pipe_ext_radius + G4PIPE::al_pipe_thickness);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PIPE::be_pipe_length / 2. + G4PIPE::al_pipe_length + G4PIPE::al_pipe_cone_length + G4PIPE::al_pipe_ext_length +no_overlapp );
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -(G4PIPE::be_pipe_length / 2. + G4PIPE::al_pipe_length + G4PIPE::al_pipe_cone_length + G4PIPE::al_pipe_ext_length) - no_overlapp);
 }
 
 double Pipe(PHG4Reco* g4Reco, double radius)
@@ -121,7 +127,112 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(cyl);
 
-  radius = G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness;
+  PHG4ConeSubsystem* cone = nullptr;
+
+  double cone_position = 0.5 * G4PIPE::be_pipe_length + G4PIPE::al_pipe_length + 0.5 * G4PIPE::al_pipe_cone_length;
+  double ext_position = 0.5 * G4PIPE::be_pipe_length + G4PIPE::al_pipe_length + G4PIPE::al_pipe_cone_length + 0.5 * G4PIPE::al_pipe_ext_length + no_overlapp;
+
+  /* north aluminum pipe (conical part) */
+  cone = new PHG4ConeSubsystem("N_AL_PIPE_CONE", 6);
+  cone->SetR1(G4PIPE::al_pipe_radius, G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
+  cone->SetR2(G4PIPE::al_pipe_ext_radius, G4PIPE::al_pipe_ext_radius + G4PIPE::al_pipe_thickness);
+  cone->SetZlength(G4PIPE::al_pipe_cone_length / 2);
+  cone->SetPlaceZ(cone_position + no_overlapp);
+  cone->SetMaterial("G4_Al");
+  cone->SuperDetector("PIPE");
+  if (AbsorberActive) cone->SetActive();
+  cone->OverlapCheck(OverlapCheck);
+  g4Reco->registerSubsystem(cone);
+
+  /* north aluminum pipe (extension) */
+  cyl = new PHG4CylinderSubsystem("N_AL_PIPE_EXT", 7);
+  cyl->set_double_param("place_z", ext_position + no_overlapp);
+  cyl->set_double_param("radius", G4PIPE::al_pipe_ext_radius);
+  cyl->set_int_param("lengthviarapidity", 0);
+  cyl->set_double_param("length", G4PIPE::al_pipe_ext_length);
+  cyl->set_string_param("material", "G4_Al");
+  cyl->set_double_param("thickness", G4PIPE::al_pipe_thickness);
+  cyl->SuperDetector("PIPE");
+  if (AbsorberActive) cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
+  g4Reco->registerSubsystem(cyl);
+
+  /* south aluminum pipe (conical part) */
+  cone = new PHG4ConeSubsystem("S_AL_PIPE_CONE", 8);
+  cone->SetR1(G4PIPE::al_pipe_ext_radius, G4PIPE::al_pipe_ext_radius + G4PIPE::al_pipe_thickness);
+  cone->SetR2(G4PIPE::al_pipe_radius, G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
+  cone->SetZlength(G4PIPE::al_pipe_cone_length / 2);
+  cone->SetPlaceZ(-cone_position - no_overlapp);
+  cone->SetMaterial("G4_Al");
+  cone->SuperDetector("PIPE");
+  if (AbsorberActive) cone->SetActive();
+  cone->OverlapCheck(OverlapCheck);
+  g4Reco->registerSubsystem(cone);
+
+  /* south aluminum pipe (extension) */
+  cyl = new PHG4CylinderSubsystem("S_AL_PIPE_EXT", 9);
+  cyl->set_double_param("place_z", -ext_position - no_overlapp);
+  cyl->set_double_param("radius", G4PIPE::al_pipe_ext_radius);
+  cyl->set_int_param("lengthviarapidity", 0);
+  cyl->set_double_param("length", G4PIPE::al_pipe_ext_length);
+  cyl->set_string_param("material", "G4_Al");
+  cyl->set_double_param("thickness", G4PIPE::al_pipe_thickness);
+  cyl->SuperDetector("PIPE");
+  if (AbsorberActive) cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
+  g4Reco->registerSubsystem(cyl);
+
+  /* north aluminum pipe (conical part) [vacuum] */
+  cone = new PHG4ConeSubsystem("VAC_N_AL_PIPE_CONE", 10);
+  cone->SetR1(0., G4PIPE::al_pipe_radius);
+  cone->SetR2(0., G4PIPE::al_pipe_ext_radius);
+  cone->SetZlength(G4PIPE::al_pipe_cone_length / 2);
+  cone->SetPlaceZ(cone_position + no_overlapp);
+  cone->SetMaterial("G4_Galactic");
+  cone->SuperDetector("PIPE");
+  if (AbsorberActive) cone->SetActive();
+  cone->OverlapCheck(OverlapCheck);
+  g4Reco->registerSubsystem(cone);
+
+  /* north aluminum pipe (extension) [vacuum] */
+  cyl = new PHG4CylinderSubsystem("VAC_N_AL_PIPE_EXT", 11);
+  cyl->set_double_param("place_z", ext_position + no_overlapp);
+  cyl->set_double_param("radius", 0.);
+  cyl->set_int_param("lengthviarapidity", 0);
+  cyl->set_double_param("length", G4PIPE::al_pipe_ext_length);
+  cyl->set_string_param("material", "G4_Galactic");
+  cyl->set_double_param("thickness", G4PIPE::al_pipe_ext_radius);
+  cyl->SuperDetector("PIPE");
+  if (AbsorberActive) cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
+  g4Reco->registerSubsystem(cyl);
+
+  /* south aluminum pipe (conical part) [vacuum] */
+  cone = new PHG4ConeSubsystem("VAC_S_AL_PIPE_CONE", 12);
+  cone->SetR1(0., G4PIPE::al_pipe_ext_radius);
+  cone->SetR2(0., G4PIPE::al_pipe_radius);
+  cone->SetZlength(G4PIPE::al_pipe_cone_length / 2);
+  cone->SetPlaceZ(-cone_position - no_overlapp);
+  cone->SetMaterial("G4_Galactic");
+  cone->SuperDetector("PIPE");
+  if (AbsorberActive) cone->SetActive();
+  cone->OverlapCheck(OverlapCheck);
+  g4Reco->registerSubsystem(cone);
+
+  /* south aluminum pipe (extension) [vacuum] */
+  cyl = new PHG4CylinderSubsystem("VAC_S_AL_PIPE_EXT", 13);
+  cyl->set_double_param("place_z", -ext_position - no_overlapp);
+  cyl->set_double_param("radius", 0.);
+  cyl->set_int_param("lengthviarapidity", 0);
+  cyl->set_double_param("length", G4PIPE::al_pipe_ext_length);
+  cyl->set_string_param("material", "G4_Galactic");
+  cyl->set_double_param("thickness", G4PIPE::al_pipe_ext_radius);
+  cyl->SuperDetector("PIPE");
+  if (AbsorberActive) cyl->SetActive();
+  cyl->OverlapCheck(OverlapCheck);
+  g4Reco->registerSubsystem(cyl);
+
+  radius = G4PIPE::al_pipe_ext_radius + G4PIPE::al_pipe_thickness;
 
   if (verbosity > 0)
   {

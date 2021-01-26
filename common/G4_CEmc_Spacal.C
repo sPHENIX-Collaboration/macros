@@ -1,7 +1,8 @@
 #ifndef MACRO_G4CEMCSPACAL_C
 #define MACRO_G4CEMCSPACAL_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
+#include <QA.C>
 
 #include <g4detectors/PHG4CylinderCellReco.h>
 #include <g4detectors/PHG4CylinderGeom_Spacalv1.h>
@@ -21,6 +22,7 @@
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawClusterPositionCorrection.h>
 #include <caloreco/RawTowerCalibration.h>
+#include <qa_modules/QAG4SimulationCalorimeter.h>
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -34,6 +36,7 @@ R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libqa_modules.so)
 
 namespace Enable
 {
@@ -44,6 +47,7 @@ namespace Enable
   bool CEMC_TOWER = false;
   bool CEMC_CLUSTER = false;
   bool CEMC_EVAL = false;
+  bool CEMC_QA = false;
   int CEMC_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -238,42 +242,22 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
   int ilayer = 0;
   PHG4SpacalSubsystem *cemc;
 
-  const bool use_2015_design = false;
-  if (use_2015_design)
-  {
-    cemc = new PHG4SpacalSubsystem("CEMC", ilayer);
+  cemc = new PHG4SpacalSubsystem("CEMC", ilayer);
 
-    cemc->set_int_param("config", PHG4CylinderGeom_Spacalv1::kFullProjective_2DTaper_SameLengthFiberPerTower);
-    cemc->set_double_param("radius", radius);            // overwrite minimal radius
-    cemc->set_double_param("thickness", cemcthickness);  // overwrite thickness
-    cemc->set_int_param("azimuthal_n_sec", 32);
-    //    cemc->set_int_param("construction_verbose", 2);
+  cemc->set_int_param("virualize_fiber", 0);
+  cemc->set_int_param("azimuthal_seg_visible", 1);
+  cemc->set_int_param("construction_verbose", 0);
+  cemc->Verbosity(0);
 
-    cemc->SetActive();
-    cemc->SuperDetector("CEMC");
-    if (AbsorberActive) cemc->SetAbsorberActive();
-    cemc->OverlapCheck(OverlapCheck);
-  }
+  cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
+  cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2018ProjTilted/"));
+  cemc->set_double_param("radius", radius);            // overwrite minimal radius
+  cemc->set_double_param("thickness", cemcthickness);  // overwrite thickness
 
-  else
-  {
-    cemc = new PHG4SpacalSubsystem("CEMC", ilayer);
-
-    cemc->set_int_param("virualize_fiber", 0);
-    cemc->set_int_param("azimuthal_seg_visible", 1);
-    cemc->set_int_param("construction_verbose", 0);
-    cemc->Verbosity(0);
-
-    cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
-    cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2018ProjTilted/"));
-    cemc->set_double_param("radius", radius);            // overwrite minimal radius
-    cemc->set_double_param("thickness", cemcthickness);  // overwrite thickness
-
-    cemc->SetActive();
-    cemc->SuperDetector("CEMC");
-    if (AbsorberActive) cemc->SetAbsorberActive();
-    cemc->OverlapCheck(OverlapCheck);
-  }
+  cemc->SetActive();
+  cemc->SuperDetector("CEMC");
+  if (AbsorberActive) cemc->SetAbsorberActive();
+  cemc->OverlapCheck(OverlapCheck);
 
   g4Reco->registerSubsystem(cemc);
 
@@ -368,11 +352,15 @@ void CEMC_Towers()
   TowerDigitizer->Detector("CEMC");
   TowerDigitizer->Verbosity(verbosity);
   TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitization);
-  TowerDigitizer->set_pedstal_central_ADC(0);
-  TowerDigitizer->set_pedstal_width_ADC(8);  // eRD1 test beam setting
-  TowerDigitizer->set_photonelec_ADC(1);     //not simulating ADC discretization error
+  TowerDigitizer->set_variable_pedestal(true);  //read ped central and width from calibrations file comment next 2 lines if true
+                                                //  TowerDigitizer->set_pedstal_central_ADC(0);
+                                                //  TowerDigitizer->set_pedstal_width_ADC(8);  // eRD1 test beam setting
+  TowerDigitizer->set_photonelec_ADC(1);        //not simulating ADC discretization error
   TowerDigitizer->set_photonelec_yield_visible_GeV(photoelectron_per_GeV / sampling_fraction);
-  TowerDigitizer->set_zero_suppression_ADC(16);  // eRD1 test beam setting
+  TowerDigitizer->set_variable_zero_suppression(true);  //read zs values from calibrations file comment next line if true
+                                                        //  TowerDigitizer->set_zero_suppression_ADC(16);  // eRD1 test beam setting
+  TowerDigitizer->GetParameters().ReadFromFile("CEMC", "xml", 0, 0,
+                                               string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
   se->registerSubsystem(TowerDigitizer);
 
   if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal)
@@ -392,9 +380,11 @@ void CEMC_Towers()
     TowerCalibration->Verbosity(verbosity);
     TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
     TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
-                                                              string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalib_2017ProjTilted/"));  // calibration database
-    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);                                                             // overall energy scale based on 4-GeV photon simulations
-    TowerCalibration->set_pedstal_ADC(0);
+                                                              string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
+    TowerCalibration->set_variable_GeV_ADC(true);                                                                                                   //read GeV per ADC from calibrations file comment next line if true
+                                                                                                                                                    //    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);                                                             // overall energy scale based on 4-GeV photon simulations
+    TowerCalibration->set_variable_pedestal(true);                                                                                                  //read pedestals from calibrations file comment next line if true
+                                                                                                                                                    //    TowerCalibration->set_pedstal_ADC(0);
     se->registerSubsystem(TowerCalibration);
   }
   else
@@ -465,4 +455,17 @@ void CEMC_Eval(const std::string &outputfile)
 
   return;
 }
+
+void CEMC_QA()
+{
+  int verbosity = std::max(Enable::QA_VERBOSITY, Enable::CEMC_VERBOSITY);
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+  QAG4SimulationCalorimeter *qa = new QAG4SimulationCalorimeter("CEMC");
+  qa->Verbosity(verbosity);
+  se->registerSubsystem(qa);
+
+  return;
+}
+
 #endif

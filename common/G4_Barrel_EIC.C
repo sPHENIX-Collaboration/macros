@@ -1,11 +1,9 @@
 #ifndef MACRO_G4BARRELEIC_C
 #define MACRO_G4BARRELEIC_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
-
-#include <g4tpc/PHG4TpcSpaceChargeDistortion.h>
 
 #include <g4main/PHG4Reco.h>
 

@@ -1,7 +1,7 @@
 #ifndef MACRO_G4FEMCEIC_C
 #define MACRO_G4FEMCEIC_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
 #include <caloreco/RawClusterBuilderFwd.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
@@ -85,14 +85,6 @@ void FEMCSetup(PHG4Reco *g4Reco)
 
 void FEMC_Cells()
 {
-  int verbosity = std::max(Enable::VERBOSITY, Enable::FEMC_VERBOSITY);
-
-  Fun4AllServer *se = Fun4AllServer::instance();
-
-  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("FEMCCellReco");
-  hc->Detector("FEMC");
-  se->registerSubsystem(hc);
-
   return;
 }
 

@@ -1,24 +1,24 @@
 #ifndef MACRO_G4SETUPFSPHENIX_C
 #define MACRO_G4SETUPFSPHENIX_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_BlackHole.C"
-#include "G4_CEmc_Spacal.C"
-#include "G4_FEMC.C"
-#include "G4_FGEM_fsPHENIX.C"
-#include "G4_FHCAL.C"
-#include "G4_HcalIn_ref.C"
-#include "G4_HcalOut_ref.C"
-#include "G4_Magnet.C"
-#include "G4_Mvtx.C"
-#include "G4_Pipe.C"
-#include "G4_Piston.C"
-#include "G4_PlugDoor_fsPHENIX.C"
-#include "G4_TPC.C"
-#include "G4_Tracking.C"
-#include "G4_User.C"
-#include "G4_World.C"
+#include <G4_Bbc.C>
+#include <G4_BlackHole.C>
+#include <G4_CEmc_Spacal.C>
+#include <G4_FEMC.C>
+#include <G4_FGEM_fsPHENIX.C>
+#include <G4_FHCAL.C>
+#include <G4_HcalIn_ref.C>
+#include <G4_HcalOut_ref.C>
+#include <G4_Magnet.C>
+#include <G4_Mvtx.C>
+#include <G4_Pipe.C>
+#include <G4_Piston.C>
+#include <G4_PlugDoor_fsPHENIX.C>
+#include <G4_TPC.C>
+#include <G4_User.C>
+#include <G4_World.C>
 
 #include <g4eval/PHG4DstCompressReco.h>
 
@@ -41,73 +41,24 @@ void G4Init()
 {
   // load detector/material macros and execute Init() function
 
-  if (Enable::PIPE)
-  {
-    PipeInit();
-  }
-  if (Enable::MVTX)
-  {
-    MvtxInit();
-  }
-  if (Enable::INTT)
-  {
-    InttInit();
-  }
-  if (Enable::TPC)
-  {
-    TPCInit();
-  }
-  if (Enable::CEMC)
-  {
-    CEmcInit();
-  }
-
-  if (Enable::HCALIN)
-  {
-    HCalInnerInit();
-  }
-
-  if (Enable::MAGNET)
-  {
-    MagnetInit();
-  }
-  if (Enable::HCALOUT)
-  {
-    HCalOuterInit();
-  }
-
-  if (Enable::FGEM)
-  {
-    FGEM_Init();
-  }
-
-  if (Enable::FEMC)
-  {
-    FEMCInit();
-  }
-
-  if (Enable::FHCAL)
-  {
-    FHCALInit();
-  }
-  if (Enable::PISTON)
-  {
-    PistonInit();
-  }
-
-  if (Enable::PLUGDOOR)
-  {
-    PlugDoorInit();
-  }
-  if (Enable::USER)
-  {
-    UserInit();
-  }
-
-  if (Enable::BLACKHOLE)
-  {
-    BlackHoleInit();
-  }
+  if (Enable::PIPE) PipeInit();
+  if (Enable::MVTX) MvtxInit();
+  if (Enable::INTT) InttInit();
+  if (Enable::TPC) TPCInit();
+  if (Enable::BBC) BbcInit();
+  if (Enable::CEMC) CEmcInit();
+  if (Enable::HCALIN) HCalInnerInit();
+  if (Enable::MAGNET) MagnetInit();
+// We want the field - even if the magnet volume is disabled
+  MagnetFieldInit();
+  if (Enable::HCALOUT) HCalOuterInit();
+  if (Enable::FGEM) FGEM_Init();
+  if (Enable::FEMC) FEMCInit();
+  if (Enable::FHCAL) FHCALInit();
+  if (Enable::PISTON) PistonInit();
+  if (Enable::PLUGDOOR) PlugDoorInit();
+  if (Enable::USER) UserInit();
+  if (Enable::BLACKHOLE) BlackHoleInit();
 }
 
 int G4Setup()
@@ -168,6 +119,12 @@ int G4Setup()
   {
     radius = TPC(g4Reco, radius);
   }
+
+  //----------------------------------------
+  // BBC
+
+  if (Enable::BBC) Bbc(g4Reco);
+
   //----------------------------------------
   // CEMC
   //

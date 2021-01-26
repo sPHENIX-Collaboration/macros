@@ -2,7 +2,8 @@
 #ifndef MACRO_G4HCALINREF_C
 #define MACRO_G4HCALINREF_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
+#include <QA.C>
 
 #include <g4calo/HcalRawTowerBuilder.h>
 #include <g4calo/RawTowerDigitizer.h>
@@ -18,6 +19,7 @@
 #include <caloreco/RawClusterBuilderGraph.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
+#include <qa_modules/QAG4SimulationCalorimeter.h>
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -25,6 +27,7 @@ R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libqa_modules.so)
 
 void HCalInner_SupportRing(PHG4Reco *g4Reco);
 
@@ -37,6 +40,7 @@ namespace Enable
   bool HCALIN_TOWER = false;
   bool HCALIN_CLUSTER = false;
   bool HCALIN_EVAL = false;
+  bool HCALIN_QA = false;
   int HCALIN_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -268,7 +272,7 @@ void HCALInner_Clusters()
   {
     RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("HcalInRawClusterBuilderTemplate");
     ClusterBuilder->Detector("HCALIN");
-    ClusterBuilder->SetCylindricalGeometry();
+    ClusterBuilder->SetCylindricalGeometry();  // has to be called after Detector()
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem(ClusterBuilder);
   }
@@ -298,4 +302,17 @@ void HCALInner_Eval(const std::string &outputfile)
 
   return;
 }
+
+void HCALInner_QA()
+{
+  int verbosity = std::max(Enable::QA_VERBOSITY, Enable::HCALIN_VERBOSITY);
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+  QAG4SimulationCalorimeter *qa = new QAG4SimulationCalorimeter("HCALIN");
+  qa->Verbosity(verbosity);
+  se->registerSubsystem(qa);
+
+  return;
+}
+
 #endif

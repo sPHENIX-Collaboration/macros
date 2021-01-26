@@ -1,14 +1,14 @@
 #ifndef MACRO_G4TRACKINGEIC_C
 #define MACRO_G4TRACKINGEIC_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
 
-#include "G4_CEmc_EIC.C"
-#include "G4_FEMC_EIC.C"
-#include "G4_FHCAL.C"
-#include "G4_GEM_EIC.C"
-#include "G4_Mvtx_EIC.C"
-#include "G4_TPC_EIC.C"
+#include <G4_CEmc_EIC.C>
+#include <G4_FEMC_EIC.C>
+#include <G4_FHCAL.C>
+#include <G4_GEM_EIC.C>
+#include <G4_Mvtx_EIC.C>
+#include <G4_TPC_EIC.C>
 
 #include <g4trackfastsim/PHG4TrackFastSim.h>
 

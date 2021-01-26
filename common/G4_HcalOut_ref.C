@@ -1,7 +1,8 @@
 #ifndef MACRO_G4HCALOUTREF_C
 #define MACRO_G4HCALOUTREF_C
 
-#include "GlobalVariables.C"
+#include <GlobalVariables.C>
+#include <QA.C>
 
 #include <g4calo/HcalRawTowerBuilder.h>
 #include <g4calo/RawTowerDigitizer.h>
@@ -16,6 +17,7 @@
 #include <caloreco/RawClusterBuilderGraph.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
+#include <qa_modules/QAG4SimulationCalorimeter.h>
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -23,6 +25,7 @@ R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libqa_modules.so)
 
 namespace Enable
 {
@@ -33,6 +36,7 @@ namespace Enable
   bool HCALOUT_TOWER = false;
   bool HCALOUT_CLUSTER = false;
   bool HCALOUT_EVAL = false;
+  bool HCALOUT_QA = false;
   int HCALOUT_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -192,7 +196,7 @@ void HCALOuter_Clusters()
   {
     RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("HcalOutRawClusterBuilderTemplate");
     ClusterBuilder->Detector("HCALOUT");
-    ClusterBuilder->SetCylindricalGeometry();
+    ClusterBuilder->SetCylindricalGeometry();  // has to be called after Detector()
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem(ClusterBuilder);
   }
@@ -224,4 +228,17 @@ void HCALOuter_Eval(const std::string &outputfile)
 
   return;
 }
+
+void HCALOuter_QA()
+{
+  int verbosity = std::max(Enable::QA_VERBOSITY, Enable::HCALOUT_VERBOSITY);
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+  QAG4SimulationCalorimeter *qa = new QAG4SimulationCalorimeter("HCALOUT");
+  qa->Verbosity(verbosity);
+  se->registerSubsystem(qa);
+
+  return;
+}
+
 #endif
