@@ -76,7 +76,7 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
   const bool readhepmc = false;  // read HepMC files
   // Or:
   // Use pythia
-  const bool runpythia8 = false;
+  const bool runpythia8 = true;
   const bool runpythia6 = false;
   //
   // **** And ****
@@ -87,7 +87,7 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
 
   // Besides the above flags. One can further choose to further put in following particles in Geant4 simulation
   // Use multi-particle generator (PHG4SimpleEventGenerator), see the code block below to choose particle species and kinematics
-  const bool particles = true && !readhits;
+  const bool particles = false && !readhits;
   // or gun/ very simple single particle gun generator
   const bool usegun = false && !readhits;
   // Throw single Upsilons, may be embedded in Hijing by setting readhepmc flag also  (note, careful to set Z vertex equal to Hijing events)
@@ -96,7 +96,7 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
   // Event pile up simulation with collision rate in Hz MB collisions.
   // Note please follow up the macro to verify the settings for beam parameters
   const double pileup_collision_rate = 0;  // 100e3 for 100kHz nominal AuAu collision rate.
-  const bool do_write_output = false;
+  const bool do_write_output = true;
   // To write cluster files set do_write_output = true and set 
   // do_tracking = true, do_tracking_cell = true, do_tracking_cluster = true and 
   // leave the tracking for later do_tracking_track =  false,  do_tracking_eval = false
@@ -112,8 +112,8 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
   bool do_tracking = true;
   bool do_tracking_cell = do_tracking && true;
   bool do_tracking_cluster = do_tracking_cell && true;
-  bool do_tracking_track = do_tracking_cluster && true;
-  bool do_tracking_eval = do_tracking_track && true;
+  bool do_tracking_track = do_tracking_cluster && false; //rcc
+  bool do_tracking_eval = do_tracking_track && false; //rcc
 
   bool do_pstof = false;
 
@@ -319,7 +319,7 @@ gROOT->SetMacroPath(".:/afs/rhic.bnl.gov/@sys/opt/sphenix/core/root-5.34.36/macr
       pgen->set_name("pi+");
       pgen->set_z_range(-z_width, z_width);
       pgen->set_eta_range(eta_min, eta_max);
-      pgen->set_mom_range(mom_min, mom_max);
+      //pgen->set_mom_range(mom_min, mom_max);
       pgen->set_phi_range(phi_min / 180. * TMath::Pi(), phi_max / 180. * TMath::Pi());
       se->registerSubsystem(pgen);
     }

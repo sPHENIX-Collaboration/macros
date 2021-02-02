@@ -57,11 +57,11 @@ R__LOAD_LIBRARY(libtrack_reco.so)
 //==============================================
 
 ////////////// MVTX 
-const int n_maps_layer = 3;  // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
+const int n_maps_layer = 0; //rcc disabling for now // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
 
 /////////////// INTT 
 int n_intt_layer = 4;  // must be 4 or 0, setting to zero removes INTT completely
-int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
+int laddertype[8] = {PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI,
 		       PHG4InttDefs::SEGMENTATION_PHI};
@@ -106,14 +106,14 @@ void SetINTTLayout(int layout = 0)
     case 1:	// Four layers, laddertypes 1-1-0-1
     {
       n_intt_layer = 8;
-      laddertype[0] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[1] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[2] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[3] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[4] = PHG4SiliconTrackerDefs::SEGMENTATION_Z;
-      laddertype[5] = PHG4SiliconTrackerDefs::SEGMENTATION_Z;
-      laddertype[6] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[7] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+      laddertype[0] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[1] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[2] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[3] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[4] = PHG4InttDefs::SEGMENTATION_Z;
+      laddertype[5] = PHG4InttDefs::SEGMENTATION_Z;
+      laddertype[6] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[7] = PHG4InttDefs::SEGMENTATION_PHI;
       nladder[0] = 11;	nladder[2] = 15;  nladder[4] = 26;  nladder[6] = 21;
       nladder[1] = 11;	nladder[3] = 15;  nladder[5] = 26;  nladder[7] = 21;
       sensor_radius[0] = 6.876;	          sensor_radius[1] = 7.462;
@@ -125,12 +125,12 @@ void SetINTTLayout(int layout = 0)
     case 2:	// Three outer layers, laddertypes 1-0-1
     {
       n_intt_layer = 6;
-      laddertype[0] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[1] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[2] = PHG4SiliconTrackerDefs::SEGMENTATION_Z;
-      laddertype[3] = PHG4SiliconTrackerDefs::SEGMENTATION_Z;
-      laddertype[4] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[5] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+      laddertype[0] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[1] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[2] = PHG4InttDefs::SEGMENTATION_Z;
+      laddertype[3] = PHG4InttDefs::SEGMENTATION_Z;
+      laddertype[4] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[5] = PHG4InttDefs::SEGMENTATION_PHI;
       nladder[0] = 15;	nladder[2] = 26;  nladder[4] = 21;
       nladder[1] = 15;	nladder[3] = 26;  nladder[5] = 21;
       sensor_radius[0] = 8.987;	          sensor_radius[1] = 9.545;
@@ -141,12 +141,12 @@ void SetINTTLayout(int layout = 0)
     case 3:	// Three outer layers, laddertypes 1-1-1
     {
       n_intt_layer = 6;
-      laddertype[0] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[1] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[2] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[3] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[4] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[5] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+      laddertype[0] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[1] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[2] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[3] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[4] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[5] = PHG4InttDefs::SEGMENTATION_PHI;
       nladder[0] = 15;	nladder[2] = 18;  nladder[4] = 21;
       nladder[1] = 15;	nladder[3] = 18;  nladder[5] = 21;
       sensor_radius[0] = 8.987;	          sensor_radius[1] = 9.545;
@@ -157,10 +157,10 @@ void SetINTTLayout(int layout = 0)
     case 4:	// Two outer layers, laddertypes 0-1
     {
       n_intt_layer = 4;
-      laddertype[0] = PHG4SiliconTrackerDefs::SEGMENTATION_Z;
-      laddertype[1] = PHG4SiliconTrackerDefs::SEGMENTATION_Z;
-      laddertype[2] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[3] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+      laddertype[0] = PHG4InttDefs::SEGMENTATION_Z;
+      laddertype[1] = PHG4InttDefs::SEGMENTATION_Z;
+      laddertype[2] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[3] = PHG4InttDefs::SEGMENTATION_PHI;
       nladder[0] = 26;	nladder[2] = 21;
       nladder[1] = 26;	nladder[3] = 21;
       sensor_radius[0] = 10.835;	  sensor_radius[1] = 11.361;
@@ -170,10 +170,10 @@ void SetINTTLayout(int layout = 0)
     case 5:	// Two outer layers, laddertypes 1-1
     {
       n_intt_layer = 4;
-      laddertype[0] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[1] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[2] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[3] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+      laddertype[0] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[1] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[2] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[3] = PHG4InttDefs::SEGMENTATION_PHI;
       nladder[0] = 18;	nladder[2] = 21;
       nladder[1] = 18;	nladder[3] = 21;
       sensor_radius[0] = 10.835;	  sensor_radius[1] = 11.361;
@@ -183,8 +183,8 @@ void SetINTTLayout(int layout = 0)
     case 6:	// One outer layer, laddertypes 1
     {
       n_intt_layer = 2;
-      laddertype[0] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[1] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+      laddertype[0] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[1] = PHG4InttDefs::SEGMENTATION_PHI;
       nladder[0] = 21;
       nladder[1] = 21;
       sensor_radius[0] = 12.676;	  sensor_radius[1] = 13.179;
@@ -198,10 +198,10 @@ void SetINTTLayout(int layout = 0)
     case 8:	// Two outer layers, laddertypes 1-1 pushed out as far as possiblef
     {
       n_intt_layer = 4;
-      laddertype[0] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[1] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[2] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[3] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+      laddertype[0] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[1] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[2] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[3] = PHG4InttDefs::SEGMENTATION_PHI;
       nladder[0] = 21;	nladder[2] = 25;
       nladder[1] = 21;	nladder[3] = 25;
       sensor_radius[0] = 12.676;	  sensor_radius[1] = 13.179;
@@ -211,14 +211,14 @@ void SetINTTLayout(int layout = 0)
     default:	// Four layers, laddertypes 0-1-1-1
     {
       n_intt_layer = 8;
-      laddertype[0] = PHG4SiliconTrackerDefs::SEGMENTATION_Z;
-      laddertype[1] = PHG4SiliconTrackerDefs::SEGMENTATION_Z;
-      laddertype[2] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[3] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[4] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[5] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[6] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
-      laddertype[7] = PHG4SiliconTrackerDefs::SEGMENTATION_PHI;
+      laddertype[0] = PHG4InttDefs::SEGMENTATION_Z;
+      laddertype[1] = PHG4InttDefs::SEGMENTATION_Z;
+      laddertype[2] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[3] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[4] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[5] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[6] = PHG4InttDefs::SEGMENTATION_PHI;
+      laddertype[7] = PHG4InttDefs::SEGMENTATION_PHI;
       nladder[0] = 17;	nladder[2] = 15;  nladder[4] = 18;  nladder[6] = 21;
       nladder[1] = 17;	nladder[3] = 15;  nladder[5] = 18;  nladder[7] = 21;
       sensor_radius[0] = 6.876;	          sensor_radius[1] = 7.462;
