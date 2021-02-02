@@ -30,12 +30,12 @@ R__LOAD_LIBRARY(libqa_modules.so)
 
 namespace Enable
 {
-  bool TPC = false;
+  bool TPC = true;
   bool TPC_ABSORBER = false;
   bool TPC_OVERLAPCHECK = false;
-  bool TPC_CELL = false;
-  bool TPC_CLUSTER = false;
-  bool TPC_QA = false;
+  bool TPC_CELL = true;
+  bool TPC_CLUSTER = true;
+  bool TPC_QA = true;
 
   bool TPC_ENDCAP = true;
 
@@ -52,7 +52,7 @@ namespace G4TPC
   double tpc_outer_radius = 77. + 2.;
 
   // distortions
-  bool ENABLE_STATIC_DISTORTIONS = false;
+  bool ENABLE_STATIC_DISTORTIONS = true;
   auto static_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/TPC/DistortionMaps/fluct_average.rev3.1side.3d.file0.h_negz.real_B1.4_E-400.0.ross_phi1_sphenix_phislice_lookup_r26xp40xz40.distortion_map.hist.root";
 
   bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
