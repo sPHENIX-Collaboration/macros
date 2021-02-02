@@ -171,6 +171,7 @@ void TPC_Cells()
   edrift->Verbosity(verbosity);
   if( G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS )
   {
+    printf("distortions enabled\n");
     auto distortionMap = new PHG4TpcDistortion;
     distortionMap->set_do_static_distortions( G4TPC::ENABLE_STATIC_DISTORTIONS );
     distortionMap->set_static_distortion_filename( G4TPC::static_distortion_filename );
