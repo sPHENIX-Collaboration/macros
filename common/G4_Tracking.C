@@ -447,7 +447,7 @@ void Tracking_Reco()
     actsTracks->Verbosity(verbosity);
     se->registerSubsystem(actsTracks);
 
-    PHActsTrkFitter* actsFit = new PHActsTrkFitter();
+    PHActsTrkFitter* actsFit = new PHActsTrkFitter("PHActsFirstTrkFitter");
     actsFit->Verbosity(verbosity);
     actsFit->doTimeAnalysis(false);
     /// If running with distortions, fit only the silicon+MMs first
@@ -465,6 +465,16 @@ void Tracking_Reco()
     PHActsVertexFinder* vtxer = new PHActsVertexFinder();
     vtxer->Verbosity(verbosity);
     se->registerSubsystem(vtxer);
+
+    PHActsTracks *actsTracks2 = new PHActsTracks();
+    actsTracks2->Verbosity(verbosity);
+    se->registerSubsystem(actsTracks2);
+
+    PHActsTrkFitter* actsFit2 = new PHActsTrkFitter("PHActsSecondTrKFitter");
+    actsFit2->Verbosity(verbosity);
+    actsFit2->doTimeAnalysis(false);
+    actsFit2->fitSiliconMMs(false);
+    se->registerSubsystem(actsFit2);
 
 #endif
   }
