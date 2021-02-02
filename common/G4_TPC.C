@@ -40,7 +40,7 @@ namespace Enable
 
   bool TPC_ENDCAP = true;
 
-  int TPC_VERBOSITY = 0;
+  int TPC_VERBOSITY = 1;
 }  // namespace Enable
 
 namespace G4TPC
