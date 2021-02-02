@@ -30,12 +30,13 @@ R__LOAD_LIBRARY(libqa_modules.so)
 
 namespace Enable
 {
-  bool TPC = true;
+  //these are set in the Fun4All macro, just placeholders here.
+  bool TPC = false;
   bool TPC_ABSORBER = false;
   bool TPC_OVERLAPCHECK = false;
-  bool TPC_CELL = true;
-  bool TPC_CLUSTER = true;
-  bool TPC_QA = true;
+  bool TPC_CELL = false;
+  bool TPC_CLUSTER = false;
+  bool TPC_QA = false;
 
   bool TPC_ENDCAP = true;
 
