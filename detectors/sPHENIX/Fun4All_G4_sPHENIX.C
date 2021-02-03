@@ -81,7 +81,7 @@ int Fun4All_G4_sPHENIX(
   //  Input::EMBED = true;
   INPUTEMBED::filename[0] = embed_input_file;
   // if you use a filelist
-  INPUTEMBED::listfile[0] = embed_input_file;
+  //INPUTEMBED::listfile[0] = embed_input_file;
 
   Input::SIMPLE = true;
   // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
