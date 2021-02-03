@@ -468,6 +468,7 @@ void Tracking_Reco()
 
     PHActsTracks *actsTracks2 = new PHActsTracks();
     actsTracks2->Verbosity(verbosity);
+    actsTracks2->setSecondFit(true);
     se->registerSubsystem(actsTracks2);
 
     PHActsTrkFitter* actsFit2 = new PHActsTrkFitter("PHActsSecondTrKFitter");
