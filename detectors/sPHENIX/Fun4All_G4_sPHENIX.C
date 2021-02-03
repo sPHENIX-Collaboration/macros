@@ -71,7 +71,7 @@ int Fun4All_G4_sPHENIX(
   //  Input::READHITS = true;
   INPUTREADHITS::filename[0] = inputFile;
   // if you use a filelist
-  // INPUTREADHITS::filelist[0] = inputFile;
+  // INPUTREADHITS::listfile[0] = inputFile;
   // Or:
   // Use particle generator
   // And
@@ -79,7 +79,9 @@ int Fun4All_G4_sPHENIX(
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
   //  Input::EMBED = true;
-  INPUTEMBED::filename = embed_input_file;
+  INPUTEMBED::filename[0] = embed_input_file;
+  // if you use a filelist
+  INPUTEMBED::listfile[0] = embed_input_file;
 
   Input::SIMPLE = true;
   // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
