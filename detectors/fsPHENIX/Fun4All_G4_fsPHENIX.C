@@ -66,8 +66,9 @@ int Fun4All_G4_fsPHENIX(
   // the simulations step completely. The G4Setup macro is only loaded to get information
   // about the number of layers used for the cell reco code
   Input::READHITS = false;
-  INPUTREADHITS::filename = inputFile;
-
+  INPUTREADHITS::filename[0] = inputFile;
+  // if you use a filelist
+  // INPUTREADHITS::listfile[0] = inputFile;
   // Or:
   // Use particle generator
   // And
@@ -76,7 +77,9 @@ int Fun4All_G4_fsPHENIX(
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
 
   //  Input::EMBED = true;
-  INPUTEMBED::filename = embed_input_file;
+  INPUTEMBED::filename[0] = embed_input_file;
+  // if you use a filelist
+  //INPUTEMBED::listfile[0] = embed_input_file;
 
   Input::SIMPLE = true;
   // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
@@ -144,6 +147,11 @@ int Fun4All_G4_fsPHENIX(
     INPUTGENERATOR::VectorMesonGenerator[0]->set_pt_range(0., 10.);
     // Y species - select only one, last one wins
     INPUTGENERATOR::VectorMesonGenerator[0]->set_upsilon_1s();
+    if (Input::HEPMC || Input::EMBED)
+    {
+      INPUTGENERATOR::VectorMesonGenerator[0]->set_reuse_existing_vertex(true);
+      INPUTGENERATOR::VectorMesonGenerator[0]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+    }
   }
   // particle gun
   // if you run more than one of these Input::GUN_NUMBER > 1
