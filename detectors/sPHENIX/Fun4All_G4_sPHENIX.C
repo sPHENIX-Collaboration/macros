@@ -256,7 +256,7 @@ int Fun4All_G4_sPHENIX(
   //  into the tracking, cannot run together with CEMC
   //  Enable::CEMCALBEDO = true;
 
-  Enable::CEMC = true;
+  Enable::CEMC = false;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
@@ -264,7 +264,7 @@ int Fun4All_G4_sPHENIX(
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
   Enable::CEMC_QA = Enable::CEMC_CLUSTER and Enable::QA && true;
 
-  Enable::HCALIN = true;
+  Enable::HCALIN = false;
   Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
@@ -275,7 +275,7 @@ int Fun4All_G4_sPHENIX(
   Enable::MAGNET = true;
   Enable::MAGNET_ABSORBER = true;
 
-  Enable::HCALOUT = true;
+  Enable::HCALOUT = false;
   Enable::HCALOUT_ABSORBER = true;
   Enable::HCALOUT_CELL = Enable::HCALOUT && true;
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
