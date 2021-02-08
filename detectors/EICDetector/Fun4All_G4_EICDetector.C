@@ -59,7 +59,9 @@ int Fun4All_G4_EICDetector(
   // about the number of layers used for the cell reco code
   //
   //Input::READHITS = true;
-  INPUTREADHITS::filename = inputFile;
+  INPUTREADHITS::filename[0] = inputFile;
+  // if you use a filelist
+  // INPUTREADHITS::listfile[0] = inputFile;
 
   // Or:
   // Use one or more particle generators
@@ -67,7 +69,10 @@ int Fun4All_G4_EICDetector(
   // all other options only play a role if it is active
   // In case embedding into a production output, please double check your G4Setup_EICDetector.C and G4_*.C consistent with those in the production macro folder
   //  Input::EMBED = true;
-  INPUTEMBED::filename = embed_input_file;
+  INPUTEMBED::filename[0] = embed_input_file;
+  // if you use a filelist
+  //INPUTEMBED::listfile[0] = embed_input_file;
+
   // Use Pythia 8
   //  Input::PYTHIA8 = true;
 
@@ -145,6 +150,11 @@ int Fun4All_G4_EICDetector(
     INPUTGENERATOR::VectorMesonGenerator[0]->set_pt_range(0., 10.);
     // Y species - select only one, last one wins
     INPUTGENERATOR::VectorMesonGenerator[0]->set_upsilon_1s();
+    if (Input::HEPMC || Input::EMBED)
+    {
+      INPUTGENERATOR::VectorMesonGenerator[0]->set_reuse_existing_vertex(true);
+      INPUTGENERATOR::VectorMesonGenerator[0]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+    }
   }
   // particle gun
   // if you run more than one of these Input::GUN_NUMBER > 1
