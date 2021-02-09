@@ -41,6 +41,7 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 void G4Init()
 {
+  printf("RCC G4Init.  So I am using this file for sure.\n");
   // Check on invalid combinations
   if (Enable::CEMC && Enable::CEMCALBEDO)
   {
