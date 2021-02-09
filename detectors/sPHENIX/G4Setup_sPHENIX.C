@@ -18,7 +18,7 @@
 #include <G4_PSTOF.C>
 #include <G4_Pipe.C>
 #include <G4_PlugDoor.C>
-#include <G4_TPC.C>
+#include <../../common/G4_TPC.C>
 #include <G4_User.C>
 #include <G4_World.C>
 
