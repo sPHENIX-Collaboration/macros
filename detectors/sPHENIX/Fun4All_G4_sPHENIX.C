@@ -358,7 +358,11 @@ int Fun4All_G4_sPHENIX(
   // G4P6DECAYER::decayType = EDecayType::kAll;
 
   // Initialize the selected subsystems
+
+    printf("RCC: Starting G4Init\n");
+
   G4Init();
+    printf("RCC: Finished G4Init\n");
 
   //---------------------
   // GEANT4 Detector description
@@ -368,6 +372,9 @@ int Fun4All_G4_sPHENIX(
     G4Setup();
   }
 
+    printf("RCC: Finished G4Setup\n");
+
+  
   //------------------
   // Detector Division
   //------------------
@@ -384,6 +391,8 @@ int Fun4All_G4_sPHENIX(
   if (Enable::HCALIN_CELL) HCALInner_Cells();
 
   if (Enable::HCALOUT_CELL) HCALOuter_Cells();
+
+      printf("RCC: Finished DetectorDivision\n");
 
   //-----------------------------
   // CEMC towering and clustering
@@ -408,6 +417,9 @@ int Fun4All_G4_sPHENIX(
   if (Enable::FEMC_TOWER) FEMC_Towers();
   if (Enable::FEMC_CLUSTER) FEMC_Clusters();
 
+
+        printf("RCC: Starting SVTX tracking\n");
+
   //--------------
   // SVTX tracking
   //--------------
@@ -421,6 +433,9 @@ int Fun4All_G4_sPHENIX(
     TrackingInit();
     Tracking_Reco();
   }
+        printf("RCC: Finished SVTX tracking\n");
+
+  
   //-----------------
   // Global Vertexing
   //-----------------
@@ -438,6 +453,7 @@ int Fun4All_G4_sPHENIX(
   {
     Global_FastSim();
   }
+        printf("RCC: Finished Global Vertexing\n");
 
   //-----------------
   // Calo Trigger Simulation
@@ -460,6 +476,8 @@ int Fun4All_G4_sPHENIX(
   //----------------------
   // Simulation evaluation
   //----------------------
+          printf("RCC: Starting simulation evaluation\n");
+
   string outputroot = outputFile;
   string remove_this = ".root";
   size_t pos = outputroot.find(remove_this);
@@ -552,6 +570,7 @@ int Fun4All_G4_sPHENIX(
   // if we use a negative number of events we go back to the command line here
   if (nEvents < 0)
   {
+    printf("RCC:  nEvents<0? n=%d\n",nEvents);
     return 0;
   }
   // if we run the particle generator and use 0 it'll run forever
@@ -562,7 +581,6 @@ int Fun4All_G4_sPHENIX(
     return 0;
   }
 
-  printf("RCC:  About to run %d events\n",nEvents);
   se->skip(skip);
   se->run(nEvents);
 
