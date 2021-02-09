@@ -562,6 +562,7 @@ int Fun4All_G4_sPHENIX(
     return 0;
   }
 
+  printf("RCC:  About to run %d events\n",nEvents);
   se->skip(skip);
   se->run(nEvents);
 
