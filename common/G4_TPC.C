@@ -175,6 +175,8 @@ void TPC_Cells()
     printf("TPC_Cells: edrift built\n");
 
   edrift->Detector("TPC");
+  printf("TPC_Cells: edrift successfully heard the word TPC\n");
+
   edrift->Verbosity(verbosity);
   printf("TPC_Cells: edrift finished\n");
   if( G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS )
