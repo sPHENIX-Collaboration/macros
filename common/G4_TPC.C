@@ -155,7 +155,7 @@ double TPC(PHG4Reco* g4Reco,
   return radius;
 }
 
-void TPC_Coells()
+void TPC_Cells()
 {
   printf("RCC: tpc cells enabled\n");
   return;
