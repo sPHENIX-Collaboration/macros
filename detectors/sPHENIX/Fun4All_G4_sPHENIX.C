@@ -383,7 +383,11 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::MVTX_CELL) Mvtx_Cells();
   if (Enable::INTT_CELL) Intt_Cells();
-  if (Enable::TPC_CELL) TPC_Cells();
+  printf("RCC starting tpc_cells?\n");
+  if (Enable::TPC_CELL) {
+    printf("yes.  starting tpc_cells\n");
+    TPC_Cells();
+  }
   printf("RCC a\n");
   if (Enable::MICROMEGAS_CELL) Micromegas_Cells();
   printf("RCC b\n");
