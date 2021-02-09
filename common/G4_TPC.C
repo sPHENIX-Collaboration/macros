@@ -172,8 +172,11 @@ void TPC_Cells()
   padplane->Verbosity(verbosity);
 
   PHG4TpcElectronDrift* edrift = new PHG4TpcElectronDrift();
+    printf("TPC_Cells: edrift built\n");
+
   edrift->Detector("TPC");
   edrift->Verbosity(verbosity);
+  printf("TPC_Cells: edrift finished\n");
   if( G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS )
   {
     printf("distortions enabled\n");
@@ -193,6 +196,7 @@ void TPC_Cells()
   // defaults are 0.085 and 0.105, they can be changed here to get a different resolution
   edrift->registerPadPlane(padplane);
   se->registerSubsystem(edrift);
+  printf("TPC_Cells: systerm registered\n");
 
   // The pad plane readout default is set in PHG4TpcPadPlaneReadout
   // We may want to change the number of inner layers, and can do that here
