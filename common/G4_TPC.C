@@ -76,6 +76,9 @@ namespace G4TPC
 
 void TPCInit()
 {
+  printf(">>>>>RCC TPCInit.  So I am using this file for sure.\n");
+
+  
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4TPC::tpc_outer_radius);
 
   if (Enable::TPC_ENDCAP)
