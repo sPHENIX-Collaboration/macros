@@ -154,7 +154,7 @@ double TPC(PHG4Reco* g4Reco,
 
 void TPC_Cells()
 {
-      printf("tpc cells enabled\n");
+  printf("RCC: tpc cells enabled\n");
 
   int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
