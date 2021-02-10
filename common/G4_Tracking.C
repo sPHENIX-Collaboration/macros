@@ -379,7 +379,7 @@ void Tracking_Reco()
       PHSiliconTpcTrackMatching* silicon_match = new PHSiliconTpcTrackMatching();
       silicon_match->Verbosity(verbosity);
       if (!G4TRACKING::use_PHTpcTracker_seeding)
-        silicon_match->set_seeder(true);  // module defaults to PHCASeeding, use true for PHTpcTracker seeding
+        silicon_match->set_seeder(true);  // module defaults to  PHTpcTracker seeding, for PHCASeeding use true here
       silicon_match->set_field(G4MAGNET::magfield);
       silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
       silicon_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
@@ -394,8 +394,8 @@ void Tracking_Reco()
       else
       {
         // after distortion corrections and rerunning clustering, default tuned values are 0.02 and 0.004 in low occupancy events
-        silicon_match->set_phi_search_window(0.02);
-        silicon_match->set_eta_search_window(0.004);
+        silicon_match->set_phi_search_window(0.03);
+        silicon_match->set_eta_search_window(0.005);
       }
       silicon_match->set_test_windows_printout(false);  // used for tuning search windows only
       se->registerSubsystem(silicon_match);
