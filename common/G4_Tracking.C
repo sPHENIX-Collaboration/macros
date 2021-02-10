@@ -443,7 +443,7 @@ void Tracking_Reco()
 #if __cplusplus >= 201703L
   
 
-    PHActsTracks* actsTracks = new PHActsTracks();
+    PHActsTracks* actsTracks = new PHActsTracks("PHActsTracks1");
     actsTracks->Verbosity(verbosity);
     se->registerSubsystem(actsTracks);
 
@@ -462,11 +462,7 @@ void Tracking_Reco()
       se->registerSubsystem(residuals);
     }
 
-    PHActsVertexFinder* vtxer = new PHActsVertexFinder();
-    vtxer->Verbosity(verbosity);
-    se->registerSubsystem(vtxer);
-
-    PHActsTracks *actsTracks2 = new PHActsTracks();
+    PHActsTracks *actsTracks2 = new PHActsTracks("PHActsTracks2");
     actsTracks2->Verbosity(verbosity);
     actsTracks2->setSecondFit(true);
     se->registerSubsystem(actsTracks2);
