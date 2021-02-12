@@ -17,6 +17,7 @@ void AddLayers_MiniTPCDrift(PHG4SectorSubsystem *gem);
 namespace Enable
 {
   bool EGEM = false;
+  bool EGEM_FULL = true;
   bool FGEM = false;
 }  // namespace Enable
 
@@ -42,10 +43,15 @@ void EGEMSetup(PHG4Reco *g4Reco)
    * TPC length = 211 cm --> from z = -105.5 to z = +105.5
    */
   float thickness = 3.;
-  make_GEM_station("EGEM_0", g4Reco, -20.5 + thickness, -0.94, -1.95);
-  make_GEM_station("EGEM_1", g4Reco, -69.5 + thickness, -2.07, -3.21);
-  make_GEM_station("EGEM_2", g4Reco, -137.0 + thickness, -1.4, -3.5);
-  make_GEM_station("EGEM_3", g4Reco, -160.0 + thickness, -1.5, -3.6);
+  if (Enable::EGEM_FULL){
+    make_GEM_station("EGEM_0", g4Reco, -20.5 + thickness, -0.94, -1.95);
+    make_GEM_station("EGEM_1", g4Reco, -69.5 + thickness, -2.07, -3.21);
+    make_GEM_station("EGEM_2", g4Reco, -137.0 + thickness, -1.4, -3.5);
+    make_GEM_station("EGEM_3", g4Reco, -160.0 + thickness, -1.5, -3.6);
+  } else {
+    make_GEM_station("EGEM_2", g4Reco, -137.0 + thickness, -1.4, -3.5);
+    make_GEM_station("EGEM_3", g4Reco, -160.0 + thickness, -1.5, -3.6);    
+  }
 }
 
 void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //

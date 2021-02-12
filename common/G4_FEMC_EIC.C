@@ -54,7 +54,7 @@ void FEMCInit()
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4FEMC::Gz0 + G4FEMC::Gdz / 2.);
 }
 
-void FEMCSetup(PHG4Reco *g4Reco)
+void FEMCSetup(PHG4Reco *g4Reco, TString specialSetting = "")
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::FEMC_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::FEMC_OVERLAPCHECK;
@@ -66,13 +66,16 @@ void FEMCSetup(PHG4Reco *g4Reco)
 
   ostringstream mapping_femc;
 
-  //  femc->SetEICDetector();
-
+  // PbScint ECAL with nominal eta coverage
+  if (specialSetting.Contains("FullEtaAcc"))
+    mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fullEtaCov.txt";
   // fsPHENIX ECAL
-  //  mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
+  else if (specialSetting.Contains("sPHENIX"))
+    mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
   // PbScint ECAL with enlarged beam pipe opening for Mar 2020 beam pipe
-  mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_v007.txt";
-
+  else 
+    mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_v007.txt";
+    
   cout << mapping_femc.str() << endl;
   femc->SetTowerMappingFile(mapping_femc.str());
   femc->OverlapCheck(OverlapCheck);
@@ -88,8 +91,7 @@ void FEMC_Cells()
   return;
 }
 
-void FEMC_Towers()
-{
+void FEMC_Towers(TString specialSetting = "" ){
   int verbosity = std::max(Enable::VERBOSITY, Enable::FEMC_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -100,7 +102,15 @@ void FEMC_Towers()
   //  mapping_femc << getenv("CALIBRATIONROOT") <<
   //   	"/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
   // PbScint ECAL with enlarged beam pipe opening for Mar 2020 beam pipe
-  mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_v007.txt";
+    // PbScint ECAL with nominal eta coverage
+  if (specialSetting.Contains("FullEtaAcc"))
+    mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fullEtaCov.txt";
+  // fsPHENIX ECAL
+  else if (specialSetting.Contains("sPHENIX"))
+    mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
+  // PbScint ECAL with enlarged beam pipe opening for Mar 2020 beam pipe
+  else 
+    mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_v007.txt";
 
   RawTowerBuilderByHitIndex *tower_FEMC = new RawTowerBuilderByHitIndex("TowerBuilder_FEMC");
   tower_FEMC->Detector("FEMC");
