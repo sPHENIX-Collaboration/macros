@@ -1,7 +1,7 @@
 #ifndef MACRO_G4FSTEIC_C
 #define MACRO_G4FSTEIC_C
 
-#include <GlobalVariables.C>
+#include "GlobalVariables.C"
 
 #include <g4detectors/PHG4SectorSubsystem.h>
 
@@ -12,13 +12,12 @@
 R__LOAD_LIBRARY(libg4detectors.so)
 
 int make_LANL_FST_station(string name, PHG4Reco *g4Reco, double zpos, double Rmin,
-                          double Rmax);
+                          double Rmax,double tSilicon);
 //-----------------------------------------------------------------------------------//
 namespace Enable
 {
-  bool FST = false;
-  bool FST_OVERLAPCHECK = false;
-}  // namespace Enable
+  static bool FST = false;
+}
 //-----------------------------------------------------------------------------------//
 void FST_Init()
 {
@@ -28,23 +27,27 @@ void FST_Init()
 //-----------------------------------------------------------------------------------//
 void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
 {
+  const double cm = PHG4Sector::Sector_Geometry::Unit_cm();
+  const double mm = .1 * cm;
+  const double um = 1e-3 * mm;
+
   //Design from Xuan Li @LANL
-  make_LANL_FST_station("FST_0", g4Reco, 35, 4, 30);  //cm
-  make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 35);
-  make_LANL_FST_station("FST_2", g4Reco, 77, 5, 40);
-  make_LANL_FST_station("FST_3", g4Reco, 101, 6, 40);
-  make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 43);
-  //make_LANL_FST_station("FST_5", g4Reco, 280, 17, 41);
+  make_LANL_FST_station("FST_0", g4Reco, 25,   3.18,   18.5, 35*um);  //cm
+  make_LANL_FST_station("FST_1", g4Reco, 49, 3.18, 36.26, 35*um);
+  make_LANL_FST_station("FST_2", g4Reco, 73,   3.5, 43.23, 35*um);
+  make_LANL_FST_station("FST_3", g4Reco, 97,  4.7,   43.23, 85*um);
+  make_LANL_FST_station("FST_4", g4Reco, 121,  5.91, 43.23, 85*um);
+//  make_LANL_FST_station("FST_5", g4Reco, 300,  15,  45, 85*um);
+//   make_LANL_FST_station("FST_5", g4Reco, 280,  15,  170, 85*um);
+//   make_LANL_FST_station("FST_6", g4Reco, 340,  18,  240, 85*um);
 }
 //-----------------------------------------------------------------------------------//
 int make_LANL_FST_station(string name, PHG4Reco *g4Reco,
-                          double zpos, double Rmin, double Rmax)
+			  double zpos, double Rmin, double Rmax,double tSilicon) //silicon thickness
 {
   //  cout
   //      << "make_GEM_station - GEM construction with PHG4SectorSubsystem - make_GEM_station_EdgeReadout  of "
   //      << name << endl;
-
-  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::FST_OVERLAPCHECK;
 
   // always facing the interaction point
   double polar_angle = 0;
@@ -77,14 +80,14 @@ int make_LANL_FST_station(string name, PHG4Reco *g4Reco,
   fst->get_geometry().set_min_polar_edge(PHG4Sector::Sector_Geometry::ConeEdge());
   fst->get_geometry().set_N_Sector(1);
   fst->get_geometry().set_material("G4_AIR");
-  fst->OverlapCheck(OverlapCheck);
+  fst->OverlapCheck(true);
 
   const double cm = PHG4Sector::Sector_Geometry::Unit_cm();
   const double mm = .1 * cm;
   const double um = 1e-3 * mm;
   // build up layers
 
-  fst->get_geometry().AddLayer("SiliconSensor", "G4_Si", 285 * um, true, 100);
+  fst->get_geometry().AddLayer("SiliconSensor", "G4_Si", tSilicon, true, 100);
   fst->get_geometry().AddLayer("Metalconnection", "G4_Al", 15 * um, false, 100);
   fst->get_geometry().AddLayer("HDI", "G4_KAPTON", 20 * um, false, 100);
   fst->get_geometry().AddLayer("Cooling", "G4_WATER", 100 * um, false, 100);
@@ -95,5 +98,7 @@ int make_LANL_FST_station(string name, PHG4Reco *g4Reco,
   g4Reco->registerSubsystem(fst);
   return 0;
 }
-//-----------------------------------------------------------------------------------//
+
 #endif
+
+//-----------------------------------------------------------------------------------//
