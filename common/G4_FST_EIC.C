@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_G4FSTEIC_C
+#define MACRO_G4FSTEIC_C
 
 #include "GlobalVariables.C"
 
@@ -97,4 +98,7 @@ int make_LANL_FST_station(string name, PHG4Reco *g4Reco,
   g4Reco->registerSubsystem(fst);
   return 0;
 }
+
+#endif
+
 //-----------------------------------------------------------------------------------//
