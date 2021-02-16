@@ -174,7 +174,7 @@ void TPC_Cells()
   PHG4TpcElectronDrift* edrift = new PHG4TpcElectronDrift();
   printf("TPC_Cells: edrift built\n");
 
-  edrift->Detector("TPC");
+  //edrift->Detector("TPC");
   printf("TPC_Cells: edrift successfully heard the word TPC\n");
 
   edrift->Verbosity(verbosity);
