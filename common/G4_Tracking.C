@@ -462,6 +462,10 @@ void Tracking_Reco()
       se->registerSubsystem(residuals);
     }
 
+    PHActsVertexFinder *finder = new PHActsVertexFinder("PHActsVertexFinder");
+    finder->Verbosity(verbosity);
+    se->registerSubsystem(finder);
+
     PHActsTracks *actsTracks2 = new PHActsTracks("PHActsTracks2");
     actsTracks2->Verbosity(verbosity);
     actsTracks2->setSecondFit(true);
