@@ -25,21 +25,61 @@ void FST_Init()
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 282.);
 }
 //-----------------------------------------------------------------------------------//
-void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
+void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245, TString specialSetting = "")
 {
   const double cm = PHG4Sector::Sector_Geometry::Unit_cm();
   const double mm = .1 * cm;
   const double um = 1e-3 * mm;
 
   //Design from Xuan Li @LANL
-  make_LANL_FST_station("FST_0", g4Reco, 25,   3.18,   18.5, 35*um);  //cm
-  make_LANL_FST_station("FST_1", g4Reco, 49, 3.18, 36.26, 35*um);
-  make_LANL_FST_station("FST_2", g4Reco, 73,   3.5, 43.23, 35*um);
-  make_LANL_FST_station("FST_3", g4Reco, 97,  4.7,   43.23, 85*um);
-  make_LANL_FST_station("FST_4", g4Reco, 121,  5.91, 43.23, 85*um);
-//  make_LANL_FST_station("FST_5", g4Reco, 300,  15,  45, 85*um);
-//   make_LANL_FST_station("FST_5", g4Reco, 280,  15,  170, 85*um);
-//   make_LANL_FST_station("FST_6", g4Reco, 340,  18,  240, 85*um);
+  // Different FST version documented in arXiv:2009.0288
+  if ( specialSetting.Contains("FSTV1")){ // version 1
+    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    25, 50*um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  36, 50*um);
+    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 50*um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 50*um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5,  45, 50*um);
+  } if ( specialSetting.Contains("FSTV2")){ // version 2
+    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    30, 50*um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  35, 50*um);
+    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 50*um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 50*um);
+    make_LANL_FST_station("FST_4", g4Reco, 270, 6.5,  45, 50*um);
+  } if ( specialSetting.Contains("FSTV3")){ // version 3
+    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    25, 50*um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  36, 50*um);
+    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 50*um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 100*um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5,  45, 100*um);
+  } if ( specialSetting.Contains("FSTV41")){ // version 4.1
+    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    25, 50*um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  36, 50*um);
+    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 50*um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 50*um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5,  45, 100*um);
+    make_LANL_FST_station("FST_5", g4Reco, 270, 15,   45, 100*um);
+  } if ( specialSetting.Contains("FSTV42")){ // version 4.1
+    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    25, 50*um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  36, 50*um);
+    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 50*um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 100*um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5,  45, 100*um);
+    make_LANL_FST_station("FST_5", g4Reco, 270, 15,   45, 100*um);
+  } if ( specialSetting.Contains("FSTV4")){ // version 4
+    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    25, 50*um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  36, 50*um);
+    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 50*um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 50*um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5,  45, 50*um);
+    make_LANL_FST_station("FST_5", g4Reco, 270, 15,   45, 50*um);
+  } else { // Version 0 
+    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    30, 100*um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  35, 100*um);
+    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 100*um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 100*um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5,  45, 100*um);
+  } 
+  
 }
 //-----------------------------------------------------------------------------------//
 int make_LANL_FST_station(string name, PHG4Reco *g4Reco,

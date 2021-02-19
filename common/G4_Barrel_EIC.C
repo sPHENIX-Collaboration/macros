@@ -14,6 +14,10 @@
 
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
+
+int make_barrel_pixel_layer(string name, PHG4Reco *g4Reco, 
+                      double radius, double halflength, double tSilicon);
+
 //---------------------------------------------------------------------//
 namespace Enable
 {
@@ -25,60 +29,38 @@ void BarrelInit()
 {
 }
 //---------------------------------------------------------------------//
-double Barrel(PHG4Reco* g4Reco, double radius)
+double Barrel(PHG4Reco* g4Reco, double radius, TString specialSetting = "")
 {
   const bool AbsorberActive = Enable::ABSORBER || Enable::BARREL_ABSORBER;
 
   //---------------------------------
   //build barrel detector
   //---------------------------------
-  const int nLayer = 5;
-  const int nSubLayer = 7;
+  int nLayer = 5;
   const float um = 0.0001;  //convert um to cm
 
-  double r[nLayer] = {3.64, 4.81, 5.98, 16.0, 22.0};  //cm
-  double halfLength[nLayer] = {20, 20, 25, 25, 25};   //cm
+  // Different Barrel versions documented in arXiv:2009.0288
+  double r[6]           = { 3.64, 4.81, 5.98, 16.0, 22.0, -1};  //cm
+  double halfLength[6]  = { 20, 20, 25, 25, 25, 25};   //cm
+  double tSilicon[6]    = { 100*um, 100*um, 100*um, 100*um, 100*um, 100*um};
 
-  string layerName[nSubLayer] = {"SiliconSensor", "Metalconnection", "HDI", "Cooling",
-                                 "Support1", "Support_Gap", "Support2"};
-  string material[nSubLayer] = {"G4_Si", "G4_Al", "G4_KAPTON", "G4_WATER",
-                                "G4_GRAPHITE", "G4_AIR", "G4_GRAPHITE"};
-  double thickness[nSubLayer] = {285 * um, 15 * um, 20 * um, 100 * um,
-                                 50 * um, 1, 50 * um};
-
-  int k = 0;  //layer id. Must be unique.
+  if (specialSetting.Contains("BARRELV1") || specialSetting.Contains("BARRELV2")){
+    for (Int_t i = 0; i < 3; i++) tSilicon[i] = 50*um;
+  } else if (specialSetting.Contains("BARRELV3")){
+    for (Int_t i = 0; i < 5; i++) tSilicon[i] = 35*um;
+  } else if (specialSetting.Contains("BARRELV4")){
+    for (Int_t i = 0; i < 3; i++) tSilicon[i] = 50*um;
+    nLayer  = 6;
+    r[3]    = 9.2;
+    r[4]    = 17.;
+    r[5]    = 27.;
+  }
+  
   double max_bh_radius = 0.;
-  PHG4CylinderSubsystem* cyl;
-  for (int i = 0; i < nLayer; i++)
-  {
-    //if (i>2) continue;
-    for (int j = 0; j < nSubLayer; j++)
-    {
-      cyl = new PHG4CylinderSubsystem("Barrel_" + layerName[j], k);
-      if (j == 0)
-      {
-        cyl->set_double_param("radius", r[i]);
-      }
-      else
-      {
-        cyl->set_double_param("radius", r[i] + thickness[j - 1]);
-      }
-      cyl->set_double_param("length", 2.0 * halfLength[i]);
-      cyl->set_string_param("material", material[j]);
-      cyl->set_double_param("thickness", thickness[j]);
-      max_bh_radius = std::max(max_bh_radius, (r[i] + thickness[j - 1] + thickness[j]));
-      cyl->SuperDetector("BARREL");
-      if (j == 0)
-      {
-        cyl->SetActive();  //only the Silicon Sensor is active
-      }
-      else
-      {
-        if (AbsorberActive) cyl->SetActive();
-      }
-      g4Reco->registerSubsystem(cyl);
-      k++;
-    }
+  for (int i = 0; i < nLayer; i++){
+    make_barrel_pixel_layer(Form("BARREL_%d", i), g4Reco, r[i],  halfLength[i], tSilicon[i]); 
+    max_bh_radius = r[i]+1.5;
+//     std::cout << "done with barrel layer intialization at "<< r[i] << std::endl;
   }
 
   // update now that we know the outer radius
@@ -86,6 +68,51 @@ double Barrel(PHG4Reco* g4Reco, double radius)
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, halfLength[nLayer - 1]);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -halfLength[nLayer - 1]);
   return max_bh_radius;
+  
 }
 //---------------------------------------------------------------------//
+//-----------------------------------------------------------------------------------//
+int make_barrel_pixel_layer(string name, PHG4Reco *g4Reco, 
+                      double radius, double halflength, double tSilicon){
+
+  //---------------------------------
+  //build barrel layer
+  //---------------------------------
+  const int nSubLayer = 7;
+  const double cm = PHG4Sector::Sector_Geometry::Unit_cm();
+  const double mm = .1 * cm;
+  const double um = 1e-3 * mm;
+
+  string layerName[nSubLayer] = {"SiliconSensor", "Metalconnection", "HDI", "Cooling",
+                                 "Support1", "Support_Gap", "Support2"};
+  string material[nSubLayer] = {"G4_Si", "G4_Al", "G4_KAPTON", "G4_WATER",
+                                "G4_GRAPHITE", "G4_AIR", "G4_GRAPHITE"};
+  double thickness[nSubLayer] = {tSilicon , 15 * um, 20 * um, 100 * um,
+                                 50 * um, 1, 50 * um};
+
+  double max_bh_radius = 0.;
+  PHG4CylinderSubsystem* cyl;
+  cout << "started to create cylinder layer: " << name << endl;
+  
+  double currRadius = radius;
+//   cout << currRadius << endl;
+  for (int l = 0; l < nSubLayer; l++) {
+    cyl = new PHG4CylinderSubsystem(name + "_" + layerName[l],l);
+    cyl->SuperDetector(name);
+    cyl->set_double_param("radius", currRadius);
+    cyl->set_double_param("length", 2.0 * halflength);
+    cyl->set_string_param("material", material[l]);
+    cyl->set_double_param("thickness", thickness[l]);
+    if (l == 0) cyl->SetActive();  //only the Silicon Sensor is active
+    cyl->OverlapCheck(true);
+    g4Reco->registerSubsystem(cyl);
+    currRadius = currRadius+thickness[l];
+  }
+
+  return 0;
+}
+
+//-----------------------------------------------------------------------------------//
+
+
 #endif
