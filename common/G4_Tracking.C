@@ -39,7 +39,6 @@
 #include <trackreco/PHActsTrkProp.h>
 #include <trackreco/PHActsInitialVertexFinder.h>
 #include <trackreco/PHActsVertexFinder.h>
-#include <trackreco/PHActsVertexFitter.h>
 #include <trackreco/PHTpcResiduals.h>
 #endif
 
@@ -207,9 +206,8 @@ void Tracking_Reco()
       silicon_Seeding->Verbosity(verbosity);
       se->registerSubsystem(silicon_Seeding);
 
-      PHTruthVertexing* init_vtx = new PHTruthVertexing("PHTruthVertexing");
+      PHActsInitialVertexFinder* init_vtx = new PHActsInitialVertexFinder();
       init_vtx->Verbosity(verbosity);
-      init_vtx->set_acts_silicon(true);
       se->registerSubsystem(init_vtx);
 
       #endif
