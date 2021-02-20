@@ -41,7 +41,7 @@ void BarrelInit()
   if ((G4BARREL::SETTING::BARRELV1 ? 1 : 0) +
       (G4BARREL::SETTING::BARRELV2 ? 1 : 0) +
       (G4BARREL::SETTING::BARRELV3 ? 1 : 0) +
-      (G4BARREL::SETTING::BARRELV4 ? 1 : 0))
+      (G4BARREL::SETTING::BARRELV4 ? 1 : 0) > 1)
   {
     cout << "use only G4BARREL::SETTING::BARRELV1=true or G4BARREL::SETTING::BARRELV2=true or G4BARREL::SETTING::BARRELV3=true or G4BARREL::SETTING::BARRELV4=true" << endl;
 
