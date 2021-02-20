@@ -3,16 +3,21 @@
 
 #include <GlobalVariables.C>
 
+#include <g4calo/RawTowerBuilderByHitIndex.h>
+#include <g4calo/RawTowerDigitizer.h>
+
+#include <g4detectors/PHG4ForwardCalCellReco.h>
+#include <g4detectors/PHG4ForwardEcalSubsystem.h>
+
+#include <g4eval/CaloEvaluator.h>
+
+#include <g4main/PHG4Reco.h>
+
 #include <caloreco/RawClusterBuilderFwd.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
+
 #include <fun4all/Fun4AllServer.h>
-#include <g4calo/RawTowerBuilderByHitIndex.h>
-#include <g4calo/RawTowerDigitizer.h>
-#include <g4detectors/PHG4ForwardCalCellReco.h>
-#include <g4detectors/PHG4ForwardEcalSubsystem.h>
-#include <g4eval/CaloEvaluator.h>
-#include <g4main/PHG4Reco.h>
 
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
@@ -46,15 +51,27 @@ namespace G4FEMC
   enu_Femc_clusterizer Femc_clusterizer = kFemcTemplateClusterizer;
   // graph clusterizer
   //enu_Femc_clusterizer Femc_clusterizer = kFemcGraphClusterizer;
+  namespace SETTING
+  {
+    bool FullEtaAcc = false;
+    bool fsPHENIX = false;
+  }  // namespace SETTING
 }  // namespace G4FEMC
 
 void FEMCInit()
 {
+  // simple way to check if only 1 of the settings is true
+  if ((G4FEMC::SETTING::FullEtaAcc ? 1 : 0) + (G4FEMC::SETTING::fsPHENIX ? 1 : 0) > 1)
+  {
+    cout << "use only  G4FHCAL::SETTING::FullEtaAcc=true or G4FHCAL::SETTING::fsPHENIX=true" << endl;
+    gSystem->Exit(1);
+  }
+
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4FEMC::outer_radius);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4FEMC::Gz0 + G4FEMC::Gdz / 2.);
 }
 
-void FEMCSetup(PHG4Reco *g4Reco, TString specialSetting = "")
+void FEMCSetup(PHG4Reco *g4Reco)
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::FEMC_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::FEMC_OVERLAPCHECK;
@@ -67,15 +84,20 @@ void FEMCSetup(PHG4Reco *g4Reco, TString specialSetting = "")
   ostringstream mapping_femc;
 
   // PbScint ECAL with nominal eta coverage
-  if (specialSetting.Contains("FullEtaAcc"))
+  if (G4FEMC::SETTING::FullEtaAcc)
+  {
     mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fullEtaCov.txt";
+  }
   // fsPHENIX ECAL
-  else if (specialSetting.Contains("sPHENIX"))
-    mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
+  else if (G4FEMC::SETTING::fsPHENIX)
+  {
+    mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
+  }
   // PbScint ECAL with enlarged beam pipe opening for Mar 2020 beam pipe
-  else 
+  else
+  {
     mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_v007.txt";
-    
+  }
   cout << mapping_femc.str() << endl;
   femc->SetTowerMappingFile(mapping_femc.str());
   femc->OverlapCheck(OverlapCheck);
@@ -91,7 +113,8 @@ void FEMC_Cells()
   return;
 }
 
-void FEMC_Towers(TString specialSetting = "" ){
+void FEMC_Towers()
+{
   int verbosity = std::max(Enable::VERBOSITY, Enable::FEMC_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -102,15 +125,21 @@ void FEMC_Towers(TString specialSetting = "" ){
   //  mapping_femc << getenv("CALIBRATIONROOT") <<
   //   	"/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
   // PbScint ECAL with enlarged beam pipe opening for Mar 2020 beam pipe
-    // PbScint ECAL with nominal eta coverage
-  if (specialSetting.Contains("FullEtaAcc"))
+  // PbScint ECAL with nominal eta coverage
+  if (G4FEMC::SETTING::FullEtaAcc)
+  {
     mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fullEtaCov.txt";
+  }
   // fsPHENIX ECAL
-  else if (specialSetting.Contains("sPHENIX"))
-    mapping_femc<< getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
+  else if (G4FEMC::SETTING::fsPHENIX)
+  {
+    mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fsPHENIX_v004.txt";
+  }
   // PbScint ECAL with enlarged beam pipe opening for Mar 2020 beam pipe
-  else 
+  else
+  {
     mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_v007.txt";
+  }
 
   RawTowerBuilderByHitIndex *tower_FEMC = new RawTowerBuilderByHitIndex("TowerBuilder_FEMC");
   tower_FEMC->Detector("FEMC");
@@ -263,7 +292,7 @@ void FEMC_Eval(const std::string &outputfile)
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  CaloEvaluator *eval = new CaloEvaluator("FEMCEVALUATOR", "FEMC", outputfile.c_str());
+  CaloEvaluator *eval = new CaloEvaluator("FEMCEVALUATOR", "FEMC", outputfile);
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 

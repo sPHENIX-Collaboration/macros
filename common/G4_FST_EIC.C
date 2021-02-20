@@ -11,21 +11,47 @@
 
 R__LOAD_LIBRARY(libg4detectors.so)
 
-int make_LANL_FST_station(string name, PHG4Reco *g4Reco, double zpos, double Rmin,
-                          double Rmax,double tSilicon);
+int make_LANL_FST_station(const string &name, PHG4Reco *g4Reco, double zpos, double Rmin,
+                          double Rmax, double tSilicon);
 //-----------------------------------------------------------------------------------//
 namespace Enable
 {
   static bool FST = false;
 }
+
+namespace G4FST
+{
+  namespace SETTING
+  {
+    bool FSTV1 = false;
+    bool FSTV2 = false;
+    bool FSTV3 = false;
+    bool FSTV41 = false;
+    bool FSTV42 = false;
+    bool FSTV4 = false;
+  }  // namespace SETTING
+}  // namespace G4FST
+
 //-----------------------------------------------------------------------------------//
 void FST_Init()
 {
+  if ((G4FST::SETTING::FSTV1 ? 1 : 0) +
+          (G4FST::SETTING::FSTV2 ? 1 : 0) +
+          (G4FST::SETTING::FSTV3 ? 1 : 0) +
+          (G4FST::SETTING::FSTV4 ? 1 : 0) +
+          (G4FST::SETTING::FSTV41 ? 1 : 0) +
+          (G4FST::SETTING::FSTV42 ? 1 : 0) >
+      1)
+  {
+    cout << "use only G4FST::SETTING::FSTV1=true or G4FST::SETTING::FSTV2=true or G4FST::SETTING::FSTV13 = true or G4FST::SETTING::FSTV3=true or G4FST::SETTING::FSTV4=true or G4FST::SETTING::FSTV41=true or G4FST::SETTING::FSTV42=true" << endl;
+    gSystem->Exit(1);
+  }
+
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 44.);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 282.);
 }
 //-----------------------------------------------------------------------------------//
-void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245, TString specialSetting = "")
+void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
 {
   const double cm = PHG4Sector::Sector_Geometry::Unit_cm();
   const double mm = .1 * cm;
@@ -33,57 +59,69 @@ void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245, TString specialSet
 
   //Design from Xuan Li @LANL
   // Different FST version documented in arXiv:2009.0288
-  if ( specialSetting.Contains("FSTV1")){ // version 1
-    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    25, 50*um);  //cm
-    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  36, 50*um);
-    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 50*um);
-    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 50*um);
-    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5,  45, 50*um);
-  } if ( specialSetting.Contains("FSTV2")){ // version 2
-    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    30, 50*um);  //cm
-    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  35, 50*um);
-    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 50*um);
-    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 50*um);
-    make_LANL_FST_station("FST_4", g4Reco, 270, 6.5,  45, 50*um);
-  } if ( specialSetting.Contains("FSTV3")){ // version 3
-    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    25, 50*um);  //cm
-    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  36, 50*um);
-    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 50*um);
-    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 100*um);
-    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5,  45, 100*um);
-  } if ( specialSetting.Contains("FSTV41")){ // version 4.1
-    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    25, 50*um);  //cm
-    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  36, 50*um);
-    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 50*um);
-    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 50*um);
-    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5,  45, 100*um);
-    make_LANL_FST_station("FST_5", g4Reco, 270, 15,   45, 100*um);
-  } if ( specialSetting.Contains("FSTV42")){ // version 4.1
-    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    25, 50*um);  //cm
-    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  36, 50*um);
-    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 50*um);
-    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 100*um);
-    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5,  45, 100*um);
-    make_LANL_FST_station("FST_5", g4Reco, 270, 15,   45, 100*um);
-  } if ( specialSetting.Contains("FSTV4")){ // version 4
-    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    25, 50*um);  //cm
-    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  36, 50*um);
-    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 50*um);
-    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 50*um);
-    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5,  45, 50*um);
-    make_LANL_FST_station("FST_5", g4Reco, 270, 15,   45, 50*um);
-  } else { // Version 0 
-    make_LANL_FST_station("FST_0", g4Reco, 35,  4,    30, 100*um);  //cm
-    make_LANL_FST_station("FST_1", g4Reco, 53,  4.5,  35, 100*um);
-    make_LANL_FST_station("FST_2", g4Reco, 77,  5,    36, 100*um);
-    make_LANL_FST_station("FST_3", g4Reco, 101, 6,    38.5, 100*um);
-    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5,  45, 100*um);
-  } 
-  
+  if (G4FST::SETTING::FSTV1)
+  {                                                              // version 1
+    make_LANL_FST_station("FST_0", g4Reco, 35, 4, 25, 50 * um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 36, 50 * um);
+    make_LANL_FST_station("FST_2", g4Reco, 77, 5, 36, 50 * um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6, 38.5, 50 * um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 45, 50 * um);
+  }
+  if (G4FST::SETTING::FSTV2)
+  {                                                              // version 2
+    make_LANL_FST_station("FST_0", g4Reco, 35, 4, 30, 50 * um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 35, 50 * um);
+    make_LANL_FST_station("FST_2", g4Reco, 77, 5, 36, 50 * um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6, 38.5, 50 * um);
+    make_LANL_FST_station("FST_4", g4Reco, 270, 6.5, 45, 50 * um);
+  }
+  if (G4FST::SETTING::FSTV3)
+  {                                                              // version 3
+    make_LANL_FST_station("FST_0", g4Reco, 35, 4, 25, 50 * um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 36, 50 * um);
+    make_LANL_FST_station("FST_2", g4Reco, 77, 5, 36, 50 * um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6, 38.5, 100 * um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 45, 100 * um);
+  }
+  if (G4FST::SETTING::FSTV41)
+  {                                                              // version 4.1
+    make_LANL_FST_station("FST_0", g4Reco, 35, 4, 25, 50 * um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 36, 50 * um);
+    make_LANL_FST_station("FST_2", g4Reco, 77, 5, 36, 50 * um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6, 38.5, 50 * um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 45, 100 * um);
+    make_LANL_FST_station("FST_5", g4Reco, 270, 15, 45, 100 * um);
+  }
+  if (G4FST::SETTING::FSTV42)
+  {                                                              // version 4.1
+    make_LANL_FST_station("FST_0", g4Reco, 35, 4, 25, 50 * um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 36, 50 * um);
+    make_LANL_FST_station("FST_2", g4Reco, 77, 5, 36, 50 * um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6, 38.5, 100 * um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 45, 100 * um);
+    make_LANL_FST_station("FST_5", g4Reco, 270, 15, 45, 100 * um);
+  }
+  if (G4FST::SETTING::FSTV4)
+  {                                                              // version 4
+    make_LANL_FST_station("FST_0", g4Reco, 35, 4, 25, 50 * um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 36, 50 * um);
+    make_LANL_FST_station("FST_2", g4Reco, 77, 5, 36, 50 * um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6, 38.5, 50 * um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 45, 50 * um);
+    make_LANL_FST_station("FST_5", g4Reco, 270, 15, 45, 50 * um);
+  }
+  else
+  {                                                               // Version 0
+    make_LANL_FST_station("FST_0", g4Reco, 35, 4, 30, 100 * um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 35, 100 * um);
+    make_LANL_FST_station("FST_2", g4Reco, 77, 5, 36, 100 * um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 6, 38.5, 100 * um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 45, 100 * um);
+  }
 }
 //-----------------------------------------------------------------------------------//
-int make_LANL_FST_station(string name, PHG4Reco *g4Reco,
-			  double zpos, double Rmin, double Rmax,double tSilicon) //silicon thickness
+int make_LANL_FST_station(const string &name, PHG4Reco *g4Reco,
+                          double zpos, double Rmin, double Rmax, double tSilicon)  //silicon thickness
 {
   //  cout
   //      << "make_GEM_station - GEM construction with PHG4SectorSubsystem - make_GEM_station_EdgeReadout  of "
