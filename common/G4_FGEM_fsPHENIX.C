@@ -267,7 +267,7 @@ void FGEM_FastSim_Reco()
   kalman->add_phg4hits(
       "G4HIT_FGEM_0",                    //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-      1. / sqrt(12),                     //      const float radres,
+      1. / sqrt(12.),                     //      const float radres,
       70e-4,                             //      const float phires,
       100e-4,                            //      const float lonres,
       1,                                 //      const float eff,
@@ -277,7 +277,7 @@ void FGEM_FastSim_Reco()
   kalman->add_phg4hits(
       "G4HIT_FGEM_1",                    //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-      1. / sqrt(12),                     //      const float radres,
+      1. / sqrt(12.),                     //      const float radres,
       70e-4,                             //      const float phires,
       100e-4,                            //      const float lonres,
       1,                                 //      const float eff,
@@ -299,7 +299,7 @@ void FGEM_FastSim_Reco()
   kalman->add_phg4hits(
       "G4HIT_FGEM_2",                    //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-      1. / sqrt(12),                     //      const float radres,
+      1. / sqrt(12.),                     //      const float radres,
       70e-4,                             //      const float phires,
       100e-4,                            //      const float lonres,
       1,                                 //      const float eff,
@@ -309,7 +309,7 @@ void FGEM_FastSim_Reco()
   kalman->add_phg4hits(
       "G4HIT_FGEM_3",                    //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-      1. / sqrt(12),                     //      const float radres,
+      1. / sqrt(12.),                     //      const float radres,
       70e-4,                             //      const float phires,
       100e-4,                            //      const float lonres,
       1,                                 //      const float eff,
@@ -319,7 +319,7 @@ void FGEM_FastSim_Reco()
   kalman->add_phg4hits(
       "G4HIT_FGEM_4",                    //      const std::string& phg4hitsNames,
       PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
-      1. / sqrt(12),                     //      const float radres,
+      1. / sqrt(12.),                     //      const float radres,
       70e-4,                             //      const float phires,
       100e-4,                            //      const float lonres,
       1,                                 //      const float eff,
