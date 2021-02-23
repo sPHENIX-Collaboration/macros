@@ -23,6 +23,7 @@ namespace G4FST
 {
   namespace SETTING
   {
+    bool FSTV0 = false;
     bool FSTV1 = false;
     bool FSTV2 = false;
     bool FSTV3 = false;
@@ -35,7 +36,8 @@ namespace G4FST
 //-----------------------------------------------------------------------------------//
 void FST_Init()
 {
-  if ((G4FST::SETTING::FSTV1 ? 1 : 0) +
+  if ((G4FST::SETTING::FSTV0 ? 1 : 0) +
+      (G4FST::SETTING::FSTV1 ? 1 : 0) +
           (G4FST::SETTING::FSTV2 ? 1 : 0) +
           (G4FST::SETTING::FSTV3 ? 1 : 0) +
           (G4FST::SETTING::FSTV4 ? 1 : 0) +
@@ -43,7 +45,7 @@ void FST_Init()
           (G4FST::SETTING::FSTV42 ? 1 : 0) >
       1)
   {
-    cout << "use only G4FST::SETTING::FSTV1=true or G4FST::SETTING::FSTV2=true or G4FST::SETTING::FSTV13 = true or G4FST::SETTING::FSTV3=true or G4FST::SETTING::FSTV4=true or G4FST::SETTING::FSTV41=true or G4FST::SETTING::FSTV42=true" << endl;
+    cout << "use only G4FST::SETTING::FSTV0=true or G4FST::SETTING::FSTV1=true or G4FST::SETTING::FSTV2=true or G4FST::SETTING::FSTV3=true or G4FST::SETTING::FSTV4=true or G4FST::SETTING::FSTV41=true or G4FST::SETTING::FSTV42=true" << endl;
     gSystem->Exit(1);
   }
 
@@ -67,7 +69,7 @@ void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
     make_LANL_FST_station("FST_3", g4Reco, 101, 6, 38.5, 50 * um);
     make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 45, 50 * um);
   }
-  if (G4FST::SETTING::FSTV2)
+  else if (G4FST::SETTING::FSTV2)
   {                                                              // version 2
     make_LANL_FST_station("FST_0", g4Reco, 35, 4, 30, 50 * um);  //cm
     make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 35, 50 * um);
@@ -75,7 +77,7 @@ void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
     make_LANL_FST_station("FST_3", g4Reco, 101, 6, 38.5, 50 * um);
     make_LANL_FST_station("FST_4", g4Reco, 270, 6.5, 45, 50 * um);
   }
-  if (G4FST::SETTING::FSTV3)
+  else if (G4FST::SETTING::FSTV3)
   {                                                              // version 3
     make_LANL_FST_station("FST_0", g4Reco, 35, 4, 25, 50 * um);  //cm
     make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 36, 50 * um);
@@ -83,7 +85,7 @@ void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
     make_LANL_FST_station("FST_3", g4Reco, 101, 6, 38.5, 100 * um);
     make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 45, 100 * um);
   }
-  if (G4FST::SETTING::FSTV41)
+  else if (G4FST::SETTING::FSTV41)
   {                                                              // version 4.1
     make_LANL_FST_station("FST_0", g4Reco, 35, 4, 25, 50 * um);  //cm
     make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 36, 50 * um);
@@ -92,7 +94,7 @@ void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
     make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 45, 100 * um);
     make_LANL_FST_station("FST_5", g4Reco, 270, 15, 45, 100 * um);
   }
-  if (G4FST::SETTING::FSTV42)
+  else if (G4FST::SETTING::FSTV42)
   {                                                              // version 4.1
     make_LANL_FST_station("FST_0", g4Reco, 35, 4, 25, 50 * um);  //cm
     make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 36, 50 * um);
@@ -101,7 +103,7 @@ void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
     make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 45, 100 * um);
     make_LANL_FST_station("FST_5", g4Reco, 270, 15, 45, 100 * um);
   }
-  if (G4FST::SETTING::FSTV4)
+  else if (G4FST::SETTING::FSTV4)
   {                                                              // version 4
     make_LANL_FST_station("FST_0", g4Reco, 35, 4, 25, 50 * um);  //cm
     make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 36, 50 * um);
