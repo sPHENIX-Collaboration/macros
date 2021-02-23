@@ -16,7 +16,7 @@ R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4mvtx.so)
 
 int make_barrel_pixel_layer(const string &name, PHG4Reco *g4Reco,
-                            double radius, double halflength, double tSilicon);
+                            double radius, double halflength, double tSilicon, double tAirgap);
 
 //---------------------------------------------------------------------//
 namespace Enable
@@ -29,6 +29,7 @@ namespace G4BARREL
 {
   namespace SETTING
   {
+    bool BARRELV0 = false;
     bool BARRELV1 = false;
     bool BARRELV2 = false;
     bool BARRELV3 = false;
@@ -38,12 +39,13 @@ namespace G4BARREL
 //---------------------------------------------------------------------//
 void BarrelInit()
 {
-  if ((G4BARREL::SETTING::BARRELV1 ? 1 : 0) +
+  if ((G4BARREL::SETTING::BARRELV0 ? 1 : 0) +
+      (G4BARREL::SETTING::BARRELV1 ? 1 : 0) +
       (G4BARREL::SETTING::BARRELV2 ? 1 : 0) +
       (G4BARREL::SETTING::BARRELV3 ? 1 : 0) +
       (G4BARREL::SETTING::BARRELV4 ? 1 : 0) > 1)
   {
-    cout << "use only G4BARREL::SETTING::BARRELV1=true or G4BARREL::SETTING::BARRELV2=true or G4BARREL::SETTING::BARRELV3=true or G4BARREL::SETTING::BARRELV4=true" << endl;
+    cout << "use only G4BARREL::SETTING::BARRELV0=true or G4BARREL::SETTING::BARRELV1=true or G4BARREL::SETTING::BARRELV2=true or G4BARREL::SETTING::BARRELV3=true or G4BARREL::SETTING::BARRELV4=true" << endl;
 
     gSystem->Exit(1);
   }
@@ -64,7 +66,8 @@ double Barrel(PHG4Reco *g4Reco, double radius)
   double r[6] = {3.64, 4.81, 5.98, 16.0, 22.0, -1};  //cm
   double halfLength[6] = {20, 20, 25, 25, 25, 25};   //cm
   double tSilicon[6] = {100 * um, 100 * um, 100 * um, 100 * um, 100 * um, 100 * um};
-
+  double tAirgap[6] = {0.9, 0.9, 1, 1, 1, 1};
+  
   if (G4BARREL::SETTING::BARRELV1 || G4BARREL::SETTING::BARRELV2)
   {
     for (Int_t i = 0; i < 3; i++) tSilicon[i] = 50 * um;
@@ -85,7 +88,7 @@ double Barrel(PHG4Reco *g4Reco, double radius)
   double max_bh_radius = 0.;
   for (int i = 0; i < nLayer; i++)
   {
-    make_barrel_pixel_layer(Form("BARREL_%d", i), g4Reco, r[i], halfLength[i], tSilicon[i]);
+    make_barrel_pixel_layer(Form("BARREL_%d", i), g4Reco, r[i], halfLength[i], tSilicon[i], tAirgap[i]);
     max_bh_radius = r[i] + 1.5;
     //     std::cout << "done with barrel layer intialization at "<< r[i] << std::endl;
   }
@@ -99,7 +102,7 @@ double Barrel(PHG4Reco *g4Reco, double radius)
 //---------------------------------------------------------------------//
 //-----------------------------------------------------------------------------------//
 int make_barrel_pixel_layer(const string &name, PHG4Reco *g4Reco,
-                            double radius, double halflength, double tSilicon)
+                            double radius, double halflength, double tSilicon, double tAirgap)
 {
   //---------------------------------
   //build barrel layer
@@ -114,16 +117,17 @@ int make_barrel_pixel_layer(const string &name, PHG4Reco *g4Reco,
   string material[nSubLayer] = {"G4_Si", "G4_Al", "G4_KAPTON", "G4_WATER",
                                 "G4_GRAPHITE", "G4_AIR", "G4_GRAPHITE"};
   double thickness[nSubLayer] = {tSilicon, 15 * um, 20 * um, 100 * um,
-                                 50 * um, 1, 50 * um};
+                                 50 * um, tAirgap, 50 * um};
 
   double max_bh_radius = 0.;
   PHG4CylinderSubsystem *cyl;
   cout << "started to create cylinder layer: " << name << endl;
 
   double currRadius = radius;
-  //   cout << currRadius << endl;
+//   cout << currRadius << endl;
   for (int l = 0; l < nSubLayer; l++)
   {
+    cout << name << "_" << layerName[l] << "\t" << currRadius ;
     cyl = new PHG4CylinderSubsystem(name + "_" + layerName[l], l);
     cyl->SuperDetector(name);
     cyl->set_double_param("radius", currRadius);
@@ -134,7 +138,9 @@ int make_barrel_pixel_layer(const string &name, PHG4Reco *g4Reco,
     cyl->OverlapCheck(true);
     g4Reco->registerSubsystem(cyl);
     currRadius = currRadius + thickness[l];
+    cout << "\t" << currRadius << endl;
   }
+  
 
   return 0;
 }
