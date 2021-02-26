@@ -40,7 +40,6 @@
 #include <trackreco/PHActsTrkProp.h>
 #include <trackreco/PHActsInitialVertexFinder.h>
 #include <trackreco/PHActsVertexFinder.h>
-#include <trackreco/PHActsVertexFitter.h>
 #include <trackreco/PHTpcResiduals.h>
 #endif
 
@@ -93,7 +92,8 @@ namespace G4TRACKING
   bool use_truth_si_matching = false;      // if true, associates silicon clusters using best truth track match to TPC seed tracks - for diagnostics only
   bool use_truth_track_seeding = false;    // false for normal track seeding, use true to run with truth track seeding instead  ***** WORKS FOR GENFIT ONLY
   bool use_Genfit = false;                 // if false, acts KF is run on proto tracks assembled above, if true, use Genfit track propagation and fitting
-  bool use_acts_init_vertexing = true;    // if true runs acts silicon seeding+initial vertexing 
+  bool use_acts_silicon_seeding = true;   // if true runs acts silicon seeding
+  bool use_acts_init_vertexing = false;    // if true runs acts initial vertex finder, false runs truth vertexing
   bool use_phinit_vertexing = false && !use_acts_init_vertexing;         // false for using smeared truth vertex, set to true to get initial vertex from MVTX hits using PHInitZVertexing
   bool use_rave_vertexing = true;          // Use Rave to find and fit for vertex after track fitting
   bool use_primary_vertex = false;         // refit Genfit tracks (only) with primary vertex included - adds second node to node tree, adds second evaluator, outputs separate ntuples
@@ -201,19 +201,26 @@ void Tracking_Reco()
 
   // Initial vertex finding
   //=================================
-  if(G4TRACKING::use_acts_init_vertexing && !G4TRACKING::use_Genfit)
+  if(G4TRACKING::use_acts_silicon_seeding && !G4TRACKING::use_Genfit)
     {
       #if __cplusplus >= 201703L
 
       PHActsSiliconSeeding* silicon_Seeding = new PHActsSiliconSeeding();
       silicon_Seeding->Verbosity(verbosity);
       se->registerSubsystem(silicon_Seeding);
-
-      PHTruthVertexing* init_vtx = new PHTruthVertexing("PHTruthVertexing");
-      init_vtx->Verbosity(verbosity);
-      init_vtx->set_acts_silicon(true);
-      se->registerSubsystem(init_vtx);
-
+      
+      if(G4TRACKING::use_acts_init_vertexing)
+	{
+	  PHActsInitialVertexFinder* init_vtx = new PHActsInitialVertexFinder();
+	  init_vtx->Verbosity(verbosity);
+	  se->registerSubsystem(init_vtx);
+	}
+      else
+	{
+	  PHTruthVertexing *init_vtx = new PHTruthVertexing();
+	  init_vtx->Verbosity(verbosity);
+	  se->registerSubsystem(init_vtx);
+	}
       #endif
     }
   else if (G4TRACKING::use_phinit_vertexing)
@@ -537,7 +544,7 @@ void Tracking_Eval(const std::string& outputfile)
   eval->do_gpoint_eval(false);
   eval->do_eval_light(true);
   eval->set_use_initial_vertex(G4TRACKING::g4eval_use_initial_vertex);
-  eval->scan_for_embedded(false);  // take all tracks if false - take only embedded tracks if true
+  eval->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
