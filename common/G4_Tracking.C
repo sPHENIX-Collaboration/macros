@@ -24,6 +24,7 @@
 #include <trackreco/PHRaveVertexing.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSiliconTruthTrackSeeding.h>
+#include <trackreco/PHTpcTrackSeedVertexAssoc.h>
 #include <trackreco/PHTrackSeeding.h>
 #include <trackreco/PHTruthSiliconAssociation.h>
 #include <trackreco/PHTruthTrackSeeding.h>
@@ -84,6 +85,7 @@ namespace G4TRACKING
   //   PHActsTrkFitter                               // Kalman fitter makes final fit to assembled tracks
 
   bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
+  bool use_tpc_seed_vertex_assoc = true;
 
   // Possible variations - these are normally false
   bool use_PHTpcTracker_seeding = false;   // false for using the default PHCASeeding to get TPC track seeds, true to use PHTpcTracker
@@ -301,6 +303,14 @@ void Tracking_Reco()
     }
   }
 
+  if(G4TRACKING::use_tpc_seed_vertex_assoc)
+    {
+      // This does not care which seeder is used
+      PHTpcTrackSeedVertexAssoc *vtxassoc = new PHTpcTrackSeedVertexAssoc();
+      vtxassoc->Verbosity(0);
+      se->registerSubsystem(vtxassoc);
+    }
+
   // Genfit track propagation and final fitting (starts from TPC track seeds)
   //=================================================
   if (G4TRACKING::use_Genfit)
@@ -378,8 +388,8 @@ void Tracking_Reco()
       // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
       PHSiliconTpcTrackMatching* silicon_match = new PHSiliconTpcTrackMatching();
       silicon_match->Verbosity(verbosity);
-      if (!G4TRACKING::use_PHTpcTracker_seeding)
-        silicon_match->set_seeder(true);  // module defaults to  PHTpcTracker seeding, for PHCASeeding use true here
+      if (G4TRACKING::use_PHTpcTracker_seeding && !G4TRACKING::use_tpc_seed_vertex_assoc)
+        silicon_match->set_seeder(false);  // module defaults to CASeeding, for PHTpcTracker seeding use false here ONLY when not using  PHTpcTrackSeedVertexAssoc.
       silicon_match->set_field(G4MAGNET::magfield);
       silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
       silicon_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
