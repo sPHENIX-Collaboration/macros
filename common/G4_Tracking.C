@@ -384,7 +384,7 @@ void Tracking_Reco()
       // start with a complete TPC track seed from one of the CA seeders
 
       // use truth information to assemble silicon clusters into track stubs for now
-      if(!G4TRACKING::use_acts_init_vertexing)
+      if(!G4TRACKING::use_acts_silicon_seeding)
 	{
 	  PHSiliconTruthTrackSeeding* silicon_seeding = new PHSiliconTruthTrackSeeding();
 	  silicon_seeding->Verbosity(verbosity);
