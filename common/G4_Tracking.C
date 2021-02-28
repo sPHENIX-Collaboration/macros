@@ -219,6 +219,7 @@ void Tracking_Reco()
 	{
 	  PHTruthVertexing *init_vtx = new PHTruthVertexing();
 	  init_vtx->Verbosity(verbosity);
+	  init_vtx->set_acts_silicon(true);
 	  se->registerSubsystem(init_vtx);
 	}
       #endif
