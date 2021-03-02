@@ -94,6 +94,7 @@ namespace Input
     if (HepMCGen == nullptr)
     {
       std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
+      exit (1);
     }
     HepMCGen->set_beam_direction_theta_phi(1e-3, 0, M_PI - 1e-3, 0);  //2mrad x-ing of sPHENIX per sPH-TRG-2020-001
 
@@ -117,8 +118,8 @@ namespace Input
     if (HepMCGen == nullptr)
     {
       std::cout << "ApplyEICBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
+      exit (1);
     }
-    //INPUTMANAGER::HepMCInputManager->set_beam_direction_theta_phi(1e-3,0,M_PI - 1e-3,0); //2mrad x-ing of sPHENIX
 
     //25mrad x-ing as in EIC CDR
     HepMCGen->set_beam_direction_theta_phi(
