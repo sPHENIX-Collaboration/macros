@@ -18,10 +18,10 @@
 
 #include <fermimotionafterburner/FermimotionAfterburner.h>
 
-#include <phhepmc/PHHepMCGenHelper.h>
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phhepmc/Fun4AllHepMCPileupInputManager.h>
 #include <phhepmc/HepMCFlowAfterBurner.h>
+#include <phhepmc/PHHepMCGenHelper.h>
 
 #include <phsartre/PHSartre.h>
 #include <phsartre/PHSartreParticleTrigger.h>
@@ -90,18 +90,18 @@ namespace Input
   //! apply EIC beam parameter to any HepMC generator,
   //! including in-time collision's space time shift, beam crossing angle and angular divergence
   //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
-  void ApplyEICBeamParameter(PHHepMCGenHelper * HepMCGen)
+  void ApplyEICBeamParameter(PHHepMCGenHelper *HepMCGen)
   {
     if (HepMCGen == nullptr)
     {
-      std::cout << "ApplyEICBeamParameter(): Fatal Error - null input pointer HepMCGen"<<std::endl;
+      std::cout << "ApplyEICBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
     }
     //INPUTMANAGER::HepMCInputManager->set_beam_direction_theta_phi(1e-3,0,M_PI - 1e-3,0); //2mrad x-ing of sPHENIX
 
-    HepMCGen->set_beam_direction_theta_phi(25e-3,0,M_PI ,0); //25mrad x-ing as in EIC CDR
+    HepMCGen->set_beam_direction_theta_phi(25e-3, 0, M_PI, 0);  //25mrad x-ing as in EIC CDR
     HepMCGen->set_beam_angular_divergence_hv(
-        119-6, 119e-6, // EIC CDR Table 1.1
-        211e-6, 152e-6 // EIC CDR Table 1.1
+        119 - 6, 119e-6,  // EIC CDR Table 1.1
+        211e-6, 152e-6    // EIC CDR Table 1.1
     );
 
     // calculate beam sigma width at IP  as in EIC CDR table 1.1
@@ -113,22 +113,20 @@ namespace Input
     const double sigma_e_l = 2;
 
     // combine two beam gives the collision sigma in z
-    const double collision_sigma_z = sqrt(sigma_p_l*sigma_p_l+sigma_e_l*sigma_e_l)/2;
-    const double collision_sigma_t = collision_sigma_z / 29.9792; // speed of light in cm/ns
+    const double collision_sigma_z = sqrt(sigma_p_l * sigma_p_l + sigma_e_l * sigma_e_l) / 2;
+    const double collision_sigma_t = collision_sigma_z / 29.9792;  // speed of light in cm/ns
 
     HepMCGen->set_vertex_distribution_width(
-        sigma_p_h*sigma_e_h / sqrt(sigma_p_h*sigma_p_h+sigma_e_h*sigma_e_h),
-        sigma_p_v*sigma_e_v / sqrt(sigma_p_v*sigma_p_v+sigma_e_v*sigma_e_v),
+        sigma_p_h * sigma_e_h / sqrt(sigma_p_h * sigma_p_h + sigma_e_h * sigma_e_h),
+        sigma_p_v * sigma_e_v / sqrt(sigma_p_v * sigma_p_v + sigma_e_v * sigma_e_v),
         collision_sigma_z,
-        collision_sigma_t );
+        collision_sigma_t);
     HepMCGen->set_vertex_distribution_function(
         PHHepMCGenHelper::Gaus,
         PHHepMCGenHelper::Gaus,
         PHHepMCGenHelper::Gaus,
         PHHepMCGenHelper::Gaus);
   }
-
-
 
 }  // namespace Input
 
