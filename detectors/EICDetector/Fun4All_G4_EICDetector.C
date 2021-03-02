@@ -168,6 +168,20 @@ int Fun4All_G4_EICDetector(
   if (Input::PYTHIA6)
   {
     INPUTGENERATOR::Pythia6->set_config_file(string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia6_ep.cfg");
+    //! apply EIC beam parameter following EIC CDR
+    Input::ApplyEICBeamParameter(INPUTGENERATOR::Pythia6);
+  }
+  // pythia8
+  if (Input::PYTHIA8)
+  {
+    //! apply EIC beam parameter following EIC CDR
+    Input::ApplyEICBeamParameter(INPUTGENERATOR::Pythia8);
+  }
+  // Sartre
+  if (Input::SARTRE)
+  {
+    //! apply EIC beam parameter following EIC CDR
+    Input::ApplyEICBeamParameter(INPUTGENERATOR::Sartre);
   }
 
   //--------------
@@ -177,10 +191,13 @@ int Fun4All_G4_EICDetector(
 
   if (Input::HEPMC)
   {
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4, 100e-4, 30, 0);  //optional collision smear in space, time
+    //! apply EIC beam parameter following EIC CDR
+    Input::ApplyEICBeamParameter(INPUTMANAGER::HepMCInputManager);
+    // optional overriding beam parameters
+    //INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4, 100e-4, 30, 0);  //optional collision smear in space, time
                                                                                             //    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
     // //optional choice of vertex distribution function in space, time
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
+    // INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
     //! embedding ID for the event
     //! positive ID is the embedded event of interest, e.g. jetty event from pythia
     //! negative IDs are backgrounds, .e.g out of time pile up collisions

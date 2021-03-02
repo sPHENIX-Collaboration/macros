@@ -109,7 +109,7 @@ namespace Input
         PHHepMCGenHelper::Gaus);
   }
 
-  //! apply EIC beam parameter to any HepMC generator,
+  //! apply EIC beam parameter to any HepMC generator following EIC CDR,
   //! including in-time collision's space time shift, beam crossing angle and angular divergence
   //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
   void ApplyEICBeamParameter(PHHepMCGenHelper *HepMCGen)

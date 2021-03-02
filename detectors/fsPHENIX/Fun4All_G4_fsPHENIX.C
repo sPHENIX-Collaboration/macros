@@ -162,6 +162,19 @@ int Fun4All_G4_fsPHENIX(
     INPUTGENERATOR::Gun[0]->set_vtx(0, 0, 0);
   }
 
+  // pythia6
+  if (Input::PYTHIA6)
+  {
+    //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia6);
+  }
+  // pythia8
+  if (Input::PYTHIA8)
+  {
+    //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia8);
+  }
+
   //--------------
   // Set Input Manager specific options
   //--------------
@@ -169,15 +182,14 @@ int Fun4All_G4_fsPHENIX(
 
   if (Input::HEPMC)
   {
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4, 100e-4, 8, 0);  //optional collision smear in space, time
-                                                                                           //    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
+    //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    Input::ApplysPHENIXBeamParameter(INPUTMANAGER::HepMCInputManager);
+
+    // optional overriding beam parameters
+    //INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4, 100e-4, 8, 0);  //optional collision smear in space, time
+    //    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
     // //optional choice of vertex distribution function in space, time
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
-    //! embedding ID for the event
-    //! positive ID is the embedded event of interest, e.g. jetty event from pythia
-    //! negative IDs are backgrounds, .e.g out of time pile up collisions
-    //! Usually, ID = 0 means the primary Au+Au collision background
-    //INPUTMANAGER::HepMCInputManager->set_embedding_id(Input::EmbedID);
+    //INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
     if (Input::PILEUPRATE > 0)
     {
       // Copy vertex settings from foreground hepmc input
@@ -185,6 +197,11 @@ int Fun4All_G4_fsPHENIX(
       // and then modify the ones you want to be different
       // INPUTMANAGER::HepMCPileupInputManager->set_vertex_distribution_width(100e-4,100e-4,8,0);
     }
+  }
+  if (Input::PILEUPRATE > 0)
+  {
+    //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    Input::ApplysPHENIXBeamParameter(INPUTMANAGER::HepMCPileupInputManager);
   }
 
   // register all input generators with Fun4All
