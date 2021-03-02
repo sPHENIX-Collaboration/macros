@@ -87,6 +87,28 @@ namespace Input
   int VERBOSITY = 0;
   int EmbedId = 1;
 
+  //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
+  void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen)
+  {
+    if (HepMCGen == nullptr)
+    {
+      std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
+    }
+    HepMCGen->set_beam_direction_theta_phi(1e-3, 0, M_PI - 1e-3, 0);  //2mrad x-ing of sPHENIX per sPH-TRG-2020-001
+
+    HepMCGen->set_vertex_distribution_width(
+        100e-4,         // approximation from past RICH data
+        100e-4,         // approximation from past RICH data
+        7,              // sPH-TRG-2020-001. Fig 3.2
+        20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+    HepMCGen->set_vertex_distribution_function(
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus);
+  }
+
   //! apply EIC beam parameter to any HepMC generator,
   //! including in-time collision's space time shift, beam crossing angle and angular divergence
   //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
@@ -127,7 +149,6 @@ namespace Input
         PHHepMCGenHelper::Gaus,
         PHHepMCGenHelper::Gaus);
   }
-
 }  // namespace Input
 
 namespace INPUTHEPMC
