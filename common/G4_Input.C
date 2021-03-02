@@ -122,8 +122,8 @@ namespace Input
 
     HepMCGen->set_beam_direction_theta_phi(25e-3, 0, M_PI, 0);  //25mrad x-ing as in EIC CDR
     HepMCGen->set_beam_angular_divergence_hv(
-        119 - 6, 119e-6,  // EIC CDR Table 1.1
-        211e-6, 152e-6    // EIC CDR Table 1.1
+        119e-6, 119e-6,   // proton beam as in EIC CDR Table 1.1
+        211e-6, 152e-6    // electron beam as in EIC CDR Table 1.1
     );
 
     // calculate beam sigma width at IP  as in EIC CDR table 1.1
