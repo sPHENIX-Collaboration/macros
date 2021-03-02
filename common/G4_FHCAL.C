@@ -91,30 +91,43 @@ void FHCALSetup(PHG4Reco *g4Reco)
   Fun4AllServer *se = Fun4AllServer::instance();
 
   /** Use dedicated FHCAL module */
-  PHG4ForwardHcalSubsystem *hhcal = new PHG4ForwardHcalSubsystem("FHCAL");
+  PHG4ForwardHcalSubsystem *fhcal = new PHG4ForwardHcalSubsystem("FHCAL");
 
   ostringstream mapping_fhcal;
 
   // Switch to desired calo setup
   // full HCal Fe-Scint with nominal acceptance
   if (G4FHCAL::SETTING::FullEtaAcc)
-    mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_default_fullEtaCov.txt";
+  {
+    mapping_fhcal << getenv("CALIBRATIONROOT")
+                  << "/ForwardHcal/mapping/towerMap_FHCAL_default_fullEtaCov.txt";
+  }
   // full HCal Fe-Scint with nominal acceptance doubled granularity
   else if (G4FHCAL::SETTING::HC2x)
-    mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_2x_fullEtaCov.txt";
+  {
+    mapping_fhcal << getenv("CALIBRATIONROOT")
+                  << "/ForwardHcal/mapping/towerMap_FHCAL_2x_fullEtaCov.txt";
+  }
   // full HCal Fe-Scint with nominal acceptance four times granularity
   else if (G4FHCAL::SETTING::HC2x)
-    mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_4x_fullEtaCov.txt";
+  {
+    mapping_fhcal << getenv("CALIBRATIONROOT")
+                  << "/ForwardHcal/mapping/towerMap_FHCAL_4x_fullEtaCov.txt";
+  }
   // full HCal Fe-Scint with enlarged beam pipe opening for Mar 2020 beam pipe
   else
-    mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_v005.txt";
+  {
+    mapping_fhcal << getenv("CALIBRATIONROOT")
+                  << "/ForwardHcal/mapping/towerMap_FHCAL_v005.txt";
+  }
 
-  hhcal->SetTowerMappingFile(mapping_fhcal.str());
-  hhcal->OverlapCheck(OverlapCheck);
+  fhcal->SetTowerMappingFile(mapping_fhcal.str());
+  fhcal->OverlapCheck(OverlapCheck);
+  fhcal->SetActive();
+  fhcal->SuperDetector("FHCAL");
+  if (AbsorberActive) fhcal->SetAbsorberActive();
 
-  if (AbsorberActive) hhcal->SetAbsorberActive();
-
-  g4Reco->registerSubsystem(hhcal);
+  g4Reco->registerSubsystem(fhcal);
 }
 
 void FHCAL_Cells(int verbosity = 0)
@@ -133,16 +146,24 @@ void FHCAL_Towers()
   // Switch to desired calo setup
   // full HCal Fe-Scint with nominal acceptance
   if (G4FHCAL::SETTING::FullEtaAcc)
+  {
     mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_default_fullEtaCov.txt";
+  }
   // full HCal Fe-Scint with nominal acceptance doubled granularity
   else if (G4FHCAL::SETTING::HC2x)
+  {
     mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_2x_fullEtaCov.txt";
+  }
   // full HCal Fe-Scint with nominal acceptance four times granularity
   else if (G4FHCAL::SETTING::HC4x)
+  {
     mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_4x_fullEtaCov.txt";
+  }
   // full HCal Fe-Scint with enlarged beam pipe opening for Mar 2020 beam pipe
   else
+  {
     mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_v005.txt";
+  }
 
   RawTowerBuilderByHitIndex *tower_FHCAL = new RawTowerBuilderByHitIndex("TowerBuilder_FHCAL");
   tower_FHCAL->Detector("FHCAL");
