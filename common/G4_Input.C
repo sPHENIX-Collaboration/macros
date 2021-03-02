@@ -120,10 +120,16 @@ namespace Input
     }
     //INPUTMANAGER::HepMCInputManager->set_beam_direction_theta_phi(1e-3,0,M_PI - 1e-3,0); //2mrad x-ing of sPHENIX
 
-    HepMCGen->set_beam_direction_theta_phi(25e-3, 0, M_PI, 0);  //25mrad x-ing as in EIC CDR
+    //25mrad x-ing as in EIC CDR
+    HepMCGen->set_beam_direction_theta_phi(
+        25e-3,  // beamA_theta
+        0,      // beamA_phi
+        M_PI,   // beamB_theta
+        0       // beamB_phi
+    );
     HepMCGen->set_beam_angular_divergence_hv(
-        119e-6, 119e-6,   // proton beam as in EIC CDR Table 1.1
-        211e-6, 152e-6    // electron beam as in EIC CDR Table 1.1
+        119e-6, 119e-6,  // proton beam divergence horizontal & vertical, as in EIC CDR Table 1.1
+        211e-6, 152e-6   // electron beam divergence horizontal & vertical, as in EIC CDR Table 1.1
     );
 
     // calculate beam sigma width at IP  as in EIC CDR table 1.1
@@ -139,15 +145,15 @@ namespace Input
     const double collision_sigma_t = collision_sigma_z / 29.9792;  // speed of light in cm/ns
 
     HepMCGen->set_vertex_distribution_width(
-        sigma_p_h * sigma_e_h / sqrt(sigma_p_h * sigma_p_h + sigma_e_h * sigma_e_h),
-        sigma_p_v * sigma_e_v / sqrt(sigma_p_v * sigma_p_v + sigma_e_v * sigma_e_v),
-        collision_sigma_z,
-        collision_sigma_t);
+        sigma_p_h * sigma_e_h / sqrt(sigma_p_h * sigma_p_h + sigma_e_h * sigma_e_h),  //x
+        sigma_p_v * sigma_e_v / sqrt(sigma_p_v * sigma_p_v + sigma_e_v * sigma_e_v),  //y
+        collision_sigma_z,                                                            //z
+        collision_sigma_t);                                                           //t
     HepMCGen->set_vertex_distribution_function(
-        PHHepMCGenHelper::Gaus,
-        PHHepMCGenHelper::Gaus,
-        PHHepMCGenHelper::Gaus,
-        PHHepMCGenHelper::Gaus);
+        PHHepMCGenHelper::Gaus,   //x
+        PHHepMCGenHelper::Gaus,   //y
+        PHHepMCGenHelper::Gaus,   //z
+        PHHepMCGenHelper::Gaus);  //t
   }
 }  // namespace Input
 
