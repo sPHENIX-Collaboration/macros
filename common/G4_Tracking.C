@@ -29,6 +29,7 @@
 #include <trackreco/PHTruthSiliconAssociation.h>
 #include <trackreco/PHTruthTrackSeeding.h>
 #include <trackreco/PHTruthVertexing.h>
+#include <trackreco/PHSimpleKFProp.h>
 
 #if __cplusplus >= 201703L
 #include <trackreco/ActsEvaluator.h>
@@ -287,8 +288,21 @@ void Tracking_Reco()
       hseeder->setSearchAngle(M_PI/8.,M_PI/8.); // radians (iter1, iter2)
       hseeder->setMinTrackSize(10,5); // (iter1, iter2)
       hseeder->setNThreads(1);
-      hseeder->Verbosity(0);
+      hseeder->Verbosity(verbosity);
       se->registerSubsystem(hseeder);
+
+      std::cout << "   Using intermediate vertex associator module " << std::endl;
+      PHTpcTrackSeedVertexAssoc *vtxassoc = new PHTpcTrackSeedVertexAssoc("PHTpcTrackSeedVertexAssoc_prePropagator");
+      vtxassoc->Verbosity(0);
+      se->registerSubsystem(vtxassoc);
+
+      std::cout << "   Using PHSimpleKFProp propagator " << std::endl;
+      PHSimpleKFProp* hprop = new PHSimpleKFProp("PHSimpleKFProp");
+      hprop->set_field_dir(G4MAGNET::magfield_rescale);
+      hprop->set_max_window(.04);
+      hprop->Verbosity(verbosity);
+      se->registerSubsystem(hprop);
+      
     }
     else
     {
@@ -304,10 +318,22 @@ void Tracking_Reco()
       seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
       seeder->Verbosity(verbosity);
       seeder->SetLayerRange(7, 55);
-      seeder->SetSearchWindow(0.01, 0.02);  // (eta width, phi width)
-      seeder->SetMinHitsPerCluster(2);
-      seeder->SetMinClustersPerTrack(20);
+      seeder->SetSearchWindow(0.01, 0.04);  // (eta width, phi width)
+      seeder->SetMinHitsPerCluster(0);
+      seeder->SetMinClustersPerTrack(5);
       se->registerSubsystem(seeder);
+
+      std::cout << "   Using intermediate vertex associator module " << std::endl;
+      PHTpcTrackSeedVertexAssoc *vtxassoc = new PHTpcTrackSeedVertexAssoc("PHTpcTrackSeedVertexAssoc_prePropagator");
+      vtxassoc->Verbosity(0);
+      se->registerSubsystem(vtxassoc);
+
+      std::cout << "   Using PHSimpleKFProp propagator " << std::endl;
+      PHSimpleKFProp* cprop = new PHSimpleKFProp("PHSimpleKFProp");
+      cprop->set_field_dir(G4MAGNET::magfield_rescale);
+      cprop->set_max_window(.04);
+      cprop->Verbosity(verbosity);
+      se->registerSubsystem(cprop);
     }
   }
 
