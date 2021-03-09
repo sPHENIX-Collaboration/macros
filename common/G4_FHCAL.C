@@ -96,23 +96,30 @@ void FHCALSetup(PHG4Reco *g4Reco)
   ostringstream mapping_fhcal;
 
   // Switch to desired calo setup
-  // full HCal Fe-Scint with nominal acceptance
-  if (G4FHCAL::SETTING::FullEtaAcc)
+  // HCal Fe-Scint with doubled granularity
+  if (G4FHCAL::SETTING::HC2x )
   {
-    mapping_fhcal << getenv("CALIBRATIONROOT")
-                  << "/ForwardHcal/mapping/towerMap_FHCAL_default_fullEtaCov.txt";
+    mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_2x.txt";
   }
   // full HCal Fe-Scint with nominal acceptance doubled granularity
-  else if (G4FHCAL::SETTING::HC2x)
+  else if (G4FHCAL::SETTING::HC2x && G4FHCAL::SETTING::FullEtaAcc)
   {
-    mapping_fhcal << getenv("CALIBRATIONROOT")
-                  << "/ForwardHcal/mapping/towerMap_FHCAL_2x_fullEtaCov.txt";
+    mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_2x_fullEtaCov.txt";
+  }
+  // HCal Fe-Scint with four times granularity
+  else if (G4FHCAL::SETTING::HC4x )
+  {
+    mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_4x.txt";
   }
   // full HCal Fe-Scint with nominal acceptance four times granularity
-  else if (G4FHCAL::SETTING::HC2x)
+  else if (G4FHCAL::SETTING::HC4x && G4FHCAL::SETTING::FullEtaAcc)
   {
-    mapping_fhcal << getenv("CALIBRATIONROOT")
-                  << "/ForwardHcal/mapping/towerMap_FHCAL_4x_fullEtaCov.txt";
+    mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_4x_fullEtaCov.txt";
+  }
+  // full HCal Fe-Scint with nominal acceptance
+  else if (G4FHCAL::SETTING::FullEtaAcc)
+  {
+    mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_default_fullEtaCov.txt";
   }
   // full HCal Fe-Scint with enlarged beam pipe opening for Mar 2020 beam pipe
   else
@@ -144,20 +151,30 @@ void FHCAL_Towers()
   ostringstream mapping_fhcal;
 
   // Switch to desired calo setup
-  // full HCal Fe-Scint with nominal acceptance
-  if (G4FHCAL::SETTING::FullEtaAcc)
+  // HCal Fe-Scint with doubled granularity
+  if (G4FHCAL::SETTING::HC2x )
   {
-    mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_default_fullEtaCov.txt";
+    mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_2x.txt";
   }
   // full HCal Fe-Scint with nominal acceptance doubled granularity
-  else if (G4FHCAL::SETTING::HC2x)
+  else if (G4FHCAL::SETTING::HC2x && G4FHCAL::SETTING::FullEtaAcc)
   {
     mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_2x_fullEtaCov.txt";
   }
+  // HCal Fe-Scint with four times granularity
+  else if (G4FHCAL::SETTING::HC4x )
+  {
+    mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_4x.txt";
+  }
   // full HCal Fe-Scint with nominal acceptance four times granularity
-  else if (G4FHCAL::SETTING::HC4x)
+  else if (G4FHCAL::SETTING::HC4x && G4FHCAL::SETTING::FullEtaAcc)
   {
     mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_4x_fullEtaCov.txt";
+  }
+  // full HCal Fe-Scint with nominal acceptance
+  else if (G4FHCAL::SETTING::FullEtaAcc)
+  {
+    mapping_fhcal << getenv("CALIBRATIONROOT") << "/ForwardHcal/mapping/towerMap_FHCAL_default_fullEtaCov.txt";
   }
   // full HCal Fe-Scint with enlarged beam pipe opening for Mar 2020 beam pipe
   else
