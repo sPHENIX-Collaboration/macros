@@ -48,7 +48,7 @@ void G4Init()
 {
   // First some check for subsystems which do not go together
 
-  if (Enable::TPC && Enable::FST)
+  if (Enable::TPC && Enable::FST && !G4FST::SETTING::FST_MVTX_TPC)
   {
     cout << "TPC and FST cannot be enabled together" << endl;
     gSystem->Exit(1);
@@ -59,11 +59,17 @@ void G4Init()
     gSystem->Exit(1);
   }
 
+  if(Enable::FGEM_ORIG && Enable::FST)
+  {
+    cout << "FST cannot be enabled with 5 FGEM setup" << endl;
+    gSystem->Exit(1);
+  }
+
   // load detector/material macros and execute Init() function
   if (Enable::PIPE) PipeInit();
   if (Enable::PLUGDOOR) PlugDoorInit();
   if (Enable::EGEM) EGEM_Init();
-  if (Enable::FGEM) FGEM_Init();
+  if (Enable::FGEM || Enable::FGEM_ORIG) FGEM_Init();
   if (Enable::FST) FST_Init();
   if (Enable::BARREL) BarrelInit();
   if (Enable::MVTX) MvtxInit();
@@ -134,7 +140,7 @@ int G4Setup()
 
   if (Enable::PIPE) radius = Pipe(g4Reco, radius);
   if (Enable::EGEM) EGEMSetup(g4Reco);
-  if (Enable::FGEM) FGEMSetup(g4Reco);
+  if (Enable::FGEM || Enable::FGEM_ORIG) FGEMSetup(g4Reco);
   if (Enable::FST) FSTSetup(g4Reco);
   if (Enable::BARREL) Barrel(g4Reco, radius);
   if (Enable::MVTX) radius = Mvtx(g4Reco, radius);
