@@ -157,6 +157,26 @@ void TrackingInit()
     std::cout << "Cannot enable space charge correction if not using GenFit tracking chain" << std::endl;
     G4TPC::ENABLE_CORRECTIONS = false;
   }
+
+  /// Built the Acts geometry
+  Fun4AllServer* se = Fun4AllServer::instance();
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+  #if __cplusplus >= 201703L
+  /// Geometry must be built before any Acts modules
+  MakeActsGeometry* geom = new MakeActsGeometry();
+  geom->Verbosity(verbosity);
+  geom->setMagField(G4MAGNET::magfield);
+  geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
+  
+  /// Need a flip of the sign for constant field in tpc tracker
+  if(G4TRACKING::use_PHTpcTracker_seeding && 
+     G4MAGNET::magfield.find(".root") == std::string::npos)
+    {
+      geom->setMagFieldRescale(-1 * G4MAGNET::magfield_rescale);
+    }
+  se->registerSubsystem(geom);
+  #endif  
+
 }
 
 void Tracking_Reco()
@@ -177,18 +197,7 @@ void Tracking_Reco()
   if(!G4TRACKING::use_Genfit)
     {
 #if __cplusplus >= 201703L
-      /// Geometry must be built before any Acts modules
-      MakeActsGeometry* geom = new MakeActsGeometry();
-      geom->Verbosity(verbosity);
-      geom->setMagField(G4MAGNET::magfield);
-      geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
-
-      /// Need a flip of the sign for constant field in tpc tracker
-      if(G4TRACKING::use_PHTpcTracker_seeding 
-	 && G4MAGNET::magfield.find(".root") == std::string::npos)
-	geom->setMagFieldRescale(-1 * G4MAGNET::magfield_rescale);
-      se->registerSubsystem(geom);
-      
+  
       /// Always run PHActsSourceLinks first, to convert TrkrClusters 
       /// to the Acts equivalent
       PHActsSourceLinks* sl = new PHActsSourceLinks();
@@ -494,6 +503,7 @@ void Tracking_Reco()
     actsFit2->doTimeAnalysis(false);
     actsFit2->fitSiliconMMs(false);
     se->registerSubsystem(actsFit2);
+
 
 #endif
   }
