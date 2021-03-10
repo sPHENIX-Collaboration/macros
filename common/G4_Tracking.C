@@ -37,7 +37,6 @@
 #include <trackreco/PHActsSiliconSeeding.h>
 #include <trackreco/PHActsTracks.h>
 #include <trackreco/PHActsTrkFitter.h>
-#include <trackreco/PHActsTrkProp.h>
 #include <trackreco/PHActsInitialVertexFinder.h>
 #include <trackreco/PHActsVertexFinder.h>
 #include <trackreco/PHTpcResiduals.h>
@@ -194,20 +193,6 @@ void Tracking_Reco()
   // Tracking
   //------------
 
-  if(!G4TRACKING::use_Genfit)
-    {
-#if __cplusplus >= 201703L
-  
-      /// Always run PHActsSourceLinks first, to convert TrkrClusters 
-      /// to the Acts equivalent
-      PHActsSourceLinks* sl = new PHActsSourceLinks();
-      sl->Verbosity(verbosity);
-      sl->setMagField(G4MAGNET::magfield);
-      sl->setMagFieldRescale(G4MAGNET::magfield_rescale);
-      se->registerSubsystem(sl);
-#endif  
-    }
-
   // Initial vertex finding
   //=================================
   if(G4TRACKING::use_acts_silicon_seeding && !G4TRACKING::use_Genfit)
@@ -220,8 +205,11 @@ void Tracking_Reco()
       
       if(G4TRACKING::use_acts_init_vertexing)
 	{
+
 	  PHActsInitialVertexFinder* init_vtx = new PHActsInitialVertexFinder();
 	  init_vtx->Verbosity(verbosity);
+	  init_vtx->setSvtxTrackMapName("SvtxSiliconTrackMap");
+	  init_vtx->setSvtxVertexMapName("SvtxVertexMap");
 	  se->registerSubsystem(init_vtx);
 	}
       else
@@ -469,11 +457,6 @@ void Tracking_Reco()
 
 #if __cplusplus >= 201703L
   
-
-    PHActsTracks* actsTracks = new PHActsTracks("PHActsTracks1");
-    actsTracks->Verbosity(verbosity);
-    se->registerSubsystem(actsTracks);
-
     PHActsTrkFitter* actsFit = new PHActsTrkFitter("PHActsFirstTrkFitter");
     actsFit->Verbosity(verbosity);
     actsFit->doTimeAnalysis(false);
@@ -489,14 +472,13 @@ void Tracking_Reco()
       se->registerSubsystem(residuals);
     }
 
-    PHActsVertexFinder *finder = new PHActsVertexFinder("PHActsVertexFinder");
+    PHActsInitialVertexFinder *finder = new PHActsInitialVertexFinder("PHActsVertexFinder");
     finder->Verbosity(verbosity);
+    finder->setSvtxTrackMapName("SvtxTrackMap");
+    finder->setSvtxVertexMapName("SvtxVertexMap");
+    /// Determines whether or not to reset track covariance matrix
+    finder->setInitialVertexer(false);
     se->registerSubsystem(finder);
-
-    PHActsTracks *actsTracks2 = new PHActsTracks("PHActsTracks2");
-    actsTracks2->Verbosity(verbosity);
-    actsTracks2->setSecondFit(true);
-    se->registerSubsystem(actsTracks2);
 
     PHActsTrkFitter* actsFit2 = new PHActsTrkFitter("PHActsSecondTrKFitter");
     actsFit2->Verbosity(verbosity);
