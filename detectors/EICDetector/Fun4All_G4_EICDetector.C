@@ -225,11 +225,15 @@ int Fun4All_G4_EICDetector(
   // EIC beam pipe extension beyond the Be-section:
   //G4PIPE::use_forward_pipes = true;
 
+  // gems
   Enable::EGEM = true;
   Enable::FGEM = true;
+  Enable::FGEM_ORIG = false; //5 forward gems; cannot be used with FST
   // barrel tracker
   Enable::BARREL = false;
-  Enable::FST = false;
+  // fst
+  Enable::FST = true;
+  G4FST::SETTING::FST_MVTX_TPC = true;
   // mvtx/tpc tracker
   Enable::MVTX = true;
   Enable::TPC = true;
@@ -239,6 +243,7 @@ int Fun4All_G4_EICDetector(
   Enable::TRACKING_EVAL = Enable::TRACKING && true;
   G4TRACKING::DISPLACED_VERTEX = false;  // this option exclude vertex in the track fitting and use RAVE to reconstruct primary and 2ndary vertexes
                                          // projections to calorimeters
+  G4TRACKING::PROJECTION_EEMC = false;
   G4TRACKING::PROJECTION_CEMC = false;
   G4TRACKING::PROJECTION_FEMC = false;
   G4TRACKING::PROJECTION_FHCAL = false;

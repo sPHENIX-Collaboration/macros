@@ -30,6 +30,7 @@ namespace G4FST
     bool FSTV41 = false;
     bool FSTV42 = false;
     bool FSTV4 = false;
+    bool FST_MVTX_TPC = false;
   }  // namespace SETTING
 }  // namespace G4FST
 
@@ -42,14 +43,15 @@ void FST_Init()
           (G4FST::SETTING::FSTV3 ? 1 : 0) +
           (G4FST::SETTING::FSTV4 ? 1 : 0) +
           (G4FST::SETTING::FSTV41 ? 1 : 0) +
-          (G4FST::SETTING::FSTV42 ? 1 : 0) >
+          (G4FST::SETTING::FSTV42 ? 1 : 0) +
+          (G4FST::SETTING::FST_MVTX_TPC ? 1 : 0) >
       1)
   {
-    cout << "use only G4FST::SETTING::FSTV0=true or G4FST::SETTING::FSTV1=true or G4FST::SETTING::FSTV2=true or G4FST::SETTING::FSTV3=true or G4FST::SETTING::FSTV4=true or G4FST::SETTING::FSTV41=true or G4FST::SETTING::FSTV42=true" << endl;
+    cout << "use only G4FST::SETTING::FSTV0=true or G4FST::SETTING::FSTV1=true or G4FST::SETTING::FSTV2=true or G4FST::SETTING::FSTV3=true or G4FST::SETTING::FSTV4=true or G4FST::SETTING::FSTV41=true or G4FST::SETTING::FSTV42=true or G4FST::SETTING::FST_MVTX_TPC=true" << endl;
     gSystem->Exit(1);
   }
 
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 44.);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 45.);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 282.);
 }
 //-----------------------------------------------------------------------------------//
@@ -95,7 +97,7 @@ void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
     make_LANL_FST_station("FST_5", g4Reco, 270, 15, 45, 100 * um);
   }
   else if (G4FST::SETTING::FSTV42)
-  {                                                              // version 4.1
+  {                                                              // version 4.2
     make_LANL_FST_station("FST_0", g4Reco, 35, 4, 25, 50 * um);  //cm
     make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 36, 50 * um);
     make_LANL_FST_station("FST_2", g4Reco, 77, 5, 36, 50 * um);
@@ -111,6 +113,15 @@ void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
     make_LANL_FST_station("FST_3", g4Reco, 101, 6, 38.5, 50 * um);
     make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 45, 50 * um);
     make_LANL_FST_station("FST_5", g4Reco, 270, 15, 45, 50 * um);
+  }
+  else if (G4FST::SETTING::FST_MVTX_TPC)
+  {                                                              // mvtx_tpc version (based on version 4)
+    make_LANL_FST_station("FST_0", g4Reco, 35, 4, 19.5, 50 * um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 19.5, 50 * um);
+    make_LANL_FST_station("FST_2", g4Reco, 77, 5, 19.5, 50 * um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 7.5, 19.5, 50 * um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 9.5, 45, 50 * um);
+    make_LANL_FST_station("FST_5", g4Reco, 280, 16, 45, 50 * um);
   }
   else
   {                                                               // Version 0

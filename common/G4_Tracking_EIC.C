@@ -33,6 +33,7 @@ namespace Enable
 namespace G4TRACKING
 {
   bool DISPLACED_VERTEX = false;
+  bool PROJECTION_EEMC = false;
   bool PROJECTION_CEMC = false;
   bool PROJECTION_FEMC = false;
   bool PROJECTION_FHCAL = false;
@@ -143,10 +144,16 @@ void Tracking_Reco()
   //-------------------------
   // FGEM
   //-------------------------
-  if (Enable::FGEM)
+  if (Enable::FGEM || Enable::FGEM_ORIG)
   {
+    int first_gem(0);
+    if (Enable::FGEM_ORIG){
+      first_gem = 0;
+    }else{
+      first_gem = 2;
+    }
     // GEM2, 70um azimuthal resolution, 1cm radial strips
-    for (int i = 2; i < 5; i++)
+    for (int i = first_gem; i < 5; i++)
     {
       kalman->add_phg4hits(Form("G4HIT_FGEM_%d", i),          //      const std::string& phg4hitsNames,
                            PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
@@ -162,7 +169,7 @@ void Tracking_Reco()
   //-------------------------
   if (Enable::FST)
   {
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 6; i++)
     {
       kalman->add_phg4hits(Form("G4HIT_FST_%d", i),           //      const std::string& phg4hitsNames,
                            PHG4TrackFastSim::Vertical_Plane,  //      const DETECTOR_TYPE phg4dettype,
@@ -192,15 +199,22 @@ void Tracking_Reco()
   //-------------------------
   // CEMC
   //-------------------------
-
   if (Enable::CEMC && G4TRACKING::PROJECTION_CEMC)
   {
     kalman->add_state_name("CEMC");
   }
-  se->registerSubsystem(kalman);
+  //-------------------------
+  // EEMC
+  //-------------------------
+  if (Enable::EEMC && G4TRACKING::PROJECTION_EEMC)
+  {
+    kalman->add_state_name("EEMC");
+  }
 
+  se->registerSubsystem(kalman);
   return;
 }
+
 
 //-----------------------------------------------------------------------------//
 
@@ -216,6 +230,7 @@ void Tracking_Eval(const std::string &outputfile)
   //----------------
   // Fast Tracking evaluation
   //----------------
+
 
   PHG4TrackFastSimEval *fast_sim_eval = new PHG4TrackFastSimEval("FastTrackingEval");
   fast_sim_eval->set_trackmapname(TRACKING::TrackNodeName);
