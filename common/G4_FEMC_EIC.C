@@ -55,6 +55,7 @@ namespace G4FEMC
   {
     bool FullEtaAcc = false;
     bool fsPHENIX = false;
+    bool EC2x = false;
   }  // namespace SETTING
 }  // namespace G4FEMC
 
@@ -87,6 +88,11 @@ void FEMCSetup(PHG4Reco *g4Reco)
   if (G4FEMC::SETTING::FullEtaAcc)
   {
     mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fullEtaCov.txt";
+  }
+  // doubled granularity ECAL
+  else if (G4FEMC::SETTING::EC2x)
+  {
+    mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_2x.txt";
   }
   // fsPHENIX ECAL
   else if (G4FEMC::SETTING::fsPHENIX)
@@ -129,6 +135,11 @@ void FEMC_Towers()
   if (G4FEMC::SETTING::FullEtaAcc)
   {
     mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_fullEtaCov.txt";
+  }
+  // doubled granularity ECAL
+  else if (G4FEMC::SETTING::EC2x)
+  {
+    mapping_femc << getenv("CALIBRATIONROOT") << "/ForwardEcal/mapping/towerMap_FEMC_2x.txt";
   }
   // fsPHENIX ECAL
   else if (G4FEMC::SETTING::fsPHENIX)
