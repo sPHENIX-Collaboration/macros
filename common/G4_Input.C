@@ -94,7 +94,7 @@ namespace Input
     if (HepMCGen == nullptr)
     {
       std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
-      exit (1);
+      exit(1);
     }
     HepMCGen->set_beam_direction_theta_phi(1e-3, 0, M_PI - 1e-3, 0);  //2mrad x-ing of sPHENIX per sPH-TRG-2020-001
 
@@ -118,20 +118,31 @@ namespace Input
     if (HepMCGen == nullptr)
     {
       std::cout << "ApplyEICBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
-      exit (1);
+      exit(1);
     }
 
     //25mrad x-ing as in EIC CDR
+    const double EIC_hadron_crossing_angle = 25e-3;
+
     HepMCGen->set_beam_direction_theta_phi(
-        25e-3,  // beamA_theta
-        0,      // beamA_phi
-        M_PI,   // beamB_theta
-        0       // beamB_phi
+        EIC_hadron_crossing_angle,  // beamA_theta
+        0,                          // beamA_phi
+        M_PI,                       // beamB_theta
+        0                           // beamB_phi
     );
     HepMCGen->set_beam_angular_divergence_hv(
         119e-6, 119e-6,  // proton beam divergence horizontal & vertical, as in EIC CDR Table 1.1
         211e-6, 152e-6   // electron beam divergence horizontal & vertical, as in EIC CDR Table 1.1
     );
+
+    // angular kick within a bunch as result of crab cavity
+    // using an naive assumption of transfer matrix from the cavity to IP,
+    // which is NOT yet validated with accelerator optics simulations!
+    const double z_hadron_cavity = 52e3;  // CDR Fig 3.3
+    const double z_e_cavity = 38e2;       // CDR Fig 3.2
+    HepMCGen->set_beam_angular_z_coefficient_hv(
+        -EIC_hadron_crossing_angle / 2. / z_hadron_cavity, 0,
+        -EIC_hadron_crossing_angle / 2. / z_e_cavity, 0);
 
     // calculate beam sigma width at IP  as in EIC CDR table 1.1
     const double sigma_p_h = sqrt(80 * 11.3e-7);
