@@ -472,12 +472,9 @@ void Tracking_Reco()
       se->registerSubsystem(residuals);
     }
 
-    PHActsInitialVertexFinder *finder = new PHActsInitialVertexFinder("PHActsVertexFinder");
+
+    PHActsVertexFinder *finder = new PHActsVertexFinder();
     finder->Verbosity(verbosity);
-    finder->setSvtxTrackMapName("SvtxTrackMap");
-    finder->setSvtxVertexMapName("SvtxVertexMap");
-    /// Determines whether or not to reset track covariance matrix
-    finder->setInitialVertexer(false);
     se->registerSubsystem(finder);
 
     PHActsTrkFitter* actsFit2 = new PHActsTrkFitter("PHActsSecondTrKFitter");
