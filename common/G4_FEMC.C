@@ -89,12 +89,6 @@ void FEMCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 
 void FEMC_Cells()
 {
-  Fun4AllServer *se = Fun4AllServer::instance();
-
-  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("FEMCCellReco");
-  hc->Detector("FEMC");
-  se->registerSubsystem(hc);
-
   return;
 }
 

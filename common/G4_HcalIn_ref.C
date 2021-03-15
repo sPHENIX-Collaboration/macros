@@ -272,7 +272,7 @@ void HCALInner_Clusters()
   {
     RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("HcalInRawClusterBuilderTemplate");
     ClusterBuilder->Detector("HCALIN");
-    ClusterBuilder->SetCylindricalGeometry();
+    ClusterBuilder->SetCylindricalGeometry();  // has to be called after Detector()
     ClusterBuilder->Verbosity(verbosity);
     se->registerSubsystem(ClusterBuilder);
   }

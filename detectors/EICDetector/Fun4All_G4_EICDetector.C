@@ -59,7 +59,9 @@ int Fun4All_G4_EICDetector(
   // about the number of layers used for the cell reco code
   //
   //Input::READHITS = true;
-  INPUTREADHITS::filename = inputFile;
+  INPUTREADHITS::filename[0] = inputFile;
+  // if you use a filelist
+  // INPUTREADHITS::listfile[0] = inputFile;
 
   // Or:
   // Use one or more particle generators
@@ -67,7 +69,10 @@ int Fun4All_G4_EICDetector(
   // all other options only play a role if it is active
   // In case embedding into a production output, please double check your G4Setup_EICDetector.C and G4_*.C consistent with those in the production macro folder
   //  Input::EMBED = true;
-  INPUTEMBED::filename = embed_input_file;
+  INPUTEMBED::filename[0] = embed_input_file;
+  // if you use a filelist
+  //INPUTEMBED::listfile[0] = embed_input_file;
+
   // Use Pythia 8
   //  Input::PYTHIA8 = true;
 
@@ -145,6 +150,11 @@ int Fun4All_G4_EICDetector(
     INPUTGENERATOR::VectorMesonGenerator[0]->set_pt_range(0., 10.);
     // Y species - select only one, last one wins
     INPUTGENERATOR::VectorMesonGenerator[0]->set_upsilon_1s();
+    if (Input::HEPMC || Input::EMBED)
+    {
+      INPUTGENERATOR::VectorMesonGenerator[0]->set_reuse_existing_vertex(true);
+      INPUTGENERATOR::VectorMesonGenerator[0]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+    }
   }
   // particle gun
   // if you run more than one of these Input::GUN_NUMBER > 1
@@ -188,13 +198,13 @@ int Fun4All_G4_EICDetector(
   // Write the DST
   //======================
 
-  //  Enable::DSTOUT = true;
+  Enable::DSTOUT = false;
   DstOut::OutputDir = outdir;
   DstOut::OutputFile = outputFile;
   Enable::DSTOUT_COMPRESS = false;  // Compress DST files
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  //Enable::DSTREADER = true;
+  Enable::DSTREADER = true;
 
   // turn the display on (default off)
   Enable::DISPLAY = false;
@@ -213,34 +223,40 @@ int Fun4All_G4_EICDetector(
   // whether to simulate the Be section of the beam pipe
   Enable::PIPE = true;
   // EIC beam pipe extension beyond the Be-section:
-  //G4PIPE::use_forward_pipes = true;
+  G4PIPE::use_forward_pipes = true;
 
-  Enable::EGEM = true;
-  Enable::FGEM = true;
+  // gems
+  Enable::EGEM = false;
+  Enable::FGEM = false;
+  Enable::FGEM_ORIG = false; //5 forward gems; cannot be used with FST
   // barrel tracker
   Enable::BARREL = false;
-  Enable::FST = false;
+  //G4BARREL::SETTING::BARRELV6=true;
+  // fst
+  Enable::FST = true;
+  G4FST::SETTING::FSTV5 = true;
   // mvtx/tpc tracker
-  Enable::MVTX = true;
-  Enable::TPC = true;
+  Enable::MVTX = false;
+  Enable::TPC = false;
   //  Enable::TPC_ENDCAP = true;
 
   Enable::TRACKING = true;
   Enable::TRACKING_EVAL = Enable::TRACKING && true;
   G4TRACKING::DISPLACED_VERTEX = false;  // this option exclude vertex in the track fitting and use RAVE to reconstruct primary and 2ndary vertexes
                                          // projections to calorimeters
+  G4TRACKING::PROJECTION_EEMC = false;
   G4TRACKING::PROJECTION_CEMC = false;
   G4TRACKING::PROJECTION_FEMC = false;
   G4TRACKING::PROJECTION_FHCAL = false;
 
-  Enable::CEMC = true;
+  Enable::CEMC = false;
   //  Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
 
-  Enable::HCALIN = true;
+  Enable::HCALIN = false;
   //  Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
@@ -249,7 +265,7 @@ int Fun4All_G4_EICDetector(
 
   Enable::MAGNET = true;
 
-  Enable::HCALOUT = true;
+  Enable::HCALOUT = false;
   //  Enable::HCALOUT_ABSORBER = true;
   Enable::HCALOUT_CELL = Enable::HCALOUT && true;
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
@@ -257,34 +273,31 @@ int Fun4All_G4_EICDetector(
   Enable::HCALOUT_EVAL = Enable::HCALOUT_CLUSTER && true;
 
   // EICDetector geometry - barrel
-  Enable::DIRC = true;
+  Enable::DIRC = false;
 
   // EICDetector geometry - 'hadron' direction
-  Enable::RICH = true;
-  Enable::AEROGEL = true;
+  Enable::RICH = false;
+  Enable::AEROGEL = false;
 
-  Enable::FEMC = true;
+  Enable::FEMC = false;
   //  Enable::FEMC_ABSORBER = true;
-  Enable::FEMC_CELL = Enable::FEMC && true;
-  Enable::FEMC_TOWER = Enable::FEMC_CELL && true;
+  Enable::FEMC_TOWER = Enable::FEMC && true;
   Enable::FEMC_CLUSTER = Enable::FEMC_TOWER && true;
   Enable::FEMC_EVAL = Enable::FEMC_CLUSTER && true;
 
-  Enable::FHCAL = true;
+  Enable::FHCAL = false;
   //  Enable::FHCAL_ABSORBER = true;
-  Enable::FHCAL_CELL = Enable::FHCAL && true;
-  Enable::FHCAL_TOWER = Enable::FHCAL_CELL && true;
+  Enable::FHCAL_TOWER = Enable::FHCAL && true;
   Enable::FHCAL_CLUSTER = Enable::FHCAL_TOWER && true;
   Enable::FHCAL_EVAL = Enable::FHCAL_CLUSTER && true;
 
   // EICDetector geometry - 'electron' direction
-  Enable::EEMC = true;
-  Enable::EEMC_CELL = Enable::EEMC && true;
-  Enable::EEMC_TOWER = Enable::EEMC_CELL && true;
+  Enable::EEMC = false;
+  Enable::EEMC_TOWER = Enable::EEMC && true;
   Enable::EEMC_CLUSTER = Enable::EEMC_TOWER && true;
   Enable::EEMC_EVAL = Enable::EEMC_CLUSTER && true;
 
-  Enable::PLUGDOOR = true;
+  Enable::PLUGDOOR = false;
 
   // Other options
   Enable::GLOBAL_RECO = true;
@@ -315,7 +328,7 @@ int Fun4All_G4_EICDetector(
   //---------------
   // World Settings
   //---------------
-  //  G4WORLD::PhysicsList = "QGSP_BERT"; //FTFP_BERT_HP best for calo
+  //  G4WORLD::PhysicsList = "FTFP_BERT"; //FTFP_BERT_HP best for calo
   //  G4WORLD::WorldMaterial = "G4_AIR"; // set to G4_GALACTIC for material scans
 
   //---------------
@@ -358,12 +371,6 @@ int Fun4All_G4_EICDetector(
   if (Enable::HCALIN_CELL) HCALInner_Cells();
 
   if (Enable::HCALOUT_CELL) HCALOuter_Cells();
-
-  if (Enable::FEMC_CELL) FEMC_Cells();
-
-  if (Enable::FHCAL_CELL) FHCAL_Cells();
-
-  if (Enable::EEMC_CELL) EEMC_Cells();
 
   //-----------------------------
   // CEMC towering and clustering

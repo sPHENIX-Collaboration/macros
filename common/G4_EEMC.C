@@ -13,6 +13,7 @@
 #include <g4main/PHG4Reco.h>
 
 #include <caloreco/RawClusterBuilderFwd.h>
+#include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
 
 #include <fun4all/Fun4AllServer.h>
@@ -39,6 +40,16 @@ namespace G4EEMC
   int use_projective_geometry = 0;
   double Gdz = 18. + 0.0001;
   double Gz0 = -170.;
+  enum enu_Eemc_clusterizer
+  {
+    kEemcGraphClusterizer,
+    kEemcTemplateClusterizer
+  };
+  //default template clusterizer, as developed by Sasha Bazilevsky
+  enu_Eemc_clusterizer Eemc_clusterizer = kEemcTemplateClusterizer;
+  // graph clusterizer
+  //enu_Eemc_clusterizer Eemc_clusterizer = kEemcGraphClusterizer;
+
 }  // namespace G4EEMC
 
 void EEMCInit()
@@ -70,19 +81,23 @@ void EEMCSetup(PHG4Reco *g4Reco)
     eemc->SetAbsorberActive();
   }
 
-  /* path to central copy of calibrations repositry */
+  /* path to central copy of calibrations repository */
   ostringstream mapping_eemc;
 
   /* Use non-projective geometry */
   if (!G4EEMC::use_projective_geometry)
   {
     mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/towerMap_EEMC_v006.txt";
-    eemc->SetTowerMappingFile(mapping_eemc.str());
+    eemc->set_string_param("mappingtower", mapping_eemc.str());
   }
 
   /* use projective geometry */
   else
   {
+    cout << "The projective version has serious problems with overlaps" << endl;
+    cout << "Do Not Use!" << endl;
+    cout << "If you insist, copy G4_EEMC.C locally and comment out this exit" << endl;
+    gSystem->Exit(1);
     ostringstream mapping_eemc_4x4construct;
 
     mapping_eemc << getenv("CALIBRATIONROOT") << "/CrystalCalorimeter/mapping/crystals_v005.txt";
@@ -98,15 +113,6 @@ void EEMCSetup(PHG4Reco *g4Reco)
 
 void EEMC_Cells()
 {
-  int verbosity = std::max(Enable::VERBOSITY, Enable::EEMC_VERBOSITY);
-
-  Fun4AllServer *se = Fun4AllServer::instance();
-
-  PHG4ForwardCalCellReco *hc = new PHG4ForwardCalCellReco("EEMCCellReco");
-  hc->Detector("EEMC");
-  se->registerSubsystem(hc);
-
-  return;
 }
 
 void EEMC_Towers()
@@ -161,11 +167,27 @@ void EEMC_Clusters()
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("EEMCRawClusterBuilderFwd");
-  ClusterBuilder->Detector("EEMC");
-  ClusterBuilder->Verbosity(verbosity);
-  se->registerSubsystem(ClusterBuilder);
+  if (G4EEMC::Eemc_clusterizer == G4EEMC::kEemcTemplateClusterizer)
+  {
+    RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("EEMCRawClusterBuilderTemplate");
 
+    ClusterBuilder->Detector("EEMC");
+    ClusterBuilder->Verbosity(verbosity);
+    se->registerSubsystem(ClusterBuilder);
+  }
+  else if (G4EEMC::Eemc_clusterizer == G4EEMC::kEemcGraphClusterizer)
+  {
+    RawClusterBuilderFwd *ClusterBuilder = new RawClusterBuilderFwd("EEMCRawClusterBuilderFwd");
+
+    ClusterBuilder->Detector("EEMC");
+    ClusterBuilder->Verbosity(verbosity);
+    se->registerSubsystem(ClusterBuilder);
+  }
+  else
+  {
+    cout << "EEMC_Clusters - unknown clusterizer setting " << G4EEMC::Eemc_clusterizer << endl;
+    gSystem->Exit(1);
+  }
   return;
 }
 

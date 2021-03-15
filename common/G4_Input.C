@@ -77,10 +77,9 @@ namespace Input
   int SIMPLE_NUMBER = 1;
   int SIMPLE_VERBOSITY = 0;
 
-//  bool UPSILON = false; // moved to GlobalVariables.C, as used in downstream vairables
   int UPSILON_NUMBER = 1;
   int UPSILON_VERBOSITY = 0;
-//  std::set<int> UPSILON_EmbedIds; // moved to GlobalVariables.C, as used in downstream vairables
+  // other UPSILON settings which are also used elsewhere are in GlobalVariables.C
 
   double PILEUPRATE = 0.;
   bool READHITS = false;
@@ -105,14 +104,14 @@ namespace INPUTREADEIC
 
 namespace INPUTREADHITS
 {
-  string filename;
-  string listfile;
+  map<unsigned int, std::string> filename;
+  map<unsigned int, std::string> listfile;
 }  // namespace INPUTREADHITS
 
 namespace INPUTEMBED
 {
-  string filename;
-  string listfile;
+  map<unsigned int, std::string> filename;
+  map<unsigned int, std::string> listfile;
 }  // namespace INPUTEMBED
 
 namespace PYTHIA6
@@ -132,7 +131,7 @@ namespace SARTRE
 
 namespace PILEUP
 {
-  string pileupfile = "/sphenix/sim/sim01/sphnxpro/sHijing_HepMC/sHijing_0-12fm.dat";
+  string pileupfile = "/sphenix/sim/sim01/sphnxpro/MDC1/sHijing_HepMC/data/sHijing_0_20fm-0000000001-00000.dat";
   double TpcDriftVelocity = 8.0 / 1000.0;
 }  // namespace PILEUP
 
@@ -417,22 +416,34 @@ void InputManagers()
   if (Input::EMBED)
   {
     gSystem->Load("libg4dst.so");
-    Fun4AllInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTinEmbed");
-    if (!INPUTEMBED::filename.empty() && INPUTEMBED::listfile.empty())
+    if (!INPUTEMBED::filename.empty() && !INPUTEMBED::listfile.empty())
     {
-      in1->fileopen(INPUTEMBED::filename);
-    }
-    else if (!INPUTEMBED::listfile.empty())
-    {
-      in1->AddListFile(INPUTEMBED::listfile);
-    }
-    else
-    {
-      cout << "no filename INPUTEMBED::filename or listfile INPUTEMBED::listfile given" << endl;
+      cout << "only filenames or filelists are supported, not mixtures" << endl;
       gSystem->Exit(1);
     }
-    in1->Repeat();  // if file(or filelist) is exhausted, start from beginning
-    se->registerInputManager(in1);
+    if (INPUTEMBED::filename.empty() && INPUTEMBED::listfile.empty())
+    {
+      cout << "you need to give an input filenames or filelist" << endl;
+      gSystem->Exit(1);
+    }
+    for (auto iter = INPUTEMBED::filename.begin(); iter != INPUTEMBED::filename.end(); ++iter)
+    {
+      string mgrname = "DSTin" + to_string(iter->first);
+      Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
+      hitsin->fileopen(iter->second);
+      hitsin->Verbosity(Input::VERBOSITY);
+      hitsin->Repeat();
+      se->registerInputManager(hitsin);
+    }
+    for (auto iter = INPUTEMBED::listfile.begin(); iter != INPUTEMBED::listfile.end(); ++iter)
+    {
+      string mgrname = "DSTin" + to_string(iter->first);
+      Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
+      hitsin->AddListFile(iter->second);
+      hitsin->Verbosity(Input::VERBOSITY);
+      hitsin->Repeat();
+      se->registerInputManager(hitsin);
+    }
   }
   if (Input::HEPMC)
   {
@@ -454,22 +465,33 @@ void InputManagers()
   }
   else if (Input::READHITS)
   {
-    Fun4AllInputManager *hitsin = new Fun4AllDstInputManager("DSTin");
-    if (!INPUTREADHITS::filename.empty() && INPUTREADHITS::listfile.empty())
+    gSystem->Load("libg4dst.so");
+    if (!INPUTREADHITS::filename.empty() && !INPUTREADHITS::listfile.empty())
     {
-      hitsin->fileopen(INPUTREADHITS::filename);
-    }
-    else if (!INPUTREADHITS::listfile.empty())
-    {
-      hitsin->AddListFile(INPUTREADHITS::listfile);
-    }
-    else
-    {
-      cout << "no filename INPUTREADHITS::filename or listfile INPUTREADHITS::listfile given" << endl;
+      cout << "only filenames or filelists are supported, not mixtures" << endl;
       gSystem->Exit(1);
     }
-    hitsin->Verbosity(Input::VERBOSITY);
-    se->registerInputManager(hitsin);
+    if (INPUTREADHITS::filename.empty() && INPUTREADHITS::listfile.empty())
+    {
+      cout << "you need to give an input filenames or filelist" << endl;
+      gSystem->Exit(1);
+    }
+    for (auto iter = INPUTREADHITS::filename.begin(); iter != INPUTREADHITS::filename.end(); ++iter)
+    {
+      string mgrname = "DSTin" + to_string(iter->first);
+      Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
+      hitsin->fileopen(iter->second);
+      hitsin->Verbosity(Input::VERBOSITY);
+      se->registerInputManager(hitsin);
+    }
+    for (auto iter = INPUTREADHITS::listfile.begin(); iter != INPUTREADHITS::listfile.end(); ++iter)
+    {
+      string mgrname = "DSTin" + to_string(iter->first);
+      Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
+      hitsin->AddListFile(iter->second);
+      hitsin->Verbosity(Input::VERBOSITY);
+      se->registerInputManager(hitsin);
+    }
   }
   else
   {
