@@ -48,14 +48,24 @@ void G4Init()
 {
   // First some check for subsystems which do not go together
 
-  if (Enable::TPC && Enable::FST && !G4FST::SETTING::FST_MVTX_TPC)
+  if (Enable::TPC && Enable::FST && !G4FST::SETTING::FST_TPC)
   {
-    cout << "TPC and FST cannot be enabled together" << endl;
+    cout << "FST setup cannot fit in the TPC" << endl;
     gSystem->Exit(1);
   }
-  else if ((Enable::TPC || Enable::MVTX) && Enable::BARREL)
+  else if (Enable::MVTX && Enable::BARREL)
   {
-    cout << "TPC/MVTX and BARREL cannot be enabled together" << endl;
+    cout << "MVTX and BARREL cannot be enabled together" << endl;
+    gSystem->Exit(1);
+  }
+  else if (Enable::TPC && Enable::BARREL && !G4BARREL::SETTING::BARRELV6) {
+    cout << "Barrel setup cannot fit in the TPC" << endl;
+    gSystem->Exit(1);
+  }
+
+  if(Enable::FGEM_ORIG && Enable::FST)
+  {
+    cout << "FST cannot be enabled with 5 FGEM setup" << endl;
     gSystem->Exit(1);
   }
 

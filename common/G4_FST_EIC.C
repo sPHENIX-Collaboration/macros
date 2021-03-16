@@ -1,3 +1,11 @@
+/*---------------------------------------------------------------------*
+ * Barrel tracker designed by LANL EIC team                            *
+ * See technical notes for details: arXiv:2009.02888                   *
+ * Contact Ping and Xuan @LANL for questions:                          *
+ *   Xuan: xuanli@lanl.gov                                             *
+ *   Ping: cpwong@lanl.gov                                             *
+ *---------------------------------------------------------------------*/
+
 #ifndef MACRO_G4FSTEIC_C
 #define MACRO_G4FSTEIC_C
 
@@ -30,7 +38,8 @@ namespace G4FST
     bool FSTV41 = false;
     bool FSTV42 = false;
     bool FSTV4 = false;
-    bool FST_MVTX_TPC = false;
+    bool FSTV5 = false;
+    bool FST_TPC = false;
   }  // namespace SETTING
 }  // namespace G4FST
 
@@ -39,15 +48,23 @@ void FST_Init()
 {
   if ((G4FST::SETTING::FSTV0 ? 1 : 0) +
       (G4FST::SETTING::FSTV1 ? 1 : 0) +
-          (G4FST::SETTING::FSTV2 ? 1 : 0) +
-          (G4FST::SETTING::FSTV3 ? 1 : 0) +
-          (G4FST::SETTING::FSTV4 ? 1 : 0) +
-          (G4FST::SETTING::FSTV41 ? 1 : 0) +
-          (G4FST::SETTING::FSTV42 ? 1 : 0) +
-          (G4FST::SETTING::FST_MVTX_TPC ? 1 : 0) >
-      1)
+      (G4FST::SETTING::FSTV2 ? 1 : 0) +
+      (G4FST::SETTING::FSTV3 ? 1 : 0) +
+      (G4FST::SETTING::FSTV4 ? 1 : 0) +
+      (G4FST::SETTING::FSTV41 ? 1 : 0) +
+      (G4FST::SETTING::FSTV42 ? 1 : 0) +
+      (G4FST::SETTING::FSTV5 ? 1 : 0) +
+      (G4FST::SETTING::FST_TPC ? 1 : 0) > 1)
   {
-    cout << "use only G4FST::SETTING::FSTV0=true or G4FST::SETTING::FSTV1=true or G4FST::SETTING::FSTV2=true or G4FST::SETTING::FSTV3=true or G4FST::SETTING::FSTV4=true or G4FST::SETTING::FSTV41=true or G4FST::SETTING::FSTV42=true or G4FST::SETTING::FST_MVTX_TPC=true" << endl;
+    cout << "use only G4FST::SETTING::FSTV0=true ";
+    cout << "or G4FST::SETTING::FSTV1=true ";
+    cout << "or G4FST::SETTING::FSTV2=true ";
+    cout << "or G4FST::SETTING::FSTV3=true ";
+    cout << "or G4FST::SETTING::FSTV4=true ";
+    cout << "or G4FST::SETTING::FSTV41=true ";
+    cout << "or G4FST::SETTING::FSTV42=true ";
+    cout << "or G4FST::SETTING::FSTV5=true ";
+    cout << "or G4FST::SETTING::FST_TPC=true "<< endl;
     gSystem->Exit(1);
   }
 
@@ -114,14 +131,23 @@ void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
     make_LANL_FST_station("FST_4", g4Reco, 125, 6.5, 45, 50 * um);
     make_LANL_FST_station("FST_5", g4Reco, 270, 15, 45, 50 * um);
   }
-  else if (G4FST::SETTING::FST_MVTX_TPC)
-  {                                                              // mvtx_tpc version (based on version 4)
-    make_LANL_FST_station("FST_0", g4Reco, 35, 4, 19.5, 50 * um);  //cm
-    make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 19.5, 50 * um);
-    make_LANL_FST_station("FST_2", g4Reco, 77, 5, 19.5, 50 * um);
-    make_LANL_FST_station("FST_3", g4Reco, 101, 7.5, 19.5, 50 * um);
-    make_LANL_FST_station("FST_4", g4Reco, 125, 9.5, 45, 50 * um);
-    make_LANL_FST_station("FST_5", g4Reco, 280, 16, 45, 50 * um);
+  else if (G4FST::SETTING::FSTV5)
+  {
+    make_LANL_FST_station("FST_0", g4Reco, 35,   4,   25, 35*um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 62.3, 4.5, 42, 35*um);
+    make_LANL_FST_station("FST_2", g4Reco, 90,   6.5,   43, 35*um);
+    make_LANL_FST_station("FST_3", g4Reco, 115,  8.9,   44, 85*um);
+    make_LANL_FST_station("FST_4", g4Reco, 125,  9.5, 45, 85*um);
+    make_LANL_FST_station("FST_5", g4Reco, 300,  16.8,  45, 85*um);  //optional disk at further location
+  }
+  else if (G4FST::SETTING::FST_TPC)
+  {                                                                // tpc version (based on version 4)
+    make_LANL_FST_station("FST_0", g4Reco, 35, 4,   17, 35 * um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 17, 35 * um);
+    make_LANL_FST_station("FST_2", g4Reco, 77, 5,   17, 35 * um);
+    make_LANL_FST_station("FST_3", g4Reco, 101,7.5, 17, 85 * um);
+    make_LANL_FST_station("FST_4", g4Reco, 125,9.5,   45, 85 * um);
+    //make_LANL_FST_station("FST_5", g4Reco, 280, 16, 45, 50 * um);  //optional disk at further location
   }
   else
   {                                                               // Version 0
