@@ -148,7 +148,6 @@ void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
     make_LANL_FST_station("FST_3", g4Reco, 101,7.5, 17, 85 * um);
     make_LANL_FST_station("FST_4", g4Reco, 125,9.5,   45, 85 * um);
     //make_LANL_FST_station("FST_5", g4Reco, 280, 16, 45, 50 * um);  //optional disk at further location
-
   }
   else
   {                                                               // Version 0

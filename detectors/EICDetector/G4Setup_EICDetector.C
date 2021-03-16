@@ -69,6 +69,12 @@ void G4Init()
     gSystem->Exit(1);
   }
 
+  if(Enable::FGEM_ORIG && Enable::FST)
+  {
+    cout << "FST cannot be enabled with 5 FGEM setup" << endl;
+    gSystem->Exit(1);
+  }
+
   // load detector/material macros and execute Init() function
   if (Enable::PIPE) PipeInit();
   if (Enable::PLUGDOOR) PlugDoorInit();

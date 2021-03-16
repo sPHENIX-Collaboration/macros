@@ -226,15 +226,15 @@ int Fun4All_G4_EICDetector(
   G4PIPE::use_forward_pipes = true;
 
   // gems
-  Enable::EGEM = false;
-  Enable::FGEM = false;
+  Enable::EGEM = true;
+  Enable::FGEM = true;
   Enable::FGEM_ORIG = false; //5 forward gems; cannot be used with FST
   // barrel tracker
   Enable::BARREL = false;
   //G4BARREL::SETTING::BARRELV6=true;
   // fst
   Enable::FST = true;
-  G4FST::SETTING::FSTV5 = true;
+  G4FST::SETTING::FST_TPC = true;
   // mvtx/tpc tracker
   Enable::MVTX = false;
   Enable::TPC = false;
@@ -292,7 +292,7 @@ int Fun4All_G4_EICDetector(
   Enable::FHCAL_EVAL = Enable::FHCAL_CLUSTER && true;
 
   // EICDetector geometry - 'electron' direction
-  Enable::EEMC = false;
+  Enable::EEMC = true;
   Enable::EEMC_TOWER = Enable::EEMC && true;
   Enable::EEMC_CLUSTER = Enable::EEMC_TOWER && true;
   Enable::EEMC_EVAL = Enable::EEMC_CLUSTER && true;

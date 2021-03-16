@@ -149,7 +149,10 @@ double Barrel(PHG4Reco *g4Reco, double radius)
     return max_bh_radius;
   }
 }
-//---------------------------------------------------------------------//
+
+  return 0;
+}
+//-----------------------------------------------------------------------------------//
 int make_barrel_pixel_layer(const string &name, PHG4Reco *g4Reco,
                             double radius, double halflength, double tSilicon, double tAirgap)
 {
@@ -173,22 +176,22 @@ int make_barrel_pixel_layer(const string &name, PHG4Reco *g4Reco,
   cout << "started to create cylinder layer: " << name << endl;
 
   double currRadius = radius;
-  //   cout << currRadius << endl;
+//   cout << currRadius << endl;
   for (int l = 0; l < nSubLayer; l++)
-    {
-      cout << name << "_" << layerName[l] << "\t" << currRadius ;
-      cyl = new PHG4CylinderSubsystem(name + "_" + layerName[l], l);
-      cyl->SuperDetector(name);
-      cyl->set_double_param("radius", currRadius);
-      cyl->set_double_param("length", 2.0 * halflength);
-      cyl->set_string_param("material", material[l]);
-      cyl->set_double_param("thickness", thickness[l]);
-      if (l == 0) cyl->SetActive();  //only the Silicon Sensor is active
-      cyl->OverlapCheck(true);
-      g4Reco->registerSubsystem(cyl);
-      currRadius = currRadius + thickness[l];
-      cout << "\t" << currRadius << endl;
-    }
+  {
+    cout << name << "_" << layerName[l] << "\t" << currRadius ;
+    cyl = new PHG4CylinderSubsystem(name + "_" + layerName[l], l);
+    cyl->SuperDetector(name);
+    cyl->set_double_param("radius", currRadius);
+    cyl->set_double_param("length", 2.0 * halflength);
+    cyl->set_string_param("material", material[l]);
+    cyl->set_double_param("thickness", thickness[l]);
+    if (l == 0) cyl->SetActive();  //only the Silicon Sensor is active
+    cyl->OverlapCheck(true);
+    g4Reco->registerSubsystem(cyl);
+    currRadius = currRadius + thickness[l];
+    cout << "\t" << currRadius << endl;
+  }
   
 
   return 0;
