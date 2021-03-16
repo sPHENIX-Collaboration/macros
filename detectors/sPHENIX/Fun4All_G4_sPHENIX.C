@@ -171,6 +171,19 @@ int Fun4All_G4_sPHENIX(
     INPUTGENERATOR::Gun[0]->set_vtx(0, 0, 0);
   }
 
+  // pythia6
+  if (Input::PYTHIA6)
+  {
+    //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia6);
+  }
+  // pythia8
+  if (Input::PYTHIA8)
+  {
+    //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia8);
+  }
+
   //--------------
   // Set Input Manager specific options
   //--------------
@@ -178,10 +191,14 @@ int Fun4All_G4_sPHENIX(
 
   if (Input::HEPMC)
   {
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4, 100e-4, 8, 0);  //optional collision smear in space, time
-                                                                                           //    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
+    //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    Input::ApplysPHENIXBeamParameter(INPUTMANAGER::HepMCInputManager);
+
+    // optional overriding beam parameters
+    //INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4, 100e-4, 8, 0);  //optional collision smear in space, time
+    //    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
     // //optional choice of vertex distribution function in space, time
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
+    //INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
     //! embedding ID for the event
     //! positive ID is the embedded event of interest, e.g. jetty event from pythia
     //! negative IDs are backgrounds, .e.g out of time pile up collisions
@@ -194,6 +211,11 @@ int Fun4All_G4_sPHENIX(
       // and then modify the ones you want to be different
       // INPUTMANAGER::HepMCPileupInputManager->set_vertex_distribution_width(100e-4,100e-4,8,0);
     }
+  }
+  if (Input::PILEUPRATE > 0)
+  {
+    //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    Input::ApplysPHENIXBeamParameter(INPUTMANAGER::HepMCPileupInputManager);
   }
   // register all input generators with Fun4All
   InputRegister();
@@ -489,7 +511,7 @@ int Fun4All_G4_sPHENIX(
   if (Enable::KFPARTICLE && Input::UPSILON) KFParticle_Upsilon_Reco();
   if (Enable::KFPARTICLE && Input::DZERO) KFParticle_D0_Reco();
   //if (Enable::KFPARTICLE && Input::LAMBDAC) KFParticle_Lambdac_Reco();
-     
+
   //----------------------
   // Standard QAs
   //----------------------
@@ -523,10 +545,10 @@ int Fun4All_G4_sPHENIX(
     string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", FullOutFile);
     if (Enable::DSTOUT_COMPRESS)
-      {
-        ShowerCompress();
-        DstCompress(out);
-      }
+    {
+      ShowerCompress();
+      DstCompress(out);
+    }
     se->registerOutputManager(out);
   }
   //-----------------
