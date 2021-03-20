@@ -148,7 +148,7 @@ double Barrel(PHG4Reco *g4Reco, double radius)
     BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -halfLength[nLayer - 1]);
     return max_bh_radius;
   }
-}
+
 
   return 0;
 }
