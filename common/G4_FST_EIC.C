@@ -25,7 +25,8 @@ int make_LANL_FST_station(const string &name, PHG4Reco *g4Reco, double zpos, dou
 namespace Enable
 {
   static bool FST = false;
-}
+  bool FST_OVERLAPCHECK = false;
+}  // namespace Enable
 
 namespace G4FST
 {
@@ -47,14 +48,15 @@ namespace G4FST
 void FST_Init()
 {
   if ((G4FST::SETTING::FSTV0 ? 1 : 0) +
-      (G4FST::SETTING::FSTV1 ? 1 : 0) +
-      (G4FST::SETTING::FSTV2 ? 1 : 0) +
-      (G4FST::SETTING::FSTV3 ? 1 : 0) +
-      (G4FST::SETTING::FSTV4 ? 1 : 0) +
-      (G4FST::SETTING::FSTV41 ? 1 : 0) +
-      (G4FST::SETTING::FSTV42 ? 1 : 0) +
-      (G4FST::SETTING::FSTV5 ? 1 : 0) +
-      (G4FST::SETTING::FST_TPC ? 1 : 0) > 1)
+          (G4FST::SETTING::FSTV1 ? 1 : 0) +
+          (G4FST::SETTING::FSTV2 ? 1 : 0) +
+          (G4FST::SETTING::FSTV3 ? 1 : 0) +
+          (G4FST::SETTING::FSTV4 ? 1 : 0) +
+          (G4FST::SETTING::FSTV41 ? 1 : 0) +
+          (G4FST::SETTING::FSTV42 ? 1 : 0) +
+          (G4FST::SETTING::FSTV5 ? 1 : 0) +
+          (G4FST::SETTING::FST_TPC ? 1 : 0) >
+      1)
   {
     cout << "use only G4FST::SETTING::FSTV0=true ";
     cout << "or G4FST::SETTING::FSTV1=true ";
@@ -64,7 +66,7 @@ void FST_Init()
     cout << "or G4FST::SETTING::FSTV41=true ";
     cout << "or G4FST::SETTING::FSTV42=true ";
     cout << "or G4FST::SETTING::FSTV5=true ";
-    cout << "or G4FST::SETTING::FST_TPC=true "<< endl;
+    cout << "or G4FST::SETTING::FST_TPC=true " << endl;
     gSystem->Exit(1);
   }
 
@@ -133,20 +135,20 @@ void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
   }
   else if (G4FST::SETTING::FSTV5)
   {
-    make_LANL_FST_station("FST_0", g4Reco, 35,   4,   25, 35*um);  //cm
-    make_LANL_FST_station("FST_1", g4Reco, 62.3, 4.5, 42, 35*um);
-    make_LANL_FST_station("FST_2", g4Reco, 90,   6.5,   43, 35*um);
-    make_LANL_FST_station("FST_3", g4Reco, 115,  8.9,   44, 85*um);
-    make_LANL_FST_station("FST_4", g4Reco, 125,  9.5, 45, 85*um);
-    make_LANL_FST_station("FST_5", g4Reco, 300,  16.8,  45, 85*um);  //optional disk at further location
+    make_LANL_FST_station("FST_0", g4Reco, 35, 4, 25, 35 * um);  //cm
+    make_LANL_FST_station("FST_1", g4Reco, 62.3, 4.5, 42, 35 * um);
+    make_LANL_FST_station("FST_2", g4Reco, 90, 6.5, 43, 35 * um);
+    make_LANL_FST_station("FST_3", g4Reco, 115, 8.9, 44, 85 * um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 9.5, 45, 85 * um);
+    make_LANL_FST_station("FST_5", g4Reco, 300, 16.8, 45, 85 * um);  //optional disk at further location
   }
   else if (G4FST::SETTING::FST_TPC)
-  {                                                                // tpc version (based on version 4)
-    make_LANL_FST_station("FST_0", g4Reco, 35, 4,   17, 35 * um);  //cm
+  {                                                              // tpc version (based on version 4)
+    make_LANL_FST_station("FST_0", g4Reco, 35, 4, 17, 35 * um);  //cm
     make_LANL_FST_station("FST_1", g4Reco, 53, 4.5, 17, 35 * um);
-    make_LANL_FST_station("FST_2", g4Reco, 77, 5,   17, 35 * um);
-    make_LANL_FST_station("FST_3", g4Reco, 101,7.5, 17, 85 * um);
-    make_LANL_FST_station("FST_4", g4Reco, 125,9.5,   45, 85 * um);
+    make_LANL_FST_station("FST_2", g4Reco, 77, 5, 17, 35 * um);
+    make_LANL_FST_station("FST_3", g4Reco, 101, 7.5, 17, 85 * um);
+    make_LANL_FST_station("FST_4", g4Reco, 125, 9.5, 45, 85 * um);
     //make_LANL_FST_station("FST_5", g4Reco, 280, 16, 45, 50 * um);  //optional disk at further location
   }
   else
@@ -162,6 +164,7 @@ void FSTSetup(PHG4Reco *g4Reco, const double min_eta = 1.245)
 int make_LANL_FST_station(const string &name, PHG4Reco *g4Reco,
                           double zpos, double Rmin, double Rmax, double tSilicon)  //silicon thickness
 {
+  const bool OverlapCheck = Enable::OVERLAPCHECK || Enable::FST_OVERLAPCHECK;
   //  cout
   //      << "make_GEM_station - GEM construction with PHG4SectorSubsystem - make_GEM_station_EdgeReadout  of "
   //      << name << endl;
@@ -197,7 +200,7 @@ int make_LANL_FST_station(const string &name, PHG4Reco *g4Reco,
   fst->get_geometry().set_min_polar_edge(PHG4Sector::Sector_Geometry::ConeEdge());
   fst->get_geometry().set_N_Sector(1);
   fst->get_geometry().set_material("G4_AIR");
-  fst->OverlapCheck(true);
+  fst->OverlapCheck(OverlapCheck);
 
   const double cm = PHG4Sector::Sector_Geometry::Unit_cm();
   const double mm = .1 * cm;
