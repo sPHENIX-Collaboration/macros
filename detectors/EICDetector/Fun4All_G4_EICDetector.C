@@ -240,7 +240,7 @@ int Fun4All_G4_EICDetector(
   // whether to simulate the Be section of the beam pipe
   Enable::PIPE = true;
   // EIC beam pipe extension beyond the Be-section:
-  G4PIPE::use_forward_pipes = true;
+  G4PIPE::use_forward_pipes = false;
 
   // gems
   Enable::EGEM = true;
@@ -253,8 +253,8 @@ int Fun4All_G4_EICDetector(
   Enable::FST = true;
   G4FST::SETTING::FST_TPC = true;
   // mvtx/tpc tracker
-  Enable::MVTX = false;
-  Enable::TPC = false;
+  Enable::MVTX = true;
+  Enable::TPC = true;
   //  Enable::TPC_ENDCAP = true;
 
   Enable::TRACKING = true;
