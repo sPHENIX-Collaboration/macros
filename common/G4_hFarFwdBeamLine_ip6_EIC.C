@@ -23,7 +23,7 @@ namespace Enable
 }  // namespace Enable
 
 void defineMagnets(PHG4Reco*,const string,int, int);
-void defineDetectors(PHG4Reco*);
+void defineDetectors(PHG4Reco*,int);
 void defineBeamPipe(PHG4Reco*);
 
 //! construct ip6 hadron forward region
@@ -33,10 +33,10 @@ void hFarFwdBeamLine(PHG4Reco* g4Reco,
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HFARFWD_OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY, Enable::HFARFWD_VERBOSITY);
 
-  defineMagnents(g4Reco,
-		 string(getenv("CALIBRATIONROOT")) + "/Beam/ip6_h_farFwdBeamLineMagnets.dat",
-		 verbosity,OverlapCheck);
-  defineDetectors(g4Reco);
+  defineMagnets(g4Reco,
+		string(getenv("CALIBRATIONROOT")) + "/Beam/ip6_h_farFwdBeamLineMagnets.dat",
+		verbosity,OverlapCheck);
+  defineDetectors(g4Reco,verbosity);
 
   // beampipe as used for initial EICroot analysis (is full of overlaps - use only as starting point)
   //defineBeamPipe(g4Reco);
@@ -51,6 +51,14 @@ void defineMagnets(PHG4Reco* g4Reco, const string magFile,
   g4Reco->save_DST_geometry(false);
   g4Reco->set_field(0);
   g4Reco->SetWorldMaterial("G4_Galactic");
+
+  // make magnet active volume if you want to study the hits
+  bool magnet_active=false;
+  int absorberactive = 0;
+
+  // if you insert numbers it only displays those magnets, do not comment out the set declaration
+  set<int> magnetlist;
+  //magnetlist.insert(7);
 
   BeamLineMagnetSubsystem *bl = nullptr;
   std::ifstream infile(magFile);
@@ -95,7 +103,7 @@ void defineMagnets(PHG4Reco* g4Reco, const string magFile,
 			   << " needs change in code (replace tube by cone for beamline)" << endl;
 		      gSystem->Exit(1);
 		    }
-		  if(verbosity>0)){
+		  if(verbosity>0){
 		    cout << endl << endl << "\tID number "<<imagnet<<endl;
 		    cout << "magname: " << magname << endl;
 		    cout << "x: " << x << endl;
@@ -168,7 +176,7 @@ void defineMagnets(PHG4Reco* g4Reco, const string magFile,
     }
 }
 
-void defineDetectors(PHG4Reco* g4Reco){
+void defineDetectors(PHG4Reco* g4Reco, int verbosity){
 
   auto *detZDC = new PHG4BlockSubsystem("zdcTruth");
   detZDC->set_double_param("place_x",96.24);
@@ -180,7 +188,7 @@ void defineDetectors(PHG4Reco* g4Reco){
   detZDC->set_double_param("size_z",0.03);
   detZDC->set_string_param("material","G4_Galactic");
   detZDC->SetActive();
-  if(verbose)
+  if(verbosity)
     detZDC->Verbosity(4);
   g4Reco->registerSubsystem(detZDC);
  
@@ -198,7 +206,7 @@ void defineDetectors(PHG4Reco* g4Reco){
     detRP->set_double_param("size_z",0.03);
     detRP->set_string_param("material","G4_Si");
     detRP->SetActive();
-    if(verbose)
+    if(verbosity)
       detRP->Verbosity(4);
     g4Reco->registerSubsystem(detRP);
   }
