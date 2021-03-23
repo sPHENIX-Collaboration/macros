@@ -21,6 +21,7 @@
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phhepmc/Fun4AllHepMCPileupInputManager.h>
 #include <phhepmc/HepMCFlowAfterBurner.h>
+#include <phhepmc/PHHepMCGenHelper.h>
 
 #include <phsartre/PHSartre.h>
 #include <phsartre/PHSartreParticleTrigger.h>
@@ -85,6 +86,87 @@ namespace Input
   bool READHITS = false;
   int VERBOSITY = 0;
   int EmbedId = 1;
+
+  //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
+  void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen)
+  {
+    if (HepMCGen == nullptr)
+    {
+      std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
+      exit(1);
+    }
+    HepMCGen->set_beam_direction_theta_phi(1e-3, 0, M_PI - 1e-3, 0);  //2mrad x-ing of sPHENIX per sPH-TRG-2020-001
+
+    HepMCGen->set_vertex_distribution_width(
+        100e-4,         // approximation from past RICH data
+        100e-4,         // approximation from past RICH data
+        7,              // sPH-TRG-2020-001. Fig 3.2
+        20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+    HepMCGen->set_vertex_distribution_function(
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus);
+  }
+
+  //! apply EIC beam parameter to any HepMC generator following EIC CDR,
+  //! including in-time collision's space time shift, beam crossing angle and angular divergence
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
+  void ApplyEICBeamParameter(PHHepMCGenHelper *HepMCGen)
+  {
+    if (HepMCGen == nullptr)
+    {
+      std::cout << "ApplyEICBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
+      exit(1);
+    }
+
+    //25mrad x-ing as in EIC CDR
+    const double EIC_hadron_crossing_angle = 25e-3;
+
+    HepMCGen->set_beam_direction_theta_phi(
+        EIC_hadron_crossing_angle,  // beamA_theta
+        0,                          // beamA_phi
+        M_PI,                       // beamB_theta
+        0                           // beamB_phi
+    );
+    HepMCGen->set_beam_angular_divergence_hv(
+        119e-6, 119e-6,  // proton beam divergence horizontal & vertical, as in EIC CDR Table 1.1
+        211e-6, 152e-6   // electron beam divergence horizontal & vertical, as in EIC CDR Table 1.1
+    );
+
+    // angular kick within a bunch as result of crab cavity
+    // using an naive assumption of transfer matrix from the cavity to IP,
+    // which is NOT yet validated with accelerator optics simulations!
+    const double z_hadron_cavity = 52e2;  // CDR Fig 3.3
+    const double z_e_cavity = 38e2;       // CDR Fig 3.2
+    HepMCGen->set_beam_angular_z_coefficient_hv(
+        -EIC_hadron_crossing_angle / 2. / z_hadron_cavity, 0,
+        -EIC_hadron_crossing_angle / 2. / z_e_cavity, 0);
+
+    // calculate beam sigma width at IP  as in EIC CDR table 1.1
+    const double sigma_p_h = sqrt(80 * 11.3e-7);
+    const double sigma_p_v = sqrt(7.2 * 1.0e-7);
+    const double sigma_p_l = 6;
+    const double sigma_e_h = sqrt(45 * 20.0e-7);
+    const double sigma_e_v = sqrt(5.6 * 1.3e-7);
+    const double sigma_e_l = 2;
+
+    // combine two beam gives the collision sigma in z
+    const double collision_sigma_z = sqrt(sigma_p_l * sigma_p_l + sigma_e_l * sigma_e_l) / 2;
+    const double collision_sigma_t = collision_sigma_z / 29.9792;  // speed of light in cm/ns
+
+    HepMCGen->set_vertex_distribution_width(
+        sigma_p_h * sigma_e_h / sqrt(sigma_p_h * sigma_p_h + sigma_e_h * sigma_e_h),  //x
+        sigma_p_v * sigma_e_v / sqrt(sigma_p_v * sigma_p_v + sigma_e_v * sigma_e_v),  //y
+        collision_sigma_z,                                                            //z
+        collision_sigma_t);                                                           //t
+    HepMCGen->set_vertex_distribution_function(
+        PHHepMCGenHelper::Gaus,   //x
+        PHHepMCGenHelper::Gaus,   //y
+        PHHepMCGenHelper::Gaus,   //z
+        PHHepMCGenHelper::Gaus);  //t
+  }
 }  // namespace Input
 
 namespace INPUTHEPMC

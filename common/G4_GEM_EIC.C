@@ -19,6 +19,7 @@ namespace Enable
   bool EGEM = false;
   bool EGEM_FULL = true;
   bool FGEM = false;
+  bool FGEM_ORIG = false;
 }  // namespace Enable
 
 void EGEM_Init()
@@ -66,10 +67,19 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   double zpos;
   PHG4SectorSubsystem *gem;
 
+  if(Enable::FGEM_ORIG){
+  	make_GEM_station("FGEM_0", g4Reco, 17.5, 0.94, 1.95, N_Sector);
+  	make_GEM_station("FGEM_1", g4Reco, 66.5, 2.07, 3.20, N_Sector);
+  }
   ///////////////////////////////////////////////////////////////////////////
 
   name = "FGEM_2";
-  etamax = 2;
+  if(Enable::FGEM_ORIG){
+  	etamax = 3.3;
+  }
+  else{
+	etamax = 2;
+  }
   etamin = min_eta;
   zpos = 134.0;
 
@@ -90,7 +100,7 @@ void FGEMSetup(PHG4Reco *g4Reco, const int N_Sector = 8,  //
   ///////////////////////////////////////////////////////////////////////////
 
   name = "FGEM_3";
-  etamax = 2;
+  etamax = 3.3;
   etamin = min_eta;
   zpos = 157.0;
 

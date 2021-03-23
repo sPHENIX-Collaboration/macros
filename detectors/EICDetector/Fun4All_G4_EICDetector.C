@@ -168,6 +168,20 @@ int Fun4All_G4_EICDetector(
   if (Input::PYTHIA6)
   {
     INPUTGENERATOR::Pythia6->set_config_file(string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia6_ep.cfg");
+    //! apply EIC beam parameter following EIC CDR
+    Input::ApplyEICBeamParameter(INPUTGENERATOR::Pythia6);
+  }
+  // pythia8
+  if (Input::PYTHIA8)
+  {
+    //! apply EIC beam parameter following EIC CDR
+    Input::ApplyEICBeamParameter(INPUTGENERATOR::Pythia8);
+  }
+  // Sartre
+  if (Input::SARTRE)
+  {
+    //! apply EIC beam parameter following EIC CDR
+    Input::ApplyEICBeamParameter(INPUTGENERATOR::Sartre);
   }
 
   //--------------
@@ -177,10 +191,13 @@ int Fun4All_G4_EICDetector(
 
   if (Input::HEPMC)
   {
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4, 100e-4, 30, 0);  //optional collision smear in space, time
+    //! apply EIC beam parameter following EIC CDR
+    Input::ApplyEICBeamParameter(INPUTMANAGER::HepMCInputManager);
+    // optional overriding beam parameters
+    //INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4, 100e-4, 30, 0);  //optional collision smear in space, time
                                                                                             //    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
     // //optional choice of vertex distribution function in space, time
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
+    // INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
     //! embedding ID for the event
     //! positive ID is the embedded event of interest, e.g. jetty event from pythia
     //! negative IDs are backgrounds, .e.g out of time pile up collisions
@@ -198,13 +215,13 @@ int Fun4All_G4_EICDetector(
   // Write the DST
   //======================
 
-  //  Enable::DSTOUT = true;
+  Enable::DSTOUT = false;
   DstOut::OutputDir = outdir;
   DstOut::OutputFile = outputFile;
   Enable::DSTOUT_COMPRESS = false;  // Compress DST files
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
-  //Enable::DSTREADER = true;
+//  Enable::DSTREADER = true;
 
   // turn the display on (default off)
   Enable::DISPLAY = false;
@@ -223,13 +240,18 @@ int Fun4All_G4_EICDetector(
   // whether to simulate the Be section of the beam pipe
   Enable::PIPE = true;
   // EIC beam pipe extension beyond the Be-section:
-  //G4PIPE::use_forward_pipes = true;
+  G4PIPE::use_forward_pipes = false;
 
+  // gems
   Enable::EGEM = true;
   Enable::FGEM = true;
+  Enable::FGEM_ORIG = false; //5 forward gems; cannot be used with FST
   // barrel tracker
   Enable::BARREL = false;
-  Enable::FST = false;
+  //G4BARREL::SETTING::BARRELV6=true;
+  // fst
+  Enable::FST = true;
+  G4FST::SETTING::FST_TPC = true;
   // mvtx/tpc tracker
   Enable::MVTX = true;
   Enable::TPC = true;
@@ -239,6 +261,7 @@ int Fun4All_G4_EICDetector(
   Enable::TRACKING_EVAL = Enable::TRACKING && true;
   G4TRACKING::DISPLACED_VERTEX = false;  // this option exclude vertex in the track fitting and use RAVE to reconstruct primary and 2ndary vertexes
                                          // projections to calorimeters
+  G4TRACKING::PROJECTION_EEMC = false;
   G4TRACKING::PROJECTION_CEMC = false;
   G4TRACKING::PROJECTION_FEMC = false;
   G4TRACKING::PROJECTION_FHCAL = false;
