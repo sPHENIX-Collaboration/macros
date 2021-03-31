@@ -182,7 +182,7 @@ namespace INPUTHEPMC
 namespace INPUTREADEIC
 {
   string filename;
-}
+}  // namespace INPUTREADEIC
 
 namespace INPUTREADHITS
 {
@@ -230,6 +230,7 @@ namespace INPUTGENERATOR
   PHPythia8 *Pythia8 = nullptr;
   PHSartre *Sartre = nullptr;
   PHSartreParticleTrigger *SartreTrigger = nullptr;
+  ReadEICFiles *EICFileReader = nullptr;
 }  // namespace INPUTGENERATOR
 
 namespace INPUTMANAGER
@@ -462,9 +463,10 @@ void InputRegister()
   }
   if (Input::READEIC)
   {
-    ReadEICFiles *eicr = new ReadEICFiles();
-    eicr->OpenInputFile(INPUTREADEIC::filename);
-    se->registerSubsystem(eicr);
+    INPUTGENERATOR::EICFileReader = new ReadEICFiles();
+    INPUTGENERATOR::EICFileReader->OpenInputFile(INPUTREADEIC::filename);
+    INPUTGENERATOR::EICFileReader->Verbosity(Input::VERBOSITY);
+    se->registerSubsystem(INPUTGENERATOR::EICFileReader);
   }
   // here are the various utility modules which read particles and
   // put them onto the G4 particle stack
