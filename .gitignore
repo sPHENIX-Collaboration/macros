@@ -82,3 +82,7 @@ tmtags
 
 # For rubinius:
 *.rbc
+
+# root/G4 output files
+*.root
+*.macro
