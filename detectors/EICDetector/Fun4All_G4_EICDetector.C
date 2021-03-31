@@ -183,6 +183,12 @@ int Fun4All_G4_EICDetector(
     //! apply EIC beam parameter following EIC CDR
     Input::ApplyEICBeamParameter(INPUTGENERATOR::Sartre);
   }
+  // EIC smear files
+  if (Input::READEIC)
+  {
+    //! apply EIC beam parameter following EIC CDR
+    Input::ApplyEICBeamParameter(INPUTGENERATOR::EICFileReader);
+  }
 
   //--------------
   // Set Input Manager specific options
