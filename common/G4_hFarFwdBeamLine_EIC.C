@@ -222,7 +222,7 @@ void hFarFwdDefineDetectors(PHG4Reco* g4Reco){
   const double rp_xCent[rpDetNr]={84.49 ,93.59};
   for(int i=0;i<rpDetNr;i++){
     auto *detRP = new PHG4BlockSubsystem(Form("rpTruth_%d",i));
-    detRP->SuperDetector("RomanPots");
+    //detRP->SuperDetector("RomanPots");
     detRP->set_double_param("place_x",rp_xCent[i]);
     detRP->set_double_param("place_y",0);
     detRP->set_double_param("place_z",rp_zCent[i]);
@@ -242,7 +242,7 @@ void hFarFwdDefineDetectors(PHG4Reco* g4Reco){
   const double b0Mag_zLen = 120;
   for(int i=0;i<b0DetNr;i++){
     auto *detB0 = new PHG4CylinderSubsystem(Form("b0Truth_%d",i),0);
-    detB0->SuperDetector("B0detectors");
+    //detB0->SuperDetector("B0detectors");
     detB0->set_double_param("radius",3.7);
     detB0->set_double_param("thickness",20 - 3.7);
     detB0->set_double_param("length",0.1);
