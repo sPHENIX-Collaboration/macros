@@ -27,7 +27,8 @@ R__LOAD_LIBRARY(libfun4all.so)
 
 int Fun4All_G4_EICDetector(
     const int nEvents = 1,
-    const string &inputFile = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
+    //    const string &inputFile = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
+    const string &inputFile = "/gpfs/mnt/gpfs02/eic/wfan/test/macros/detectors/EICDetector/DIS_c.root",
     const string &outputFile = "G4EICDetector.root",
     const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const int skip = 0,
@@ -83,7 +84,7 @@ int Fun4All_G4_EICDetector(
   //   Input::SARTRE = true;
 
   // Simple multi particle generator in eta/phi/pt ranges
-  Input::SIMPLE = true;
+  //Input::SIMPLE = true;
   // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
@@ -100,12 +101,12 @@ int Fun4All_G4_EICDetector(
   // And/Or read generated particles from file
 
   // eic-smear output
-  //  Input::READEIC = true;
+  Input::READEIC = true;
   INPUTREADEIC::filename = inputFile;
 
   // HepMC2 files
   //  Input::HEPMC = true;
-  Input::VERBOSITY = 0;
+  Input::VERBOSITY = 10;
   INPUTHEPMC::filename = inputFile;
 
   //-----------------
@@ -232,7 +233,7 @@ int Fun4All_G4_EICDetector(
   // Global options (enabled for all subsystems - if implemented)
   //  Enable::ABSORBER = true;
   //  Enable::OVERLAPCHECK = true;
-  //  Enable::VERBOSITY = 1;
+  Enable::VERBOSITY = 0;
 
   //  Enable::BBC = true;
   Enable::BBCFAKE = true; // Smeared vtx and t0, use if you don't want real BBC in simulation
