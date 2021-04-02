@@ -78,7 +78,7 @@ void G4Init()
 
   // load detector/material macros and execute Init() function
   if (Enable::PIPE) PipeInit();
-  if (Enable::HFARFWD_MAGNETS_IP6 || Enable::HFARFWD_MAGNETS_IP6) hFarFwdBeamLineInit();
+  if (Enable::HFARFWD_MAGNETS_IP6 || Enable::HFARFWD_MAGNETS_IP8) hFarFwdBeamLineInit();
   if (Enable::PLUGDOOR) PlugDoorInit();
   if (Enable::EGEM) EGEM_Init();
   if (Enable::FGEM || Enable::FGEM_ORIG) FGEM_Init();
