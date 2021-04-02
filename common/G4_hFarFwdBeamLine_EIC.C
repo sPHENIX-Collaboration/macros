@@ -210,8 +210,8 @@ void hFarFwdDefineDetectors(PHG4Reco* g4Reco){
   detZDC->set_double_param("rot_y",-0.025*TMath::RadToDeg());
   detZDC->set_double_param("size_x",60);
   detZDC->set_double_param("size_y",60);
-  detZDC->set_double_param("size_z",0.03);
-  detZDC->set_string_param("material","G4_Galactic");
+  detZDC->set_double_param("size_z",0.1);
+  detZDC->set_string_param("material","G4_Si");
   detZDC->SetActive();
   if(verbosity)
     detZDC->Verbosity(verbosity);
