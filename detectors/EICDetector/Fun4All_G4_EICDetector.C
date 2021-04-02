@@ -209,6 +209,13 @@ int Fun4All_G4_EICDetector(
   // register all input generators with Fun4All
   InputRegister();
 
+  // Reads event generators in EIC smear files, which is registered in InputRegister
+  if (Input::READEIC)
+  {
+    //! apply EIC beam parameter following EIC CDR
+    Input::ApplyEICBeamParameter(INPUTGENERATOR::EICFileReader);
+  }
+
   // set up production relatedstuff
   //   Enable::PRODUCTION = true;
 
