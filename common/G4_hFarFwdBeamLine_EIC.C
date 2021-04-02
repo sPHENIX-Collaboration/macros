@@ -243,8 +243,8 @@ void hFarFwdDefineDetectors(PHG4Reco* g4Reco){
   for(int i=0;i<b0DetNr;i++){
     auto *detB0 = new PHG4CylinderSubsystem(Form("b0Truth_%d",i),0);
     //detB0->SuperDetector("B0detectors");
-    detB0->set_double_param("radius",3.7);
-    detB0->set_double_param("thickness",20 - 3.7);
+    detB0->set_double_param("radius",0;
+    detB0->set_double_param("thickness",20);
     detB0->set_double_param("length",0.1);
     detB0->set_string_param("material","G4_Si");
     detB0->set_double_param("place_x",13.2);
