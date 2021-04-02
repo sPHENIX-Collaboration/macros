@@ -1,5 +1,5 @@
-#ifndef MACRO_G4HFARFWDBEAMLINEIP6EIC_C
-#define MACRO_G4HFARFWDBEAMLINEIP6EIC_C
+#ifndef MACRO_G4HFARFWDBEAMLINE_EIC_C
+#define MACRO_G4HFARFWDBEAMLINE_EIC_C
 
 #include <GlobalVariables.C>
 
@@ -17,41 +17,55 @@ R__LOAD_LIBRARY(libg4detectors.so)
 // This creates the Enable Flag to be used in the main steering macro
 namespace Enable
 {
+  bool HFARFWD_MAGNETS_IP6 = false;
+  bool HFARFWD_MAGNETS_IP8 = false;
+  bool HFARFWD_VIRTUAL_DETECTORS_IP8 = false;
+  bool HFARFWD_VIRTUAL_DETECTORS_IP6 = false;
   bool HFARFWD_PIPE = false;
   bool HFARFWD_OVERLAPCHECK = false;
   int HFARFWD_VERBOSITY = 0;
 }  // namespace Enable
 
-void defineMagnets(PHG4Reco*,const string,int, int);
-void defineDetectors(PHG4Reco*,int);
-void defineBeamPipe(PHG4Reco*);
 
-//! construct ip6 hadron forward region
-void hFarFwdBeamLine(PHG4Reco* g4Reco,
-		     double radius){
+void hFarFwdBeamLineInit()
+{
 
-  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HFARFWD_OVERLAPCHECK;
-  int verbosity = std::max(Enable::VERBOSITY, Enable::HFARFWD_VERBOSITY);
+  if (Enable::HFARFWD_MAGNETS_IP6 && Enable::HFARFWD_MAGNETS_IP8)
+  {
+    cout << "You cannot have magnets for both IP6 and IP8 ON at the same time" << endl;
+    gSystem->Exit(1);
+  }
 
-  defineMagnets(g4Reco,
-		string(getenv("CALIBRATIONROOT")) + "/Beam/ip6_h_farFwdBeamLineMagnets.dat",
-		verbosity,OverlapCheck);
-  defineDetectors(g4Reco,verbosity);
+  if (Enable::HFARFWD_MAGNETS_IP6)
+  {
+    BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 4500.);
+    BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, 0.);
+    BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 180.0);
+  }
 
-  // beampipe as used for initial EICroot analysis (is full of overlaps - use only as starting point)
-  //defineBeamPipe(g4Reco);
-
+  if (Enable::HFARFWD_MAGNETS_IP8)
+  {
+    BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z,  4800.);
+    BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -2050.);
+    BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 150.0);
+  }
 }
 
-void defineMagnets(PHG4Reco* g4Reco, const string magFile, 
-		   int verbosity, int overlapcheck){
-  // setup of G4: 
-  //   no saving of geometry: it takes time and we do not do tracking
-  //   so we do not need the geometry
-  g4Reco->save_DST_geometry(false);
-  g4Reco->set_field(0);
-  g4Reco->SetWorldMaterial("G4_Galactic");
+void hFarFwdDefineMagnets(PHG4Reco* g4Reco){
 
+  bool overlapCheck = Enable::OVERLAPCHECK || Enable::HFARFWD_OVERLAPCHECK;
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HFARFWD_VERBOSITY);
+
+  string magFile;
+  if(Enable::HFARFWD_MAGNETS_IP6)
+    magFile = string(getenv("CALIBRATIONROOT")) + "/Beam/ip6_h_farFwdBeamLineMagnets.dat";
+  else if(Enable::HFARFWD_MAGNETS_IP8)
+    magFile = string(getenv("CALIBRATIONROOT")) + "/Beam/ip8_35mrad_h_farFwdBeamLineMagnets.dat";
+  else{
+    cout << " You have to enable either the IP6 or IP8 Magnet configuration to define magnets! "<<endl;
+    gSystem->Exit(1);
+  }
+    
   // make magnet active volume if you want to study the hits
   bool magnet_active=false;
   int absorberactive = 0;
@@ -156,8 +170,10 @@ void defineMagnets(PHG4Reco* g4Reco, const string magFile,
 			{
 			  bl->SetAbsorberActive();
 			}
-		      bl->OverlapCheck(overlapcheck);
+		      bl->OverlapCheck(overlapCheck);
 		      bl->SuperDetector("BEAMLINEMAGNET");
+		      if(verbosity)
+			bl->Verbosity(verbosity);
 		      g4Reco->registerSubsystem(bl);
 		    }
 		  imagnet++;
@@ -169,27 +185,37 @@ void defineMagnets(PHG4Reco* g4Reco, const string magFile,
 	    }
 	}
       infile.close();
-      if (biggest_z*2. > g4Reco->GetWorldSizeZ())
-	{
-	  g4Reco->SetWorldSizeZ((biggest_z+100.)*2); // leave 1m on both sides
-	}
     }
 }
 
-void defineDetectors(PHG4Reco* g4Reco, int verbosity){
+void hFarFwdDefineDetectors(PHG4Reco* g4Reco){
+
+  if (Enable::HFARFWD_VIRTUAL_DETECTORS_IP6 && Enable::HFARFWD_VIRTUAL_DETECTORS_IP8)
+  {
+    cout << "You cannot have detectors enabled for both IP6 and IP8 ON at the same time" << endl;
+    gSystem->Exit(1);
+  }
+
+  if (Enable::HFARFWD_VIRTUAL_DETECTORS_IP8) {
+    cout << " IP8 h far forward detectors not defined right now. " <<endl;
+    return;
+  }
+
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HFARFWD_VERBOSITY);
 
   auto *detZDC = new PHG4BlockSubsystem("zdcTruth");
+  detZDC->SuperDetector("ZDC");
   detZDC->set_double_param("place_x",96.24);
   detZDC->set_double_param("place_y",0);
   detZDC->set_double_param("place_z",3750);
   detZDC->set_double_param("rot_y",-0.025*TMath::RadToDeg());
   detZDC->set_double_param("size_x",60);
   detZDC->set_double_param("size_y",60);
-  detZDC->set_double_param("size_z",0.03);
-  detZDC->set_string_param("material","G4_Galactic");
+  detZDC->set_double_param("size_z",0.1);
+  detZDC->set_string_param("material","G4_Si");
   detZDC->SetActive();
   if(verbosity)
-    detZDC->Verbosity(4);
+    detZDC->Verbosity(verbosity);
   g4Reco->registerSubsystem(detZDC);
  
   const int rpDetNr = 2;
@@ -197,6 +223,7 @@ void defineDetectors(PHG4Reco* g4Reco, int verbosity){
   const double rp_xCent[rpDetNr]={84.49 ,93.59};
   for(int i=0;i<rpDetNr;i++){
     auto *detRP = new PHG4BlockSubsystem(Form("rpTruth_%d",i));
+    //detRP->SuperDetector("RomanPots");
     detRP->set_double_param("place_x",rp_xCent[i]);
     detRP->set_double_param("place_y",0);
     detRP->set_double_param("place_z",rp_zCent[i]);
@@ -207,7 +234,7 @@ void defineDetectors(PHG4Reco* g4Reco, int verbosity){
     detRP->set_string_param("material","G4_Si");
     detRP->SetActive();
     if(verbosity)
-      detRP->Verbosity(4);
+      detRP->Verbosity(verbosity);
     g4Reco->registerSubsystem(detRP);
   }
 
@@ -216,14 +243,17 @@ void defineDetectors(PHG4Reco* g4Reco, int verbosity){
   const double b0Mag_zLen = 120;
   for(int i=0;i<b0DetNr;i++){
     auto *detB0 = new PHG4CylinderSubsystem(Form("b0Truth_%d",i),0);
-    detB0->set_double_param("radius",3.7);
-    detB0->set_double_param("thickness",20 - 3.7);
+    //detB0->SuperDetector("B0detectors");
+    detB0->set_double_param("radius",0);
+    detB0->set_double_param("thickness",20);
     detB0->set_double_param("length",0.1);
     detB0->set_string_param("material","G4_Si");
     detB0->set_double_param("place_x",13.2);
     detB0->set_double_param("place_y",0);
     detB0->set_double_param("place_z", (b0Mag_zCent - b0Mag_zLen/2) + b0Mag_zLen/(b0DetNr-1) * i);
     detB0->SetActive(true);
+    if(verbosity)
+      detB0->Verbosity(verbosity);
     g4Reco->registerSubsystem(detB0);
   }
  
@@ -231,7 +261,8 @@ void defineDetectors(PHG4Reco* g4Reco, int verbosity){
 }
 
 
-void defineBeamPipe(PHG4Reco* g4Reco){
+void hFarFwdDefineBeamPipe(PHG4Reco* g4Reco){
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HFARFWD_VERBOSITY);
   //exit window
   PHG4CylinderSubsystem *exitWin = new PHG4CylinderSubsystem("exitWin",0);
   exitWin->set_double_param("radius"   ,3.2);

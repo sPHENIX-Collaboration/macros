@@ -26,6 +26,7 @@
 #include <G4_Tracking_EIC.C>
 #include <G4_User.C>
 #include <G4_World.C>
+#include <G4_hFarFwdBeamLine_EIC.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
@@ -77,6 +78,7 @@ void G4Init()
 
   // load detector/material macros and execute Init() function
   if (Enable::PIPE) PipeInit();
+  if (Enable::HFARFWD_MAGNETS_IP6 || Enable::HFARFWD_MAGNETS_IP8) hFarFwdBeamLineInit();
   if (Enable::PLUGDOOR) PlugDoorInit();
   if (Enable::EGEM) EGEM_Init();
   if (Enable::FGEM || Enable::FGEM_ORIG) FGEM_Init();
@@ -149,6 +151,8 @@ int G4Setup()
   double radius = 0.;
 
   if (Enable::PIPE) radius = Pipe(g4Reco, radius);
+  if (Enable::HFARFWD_MAGNETS_IP6 || Enable::HFARFWD_MAGNETS_IP8) hFarFwdDefineMagnets(g4Reco);
+  if (Enable::HFARFWD_VIRTUAL_DETECTORS_IP6 || Enable::HFARFWD_VIRTUAL_DETECTORS_IP8) hFarFwdDefineDetectors(g4Reco);
   if (Enable::EGEM) EGEMSetup(g4Reco);
   if (Enable::FGEM || Enable::FGEM_ORIG) FGEMSetup(g4Reco);
   if (Enable::FST) FSTSetup(g4Reco);
@@ -196,6 +200,9 @@ void ShowerCompress()
 
   PHG4DstCompressReco *compress = new PHG4DstCompressReco("PHG4DstCompressReco");
   compress->AddHitContainer("G4HIT_PIPE");
+  compress->AddHitContainer("G4HIT_ZDC");
+  compress->AddHitContainer("G4HIT_RomanPots");
+  compress->AddHitContainer("G4HIT_B0detector");
   compress->AddHitContainer("G4HIT_FIELDCAGE");
   compress->AddHitContainer("G4HIT_CEMC_ELECTRONICS");
   compress->AddHitContainer("G4HIT_CEMC");
@@ -253,6 +260,9 @@ void DstCompress(Fun4AllDstOutputManager *out)
   if (out)
   {
     out->StripNode("G4HIT_PIPE");
+    out->StripNode("G4HIT_ZDC");
+    out->StripNode("G4HIT_RomanPots");
+    out->StripNode("G4HIT_B0detectors");
     out->StripNode("G4HIT_SVTXSUPPORT");
     out->StripNode("G4HIT_CEMC_ELECTRONICS");
     out->StripNode("G4HIT_CEMC");

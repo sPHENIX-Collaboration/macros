@@ -29,8 +29,8 @@
 /vis/open OGL 1200x900-0+0
 # increase display limit for more complex detectors
 /vis/ogl/set/displayListLimit 500000
-/vis/viewer/set/viewpointThetaPhi 240 -10
-/vis/viewer/addCutawayPlane 0 0 0 m 1 0 0
+/vis/viewer/set/viewpointThetaPhi 240 -40
+/vis/viewer/addCutawayPlane 0 0 0 m 0 -1 0
 # our world is 4x4 meters, the detector is about 1m across
 # zooming by 4 makes it fill the display
 /vis/viewer/zoom 1.5

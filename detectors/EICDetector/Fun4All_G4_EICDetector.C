@@ -248,6 +248,11 @@ int Fun4All_G4_EICDetector(
   Enable::PIPE = true;
   // EIC beam pipe extension beyond the Be-section:
   G4PIPE::use_forward_pipes = false;
+  //EIC hadron far forward magnets and detectors. IP6 and IP8 are incompatible (pick either or);
+  Enable::HFARFWD_MAGNETS_IP6=true;
+  Enable::HFARFWD_VIRTUAL_DETECTORS_IP6=true;
+  Enable::HFARFWD_MAGNETS_IP8=false;
+  Enable::HFARFWD_VIRTUAL_DETECTORS_IP8=false;
 
   // gems
   Enable::EGEM = true;
