@@ -192,16 +192,9 @@ void TPC_Cells()
   padplane->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);  // sPHENIX layer number of first Tpc readout layer
   padplane->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
   padplane->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
-}
 
-void TPC_Clustering()
-{
-  int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
-
-  Fun4AllServer* se = Fun4AllServer::instance();
-
-  // Tpc
-  //====
+  // Tpc digitizer
+  //=========
   PHG4TpcDigitizer* digitpc = new PHG4TpcDigitizer();
   digitpc->SetTpcMinLayer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
   double ENC = 670.0;  // standard
@@ -213,6 +206,14 @@ void TPC_Clustering()
        << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << endl;
 
   se->registerSubsystem(digitpc);
+
+}
+
+void TPC_Clustering()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
+
+  Fun4AllServer* se = Fun4AllServer::instance();
 
   //-------------
   // Cluster Hits
