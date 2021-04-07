@@ -16,15 +16,15 @@ Please follow [software day-1 checklist](https://ecce-eic.github.io/tutorials_da
 Download the newest macro repository from GitHub:
 
 ```
-[jinhuang@rcas2073 test]$ git clone https://github.com/ECCE-EIC/macros.git
+[test]$ git clone https://github.com/ECCE-EIC/macros.git
 Cloning into 'macros'...
 remote: Counting objects: 1125, done.
 remote: Total 1125 (delta 0), reused 0 (delta 0), pack-reused 1125
 Receiving objects: 100% (1125/1125), 181.75 KiB | 0 bytes/s, done.
 Resolving deltas: 100% (471/471), done.
 Checking connectivity... done.
-[jinhuang@rcas2073 test]$ cd macros/detectors
-[jinhuang@rcas2073 detectors]$ # here are all the subdirectories e.g. an example EIC detector simulations
+[test]$ cd macros/detectors
+[detectors]$ # here are all the subdirectories e.g. an example EIC detector simulations
 ```
 
 The default EIC detector simulation + reconstruction macro is [`detectors/EICDetector/Fun4All_G4_EICDetector.C`](detectors/EICDetector/Fun4All_G4_EICDetector.C), which is a collection of steering flags that drives [the common macros](/common). They are not a black box!. You are welcome to open/edit it to work for your purpose of study.
@@ -33,14 +33,13 @@ The default EIC detector simulation + reconstruction macro is [`detectors/EICDet
 
 Then let's see what is implemented by firing up one event:
 ```
-[jinhuang@rcas2072 EICDetector]$ source /cvmfs/eic.opensciencegrid.org/ecce/gcc-8.3/opt/fun4all/core/bin/ecce_setup.sh -n   # setup environment if not already done so
+[EICDetector]$ source /cvmfs/eic.opensciencegrid.org/ecce/gcc-8.3/opt/fun4all/core/bin/ecce_setup.sh -n   # setup environment if not already done so
 # Note, for csh users, please use /cvmfs/eic.opensciencegrid.org/ecce/gcc-8.3/opt/fun4all/core/bin/ecce_setup.csh instead
-[jinhuang@rcas2072 EICDetector]$ root
-root [] .x Fun4All_G4_EICDetector.C(-1) // here negative value in event number start an event display of one event
-root [] .L DisplayOn.C 
-root [] PHG4Reco* g4 = DisplayOn()
-root [] Fun4AllServer *se = Fun4AllServer::instance();
+Please edit Fun4All_G4_EICDetector.C to change flag Enable::DISPLAY = true;
+[EICDetector]$ root
+root [] .x Fun4All_G4_EICDetector.C // here negative value in event number start an event display of one event
 root [] se->run(1)
+root [] g4->ApplyCommand("/vis/viewer/refresh");
 root [] displaycmd() # this one show more Geant4 command we can run from the ROOT prompt
 ```
 
@@ -49,8 +48,9 @@ root [] displaycmd() # this one show more Geant4 command we can run from the ROO
 
 This is simpler, just run with first parameter as the intended number of event:
 ```
-[jinhuang@rcas2072 EICDetector]$ source /cvmfs/eic.opensciencegrid.org/ecce/gcc-8.3/opt/fun4all/core/bin/ecce_setup.sh -n   # setup sPHENIX environment if not already done so
-[jinhuang@rcas2072 EICDetector]$ root
+[EICDetector]$ source /cvmfs/eic.opensciencegrid.org/ecce/gcc-8.3/opt/fun4all/core/bin/ecce_setup.sh -n   # setup sPHENIX environment if not already done so
+Please recover Enable::DISPLAY = false; as in Fun4All_G4_EICDetector.C 
+[EICDetector]$ root
 root [] .x Fun4All_G4_EICDetector.C(10) // run 10 events
 ```
 
