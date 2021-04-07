@@ -223,6 +223,13 @@ void Mvtx_Cells()
     maps_hits->set_timing_window(ilayer, -5000, 5000);
   }
   se->registerSubsystem(maps_hits);
+
+  PHG4MvtxDigitizer* digimvtx = new PHG4MvtxDigitizer();
+  digimvtx->Verbosity(verbosity);
+  // energy deposit in 25 microns = 9.6 KeV = 1000 electrons collected after recombination
+  //digimvtx->set_adc_scale(0.95e-6);  // default set in code is 0.95e-06, which is 99 electrons
+  se->registerSubsystem(digimvtx);
+
   return;
 }
 
@@ -230,11 +237,7 @@ void Mvtx_Clustering()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
-  PHG4MvtxDigitizer* digimvtx = new PHG4MvtxDigitizer();
-  digimvtx->Verbosity(verbosity);
-  // energy deposit in 25 microns = 9.6 KeV = 1000 electrons collected after recombination
-  //digimvtx->set_adc_scale(0.95e-6);  // default set in code is 0.95e-06, which is 99 electrons
-  se->registerSubsystem(digimvtx);
+
   // For the Mvtx layers
   //================
   MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");

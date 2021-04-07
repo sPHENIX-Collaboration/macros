@@ -95,7 +95,7 @@ void Tracking_Reco()
       for (int n = 0; n < 2; n++)
       {
         if (n == 1) pitch = 36.4e-4 / sqrt(12);
-        for (int i; i < nLayer[n]; i++)
+        for (int i=0; i < nLayer[n]; i++)
         {
           kalman->add_phg4hits(Form("G4HIT_BARREL%d_%d", n, i),  // const std::string& phg4hitsNames,
                                PHG4TrackFastSim::Cylinder,       // const DETECTOR_TYPE phg4dettype,
@@ -111,7 +111,7 @@ void Tracking_Reco()
     {
       int nLayer = 5;
       if (G4BARREL::SETTING::BARRELV4) nLayer = 6;
-      for (int i; i < nLayer; i++)
+      for (int i=0; i < nLayer; i++)
       {
         kalman->add_phg4hits(Form("G4HIT_BARREL_%d", i),  // const std::string& phg4hitsNames,
                              PHG4TrackFastSim::Cylinder,  // const DETECTOR_TYPE phg4dettype,
