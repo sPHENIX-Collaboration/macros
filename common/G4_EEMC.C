@@ -40,6 +40,15 @@ namespace G4EEMC
   int use_projective_geometry = 0;
   double Gdz = 18. + 0.0001;
   double Gz0 = -170.;
+  // Digitization (default photon digi):
+  RawTowerDigitizer::enu_digi_algorithm TowerDigi = RawTowerDigitizer::kSimple_photon_digitization;
+  // directly pass the energy of sim tower to digitized tower
+  // kNo_digitization
+  // simple digitization with photon statistics, single amplitude ADC conversion and pedestal
+  // kSimple_photon_digitization
+  // digitization with photon statistics on SiPM with an effective pixel N, ADC conversion and pedestal
+  // kSiPM_photon_digitization
+
   enum enu_Eemc_clusterizer
   {
     kEemcGraphClusterizer,
@@ -140,7 +149,7 @@ void EEMC_Towers()
   TowerDigitizer_EEMC->Detector("EEMC");
   TowerDigitizer_EEMC->Verbosity(verbosity);
   TowerDigitizer_EEMC->set_raw_tower_node_prefix("RAW");
-  TowerDigitizer_EEMC->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitization);
+  TowerDigitizer_EEMC->set_digi_algorithm(G4EEMC::TowerDigi);
   TowerDigitizer_EEMC->set_pedstal_central_ADC(0);
   TowerDigitizer_EEMC->set_pedstal_width_ADC(8);  // eRD1 test beam setting
   TowerDigitizer_EEMC->set_photonelec_ADC(1);     //not simulating ADC discretization error

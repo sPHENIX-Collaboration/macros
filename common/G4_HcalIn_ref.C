@@ -57,6 +57,15 @@ namespace G4HCALIN
 
   int inner_hcal_eic = 0;
 
+  // Digitization (default photon digi):
+  RawTowerDigitizer::enu_digi_algorithm TowerDigi = RawTowerDigitizer::kSimple_photon_digitization;
+  // directly pass the energy of sim tower to digitized tower
+  // kNo_digitization
+  // simple digitization with photon statistics, single amplitude ADC conversion and pedestal
+  // kSimple_photon_digitization
+  // digitization with photon statistics on SiPM with an effective pixel N, ADC conversion and pedestal
+  // kSiPM_photon_digitization
+
   enum enu_HCalIn_clusterizer
   {
     kHCalInGraphClusterizer,
@@ -237,7 +246,7 @@ void HCALInner_Towers()
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalInRawTowerDigitizer");
   TowerDigitizer->Detector("HCALIN");
   //  TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
-  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitalization);
+  TowerDigitizer->set_digi_algorithm(G4HCALIN::TowerDigi);
   TowerDigitizer->set_pedstal_central_ADC(0);
   TowerDigitizer->set_pedstal_width_ADC(1);  // From Jin's guess. No EMCal High Gain data yet! TODO: update
   TowerDigitizer->set_photonelec_ADC(32. / 5.);
