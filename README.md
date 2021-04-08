@@ -35,7 +35,7 @@ Then let's see what is implemented by firing up one event:
 ```
 [EICDetector]$ source /cvmfs/eic.opensciencegrid.org/ecce/gcc-8.3/opt/fun4all/core/bin/ecce_setup.sh -n   # setup environment if not already done so
 # Note, for csh users, please use /cvmfs/eic.opensciencegrid.org/ecce/gcc-8.3/opt/fun4all/core/bin/ecce_setup.csh instead
-Please edit Fun4All_G4_EICDetector.C to change flag Enable::DISPLAY = true;
+**Please edit Fun4All_G4_EICDetector.C to change flag Enable::DISPLAY = true;**
 [EICDetector]$ root
 root [] .x Fun4All_G4_EICDetector.C // here negative value in event number start an event display of one event
 root [] se->run(1)
