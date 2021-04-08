@@ -56,6 +56,15 @@ namespace G4CEMC
   int Min_cemc_layer = 1;
   int Max_cemc_layer = 1;
 
+  // Digitization (default photon digi):
+  RawTowerDigitizer::enu_digi_algorithm TowerDigi = RawTowerDigitizer::kSimple_photon_digitization;
+  // directly pass the energy of sim tower to digitized tower
+  // kNo_digitization
+  // simple digitization with photon statistics, single amplitude ADC conversion and pedestal
+  // kSimple_photon_digitization
+  // digitization with photon statistics on SiPM with an effective pixel N, ADC conversion and pedestal
+  // kSiPM_photon_digitization
+
   // set a default value for SPACAL configuration
   //  // 1D azimuthal projective SPACAL (fast)
   //int Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal;
@@ -351,7 +360,7 @@ void CEMC_Towers()
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
   TowerDigitizer->Detector("CEMC");
   TowerDigitizer->Verbosity(verbosity);
-  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitization);
+  TowerDigitizer->set_digi_algorithm(G4CEMC::TowerDigi);
   TowerDigitizer->set_variable_pedestal(true);  //read ped central and width from calibrations file comment next 2 lines if true
                                                 //  TowerDigitizer->set_pedstal_central_ADC(0);
                                                 //  TowerDigitizer->set_pedstal_width_ADC(8);  // eRD1 test beam setting
