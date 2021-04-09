@@ -60,6 +60,15 @@ namespace G4CEMC
   // if the user changes these, the z position of the
   // calorimeter must be changed in the function CEmc(...)
 
+  // Digitization (default photon digi):
+  RawTowerDigitizer::enu_digi_algorithm TowerDigi = RawTowerDigitizer::kSimple_photon_digitization;
+  // directly pass the energy of sim tower to digitized tower
+  // kNo_digitization
+  // simple digitization with photon statistics, single amplitude ADC conversion and pedestal
+  // kSimple_photon_digitization
+  // digitization with photon statistics on SiPM with an effective pixel N, ADC conversion and pedestal
+  // kSiPM_photon_digitization
+
   enum enu_Cemc_clusterizer
   {
     kCemcGraphClusterizer,
@@ -67,12 +76,16 @@ namespace G4CEMC
     kCemcTemplateClusterizer
   };
 
-  //! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha
-  //! Bazilevsky
+  // default: template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
   enu_Cemc_clusterizer Cemc_clusterizer = kCemcTemplateClusterizer;
-  //! graph clusterizer, RawClusterBuilderGraph
+  // graph clusterizer, RawClusterBuilderGraph
   // enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
 }  // namespace G4CEMC
+
+namespace CEMC_TOWER
+{
+  double emin = NAN;
+}
 
 // Black hole and size parameters set in CEmc function
 void CEmcInit(const int nslats = 1)
@@ -245,6 +258,10 @@ void CEMC_Towers()
   RawTowerBuilder *CemcTowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
   CemcTowerBuilder->Detector("CEMC");
   CemcTowerBuilder->set_sim_tower_node_prefix("SIM");
+  if (isfinite(CEMC_TOWER::emin))
+  {
+    CemcTowerBuilder->EminCut(CEMC_TOWER::emin);
+  }
   CemcTowerBuilder->Verbosity(verbosity);
   se->registerSubsystem(CemcTowerBuilder);
 
@@ -254,7 +271,7 @@ void CEMC_Towers()
   RawTowerDigitizer *CemcTowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
   CemcTowerDigitizer->Detector("CEMC");
   CemcTowerDigitizer->Verbosity(verbosity);
-  CemcTowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitization);
+  CemcTowerDigitizer->set_digi_algorithm(G4CEMC::TowerDigi);
   CemcTowerDigitizer->set_pedstal_central_ADC(0);
   CemcTowerDigitizer->set_pedstal_width_ADC(8);  // eRD1 test beam setting
   CemcTowerDigitizer->set_photonelec_ADC(1);     // not simulating ADC discretization error
