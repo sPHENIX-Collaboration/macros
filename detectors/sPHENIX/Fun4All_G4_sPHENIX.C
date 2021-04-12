@@ -432,6 +432,10 @@ int Fun4All_G4_sPHENIX(
   //--------------
   // SVTX tracking
   //--------------
+  if(Enable::TRACKING_TRACK)
+    {
+      TrackingInit();
+    }
   if (Enable::MVTX_CLUSTER) Mvtx_Clustering();
   if (Enable::INTT_CLUSTER) Intt_Clustering();
   if (Enable::TPC_CLUSTER) TPC_Clustering();
@@ -439,7 +443,6 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::TRACKING_TRACK)
   {
-    TrackingInit();
     Tracking_Reco();
   }
   //-----------------
