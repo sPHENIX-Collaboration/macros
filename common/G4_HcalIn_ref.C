@@ -264,7 +264,14 @@ void HCALInner_Towers()
   //  TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
   //  TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration->set_calib_const_GeV_ADC(0.4e-3 / visible_sample_fraction_HCALIN);
+  if (G4HCALIN::TowerDigi == RawTowerDigitizer::kNo_digitization)
+  {
+    TowerCalibration->set_calib_const_GeV_ADC(1. / visible_sample_fraction_HCALIN);
+  }
+  else
+  {
+    TowerCalibration->set_calib_const_GeV_ADC(0.4e-3 / visible_sample_fraction_HCALIN);
+  }
   TowerCalibration->set_pedstal_ADC(0);
   se->registerSubsystem(TowerCalibration);
 

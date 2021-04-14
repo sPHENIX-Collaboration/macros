@@ -164,7 +164,14 @@ void EEMC_Towers()
   TowerCalibration_EEMC->Detector("EEMC");
   TowerCalibration_EEMC->Verbosity(verbosity);
   TowerCalibration_EEMC->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration_EEMC->set_calib_const_GeV_ADC(1. / EEMC_photoelectron_per_GeV);
+  if (G4EEMC::TowerDigi == RawTowerDigitizer::kNo_digitization)
+  {
+    TowerCalibration_EEMC->set_calib_const_GeV_ADC(1.);
+  }
+  else
+  {
+    TowerCalibration_EEMC->set_calib_const_GeV_ADC(1. / EEMC_photoelectron_per_GeV);
+  }
   TowerCalibration_EEMC->set_pedstal_ADC(0);
 
   se->registerSubsystem(TowerCalibration_EEMC);

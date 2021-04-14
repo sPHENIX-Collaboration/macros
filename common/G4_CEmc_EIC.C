@@ -283,7 +283,14 @@ void CEMC_Towers()
   CemcTowerCalibration->Detector("CEMC");
   CemcTowerCalibration->Verbosity(verbosity);
   CemcTowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  CemcTowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);
+  if (G4CEMC::TowerDigi == RawTowerDigitizer::kNo_digitization)
+  {
+    CemcTowerCalibration->set_calib_const_GeV_ADC(1.0 / 0.023);  // 2.3% sampling fraction from test beam
+  }
+  else
+  {
+    CemcTowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);
+  }
   CemcTowerCalibration->set_pedstal_ADC(0);
 
   se->registerSubsystem(CemcTowerCalibration);
