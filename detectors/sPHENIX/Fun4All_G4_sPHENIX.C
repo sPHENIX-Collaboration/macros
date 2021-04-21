@@ -312,13 +312,6 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALOUT_EVAL = Enable::HCALOUT_CLUSTER && true;
   Enable::HCALOUT_QA = Enable::HCALOUT_CLUSTER and Enable::QA && true;
 
-  // forward EMC
-  //Enable::FEMC = true;
-  Enable::FEMC_ABSORBER = true;
-  Enable::FEMC_TOWER = Enable::FEMC && true;
-  Enable::FEMC_CLUSTER = Enable::FEMC_TOWER && true;
-  Enable::FEMC_EVAL = Enable::FEMC_CLUSTER and Enable::QA && true;
-
   Enable::EPD = false;
 
   //! forward flux return plug door. Out of acceptance and off by default.
@@ -426,9 +419,6 @@ int Fun4All_G4_sPHENIX(
   // if enabled, do topoClustering early, upstream of any possible jet reconstruction
   if (Enable::TOPOCLUSTER) TopoClusterReco();
 
-  if (Enable::FEMC_TOWER) FEMC_Towers();
-  if (Enable::FEMC_CLUSTER) FEMC_Clusters();
-
   //--------------
   // SVTX tracking
   //--------------
@@ -499,8 +489,6 @@ int Fun4All_G4_sPHENIX(
   if (Enable::HCALIN_EVAL) HCALInner_Eval(outputroot + "_g4hcalin_eval.root");
 
   if (Enable::HCALOUT_EVAL) HCALOuter_Eval(outputroot + "_g4hcalout_eval.root");
-
-  if (Enable::FEMC_EVAL) FEMC_Eval(outputroot + "_g4femc_eval.root");
 
   if (Enable::JETS_EVAL) Jet_Eval(outputroot + "_g4jet_eval.root");
 
