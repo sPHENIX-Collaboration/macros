@@ -284,9 +284,10 @@ int Fun4All_G4_sPHENIX(
   Enable::TPC_CLUSTER = Enable::TPC_CELL && true;
   Enable::TPC_QA = Enable::TPC_CLUSTER and Enable::QA && true;
 
-  //Enable::MICROMEGAS = true;
+  Enable::MICROMEGAS = true;
   Enable::MICROMEGAS_CELL = Enable::MICROMEGAS && true;
   Enable::MICROMEGAS_CLUSTER = Enable::MICROMEGAS_CELL && true;
+  Enable::MICROMEGAS_QA = Enable::MICROMEGAS_CLUSTER && Enable::QA && true;
 
   Enable::TRACKING_TRACK = true;
   Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && false;
@@ -527,6 +528,7 @@ int Fun4All_G4_sPHENIX(
   if (Enable::MVTX_QA) Mvtx_QA();
   if (Enable::INTT_QA) Intt_QA();
   if (Enable::TPC_QA) TPC_QA();
+  if (Enable::MICROMEGAS_QA) Micromegas_QA();
   if (Enable::TRACKING_QA) Tracking_QA();
 
   if (Enable::TRACKING_QA and Enable::CEMC_QA and Enable::HCALIN_QA and Enable::HCALOUT_QA) QA_G4CaloTracking();
