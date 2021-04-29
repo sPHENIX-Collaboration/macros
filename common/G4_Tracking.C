@@ -19,7 +19,6 @@
 #include <trackreco/PHGenFitTrkFitter.h>
 #include <trackreco/PHGenFitTrkProp.h>
 #include <trackreco/PHHoughSeeding.h>
-#include <trackreco/PHInitZVertexing.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
 #include <trackreco/PHRaveVertexing.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
@@ -82,8 +81,8 @@ namespace G4TRACKING
   //   PHActsTracks                                  // convert SvtxTracks to Acts tracks
   //   PHActsTrkFitter                               // Kalman fitter makes final fit to assembled tracks
 
+  bool use_acts_silicon_seeding = true;   // if true runs acts silicon seeding
   bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
-  bool use_tpc_seed_vertex_assoc = true;
 
   // Possible variations - these are normally false
   bool use_PHTpcTracker_seeding = false;   // false for using the default PHCASeeding to get TPC track seeds, true to use PHTpcTracker
@@ -91,19 +90,11 @@ namespace G4TRACKING
   bool use_truth_si_matching = false;      // if true, associates silicon clusters using best truth track match to TPC seed tracks - for diagnostics only
   bool use_truth_track_seeding = false;    // false for normal track seeding, use true to run with truth track seeding instead  ***** WORKS FOR GENFIT ONLY
   bool use_Genfit = false;                 // if false, acts KF is run on proto tracks assembled above, if true, use Genfit track propagation and fitting
-  bool use_acts_silicon_seeding = true;   // if true runs acts silicon seeding
   bool use_acts_init_vertexing = false;    // if true runs acts initial vertex finder, false runs truth vertexing
-  bool use_phinit_vertexing = false && !use_acts_init_vertexing;         // false for using smeared truth vertex, set to true to get initial vertex from MVTX hits using PHInitZVertexing
   bool use_rave_vertexing = true;          // Use Rave to find and fit for vertex after track fitting
-  bool use_primary_vertex = false;         // refit Genfit tracks (only) with primary vertex included - adds second node to node tree, adds second evaluator, outputs separate ntuples
-  bool use_acts_evaluator = false;         // Turn to true for an acts evaluator which outputs acts specific information in a tuple
-  int init_vertexing_min_zvtx_tracks = 2;  // PHInitZvertexing parameter for reducing spurious vertices, use 2 for Pythia8 events, 5 for large multiplicity events
-                                           //default seed is PHTpcTracker
 
-  // This is the setup we have been using before PHInitZVertexing was implemented - smeared truth vertex for a single collision per event. Make it the default for now.
+  // This is the setup we have been using  - smeared truth vertex for a single collision per event. Make it the default for now.
   std::string vmethod("avf-smoothing:1");  // only good for 1 vertex events // vmethod is a string used to set the Rave final-vertexing method:
-  // This is the setup that uses PHInitZvertexing to find initial vertices, and allows for multiple collisions per event
-  //std::string vmethod("avr-smoothing:1-minweight:0.5-primcut:9-seccut:9");  // seems to handle multi-vertex events.
 
 }  // namespace G4TRACKING
 
@@ -221,18 +212,6 @@ void Tracking_Reco()
 	}
       #endif
     }
-  else if (G4TRACKING::use_phinit_vertexing)
-  {
-    // get the initial vertex for track fitting from the MVTX hits
-    PHInitZVertexing* init_zvtx = new PHInitZVertexing(7, 7, "PHInitZVertexing");
-    int seed_layer[7] = {0, 1, 2, 3, 4, 5, 6};
-    init_zvtx->set_seeding_layer(seed_layer, 7);
-    // this is the minimum number of associated MVTX triplets for a vertex to be accepted as a candidate.
-    // Suggest to use 2 for Pythia8 and 5 for Au+Au (to reduce spurious vertices).
-    init_zvtx->set_min_zvtx_tracks(G4TRACKING::init_vertexing_min_zvtx_tracks);
-    init_zvtx->Verbosity(verbosity);
-    se->registerSubsystem(init_zvtx);
-  }
   else
   {
     // We cheat to get the initial vertex for the full track reconstruction case
@@ -307,15 +286,11 @@ void Tracking_Reco()
       se->registerSubsystem(seeder);
     }
   }
-
-  if(G4TRACKING::use_tpc_seed_vertex_assoc)
-    {
-      // This does not care which seeder is used
-      PHTpcTrackSeedVertexAssoc *vtxassoc = new PHTpcTrackSeedVertexAssoc();
-      vtxassoc->Verbosity(0);
-      se->registerSubsystem(vtxassoc);
-    }
-
+  // This does not care which seeder is used
+  PHTpcTrackSeedVertexAssoc *vtxassoc = new PHTpcTrackSeedVertexAssoc();
+  vtxassoc->Verbosity(0);
+  se->registerSubsystem(vtxassoc);
+  
   // Genfit track propagation and final fitting (starts from TPC track seeds)
   //=================================================
   if (G4TRACKING::use_Genfit)
@@ -347,11 +322,13 @@ void Tracking_Reco()
 
     PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
     kalman->Verbosity(verbosity);
+    /*
 
     if (G4TRACKING::use_primary_vertex)
     {
       kalman->set_fit_primary_tracks(true);  // include primary vertex in track fit if true
     }
+    */
     kalman->set_vertexing_method(G4TRACKING::vmethod);
     kalman->set_use_truth_vertex(false);
 
@@ -393,8 +370,6 @@ void Tracking_Reco()
       // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
       PHSiliconTpcTrackMatching* silicon_match = new PHSiliconTpcTrackMatching();
       silicon_match->Verbosity(verbosity);
-      if (G4TRACKING::use_PHTpcTracker_seeding && !G4TRACKING::use_tpc_seed_vertex_assoc)
-        silicon_match->set_seeder(false);  // module defaults to CASeeding, for PHTpcTracker seeding use false here ONLY when not using  PHTpcTrackSeedVertexAssoc.
       silicon_match->set_field(G4MAGNET::magfield);
       silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
       silicon_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
@@ -537,34 +512,6 @@ void Tracking_Eval(const std::string& outputfile)
   eval->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
-
-  if (!G4TRACKING::use_Genfit && !G4TRACKING::SC_CALIBMODE)
-  {
-#if __cplusplus >= 201703L
-    if (G4TRACKING::use_acts_evaluator)
-    {
-      ActsEvaluator* actsEval = new ActsEvaluator(outputfile + "_acts.root", eval);
-      actsEval->Verbosity(verbosity);
-      actsEval->setEvalCKF(false);
-      se->registerSubsystem(actsEval);
-    }
-#endif
-  }
-
-  if (G4TRACKING::use_primary_vertex)
-  {
-    // make a second evaluator that records tracks fitted with primary vertex included
-    // good for analysis of prompt tracks, particularly if Mvtx is not present
-    SvtxEvaluator* evalp;
-    evalp = new SvtxEvaluator("SVTXEVALUATOR", outputfile + "_primary_eval.root", "PrimaryTrackMap", G4MVTX::n_maps_layer, G4INTT::n_intt_layer, G4TPC::n_gas_layer);
-    evalp->do_cluster_eval(true);
-    evalp->do_g4hit_eval(true);
-    evalp->do_hit_eval(false);
-    evalp->do_gpoint_eval(false);
-    evalp->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
-    evalp->Verbosity(verbosity);
-    se->registerSubsystem(evalp);
-  }
 
   return;
 }
