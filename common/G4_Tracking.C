@@ -98,9 +98,10 @@ namespace G4TRACKING
   bool use_truth_silicon_seeding = false;        // if true runs truth silicon seeding instead of acts silicon seeding
   bool use_truth_tpc_seeding = false;              // if true runs truth silicon seeding instead of reco TPC seeding
   bool use_truth_si_matching = false;              // if true, associates silicon clusters using best truth track match to TPC seed tracks - for diagnostics only
+ // Full truth track seeding 
   bool use_full_truth_track_seeding = false;  // makes track seeds using truth info, used for both Acts and Genfit
 
-  // Rave final vertexing
+  // Rave final vertexing (for QA)
   bool use_rave_vertexing = true;                     // Use Rave to find and fit for vertex after track fitting - used for QA only
   // This is the setup we have been using  - smeared truth vertex for a single collision per event. Make it the default for now.
   std::string vmethod("avf-smoothing:1");  // only good for 1 vertex events // vmethod is a string used to set the Rave final-vertexing method:
@@ -198,8 +199,10 @@ void Tracking_Reco()
   //-------------------------------------------------------
   // Tracking
   // Sections 1, 2 and 3 are alternatives to each other
+  // Section 1: Normal Acts tracking chain, with options for truth seeding
+  // Section 2: Truth track seeding with Acts fitting
+  // Section 3: Genfit tracking chain with option for truth track seeding
   //--------------------------------------------------------
-
 
   //====================
   // Common to all sections
