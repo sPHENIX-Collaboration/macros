@@ -196,13 +196,13 @@ void Tracking_Reco()
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  //-------------------------------------------------------
+  //----------------------------------------------------------------------------
   // Tracking
   // Sections 1, 2 and 3 are alternatives to each other
   // Section 1: Normal Acts tracking chain, with options for truth seeding
   // Section 2: Truth track seeding with Acts fitting
   // Section 3: Genfit tracking chain with option for truth track seeding
-  //--------------------------------------------------------
+  //------------------------------------------------------------------------------
 
   //====================
   // Common to all sections
