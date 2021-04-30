@@ -74,32 +74,34 @@ namespace G4TRACKING
   //   PHActsSiliconSeeding                    // make silicon track seeds
   //   PHActsInitialVertexing                    // event vertex from silicon track stubs
   //   PHCASeeding                                    // TPC track seeds
+  //    PHTpcTrackSeedVertexAssoc    // Associates TPC track seeds with a vertex, refines phi and eta
   //   PHSiliconTpcTrackMatching      // match TPC track seeds to silicon track seeds
-  //   PHMicromegasTpcTrackMatching   // associate Micromagas clusters with TPC track stubs
-  //   PHActsTracks                                  // convert SvtxTracks to Acts tracks
-  //   PHActsTrkFitter                               // Kalman fitter makes final fit to assembled tracks
-  //   Final vertexing
-
+  //   PHMicromegasTpcTrackMatching   // associate Micromegas clusters with TPC track stubs
+  //   PHActsTrkFitter (1)                         // Kalman fitter makes fit to assembled tracks
+  //   PHActsVertexFinder                       // final vertexing using fitted Acts tracks
+  //   PHActsTrkFitter (2)                         // Kalman fitter makes final fit to tracks (improves DCA resolution using final vertex)
 
   // Possible variations - these are normally false
   //====================================
   //Fittting
-  bool use_genfit = true;                 // if false, acts KF is run on proto tracks. If true, use Genfit track propagation and fitting
+  bool use_genfit = false;                 // if false, acts KF is run on proto tracks. If true, use Genfit track propagation and fitting
 
   // Initial vertexing
   bool g4eval_use_initial_vertex = false;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
   bool use_truth_init_vertexing = false;    // if true runs truth vertexing, if false runs acts initial vertex finder
 
-  // Seeding
+  // TPC seeding options
   bool use_PHTpcTracker_seeding = false;  // false for using the default PHCASeeding to get TPC track seeds, true to use PHTpcTracker
   bool use_hybrid_seeding = false;                  // false for using the default PHCASeeding, true to use PHHybridSeeding (STAR core, ALICE KF)
-  bool use_truth_silicon_seeding = false;     // if true runs truth silicon seeding instead of acts silicon seeding
-  bool use_truth_tpc_seeding = false;           // if true runs truth silicon seeding instead of reco TPC seeding
-  bool use_truth_si_matching = false;          // if true, associates silicon clusters using best truth track match to TPC seed tracks - for diagnostics only
+
+  // Truth seeding options (can use any or all)
+  bool use_truth_silicon_seeding = false;        // if true runs truth silicon seeding instead of acts silicon seeding
+  bool use_truth_tpc_seeding = false;              // if true runs truth silicon seeding instead of reco TPC seeding
+  bool use_truth_si_matching = false;              // if true, associates silicon clusters using best truth track match to TPC seed tracks - for diagnostics only
   bool use_full_truth_track_seeding = false;  // makes track seeds using truth info, used for both Acts and Genfit
 
-  // Final vertexing
-  bool use_rave_vertexing = true;          // Use Rave to find and fit for vertex after track fitting
+  // Rave final vertexing
+  bool use_rave_vertexing = true;                     // Use Rave to find and fit for vertex after track fitting - used for QA only
   // This is the setup we have been using  - smeared truth vertex for a single collision per event. Make it the default for now.
   std::string vmethod("avf-smoothing:1");  // only good for 1 vertex events // vmethod is a string used to set the Rave final-vertexing method:
 
@@ -143,10 +145,6 @@ void TrackingInit()
 
   // SC_CALIBMODE makes no sense if distortions are not present
   G4TRACKING::SC_CALIBMODE = (G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS ) && G4TRACKING::SC_CALIBMODE;
-
-  // Genfit does final vertexing, Acts does not
-  //if (G4TRACKING::use_genfit)
-  //G4TRACKING::g4eval_use_initial_vertex = false;
 
   // For now the TpcSpaceChargeCorrection module only works with the GenFit tracking chain
   if (G4TPC::ENABLE_CORRECTIONS && !G4TRACKING::use_genfit)
@@ -197,25 +195,26 @@ void Tracking_Reco()
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  //-------------
+  //-------------------------------------------------------
   // Tracking
-  //------------
+  // Sections 1, 2 and 3 are alternatives to each other
+  //--------------------------------------------------------
+
 
   //====================
-  // Initial vertex finding
   // Common to all sections
+  // Initial vertex finding
   //=====================
 
-  // Assemble silicon clusters into track stubs 
-  // (needed for initial vertex finding)
-  //==================================
+  // Assemble silicon clusters into track stubs - needed for initial vertex finding
+  //============================================================
   if(G4TRACKING::use_truth_silicon_seeding)  
     {
       
       // For the silicon, for each truth particle, create a track and associate clusters with it using truth information, write to silicon track map
       // track stubs are given the location of the truth vertex in this module
       PHTruthTrackSeeding* pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingSilicon");
-      pat_rec->Verbosity(0);
+      pat_rec->Verbosity(verbosity);
       pat_rec->set_track_map_name("SvtxSiliconTrackMap");
       pat_rec->set_min_layer(0);
       pat_rec->set_max_layer( G4MVTX::n_maps_layer +  G4INTT::n_intt_layer);
@@ -225,7 +224,7 @@ void Tracking_Reco()
   else
     {
       PHActsSiliconSeeding* silicon_Seeding = new PHActsSiliconSeeding();
-      silicon_Seeding->Verbosity(0);
+      silicon_Seeding->Verbosity(verbosity);
       se->registerSubsystem(silicon_Seeding);
     }
   
@@ -241,15 +240,15 @@ void Tracking_Reco()
   else
     {
       PHActsInitialVertexFinder* init_vtx = new PHActsInitialVertexFinder();
-      init_vtx->Verbosity(0);
+      init_vtx->Verbosity(verbosity);
       init_vtx->setSvtxTrackMapName("SvtxSiliconTrackMap");
       init_vtx->setSvtxVertexMapName("SvtxVertexMap");
       se->registerSubsystem(init_vtx);
     }
   
-  //=========================================================    
+  //================================================    
   // Section 1: Acts chain of track propagation and final fitting 
-  //=========================================================
+  //================================================
   if(!G4TRACKING::use_genfit && !G4TRACKING::use_full_truth_track_seeding)
     {      
       // TPC track seeding (finds all clusters in TPC for tracks)
@@ -259,7 +258,7 @@ void Tracking_Reco()
 	  // For the TPC, for each truth particle, create a track and associate clusters with it using truth information, write to Svtx track map
 	  // track stubs are given the position odf the truth vertex in this module
 	  PHTruthTrackSeeding* pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingTpc");
-	  pat_rec->Verbosity(0);
+	  pat_rec->Verbosity(verbosity);
 	  pat_rec->set_track_map_name("SvtxTrackMap");
 	  pat_rec->set_min_layer( G4MVTX::n_maps_layer +  G4INTT::n_intt_layer);
 	  pat_rec->set_max_layer( G4MVTX::n_maps_layer +  G4INTT::n_intt_layer + G4TPC::n_gas_layer);
@@ -295,7 +294,7 @@ void Tracking_Reco()
 	      hseeder->setSearchAngle(M_PI/8.,M_PI/8.); // radians (iter1, iter2)
 	      hseeder->setMinTrackSize(10,5); // (iter1, iter2)
 	      hseeder->setNThreads(1);
-	      hseeder->Verbosity(0);
+	      hseeder->Verbosity(verbosity);
 	      se->registerSubsystem(hseeder);
 	    }
 	  else
@@ -317,8 +316,9 @@ void Tracking_Reco()
       //=============================================
 
       // This does not care which seeder is used
+      // It refines the phi and eta of the TPC tracklet prior to matching with the silicon tracklet
       PHTpcTrackSeedVertexAssoc *vtxassoc = new PHTpcTrackSeedVertexAssoc();
-      vtxassoc->Verbosity(0);
+      vtxassoc->Verbosity(verbosity);
       se->registerSubsystem(vtxassoc);
       
       // Silicon cluster matching to TPC track seeds
@@ -437,12 +437,12 @@ void Tracking_Reco()
       // track stubs are given the position of the truth vertex in this module, but Genfit does not care
       // Includes clusters for TPC, silicon and MM's
       PHTruthTrackSeeding* pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingFull");
-      pat_rec->Verbosity(0);
+      pat_rec->Verbosity(verbosity);
       pat_rec->set_track_map_name("SvtxTrackMap");
       se->registerSubsystem(pat_rec);
       
-      // Final fitting of tracks using Acts Kalman Filter
-      //=====================================
+      // Fitting of tracks using Acts Kalman Filter
+      //==================================
       
       std::cout << "   Using Acts track fitting " << std::endl;
       
@@ -460,8 +460,7 @@ void Tracking_Reco()
 	  residuals->Verbosity(verbosity);
 	  se->registerSubsystem(residuals);
 	}
-      
-      
+            
       PHActsVertexFinder *finder = new PHActsVertexFinder();
       finder->Verbosity(verbosity);
       se->registerSubsystem(finder);
@@ -471,9 +470,7 @@ void Tracking_Reco()
       actsFit2->doTimeAnalysis(false);
       actsFit2->fitSiliconMMs(false);
       se->registerSubsystem(actsFit2);
-          
     }
-
   
   //=========================================================    
   // Section 3: Genfit track propagation and final fitting
@@ -488,10 +485,10 @@ void Tracking_Reco()
 	  std::cout << "  Using truth track seeding for Genfit" << std::endl;
 
 	  // For each truth particle, create a track and associate clusters with it using truth information, write to Svtx track map
-	  // track stubs are given the position of the truth vertex in this module, but Genfit does not care
+	  // tracks are given the position of the truth particle vertex in this module, but Genfit does not care
 	  // Includes clusters for TPC, silicon and MM's
 	  PHTruthTrackSeeding* pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingFull");
-	  pat_rec->Verbosity(0);
+	  pat_rec->Verbosity(verbosity);
 	  pat_rec->set_track_map_name("SvtxTrackMap");
 	  se->registerSubsystem(pat_rec);
 	}
@@ -523,7 +520,7 @@ void Tracking_Reco()
 	      hseeder->setSearchAngle(M_PI/8.,M_PI/8.); // radians (iter1, iter2)
 	      hseeder->setMinTrackSize(10,5); // (iter1, iter2)
 	      hseeder->setNThreads(1);
-	      hseeder->Verbosity(0);
+	      hseeder->Verbosity(verbosity);
 	      se->registerSubsystem(hseeder);
 	    }
 	  else
@@ -542,14 +539,14 @@ void Tracking_Reco()
 
 	  std::cout << "   Using PHGenFitTrkProp " << std::endl;
 	  
-	  // Association of TPC track seeds with silicon layers and Micromegas layers
+	  // Association of TPC track seeds with all TPC layers, silicon layers and Micromegas layers
 	  // Find all clusters associated with each seed track
 	  auto track_prop = new PHGenFitTrkProp("PHGenFitTrkProp",
 						G4MVTX::n_maps_layer,
 						G4INTT::n_intt_layer,
 						G4TPC::n_gas_layer,
 						G4MICROMEGAS::n_micromegas_layer);
-	  track_prop->Verbosity(0);
+	  track_prop->Verbosity(verbosity);
 	  se->registerSubsystem(track_prop);
 	  for (int i = 0; i < G4INTT::n_intt_layer; i++)
 	    {
@@ -569,9 +566,14 @@ void Tracking_Reco()
       kalman->set_use_truth_vertex(false);      
       se->registerSubsystem(kalman);
     }
-  
+
+
+  //==================================
+  // Common  to all sections
+  //==================================
+
   // Final vertex finding and fitting with RAVE
-  //=================================
+  //==================================
   if (G4TRACKING::use_rave_vertexing)
     {
       PHRaveVertexing* rave = new PHRaveVertexing();
@@ -580,12 +582,10 @@ void Tracking_Reco()
       rave->set_svtxvertexmaprefit_node_name("SvtxVertexMapRave");
       rave->Verbosity(verbosity);
       se->registerSubsystem(rave);
-    }
-  
-  
-  //------------------
+    }   
+     
   // Track Projections
-  //------------------
+  //===============
   PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
   projection->Verbosity(verbosity);
   se->registerSubsystem(projection);
@@ -596,7 +596,7 @@ void Tracking_Reco()
 void Tracking_Eval(const std::string& outputfile)
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
-
+  
   //---------------
   // Fun4All server
   //---------------
