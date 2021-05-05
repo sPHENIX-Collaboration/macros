@@ -87,7 +87,7 @@ namespace G4TRACKING
   bool use_genfit = false;                 // if false, acts KF is run on proto tracks. If true, use Genfit track propagation and fitting
 
   // Initial vertexing
-  bool g4eval_use_initial_vertex = false;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
+  bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
   bool use_truth_init_vertexing = false;    // if true runs truth vertexing, if false runs acts initial vertex finder
 
   // TPC seeding options
