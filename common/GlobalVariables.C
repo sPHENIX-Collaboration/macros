@@ -27,10 +27,11 @@ namespace DstOut
 // Global settings affecting multiple subsystems
 namespace Enable
 {
-  bool OVERLAPCHECK = false;
   bool ABSORBER = false;
   bool DSTOUT = false;
   bool DSTOUT_COMPRESS = false;
+  bool OVERLAPCHECK = false;
+  bool SUPPORT = false;
   int VERBOSITY = 0;
 }  // namespace Enable
 

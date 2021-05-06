@@ -41,6 +41,7 @@ namespace Enable
   bool HCALIN_CLUSTER = false;
   bool HCALIN_EVAL = false;
   bool HCALIN_QA = false;
+  bool HCALIN_SUPPORT = false;
   int HCALIN_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -174,7 +175,7 @@ double HCalInner(PHG4Reco *g4Reco,
 //! A rough version of the inner HCal support ring, from Richie's CAD drawing. - Jin
 void HCalInner_SupportRing(PHG4Reco *g4Reco)
 {
-  bool AbsorberActive = Enable::ABSORBER || Enable::HCALIN_ABSORBER;
+  bool AbsorberActive = Enable::SUPPORT || Enable::HCALIN_SUPPORT;
 
   const double z_ring1 = (2025 + 2050) / 2. / 10.;
   const double innerradius_sphenix = 116.;
