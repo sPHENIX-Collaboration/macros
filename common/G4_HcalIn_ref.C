@@ -267,7 +267,8 @@ void HCALInner_Towers()
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
   if (G4HCALIN::TowerDigi == RawTowerDigitizer::kNo_digitization)
   {
-    TowerCalibration->set_calib_const_GeV_ADC(1. / visible_sample_fraction_HCALIN);
+    // 0.176 extracted from electron sims (edep(scintillator)/edep(total))
+    TowerCalibration->set_calib_const_GeV_ADC(1. / 0.176);
   }
   else
   {

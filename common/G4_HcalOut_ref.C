@@ -191,7 +191,8 @@ void HCALOuter_Towers()
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
   if (G4HCALOUT::TowerDigi == RawTowerDigitizer::kNo_digitization)
   {
-    TowerCalibration->set_calib_const_GeV_ADC(1. / visible_sample_fraction_HCALOUT);
+    // 0.033 extracted from electron sims (edep(scintillator)/edep(total))
+    TowerCalibration->set_calib_const_GeV_ADC(1. / 0.033);
   }
   else
   {
