@@ -29,7 +29,6 @@
 #include <trackreco/PHTruthVertexing.h>
 
 #if __cplusplus >= 201703L
-#include <trackreco/ActsEvaluator.h>
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSourceLinks.h>
 #include <trackreco/PHActsSiliconSeeding.h>
