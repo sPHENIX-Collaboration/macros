@@ -30,9 +30,7 @@
 
 #if __cplusplus >= 201703L
 #include <trackreco/MakeActsGeometry.h>
-#include <trackreco/PHActsSourceLinks.h>
 #include <trackreco/PHActsSiliconSeeding.h>
-#include <trackreco/PHActsTracks.h>
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsInitialVertexFinder.h>
 #include <trackreco/PHActsVertexFinder.h>
