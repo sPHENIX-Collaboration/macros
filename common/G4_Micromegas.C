@@ -170,12 +170,13 @@ void Micromegas_Cells()
   }
 
   se->registerSubsystem(reco);
+
+  se->registerSubsystem(new PHG4MicromegasDigitizer);
 }
 
 void Micromegas_Clustering()
 {
   auto se = Fun4AllServer::instance();
-  se->registerSubsystem(new PHG4MicromegasDigitizer);
   se->registerSubsystem(new MicromegasClusterizer);
 }
 #endif

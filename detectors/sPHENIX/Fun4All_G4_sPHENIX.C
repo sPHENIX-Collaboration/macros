@@ -171,6 +171,19 @@ int Fun4All_G4_sPHENIX(
     INPUTGENERATOR::Gun[0]->set_vtx(0, 0, 0);
   }
 
+  // pythia6
+  if (Input::PYTHIA6)
+  {
+    //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia6);
+  }
+  // pythia8
+  if (Input::PYTHIA8)
+  {
+    //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia8);
+  }
+
   //--------------
   // Set Input Manager specific options
   //--------------
@@ -178,10 +191,14 @@ int Fun4All_G4_sPHENIX(
 
   if (Input::HEPMC)
   {
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4, 100e-4, 8, 0);  //optional collision smear in space, time
-                                                                                           //    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
+    //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    Input::ApplysPHENIXBeamParameter(INPUTMANAGER::HepMCInputManager);
+
+    // optional overriding beam parameters
+    //INPUTMANAGER::HepMCInputManager->set_vertex_distribution_width(100e-4, 100e-4, 8, 0);  //optional collision smear in space, time
+    //    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_mean(0,0,0,0);//optional collision central position shift in space, time
     // //optional choice of vertex distribution function in space, time
-    INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
+    //INPUTMANAGER::HepMCInputManager->set_vertex_distribution_function(PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus, PHHepMCGenHelper::Gaus);
     //! embedding ID for the event
     //! positive ID is the embedded event of interest, e.g. jetty event from pythia
     //! negative IDs are backgrounds, .e.g out of time pile up collisions
@@ -194,6 +211,11 @@ int Fun4All_G4_sPHENIX(
       // and then modify the ones you want to be different
       // INPUTMANAGER::HepMCPileupInputManager->set_vertex_distribution_width(100e-4,100e-4,8,0);
     }
+  }
+  if (Input::PILEUPRATE > 0)
+  {
+    //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    Input::ApplysPHENIXBeamParameter(INPUTMANAGER::HepMCPileupInputManager);
   }
   // register all input generators with Fun4All
   InputRegister();
@@ -291,13 +313,6 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALOUT_EVAL = Enable::HCALOUT_CLUSTER && true;
   Enable::HCALOUT_QA = Enable::HCALOUT_CLUSTER and Enable::QA && true;
 
-  // forward EMC
-  //Enable::FEMC = true;
-  Enable::FEMC_ABSORBER = true;
-  Enable::FEMC_TOWER = Enable::FEMC && true;
-  Enable::FEMC_CLUSTER = Enable::FEMC_TOWER && true;
-  Enable::FEMC_EVAL = Enable::FEMC_CLUSTER and Enable::QA && true;
-
   Enable::EPD = false;
 
   //! forward flux return plug door. Out of acceptance and off by default.
@@ -338,7 +353,7 @@ int Fun4All_G4_sPHENIX(
   //---------------
   // World Settings
   //---------------
-  //  G4WORLD::PhysicsList = "QGSP_BERT"; //FTFP_BERT_HP best for calo
+  //  G4WORLD::PhysicsList = "FTFP_BERT"; //FTFP_BERT_HP best for calo
   //  G4WORLD::WorldMaterial = "G4_AIR"; // set to G4_GALACTIC for material scans
 
   //---------------
@@ -422,15 +437,13 @@ int Fun4All_G4_sPHENIX(
   // if enabled, do topoClustering early, upstream of any possible jet reconstruction
   if (Enable::TOPOCLUSTER) TopoClusterReco();
 
-  if (Enable::FEMC_TOWER) FEMC_Towers();
-  if (Enable::FEMC_CLUSTER) FEMC_Clusters();
-
-
-        printf("RCC: Starting SVTX tracking\n");
-
   //--------------
   // SVTX tracking
   //--------------
+  if(Enable::TRACKING_TRACK)
+    {
+      TrackingInit();
+    }
   if (Enable::MVTX_CLUSTER) Mvtx_Clustering();
   if (Enable::INTT_CLUSTER) Intt_Clustering();
   if (Enable::TPC_CLUSTER) TPC_Clustering();
@@ -438,7 +451,6 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::TRACKING_TRACK)
   {
-    TrackingInit();
     Tracking_Reco();
   }
         printf("RCC: Finished SVTX tracking\n");
@@ -502,8 +514,6 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::HCALOUT_EVAL) HCALOuter_Eval(outputroot + "_g4hcalout_eval.root");
 
-  if (Enable::FEMC_EVAL) FEMC_Eval(outputroot + "_g4femc_eval.root");
-
   if (Enable::JETS_EVAL) Jet_Eval(outputroot + "_g4jet_eval.root");
 
   if (Enable::DSTREADER) G4DSTreader(outputroot + "_DSTReader.root");
@@ -516,7 +526,7 @@ int Fun4All_G4_sPHENIX(
   if (Enable::KFPARTICLE && Input::UPSILON) KFParticle_Upsilon_Reco();
   if (Enable::KFPARTICLE && Input::DZERO) KFParticle_D0_Reco();
   //if (Enable::KFPARTICLE && Input::LAMBDAC) KFParticle_Lambdac_Reco();
-     
+
   //----------------------
   // Standard QAs
   //----------------------
@@ -550,10 +560,10 @@ int Fun4All_G4_sPHENIX(
     string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", FullOutFile);
     if (Enable::DSTOUT_COMPRESS)
-      {
-        ShowerCompress();
-        DstCompress(out);
-      }
+    {
+      ShowerCompress();
+      DstCompress(out);
+    }
     se->registerOutputManager(out);
   }
   //-----------------
