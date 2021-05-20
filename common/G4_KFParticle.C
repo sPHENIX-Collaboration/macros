@@ -48,15 +48,12 @@ void KFParticle_Upsilon_Reco()
   kfparticle->doTruthMatching(Enable::KFPARTICLE_TRUTH_MATCH);
   kfparticle->getDetectorInfo(Enable::KFPARTICLE_DETECTOR_INFO);
 
+  std::string decayDescriptor = motherName + " -> e^+ e^-";
+  kfparticle->setDecayDescriptor(decayDescriptor);
+
   kfparticle->setContainerName(motherName);
   kfparticle->setOutputName("KFParticleOutput_" + motherName + "_reconstruction.root");
 
-  std::pair<std::string, int> daughterList[99];
-  kfparticle->setNumberOfTracks(2);
-  daughterList[0] = make_pair("electron", +1);
-  daughterList[1] = make_pair("electron", -1);
-  kfparticle->getChargeConjugate(false);
-  kfparticle->setDaughters(daughterList);
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
   kfparticle->setMinimumTrackIPchi2(0); // Upsilon decays are prompt, tracks are more likely to point to vertex
   kfparticle->setMaximumTrackchi2nDOF(KFParticleBaseCut::maxTrackchi2nDoF);
@@ -64,7 +61,6 @@ void KFParticle_Upsilon_Reco()
   kfparticle->setMaximumVertexchi2nDOF(KFParticleBaseCut::maxVertexchi2nDoF);
   kfparticle->setMaximumDaughterDCA(KFParticleBaseCut::maxTrackTrackDCA);
 
-  kfparticle->setMotherName(motherName);
   kfparticle->setMinimumMass(7);
   kfparticle->setMaximumMass(11);
   kfparticle->setMotherPT(KFParticleBaseCut::minMotherPT);
@@ -91,15 +87,12 @@ void KFParticle_D0_Reco()
   kfparticle->doTruthMatching(Enable::KFPARTICLE_TRUTH_MATCH);
   kfparticle->getDetectorInfo(Enable::KFPARTICLE_DETECTOR_INFO);
 
+  std::string decayDescriptor = "[" + motherName + " -> K^- pi^+]cc";
+  kfparticle->setDecayDescriptor(decayDescriptor);
+
   kfparticle->setContainerName(motherName);
   kfparticle->setOutputName("KFParticleOutput_" + motherName + "_reconstruction.root");
 
-  std::pair<std::string, int> daughterList[99];
-  kfparticle->setNumberOfTracks(2);
-  daughterList[0] = make_pair("kaon", -1);
-  daughterList[1] = make_pair("pion", +1);
-  kfparticle->getChargeConjugate(true);
-  kfparticle->setDaughters(daughterList);
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
   kfparticle->setMinimumTrackIPchi2(KFParticleBaseCut::minTrackIPchi2);
   kfparticle->setMaximumTrackchi2nDOF(KFParticleBaseCut::maxTrackchi2nDoF);
@@ -107,7 +100,6 @@ void KFParticle_D0_Reco()
   kfparticle->setMaximumVertexchi2nDOF(KFParticleBaseCut::maxVertexchi2nDoF);
   kfparticle->setMaximumDaughterDCA(KFParticleBaseCut::maxTrackTrackDCA);
 
-  kfparticle->setMotherName(motherName);
   kfparticle->setMinimumMass(1.750);
   kfparticle->setMaximumMass(1.950);
   kfparticle->setMotherPT(KFParticleBaseCut::minMotherPT);
@@ -134,16 +126,12 @@ void KFParticle_Lambdac_Reco()
   kfparticle->doTruthMatching(Enable::KFPARTICLE_TRUTH_MATCH);
   kfparticle->getDetectorInfo(Enable::KFPARTICLE_DETECTOR_INFO);
 
+  std::string decayDescriptor = "[" + motherName + " -> proton^+ K^- pi^+]cc";
+  kfparticle->setDecayDescriptor(decayDescriptor);
+
   kfparticle->setContainerName(motherName);
   kfparticle->setOutputName("KFParticleOutput_" + motherName + "_reconstruction.root");
 
-  std::pair<std::string, int> daughterList[99];
-  kfparticle->setNumberOfTracks(3);
-  daughterList[0] = make_pair("proton", +1);
-  daughterList[1] = make_pair("kaon", -1);
-  daughterList[2] = make_pair("pion", +1);
-  kfparticle->getChargeConjugate(true);
-  kfparticle->setDaughters(daughterList);
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
   kfparticle->setMinimumTrackIPchi2(KFParticleBaseCut::minTrackIPchi2);
   kfparticle->setMaximumTrackchi2nDOF(KFParticleBaseCut::maxTrackchi2nDoF);
@@ -151,7 +139,6 @@ void KFParticle_Lambdac_Reco()
   kfparticle->setMaximumVertexchi2nDOF(KFParticleBaseCut::maxVertexchi2nDoF);
   kfparticle->setMaximumDaughterDCA(KFParticleBaseCut::maxTrackTrackDCA);
 
-  kfparticle->setMotherName(motherName);
   kfparticle->setMinimumMass(2.150);
   kfparticle->setMaximumMass(2.400);
   kfparticle->setMotherPT(KFParticleBaseCut::minMotherPT);
