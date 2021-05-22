@@ -372,29 +372,41 @@ void CEMC_Towers()
                                                string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
   se->registerSubsystem(TowerDigitizer);
 
+  RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
+  TowerCalibration->Detector("CEMC");
+  TowerCalibration->Verbosity(verbosity);
+
   if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal)
   {
-    RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
-    TowerCalibration->Detector("CEMC");
-    TowerCalibration->Verbosity(verbosity);
-    TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV);
-    TowerCalibration->set_pedstal_ADC(0);
-    se->registerSubsystem(TowerCalibration);
+    if (G4CEMC::TowerDigi == RawTowerDigitizer::kNo_digitization)
+    {
+      // just use sampling fraction set previously
+      TowerCalibration->set_calib_const_GeV_ADC(1.0 / sampling_fraction);
+    }
+    else
+    {
+      TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+      TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV);
+      TowerCalibration->set_pedstal_ADC(0);
+    }
   }
   else if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal)
   {
-    RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
-    TowerCalibration->Detector("CEMC");
-    TowerCalibration->Verbosity(verbosity);
-    TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
-    TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
-                                                              string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
-    TowerCalibration->set_variable_GeV_ADC(true);                                                                                                   //read GeV per ADC from calibrations file comment next line if true
-                                                                                                                                                    //    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);                                                             // overall energy scale based on 4-GeV photon simulations
-    TowerCalibration->set_variable_pedestal(true);                                                                                                  //read pedestals from calibrations file comment next line if true
-                                                                                                                                                    //    TowerCalibration->set_pedstal_ADC(0);
-    se->registerSubsystem(TowerCalibration);
+    if (G4CEMC::TowerDigi == RawTowerDigitizer::kNo_digitization)
+    {
+      // just use sampling fraction set previously
+      TowerCalibration->set_calib_const_GeV_ADC(1.0 / sampling_fraction);
+    }
+    else
+    {
+      TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
+      TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
+								string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
+      TowerCalibration->set_variable_GeV_ADC(true);                                                                                                   //read GeV per ADC from calibrations file comment next line if true
+      //    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);                                                             // overall energy scale based on 4-GeV photon simulations
+      TowerCalibration->set_variable_pedestal(true);                                                                                                  //read pedestals from calibrations file comment next line if true
+      //    TowerCalibration->set_pedstal_ADC(0);
+    }
   }
   else
   {
@@ -403,6 +415,7 @@ void CEMC_Towers()
     gSystem->Exit(-1);
     return;
   }
+  se->registerSubsystem(TowerCalibration);
 
   return;
 }
