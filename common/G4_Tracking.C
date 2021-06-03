@@ -34,7 +34,7 @@
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsInitialVertexFinder.h>
 #include <trackreco/PHActsVertexFinder.h>
-#include <trackreco/PHTpcResiduals.h>
+#include <tpccalib/PHTpcResiduals.h>
 #endif
 
 #include <trackbase/TrkrHitTruthAssoc.h>
@@ -47,6 +47,7 @@
 
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
+R__LOAD_LIBRARY(libtpccalib.so)
 R__LOAD_LIBRARY(libPHTpcTracker.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
