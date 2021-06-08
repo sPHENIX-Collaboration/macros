@@ -28,14 +28,14 @@
 #include <trackreco/PHTruthTrackSeeding.h>
 #include <trackreco/PHTruthVertexing.h>
 
-#if __cplusplus >= 201703L
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSiliconSeeding.h>
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsInitialVertexFinder.h>
 #include <trackreco/PHActsVertexFinder.h>
+
+#include <tpccalib/TpcSpaceChargeReconstruction.h>
 #include <tpccalib/PHTpcResiduals.h>
-#endif
 
 #include <trackbase/TrkrHitTruthAssoc.h>
 
@@ -64,6 +64,7 @@ namespace G4TRACKING
   // Space Charge calibration flag
   bool SC_CALIBMODE = true;        // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
   double SC_COLLISIONRATE = 50e3;  // leave at 50 KHz for now, scaling of distortion map not implemented yet
+  std::string SC_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root"; // space charge calibration output file
 
   // Tracking reconstruction setup parameters and flags
   //=====================================
@@ -91,6 +92,9 @@ namespace G4TRACKING
   // TPC seeding options
   bool use_PHTpcTracker_seeding = false;  // false for using the default PHCASeeding to get TPC track seeds, true to use PHTpcTracker
   bool use_hybrid_seeding = false;                  // false for using the default PHCASeeding, true to use PHHybridSeeding (STAR core, ALICE KF)
+
+  // set to false to disable adding fake surfaces (TPC, Micromegas) to MakeActsGeom
+  bool add_fake_surfaces = true;
 
   // Truth seeding options (can use any or all)
   bool use_truth_silicon_seeding = false;        // if true runs truth silicon seeding instead of acts silicon seeding
@@ -171,6 +175,7 @@ void TrackingInit()
   geom->Verbosity(verbosity);
   geom->setMagField(G4MAGNET::magfield);
   geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
+  geom->add_fake_surfaces( G4TRACKING::add_fake_surfaces );
   
   /// Need a flip of the sign for constant field in tpc tracker
   if(G4TRACKING::use_PHTpcTracker_seeding && 
@@ -410,8 +415,9 @@ void Tracking_Reco()
       if (G4TRACKING::SC_CALIBMODE)
 	{
 	  /// run tpc residual determination with silicon+MM track fit
-	  PHTpcResiduals* residuals = new PHTpcResiduals();
-	  residuals->Verbosity(verbosity);
+	  auto residuals = new PHTpcResiduals;
+   residuals->setOutputfile( G4TRACKING::SC_ROOTOUTPUT_FILENAME );
+   residuals->Verbosity(verbosity);
 	  se->registerSubsystem(residuals);
 	}
       
@@ -561,13 +567,30 @@ void Tracking_Reco()
         
       std::cout << "   Using Genfit track fitting " << std::endl;
       
-      PHGenFitTrkFitter* kalman = new PHGenFitTrkFitter();
+      auto kalman = new PHGenFitTrkFitter;
       kalman->Verbosity(verbosity);
       kalman->set_vertexing_method(G4TRACKING::vmethod);
       kalman->set_use_truth_vertex(false);      
       se->registerSubsystem(kalman);
-    }
+      
+      // in space charge calibration mode, disable the tpc
+      if( G4TRACKING::SC_CALIBMODE )
+      {
+        std::cout << "Tracking_reco - Disabling TPC layers from kalman filter" << std::endl;
+        for( int layer = 7; layer < 23; ++layer ) { kalman->disable_layer( layer ); }
+        for( int layer = 23; layer < 39; ++layer ) { kalman->disable_layer( layer ); }
+        for( int layer = 39; layer < 55; ++layer ) { kalman->disable_layer( layer ); }
+      }
 
+      if( G4TRACKING::SC_CALIBMODE )
+      {
+        // Genfit based Tpc space charge Reconstruction
+        auto tpcSpaceChargeReconstruction = new TpcSpaceChargeReconstruction;
+        tpcSpaceChargeReconstruction->set_outputfile( G4TRACKING::SC_ROOTOUTPUT_FILENAME );
+        se->registerSubsystem(tpcSpaceChargeReconstruction);
+      }
+      
+    }
 
   //==================================
   // Common  to all sections
