@@ -416,8 +416,8 @@ void Tracking_Reco()
 	{
 	  /// run tpc residual determination with silicon+MM track fit
 	  auto residuals = new PHTpcResiduals;
-   residuals->setOutputfile( G4TRACKING::SC_ROOTOUTPUT_FILENAME );
-   residuals->Verbosity(verbosity);
+    residuals->setOutputfile( G4TRACKING::SC_ROOTOUTPUT_FILENAME );
+    residuals->Verbosity(verbosity);
 	  se->registerSubsystem(residuals);
 	}
       
@@ -463,8 +463,9 @@ void Tracking_Reco()
       if (G4TRACKING::SC_CALIBMODE)
 	{
 	  /// run tpc residual determination with silicon+MM track fit
-	  PHTpcResiduals* residuals = new PHTpcResiduals();
-	  residuals->Verbosity(verbosity);
+	  auto residuals = new PHTpcResiduals;
+    residuals->setOutputfile( G4TRACKING::SC_ROOTOUTPUT_FILENAME );
+    residuals->Verbosity(verbosity);
 	  se->registerSubsystem(residuals);
 	}
             
@@ -571,7 +572,6 @@ void Tracking_Reco()
       kalman->Verbosity(verbosity);
       kalman->set_vertexing_method(G4TRACKING::vmethod);
       kalman->set_use_truth_vertex(false);      
-      se->registerSubsystem(kalman);
       
       // in space charge calibration mode, disable the tpc
       if( G4TRACKING::SC_CALIBMODE )
@@ -581,6 +581,8 @@ void Tracking_Reco()
         for( int layer = 23; layer < 39; ++layer ) { kalman->disable_layer( layer ); }
         for( int layer = 39; layer < 55; ++layer ) { kalman->disable_layer( layer ); }
       }
+
+      se->registerSubsystem(kalman);
 
       if( G4TRACKING::SC_CALIBMODE )
       {
