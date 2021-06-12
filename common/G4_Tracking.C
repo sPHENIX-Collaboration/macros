@@ -23,6 +23,7 @@
 #include <trackreco/PHRaveVertexing.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHTpcTrackSeedVertexAssoc.h>
+#include <trackreco/PHTrackCleaner.h>
 #include <trackreco/PHTrackSeeding.h>
 #include <trackreco/PHTruthSiliconAssociation.h>
 #include <trackreco/PHTruthTrackSeeding.h>
@@ -421,6 +422,10 @@ void Tracking_Reco()
 	  se->registerSubsystem(residuals);
 	}
       
+      // Choose the best silicon matched track for each TPC track seed
+      PHTrackCleaner *cleaner= new PHTrackCleaner();
+      cleaner->Verbosity(verbosity);
+      se->registerSubsystem(cleaner);
       
       PHActsVertexFinder *finder = new PHActsVertexFinder();
       finder->Verbosity(verbosity);
