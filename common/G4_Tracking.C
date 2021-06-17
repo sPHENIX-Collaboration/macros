@@ -317,26 +317,26 @@ void Tracking_Reco()
 	      seeder->SetSearchWindow(0.01, 0.02);  // (eta width, phi width)
 	      seeder->SetMinHitsPerCluster(0);
 	      if(G4TRACKING::use_propagator) seeder->SetMinClustersPerTrack(3);
-              else seeder->SetMinClustersPerTrack(20);
-              seeder->useConstBField(false);
-              seeder->useFixedClusterError(true);
+	      else seeder->SetMinClustersPerTrack(20);
+	      seeder->useConstBField(false);
+	      seeder->useFixedClusterError(true);
 	      se->registerSubsystem(seeder);
 
-              if(G4TRACKING::use_propagator)
-              {
-                PHTpcTrackSeedVertexAssoc* vtxassoc2 = new PHTpcTrackSeedVertexAssoc("PrePropagatorPHTpcTrackSeedVertexAssoc");
-                vtxassoc2->Verbosity(verbosity);
-                se->registerSubsystem(vtxassoc2);
+	      if(G4TRACKING::use_propagator)
+	      {
+	        PHTpcTrackSeedVertexAssoc* vtxassoc2 = new PHTpcTrackSeedVertexAssoc("PrePropagatorPHTpcTrackSeedVertexAssoc");
+	        vtxassoc2->Verbosity(verbosity);
+	        se->registerSubsystem(vtxassoc2);
 
-                std::cout << "   Using PHSimpleKFProp propagator " << std::endl;
-                PHSimpleKFProp* cprop = new PHSimpleKFProp("PHSimpleKFProp");
-                cprop->set_field_dir(G4MAGNET::magfield_rescale);
-                cprop->useConstBField(false);
-                cprop->useFixedClusterError(true);
-                cprop->set_max_window(5.);
-                cprop->Verbosity(verbosity);
-                se->registerSubsystem(cprop);
-              }
+	        std::cout << "   Using PHSimpleKFProp propagator " << std::endl;
+	        PHSimpleKFProp* cprop = new PHSimpleKFProp("PHSimpleKFProp");
+	        cprop->set_field_dir(G4MAGNET::magfield_rescale);
+	        cprop->useConstBField(false);
+	        cprop->useFixedClusterError(true);
+	        cprop->set_max_window(5.);
+	        cprop->Verbosity(verbosity);
+	        se->registerSubsystem(cprop);
+	      }
 	    }
 	}
 
