@@ -15,6 +15,7 @@
 
 #include <trackreco/PHCASeeding.h>
 #include <trackreco/PHHybridSeeding.h>
+#include <trackreco/PHSimpleKFProp.h>
 #include <trackreco/PHGenFitTrackProjection.h>
 #include <trackreco/PHGenFitTrkFitter.h>
 #include <trackreco/PHGenFitTrkProp.h>
@@ -93,6 +94,7 @@ namespace G4TRACKING
   // TPC seeding options
   bool use_PHTpcTracker_seeding = false;  // false for using the default PHCASeeding to get TPC track seeds, true to use PHTpcTracker
   bool use_hybrid_seeding = false;                  // false for using the default PHCASeeding, true to use PHHybridSeeding (STAR core, ALICE KF)
+  bool use_propagator = true;             // use PHSimpleKFProp for CA seeding if true
 
   // set to false to disable adding fake surfaces (TPC, Micromegas) to MakeActsGeom
   bool add_fake_surfaces = true;
@@ -313,9 +315,28 @@ void Tracking_Reco()
 	      seeder->Verbosity(verbosity);
 	      seeder->SetLayerRange(7, 55);
 	      seeder->SetSearchWindow(0.01, 0.02);  // (eta width, phi width)
-	      seeder->SetMinHitsPerCluster(2);
-	      seeder->SetMinClustersPerTrack(20);
+	      seeder->SetMinHitsPerCluster(0);
+	      if(G4TRACKING::use_propagator) seeder->SetMinClustersPerTrack(3);
+	      else seeder->SetMinClustersPerTrack(20);
+	      seeder->useConstBField(false);
+	      seeder->useFixedClusterError(true);
 	      se->registerSubsystem(seeder);
+
+	      if(G4TRACKING::use_propagator)
+	      {
+	        PHTpcTrackSeedVertexAssoc* vtxassoc2 = new PHTpcTrackSeedVertexAssoc("PrePropagatorPHTpcTrackSeedVertexAssoc");
+	        vtxassoc2->Verbosity(verbosity);
+	        se->registerSubsystem(vtxassoc2);
+
+	        std::cout << "   Using PHSimpleKFProp propagator " << std::endl;
+	        PHSimpleKFProp* cprop = new PHSimpleKFProp("PHSimpleKFProp");
+	        cprop->set_field_dir(G4MAGNET::magfield_rescale);
+	        cprop->useConstBField(false);
+	        cprop->useFixedClusterError(true);
+	        cprop->set_max_window(5.);
+	        cprop->Verbosity(verbosity);
+	        se->registerSubsystem(cprop);
+	      }
 	    }
 	}
 
