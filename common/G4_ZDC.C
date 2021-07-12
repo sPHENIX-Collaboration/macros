@@ -42,8 +42,8 @@ namespace G4ZDC
 {
  
   double Gz0 = 1900.;
-  double outer_radius = 180.;
-  string calibfile = "/sphenix/u/shuhang98/build/ZDC/source/towerMap_ZDC.txt";
+  double outer_radius = 18.;
+  string calibfile = "/ForwardEcal/mapping/towerMap_ZDC.txt";
 }
 void ZDCInit()
 {
@@ -83,8 +83,8 @@ void ZDC_Towers()
   Fun4AllServer *se = Fun4AllServer::instance();
 
   ostringstream mapping_zdc;
-  // mapping_zdc << getenv("CALIBRATIONROOT") << G4ZDC::calibfile;
-  mapping_zdc  << G4ZDC::calibfile;
+  mapping_zdc << getenv("CALIBRATIONROOT") << G4ZDC::calibfile;
+  //mapping_zdc  << G4ZDC::calibfile;
 
   RawTowerBuilderByHitIndex *tower_ZDC = new RawTowerBuilderByHitIndex("TowerBuilder_ZDC");
   tower_ZDC->Detector("ZDC");
