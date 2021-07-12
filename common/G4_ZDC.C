@@ -6,9 +6,6 @@
 #include <g4calo/RawTowerBuilderByHitIndex.h>
 #include <g4calo/RawTowerDigitizer.h>
 
-//#include <g4eiccalos/PHG4ForwardCalCellReco.h>
-//#include <g4eiccalos/PHG4ForwardEcalSubsystem.h>
-
 #include <g4detectors/PHG4ZDCSubsystem.h>
 
 #include <g4detectors/PHG4DetectorSubsystem.h>
@@ -27,7 +24,6 @@
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
-//R__LOAD_LIBRARY(libg4zdcdetector.so)
 R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
@@ -68,13 +64,6 @@ void ZDCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 
   PHG4ZDCSubsystem *zdc = new PHG4ZDCSubsystem("ZDC");
   
-  //ostringstream mapping_zdc;
-
- 
-  //mapping_zdc << getenv("CALIBRATIONROOT") << G4ZDC::calibfile;
-  //mapping_zdc  << G4ZDC::calibfile;
-
-  //femc->SetTowerMappingFile(mapping_femc.str());
   zdc->OverlapCheck(OverlapCheck);
   zdc->SetActive();
   zdc->SuperDetector("ZDC");
@@ -120,7 +109,7 @@ void ZDC_Towers()
   TowerCalibration->TowerType(0);
   TowerCalibration->Verbosity(verbosity);
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration->set_calib_const_GeV_ADC(1.0 / 0.010);  // sampling fraction = 0.010
+  TowerCalibration->set_calib_const_GeV_ADC(1.0 / 0.008);  // sampling fraction = 0.008
   TowerCalibration->set_pedstal_ADC(0);
   se->registerSubsystem(TowerCalibration);
 
