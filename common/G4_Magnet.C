@@ -28,11 +28,11 @@ void MagnetFieldInit()
 {
   if (!isfinite(G4MAGNET::magfield_rescale))
   {
-    G4MAGNET::magfield_rescale = 1.;
+    G4MAGNET::magfield_rescale = -1.;
   }
   if (G4MAGNET::magfield.empty())
   {
-    G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");
+    G4MAGNET::magfield = string(getenv("CALIBRATIONROOT"))+ string("/Field/Map/sphenix3dbigmapxyz.root");
   }
 }
 
