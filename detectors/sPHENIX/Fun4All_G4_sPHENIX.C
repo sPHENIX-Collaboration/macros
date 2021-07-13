@@ -363,6 +363,7 @@ int Fun4All_G4_sPHENIX(
   //  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
   // G4MAGNET::magfield_rescale = -1.4 / 1.5;  // make consistent with expected Babar field strength of 1.4T
   G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dbigmapxyz.root");
+  G4MAGNET::magfield_rescale = -1.;  // get polarity of our fieldmap right
 
   //---------------
   // Pythia Decayer
