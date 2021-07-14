@@ -8,6 +8,7 @@
 #include <G4_Mvtx.C>
 
 #include <g4tpc/PHG4TpcDigitizer.h>
+#include <g4tpc/PHG4TpcDirectLaser.h>
 #include <g4tpc/PHG4TpcDistortion.h>
 #include <g4tpc/PHG4TpcElectronDrift.h>
 #include <g4tpc/PHG4TpcEndCapSubsystem.h>
@@ -168,6 +169,24 @@ void TPC_Cells()
   PHG4TpcElectronDrift* edrift = new PHG4TpcElectronDrift();
   edrift->Detector("TPC");
   edrift->Verbosity(verbosity);
+
+  if (false) //enable and adjust the settings of the CM flash and direct lasers
+    {//eventually should be G4TPC::ENABLE_DIRECT_LASER
+
+      //activate and aim the direct lasers:
+      edrift->setDirectLaser(true);
+      edrift->directLaser->AimToThetaPhi(0.78,0.60);
+      //auto-advance may still have bugs in it.  use with care.
+      //edrift->setDirectLaserAuto(true);
+      //edrift->directLaser->SetPhiStepping(20,0.,6.28);
+      //edrift->directLaser->SetThetaStepping(20,0.,1.57);
+
+      //activate and set the time delay (ns) of the central membrane flash:
+      edrift->setCentralMembrane(true);
+      edrift->setCentralMembraneDelay(0);
+
+    }
+  
   if( G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS )
   {
     auto distortionMap = new PHG4TpcDistortion;
