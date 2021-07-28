@@ -234,6 +234,12 @@ void Tracking_Reco()
     {
       PHActsSiliconSeeding* silicon_Seeding = new PHActsSiliconSeeding();
       silicon_Seeding->Verbosity(verbosity);
+      if(G4MAGNET::magfield.find(".root") == std::string::npos and
+	 G4MAGNET::magfield.find("3d") == std::string::npos)
+	{
+	  silicon_Seeding->use3dField(true);
+	}
+      
       se->registerSubsystem(silicon_Seeding);
     }
   
