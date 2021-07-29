@@ -672,6 +672,7 @@ void Tracking_Eval(const std::string& outputfile)
   eval->set_use_initial_vertex(G4TRACKING::g4eval_use_initial_vertex);
   eval->set_use_genfit_vertex(G4TRACKING::use_genfit);
   eval->scan_for_embedded(true);  // take all tracks if false - take only embedded tracks if true
+  eval->scan_for_primaries(true); // defaults to only thrown particles for ntp_gtrack
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
