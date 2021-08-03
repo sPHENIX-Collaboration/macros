@@ -7,7 +7,9 @@
 #include <G4_Intt.C>
 #include <G4_Mvtx.C>
 
+#include <g4tpc/PHG4TpcCentralMembrane.h>
 #include <g4tpc/PHG4TpcDigitizer.h>
+#include <g4tpc/PHG4TpcDirectLaser.h>
 #include <g4tpc/PHG4TpcDistortion.h>
 #include <g4tpc/PHG4TpcElectronDrift.h>
 #include <g4tpc/PHG4TpcEndCapSubsystem.h>
@@ -58,11 +60,6 @@ namespace G4TPC
   bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
   std::string time_ordered_distortion_filename = "/gpfs/mnt/gpfs02/sphenix/user/klest/TimeOrderedDistortions.root";
 
-//   unsigned int distortion_coordinates =
-//     PHG4TpcElectronDrift::COORD_PHI|
-//     PHG4TpcElectronDrift::COORD_R|
-//     PHG4TpcElectronDrift::COORD_Z;
-
   // distortion corrections
   bool ENABLE_CORRECTIONS = false;
   auto correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/TPC/DistortionMaps/fluct_average.rev3.1side.3d.file0.h_negz.real_B1.4_E-400.0.ross_phi1_sphenix_phislice_lookup_r26xp40xz40.distortion_map.hist.root";
@@ -70,6 +67,12 @@ namespace G4TPC
     TpcSpaceChargeCorrection::COORD_PHI|
     TpcSpaceChargeCorrection::COORD_R|
     TpcSpaceChargeCorrection::COORD_Z;
+
+  // enable central membrane g4hits generation
+  bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
+  
+  // enable direct laser g4hits generation
+  bool ENABLE_DIRECT_LASER_HITS = false;
 
 }  // namespace G4TPC
 
@@ -156,16 +159,38 @@ void TPC_Cells()
   int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
 
+  // central membrane G4Hit generation
+  if( G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS )
+  {
+    auto centralMembrane = new PHG4TpcCentralMembrane;
+    centralMembrane->setCentralMembraneDelay(0);
+    se->registerSubsystem(centralMembrane);
+  }
+
+  // direct laser G4Hit generation
+  if( G4TPC::ENABLE_DIRECT_LASER_HITS )
+  {
+    auto directLaser = new PHG4TpcDirectLaser;
+
+    // setup phi and theta steps
+    /* use 5deg steps */
+    static constexpr double deg_to_rad = M_PI/180.;
+    directLaser->SetPhiStepping( 72, 0*deg_to_rad, 360*deg_to_rad );
+    directLaser->SetThetaStepping( 18, 0*deg_to_rad, 90*deg_to_rad );
+    directLaser->SetDirectLaserAuto( true );
+    se->registerSubsystem(directLaser);
+  }
+
   //=========================
   // setup Tpc readout for filling cells
   // g4tpc/PHG4TpcElectronDrift uses
   // g4tpc/PHG4TpcPadPlaneReadout
   //=========================
 
-  PHG4TpcPadPlane* padplane = new PHG4TpcPadPlaneReadout();
+  auto padplane = new PHG4TpcPadPlaneReadout;
   padplane->Verbosity(verbosity);
 
-  PHG4TpcElectronDrift* edrift = new PHG4TpcElectronDrift();
+  auto edrift = new PHG4TpcElectronDrift;
   edrift->Detector("TPC");
   edrift->Verbosity(verbosity);
   if( G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS )
