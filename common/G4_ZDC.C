@@ -43,7 +43,7 @@ namespace G4ZDC
  
   double Gz0 = 1900.;
   double outer_radius = 18.;
-  string calibfile = "/ForwardEcal/mapping/towerMap_ZDC.txt";
+  string calibfile = "/ZDC/mapping/towerMap_ZDC.txt";
 }
 void ZDCInit()
 {
@@ -109,7 +109,7 @@ void ZDC_Towers()
   TowerCalibration->TowerType(0);
   TowerCalibration->Verbosity(verbosity);
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration->set_calib_const_GeV_ADC(1.0 / 0.008);  // sampling fraction = 0.008
+  TowerCalibration->set_calib_const_GeV_ADC(1.0); 
   TowerCalibration->set_pedstal_ADC(0);
   se->registerSubsystem(TowerCalibration);
 
