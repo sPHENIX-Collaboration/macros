@@ -234,6 +234,7 @@ void Tracking_Reco()
     {
       PHActsSiliconSeeding* silicon_Seeding = new PHActsSiliconSeeding();
       silicon_Seeding->Verbosity(verbosity);
+      silicon_Seeding->fieldMapName(G4MAGNET::magfield);
       se->registerSubsystem(silicon_Seeding);
     }
   
