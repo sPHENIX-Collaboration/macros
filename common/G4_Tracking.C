@@ -253,6 +253,7 @@ void Tracking_Reco()
       init_vtx->Verbosity(verbosity);
       init_vtx->setSvtxTrackMapName("SvtxSiliconTrackMap");
       init_vtx->setSvtxVertexMapName("SvtxVertexMap");
+      init_vtx->magFieldName(G4MAGNET::magfield);
       se->registerSubsystem(init_vtx);
     }
   
@@ -336,7 +337,7 @@ void Tracking_Reco()
 	        cprop->useFixedClusterError(true);
 	        cprop->set_max_window(5.);
 	        cprop->Verbosity(verbosity);
-	        se->registerSubsystem(cprop);
+		se->registerSubsystem(cprop);
 	      }
 	    }
 	}
