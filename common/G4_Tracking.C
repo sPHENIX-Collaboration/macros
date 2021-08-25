@@ -313,7 +313,7 @@ void Tracking_Reco()
 	      std::cout << "   Using PHCASeeding track seeding " << std::endl;
 	      
 	      auto seeder = new PHCASeeding("PHCASeeding");
-	      seeder->set_field_dir(-1*G4MAGNET::magfield_rescale);  // to get charge sign right
+	      seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
 	      if(G4MAGNET::magfield.find("3d") != std::string::npos)
 		{ seeder->set_field_dir(-1*G4MAGNET::magfield_rescale); }
 	      seeder->Verbosity(verbosity);
