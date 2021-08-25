@@ -313,7 +313,9 @@ void Tracking_Reco()
 	      std::cout << "   Using PHCASeeding track seeding " << std::endl;
 	      
 	      auto seeder = new PHCASeeding("PHCASeeding");
-	      seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
+	      seeder->set_field_dir(-1*G4MAGNET::magfield_rescale);  // to get charge sign right
+	      if(G4MAGNET::magfield.find("3d") != std::string::npos)
+		{ seeder->set_field_dir(-1*G4MAGNET::magfield_rescale); }
 	      seeder->Verbosity(verbosity);
 	      seeder->SetLayerRange(7, 55);
 	      seeder->SetSearchWindow(0.01, 0.02);  // (eta width, phi width)
@@ -332,7 +334,9 @@ void Tracking_Reco()
 
 	        std::cout << "   Using PHSimpleKFProp propagator " << std::endl;
 	        PHSimpleKFProp* cprop = new PHSimpleKFProp("PHSimpleKFProp");
-	        cprop->set_field_dir(G4MAGNET::magfield_rescale);
+		cprop->set_field_dir(G4MAGNET::magfield_rescale);
+		if(G4MAGNET::magfield.find("3d") != std::string::npos)
+		  { cprop->set_field_dir(-1*G4MAGNET::magfield_rescale); }
 	        cprop->useConstBField(false);
 	        cprop->useFixedClusterError(true);
 	        cprop->set_max_window(5.);
