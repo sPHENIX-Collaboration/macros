@@ -452,6 +452,7 @@ void Tracking_Reco()
       
       PHActsVertexFinder *finder = new PHActsVertexFinder();
       finder->Verbosity(verbosity);
+      finder->setFieldMap(G4MAGNET::magfield);
       se->registerSubsystem(finder);
       
       PHActsTrkFitter* actsFit2 = new PHActsTrkFitter("PHActsSecondTrKFitter");
