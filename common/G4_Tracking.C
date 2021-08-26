@@ -234,6 +234,7 @@ void Tracking_Reco()
     {
       PHActsSiliconSeeding* silicon_Seeding = new PHActsSiliconSeeding();
       silicon_Seeding->Verbosity(verbosity);
+      silicon_Seeding->fieldMapName(G4MAGNET::magfield);
       se->registerSubsystem(silicon_Seeding);
     }
   
@@ -252,6 +253,7 @@ void Tracking_Reco()
       init_vtx->Verbosity(verbosity);
       init_vtx->setSvtxTrackMapName("SvtxSiliconTrackMap");
       init_vtx->setSvtxVertexMapName("SvtxVertexMap");
+      init_vtx->magFieldName(G4MAGNET::magfield);
       se->registerSubsystem(init_vtx);
     }
   
@@ -312,6 +314,8 @@ void Tracking_Reco()
 	      
 	      auto seeder = new PHCASeeding("PHCASeeding");
 	      seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
+	      if(G4MAGNET::magfield.find("3d") != std::string::npos)
+		{ seeder->set_field_dir(-1*G4MAGNET::magfield_rescale); }
 	      seeder->Verbosity(verbosity);
 	      seeder->SetLayerRange(7, 55);
 	      seeder->SetSearchWindow(0.01, 0.02);  // (eta width, phi width)
@@ -330,12 +334,14 @@ void Tracking_Reco()
 
 	        std::cout << "   Using PHSimpleKFProp propagator " << std::endl;
 	        PHSimpleKFProp* cprop = new PHSimpleKFProp("PHSimpleKFProp");
-	        cprop->set_field_dir(G4MAGNET::magfield_rescale);
+		cprop->set_field_dir(G4MAGNET::magfield_rescale);
+		if(G4MAGNET::magfield.find("3d") != std::string::npos)
+		  { cprop->set_field_dir(-1*G4MAGNET::magfield_rescale); }
 	        cprop->useConstBField(false);
 	        cprop->useFixedClusterError(true);
 	        cprop->set_max_window(5.);
 	        cprop->Verbosity(verbosity);
-	        se->registerSubsystem(cprop);
+		se->registerSubsystem(cprop);
 	      }
 	    }
 	}
@@ -450,6 +456,7 @@ void Tracking_Reco()
       
       PHActsVertexFinder *finder = new PHActsVertexFinder();
       finder->Verbosity(verbosity);
+      finder->setFieldMap(G4MAGNET::magfield);
       se->registerSubsystem(finder);
       
       PHActsTrkFitter* actsFit2 = new PHActsTrkFitter("PHActsSecondTrKFitter");
