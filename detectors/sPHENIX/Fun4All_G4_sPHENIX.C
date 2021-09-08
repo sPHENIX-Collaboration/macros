@@ -83,13 +83,13 @@ int Fun4All_G4_sPHENIX(
   // if you use a filelist
   //INPUTEMBED::listfile[0] = embed_input_file;
 
-  Input::SIMPLE = true;
-  Input::SIMPLE_NUMBER = 2; // if you need 2 of them
+  Input::SIMPLE = false;
+  //Input::SIMPLE_NUMBER = 2; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
   //  Input::PYTHIA6 = true;
 
-  // Input::PYTHIA8 = true;
+   Input::PYTHIA8 = true;
 
   //  Input::GUN = true;
   //  Input::GUN_NUMBER = 3; // if you need 3 of them
@@ -167,7 +167,7 @@ int Fun4All_G4_sPHENIX(
     INPUTGENERATOR::VectorMesonGenerator[0]->set_pt_range(0., 10.);
     // Y species - select only one, last one wins
     INPUTGENERATOR::VectorMesonGenerator[0]->set_upsilon_1s();
-    if (Input::HEPMC || Input::EMBED)
+    if (Input::HEPMC || Input::EMBED || Input::PYTHIA8)
     {
       INPUTGENERATOR::VectorMesonGenerator[0]->set_reuse_existing_vertex(true);
       INPUTGENERATOR::VectorMesonGenerator[0]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
