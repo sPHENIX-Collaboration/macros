@@ -56,7 +56,7 @@ int Fun4All_G4_sPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  //  rc->set_IntFlag("RANDOMSEED", 12345);
+  rc->set_IntFlag("RANDOMSEED", TString(outputFile).Hash());
 
   //===============
   // Input options
@@ -84,7 +84,7 @@ int Fun4All_G4_sPHENIX(
   //INPUTEMBED::listfile[0] = embed_input_file;
 
   Input::SIMPLE = true;
-  // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
+  Input::SIMPLE_NUMBER = 2; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
   //  Input::PYTHIA6 = true;
@@ -102,8 +102,8 @@ int Fun4All_G4_sPHENIX(
   //Input::LAMBDAC = false;
   //Input::LAMBDAC_VERBOSITY = 0;
   // Upsilon generator
-  //Input::UPSILON = true;
-  //Input::UPSILON_NUMBER = 3; // if you need 3 of them
+  Input::UPSILON = true;
+  Input::UPSILON_NUMBER = 1; // if you need 3 of them
   //Input::UPSILON_VERBOSITY = 0;
 
   //  Input::HEPMC = true;
@@ -128,7 +128,9 @@ int Fun4All_G4_sPHENIX(
   // add the settings for other with [1], next with [2]...
   if (Input::SIMPLE)
   {
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 5);
+    // low pT pions
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 10);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi+", 10);
     if (Input::HEPMC || Input::EMBED)
     {
       INPUTGENERATOR::SimpleEventGenerator[0]->set_reuse_existing_vertex(true);
@@ -140,11 +142,20 @@ int Fun4All_G4_sPHENIX(
                                                                                 PHG4SimpleEventGenerator::Uniform,
                                                                                 PHG4SimpleEventGenerator::Uniform);
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_mean(0., 0., 0.);
-      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0., 0., 5.);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0., 0., 10.);
     }
     INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1, 1);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
-    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.1, 20.);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.1, 2.);
+
+    // high pT pions
+    INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi-", 10);
+    INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi+", 10);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_reuse_existing_vertex(true);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_eta_range(-1, 1);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_phi_range(-M_PI, M_PI);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_pt_range(2, 50.);
   }
   // Upsilons
   // if you run more than one of these Input::UPSILON_NUMBER > 1
@@ -273,19 +284,20 @@ int Fun4All_G4_sPHENIX(
   Enable::TPC_CLUSTER = Enable::TPC_CELL && true;
   Enable::TPC_QA = Enable::TPC_CLUSTER and Enable::QA && true;
 
-  //Enable::MICROMEGAS = true;
+  Enable::MICROMEGAS = true;
   Enable::MICROMEGAS_CELL = Enable::MICROMEGAS && true;
   Enable::MICROMEGAS_CLUSTER = Enable::MICROMEGAS_CELL && true;
+  Enable::MICROMEGAS_QA = Enable::MICROMEGAS_CLUSTER && Enable::QA && true;
 
   Enable::TRACKING_TRACK = true;
-  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;
+  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && false;
   Enable::TRACKING_QA = Enable::TRACKING_TRACK and Enable::QA && true;
 
   //  cemc electronics + thin layer of W-epoxy to get albedo from cemc
   //  into the tracking, cannot run together with CEMC
   //  Enable::CEMCALBEDO = true;
 
-  Enable::CEMC = true;
+  Enable::CEMC = false;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
@@ -293,7 +305,7 @@ int Fun4All_G4_sPHENIX(
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
   Enable::CEMC_QA = Enable::CEMC_CLUSTER and Enable::QA && true;
 
-  Enable::HCALIN = true;
+  Enable::HCALIN = false;
   Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
@@ -301,10 +313,10 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && true;
   Enable::HCALIN_QA = Enable::HCALIN_CLUSTER and Enable::QA && true;
 
-  Enable::MAGNET = true;
-  Enable::MAGNET_ABSORBER = true;
+  Enable::MAGNET = false;
+  Enable::MAGNET_ABSORBER = false;
 
-  Enable::HCALOUT = true;
+  Enable::HCALOUT = false;
   Enable::HCALOUT_ABSORBER = true;
   Enable::HCALOUT_CELL = Enable::HCALOUT && true;
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
@@ -327,7 +339,7 @@ int Fun4All_G4_sPHENIX(
 
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && false;
 
-  Enable::JETS = true;
+  Enable::JETS = false;
   Enable::JETS_EVAL = Enable::JETS && true;
   Enable::JETS_QA = Enable::JETS and Enable::QA && true;
 
@@ -516,6 +528,7 @@ int Fun4All_G4_sPHENIX(
   if (Enable::MVTX_QA) Mvtx_QA();
   if (Enable::INTT_QA) Intt_QA();
   if (Enable::TPC_QA) TPC_QA();
+  if (Enable::MICROMEGAS_QA) Micromegas_QA();
   if (Enable::TRACKING_QA) Tracking_QA();
 
   if (Enable::TRACKING_QA and Enable::CEMC_QA and Enable::HCALIN_QA and Enable::HCALOUT_QA) QA_G4CaloTracking();
