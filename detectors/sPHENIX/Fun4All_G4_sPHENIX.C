@@ -34,8 +34,11 @@ R__LOAD_LIBRARY(libfun4all.so)
 
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
-    const string &inputFile = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
-    const string &outputFile = "G4sPHENIX.root",
+    const int process = 0,
+    const string &embed_input_str0 = "DST_TRUTH_G4HIT_sHijing_0_12fm_50kHz_bkg_0_12fm-0000000001-0",
+    const string &embed_input_str1 = "DST_TRKR_G4HIT_sHijing_0_12fm_50kHz_bkg_0_12fm-0000000001-0",
+    const string &embed_input_str2 = "DST_CALO_G4HIT_sHijing_0_12fm_50kHz_bkg_0_12fm-0000000001-0",
+    const string &outputFile_str = "G4sPHENIX.root",
     const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const int skip = 0,
     const string &outdir = ".")
@@ -45,6 +48,23 @@ int Fun4All_G4_sPHENIX(
 
   //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
   PHRandomSeed::Verbosity(1);
+
+   // construct the input and output file names
+  char num_field[500];
+  sprintf(num_field,"%04d.root", process);
+  string numin = num_field;
+  string embed_infile0 = embed_input_str0 + numin;
+  string embed_infile1 = embed_input_str1 + numin;
+  string embed_infile2 = embed_input_str2 + numin;
+
+  cout << "Embedding input file0: " << embed_infile0 << endl;
+  cout << "Embedding input file1: " << embed_infile1 << endl;
+  cout << "Embedding input file2: " << embed_infile2 << endl;
+
+  char outputFile[500];
+  sprintf(outputFile,"%s%04d.root", outputFile_str.c_str(), process);
+  cout << "Embedding output file: " << outputFile << endl;
+  const string& inputFile = embed_input_str0;
 
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
@@ -78,8 +98,10 @@ int Fun4All_G4_sPHENIX(
   // Further choose to embed newly simulated events to a previous simulation. Not compatible with `readhits = true`
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
-  //  Input::EMBED = true;
-  INPUTEMBED::filename[0] = embed_input_file;
+  Input::EMBED = true;
+  INPUTEMBED::filename[0] = embed_infile0;
+  INPUTEMBED::filename[1] = embed_infile1;
+  INPUTEMBED::filename[2] = embed_infile2;
   // if you use a filelist
   //INPUTEMBED::listfile[0] = embed_input_file;
 
