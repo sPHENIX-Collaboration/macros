@@ -14,6 +14,7 @@
 #include <g4main/PHG4Reco.h>
 
 #include <micromegas/MicromegasClusterizer.h>
+#include <qa_modules/QAG4SimulationMicromegas.h>
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -25,6 +26,7 @@ namespace Enable
   bool MICROMEGAS = false;
   bool MICROMEGAS_CELL = false;
   bool MICROMEGAS_CLUSTER = false;
+  bool MICROMEGAS_QA = false;
 }  // namespace Enable
 
 namespace G4MICROMEGAS
@@ -179,4 +181,13 @@ void Micromegas_Clustering()
   auto se = Fun4AllServer::instance();
   se->registerSubsystem(new MicromegasClusterizer);
 }
+
+void Micromegas_QA()
+{
+  auto se = Fun4AllServer::instance();
+  auto qa = new QAG4SimulationMicromegas;
+  qa->Verbosity(Enable::QA_VERBOSITY);
+  se->registerSubsystem(qa);
+}
+
 #endif
