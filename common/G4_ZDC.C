@@ -6,6 +6,9 @@
 #include <g4calo/RawTowerBuilderByHitIndex.h>
 #include <g4calo/RawTowerDigitizer.h>
 
+//#include <g4eiccalos/PHG4ForwardCalCellReco.h>
+//#include <g4eiccalos/PHG4ForwardEcalSubsystem.h>
+
 #include <g4detectors/PHG4ZDCSubsystem.h>
 
 #include <g4detectors/PHG4DetectorSubsystem.h>
@@ -24,6 +27,7 @@
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
+//R__LOAD_LIBRARY(libg4zdcdetector.so)
 R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
@@ -42,8 +46,8 @@ namespace G4ZDC
 {
  
   double Gz0 = 1900.;
-  double outer_radius = 18.;
-  string calibfile = "/ZDC/mapping/towerMap_ZDC.txt";
+  double outer_radius = 180.;
+  //string calibfile = "/sphenix/u/shuhang98/build/ZDC/source/towerMap_ZDC.txt";
 }
 void ZDCInit()
 {
@@ -63,13 +67,22 @@ void ZDCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
  
 
   PHG4ZDCSubsystem *zdc = new PHG4ZDCSubsystem("ZDC");
-  
+  zdc -> set_int_param("fzdc", 1);
   zdc->OverlapCheck(OverlapCheck);
   zdc->SetActive();
   zdc->SuperDetector("ZDC");
   if (AbsorberActive) zdc->SetAbsorberActive(AbsorberActive);
   g4Reco->registerSubsystem(zdc);
-  //cout << mapping_zdc.str() << endl;
+
+  
+  zdc = new PHG4ZDCSubsystem("ZDC", 1);
+  zdc -> set_int_param("bzdc", 1);
+  zdc->OverlapCheck(OverlapCheck);
+  zdc->SetActive();
+  zdc->SuperDetector("ZDC");
+  if (AbsorberActive) zdc->SetAbsorberActive(AbsorberActive);
+  g4Reco->registerSubsystem(zdc);
+  
 }
 
 void ZDC_Cells()
@@ -101,6 +114,13 @@ void ZDC_Towers()
   TowerDigitizer->Verbosity(verbosity);
   TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem(TowerDigitizer);
+  //SMD
+  RawTowerDigitizer *TowerDigitizer1 = new RawTowerDigitizer("ZDCRawTowerDigitizer1");
+  TowerDigitizer1->Detector("ZDC");
+  TowerDigitizer1->TowerType(1);
+  TowerDigitizer1->Verbosity(verbosity);
+  TowerDigitizer1->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
+  se->registerSubsystem(TowerDigitizer1);
 
  
 
@@ -109,9 +129,18 @@ void ZDC_Towers()
   TowerCalibration->TowerType(0);
   TowerCalibration->Verbosity(verbosity);
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration->set_calib_const_GeV_ADC(1.0); 
+  TowerCalibration->set_calib_const_GeV_ADC(1.0);  // sampling fraction = 0.010
   TowerCalibration->set_pedstal_ADC(0);
   se->registerSubsystem(TowerCalibration);
+
+  RawTowerCalibration *TowerCalibration1 = new RawTowerCalibration("ZDCRawTowerCalibration1");
+  TowerCalibration1->Detector("ZDC");
+  TowerCalibration1->TowerType(1);
+  TowerCalibration1->Verbosity(verbosity);
+  TowerCalibration1->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+  TowerCalibration1->set_calib_const_GeV_ADC(1.0);
+  TowerCalibration1->set_pedstal_ADC(0);
+  se->registerSubsystem(TowerCalibration1);
 
 }
 
