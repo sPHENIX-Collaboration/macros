@@ -19,6 +19,7 @@
 #include <trackreco/PHGenFitTrackProjection.h>
 #include <trackreco/PHGenFitTrkFitter.h>
 #include <trackreco/PHGenFitTrkProp.h>
+#include <trackreco/PHGhostRejection.h>
 #include <trackreco/PHHoughSeeding.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
 #include <trackreco/PHRaveVertexing.h>
@@ -355,6 +356,11 @@ void Tracking_Reco()
       vtxassoc->Verbosity(verbosity);
       se->registerSubsystem(vtxassoc);
       
+      // Choose the best duplicate TPC track seed
+      PHGhostRejection *ghosts= new PHGhostRejection();
+      ghosts->Verbosity(verbosity);
+      se->registerSubsystem(ghosts);
+            
       // Silicon cluster matching to TPC track seeds
       if (G4TRACKING::use_truth_si_matching)
 	{
