@@ -55,6 +55,12 @@ namespace G4MVTX
   double service_barrel_length = 150;    // [cm] length of service barrel ~(to patch panel)
 }  // namespace G4MVTX
 
+namespace G4MVTXAlignment 
+{
+  std::string alignment_path = string(getenv("CALIBRATIONROOT")) + "/Tracking/MVTX/alignment";
+  double z_offset[] = {0.0, 0.0, 200.0};
+}
+
 void MvtxInit()
 {
   //BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, (PHG4MvtxDefs::mvtxdat[G4MVTX::n_maps_layer - 1][PHG4MvtxDefs::kRmd]) / 10. + G4MVTX::radius_offset);
@@ -194,13 +200,16 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   for (int ilayer = 0; ilayer < G4MVTX::n_maps_layer; ilayer++)
   {
     double radius_lyr = PHG4MvtxDefs::mvtxdat[ilayer][PHG4MvtxDefs::kRmd];
+    mvtx->set_double_param(ilayer, "layer_z_offset", G4MVTXAlignment::z_offset[ilayer]);
     if (verbosity)
     {
       cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << endl;
     }
     radius = radius_lyr / 10.;
   }
+  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "alignment_path",  G4MVTXAlignment::alignment_path);
   mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v1.gdml"));
+
   mvtx->SetActive();
   mvtx->OverlapCheck(maps_overlapcheck);
   g4Reco->registerSubsystem(mvtx);
