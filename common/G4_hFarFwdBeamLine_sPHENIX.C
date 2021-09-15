@@ -3,6 +3,8 @@
 
 #include <GlobalVariables.C>
 
+#include <G4_ZDC.C>
+
 #include <g4detectors/BeamLineMagnetSubsystem.h>
 #include <g4detectors/PHG4BlockSubsystem.h>
 #include <g4detectors/PHG4ConeSubsystem.h>
