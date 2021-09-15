@@ -27,7 +27,6 @@
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
-//R__LOAD_LIBRARY(libg4zdcdetector.so)
 R__LOAD_LIBRARY(libg4eval.so)
 
 namespace Enable
@@ -47,7 +46,7 @@ namespace G4ZDC
  
   double Gz0 = 1900.;
   double outer_radius = 180.;
-  //string calibfile = "/sphenix/u/shuhang98/build/ZDC/source/towerMap_ZDC.txt";
+  string calibfile = "ZDC/mapping/towerMap_ZDC.txt";
 }
 void ZDCInit()
 {
@@ -95,14 +94,12 @@ void ZDC_Towers()
   int verbosity = std::max(Enable::VERBOSITY, Enable::ZDC_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  ostringstream mapping_zdc;
-  mapping_zdc << getenv("CALIBRATIONROOT") << G4ZDC::calibfile;
-  //mapping_zdc  << G4ZDC::calibfile;
+  string mapping_zdc = string(getenv("CALIBRATIONROOT")) + "/" + G4ZDC::calibfile;
 
   RawTowerBuilderByHitIndex *tower_ZDC = new RawTowerBuilderByHitIndex("TowerBuilder_ZDC");
   tower_ZDC->Detector("ZDC");
   tower_ZDC->set_sim_tower_node_prefix("SIM");
-  tower_ZDC->GeometryTableFile(mapping_zdc.str());
+  tower_ZDC->GeometryTableFile(mapping_zdc);
 
   se->registerSubsystem(tower_ZDC);
 
