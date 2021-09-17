@@ -8,7 +8,6 @@
 #include <g4detectors/PHG4ConeSubsystem.h>
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
-
 #include <g4detectors/PHG4ZDCSubsystem.h>
 
 #include <g4detectors/PHG4DetectorSubsystem.h>
@@ -17,7 +16,7 @@
 
 #include <TSystem.h>
 
-R__LOAD_LIBRARY(libg4detectors.so) 
+R__LOAD_LIBRARY(libg4detectors.so)
 
 float PosFlip(float pos);
 float AngleFlip(float angle);
@@ -27,10 +26,10 @@ float MagFieldFlip(float Bfield);
 namespace Enable
 {
   bool BEAMLINE = false;
- 
+
   bool BEAMLINE_OVERLAPCHECK = false;
   int BEAMLINE_VERBOSITY = 0;
- 
+
 }  // namespace Enable
 
 namespace BeamLine
@@ -40,7 +39,6 @@ namespace BeamLine
   double enclosure_r_max = NAN;
   double enclosure_center = NAN;
 
-
   PHG4CylinderSubsystem *ForwardBeamLineEnclosure(nullptr);
   PHG4CylinderSubsystem *BackwardBeamLineEnclosure(nullptr);
 
@@ -48,13 +46,12 @@ namespace BeamLine
 
 void BeamLineInit()
 {
-
   BeamLine::enclosure_z_max = 3000.;
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, BeamLine::starting_z);
   BeamLine::enclosure_r_max = 200.;
-  
+
   BeamLine::enclosure_center = 0.5 * (BeamLine::starting_z + BeamLine::enclosure_z_max);
-  
+
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, BeamLine::enclosure_z_max);
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, BeamLine::enclosure_r_max);
 }
@@ -63,7 +60,7 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
 {
   bool overlapCheck = Enable::OVERLAPCHECK || Enable::BEAMLINE_OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY, Enable::BEAMLINE_VERBOSITY);
-  
+
   BeamLine::ForwardBeamLineEnclosure = new PHG4CylinderSubsystem("ForwardBeamLineEnclosure");
   BeamLine::ForwardBeamLineEnclosure->set_double_param("place_z", BeamLine::enclosure_center);
   BeamLine::ForwardBeamLineEnclosure->set_double_param("radius", 0);
@@ -75,9 +72,9 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
   if (verbosity)
     BeamLine::ForwardBeamLineEnclosure->Verbosity(verbosity);
   g4Reco->registerSubsystem(BeamLine::ForwardBeamLineEnclosure);
-  
+
   BeamLine::BackwardBeamLineEnclosure = new PHG4CylinderSubsystem("ForwardBeamLineEnclosure");
-  BeamLine::BackwardBeamLineEnclosure->set_double_param("place_z",  - BeamLine::enclosure_center);
+  BeamLine::BackwardBeamLineEnclosure->set_double_param("place_z", -BeamLine::enclosure_center);
   BeamLine::BackwardBeamLineEnclosure->set_double_param("radius", 0);
   BeamLine::BackwardBeamLineEnclosure->set_double_param("thickness", BeamLine::enclosure_r_max);  // This is intentionally made large 25cm radius
   BeamLine::BackwardBeamLineEnclosure->set_double_param("length", BeamLine::enclosure_z_max - BeamLine::starting_z);
@@ -86,7 +83,7 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
   BeamLine::BackwardBeamLineEnclosure->OverlapCheck(overlapCheck);
   if (verbosity)
     BeamLine::BackwardBeamLineEnclosure->Verbosity(verbosity);
-   g4Reco->registerSubsystem(BeamLine::BackwardBeamLineEnclosure);
+  g4Reco->registerSubsystem(BeamLine::BackwardBeamLineEnclosure);
 
   string magFile;
   magFile = string(getenv("CALIBRATIONROOT")) + "/Beam/D0DXMagnets.dat";
@@ -125,12 +122,12 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
         double fieldgradient;
         if (!(iss >> magname >> x >> y >> z >> inner_radius_zin >> inner_radius_zout >> outer_magnet_diameter >> length >> angle >> dipole_field_x >> fieldgradient))
         {
-          cout << "coud not decode " << line << endl;
+          cout << "could not decode " << line << endl;
           gSystem->Exit(1);
         }
         else
         {
-	  //------------------------
+          //------------------------
 
           string magtype;
           if (inner_radius_zin != inner_radius_zout)
@@ -183,8 +180,8 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
           outer_magnet_diameter *= 100.;
           angle = (angle / M_PI * 180.) / 1000.;  // given in mrad
 
-	  //------------------------
-	  
+          //------------------------
+
           if (magnetlist.empty() || magnetlist.find(imagnet) != magnetlist.end())
           {
             bl = new BeamLineMagnetSubsystem("BEAMLINEMAGNET", imagnet);
@@ -192,41 +189,41 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
             bl->set_double_param("fieldgradient", MagFieldFlip(fieldgradient));
             bl->set_string_param("magtype", magtype);
             bl->set_double_param("length", length);
-            bl->set_double_param("place_x", PosFlip(x));// relative position to mother vol.
-            bl->set_double_param("place_y", y);// relative position to mother vol.
-	    if(z > 0)
-	      {
-		bl->set_double_param("place_z", z - BeamLine::enclosure_center);// relative position to mother vol.
-	      }
-	    else{
-	      bl->set_double_param("place_z", z + BeamLine::enclosure_center);// relative position to mother vol.
-	    }
-	    bl->set_double_param("field_global_position_x", PosFlip(x));// abs. position to world for field manager
-            bl->set_double_param("field_global_position_y", y);// abs. position to world for field manager
-            bl->set_double_param("field_global_position_z", z);// abs. position to world for field manager
+            bl->set_double_param("place_x", PosFlip(x));  // relative position to mother vol.
+            bl->set_double_param("place_y", y);           // relative position to mother vol.
+            if (z > 0)
+            {
+              bl->set_double_param("place_z", z - BeamLine::enclosure_center);  // relative position to mother vol.
+            }
+            else
+            {
+              bl->set_double_param("place_z", z + BeamLine::enclosure_center);  // relative position to mother vol.
+            }
+            bl->set_double_param("field_global_position_x", PosFlip(x));  // abs. position to world for field manager
+            bl->set_double_param("field_global_position_y", y);           // abs. position to world for field manager
+            bl->set_double_param("field_global_position_z", z);           // abs. position to world for field manager
             bl->set_double_param("rot_y", AngleFlip(angle));
-            bl->set_double_param("field_global_rot_y", AngleFlip(angle));// abs. rotation to world for field manager
+            bl->set_double_param("field_global_rot_y", AngleFlip(angle));  // abs. rotation to world for field manager
             bl->set_double_param("inner_radius", inner_radius_zin);
             bl->set_double_param("outer_radius", outer_magnet_diameter / 2.);
             bl->SetActive(magnet_active);
             bl->BlackHole();
-	    if(z > 0)
-	      {
-		bl->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
-	      }
-	    else
-	      {
-		bl->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
-	      }
-	    if (absorberactive)
-	      {
+            if (z > 0)
+            {
+              bl->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
+            }
+            else
+            {
+              bl->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
+            }
+            if (absorberactive)
+            {
               bl->SetAbsorberActive();
             }
             bl->OverlapCheck(overlapCheck);
             bl->SuperDetector("BEAMLINEMAGNET");
             if (verbosity) bl->Verbosity(verbosity);
             g4Reco->registerSubsystem(bl);
-
           }
           imagnet++;
           if (fabs(z) + length > biggest_z)
@@ -244,14 +241,13 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
 {
   bool OverlapCheck = Enable::OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY, Enable::BEAMLINE_VERBOSITY);
- 
 
-  const int ntube = 10; 
+  const int ntube = 10;
   const string nm[ntube] = {"B00", "B01", "B10", "B11", "B20", "B21", "B30", "B31", "B32", "B33"};
-  const double qlen[ntube] = {233.8, 233.8, 118.7, 118.7, 217.16,217.16, 182.5, 182.5, 182.5, 182.5};
+  const double qlen[ntube] = {233.8, 233.8, 118.7, 118.7, 217.16, 217.16, 182.5, 182.5, 182.5, 182.5};
   const double qir[ntube] = {6.08, 6.08, 14.60, 14.60, 20.0, 20.0, 6.07, 6.07, 6.07, 6.07};
   const double qor[ntube] = {6.35, 6.35, 15.24, 15.24, 20.96, 20.96, 6.35, 6.35, 6.35, 6.35};
-  const double qrot[ntube] = {0, 0, 0, 0, 0, 0, 1.074, -1.074, -1.074, 1.074}; //degree 
+  const double qrot[ntube] = {0, 0, 0, 0, 0, 0, 1.074, -1.074, -1.074, 1.074};  //degree
   const double qxC[ntube] = {0, 0, 0, 0, 0, 0, 12.820, -12.820, 12.820, -12.820};
   const double qyC[ntube] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   const double qzC[ntube] = {863.1, -863.1, 1474.470, -1474.470, 1642.4, -1642.4, 1843.2, 1843.2, -1843.2, -1843.2};
@@ -265,25 +261,25 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
     pipe->set_string_param("material", "G4_STAINLESS-STEEL");
     pipe->set_double_param("place_x", PosFlip(qxC[i]));
     pipe->set_double_param("place_y", qyC[i]);
-    if(qzC[i] > 0)
-      {
-	pipe->set_double_param("place_z", qzC[i] - BeamLine::enclosure_center);// relative position to mother vol.
-      }
+    if (qzC[i] > 0)
+    {
+      pipe->set_double_param("place_z", qzC[i] - BeamLine::enclosure_center);  // relative position to mother vol.
+    }
     else
-      {
-	pipe->set_double_param("place_z", qzC[i] + BeamLine::enclosure_center);// relative position to mother vol.
-      }
+    {
+      pipe->set_double_param("place_z", qzC[i] + BeamLine::enclosure_center);  // relative position to mother vol.
+    }
     //pipe->set_double_param("place_z", qzC[i]);
     pipe->SetActive(false);
-    if(qzC[i] > 0)
-      {
-	pipe->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
-      }
+    if (qzC[i] > 0)
+    {
+      pipe->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
+    }
     else
-      {
-	pipe->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
-      }
-    
+    {
+      pipe->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
+    }
+
     pipe->OverlapCheck(OverlapCheck);
     //    pipe->SetActive(true);
     g4Reco->registerSubsystem(pipe);
@@ -319,42 +315,44 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
     pipe->set_string_param("material", "G4_STAINLESS-STEEL");
     pipe->set_double_param("place_x", PosFlip(xC[i]));
     pipe->set_double_param("place_y", yC[i]);
-    if(zC[i] > 0)
-      {
-	pipe->set_double_param("place_z", zC[i] - BeamLine::enclosure_center);
-      }
+    if (zC[i] > 0)
+    {
+      pipe->set_double_param("place_z", zC[i] - BeamLine::enclosure_center);
+    }
     else
-      {
-	pipe->set_double_param("place_z", zC[i] + BeamLine::enclosure_center);
-      }
+    {
+      pipe->set_double_param("place_z", zC[i] + BeamLine::enclosure_center);
+    }
     // pipe->set_double_param("place_z", zC[i]);
     pipe->set_double_param("length", len[i]);
     pipe->set_double_param("rmin1", ir1[i]);
     pipe->set_double_param("rmin2", ir2[i]);
     pipe->set_double_param("rmax1", or1[i]);
     pipe->set_double_param("rmax2", or2[i]);
-    pipe->set_double_param("rot_y", AngleFlip(-0.047 * 180./M_PI));
-    if(zC[i] > 0)
-      {
-	pipe->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
-      }
+    pipe->set_double_param("rot_y", AngleFlip(-0.047 * 180. / M_PI));
+    if (zC[i] > 0)
+    {
+      pipe->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
+    }
     else
-      {
-	pipe->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
-      }
+    {
+      pipe->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
+    }
     pipe->OverlapCheck(OverlapCheck);
     g4Reco->registerSubsystem(pipe);
-    
   }
 }
 
-float PosFlip(float pos){
+float PosFlip(float pos)
+{
   return pos;
 };
-float AngleFlip(float angle){
+float AngleFlip(float angle)
+{
   return angle;
 };
-float MagFieldFlip(float Bfield){
+float MagFieldFlip(float Bfield)
+{
   return Bfield;
 };
 
