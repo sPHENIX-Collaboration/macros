@@ -1,9 +1,7 @@
-#ifndef MACRO_G4HFARFWDBEAMLINE_SPHENIX_C
-#define MACRO_G4HFARFWDBEAMLINE_SPHENIX_C
+#ifndef MACRO_G4BEAMLINE_C
+#define MACRO_G4BEAMLINE_C
 
 #include <GlobalVariables.C>
-
-#include <G4_ZDC.C>
 
 #include <g4detectors/BeamLineMagnetSubsystem.h>
 #include <g4detectors/PHG4BlockSubsystem.h>
@@ -28,73 +26,70 @@ float MagFieldFlip(float Bfield);
 // This creates the Enable Flag to be used in the main steering macro
 namespace Enable
 {
-  bool HFARFWD_MAGNETS = false;
+  bool BEAMLINE = false;
  
-  bool HFARFWD_OVERLAPCHECK = false;
-  int HFARFWD_VERBOSITY = 0;
+  bool BEAMLINE_OVERLAPCHECK = false;
+  int BEAMLINE_VERBOSITY = 0;
  
 }  // namespace Enable
 
-namespace hFarFwdBeamLine
+namespace BeamLine
 {
   double starting_z = 700;  //cm as center-forward interface
   double enclosure_z_max = NAN;
   double enclosure_r_max = NAN;
   double enclosure_center = NAN;
 
-  double ZDCPlaceZ = 1843.0; 
 
-  PHG4CylinderSubsystem *hFarFwdBeamLineEnclosure(nullptr);
-  PHG4CylinderSubsystem *hFarBwdBeamLineEnclosure(nullptr);
+  PHG4CylinderSubsystem *ForwardBeamLineEnclosure(nullptr);
+  PHG4CylinderSubsystem *BackwardBeamLineEnclosure(nullptr);
 
-  BeamLineMagnetSubsystem *B0Magnet = (nullptr);
-}  // namespace hFarFwdBeamLine
+}  // namespace BeamLine
 
-void hFarFwdBeamLineInit()
+void BeamLineInit()
 {
 
-  hFarFwdBeamLine::enclosure_z_max = 3000.;
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, hFarFwdBeamLine::starting_z);
-  hFarFwdBeamLine::enclosure_r_max = 200.;
+  BeamLine::enclosure_z_max = 3000.;
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, BeamLine::starting_z);
+  BeamLine::enclosure_r_max = 200.;
   
-  hFarFwdBeamLine::enclosure_center = 0.5 * (hFarFwdBeamLine::starting_z + hFarFwdBeamLine::enclosure_z_max);
+  BeamLine::enclosure_center = 0.5 * (BeamLine::starting_z + BeamLine::enclosure_z_max);
   
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, hFarFwdBeamLine::enclosure_z_max);
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, hFarFwdBeamLine::enclosure_r_max);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, BeamLine::enclosure_z_max);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, BeamLine::enclosure_r_max);
 }
 
-void hFarFwdDefineMagnets(PHG4Reco *g4Reco)
+void BeamLineDefineMagnets(PHG4Reco *g4Reco)
 {
-  bool overlapCheck = Enable::OVERLAPCHECK || Enable::HFARFWD_OVERLAPCHECK;
-  int verbosity = std::max(Enable::VERBOSITY, Enable::HFARFWD_VERBOSITY);
+  bool overlapCheck = Enable::OVERLAPCHECK || Enable::BEAMLINE_OVERLAPCHECK;
+  int verbosity = std::max(Enable::VERBOSITY, Enable::BEAMLINE_VERBOSITY);
   
-  hFarFwdBeamLine::hFarFwdBeamLineEnclosure = new PHG4CylinderSubsystem("hFarFwdBeamLineEnclosure");
-  hFarFwdBeamLine::hFarFwdBeamLineEnclosure->set_double_param("place_z", hFarFwdBeamLine::enclosure_center);
-  hFarFwdBeamLine::hFarFwdBeamLineEnclosure->set_double_param("radius", 0);
-  hFarFwdBeamLine::hFarFwdBeamLineEnclosure->set_double_param("thickness", hFarFwdBeamLine::enclosure_r_max);  // This is intentionally made large 25cm radius
-  hFarFwdBeamLine::hFarFwdBeamLineEnclosure->set_double_param("length", hFarFwdBeamLine::enclosure_z_max - hFarFwdBeamLine::starting_z);
-  hFarFwdBeamLine::hFarFwdBeamLineEnclosure->set_string_param("material", "G4_Galactic");
-  hFarFwdBeamLine::hFarFwdBeamLineEnclosure->set_color(.5, .5, .5, 0.2);
-  hFarFwdBeamLine::hFarFwdBeamLineEnclosure->OverlapCheck(overlapCheck);
+  BeamLine::ForwardBeamLineEnclosure = new PHG4CylinderSubsystem("ForwardBeamLineEnclosure");
+  BeamLine::ForwardBeamLineEnclosure->set_double_param("place_z", BeamLine::enclosure_center);
+  BeamLine::ForwardBeamLineEnclosure->set_double_param("radius", 0);
+  BeamLine::ForwardBeamLineEnclosure->set_double_param("thickness", BeamLine::enclosure_r_max);  // This is intentionally made large 25cm radius
+  BeamLine::ForwardBeamLineEnclosure->set_double_param("length", BeamLine::enclosure_z_max - BeamLine::starting_z);
+  BeamLine::ForwardBeamLineEnclosure->set_string_param("material", "G4_Galactic");
+  BeamLine::ForwardBeamLineEnclosure->set_color(.5, .5, .5, 0.2);
+  BeamLine::ForwardBeamLineEnclosure->OverlapCheck(overlapCheck);
   if (verbosity)
-    hFarFwdBeamLine::hFarFwdBeamLineEnclosure->Verbosity(verbosity);
-  g4Reco->registerSubsystem(hFarFwdBeamLine::hFarFwdBeamLineEnclosure);
+    BeamLine::ForwardBeamLineEnclosure->Verbosity(verbosity);
+  g4Reco->registerSubsystem(BeamLine::ForwardBeamLineEnclosure);
   
-  hFarFwdBeamLine::hFarBwdBeamLineEnclosure = new PHG4CylinderSubsystem("hFarFwdBeamLineEnclosure");
-  hFarFwdBeamLine::hFarBwdBeamLineEnclosure->set_double_param("place_z",  - hFarFwdBeamLine::enclosure_center);
-  hFarFwdBeamLine::hFarBwdBeamLineEnclosure->set_double_param("radius", 0);
-  hFarFwdBeamLine::hFarBwdBeamLineEnclosure->set_double_param("thickness", hFarFwdBeamLine::enclosure_r_max);  // This is intentionally made large 25cm radius
-  hFarFwdBeamLine::hFarBwdBeamLineEnclosure->set_double_param("length", hFarFwdBeamLine::enclosure_z_max - hFarFwdBeamLine::starting_z);
-  hFarFwdBeamLine::hFarBwdBeamLineEnclosure->set_string_param("material", "G4_Galactic");
-  hFarFwdBeamLine::hFarBwdBeamLineEnclosure->set_color(.5, .5, .5, 0.2);
-  hFarFwdBeamLine::hFarBwdBeamLineEnclosure->OverlapCheck(overlapCheck);
+  BeamLine::BackwardBeamLineEnclosure = new PHG4CylinderSubsystem("ForwardBeamLineEnclosure");
+  BeamLine::BackwardBeamLineEnclosure->set_double_param("place_z",  - BeamLine::enclosure_center);
+  BeamLine::BackwardBeamLineEnclosure->set_double_param("radius", 0);
+  BeamLine::BackwardBeamLineEnclosure->set_double_param("thickness", BeamLine::enclosure_r_max);  // This is intentionally made large 25cm radius
+  BeamLine::BackwardBeamLineEnclosure->set_double_param("length", BeamLine::enclosure_z_max - BeamLine::starting_z);
+  BeamLine::BackwardBeamLineEnclosure->set_string_param("material", "G4_Galactic");
+  BeamLine::BackwardBeamLineEnclosure->set_color(.5, .5, .5, 0.2);
+  BeamLine::BackwardBeamLineEnclosure->OverlapCheck(overlapCheck);
   if (verbosity)
-    hFarFwdBeamLine::hFarBwdBeamLineEnclosure->Verbosity(verbosity);
-   g4Reco->registerSubsystem(hFarFwdBeamLine::hFarBwdBeamLineEnclosure);
+    BeamLine::BackwardBeamLineEnclosure->Verbosity(verbosity);
+   g4Reco->registerSubsystem(BeamLine::BackwardBeamLineEnclosure);
 
   string magFile;
   magFile = string(getenv("CALIBRATIONROOT")) + "/Beam/D0DXMagnets.dat";
-  // magFile = "/sphenix/u/shuhang98/macros/detectors/sPHENIX/D0DXMagnets.dat";
   // make magnet active volume if you want to study the hits
   bool magnet_active = false;
   int absorberactive = 0;
@@ -186,7 +181,7 @@ void hFarFwdDefineMagnets(PHG4Reco *g4Reco)
           length *= 100.;
           inner_radius_zin *= 100.;
           outer_magnet_diameter *= 100.;
-          angle = (angle / TMath::Pi() * 180.) / 1000.;  // given in mrad
+          angle = (angle / M_PI * 180.) / 1000.;  // given in mrad
 
 	  //------------------------
 	  
@@ -201,10 +196,10 @@ void hFarFwdDefineMagnets(PHG4Reco *g4Reco)
             bl->set_double_param("place_y", y);// relative position to mother vol.
 	    if(z > 0)
 	      {
-		bl->set_double_param("place_z", z - hFarFwdBeamLine::enclosure_center);// relative position to mother vol.
+		bl->set_double_param("place_z", z - BeamLine::enclosure_center);// relative position to mother vol.
 	      }
 	    else{
-	      bl->set_double_param("place_z", z + hFarFwdBeamLine::enclosure_center);// relative position to mother vol.
+	      bl->set_double_param("place_z", z + BeamLine::enclosure_center);// relative position to mother vol.
 	    }
 	    bl->set_double_param("field_global_position_x", PosFlip(x));// abs. position to world for field manager
             bl->set_double_param("field_global_position_y", y);// abs. position to world for field manager
@@ -217,11 +212,11 @@ void hFarFwdDefineMagnets(PHG4Reco *g4Reco)
             bl->BlackHole();
 	    if(z > 0)
 	      {
-		bl->SetMotherSubsystem(hFarFwdBeamLine::hFarFwdBeamLineEnclosure);
+		bl->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
 	      }
 	    else
 	      {
-		bl->SetMotherSubsystem(hFarFwdBeamLine::hFarBwdBeamLineEnclosure);
+		bl->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
 	      }
 	    if (absorberactive)
 	      {
@@ -229,13 +224,9 @@ void hFarFwdDefineMagnets(PHG4Reco *g4Reco)
             }
             bl->OverlapCheck(overlapCheck);
             bl->SuperDetector("BEAMLINEMAGNET");
-            if (verbosity)
-              bl->Verbosity(verbosity);
+            if (verbosity) bl->Verbosity(verbosity);
             g4Reco->registerSubsystem(bl);
 
-            // rag the B0 magnet
-            if (imagnet == 0)
-              hFarFwdBeamLine::B0Magnet = bl;
           }
           imagnet++;
           if (fabs(z) + length > biggest_z)
@@ -249,10 +240,10 @@ void hFarFwdDefineMagnets(PHG4Reco *g4Reco)
   }
 }
 
-void hFarFwdDefineBeamPipe(PHG4Reco *g4Reco)
+void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
 {
   bool OverlapCheck = Enable::OVERLAPCHECK;
-  int verbosity = std::max(Enable::VERBOSITY, Enable::HFARFWD_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::BEAMLINE_VERBOSITY);
  
 
   const int ntube = 10; 
@@ -276,21 +267,21 @@ void hFarFwdDefineBeamPipe(PHG4Reco *g4Reco)
     pipe->set_double_param("place_y", qyC[i]);
     if(qzC[i] > 0)
       {
-	pipe->set_double_param("place_z", qzC[i] - hFarFwdBeamLine::enclosure_center);// relative position to mother vol.
+	pipe->set_double_param("place_z", qzC[i] - BeamLine::enclosure_center);// relative position to mother vol.
       }
     else
       {
-	pipe->set_double_param("place_z", qzC[i] + hFarFwdBeamLine::enclosure_center);// relative position to mother vol.
+	pipe->set_double_param("place_z", qzC[i] + BeamLine::enclosure_center);// relative position to mother vol.
       }
     //pipe->set_double_param("place_z", qzC[i]);
     pipe->SetActive(false);
     if(qzC[i] > 0)
       {
-	pipe->SetMotherSubsystem(hFarFwdBeamLine::hFarFwdBeamLineEnclosure);
+	pipe->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
       }
     else
       {
-	pipe->SetMotherSubsystem(hFarFwdBeamLine::hFarBwdBeamLineEnclosure);
+	pipe->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
       }
     
     pipe->OverlapCheck(OverlapCheck);
@@ -328,14 +319,13 @@ void hFarFwdDefineBeamPipe(PHG4Reco *g4Reco)
     pipe->set_string_param("material", "G4_STAINLESS-STEEL");
     pipe->set_double_param("place_x", PosFlip(xC[i]));
     pipe->set_double_param("place_y", yC[i]);
-    pipe->set_double_param("place_y", qyC[i]);
     if(zC[i] > 0)
       {
-	pipe->set_double_param("place_z", zC[i] - hFarFwdBeamLine::enclosure_center);
+	pipe->set_double_param("place_z", zC[i] - BeamLine::enclosure_center);
       }
     else
       {
-	pipe->set_double_param("place_z", zC[i] + hFarFwdBeamLine::enclosure_center);
+	pipe->set_double_param("place_z", zC[i] + BeamLine::enclosure_center);
       }
     // pipe->set_double_param("place_z", zC[i]);
     pipe->set_double_param("length", len[i]);
@@ -343,50 +333,19 @@ void hFarFwdDefineBeamPipe(PHG4Reco *g4Reco)
     pipe->set_double_param("rmin2", ir2[i]);
     pipe->set_double_param("rmax1", or1[i]);
     pipe->set_double_param("rmax2", or2[i]);
-    pipe->set_double_param("rot_y", AngleFlip(-0.047 * TMath::RadToDeg()));
+    pipe->set_double_param("rot_y", AngleFlip(-0.047 * 180./M_PI));
     if(zC[i] > 0)
       {
-	pipe->SetMotherSubsystem(hFarFwdBeamLine::hFarFwdBeamLineEnclosure);
+	pipe->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
       }
     else
       {
-	pipe->SetMotherSubsystem(hFarFwdBeamLine::hFarBwdBeamLineEnclosure);
+	pipe->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
       }
-    // pipe->SetMotherSubsystem(hFarFwdBeamLine::hFarFwdBeamLineEnclosure);
     pipe->OverlapCheck(OverlapCheck);
     g4Reco->registerSubsystem(pipe);
     
   }
-}
-void fbZDCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
-{
-  bool AbsorberActive = Enable::ABSORBER || Enable::ZDC_ABSORBER || (absorberactive > 0);
-  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::ZDC_OVERLAPCHECK;
-
-  
-  cout<<"constructing fzdc"<<endl;
-
-  PHG4ZDCSubsystem *zdc = new PHG4ZDCSubsystem("ZDC");
-  zdc -> set_int_param("fzdc", 1);
-  zdc -> set_double_param("z",  hFarFwdBeamLine::ZDCPlaceZ - hFarFwdBeamLine::enclosure_center);
-  zdc->OverlapCheck(OverlapCheck);
-  zdc->SetActive();
-  zdc->SuperDetector("ZDC");
-  if (AbsorberActive) zdc->SetAbsorberActive(AbsorberActive);
-  zdc->SetMotherSubsystem(hFarFwdBeamLine::hFarFwdBeamLineEnclosure);
-  g4Reco->registerSubsystem(zdc);
-
-  
-  zdc = new PHG4ZDCSubsystem("ZDC", 1);
-  zdc -> set_int_param("bzdc", 1);
-  zdc -> set_double_param("z",  hFarFwdBeamLine::ZDCPlaceZ - hFarFwdBeamLine::enclosure_center);
-  zdc->OverlapCheck(OverlapCheck);
-  zdc->SetActive();
-  zdc->SuperDetector("ZDC");
-  if (AbsorberActive) zdc->SetAbsorberActive(AbsorberActive);
-  zdc->SetMotherSubsystem(hFarFwdBeamLine::hFarBwdBeamLineEnclosure);
-  g4Reco->registerSubsystem(zdc);
-  
 }
 
 float PosFlip(float pos){
