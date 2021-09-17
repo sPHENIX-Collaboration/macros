@@ -3,11 +3,10 @@
 
 #include <GlobalVariables.C>
 
+#include <G4_BeamLine.C>
+
 #include <g4calo/RawTowerBuilderByHitIndex.h>
 #include <g4calo/RawTowerDigitizer.h>
-
-//#include <g4eiccalos/PHG4ForwardCalCellReco.h>
-//#include <g4eiccalos/PHG4ForwardEcalSubsystem.h>
 
 #include <g4detectors/PHG4ZDCSubsystem.h>
 
@@ -47,7 +46,10 @@ namespace G4ZDC
   double Gz0 = 1900.;
   double outer_radius = 180.;
   string calibfile = "ZDC/mapping/towerMap_ZDC.txt";
+  double ZDCPlaceZ = 1843.0; 
+
 }
+
 void ZDCInit()
 {
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4ZDC::outer_radius);
@@ -67,26 +69,25 @@ void ZDCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 
   PHG4ZDCSubsystem *zdc = new PHG4ZDCSubsystem("ZDC");
   zdc -> set_int_param("fzdc", 1);
+  zdc -> set_double_param("z",  G4ZDC::ZDCPlaceZ - BeamLine::enclosure_center);
   zdc->OverlapCheck(OverlapCheck);
   zdc->SetActive();
   zdc->SuperDetector("ZDC");
   if (AbsorberActive) zdc->SetAbsorberActive(AbsorberActive);
+  zdc->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
   g4Reco->registerSubsystem(zdc);
 
   
   zdc = new PHG4ZDCSubsystem("ZDC", 1);
   zdc -> set_int_param("bzdc", 1);
+  zdc -> set_double_param("z", G4ZDC::ZDCPlaceZ - BeamLine::enclosure_center);
   zdc->OverlapCheck(OverlapCheck);
   zdc->SetActive();
   zdc->SuperDetector("ZDC");
   if (AbsorberActive) zdc->SetAbsorberActive(AbsorberActive);
+  zdc->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
   g4Reco->registerSubsystem(zdc);
   
-}
-
-void ZDC_Cells()
-{
-  return;
 }
 
 void ZDC_Towers()
