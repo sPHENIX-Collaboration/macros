@@ -1,6 +1,8 @@
 #ifndef COMMON_G4EPD_C
 #define COMMON_G4EPD_C
 
+#include <GlobalVariables.C>
+
 #include <g4epd/PHG4EPDSubsystem.h>
 
 #include <g4main/PHG4Reco.h>

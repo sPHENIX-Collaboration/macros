@@ -5,6 +5,8 @@
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
+#include <g4main/PHG4Reco.h>
+
 namespace Enable
 {
   bool CEMCALBEDO = false;

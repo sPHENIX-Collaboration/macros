@@ -1,6 +1,8 @@
 #ifndef MACRO_G4BBC_C
 #define MACRO_G4BBC_C
 
+#include <GlobalVariables.C>
+
 #include <g4detectors/PHG4BbcSubsystem.h>
 
 #include <g4bbc/BbcVertexFastSimReco.h>
