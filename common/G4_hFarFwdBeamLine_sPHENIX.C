@@ -91,8 +91,8 @@ void hFarFwdDefineMagnets(PHG4Reco *g4Reco)
    g4Reco->registerSubsystem(hFarFwdBeamLine::hFarBwdBeamLineEnclosure);
 
   string magFile;
-  magFile = string(getenv("CALIBRATIONROOT")) + "/Beam/D0DXMagnets.dat";
-  // magFile = "/sphenix/u/shuhang98/macros/detectors/sPHENIX/D0DXMagnets.dat";
+  // magFile = string(getenv("CALIBRATIONROOT")) + "/Beam/D0DXMagnets.dat";
+    magFile = "/sphenix/u/shuhang98/macros/detectors/sPHENIX/D0DXMagnets.dat";
   // make magnet active volume if you want to study the hits
   bool magnet_active = false;
   int absorberactive = 0;
@@ -312,7 +312,7 @@ void hFarFwdDefineBeamPipe(PHG4Reco *g4Reco)
 
   //Roman Pot pipe
   const int nSec = 2;
-  const double len[nSec] = {41.74, 41.74};
+  const double len[nSec] = {20.87, 20.87};
   const double ir1[nSec] = {7.14, 14.60};
   const double or1[nSec] = {7.77, 15.24};
   const double ir2[nSec] = {14.60, 7.14};
@@ -341,7 +341,6 @@ void hFarFwdDefineBeamPipe(PHG4Reco *g4Reco)
     pipe->set_double_param("rmin2", ir2[i]);
     pipe->set_double_param("rmax1", or1[i]);
     pipe->set_double_param("rmax2", or2[i]);
-    pipe->set_double_param("rot_y", AngleFlip(-0.047 * TMath::RadToDeg()));
     if(zC[i] > 0)
       {
 	pipe->SetMotherSubsystem(hFarFwdBeamLine::hFarFwdBeamLineEnclosure);
