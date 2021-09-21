@@ -91,8 +91,7 @@ void hFarFwdDefineMagnets(PHG4Reco *g4Reco)
    g4Reco->registerSubsystem(hFarFwdBeamLine::hFarBwdBeamLineEnclosure);
 
   string magFile;
-  // magFile = string(getenv("CALIBRATIONROOT")) + "/Beam/D0DXMagnets.dat";
-    magFile = "/sphenix/u/shuhang98/macros/detectors/sPHENIX/D0DXMagnets.dat";
+  magFile = string(getenv("CALIBRATIONROOT")) + "/Beam/D0DXMagnets.dat";
   // make magnet active volume if you want to study the hits
   bool magnet_active = false;
   int absorberactive = 0;
@@ -280,7 +279,6 @@ void hFarFwdDefineBeamPipe(PHG4Reco *g4Reco)
       {
 	pipe->set_double_param("place_z", qzC[i] + hFarFwdBeamLine::enclosure_center);// relative position to mother vol.
       }
-    //pipe->set_double_param("place_z", qzC[i]);
     pipe->SetActive(false);
     if(qzC[i] > 0)
       {
@@ -294,23 +292,9 @@ void hFarFwdDefineBeamPipe(PHG4Reco *g4Reco)
     pipe->OverlapCheck(OverlapCheck);
     //    pipe->SetActive(true);
     g4Reco->registerSubsystem(pipe);
-    /*
-    PHG4CylinderSubsystem *pipev = new PHG4CylinderSubsystem(Form("beamPipevacuum%s", nm[i].c_str()), 0);
-    pipev->set_double_param("radius", 0);
-    pipev->set_double_param("thickness", qir[i]);
-    pipev->set_double_param("length", qlen[i]);
-    pipev->set_double_param("rot_y", qrot[i]);
-    pipev->set_string_param("material", "G4_Galactic");
-    pipev->set_double_param("place_x", PosFlip(qxC[i]));
-    pipev->set_double_param("place_y", qyC[i]);
-    pipev->set_double_param("place_z", qzC[i]);
-    pipev->SetActive(false);
-    pipev->OverlapCheck(OverlapCheck);
-    g4Reco->registerSubsystem(pipev);
-    */
+ 
   }
 
-  //Roman Pot pipe
   const int nSec = 2;
   const double len[nSec] = {20.87, 20.87};
   const double ir1[nSec] = {7.14, 14.60};
@@ -326,7 +310,6 @@ void hFarFwdDefineBeamPipe(PHG4Reco *g4Reco)
     pipe->set_string_param("material", "G4_STAINLESS-STEEL");
     pipe->set_double_param("place_x", PosFlip(xC[i]));
     pipe->set_double_param("place_y", yC[i]);
-    pipe->set_double_param("place_y", qyC[i]);
     if(zC[i] > 0)
       {
 	pipe->set_double_param("place_z", zC[i] - hFarFwdBeamLine::enclosure_center);
@@ -335,7 +318,6 @@ void hFarFwdDefineBeamPipe(PHG4Reco *g4Reco)
       {
 	pipe->set_double_param("place_z", zC[i] + hFarFwdBeamLine::enclosure_center);
       }
-    // pipe->set_double_param("place_z", zC[i]);
     pipe->set_double_param("length", len[i]);
     pipe->set_double_param("rmin1", ir1[i]);
     pipe->set_double_param("rmin2", ir2[i]);
@@ -349,7 +331,6 @@ void hFarFwdDefineBeamPipe(PHG4Reco *g4Reco)
       {
 	pipe->SetMotherSubsystem(hFarFwdBeamLine::hFarBwdBeamLineEnclosure);
       }
-    // pipe->SetMotherSubsystem(hFarFwdBeamLine::hFarFwdBeamLineEnclosure);
     pipe->OverlapCheck(OverlapCheck);
     g4Reco->registerSubsystem(pipe);
     
