@@ -24,13 +24,13 @@
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
 #include <trackreco/PHRaveVertexing.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
-#include <trackreco/PHTpcTrackSeedVertexAssoc.h>
+#include <trackreco/PHTpcTrackSeedCircleFit.h>
 #include <trackreco/PHTrackCleaner.h>
 #include <trackreco/PHTrackSeeding.h>
 #include <trackreco/PHTruthSiliconAssociation.h>
 #include <trackreco/PHTruthTrackSeeding.h>
 #include <trackreco/PHTruthVertexing.h>
-
+#include <trackreco/PHActsVertexPropagator.h>
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSiliconSeeding.h>
 #include <trackreco/PHActsTrkFitter.h>
@@ -90,7 +90,7 @@ namespace G4TRACKING
 
   // Initial vertexing
   bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
-  bool use_truth_init_vertexing = false;    // if true runs truth vertexing, if false runs acts initial vertex finder
+  bool use_truth_init_vertexing = true;    // if true runs truth vertexing, if false runs acts initial vertex finder
 
   // TPC seeding options
   bool use_PHTpcTracker_seeding = false;  // false for using the default PHCASeeding to get TPC track seeds, true to use PHTpcTracker
@@ -245,8 +245,10 @@ void Tracking_Reco()
     {
       PHTruthVertexing *init_vtx = new PHTruthVertexing();
       init_vtx->Verbosity(verbosity);
-      init_vtx->set_acts_silicon(true);
-      se->registerSubsystem(init_vtx);	  
+      std::string trackmapname = "SvtxSiliconTrackMap";
+      init_vtx->associate_tracks(true);
+      init_vtx->set_track_map_name(trackmapname);
+      //se->registerSubsystem(init_vtx);	  
     }
   else
     {
@@ -329,7 +331,7 @@ void Tracking_Reco()
 
 	      if(G4TRACKING::use_propagator)
 	      {
-	        PHTpcTrackSeedVertexAssoc* vtxassoc2 = new PHTpcTrackSeedVertexAssoc("PrePropagatorPHTpcTrackSeedVertexAssoc");
+	        PHTpcTrackSeedCircleFit* vtxassoc2 = new PHTpcTrackSeedCircleFit("PrePropagatorPHTpcTrackSeedCircleFit");
 	        vtxassoc2->Verbosity(verbosity);
 	        se->registerSubsystem(vtxassoc2);
 
@@ -352,7 +354,7 @@ void Tracking_Reco()
 
       // This does not care which seeder is used
       // It refines the phi and eta of the TPC tracklet prior to matching with the silicon tracklet
-      PHTpcTrackSeedVertexAssoc *vtxassoc = new PHTpcTrackSeedVertexAssoc();
+      PHTpcTrackSeedCircleFit *vtxassoc = new PHTpcTrackSeedCircleFit();
       vtxassoc->Verbosity(verbosity);
       se->registerSubsystem(vtxassoc);
       
@@ -446,30 +448,30 @@ void Tracking_Reco()
       actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
       se->registerSubsystem(actsFit);
       
-      if (G4TRACKING::SC_CALIBMODE)
+         if (G4TRACKING::SC_CALIBMODE)
 	{
 	  /// run tpc residual determination with silicon+MM track fit
 	  auto residuals = new PHTpcResiduals;
-    residuals->setOutputfile( G4TRACKING::SC_ROOTOUTPUT_FILENAME );
-    residuals->Verbosity(verbosity);
+	  residuals->setOutputfile( G4TRACKING::SC_ROOTOUTPUT_FILENAME );
+	  residuals->Verbosity(verbosity);
 	  se->registerSubsystem(residuals);
 	}
-      
+
       // Choose the best silicon matched track for each TPC track seed
       PHTrackCleaner *cleaner= new PHTrackCleaner();
       cleaner->Verbosity(verbosity);
       se->registerSubsystem(cleaner);
       
-      PHActsVertexFinder *finder = new PHActsVertexFinder();
-      finder->Verbosity(verbosity);
-      finder->setFieldMap(G4MAGNET::magfield);
-      se->registerSubsystem(finder);
-      
-      PHActsTrkFitter* actsFit2 = new PHActsTrkFitter("PHActsSecondTrKFitter");
-      actsFit2->Verbosity(verbosity);
-      actsFit2->doTimeAnalysis(false);
-      actsFit2->fitSiliconMMs(false);
-      se->registerSubsystem(actsFit2);
+      PHTruthVertexing *vtxing = new PHTruthVertexing();
+      vtxing->associate_tracks(true);
+      std::string trackmapnamef = "SvtxTrackMap";
+      vtxing->set_track_map_name(trackmapnamef);
+      se->registerSubsystem(vtxing);
+
+      PHActsVertexPropagator *vtxProp = new PHActsVertexPropagator();
+      vtxProp->Verbosity(1);
+      se->registerSubsystem(vtxProp);
+
     }
 
   //=========================================================    
