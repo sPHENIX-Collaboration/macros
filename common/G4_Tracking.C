@@ -90,7 +90,7 @@ namespace G4TRACKING
 
   // Initial vertexing
   bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
-  bool use_truth_init_vertexing = true;    // if true runs truth vertexing, if false runs acts initial vertex finder
+  bool use_truth_vertexing = true;    // if true runs truth vertexing, if false runs acts initial vertex finder
 
   // TPC seeding options
   bool use_PHTpcTracker_seeding = false;  // false for using the default PHCASeeding to get TPC track seeds, true to use PHTpcTracker
@@ -213,7 +213,7 @@ void Tracking_Reco()
 
   //====================
   // Common to all sections
-  // Initial vertex finding
+  // Silicon seeding
   //=====================
 
   // Assemble silicon clusters into track stubs - needed for initial vertex finding
@@ -237,27 +237,6 @@ void Tracking_Reco()
       silicon_Seeding->Verbosity(verbosity);
       silicon_Seeding->fieldMapName(G4MAGNET::magfield);
       se->registerSubsystem(silicon_Seeding);
-    }
-  
-  // Initial vertex finding
-  //=================================
-  if(G4TRACKING::use_truth_init_vertexing)
-    {
-      PHTruthVertexing *init_vtx = new PHTruthVertexing();
-      init_vtx->Verbosity(verbosity);
-      std::string trackmapname = "SvtxSiliconTrackMap";
-      init_vtx->associate_tracks(true);
-      init_vtx->set_track_map_name(trackmapname);
-      //se->registerSubsystem(init_vtx);	  
-    }
-  else
-    {
-      PHActsInitialVertexFinder* init_vtx = new PHActsInitialVertexFinder();
-      init_vtx->Verbosity(verbosity);
-      init_vtx->setSvtxTrackMapName("SvtxSiliconTrackMap");
-      init_vtx->setSvtxVertexMapName("SvtxVertexMap");
-      init_vtx->magFieldName(G4MAGNET::magfield);
-      se->registerSubsystem(init_vtx);
     }
   
   //================================================    
@@ -461,13 +440,24 @@ void Tracking_Reco()
       PHTrackCleaner *cleaner= new PHTrackCleaner();
       cleaner->Verbosity(verbosity);
       se->registerSubsystem(cleaner);
-      
-      PHTruthVertexing *vtxing = new PHTruthVertexing();
-      vtxing->associate_tracks(true);
-      std::string trackmapnamef = "SvtxTrackMap";
-      vtxing->set_track_map_name(trackmapnamef);
-      se->registerSubsystem(vtxing);
 
+      if(G4TRACKING::use_truth_vertexing)
+	{
+	  PHTruthVertexing *vtxing = new PHTruthVertexing();
+	  vtxing->associate_tracks(true);
+	  std::string trackmapnamef = "SvtxTrackMap";
+	  vtxing->set_track_map_name(trackmapnamef);
+	  se->registerSubsystem(vtxing);
+	}
+      else
+	{
+	  PHActsVertexFinder *finder = new PHActsVertexFinder();
+	  finder->Verbosity(verbosity);
+	  finder->setFieldMap(G4MAGNET::magfield);
+	  se->registerSubsystem(finder);
+	}
+
+      /// Propagate track positions to the vertex position
       PHActsVertexPropagator *vtxProp = new PHActsVertexPropagator();
       vtxProp->Verbosity(1);
       se->registerSubsystem(vtxProp);
