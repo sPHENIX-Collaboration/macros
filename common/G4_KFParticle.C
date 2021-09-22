@@ -3,6 +3,7 @@
 
 #include <GlobalVariables.C>
 
+#define HomogeneousField
 #include <kfparticle_sphenix/KFParticle_sPHENIX.h>
 
 #include <fun4all/Fun4AllServer.h>

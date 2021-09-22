@@ -10,6 +10,7 @@
 #include <G4_EPD.C>
 #include <G4_HcalIn_ref.C>
 #include <G4_HcalOut_ref.C>
+#include <G4_BeamLine.C>
 #include <G4_Intt.C>
 #include <G4_Magnet.C>
 #include <G4_Micromegas.C>
@@ -20,6 +21,7 @@
 #include <G4_TPC.C>
 #include <G4_User.C>
 #include <G4_World.C>
+#include <G4_ZDC.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
@@ -62,6 +64,14 @@ void G4Init()
   if (Enable::HCALOUT) HCalOuterInit();
   if (Enable::PLUGDOOR) PlugDoorInit();
   if (Enable::EPD) EPDInit();
+  if (Enable::BEAMLINE)
+  {
+    BeamLineInit();
+    if (Enable::ZDC)
+    {
+      ZDCInit();
+    }
+  }
   if (Enable::USER) UserInit();
   if (Enable::BLACKHOLE) BlackHoleInit();
 }
@@ -120,6 +130,15 @@ int G4Setup()
   if (Enable::HCALOUT) radius = HCalOuter(g4Reco, radius, 4);
   if (Enable::PLUGDOOR) PlugDoor(g4Reco);
   if (Enable::EPD) EPD(g4Reco);
+  if (Enable::BEAMLINE)
+  {
+    BeamLineDefineMagnets(g4Reco);
+    BeamLineDefineBeamPipe(g4Reco);
+    if (Enable::ZDC)
+    {
+      ZDCSetup(g4Reco);
+    }
+  }
   if (Enable::USER) UserDetector(g4Reco);
 
 

@@ -4,6 +4,7 @@
 #include <GlobalVariables.C>
 
 #include <g4jets/FastJetAlgo.h>
+#include <g4jets/JetReco.h>
 
 #include <particleflowreco/ParticleFlowJetInput.h>
 #include <particleflowreco/ParticleFlowReco.h>
