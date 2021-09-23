@@ -314,6 +314,16 @@ int Fun4All_G4_sPHENIX(
 
   Enable::EPD = true;
 
+
+  Enable::BEAMLINE = true;
+//  Enable::BEAMLINE_ABSORBER = true;  // makes the beam line magnets sensitive volumes
+//  Enable::BEAMLINE_BLACKHOLE = true; // turns the beamline magnets into black holes
+  Enable::ZDC = true;
+//  Enable::ZDC_ABSORBER = true;
+//  Enable::ZDC_SUPPORT = true;
+  Enable::ZDC_TOWER = Enable::ZDC && true;
+  Enable::ZDC_EVAL = Enable::ZDC_TOWER && true;
+
   //! forward flux return plug door. Out of acceptance and off by default.
   //Enable::PLUGDOOR = true;
   Enable::PLUGDOOR_ABSORBER = true;
