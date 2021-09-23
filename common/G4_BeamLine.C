@@ -3,13 +3,13 @@
 
 #include <GlobalVariables.C>
 
+#include <G4_Pipe.C>
+
 #include <g4detectors/BeamLineMagnetSubsystem.h>
 #include <g4detectors/PHG4BlockSubsystem.h>
 #include <g4detectors/PHG4ConeSubsystem.h>
 #include <g4detectors/PHG4CylinderSubsystem.h>
-
 #include <g4detectors/PHG4ZDCSubsystem.h>
-
 #include <g4detectors/PHG4DetectorSubsystem.h>
 
 #include <g4main/PHG4Reco.h>
@@ -35,10 +35,11 @@ namespace Enable
 
 namespace BeamLine
 {
-  double starting_z = 700;  //cm as center-forward interface
-  double enclosure_z_max = 3000.;
-  double enclosure_r_max = 30.;  // This is intentionally made large 25cm radius
+  double starting_z =  G4PIPE::be_pipe_length / 2. + G4PIPE::al_pipe_length + G4PIPE::al_pipe_cone_length + G4PIPE::al_pipe_ext_length;
+  double enclosure_z_max = 2000. + (700-starting_z);
+  double enclosure_r_max = 30.;  // 30cm radius to cover magnets
   double enclosure_center = 0.5 * (starting_z + enclosure_z_max);
+
   int pipe_id_offset = 100;
   int roman_pot_pipe_id_offset = 200;
   PHG4CylinderSubsystem *ForwardBeamLineEnclosure(nullptr);
@@ -48,7 +49,7 @@ namespace BeamLine
 
 void BeamLineInit()
 {
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, BeamLine::starting_z);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -BeamLine::enclosure_z_max);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, BeamLine::enclosure_z_max);
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, BeamLine::enclosure_r_max);
 }
@@ -61,7 +62,7 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
   int verbosity = std::max(Enable::VERBOSITY, Enable::BEAMLINE_VERBOSITY);
 
   BeamLine::ForwardBeamLineEnclosure = new PHG4CylinderSubsystem("ForwardBeamLineEnclosure");
-  BeamLine::ForwardBeamLineEnclosure->set_double_param("place_z", BeamLine::enclosure_center);
+  BeamLine::ForwardBeamLineEnclosure->set_double_param("place_z", BeamLine::enclosure_center );
   BeamLine::ForwardBeamLineEnclosure->set_double_param("radius", 0);
   BeamLine::ForwardBeamLineEnclosure->set_double_param("thickness", BeamLine::enclosure_r_max);
   BeamLine::ForwardBeamLineEnclosure->set_double_param("length", BeamLine::enclosure_z_max - BeamLine::starting_z);
@@ -94,9 +95,7 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
   if (infile.is_open())
   {
     double biggest_z = 0.;
-    // start with 1 so we do not end up with id=0 since we distinguish between pos and neg
-    // pos is inside the magnet (beam pipe), negative is the magnet volume
-    int imagnet = 1;
+    int imagnet = 0;
     std::string line;
     while (std::getline(infile, line))
     {
@@ -292,7 +291,6 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
   for (int i = 0; i < nSec; i++)
   {
     string name = "beamPipeRP" + to_string(i);
-    //    PHG4ConeSubsystem *pipe = new PHG4ConeSubsystem(Form("beamPipeRP%d", i), 0);
     PHG4ConeSubsystem *pipe = new PHG4ConeSubsystem(name, BeamLine::roman_pot_pipe_id_offset + i);
     pipe->set_string_param("material", "G4_STAINLESS-STEEL");
     pipe->set_double_param("place_x", PosFlip(xC[i]));
