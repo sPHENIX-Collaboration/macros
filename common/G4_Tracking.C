@@ -35,7 +35,7 @@
 #include <trackreco/PHActsSiliconSeeding.h>
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsInitialVertexFinder.h>
-#include <trackreco/PHActsVertexFinder.h>
+#include <trackreco/PHSimpleVertexFinder.h>
 
 #include <tpccalib/TpcSpaceChargeReconstruction.h>
 #include <tpccalib/PHTpcResiduals.h>
@@ -74,23 +74,21 @@ namespace G4TRACKING
 
   // The normal (default) Acts tracking chain is:
   //   PHActsSiliconSeeding                    // make silicon track seeds
-  //   PHActsInitialVertexing                    // event vertex from silicon track stubs
   //   PHCASeeding                                    // TPC track seeds
   //    PHTpcTrackSeedVertexAssoc    // Associates TPC track seeds with a vertex, refines phi and eta
   //   PHSiliconTpcTrackMatching      // match TPC track seeds to silicon track seeds
   //   PHMicromegasTpcTrackMatching   // associate Micromegas clusters with TPC track stubs
   //   PHActsTrkFitter (1)                         // Kalman fitter makes fit to assembled tracks
-  //   PHActsVertexFinder                       // final vertexing using fitted Acts tracks
-  //   PHActsTrkFitter (2)                         // Kalman fitter makes final fit to tracks (improves DCA resolution using final vertex)
+  //   PHSimpleVertexFinder                       // final vertexing using fitted Acts tracks
+  //   PHActsVertexPropagator          // propagates track parameters to vertex position to get final dca
 
-  // Possible variations - these are normally false
+  // Possible variations 
   //====================================
   //Fittting
   bool use_genfit = false;                 // if false, acts KF is run on proto tracks. If true, use Genfit track propagation and fitting
 
-  // Initial vertexing
+  // Vertexing
   bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
-  bool use_truth_vertexing = true;    // if true runs truth vertexing, if false runs acts initial vertex finder
 
   // TPC seeding options
   bool use_PHTpcTracker_seeding = false;  // false for using the default PHCASeeding to get TPC track seeds, true to use PHTpcTracker
@@ -106,6 +104,7 @@ namespace G4TRACKING
   bool use_truth_si_matching = false;              // if true, associates silicon clusters using best truth track match to TPC seed tracks - for diagnostics only
  // Full truth track seeding 
   bool use_full_truth_track_seeding = false;  // makes track seeds using truth info, used for both Acts and Genfit
+  bool use_truth_vertexing = false;    // if true runs truth vertexing, if false runs PHSimpleVertexFinder
 
   // Rave final vertexing (for QA)
   bool use_rave_vertexing = true;                     // Use Rave to find and fit for vertex after track fitting - used for QA only
@@ -451,15 +450,14 @@ void Tracking_Reco()
 	}
       else
 	{
-	  PHActsVertexFinder *finder = new PHActsVertexFinder();
-	  finder->Verbosity(verbosity);
-	  finder->setFieldMap(G4MAGNET::magfield);
-	  se->registerSubsystem(finder);
+	  PHSimpleVertexFinder *vtxfinder = new PHSimpleVertexFinder();
+	  vtxfinder->Verbosity(verbosity);
+	  se->registerSubsystem(vtxfinder);
 	}
 
       /// Propagate track positions to the vertex position
       PHActsVertexPropagator *vtxProp = new PHActsVertexPropagator();
-      vtxProp->Verbosity(1);
+      vtxProp->Verbosity(verbosity);
       se->registerSubsystem(vtxProp);
 
     }
@@ -500,7 +498,7 @@ void Tracking_Reco()
 	  se->registerSubsystem(residuals);
 	}
             
-      PHActsVertexFinder *finder = new PHActsVertexFinder();
+      PHSimpleVertexFinder *finder = new PHSimpleVertexFinder();
       finder->Verbosity(verbosity);
       se->registerSubsystem(finder);
       
@@ -718,10 +716,6 @@ void Tracking_QA()
   if (!G4TRACKING::use_genfit)
   {
 #if __cplusplus >= 201703L
-
-    //    PHActsVertexFinder* vtxer = new PHActsVertexFinder();
-    //    vtxer->Verbosity(verbosity);
-    //    se->registerSubsystem(vtxer);
 
     QAG4SimulationVertex* qav = new QAG4SimulationVertex();
     // qav->addEmbeddingID(2);
