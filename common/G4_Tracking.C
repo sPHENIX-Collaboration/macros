@@ -670,7 +670,8 @@ void Tracking_Eval(const std::string& outputfile)
   eval->do_cluster_eval(true);
   eval->do_g4hit_eval(true);
   eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
-  eval->do_gpoint_eval(false);
+  eval->do_gpoint_eval(true);
+  eval->do_vtx_eval_light(true);
   eval->do_eval_light(true);
   eval->set_use_initial_vertex(G4TRACKING::g4eval_use_initial_vertex);
   eval->set_use_genfit_vertex(G4TRACKING::use_genfit);
