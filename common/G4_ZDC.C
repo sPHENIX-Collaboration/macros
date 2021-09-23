@@ -8,9 +8,9 @@
 #include <g4calo/RawTowerBuilderByHitIndex.h>
 #include <g4calo/RawTowerDigitizer.h>
 
-#include <g4detectors/PHG4ZDCSubsystem.h>
-
 #include <g4detectors/PHG4DetectorSubsystem.h>
+#include <g4detectors/PHG4ZDCDefs.h>
+#include <g4detectors/PHG4ZDCSubsystem.h>
 
 #include <g4eval/CaloEvaluator.h>
 
@@ -33,6 +33,7 @@ namespace Enable
 {
   bool ZDC = false;
   bool ZDC_ABSORBER = false;
+  bool ZDC_SUPPORT = false;
   bool ZDC_TOWER = false;
   bool ZDC_EVAL = false;
   bool ZDC_OVERLAPCHECK = false;
@@ -60,25 +61,29 @@ void ZDCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
   bool AbsorberActive = Enable::ABSORBER || Enable::ZDC_ABSORBER || (absorberactive > 0);
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::ZDC_OVERLAPCHECK;
 
+  bool SupportActive = Enable::SUPPORT || Enable::ZDC_SUPPORT;
+
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  PHG4ZDCSubsystem *zdc = new PHG4ZDCSubsystem("ZDC");
-  zdc->set_int_param("fzdc", 1);
-  zdc->set_double_param("z", G4ZDC::ZDCPlaceZ - BeamLine::enclosure_center);
+  PHG4ZDCSubsystem *zdc = new PHG4ZDCSubsystem("ZDC",PHG4ZDCDefs::NORTH);
+// place zdc in beam enclosure
+  zdc->set_double_param("place_z", G4ZDC::ZDCPlaceZ - BeamLine::enclosure_center);
   zdc->OverlapCheck(OverlapCheck);
   zdc->SetActive();
   zdc->SuperDetector("ZDC");
   if (AbsorberActive) zdc->SetAbsorberActive(AbsorberActive);
+  if (SupportActive) zdc->SetSupportActive(SupportActive);
   zdc->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
   g4Reco->registerSubsystem(zdc);
 
-  zdc = new PHG4ZDCSubsystem("ZDC", 1);
-  zdc->set_int_param("bzdc", 1);
-  zdc->set_double_param("z", G4ZDC::ZDCPlaceZ - BeamLine::enclosure_center);
+  zdc = new PHG4ZDCSubsystem("ZDC", PHG4ZDCDefs::SOUTH);
+// place zdc in beam enclosure
+  zdc->set_double_param("place_z", G4ZDC::ZDCPlaceZ - BeamLine::enclosure_center);
   zdc->OverlapCheck(OverlapCheck);
   zdc->SetActive();
   zdc->SuperDetector("ZDC");
   if (AbsorberActive) zdc->SetAbsorberActive(AbsorberActive);
+  if (SupportActive) zdc->SetSupportActive(SupportActive);
   zdc->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
   g4Reco->registerSubsystem(zdc);
 }
@@ -94,7 +99,6 @@ void ZDC_Towers()
   tower_ZDC->Detector("ZDC");
   tower_ZDC->set_sim_tower_node_prefix("SIM");
   tower_ZDC->GeometryTableFile(mapping_zdc);
-
   se->registerSubsystem(tower_ZDC);
 
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("ZDCRawTowerDigitizer");
