@@ -36,7 +36,7 @@ namespace Enable
 namespace BeamLine
 {
   double starting_z =  G4PIPE::be_pipe_length / 2. + G4PIPE::al_pipe_length + G4PIPE::al_pipe_cone_length + G4PIPE::al_pipe_ext_length;
-  double enclosure_z_max = 2000. + (700-starting_z);
+  double enclosure_z_max = 2050. + (700-starting_z);
   double enclosure_r_max = 30.;  // 30cm radius to cover magnets
   double enclosure_center = 0.5 * (starting_z + enclosure_z_max);
 
