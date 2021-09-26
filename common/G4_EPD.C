@@ -32,6 +32,7 @@ void EPD(PHG4Reco* g4Reco)
 
   epd->SuperDetector("EPD");
   epd->OverlapCheck(overlap_check);
+  epd->SetActive();
 
   g4Reco->registerSubsystem(epd);
 }
