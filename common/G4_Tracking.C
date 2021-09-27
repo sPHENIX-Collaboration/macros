@@ -35,6 +35,7 @@
 #include <trackreco/PHActsSiliconSeeding.h>
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsInitialVertexFinder.h>
+#include <trackreco/PHActsTrackProjection.h>
 #include <trackreco/PHSimpleVertexFinder.h>
 
 #include <tpccalib/TpcSpaceChargeReconstruction.h>
@@ -641,7 +642,7 @@ void Tracking_Reco()
      
   // Track Projections
   //===============
-  PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
+  PHActsTrackProjection *projection = new PHActsTrackProjection();
   projection->Verbosity(verbosity);
   se->registerSubsystem(projection);
   
