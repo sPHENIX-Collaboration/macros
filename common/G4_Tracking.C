@@ -34,6 +34,7 @@
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSiliconSeeding.h>
 #include <trackreco/PHActsTrkFitter.h>
+#include <trackreco/PHActsInitialVertexFinder.h>
 #include <trackreco/PHActsTrackProjection.h>
 #include <trackreco/PHSimpleVertexFinder.h>
 
