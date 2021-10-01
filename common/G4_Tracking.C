@@ -501,11 +501,6 @@ void Tracking_Reco()
       finder->Verbosity(verbosity);
       se->registerSubsystem(finder);
       
-      PHActsTrkFitter* actsFit2 = new PHActsTrkFitter("PHActsSecondTrKFitter");
-      actsFit2->Verbosity(verbosity);
-      actsFit2->doTimeAnalysis(false);
-      actsFit2->fitSiliconMMs(false);
-      se->registerSubsystem(actsFit2);
     }
   
   //=========================================================    
