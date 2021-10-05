@@ -31,7 +31,7 @@ namespace G4PIPE
   double al_pipe_cone_length = 8.56;
 
   double al_pipe_ext_radius = 2.5005;
-  double al_pipe_ext_length = 89.9;  // extension beyond conical part
+  double al_pipe_ext_length = 90.;  // extension beyond conical part
 }  // namespace G4PIPE
 
 void PipeInit()
@@ -146,7 +146,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
 
   /* north aluminum pipe (extension) */
   cyl = new PHG4CylinderSubsystem("N_AL_PIPE_EXT", 7);
-  cyl->set_double_param("place_z", ext_position + no_overlapp);
+  cyl->set_double_param("place_z", ext_position);
   cyl->set_double_param("radius", G4PIPE::al_pipe_ext_radius);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::al_pipe_ext_length);
@@ -171,7 +171,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
 
   /* south aluminum pipe (extension) */
   cyl = new PHG4CylinderSubsystem("S_AL_PIPE_EXT", 9);
-  cyl->set_double_param("place_z", -ext_position - no_overlapp);
+  cyl->set_double_param("place_z", -ext_position);
   cyl->set_double_param("radius", G4PIPE::al_pipe_ext_radius);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::al_pipe_ext_length);
