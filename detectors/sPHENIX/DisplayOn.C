@@ -59,4 +59,6 @@ void displaycmd()
   cout << " g4->ApplyCommand(\"/vis/ogl/printEPS\")" << endl;
   cout << "set background color:" << endl;
   cout << " g4->ApplyCommand(\"/vis/viewer/set/background white\")" << endl;
+  cout << "Overlap check:" << endl;
+  cout << " g4->ApplyCommand(\"/geometry/test/run\")" << endl;
 }
