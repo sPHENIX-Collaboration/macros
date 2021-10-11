@@ -63,11 +63,9 @@ namespace G4MVTXAlignment
 
 void MvtxInit()
 {
-  //BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, (PHG4MvtxDefs::mvtxdat[G4MVTX::n_maps_layer - 1][PHG4MvtxDefs::kRmd]) / 10. + G4MVTX::radius_offset);
-  //BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 16.);
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4MVTX::service_barrel_radius);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -1 * (G4MVTX::service_barrel_length + G4MVTX::service_barrel_start));
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -17.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -1 * (G4MVTX::service_barrel_length - G4MVTX::service_barrel_start + 5.));
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 25.);
 }
 
 double calculateArea(double inner_radius, double outer_radius)  //Calculate the area of a disk
