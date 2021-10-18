@@ -67,24 +67,24 @@ void ZDCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 
   PHG4ZDCSubsystem *zdc = new PHG4ZDCSubsystem("ZDC",PHG4ZDCDefs::NORTH);
 // place zdc in beam enclosure
-  zdc->set_double_param("place_z", G4ZDC::ZDCPlaceZ - BeamLine::enclosure_center);
+  zdc->set_double_param("place_z", G4ZDC::ZDCPlaceZ - G4BEAMLINE::enclosure_center);
   zdc->OverlapCheck(OverlapCheck);
   zdc->SetActive();
   zdc->SuperDetector("ZDC");
   if (AbsorberActive) zdc->SetAbsorberActive(AbsorberActive);
   if (SupportActive) zdc->SetSupportActive(SupportActive);
-  zdc->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
+  zdc->SetMotherSubsystem(G4BEAMLINE::ForwardBeamLineEnclosure);
   g4Reco->registerSubsystem(zdc);
 
   zdc = new PHG4ZDCSubsystem("ZDC", PHG4ZDCDefs::SOUTH);
 // place zdc in beam enclosure
-  zdc->set_double_param("place_z", G4ZDC::ZDCPlaceZ - BeamLine::enclosure_center);
+  zdc->set_double_param("place_z", G4ZDC::ZDCPlaceZ - G4BEAMLINE::enclosure_center);
   zdc->OverlapCheck(OverlapCheck);
   zdc->SetActive();
   zdc->SuperDetector("ZDC");
   if (AbsorberActive) zdc->SetAbsorberActive(AbsorberActive);
   if (SupportActive) zdc->SetSupportActive(SupportActive);
-  zdc->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
+  zdc->SetMotherSubsystem(G4BEAMLINE::BackwardBeamLineEnclosure);
   g4Reco->registerSubsystem(zdc);
 }
 
