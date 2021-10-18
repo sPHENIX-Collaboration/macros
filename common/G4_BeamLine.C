@@ -33,7 +33,7 @@ namespace Enable
 
 }  // namespace Enable
 
-namespace BeamLine
+namespace G4BEAMLINE
 {
 // the beampipes seem to add 2 no_overlaps - needs to be looked at
 // but this z position takes care of our current overlap issues
@@ -41,7 +41,7 @@ namespace BeamLine
   double enclosure_z_max = 2050. + (700-starting_z);
   double enclosure_r_max = 30.;  // 30cm radius to cover magnets
   double enclosure_center = 0.5 * (starting_z + enclosure_z_max);
-
+  double skin_thickness = 0.; // if center of magnet iron is black hole - thickness of Fe surrounding it
   int pipe_id_offset = 100;
   int roman_pot_pipe_id_offset = 200;
   PHG4CylinderSubsystem *ForwardBeamLineEnclosure(nullptr);
@@ -51,9 +51,9 @@ namespace BeamLine
 
 void BeamLineInit()
 {
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -BeamLine::enclosure_z_max);
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, BeamLine::enclosure_z_max);
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, BeamLine::enclosure_r_max);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -G4BEAMLINE::enclosure_z_max);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4BEAMLINE::enclosure_z_max);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4BEAMLINE::enclosure_r_max);
 }
 
 void BeamLineDefineMagnets(PHG4Reco *g4Reco)
@@ -63,27 +63,27 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
 
   int verbosity = std::max(Enable::VERBOSITY, Enable::BEAMLINE_VERBOSITY);
 
-  BeamLine::ForwardBeamLineEnclosure = new PHG4CylinderSubsystem("ForwardBeamLineEnclosure");
-  BeamLine::ForwardBeamLineEnclosure->set_double_param("place_z", BeamLine::enclosure_center );
-  BeamLine::ForwardBeamLineEnclosure->set_double_param("radius", 0);
-  BeamLine::ForwardBeamLineEnclosure->set_double_param("thickness", BeamLine::enclosure_r_max);
-  BeamLine::ForwardBeamLineEnclosure->set_double_param("length", BeamLine::enclosure_z_max - BeamLine::starting_z);
-  BeamLine::ForwardBeamLineEnclosure->set_string_param("material", "G4_Galactic");
-  BeamLine::ForwardBeamLineEnclosure->set_color(.5, .5, .5, 0.2);
-  BeamLine::ForwardBeamLineEnclosure->OverlapCheck(overlapCheck);
-  if (verbosity) BeamLine::ForwardBeamLineEnclosure->Verbosity(verbosity);
-  g4Reco->registerSubsystem(BeamLine::ForwardBeamLineEnclosure);
+  G4BEAMLINE::ForwardBeamLineEnclosure = new PHG4CylinderSubsystem("ForwardBeamLineEnclosure");
+  G4BEAMLINE::ForwardBeamLineEnclosure->set_double_param("place_z", G4BEAMLINE::enclosure_center );
+  G4BEAMLINE::ForwardBeamLineEnclosure->set_double_param("radius", 0);
+  G4BEAMLINE::ForwardBeamLineEnclosure->set_double_param("thickness", G4BEAMLINE::enclosure_r_max);
+  G4BEAMLINE::ForwardBeamLineEnclosure->set_double_param("length", G4BEAMLINE::enclosure_z_max - G4BEAMLINE::starting_z);
+  G4BEAMLINE::ForwardBeamLineEnclosure->set_string_param("material", "G4_Galactic");
+  G4BEAMLINE::ForwardBeamLineEnclosure->set_color(.5, .5, .5, 0.2);
+  G4BEAMLINE::ForwardBeamLineEnclosure->OverlapCheck(overlapCheck);
+  if (verbosity) G4BEAMLINE::ForwardBeamLineEnclosure->Verbosity(verbosity);
+  g4Reco->registerSubsystem(G4BEAMLINE::ForwardBeamLineEnclosure);
 
-  BeamLine::BackwardBeamLineEnclosure = new PHG4CylinderSubsystem("BackwardBeamLineEnclosure");
-  BeamLine::BackwardBeamLineEnclosure->set_double_param("place_z", -BeamLine::enclosure_center);
-  BeamLine::BackwardBeamLineEnclosure->set_double_param("radius", 0);
-  BeamLine::BackwardBeamLineEnclosure->set_double_param("thickness", BeamLine::enclosure_r_max);  // This is intentionally made large 25cm radius
-  BeamLine::BackwardBeamLineEnclosure->set_double_param("length", BeamLine::enclosure_z_max - BeamLine::starting_z);
-  BeamLine::BackwardBeamLineEnclosure->set_string_param("material", "G4_Galactic");
-  BeamLine::BackwardBeamLineEnclosure->set_color(.5, .5, .5, 0.2);
-  BeamLine::BackwardBeamLineEnclosure->OverlapCheck(overlapCheck);
-  if (verbosity) BeamLine::BackwardBeamLineEnclosure->Verbosity(verbosity);
-  g4Reco->registerSubsystem(BeamLine::BackwardBeamLineEnclosure);
+  G4BEAMLINE::BackwardBeamLineEnclosure = new PHG4CylinderSubsystem("BackwardBeamLineEnclosure");
+  G4BEAMLINE::BackwardBeamLineEnclosure->set_double_param("place_z", -G4BEAMLINE::enclosure_center);
+  G4BEAMLINE::BackwardBeamLineEnclosure->set_double_param("radius", 0);
+  G4BEAMLINE::BackwardBeamLineEnclosure->set_double_param("thickness", G4BEAMLINE::enclosure_r_max);  // This is intentionally made large 25cm radius
+  G4BEAMLINE::BackwardBeamLineEnclosure->set_double_param("length", G4BEAMLINE::enclosure_z_max - G4BEAMLINE::starting_z);
+  G4BEAMLINE::BackwardBeamLineEnclosure->set_string_param("material", "G4_Galactic");
+  G4BEAMLINE::BackwardBeamLineEnclosure->set_color(.5, .5, .5, 0.2);
+  G4BEAMLINE::BackwardBeamLineEnclosure->OverlapCheck(overlapCheck);
+  if (verbosity) G4BEAMLINE::BackwardBeamLineEnclosure->Verbosity(verbosity);
+  g4Reco->registerSubsystem(G4BEAMLINE::BackwardBeamLineEnclosure);
 
   string magFile;
   magFile = string(getenv("CALIBRATIONROOT")) + "/Beam/D0DXMagnets.dat";
@@ -190,11 +190,11 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
             bl->set_double_param("place_y", y);           // relative position to mother vol.
             if (z > 0)
             {
-              bl->set_double_param("place_z", z - BeamLine::enclosure_center);  // relative position to mother vol.
+              bl->set_double_param("place_z", z - G4BEAMLINE::enclosure_center);  // relative position to mother vol.
             }
             else
             {
-              bl->set_double_param("place_z", z + BeamLine::enclosure_center);  // relative position to mother vol.
+              bl->set_double_param("place_z", z + G4BEAMLINE::enclosure_center);  // relative position to mother vol.
             }
             bl->set_double_param("field_global_position_x", PosFlip(x));  // abs. position to world for field manager
             bl->set_double_param("field_global_position_y", y);           // abs. position to world for field manager
@@ -203,16 +203,17 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
             bl->set_double_param("field_global_rot_y", AngleFlip(angle));  // abs. rotation to world for field manager
             bl->set_double_param("inner_radius", inner_radius_zin);
             bl->set_double_param("outer_radius", outer_magnet_diameter / 2.);
+            bl->set_double_param("skin_thickness",G4BEAMLINE::skin_thickness);
             bl->SetActive(AbsorberActive);
             bl->SetAbsorberActive(AbsorberActive);
             if (Enable::BEAMLINE_BLACKHOLE) bl->BlackHole();  // turn magnets into black holes
             if (z > 0)
             {
-              bl->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
+              bl->SetMotherSubsystem(G4BEAMLINE::ForwardBeamLineEnclosure);
             }
             else
             {
-              bl->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
+              bl->SetMotherSubsystem(G4BEAMLINE::BackwardBeamLineEnclosure);
             }
             bl->OverlapCheck(overlapCheck);
             bl->SuperDetector("BEAMLINEMAGNET");
@@ -249,7 +250,7 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
   for (int i = 0; i < ntube; i++)
   {
     string name = "beamPipe" + nm[i];
-    PHG4CylinderSubsystem *pipe = new PHG4CylinderSubsystem(name, BeamLine::pipe_id_offset + i);
+    PHG4CylinderSubsystem *pipe = new PHG4CylinderSubsystem(name, G4BEAMLINE::pipe_id_offset + i);
     pipe->set_double_param("radius", qir[i]);
     pipe->set_double_param("thickness", qor[i] - qir[i]);
     pipe->set_double_param("length", qlen[i]);
@@ -259,21 +260,21 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
     pipe->set_double_param("place_y", qyC[i]);
     if (qzC[i] > 0)
     {
-      pipe->set_double_param("place_z", qzC[i] - BeamLine::enclosure_center);  // relative position to mother vol.
+      pipe->set_double_param("place_z", qzC[i] - G4BEAMLINE::enclosure_center);  // relative position to mother vol.
     }
     else
     {
-      pipe->set_double_param("place_z", qzC[i] + BeamLine::enclosure_center);  // relative position to mother vol.
+      pipe->set_double_param("place_z", qzC[i] + G4BEAMLINE::enclosure_center);  // relative position to mother vol.
     }
     if (AbsorberActive) pipe->SetActive();
     pipe->SuperDetector("PIPE");
     if (qzC[i] > 0)
     {
-      pipe->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
+      pipe->SetMotherSubsystem(G4BEAMLINE::ForwardBeamLineEnclosure);
     }
     else
     {
-      pipe->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
+      pipe->SetMotherSubsystem(G4BEAMLINE::BackwardBeamLineEnclosure);
     }
 
     pipe->OverlapCheck(OverlapCheck);
@@ -293,17 +294,17 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
   for (int i = 0; i < nSec; i++)
   {
     string name = "beamPipeRP" + to_string(i);
-    PHG4ConeSubsystem *pipe = new PHG4ConeSubsystem(name, BeamLine::roman_pot_pipe_id_offset + i);
+    PHG4ConeSubsystem *pipe = new PHG4ConeSubsystem(name, G4BEAMLINE::roman_pot_pipe_id_offset + i);
     pipe->set_string_param("material", "G4_STAINLESS-STEEL");
     pipe->set_double_param("place_x", PosFlip(xC[i]));
     pipe->set_double_param("place_y", yC[i]);
     if (zC[i] > 0)
     {
-      pipe->set_double_param("place_z", zC[i] - BeamLine::enclosure_center);
+      pipe->set_double_param("place_z", zC[i] - G4BEAMLINE::enclosure_center);
     }
     else
     {
-      pipe->set_double_param("place_z", zC[i] + BeamLine::enclosure_center);
+      pipe->set_double_param("place_z", zC[i] + G4BEAMLINE::enclosure_center);
     }
     pipe->set_double_param("length", len[i]);
     pipe->set_double_param("rmin1", ir1[i]);
@@ -312,11 +313,11 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
     pipe->set_double_param("rmax2", or2[i]);
     if (zC[i] > 0)
     {
-      pipe->SetMotherSubsystem(BeamLine::ForwardBeamLineEnclosure);
+      pipe->SetMotherSubsystem(G4BEAMLINE::ForwardBeamLineEnclosure);
     }
     else
     {
-      pipe->SetMotherSubsystem(BeamLine::BackwardBeamLineEnclosure);
+      pipe->SetMotherSubsystem(G4BEAMLINE::BackwardBeamLineEnclosure);
     }
     if (AbsorberActive) pipe->SetActive();
     pipe->SuperDetector("PIPE");
