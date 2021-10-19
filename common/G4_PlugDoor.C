@@ -9,6 +9,8 @@
 
 R__LOAD_LIBRARY(libg4detectors.so)
 
+void common_color(PHG4CylinderSubsystem *subsys);
+
 namespace Enable
 {
   bool PLUGDOOR = false;
@@ -67,6 +69,7 @@ void PlugDoor(PHG4Reco *g4Reco)
     flux_return_plus->SetActive(flux_door_active);
     flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
     flux_return_plus->OverlapCheck(OverlapCheck);
+    common_color(flux_return_plus);
     g4Reco->registerSubsystem(flux_return_plus);
 
     flux_return_plus = new PHG4CylinderSubsystem("FLUXRET_ETA_PLUS", 1);
@@ -78,6 +81,7 @@ void PlugDoor(PHG4Reco *g4Reco)
     flux_return_plus->SetActive(flux_door_active);
     flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
     flux_return_plus->OverlapCheck(OverlapCheck);
+    common_color(flux_return_plus);
     g4Reco->registerSubsystem(flux_return_plus);
 
     // Black hole behind door with thickness G4PLUGDOOR::thickness
@@ -92,6 +96,7 @@ void PlugDoor(PHG4Reco *g4Reco)
     flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
     flux_return_plus->OverlapCheck(OverlapCheck);
     flux_return_plus->BlackHole();
+    common_color(flux_return_plus);
     g4Reco->registerSubsystem(flux_return_plus);
 
     PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FLUXRET_ETA_MINUS", 0);
@@ -103,6 +108,7 @@ void PlugDoor(PHG4Reco *g4Reco)
     flux_return_minus->SetActive(flux_door_active);
     flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
     flux_return_minus->OverlapCheck(OverlapCheck);
+    common_color(flux_return_minus);
     g4Reco->registerSubsystem(flux_return_minus);
 
     flux_return_minus = new PHG4CylinderSubsystem("FLUXRET_ETA_MINUS", 1);
@@ -114,6 +120,7 @@ void PlugDoor(PHG4Reco *g4Reco)
     flux_return_minus->SetActive(flux_door_active);
     flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
     flux_return_minus->OverlapCheck(OverlapCheck);
+    common_color(flux_return_minus);
     g4Reco->registerSubsystem(flux_return_minus);
 
     // Black hole behind door with thickness G4PLUGDOOR::thickness
@@ -128,6 +135,7 @@ void PlugDoor(PHG4Reco *g4Reco)
     flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
     flux_return_minus->OverlapCheck(OverlapCheck);
     flux_return_minus->BlackHole();
+    common_color(flux_return_minus);
     g4Reco->registerSubsystem(flux_return_minus);
   }
   else
@@ -141,6 +149,7 @@ void PlugDoor(PHG4Reco *g4Reco)
     flux_return_plus->SetActive(flux_door_active);
     flux_return_plus->SuperDetector("FLUXRET_ETA_PLUS");
     flux_return_plus->OverlapCheck(OverlapCheck);
+    common_color(flux_return_plus);
     g4Reco->registerSubsystem(flux_return_plus);
 
     PHG4CylinderSubsystem *flux_return_minus = new PHG4CylinderSubsystem("FLUXRET_ETA_MINUS", 3);
@@ -152,9 +161,15 @@ void PlugDoor(PHG4Reco *g4Reco)
     flux_return_minus->SetActive(flux_door_active);
     flux_return_minus->SuperDetector("FLUXRET_ETA_MINUS");
     flux_return_minus->OverlapCheck(OverlapCheck);
+    common_color(flux_return_minus);
     g4Reco->registerSubsystem(flux_return_minus);
   }
 
   return;
+}
+
+void common_color(PHG4CylinderSubsystem *subsys)
+{
+  subsys->set_color(0.29, 0.44, 0.54);
 }
 #endif
