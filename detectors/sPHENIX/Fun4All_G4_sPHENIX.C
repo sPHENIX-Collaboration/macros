@@ -3,6 +3,10 @@
 
 #include <GlobalVariables.C>
 
+// leave this here - there is a weird library interaction
+// if G4_KFParticle.C gets included after G4Setup_sPHENIX.C
+#include <G4_KFParticle.C>
+
 #include <DisplayOn.C>
 #include <G4Setup_sPHENIX.C>
 #include <G4_Bbc.C>
@@ -12,7 +16,6 @@
 #include <G4_HIJetReco.C>
 #include <G4_Input.C>
 #include <G4_Jets.C>
-#include <G4_KFParticle.C>
 #include <G4_ParticleFlow.C>
 #include <G4_Production.C>
 #include <G4_TopoClusterReco.C>
