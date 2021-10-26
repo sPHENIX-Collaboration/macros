@@ -251,6 +251,7 @@ int Fun4All_G4_sPHENIX(
   //  Enable::VERBOSITY = 1;
 
   // Enable::BBC = true;
+  // Enable::BBC_SUPPORT = true; // save hist in bbc support structure
   Enable::BBCFAKE = true;  // Smeared vtx and t0, use if you don't want real BBC in simulation
 
   Enable::PIPE = true;
