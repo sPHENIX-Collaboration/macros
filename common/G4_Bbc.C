@@ -17,6 +17,7 @@ R__LOAD_LIBRARY(libg4detectors.so)
 namespace Enable
 {
   bool BBC = false;
+  bool BBC_SUPPORT = false;
   bool BBCFAKE = false;
   int BBC_VERBOSITY = 0;
 }  // namespace Enable
@@ -45,10 +46,16 @@ void BbcInit()
 
 void Bbc(PHG4Reco* g4Reco)
 {
+  bool SupportActive = Enable::SUPPORT || Enable::BBC_SUPPORT;
   if (Enable::BBC)
   {
     PHG4BbcSubsystem* bbc = new PHG4BbcSubsystem("BBC");
     bbc->SuperDetector("BBC");
+    bbc->SetActive();
+    if (SupportActive)
+    {
+      bbc->SetSupportActive(SupportActive);
+    }
     g4Reco->registerSubsystem(bbc);
   }
   return;
