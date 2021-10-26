@@ -12,11 +12,10 @@
 
 #include <fun4all/Fun4AllServer.h>
 
+#include <boost/format.hpp>
 #include <cmath>
-#include <format>
 #include <iostream>
 #include <string>
-#include <string_view>
 #include <vector>
 
 //sPHENIX Tracking Services
@@ -322,7 +321,7 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
     {
       for (unsigned int iCol = 0; iCol < nCol; ++iCol)
       {
-        Cable *cable = new Cable(format("{}_samtec_{}_{}", superName, iRow, iCol), "G4_Cu", samtecCoreRadius, samtecSheathRadius,
+        Cable *cable = new Cable(boost::format("%1%_samtec_%2%_%3%") % superName % iRow % iCol, "G4_Cu", samtecCoreRadius, samtecSheathRadius,
                                  x1 + (iCol + 1) * samtecSheathRadius * 2, x2 + (iCol + 1) * samtecSheathRadius * 2,
                                  y1 + -1 * (iRow + 1) * samtecSheathRadius * 2, y2 + -1 * (iRow + 1) * samtecSheathRadius * 2,
                                  z1, z2);
@@ -337,7 +336,7 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
     unsigned int nCool = 2;
     for (unsigned int iCool = 0; iCool < nCool; ++iCool)
     {
-      Cable *cable = new Cable(format("{}_cooling_{}", superName, iCool), "G4_WATER", coolingCoreRadius, coolingSheathRadius,
+      Cable *cable = new Cable(boost::format("%1%_cooling_%2%") % superName % iCool, "G4_WATER", coolingCoreRadius, coolingSheathRadius,
                                x1 + (iCool + 1) * coolingSheathRadius * 2, x2 + (iCool + 1) * coolingSheathRadius * 2,
                                y1 + (iCool + 1) * coolingSheathRadius * 2, y2 + (iCool + 1) * coolingSheathRadius * 2,
                                z1, z2);
@@ -351,14 +350,14 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
     typedef pair < pair<string, string>, pair<double, double> PowerCableParameters;
     vector<PowerCableParameters> powerCables;
 
-    powerCables.push_back(make_pair(make_pair(format("{}_digiReturn", superName), "Large"), make_pair(-1 * powerLargeSheathRadius, -1 * powerLargeSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(format("{}_digiSupply", superName), "Large"), make_pair(-3 * powerLargeSheathRadius, powerLargeSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(format("{}_anaReturn", superName), "Medium"), make_pair(-1 * (powerMediumSheathRadius + 2 * powerLargeSheathRadius), -2 * powerMediumSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(format("{}_anaSupply", superName), "Medium"), make_pair(-1 * (3 * powerMediumSheathRadius + 2 * powerLargeSheathRadius), -1 * powerMediumSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(format("{}_digiSense", superName), "Small"), make_pair(-1 * (2 * powerMediumSheathRadius + 4 * powerLargeSheathRadius), powerSmallSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(format("{}_anaSense", superName), "Small"), make_pair(-4 * powerLargeSheathRadius, 2 * powerSmallSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(format("{}_bias", superName), "Small"), make_pair(-2 * powerLargeSheathRadius, powerLargeSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(format("{}_ground", superName), "Small"), make_pair(-1 * powerLargeSheathRadius, powerSmallSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::format("%1%_digiReturn") % superName, "Large"), make_pair(-1 * powerLargeSheathRadius, -1 * powerLargeSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::format("%1%_digiSupply") % superName, "Large"), make_pair(-3 * powerLargeSheathRadius, powerLargeSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::format("%1%_anaReturn") % superName, "Medium"), make_pair(-1 * (powerMediumSheathRadius + 2 * powerLargeSheathRadius), -2 * powerMediumSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::format("%1%_anaSupply") % superName, "Medium"), make_pair(-1 * (3 * powerMediumSheathRadius + 2 * powerLargeSheathRadius), -1 * powerMediumSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::format("%1%_digiSense", superName, "Small"), make_pair(-1 * (2 * powerMediumSheathRadius + 4 * powerLargeSheathRadius), powerSmallSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::format("%1%_anaSense") % superName, "Small"), make_pair(-4 * powerLargeSheathRadius, 2 * powerSmallSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::format("%1%_bias") % superName, "Small"), make_pair(-2 * powerLargeSheathRadius, powerLargeSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::format("%1%_ground") % superName, "Small"), make_pair(-1 * powerLargeSheathRadius, powerSmallSheathRadius)));
 
     for (PowerCableParameters &powerCable : powerCables)
     {
