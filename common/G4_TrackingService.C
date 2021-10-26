@@ -271,7 +271,7 @@ double CreateCable(Cable *object, PHG4Reco* g4Reco, double radius)
   PHG4CylinderSubsystem* cyl;
   for (int i = 0; i < 2; ++i)
   {
-    cyl = new PHG4CylinderSubsystem(object->get_name(), i);
+    cyl = new PHG4CylinderSubsystem(object->get_name(), G4TrackingService::subsysID);
     cyl->Verbosity(verbosity);
     cyl->set_string_param("material", cableMaterials[i]);
     cyl->set_double_param("length", length);
@@ -295,7 +295,7 @@ double CreateCable(Cable *object, PHG4Reco* g4Reco, double radius)
 double CreateCableBundle(string superName, PHG4Reco* g4Reco, double radius, 
                          double x1, double x2, double y1, double y2, double z1, double z2)
 {
-  //Set up basic MVTX cable bundle (24 Samtex cables, 1 power cable, 2 cooling cables)
+  //Set up basic MVTX cable bundle (24 Samtec cables, 1 power cable, 2 cooling cables)
   double samtecCoreRadius = 0.1275;
   double samtecSheathRadius = 0.05;
   double coolingCoreRadius = 0.056;
@@ -303,24 +303,28 @@ double CreateCableBundle(string superName, PHG4Reco* g4Reco, double radius,
 
 
   //Samtec cables (we use 24 as there are 12 twinax)
-  for (unsigned int row = 0; row < 2; ++row)
+  unsigned int nSamtecWires = 24;
+  unsigned int nRows = 2;
+  unsigned int nCols = nSamtecWires/nRows;
+  for (unsigned int iRow = 0; iRow < 2; ++iRow)
   {
-    for (unsigned int col = 0; col < 12; ++ col)
+    for (unsigned int iCol = 0; iCol < 12; ++ iCol)
     {
-      Cable *cable = new Cable(superName + "_samtec", "G4_Cu", samtecCoreRadius, samtecSheathRadius, 
-                               x1 + -1*(col + 1)*samtecSheathRadius, x2 + -1*(col + 1)*samtecSheathRadius,
-                               y1 + -1*(row + 1)*samtecSheathRadius, y2 + -1*(row + 1)*samtecSheathRadius,
+      Cable *cable = new Cable(format("{}_samtec_{}_{}", superName, iRow, iCol), "G4_Cu", samtecCoreRadius, samtecSheathRadius, 
+                               x1 + -1*(iCol + 1)*samtecSheathRadius, x2 + -1*(iCol + 1)*samtecSheathRadius,
+                               y1 + -1*(iRow + 1)*samtecSheathRadius, y2 + -1*(iRow + 1)*samtecSheathRadius,
                                z1, z2);
       radius += CreateCable(cable, g4Reco, radius);
     }
   }
 
   //Cooling Cables
-  for (unsigned int nCool = 0; nCool < 2; ++nCool)
+  unsigned int nCool = 2;
+  for (unsigned int iCool = 0; iCool < nCool; ++iCool)
   {
-    Cable *cable = new Cable(superName + "_cooling", "G4_WATER", coolingCoreRadius, coolingSheathRadius, 
-                             x1 + (nCool + 1)*coolingSheathRadius, x2 + (nCool + 1)*coolingSheathRadius,
-                             y1 + (nCool + 1)*coolingSheathRadius, y2 + (nCool + 1)*coolingSheathRadius,
+    Cable *cable = new Cable(format("{}_cooling_{}", superName, iCool), "G4_WATER", coolingCoreRadius, coolingSheathRadius, 
+                             x1 + (iCool + 1)*coolingSheathRadius, x2 + (iCool + 1)*coolingSheathRadius,
+                             y1 + (iCool + 1)*coolingSheathRadius, y2 + (iCool + 1)*coolingSheathRadius,
                              z1, z2);
     radius += CreateCable(cable, g4Reco, radius);
   }
@@ -333,8 +337,8 @@ double TrackingService(PHG4Reco* g4Reco, double radius)
 {
   vector<ServiceStructure*> cylinders, cones;
 
-  double shellX0 = 100*G4TrackingService::ShellThickness/G4TrackingService::materials[4].second;
-  double layerX0 = 100*G4TrackingService::LayerThickness/G4TrackingService::materials[4].second;
+  double shellX0 = 100*G4TrackingService::ShellThickness/G4TrackingService::materials[1].second;
+  double layerX0 = 100*G4TrackingService::LayerThickness/G4TrackingService::materials[1].second;
   double shellOffset = 18.679;
 
   cylinders.push_back(new ServiceStructure("MVTXServiceBarrel", 0, shellX0, -1.*(G4TrackingService::ShellLength + shellOffset), -1.*shellOffset , 10.33, 0));
