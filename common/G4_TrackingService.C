@@ -13,6 +13,10 @@
 #include <fun4all/Fun4AllServer.h>
 
 #include <cmath>
+#include <format>
+#include <iostream>
+#include <string>
+#include <string_view>
 #include <vector>
 
 //sPHENIX Tracking Services
@@ -21,56 +25,57 @@ using namespace std;
 
 class ServiceStructure
 {
-  public:
-   ServiceStructure();
+ public:
+  ServiceStructure();
 
-    explicit ServiceStructure(const string &name,
-                              const double &rad_len_aluminum,
-                              const double &rad_len_carbon,
-                              const double &zSouth,
-                              const double &zNorth,
-                              const double &rSouth,
-                              const double &rNorth);
+  explicit ServiceStructure(const string &name,
+                            const double &thickness_aluminum,
+                            const double &thickness_carbon,
+                            const double &zSouth,
+                            const double &zNorth,
+                            const double &rSouth,
+                            const double &rNorth);
 
-    virtual ~ServiceStructure(){};
+  virtual ~ServiceStructure(){};
 
-    const string get_name();
-    const double get_rad_len_aluminum();
-    const double get_rad_len_carbon();
-    const double get_zSouth();
-    const double get_zNorth();
-    const double get_rSouth();
-    const double get_rNorth();
-  
-  private:
-    const string m_name = "service";
-    const double m_rad_len_aluminum = 0.0;
-    const double m_rad_len_carbon = 0.0;
-    const double m_zSouth = 0.0;
-    const double m_zNorth = 0.0;
-    const double m_rSouth = 0.0;
-    const double m_rNorth = 0.0;
+  const string get_name();
+  const double get_thickness_aluminum();
+  const double get_thickness_carbon();
+  const double get_zSouth();
+  const double get_zNorth();
+  const double get_rSouth();
+  const double get_rNorth();
+
+ private:
+  const string m_name = "service";
+  const double m_thickness_aluminum = 0.0;
+  const double m_thickness_carbon = 0.0;
+  const double m_zSouth = 0.0;
+  const double m_zNorth = 0.0;
+  const double m_rSouth = 0.0;
+  const double m_rNorth = 0.0;
 };
 
 ServiceStructure::ServiceStructure(const string &name,
-                                   const double &rad_len_aluminum,
-                                   const double &rad_len_carbon,
+                                   const double &thickness_aluminum,
+                                   const double &thickness_carbon,
                                    const double &zSouth,
                                    const double &zNorth,
                                    const double &rSouth,
                                    const double &rNorth)
   : m_name(name)
-  , m_rad_len_aluminum(rad_len_aluminum)
-  , m_rad_len_carbon(rad_len_carbon)
+  , m_thickness_aluminum(thickness_aluminum)
+  , m_thickness_carbon(thickness_carbon)
   , m_zSouth(zSouth)
   , m_zNorth(zNorth)
   , m_rSouth(rSouth)
   , m_rNorth(rNorth)
-{}
+{
+}
 
 const string ServiceStructure::get_name() { return m_name; }
-const double ServiceStructure::get_rad_len_aluminum() { return m_rad_len_aluminum; }
-const double ServiceStructure::get_rad_len_carbon() { return m_rad_len_carbon; }
+const double ServiceStructure::get_thickness_aluminum() { return m_thickness_aluminum; }
+const double ServiceStructure::get_thickness_carbon() { return m_thickness_carbon; }
 const double ServiceStructure::get_zSouth() { return m_zSouth; }
 const double ServiceStructure::get_zNorth() { return m_zNorth; }
 const double ServiceStructure::get_rSouth() { return m_rSouth; }
@@ -78,41 +83,41 @@ const double ServiceStructure::get_rNorth() { return m_rNorth; }
 
 class Cable
 {
-  public:
-    Cable();
+ public:
+  Cable();
 
-    explicit Cable(const string &name,
-                   const string &coreMaterial,
-                   const double &coreRadius,
-                   const double &sheathRadius,
-                   const double &xSouth, const double &xNorth,
-                   const double &ySouth, const double &yNorth,
-                   const double &zSouth, const double &zNorth);
+  explicit Cable(const string &name,
+                 const string &coreMaterial,
+                 const double &coreRadius,
+                 const double &sheathRadius,
+                 const double &xSouth, const double &xNorth,
+                 const double &ySouth, const double &yNorth,
+                 const double &zSouth, const double &zNorth);
 
-    virtual ~Cable(){};
+  virtual ~Cable(){};
 
-    const string get_name();
-    const string get_coreMaterial();
-    const double get_coreRadius();
-    const double get_sheathRadius();
-    const double get_xSouth();
-    const double get_xNorth();
-    const double get_ySouth();
-    const double get_yNorth();
-    const double get_zSouth();
-    const double get_zNorth();
-  
-  private:
-    const string m_name = "cable";
-    const string m_coreMaterial = "G4_Cu";
-    const double m_coreRadius = 1;
-    const double m_sheathRadius = 2;
-    const double m_xSouth = 0.;
-    const double m_xNorth = 1.;
-    const double m_ySouth = 0.;
-    const double m_yNorth = 1.;
-    const double m_zSouth = 0.;
-    const double m_zNorth = 1.;
+  const string get_name();
+  const string get_coreMaterial();
+  const double get_coreRadius();
+  const double get_sheathRadius();
+  const double get_xSouth();
+  const double get_xNorth();
+  const double get_ySouth();
+  const double get_yNorth();
+  const double get_zSouth();
+  const double get_zNorth();
+
+ private:
+  const string m_name = "cable";
+  const string m_coreMaterial = "G4_Cu";
+  const double m_coreRadius = 1;
+  const double m_sheathRadius = 2;
+  const double m_xSouth = 0.;
+  const double m_xNorth = 1.;
+  const double m_ySouth = 0.;
+  const double m_yNorth = 1.;
+  const double m_zSouth = 0.;
+  const double m_zNorth = 1.;
 };
 
 Cable::Cable(const string &name,
@@ -132,7 +137,8 @@ Cable::Cable(const string &name,
   , m_yNorth(yNorth)
   , m_zSouth(zSouth)
   , m_zNorth(zNorth)
-{}
+{
+}
 
 const string Cable::get_name() { return m_name; }
 const string Cable::get_coreMaterial() { return m_coreMaterial; }
@@ -155,22 +161,20 @@ namespace Enable
 }  // namespace Enable
 
 namespace G4TrackingService
-{ //List materials and radiation length in cm
+{  //List materials and radiation length in cm
   const int nMaterials = 2;
-  pair<string, double> materials[nMaterials] = { make_pair("G4_Al",  8.897)
-                                               , make_pair("PEEK", 30.00) };
-  
+  string materials[nMaterials] = {"G4_Al", "PEEK"};
+
   double GlobalOffset = -15.0;
-  double ShellThickness = 0.436; //Thickness in cm
-  double LayerThickness = 0.1; //
-  double ShellLength = 121.24; //Length of cylinder in cm
+  double ShellThickness = 0.436;  //Thickness in cm
+  double LayerThickness = 0.1;    //
+  double ShellLength = 121.24;    //Length of cylinder in cm
   int subsysID = 0;
 }  // namespace G4TrackingService
 
 vector<double> get_thickness(ServiceStructure *object)
 {
-  vector<double> thickness = {(object->get_rad_len_aluminum()/100)*G4TrackingService::materials[0].second
-                             ,(object->get_rad_len_carbon()/100)*G4TrackingService::materials[1].second};
+  vector<double> thickness = {object->get_thickness_aluminum(), object->get_thickness_carbon()};
   return thickness;
 }
 
@@ -178,13 +182,13 @@ void TrackingServiceInit()
 {
 }
 
-double TrackingServiceCone(ServiceStructure *object, PHG4Reco* g4Reco, double radius)
+double TrackingServiceCone(ServiceStructure *object, PHG4Reco *g4Reco, double radius)
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::TrackingService_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::TrackingService_OVERLAPCHECK;
   int verbosity = max(Enable::VERBOSITY, Enable::TrackingService_VERBOSITY);
 
-  PHG4ConeSubsystem* cone;
+  PHG4ConeSubsystem *cone;
 
   double innerRadiusSouth = object->get_rSouth();
   double innerRadiusNorth = object->get_rNorth();
@@ -198,9 +202,9 @@ double TrackingServiceCone(ServiceStructure *object, PHG4Reco* g4Reco, double ra
     cone->Verbosity(verbosity);
     cone->SetR1(innerRadiusSouth, innerRadiusSouth + thickness[i]);
     cone->SetR2(innerRadiusNorth, innerRadiusNorth + thickness[i]);
-    cone->SetPlaceZ(object->get_zSouth() + length/2 + G4TrackingService::GlobalOffset);
-    cone->SetZlength(length/2);
-    cone->SetMaterial(G4TrackingService::materials[i].first);
+    cone->SetPlaceZ(object->get_zSouth() + length / 2 + G4TrackingService::GlobalOffset);
+    cone->SetZlength(length / 2);
+    cone->SetMaterial(G4TrackingService::materials[i]);
     cone->SuperDetector("TrackingService");
     if (AbsorberActive) cone->SetActive();
     cone->OverlapCheck(OverlapCheck);
@@ -214,13 +218,13 @@ double TrackingServiceCone(ServiceStructure *object, PHG4Reco* g4Reco, double ra
   return radius;
 }
 
-double TrackingServiceCylinder(ServiceStructure *object, PHG4Reco* g4Reco, double radius)
+double TrackingServiceCylinder(ServiceStructure *object, PHG4Reco *g4Reco, double radius)
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::TrackingService_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::TrackingService_OVERLAPCHECK;
   int verbosity = max(Enable::VERBOSITY, Enable::TrackingService_VERBOSITY);
 
-  PHG4CylinderSubsystem* cyl;
+  PHG4CylinderSubsystem *cyl;
 
   double innerRadius = object->get_rSouth();
   double length = abs(object->get_zNorth() - object->get_zSouth());
@@ -231,10 +235,10 @@ double TrackingServiceCylinder(ServiceStructure *object, PHG4Reco* g4Reco, doubl
     if (thickness[i] == 0) continue;
     cyl = new PHG4CylinderSubsystem(object->get_name(), G4TrackingService::subsysID);
     cyl->Verbosity(verbosity);
-    cyl->set_double_param("place_z", object->get_zSouth() + length/2 + G4TrackingService::GlobalOffset);
+    cyl->set_double_param("place_z", object->get_zSouth() + length / 2 + G4TrackingService::GlobalOffset);
     cyl->set_double_param("radius", innerRadius);
     cyl->set_double_param("length", length);
-    cyl->set_string_param("material", G4TrackingService::materials[i].first);
+    cyl->set_string_param("material", G4TrackingService::materials[i]);
     cyl->set_double_param("thickness", thickness[i]);
     cyl->SuperDetector("TrackingService");
     if (AbsorberActive) cyl->SetActive();
@@ -248,27 +252,27 @@ double TrackingServiceCylinder(ServiceStructure *object, PHG4Reco* g4Reco, doubl
   return radius;
 }
 
-double CreateCable(Cable *object, PHG4Reco* g4Reco, double radius)
+double CreateCable(Cable *object, PHG4Reco *g4Reco, double radius)
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::TrackingService_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::TrackingService_OVERLAPCHECK;
   int verbosity = max(Enable::VERBOSITY, Enable::TrackingService_VERBOSITY);
 
-  string cableMaterials[2] = { object->get_coreMaterial(), "G4_POLYETHYLENE" };
-  double IR[2] = { 0, object->get_coreRadius() };
-  double OR[2] = { object->get_coreRadius(), object->get_sheathRadius() };
+  string cableMaterials[2] = {object->get_coreMaterial(), "G4_POLYETHYLENE"};
+  double IR[2] = {0, object->get_coreRadius()};
+  double OR[2] = {object->get_coreRadius(), object->get_sheathRadius()};
 
   double length = abs(object->get_zNorth() - object->get_zSouth());
-  double setX = (object->get_xSouth() + object->get_xNorth())/2;
-  double setY = (object->get_ySouth() + object->get_yNorth())/2;
-  double setZ = (object->get_zSouth() + object->get_zNorth())/2;
-  
-  double radToDeg = 180.0/M_PI;
-  double rotX = tan((object->get_yNorth() - object->get_ySouth())/(object->get_zNorth() - object->get_zSouth()))*radToDeg;
-  double rotY = tan((object->get_xNorth() - object->get_xSouth())/(object->get_zNorth() - object->get_zSouth()))*radToDeg;
-  double rotZ = tan((object->get_xNorth() - object->get_xSouth())/(object->get_yNorth() - object->get_ySouth()))*radToDeg;
-  
-  PHG4CylinderSubsystem* cyl;
+  double setX = (object->get_xSouth() + object->get_xNorth()) / 2;
+  double setY = (object->get_ySouth() + object->get_yNorth()) / 2;
+  double setZ = (object->get_zSouth() + object->get_zNorth()) / 2;
+
+  double radToDeg = 180.0 / M_PI;
+  double rotX = tan((object->get_yNorth() - object->get_ySouth()) / (object->get_zNorth() - object->get_zSouth())) * radToDeg;
+  double rotY = tan((object->get_xNorth() - object->get_xSouth()) / (object->get_zNorth() - object->get_zSouth())) * radToDeg;
+  double rotZ = tan((object->get_xNorth() - object->get_xSouth()) / (object->get_yNorth() - object->get_ySouth())) * radToDeg;
+
+  PHG4CylinderSubsystem *cyl;
   for (int i = 0; i < 2; ++i)
   {
     cyl = new PHG4CylinderSubsystem(object->get_name(), G4TrackingService::subsysID);
@@ -292,77 +296,129 @@ double CreateCable(Cable *object, PHG4Reco* g4Reco, double radius)
   return OR[1];
 }
 
-double CreateCableBundle(string superName, PHG4Reco* g4Reco, double radius, 
+double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
+                         bool enableSignal, bool enableCooling, bool enablePower,
                          double x1, double x2, double y1, double y2, double z1, double z2)
 {
   //Set up basic MVTX cable bundle (24 Samtec cables, 1 power cable, 2 cooling cables)
   double samtecCoreRadius = 0.1275;
   double samtecSheathRadius = 0.05;
   double coolingCoreRadius = 0.056;
-  double coolingSheathRadius = 0.08; //?
-
+  double coolingSheathRadius = 0.08;  //?
+  double powerLargeCoreRadius = 0.069;
+  double powerLargeSheathRadius = 0.158;
+  double powerMediumCoreRadius = 0.033;
+  double powerMediumSheathRadius = 0.073;
+  double powerSmallCoreRadius = 0.028;
+  double powerSmallSheathRadius = 0.028;
 
   //Samtec cables (we use 24 as there are 12 twinax)
-  unsigned int nSamtecWires = 24;
-  unsigned int nRows = 2;
-  unsigned int nCols = nSamtecWires/nRows;
-  for (unsigned int iRow = 0; iRow < 2; ++iRow)
+  if (enableSignal)
   {
-    for (unsigned int iCol = 0; iCol < 12; ++ iCol)
+    unsigned int nSamtecWires = 24;
+    unsigned int nRow = 2;
+    unsigned int nCol = nSamtecWires / nRow;
+    for (unsigned int iRow = 0; iRow < nRow; ++iRow)
     {
-      Cable *cable = new Cable(format("{}_samtec_{}_{}", superName, iRow, iCol), "G4_Cu", samtecCoreRadius, samtecSheathRadius, 
-                               x1 + -1*(iCol + 1)*samtecSheathRadius, x2 + -1*(iCol + 1)*samtecSheathRadius,
-                               y1 + -1*(iRow + 1)*samtecSheathRadius, y2 + -1*(iRow + 1)*samtecSheathRadius,
+      for (unsigned int iCol = 0; iCol < nCol; ++iCol)
+      {
+        Cable *cable = new Cable(format("{}_samtec_{}_{}", superName, iRow, iCol), "G4_Cu", samtecCoreRadius, samtecSheathRadius,
+                                 x1 + (iCol + 1) * samtecSheathRadius * 2, x2 + (iCol + 1) * samtecSheathRadius * 2,
+                                 y1 + -1 * (iRow + 1) * samtecSheathRadius * 2, y2 + -1 * (iRow + 1) * samtecSheathRadius * 2,
+                                 z1, z2);
+        radius += CreateCable(cable, g4Reco, radius);
+      }
+    }
+  }
+
+  //Cooling Cables
+  if (enableCooling)
+  {
+    unsigned int nCool = 2;
+    for (unsigned int iCool = 0; iCool < nCool; ++iCool)
+    {
+      Cable *cable = new Cable(format("{}_cooling_{}", superName, iCool), "G4_WATER", coolingCoreRadius, coolingSheathRadius,
+                               x1 + (iCool + 1) * coolingSheathRadius * 2, x2 + (iCool + 1) * coolingSheathRadius * 2,
+                               y1 + (iCool + 1) * coolingSheathRadius * 2, y2 + (iCool + 1) * coolingSheathRadius * 2,
                                z1, z2);
       radius += CreateCable(cable, g4Reco, radius);
     }
   }
 
-  //Cooling Cables
-  unsigned int nCool = 2;
-  for (unsigned int iCool = 0; iCool < nCool; ++iCool)
-  {
-    Cable *cable = new Cable(format("{}_cooling_{}", superName, iCool), "G4_WATER", coolingCoreRadius, coolingSheathRadius, 
-                             x1 + (iCool + 1)*coolingSheathRadius, x2 + (iCool + 1)*coolingSheathRadius,
-                             y1 + (iCool + 1)*coolingSheathRadius, y2 + (iCool + 1)*coolingSheathRadius,
-                             z1, z2);
-    radius += CreateCable(cable, g4Reco, radius);
-  }
-
   //Power Cables
+  if (enablePower)
+  {
+    typedef pair < pair<string, string>, pair<double, double> PowerCableParameters;
+    vector<PowerCableParameters> powerCables;
+
+    powerCables.push_back(make_pair(make_pair(format("{}_digiReturn", superName), "Large"), make_pair(-1 * powerLargeSheathRadius, -1 * powerLargeSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(format("{}_digiSupply", superName), "Large"), make_pair(-3 * powerLargeSheathRadius, powerLargeSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(format("{}_anaReturn", superName), "Medium"), make_pair(-1 * (powerMediumSheathRadius + 2 * powerLargeSheathRadius), -2 * powerMediumSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(format("{}_anaSupply", superName), "Medium"), make_pair(-1 * (3 * powerMediumSheathRadius + 2 * powerLargeSheathRadius), -1 * powerMediumSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(format("{}_digiSense", superName), "Small"), make_pair(-1 * (2 * powerMediumSheathRadius + 4 * powerLargeSheathRadius), powerSmallSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(format("{}_anaSense", superName), "Small"), make_pair(-4 * powerLargeSheathRadius, 2 * powerSmallSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(format("{}_bias", superName), "Small"), make_pair(-2 * powerLargeSheathRadius, powerLargeSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(format("{}_ground", superName), "Small"), make_pair(-1 * powerLargeSheathRadius, powerSmallSheathRadius)));
+
+    for (PowerCableParameters &powerCable : powerCables)
+    {
+      double coreRad, sheathRad;
+      string cableType = powerCable.first.second;
+      switch (cableType)
+      {
+      case "Small":
+        coreRad = powerSmallCoreRadius;
+        sheathRad = powerSmallSheathRadius;
+        break;
+      case "Medium":
+        coreRad = powerMediumCoreRadius;
+        sheathRad = powerMediumSheathRadius;
+        break;
+      case "Large":
+        coreRad = powerLargeCoreRadius;
+        sheathRad = powerLargeSheathRadius;
+        break;
+      default:
+        coreRad = powerSmallCoreRadius;
+        sheathRad = powerSmallSheathRadius;
+      }
+
+      Cable *cable = new Cable(powerCable.first.first, "G4_Cu", coreRad, sheathRad,
+                               x1 + powerCable.second.first, x2 + powerCable.second.first,
+                               y1 + powerCable.second.second, y2 + powerCable.second.second, z1, z2);
+
+      radius += CreateCable(cable, g4Reco, radius);
+    }
+  }
   return radius;
 }
 
-double TrackingService(PHG4Reco* g4Reco, double radius)
+double TrackingService(PHG4Reco *g4Reco, double radius)
 {
-  vector<ServiceStructure*> cylinders, cones;
+  vector<ServiceStructure *> cylinders, cones;
 
-  double shellX0 = 100*G4TrackingService::ShellThickness/G4TrackingService::materials[1].second;
-  double layerX0 = 100*G4TrackingService::LayerThickness/G4TrackingService::materials[1].second;
   double shellOffset = 18.679;
 
-  cylinders.push_back(new ServiceStructure("MVTXServiceBarrel", 0, shellX0, -1.*(G4TrackingService::ShellLength + shellOffset), -1.*shellOffset , 10.33, 0));
+  cylinders.push_back(new ServiceStructure("MVTXServiceBarrel", 0, G4TrackingService::ShellThickness, -1. * (G4TrackingService::ShellLength + shellOffset), -1. * shellOffset, 10.33, 0));
 
-  cylinders.push_back(new ServiceStructure("L0_1", 0, layerX0, -18.680, -16.579, 5.050, 0));
-  cones.push_back(new ServiceStructure("L0_2", 0, layerX0, -16.579, -9.186, 5.050, 2.997));
-  cylinders.push_back(new ServiceStructure("L0_3", 0, layerX0, -9.186, 0, 2.997, 0));
+  cylinders.push_back(new ServiceStructure("L0_1", 0, G4TrackingService::LayerThickness, -18.680, -16.579, 5.050, 0));
+  cones.push_back(new ServiceStructure("L0_2", 0, G4TrackingService::LayerThickness, -16.579, -9.186, 5.050, 2.997));
+  cylinders.push_back(new ServiceStructure("L0_3", 0, G4TrackingService::LayerThickness, -9.186, 0, 2.997, 0));
 
-  cylinders.push_back(new ServiceStructure("L1_1", 0, layerX0, -17.970, -15.851, 7.338, 0));
-  cones.push_back(new ServiceStructure("L1_2", 0, layerX0, -15.851, -8.938, 7.338, 3.799));
-  cylinders.push_back(new ServiceStructure("L1_3", 0, layerX0, -8.938, 0, 3.799, 0));
+  cylinders.push_back(new ServiceStructure("L1_1", 0, G4TrackingService::LayerThickness, -17.970, -15.851, 7.338, 0));
+  cones.push_back(new ServiceStructure("L1_2", 0, G4TrackingService::LayerThickness, -15.851, -8.938, 7.338, 3.799));
+  cylinders.push_back(new ServiceStructure("L1_3", 0, G4TrackingService::LayerThickness, -8.938, 0, 3.799, 0));
 
-  cylinders.push_back(new ServiceStructure("L2_1", 0, layerX0, -22.300, -15.206, 9.650, 0));
-  cones.push_back(new ServiceStructure("L2_2", 0, layerX0, -15.206, -8.538, 9.650, 4.574));
-  cylinders.push_back(new ServiceStructure("L2_3", 0, layerX0, -8.538, 0, 4.574, 0));
-  
+  cylinders.push_back(new ServiceStructure("L2_1", 0, G4TrackingService::LayerThickness, -22.300, -15.206, 9.650, 0));
+  cones.push_back(new ServiceStructure("L2_2", 0, G4TrackingService::LayerThickness, -15.206, -8.538, 9.650, 4.574));
+  cylinders.push_back(new ServiceStructure("L2_3", 0, G4TrackingService::LayerThickness, -8.538, 0, 4.574, 0));
 
-  //for (ServiceStructure *cylinder : cylinders) radius += TrackingServiceCylinder(cylinder, g4Reco, radius); 
+  //for (ServiceStructure *cylinder : cylinders) radius += TrackingServiceCylinder(cylinder, g4Reco, radius);
   //for (ServiceStructure *cone : cones) radius += TrackingServiceCone(cone, g4Reco, radius);
 
-  radius += CreateCableBundle("Test", g4Reco, radius, 0, 0, 0, 0, 0, 10);
+  radius += CreateCableBundle("Test", g4Reco, radius, true, true, true, 0, 0, 0, 0, 0, 100);
 
   return radius;
 }
 
 #endif
-
