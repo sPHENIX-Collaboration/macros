@@ -161,13 +161,15 @@ namespace Enable
 
 namespace G4TrackingService
 {  //List materials and radiation length in cm
-  const int nMaterials = 2;
-  string materials[nMaterials] = {"G4_Al", "PEEK"};
+  string materials[] = {"G4_Al", "PEEK"};
+  const int nMaterials = sizeof(materials)/sizeof(materials[0]);
 
   double GlobalOffset = -15.0;
-  double ShellThickness = 0.436;  //Thickness in cm
+  double BarrelOffset = 18.679;
+  double BarrelRadius = 10.33; //Inner radious of service barrel 
+  double BarrelThickness = 0.436;  //Thickness in cm
+  double BarrelLength = 121.24;    //Length of cylinder in cm
   double LayerThickness = 0.1;    //
-  double ShellLength = 121.24;    //Length of cylinder in cm
   int subsysID = 0;
 }  // namespace G4TrackingService
 
@@ -179,6 +181,12 @@ vector<double> get_thickness(ServiceStructure *object)
 
 void TrackingServiceInit()
 {
+  double serviceRad = G4TrackingService::BarrelRadius + G4TrackingService::BarrelThickness;
+  double serviceMinZ = G4TrackingService::GlobalOffset - G4TrackingService::BarrelOffset - G4TrackingService::BarrelLength;
+  double serviceMaxZ =  G4TrackingService::GlobalOffset;
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, serviceRad);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, serviceMinZ);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, serviceMaxZ);
 }
 
 double TrackingServiceCone(ServiceStructure *object, PHG4Reco *g4Reco, double radius)
@@ -321,7 +329,7 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
     {
       for (unsigned int iCol = 0; iCol < nCol; ++iCol)
       {
-        Cable *cable = new Cable(boost::format("%1%_samtec_%2%_%3%") % superName % iRow % iCol, "G4_Cu", samtecCoreRadius, samtecSheathRadius,
+        Cable *cable = new Cable(boost::str(boost::format("%1%_samtec_%2%_%3%") % superName % iRow % iCol), "G4_Cu", samtecCoreRadius, samtecSheathRadius,
                                  x1 + (iCol + 1) * samtecSheathRadius * 2, x2 + (iCol + 1) * samtecSheathRadius * 2,
                                  y1 + -1 * (iRow + 1) * samtecSheathRadius * 2, y2 + -1 * (iRow + 1) * samtecSheathRadius * 2,
                                  z1, z2);
@@ -336,7 +344,7 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
     unsigned int nCool = 2;
     for (unsigned int iCool = 0; iCool < nCool; ++iCool)
     {
-      Cable *cable = new Cable(boost::format("%1%_cooling_%2%") % superName % iCool, "G4_WATER", coolingCoreRadius, coolingSheathRadius,
+      Cable *cable = new Cable(boost::str(boost::format("%1%_cooling_%2%") % superName % iCool), "G4_WATER", coolingCoreRadius, coolingSheathRadius,
                                x1 + (iCool + 1) * coolingSheathRadius * 2, x2 + (iCool + 1) * coolingSheathRadius * 2,
                                y1 + (iCool + 1) * coolingSheathRadius * 2, y2 + (iCool + 1) * coolingSheathRadius * 2,
                                z1, z2);
@@ -347,39 +355,36 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
   //Power Cables
   if (enablePower)
   {
-    typedef pair < pair<string, string>, pair<double, double> PowerCableParameters;
+    typedef pair<pair<string, string>, pair<double, double>> PowerCableParameters;
     vector<PowerCableParameters> powerCables;
 
-    powerCables.push_back(make_pair(make_pair(boost::format("%1%_digiReturn") % superName, "Large"), make_pair(-1 * powerLargeSheathRadius, -1 * powerLargeSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::format("%1%_digiSupply") % superName, "Large"), make_pair(-3 * powerLargeSheathRadius, powerLargeSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::format("%1%_anaReturn") % superName, "Medium"), make_pair(-1 * (powerMediumSheathRadius + 2 * powerLargeSheathRadius), -2 * powerMediumSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::format("%1%_anaSupply") % superName, "Medium"), make_pair(-1 * (3 * powerMediumSheathRadius + 2 * powerLargeSheathRadius), -1 * powerMediumSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::format("%1%_digiSense", superName, "Small"), make_pair(-1 * (2 * powerMediumSheathRadius + 4 * powerLargeSheathRadius), powerSmallSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::format("%1%_anaSense") % superName, "Small"), make_pair(-4 * powerLargeSheathRadius, 2 * powerSmallSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::format("%1%_bias") % superName, "Small"), make_pair(-2 * powerLargeSheathRadius, powerLargeSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::format("%1%_ground") % superName, "Small"), make_pair(-1 * powerLargeSheathRadius, powerSmallSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_digiReturn") % superName), "Large"), make_pair(-1 * powerLargeSheathRadius, -1 * powerLargeSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_digiSupply") % superName), "Large"), make_pair(-3 * powerLargeSheathRadius, powerLargeSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_anaReturn") % superName), "Medium"), make_pair(-1 * (powerMediumSheathRadius + 2 * powerLargeSheathRadius), -2 * powerMediumSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_anaSupply") % superName), "Medium"), make_pair(-1 * (3 * powerMediumSheathRadius + 2 * powerLargeSheathRadius), -1 * powerMediumSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_digiSense") % superName), "Small"), make_pair(-1 * (2 * powerMediumSheathRadius + 4 * powerLargeSheathRadius), powerSmallSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_anaSense") % superName), "Small"), make_pair(-4 * powerLargeSheathRadius, 2 * powerSmallSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_bias") % superName), "Small"), make_pair(-2 * powerLargeSheathRadius, powerLargeSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_ground") % superName), "Small"), make_pair(-1 * powerLargeSheathRadius, powerSmallSheathRadius)));
 
     for (PowerCableParameters &powerCable : powerCables)
     {
       double coreRad, sheathRad;
       string cableType = powerCable.first.second;
-      switch (cableType)
+      if (cableType == "Small")
       {
-      case "Small":
         coreRad = powerSmallCoreRadius;
         sheathRad = powerSmallSheathRadius;
-        break;
-      case "Medium":
+      }
+      else if (cableType == "Medium")
+      {
         coreRad = powerMediumCoreRadius;
         sheathRad = powerMediumSheathRadius;
-        break;
-      case "Large":
+      }
+      else
+      {
         coreRad = powerLargeCoreRadius;
         sheathRad = powerLargeSheathRadius;
-        break;
-      default:
-        coreRad = powerSmallCoreRadius;
-        sheathRad = powerSmallSheathRadius;
       }
 
       Cable *cable = new Cable(powerCable.first.first, "G4_Cu", coreRad, sheathRad,
@@ -389,6 +394,7 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
       radius += CreateCable(cable, g4Reco, radius);
     }
   }
+
   return radius;
 }
 
@@ -396,9 +402,9 @@ double TrackingService(PHG4Reco *g4Reco, double radius)
 {
   vector<ServiceStructure *> cylinders, cones;
 
-  double shellOffset = 18.679;
 
-  cylinders.push_back(new ServiceStructure("MVTXServiceBarrel", 0, G4TrackingService::ShellThickness, -1. * (G4TrackingService::ShellLength + shellOffset), -1. * shellOffset, 10.33, 0));
+  cylinders.push_back(new ServiceStructure("MVTXServiceBarrel", 0, G4TrackingService::BarrelThickness, -1. * (G4TrackingService::BarrelLength + G4TrackingService::BarrelOffset), 
+                                           -1. * G4TrackingService::BarrelOffset, G4TrackingService::BarrelRadius, 0));
 
   cylinders.push_back(new ServiceStructure("L0_1", 0, G4TrackingService::LayerThickness, -18.680, -16.579, 5.050, 0));
   cones.push_back(new ServiceStructure("L0_2", 0, G4TrackingService::LayerThickness, -16.579, -9.186, 5.050, 2.997));

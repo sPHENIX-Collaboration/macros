@@ -12,7 +12,7 @@
 #include <G4_HIJetReco.C>
 #include <G4_Input.C>
 #include <G4_Jets.C>
-#include <G4_KFParticle.C>
+//#include <G4_KFParticle.C>
 #include <G4_ParticleFlow.C>
 #include <G4_Production.C>
 #include <G4_TopoClusterReco.C>
@@ -243,7 +243,7 @@ int Fun4All_G4_sPHENIX(
   //======================
 
   // QA, main switch
-  Enable::QA = true;
+  Enable::QA = false;
 
   // Global options (enabled for all enables subsystems - if implemented)
   //  Enable::ABSORBER = true;
@@ -253,21 +253,22 @@ int Fun4All_G4_sPHENIX(
   // Enable::BBC = true;
   Enable::BBCFAKE = true;  // Smeared vtx and t0, use if you don't want real BBC in simulation
 
-  Enable::PIPE = true;
+  Enable::PIPE = false;
   Enable::PIPE_ABSORBER = true;
 
   // central tracking
-  Enable::MVTX = true;
+  Enable::MVTX = false;
   Enable::MVTX_CELL = Enable::MVTX && true;
   Enable::MVTX_CLUSTER = Enable::MVTX_CELL && true;
   Enable::MVTX_QA = Enable::MVTX_CLUSTER and Enable::QA && true;
+  Enable::TrackingService = true;
 
-  Enable::INTT = true;
+  Enable::INTT = false;
   Enable::INTT_CELL = Enable::INTT && true;
   Enable::INTT_CLUSTER = Enable::INTT_CELL && true;
   Enable::INTT_QA = Enable::INTT_CLUSTER and Enable::QA && true;
 
-  Enable::TPC = true;
+  Enable::TPC = false;
   Enable::TPC_ABSORBER = true;
   Enable::TPC_CELL = Enable::TPC && true;
   Enable::TPC_CLUSTER = Enable::TPC_CELL && true;
@@ -277,7 +278,7 @@ int Fun4All_G4_sPHENIX(
   Enable::MICROMEGAS_CELL = Enable::MICROMEGAS && true;
   Enable::MICROMEGAS_CLUSTER = Enable::MICROMEGAS_CELL && true;
 
-  Enable::TRACKING_TRACK = true;
+  Enable::TRACKING_TRACK = false;
   Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;
   Enable::TRACKING_QA = Enable::TRACKING_TRACK and Enable::QA && true;
 
@@ -285,7 +286,7 @@ int Fun4All_G4_sPHENIX(
   //  into the tracking, cannot run together with CEMC
   //  Enable::CEMCALBEDO = true;
 
-  Enable::CEMC = true;
+  Enable::CEMC = false;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
@@ -293,7 +294,7 @@ int Fun4All_G4_sPHENIX(
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
   Enable::CEMC_QA = Enable::CEMC_CLUSTER and Enable::QA && true;
 
-  Enable::HCALIN = true;
+  Enable::HCALIN = false;
   Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
@@ -301,10 +302,10 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && true;
   Enable::HCALIN_QA = Enable::HCALIN_CLUSTER and Enable::QA && true;
 
-  Enable::MAGNET = true;
+  Enable::MAGNET = false;
   Enable::MAGNET_ABSORBER = true;
 
-  Enable::HCALOUT = true;
+  Enable::HCALOUT = false;
   Enable::HCALOUT_ABSORBER = true;
   Enable::HCALOUT_CELL = Enable::HCALOUT && true;
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
@@ -315,10 +316,10 @@ int Fun4All_G4_sPHENIX(
   Enable::EPD = true;
 
 
-  Enable::BEAMLINE = true;
+  Enable::BEAMLINE = false;
 //  Enable::BEAMLINE_ABSORBER = true;  // makes the beam line magnets sensitive volumes
 //  Enable::BEAMLINE_BLACKHOLE = true; // turns the beamline magnets into black holes
-  Enable::ZDC = true;
+  Enable::ZDC = false;
 //  Enable::ZDC_ABSORBER = true;
 //  Enable::ZDC_SUPPORT = true;
   Enable::ZDC_TOWER = Enable::ZDC && true;
@@ -326,7 +327,7 @@ int Fun4All_G4_sPHENIX(
 
   //! forward flux return plug door. Out of acceptance and off by default.
   //Enable::PLUGDOOR = true;
-  Enable::PLUGDOOR_ABSORBER = true;
+  Enable::PLUGDOOR_ABSORBER = false;
 
   Enable::GLOBAL_RECO = true;
   //Enable::GLOBAL_FASTSIM = true;
@@ -337,7 +338,7 @@ int Fun4All_G4_sPHENIX(
 
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && false;
 
-  Enable::JETS = true;
+  Enable::JETS = false;
   Enable::JETS_EVAL = Enable::JETS && true;
   Enable::JETS_QA = Enable::JETS and Enable::QA && true;
 
@@ -509,8 +510,8 @@ int Fun4All_G4_sPHENIX(
   //======================
   // Run KFParticle on evt
   //======================
-  if (Enable::KFPARTICLE && Input::UPSILON) KFParticle_Upsilon_Reco();
-  if (Enable::KFPARTICLE && Input::DZERO) KFParticle_D0_Reco();
+  //if (Enable::KFPARTICLE && Input::UPSILON) KFParticle_Upsilon_Reco();
+  //if (Enable::KFPARTICLE && Input::DZERO) KFParticle_D0_Reco();
   //if (Enable::KFPARTICLE && Input::LAMBDAC) KFParticle_Lambdac_Reco();
 
   //----------------------
