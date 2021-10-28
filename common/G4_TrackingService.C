@@ -418,16 +418,16 @@ double TrackingService(PHG4Reco *g4Reco, double radius)
   cones.push_back(new ServiceStructure("L2_2", 0, G4TrackingService::LayerThickness, -15.206, -8.538, 9.650, 4.574));
   cylinders.push_back(new ServiceStructure("L2_3", 0, G4TrackingService::LayerThickness, -8.538, 0, 4.574, 0));
 
-  //for (ServiceStructure *cylinder : cylinders) radius += TrackingServiceCylinder(cylinder, g4Reco, radius);
-  //for (ServiceStructure *cone : cones) radius += TrackingServiceCone(cone, g4Reco, radius);
+  for (ServiceStructure *cylinder : cylinders) radius += TrackingServiceCylinder(cylinder, g4Reco, radius);
+  for (ServiceStructure *cone : cones) radius += TrackingServiceCone(cone, g4Reco, radius);
 
-  int nSets = 4
+  int nSets = 48;
   for (unsigned int i = 0; i < nSets; ++i)
   {
     double theta = 360.*i/nSets;
-    double r = 10;
-    radius += CreateCableBundle("Test", g4Reco, radius, true, true, true, r*cos(theta), r*cos(theta), r*sin(theta), r*sin(theta), 0, 100, theta);
-    radius += CreateCableBundle("Test2", g4Reco, radius, true, true, true, r*cos(theta), (r+10)*cos(theta), r*sin(theta), (r+10)*sin(theta), -50, 0, theta);
+    double r = G4TrackingService::BarrelRadius - 1.;
+    radius += CreateCableBundle("Test", g4Reco, radius, true, true, true, r*cos(theta), r*cos(theta), r*sin(theta), r*sin(theta),  -1. * (G4TrackingService::BarrelLength + G4TrackingService::BarrelOffset), -1. * G4TrackingService::BarrelOffset - 5., theta);
+    radius += CreateCableBundle("Test2", g4Reco, radius, true, true, true, r*cos(theta), (r-4)*cos(theta), r*sin(theta), (r-4)*sin(theta), -1. * G4TrackingService::BarrelOffset - 5, -1. * G4TrackingService::BarrelOffset, theta);
   }
 
   return radius;
