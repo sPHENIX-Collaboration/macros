@@ -424,7 +424,10 @@ double TrackingService(PHG4Reco *g4Reco, double radius)
   int nSets = 4
   for (unsigned int i = 0; i < nSets; ++i)
   {
-    radius += CreateCableBundle("Test", g4Reco, radius, true, true, true, 0, 0, 0, 0, 0, 100, 360.*i/nSets);
+    double theta = 360.*i/nSets;
+    double r = 10;
+    radius += CreateCableBundle("Test", g4Reco, radius, true, true, true, r*cos(theta), r*cos(theta), r*sin(theta), r*sin(theta), 0, 100, theta);
+    radius += CreateCableBundle("Test2", g4Reco, radius, true, true, true, r*cos(theta), (r+10)*cos(theta), r*sin(theta), (r+10)*sin(theta), -50, 0, theta);
   }
 
   return radius;
