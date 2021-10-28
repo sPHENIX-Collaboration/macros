@@ -275,9 +275,9 @@ double CreateCable(Cable *object, PHG4Reco *g4Reco, double radius)
   double setZ = (object->get_zSouth() + object->get_zNorth()) / 2;
 
   double radToDeg = 180.0 / M_PI;
-  double rotX = tan((object->get_yNorth() - object->get_ySouth()) / (object->get_zNorth() - object->get_zSouth())) * radToDeg;
-  double rotY = tan((object->get_xNorth() - object->get_xSouth()) / (object->get_zNorth() - object->get_zSouth())) * radToDeg;
-  double rotZ = tan((object->get_xNorth() - object->get_xSouth()) / (object->get_yNorth() - object->get_ySouth())) * radToDeg;
+  double rotX = atan((object->get_yNorth() - object->get_ySouth()) / (object->get_zNorth() - object->get_zSouth())) * radToDeg;
+  double rotY = atan((object->get_xNorth() - object->get_xSouth()) / (object->get_zNorth() - object->get_zSouth())) * radToDeg;
+  double rotZ = atan((object->get_xNorth() - object->get_xSouth()) / (object->get_yNorth() - object->get_ySouth())) * radToDeg;
 
   PHG4CylinderSubsystem *cyl;
   for (int i = 0; i < 2; ++i)
@@ -305,7 +305,7 @@ double CreateCable(Cable *object, PHG4Reco *g4Reco, double radius)
 
 double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
                          bool enableSignal, bool enableCooling, bool enablePower,
-                         double x1, double x2, double y1, double y2, double z1, double z2)
+                         double x1, double x2, double y1, double y2, double z1, double z2, double theta)
 {
   //Set up basic MVTX cable bundle (24 Samtec cables, 1 power cable, 2 cooling cables)
   double samtecCoreRadius = 0.1275;
@@ -330,8 +330,8 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
       for (unsigned int iCol = 0; iCol < nCol; ++iCol)
       {
         Cable *cable = new Cable(boost::str(boost::format("%1%_samtec_%2%_%3%") % superName % iRow % iCol), "G4_Cu", samtecCoreRadius, samtecSheathRadius,
-                                 x1 + (iCol + 1) * samtecSheathRadius * 2, x2 + (iCol + 1) * samtecSheathRadius * 2,
-                                 y1 + -1 * (iRow + 1) * samtecSheathRadius * 2, y2 + -1 * (iRow + 1) * samtecSheathRadius * 2,
+                                 (x1 + (iCol + 1) * samtecSheathRadius * 2)*cos(theta), (x2 + (iCol + 1) * samtecSheathRadius * 2)*cos(theta),
+                                 (y1 + -1 * (iRow + 1) * samtecSheathRadius * 2)*sin(theta), (y2 + -1 * (iRow + 1) * samtecSheathRadius * 2)*sin(theta),
                                  z1, z2);
         radius += CreateCable(cable, g4Reco, radius);
       }
@@ -345,8 +345,8 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
     for (unsigned int iCool = 0; iCool < nCool; ++iCool)
     {
       Cable *cable = new Cable(boost::str(boost::format("%1%_cooling_%2%") % superName % iCool), "G4_WATER", coolingCoreRadius, coolingSheathRadius,
-                               x1 + (iCool + 1) * coolingSheathRadius * 2, x2 + (iCool + 1) * coolingSheathRadius * 2,
-                               y1 + (iCool + 1) * coolingSheathRadius * 2, y2 + (iCool + 1) * coolingSheathRadius * 2,
+                               (x1 + (iCool + 1) * coolingSheathRadius * 2)*cos(theta), (x2 + (iCool + 1) * coolingSheathRadius * 2)*cos(theta),
+                               (y1 + (iCool + 1) * coolingSheathRadius * 2)*sin(theta), (y2 + (iCool + 1) * coolingSheathRadius * 2)*sin(theta),
                                z1, z2);
       radius += CreateCable(cable, g4Reco, radius);
     }
@@ -388,8 +388,8 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
       }
 
       Cable *cable = new Cable(powerCable.first.first, "G4_Cu", coreRad, sheathRad,
-                               x1 + powerCable.second.first, x2 + powerCable.second.first,
-                               y1 + powerCable.second.second, y2 + powerCable.second.second, z1, z2);
+                               (x1 + powerCable.second.first)*cos(theta), (x2 + powerCable.second.first)*cos(theta),
+                               (y1 + powerCable.second.second)*sin(theta), (y2 + powerCable.second.second)*sin(theta), z1, z2);
 
       radius += CreateCable(cable, g4Reco, radius);
     }
@@ -421,7 +421,11 @@ double TrackingService(PHG4Reco *g4Reco, double radius)
   //for (ServiceStructure *cylinder : cylinders) radius += TrackingServiceCylinder(cylinder, g4Reco, radius);
   //for (ServiceStructure *cone : cones) radius += TrackingServiceCone(cone, g4Reco, radius);
 
-  radius += CreateCableBundle("Test", g4Reco, radius, true, true, true, 0, 0, 0, 0, 0, 100);
+  int nSets = 4
+  for (unsigned int i = 0; i < nSets; ++i)
+  {
+    radius += CreateCableBundle("Test", g4Reco, radius, true, true, true, 0, 0, 0, 0, 0, 100, 360.*i/nSets);
+  }
 
   return radius;
 }
