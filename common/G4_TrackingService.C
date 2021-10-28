@@ -426,8 +426,8 @@ double TrackingService(PHG4Reco *g4Reco, double radius)
   {
     double theta = 360.*i/nSets;
     double r = G4TrackingService::BarrelRadius - 1.;
-    radius += CreateCableBundle("Test", g4Reco, radius, true, true, true, r*cos(theta), r*cos(theta), r*sin(theta), r*sin(theta),  -1. * (G4TrackingService::BarrelLength + G4TrackingService::BarrelOffset), -1. * G4TrackingService::BarrelOffset - 5., theta);
-    radius += CreateCableBundle("Test2", g4Reco, radius, true, true, true, r*cos(theta), (r-4)*cos(theta), r*sin(theta), (r-4)*sin(theta), -1. * G4TrackingService::BarrelOffset - 5, -1. * G4TrackingService::BarrelOffset, theta);
+    radius += CreateCableBundle(Form("Test_%d", i), g4Reco, radius, true, true, true, r*cos(theta), r*cos(theta), r*sin(theta), r*sin(theta),  -1. * (G4TrackingService::BarrelLength + G4TrackingService::BarrelOffset), -1. * G4TrackingService::BarrelOffset - 5., theta);
+    radius += CreateCableBundle(Form("Test2_%d", i), g4Reco, radius, true, true, true, r*cos(theta), (r-4)*cos(theta), r*sin(theta), (r-4)*sin(theta), -1. * G4TrackingService::BarrelOffset - 5, -1. * G4TrackingService::BarrelOffset, theta);
   }
 
   return radius;
