@@ -272,7 +272,7 @@ double CreateCable(Cable *object, PHG4Reco *g4Reco, double radius)
   double length = abs(object->get_zNorth() - object->get_zSouth());
   double setX = (object->get_xSouth() + object->get_xNorth()) / 2;
   double setY = (object->get_ySouth() + object->get_yNorth()) / 2;
-  double setZ = (object->get_zSouth() + object->get_zNorth()) / 2;
+  double setZ = (object->get_zSouth() + object->get_zNorth()) / 2 + G4TrackingService::GlobalOffset;
 
   double radToDeg = 180.0 / M_PI;
   double rotX = atan((object->get_yNorth() - object->get_ySouth()) / (object->get_zNorth() - object->get_zSouth())) * radToDeg;
@@ -294,7 +294,7 @@ double CreateCable(Cable *object, PHG4Reco *g4Reco, double radius)
     cyl->set_double_param("rot_x", rotX);
     cyl->set_double_param("rot_y", rotY);
     cyl->set_double_param("rot_z", rotZ);
-    cyl->SuperDetector("TrackingService");
+    cyl->SuperDetector("TrackingCable");
     if (AbsorberActive) cyl->SetActive();
     cyl->OverlapCheck(OverlapCheck);
     g4Reco->registerSubsystem(cyl);
@@ -308,7 +308,7 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
                          double x1, double x2, double y1, double y2, double z1, double z2, double theta)
 {
   //Set up basic MVTX cable bundle (24 Samtec cables, 1 power cable, 2 cooling cables)
-  double samtecCoreRadius = 0.1275;
+  double samtecCoreRadius = 0.01275;
   double samtecSheathRadius = 0.05;
   double coolingCoreRadius = 0.056;
   double coolingSheathRadius = 0.08;  //?
@@ -317,7 +317,7 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
   double powerMediumCoreRadius = 0.033;
   double powerMediumSheathRadius = 0.073;
   double powerSmallCoreRadius = 0.028;
-  double powerSmallSheathRadius = 0.028;
+  double powerSmallSheathRadius = 0.058;
 
   //Samtec cables (we use 24 as there are 12 twinax)
   if (enableSignal)
@@ -329,9 +329,9 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
     {
       for (unsigned int iCol = 0; iCol < nCol; ++iCol)
       {
-        Cable *cable = new Cable(boost::str(boost::format("%1%_samtec_%2%_%3%") % superName % iRow % iCol), "G4_Cu", samtecCoreRadius, samtecSheathRadius,
+        Cable *cable = new Cable(Form("%s_samtec_%d_%d", superName.c_str(), iRow, iCol), "G4_Cu", samtecCoreRadius, samtecSheathRadius,
                                  (x1 + (iCol + 1) * samtecSheathRadius * 2)*cos(theta), (x2 + (iCol + 1) * samtecSheathRadius * 2)*cos(theta),
-                                 (y1 + -1 * (iRow + 1) * samtecSheathRadius * 2)*sin(theta), (y2 + -1 * (iRow + 1) * samtecSheathRadius * 2)*sin(theta),
+                                 (y1 - (iRow + 1) * samtecSheathRadius * 2)*sin(theta), (y2 - (iRow + 1) * samtecSheathRadius * 2)*sin(theta),
                                  z1, z2);
         radius += CreateCable(cable, g4Reco, radius);
       }
@@ -344,7 +344,7 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
     unsigned int nCool = 2;
     for (unsigned int iCool = 0; iCool < nCool; ++iCool)
     {
-      Cable *cable = new Cable(boost::str(boost::format("%1%_cooling_%2%") % superName % iCool), "G4_WATER", coolingCoreRadius, coolingSheathRadius,
+      Cable *cable = new Cable(Form("%s_cooling_%d", superName.c_str(), iCool), "G4_WATER", coolingCoreRadius, coolingSheathRadius,
                                (x1 + (iCool + 1) * coolingSheathRadius * 2)*cos(theta), (x2 + (iCool + 1) * coolingSheathRadius * 2)*cos(theta),
                                (y1 + (iCool + 1) * coolingSheathRadius * 2)*sin(theta), (y2 + (iCool + 1) * coolingSheathRadius * 2)*sin(theta),
                                z1, z2);
@@ -358,14 +358,14 @@ double CreateCableBundle(string superName, PHG4Reco *g4Reco, double radius,
     typedef pair<pair<string, string>, pair<double, double>> PowerCableParameters;
     vector<PowerCableParameters> powerCables;
 
-    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_digiReturn") % superName), "Large"), make_pair(-1 * powerLargeSheathRadius, -1 * powerLargeSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_digiSupply") % superName), "Large"), make_pair(-3 * powerLargeSheathRadius, powerLargeSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_anaReturn") % superName), "Medium"), make_pair(-1 * (powerMediumSheathRadius + 2 * powerLargeSheathRadius), -2 * powerMediumSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_anaSupply") % superName), "Medium"), make_pair(-1 * (3 * powerMediumSheathRadius + 2 * powerLargeSheathRadius), -1 * powerMediumSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_digiSense") % superName), "Small"), make_pair(-1 * (2 * powerMediumSheathRadius + 4 * powerLargeSheathRadius), powerSmallSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_anaSense") % superName), "Small"), make_pair(-4 * powerLargeSheathRadius, 2 * powerSmallSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_bias") % superName), "Small"), make_pair(-2 * powerLargeSheathRadius, powerLargeSheathRadius)));
-    powerCables.push_back(make_pair(make_pair(boost::str(boost::format("%1%_ground") % superName), "Small"), make_pair(-1 * powerLargeSheathRadius, powerSmallSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(Form("%s_digiReturn", superName.c_str()), "Large"), make_pair(-1 * powerLargeSheathRadius, -1 * powerLargeSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(Form("%s_digiSupply", superName.c_str()), "Large"), make_pair(-3 * powerLargeSheathRadius, powerLargeSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(Form("%s_anaReturn", superName.c_str()), "Medium"), make_pair(-1 * (powerMediumSheathRadius + 2 * powerLargeSheathRadius), -2 * powerMediumSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(Form("%s_anaSupply", superName.c_str()), "Medium"), make_pair(-1 * (3 * powerMediumSheathRadius + 2 * powerLargeSheathRadius), -1 * powerMediumSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(Form("%s_digiSense", superName.c_str()), "Small"), make_pair(-1 * (2 * powerMediumSheathRadius + 4 * powerLargeSheathRadius), powerSmallSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(Form("%s_anaSense", superName.c_str()), "Small"), make_pair(-4 * powerLargeSheathRadius, 2 * powerSmallSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(Form("%s_bias", superName.c_str()), "Small"), make_pair(-2 * powerLargeSheathRadius, powerLargeSheathRadius)));
+    powerCables.push_back(make_pair(make_pair(Form("%s_ground", superName.c_str()), "Small"), make_pair(-1 * powerLargeSheathRadius, powerSmallSheathRadius)));
 
     for (PowerCableParameters &powerCable : powerCables)
     {
@@ -402,7 +402,6 @@ double TrackingService(PHG4Reco *g4Reco, double radius)
 {
   vector<ServiceStructure *> cylinders, cones;
 
-
   cylinders.push_back(new ServiceStructure("MVTXServiceBarrel", 0, G4TrackingService::BarrelThickness, -1. * (G4TrackingService::BarrelLength + G4TrackingService::BarrelOffset), 
                                            -1. * G4TrackingService::BarrelOffset, G4TrackingService::BarrelRadius, 0));
 
@@ -418,15 +417,15 @@ double TrackingService(PHG4Reco *g4Reco, double radius)
   cones.push_back(new ServiceStructure("L2_2", 0, G4TrackingService::LayerThickness, -15.206, -8.538, 9.650, 4.574));
   cylinders.push_back(new ServiceStructure("L2_3", 0, G4TrackingService::LayerThickness, -8.538, 0, 4.574, 0));
 
-  for (ServiceStructure *cylinder : cylinders) radius += TrackingServiceCylinder(cylinder, g4Reco, radius);
-  for (ServiceStructure *cone : cones) radius += TrackingServiceCone(cone, g4Reco, radius);
+  //for (ServiceStructure *cylinder : cylinders) radius += TrackingServiceCylinder(cylinder, g4Reco, radius);
+  //for (ServiceStructure *cone : cones) radius += TrackingServiceCone(cone, g4Reco, radius);
 
-  int nSets = 48;
+  int nSets = 1;
   for (unsigned int i = 0; i < nSets; ++i)
   {
     double theta = 360.*i/nSets;
     double r = G4TrackingService::BarrelRadius - 1.;
-    radius += CreateCableBundle(Form("Test_%d", i), g4Reco, radius, true, true, true, r*cos(theta), r*cos(theta), r*sin(theta), r*sin(theta),  -1. * (G4TrackingService::BarrelLength + G4TrackingService::BarrelOffset), -1. * G4TrackingService::BarrelOffset - 5., theta);
+    //radius += CreateCableBundle(Form("Test_%d", i), g4Reco, radius, true, true, true, r*cos(theta), r*cos(theta), r*sin(theta), r*sin(theta),  -1. * (G4TrackingService::BarrelLength + G4TrackingService::BarrelOffset), -1. * G4TrackingService::BarrelOffset - 5., theta);
     radius += CreateCableBundle(Form("Test2_%d", i), g4Reco, radius, true, true, true, r*cos(theta), (r-4)*cos(theta), r*sin(theta), (r-4)*sin(theta), -1. * G4TrackingService::BarrelOffset - 5, -1. * G4TrackingService::BarrelOffset, theta);
   }
 
