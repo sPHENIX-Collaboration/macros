@@ -41,6 +41,7 @@ namespace Enable
   bool HCALIN_CLUSTER = false;
   bool HCALIN_EVAL = false;
   bool HCALIN_QA = false;
+  bool HCALIN_SUPPORT = false;
   int HCALIN_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -56,6 +57,15 @@ namespace G4HCALIN
   bool inner_hcal_material_Al = true;
 
   int inner_hcal_eic = 0;
+
+  // Digitization (default photon digi):
+  RawTowerDigitizer::enu_digi_algorithm TowerDigi = RawTowerDigitizer::kSimple_photon_digitization;
+  // directly pass the energy of sim tower to digitized tower
+  // kNo_digitization
+  // simple digitization with photon statistics, single amplitude ADC conversion and pedestal
+  // kSimple_photon_digitization
+  // digitization with photon statistics on SiPM with an effective pixel N, ADC conversion and pedestal
+  // kSiPM_photon_digitization
 
   enum enu_HCalIn_clusterizer
   {
@@ -165,7 +175,7 @@ double HCalInner(PHG4Reco *g4Reco,
 //! A rough version of the inner HCal support ring, from Richie's CAD drawing. - Jin
 void HCalInner_SupportRing(PHG4Reco *g4Reco)
 {
-  bool AbsorberActive = Enable::ABSORBER || Enable::HCALIN_ABSORBER;
+  bool AbsorberActive = Enable::SUPPORT || Enable::HCALIN_SUPPORT;
 
   const double z_ring1 = (2025 + 2050) / 2. / 10.;
   const double innerradius_sphenix = 116.;
@@ -237,7 +247,7 @@ void HCALInner_Towers()
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalInRawTowerDigitizer");
   TowerDigitizer->Detector("HCALIN");
   //  TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
-  TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kSimple_photon_digitalization);
+  TowerDigitizer->set_digi_algorithm(G4HCALIN::TowerDigi);
   TowerDigitizer->set_pedstal_central_ADC(0);
   TowerDigitizer->set_pedstal_width_ADC(1);  // From Jin's guess. No EMCal High Gain data yet! TODO: update
   TowerDigitizer->set_photonelec_ADC(32. / 5.);
@@ -255,7 +265,15 @@ void HCALInner_Towers()
   //  TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
   //  TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  TowerCalibration->set_calib_const_GeV_ADC(0.4e-3 / visible_sample_fraction_HCALIN);
+  if (G4HCALIN::TowerDigi == RawTowerDigitizer::kNo_digitization)
+  {
+    // 0.176 extracted from electron sims (edep(scintillator)/edep(total))
+    TowerCalibration->set_calib_const_GeV_ADC(1. / 0.176);
+  }
+  else
+  {
+    TowerCalibration->set_calib_const_GeV_ADC(0.4e-3 / visible_sample_fraction_HCALIN);
+  }
   TowerCalibration->set_pedstal_ADC(0);
   se->registerSubsystem(TowerCalibration);
 

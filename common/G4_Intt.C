@@ -129,15 +129,9 @@ void Intt_Cells()
   //reco->set_double_param("tmin",-20.0);
   reco->Verbosity(verbosity);
   se->registerSubsystem(reco);
-  return;
-}
 
-void Intt_Clustering()
-{
-  int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
-  Fun4AllServer* se = Fun4AllServer::instance();
-  // Intt
-  //=====
+  // Intt digitization
+  //===========
   // these should be used for the Intt
   /*
 	How threshold are calculated based on default FPHX settings
@@ -177,6 +171,15 @@ void Intt_Clustering()
     digiintt->set_adc_scale(G4MVTX::n_maps_layer + i, userrange);
   }
   se->registerSubsystem(digiintt);
+
+  return;
+}
+
+void Intt_Clustering()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
+  Fun4AllServer* se = Fun4AllServer::instance();
+
   InttClusterizer* inttclusterizer = new InttClusterizer("InttClusterizer", G4MVTX::n_maps_layer, G4MVTX::n_maps_layer + G4INTT::n_intt_layer - 1);
   inttclusterizer->Verbosity(verbosity);
   // no Z clustering for Intt type 1 layers (we DO want Z clustering for type 0 layers)

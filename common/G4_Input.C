@@ -21,6 +21,7 @@
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phhepmc/Fun4AllHepMCPileupInputManager.h>
 #include <phhepmc/HepMCFlowAfterBurner.h>
+#include <phhepmc/PHHepMCGenHelper.h>
 
 #include <phsartre/PHSartre.h>
 #include <phsartre/PHSartreParticleTrigger.h>
@@ -77,15 +78,95 @@ namespace Input
   int SIMPLE_NUMBER = 1;
   int SIMPLE_VERBOSITY = 0;
 
-//  bool UPSILON = false; // moved to GlobalVariables.C, as used in downstream vairables
   int UPSILON_NUMBER = 1;
   int UPSILON_VERBOSITY = 0;
-//  std::set<int> UPSILON_EmbedIds; // moved to GlobalVariables.C, as used in downstream vairables
+  // other UPSILON settings which are also used elsewhere are in GlobalVariables.C
 
   double PILEUPRATE = 0.;
   bool READHITS = false;
   int VERBOSITY = 0;
   int EmbedId = 1;
+
+  //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
+  void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen)
+  {
+    if (HepMCGen == nullptr)
+    {
+      std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
+      exit(1);
+    }
+    HepMCGen->set_beam_direction_theta_phi(1e-3, 0, M_PI - 1e-3, 0);  //2mrad x-ing of sPHENIX per sPH-TRG-2020-001
+
+    HepMCGen->set_vertex_distribution_width(
+        100e-4,         // approximation from past RICH data
+        100e-4,         // approximation from past RICH data
+        7,              // sPH-TRG-2020-001. Fig 3.2
+        20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+    HepMCGen->set_vertex_distribution_function(
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus);
+  }
+
+  //! apply EIC beam parameter to any HepMC generator following EIC CDR,
+  //! including in-time collision's space time shift, beam crossing angle and angular divergence
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
+  void ApplyEICBeamParameter(PHHepMCGenHelper *HepMCGen)
+  {
+    if (HepMCGen == nullptr)
+    {
+      std::cout << "ApplyEICBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
+      exit(1);
+    }
+
+    //25mrad x-ing as in EIC CDR
+    const double EIC_hadron_crossing_angle = 25e-3;
+
+    HepMCGen->set_beam_direction_theta_phi(
+        EIC_hadron_crossing_angle,  // beamA_theta
+        0,                          // beamA_phi
+        M_PI,                       // beamB_theta
+        0                           // beamB_phi
+    );
+    HepMCGen->set_beam_angular_divergence_hv(
+        119e-6, 119e-6,  // proton beam divergence horizontal & vertical, as in EIC CDR Table 1.1
+        211e-6, 152e-6   // electron beam divergence horizontal & vertical, as in EIC CDR Table 1.1
+    );
+
+    // angular kick within a bunch as result of crab cavity
+    // using an naive assumption of transfer matrix from the cavity to IP,
+    // which is NOT yet validated with accelerator optics simulations!
+    const double z_hadron_cavity = 52e2;  // CDR Fig 3.3
+    const double z_e_cavity = 38e2;       // CDR Fig 3.2
+    HepMCGen->set_beam_angular_z_coefficient_hv(
+        -EIC_hadron_crossing_angle / 2. / z_hadron_cavity, 0,
+        -EIC_hadron_crossing_angle / 2. / z_e_cavity, 0);
+
+    // calculate beam sigma width at IP  as in EIC CDR table 1.1
+    const double sigma_p_h = sqrt(80 * 11.3e-7);
+    const double sigma_p_v = sqrt(7.2 * 1.0e-7);
+    const double sigma_p_l = 6;
+    const double sigma_e_h = sqrt(45 * 20.0e-7);
+    const double sigma_e_v = sqrt(5.6 * 1.3e-7);
+    const double sigma_e_l = 2;
+
+    // combine two beam gives the collision sigma in z
+    const double collision_sigma_z = sqrt(sigma_p_l * sigma_p_l + sigma_e_l * sigma_e_l) / 2;
+    const double collision_sigma_t = collision_sigma_z / 29.9792;  // speed of light in cm/ns
+
+    HepMCGen->set_vertex_distribution_width(
+        sigma_p_h * sigma_e_h / sqrt(sigma_p_h * sigma_p_h + sigma_e_h * sigma_e_h),  //x
+        sigma_p_v * sigma_e_v / sqrt(sigma_p_v * sigma_p_v + sigma_e_v * sigma_e_v),  //y
+        collision_sigma_z,                                                            //z
+        collision_sigma_t);                                                           //t
+    HepMCGen->set_vertex_distribution_function(
+        PHHepMCGenHelper::Gaus,   //x
+        PHHepMCGenHelper::Gaus,   //y
+        PHHepMCGenHelper::Gaus,   //z
+        PHHepMCGenHelper::Gaus);  //t
+  }
 }  // namespace Input
 
 namespace INPUTHEPMC
@@ -101,18 +182,18 @@ namespace INPUTHEPMC
 namespace INPUTREADEIC
 {
   string filename;
-}
+}  // namespace INPUTREADEIC
 
 namespace INPUTREADHITS
 {
-  string filename;
-  string listfile;
+  map<unsigned int, std::string> filename;
+  map<unsigned int, std::string> listfile;
 }  // namespace INPUTREADHITS
 
 namespace INPUTEMBED
 {
-  string filename;
-  string listfile;
+  map<unsigned int, std::string> filename;
+  map<unsigned int, std::string> listfile;
 }  // namespace INPUTEMBED
 
 namespace PYTHIA6
@@ -132,7 +213,7 @@ namespace SARTRE
 
 namespace PILEUP
 {
-  string pileupfile = "/sphenix/sim/sim01/sphnxpro/sHijing_HepMC/sHijing_0-12fm.dat";
+  string pileupfile = "/sphenix/sim/sim01/sphnxpro/MDC1/sHijing_HepMC/data/sHijing_0_20fm-0000000001-00000.dat";
   double TpcDriftVelocity = 8.0 / 1000.0;
 }  // namespace PILEUP
 
@@ -149,6 +230,7 @@ namespace INPUTGENERATOR
   PHPythia8 *Pythia8 = nullptr;
   PHSartre *Sartre = nullptr;
   PHSartreParticleTrigger *SartreTrigger = nullptr;
+  ReadEICFiles *EICFileReader = nullptr;
 }  // namespace INPUTGENERATOR
 
 namespace INPUTMANAGER
@@ -381,9 +463,10 @@ void InputRegister()
   }
   if (Input::READEIC)
   {
-    ReadEICFiles *eicr = new ReadEICFiles();
-    eicr->OpenInputFile(INPUTREADEIC::filename);
-    se->registerSubsystem(eicr);
+    INPUTGENERATOR::EICFileReader = new ReadEICFiles();
+    INPUTGENERATOR::EICFileReader->OpenInputFile(INPUTREADEIC::filename);
+    INPUTGENERATOR::EICFileReader->Verbosity(Input::VERBOSITY);
+    se->registerSubsystem(INPUTGENERATOR::EICFileReader);
   }
   // here are the various utility modules which read particles and
   // put them onto the G4 particle stack
@@ -417,22 +500,34 @@ void InputManagers()
   if (Input::EMBED)
   {
     gSystem->Load("libg4dst.so");
-    Fun4AllInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTinEmbed");
-    if (!INPUTEMBED::filename.empty() && INPUTEMBED::listfile.empty())
+    if (!INPUTEMBED::filename.empty() && !INPUTEMBED::listfile.empty())
     {
-      in1->fileopen(INPUTEMBED::filename);
-    }
-    else if (!INPUTEMBED::listfile.empty())
-    {
-      in1->AddListFile(INPUTEMBED::listfile);
-    }
-    else
-    {
-      cout << "no filename INPUTEMBED::filename or listfile INPUTEMBED::listfile given" << endl;
+      cout << "only filenames or filelists are supported, not mixtures" << endl;
       gSystem->Exit(1);
     }
-    in1->Repeat();  // if file(or filelist) is exhausted, start from beginning
-    se->registerInputManager(in1);
+    if (INPUTEMBED::filename.empty() && INPUTEMBED::listfile.empty())
+    {
+      cout << "you need to give an input filenames or filelist" << endl;
+      gSystem->Exit(1);
+    }
+    for (auto iter = INPUTEMBED::filename.begin(); iter != INPUTEMBED::filename.end(); ++iter)
+    {
+      string mgrname = "DSTin" + to_string(iter->first);
+      Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
+      hitsin->fileopen(iter->second);
+      hitsin->Verbosity(Input::VERBOSITY);
+      hitsin->Repeat();
+      se->registerInputManager(hitsin);
+    }
+    for (auto iter = INPUTEMBED::listfile.begin(); iter != INPUTEMBED::listfile.end(); ++iter)
+    {
+      string mgrname = "DSTin" + to_string(iter->first);
+      Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
+      hitsin->AddListFile(iter->second);
+      hitsin->Verbosity(Input::VERBOSITY);
+      hitsin->Repeat();
+      se->registerInputManager(hitsin);
+    }
   }
   if (Input::HEPMC)
   {
@@ -454,22 +549,33 @@ void InputManagers()
   }
   else if (Input::READHITS)
   {
-    Fun4AllInputManager *hitsin = new Fun4AllDstInputManager("DSTin");
-    if (!INPUTREADHITS::filename.empty() && INPUTREADHITS::listfile.empty())
+    gSystem->Load("libg4dst.so");
+    if (!INPUTREADHITS::filename.empty() && !INPUTREADHITS::listfile.empty())
     {
-      hitsin->fileopen(INPUTREADHITS::filename);
-    }
-    else if (!INPUTREADHITS::listfile.empty())
-    {
-      hitsin->AddListFile(INPUTREADHITS::listfile);
-    }
-    else
-    {
-      cout << "no filename INPUTREADHITS::filename or listfile INPUTREADHITS::listfile given" << endl;
+      cout << "only filenames or filelists are supported, not mixtures" << endl;
       gSystem->Exit(1);
     }
-    hitsin->Verbosity(Input::VERBOSITY);
-    se->registerInputManager(hitsin);
+    if (INPUTREADHITS::filename.empty() && INPUTREADHITS::listfile.empty())
+    {
+      cout << "you need to give an input filenames or filelist" << endl;
+      gSystem->Exit(1);
+    }
+    for (auto iter = INPUTREADHITS::filename.begin(); iter != INPUTREADHITS::filename.end(); ++iter)
+    {
+      string mgrname = "DSTin" + to_string(iter->first);
+      Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
+      hitsin->fileopen(iter->second);
+      hitsin->Verbosity(Input::VERBOSITY);
+      se->registerInputManager(hitsin);
+    }
+    for (auto iter = INPUTREADHITS::listfile.begin(); iter != INPUTREADHITS::listfile.end(); ++iter)
+    {
+      string mgrname = "DSTin" + to_string(iter->first);
+      Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
+      hitsin->AddListFile(iter->second);
+      hitsin->Verbosity(Input::VERBOSITY);
+      se->registerInputManager(hitsin);
+    }
   }
   else
   {

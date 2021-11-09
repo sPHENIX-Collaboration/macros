@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_DISPLAYON_C
+#define MACRO_DISPLAYON_C
 
 #include <g4main/PHG4Reco.h>
 
@@ -60,3 +61,4 @@ void displaycmd()
   cout << "set background color:" << endl;
   cout << " g4->ApplyCommand(\"/vis/viewer/set/background white\")" << endl;
 }
+#endif

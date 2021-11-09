@@ -8,9 +8,9 @@
 #include <G4_CEmc_Albedo.C>
 #include <G4_CEmc_Spacal.C>
 #include <G4_EPD.C>
-#include <G4_FEMC.C>
 #include <G4_HcalIn_ref.C>
 #include <G4_HcalOut_ref.C>
+#include <G4_BeamLine.C>
 #include <G4_Intt.C>
 #include <G4_Magnet.C>
 #include <G4_Micromegas.C>
@@ -21,6 +21,7 @@
 #include <G4_TPC.C>
 #include <G4_User.C>
 #include <G4_World.C>
+#include <G4_ZDC.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 
@@ -62,8 +63,15 @@ void G4Init()
   MagnetFieldInit(); // We want the field - even if the magnet volume is disabled
   if (Enable::HCALOUT) HCalOuterInit();
   if (Enable::PLUGDOOR) PlugDoorInit();
-  if (Enable::FEMC) FEMCInit();
   if (Enable::EPD) EPDInit();
+  if (Enable::BEAMLINE)
+  {
+    BeamLineInit();
+    if (Enable::ZDC)
+    {
+      ZDCInit();
+    }
+  }
   if (Enable::USER) UserInit();
   if (Enable::BLACKHOLE) BlackHoleInit();
 }
@@ -90,7 +98,7 @@ int G4Setup()
   if (stringline.fail())
   {  // conversion to double fails -> we have a string
 
-    if (G4MAGNET::magfield.find("sPHENIX.root") != string::npos)
+    if (G4MAGNET::magfield.find("sphenix3dbigmapxyz") != string::npos)
     {
       g4Reco->set_field_map(G4MAGNET::magfield, PHFieldConfig::Field3DCartesian);
     }
@@ -121,8 +129,16 @@ int G4Setup()
   if (Enable::MAGNET) radius = Magnet(g4Reco, radius);
   if (Enable::HCALOUT) radius = HCalOuter(g4Reco, radius, 4);
   if (Enable::PLUGDOOR) PlugDoor(g4Reco);
-  if (Enable::FEMC) FEMCSetup(g4Reco);
   if (Enable::EPD) EPD(g4Reco);
+  if (Enable::BEAMLINE)
+  {
+    BeamLineDefineMagnets(g4Reco);
+    BeamLineDefineBeamPipe(g4Reco);
+    if (Enable::ZDC)
+    {
+      ZDCSetup(g4Reco);
+    }
+  }
   if (Enable::USER) UserDetector(g4Reco);
 
 
@@ -174,12 +190,6 @@ void ShowerCompress(int verbosity = 0)
   compress->AddTowerContainer("TOWER_SIM_HCALOUT");
   compress->AddTowerContainer("TOWER_RAW_HCALOUT");
   compress->AddTowerContainer("TOWER_CALIB_HCALOUT");
-  compress->AddHitContainer("G4HIT_FEMC");
-  compress->AddHitContainer("G4HIT_ABSORBER_FEMC");
-  compress->AddCellContainer("G4CELL_FEMC");
-  compress->AddTowerContainer("TOWER_SIM_FEMC");
-  compress->AddTowerContainer("TOWER_RAW_FEMC");
-  compress->AddTowerContainer("TOWER_CALIB_FEMC");
   se->registerSubsystem(compress);
 
   return;
@@ -208,9 +218,6 @@ void DstCompress(Fun4AllDstOutputManager *out)
     out->StripNode("G4CELL_CEMC");
     out->StripNode("G4CELL_HCALIN");
     out->StripNode("G4CELL_HCALOUT");
-    out->StripNode("G4HIT_FEMC");
-    out->StripNode("G4HIT_ABSORBER_FEMC");
-    out->StripNode("G4CELL_FEMC");
   }
 }
 #endif
