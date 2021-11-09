@@ -29,6 +29,7 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSimpleKFProp.h>
 #include <trackreco/PHSimpleVertexFinder.h>
+#include <trackreco/PHTpcDeltaZCorrection.h>
 #include <trackreco/PHTpcTrackSeedCircleFit.h>
 #include <trackreco/PHTrackCleaner.h>
 #include <trackreco/PHTrackSeeding.h>
@@ -57,8 +58,11 @@ namespace G4TRACKING
 {
   // Space Charge calibration flag
   bool SC_CALIBMODE = true;                                            // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
+  bool SC_USE_MICROMEGAS = true;
+  bool SC_SAVEHISTOGRAMS = false;
   double SC_COLLISIONRATE = 50e3;                                      // leave at 50 KHz for now, scaling of distortion map not implemented yet
   std::string SC_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";  // space charge calibration output file
+  std::string SC_HISTOGRAMOUTPUT_FILENAME = "TpcResiduals.root"; // space charge calibration output file
 
   // Vertexing
   bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
@@ -196,6 +200,9 @@ void Tracking_Reco()
     ghosts->Verbosity(verbosity);
     se->registerSubsystem(ghosts);
 
+    // correct for particle propagation in TPC
+    se->registerSubsystem(new PHTpcDeltaZCorrection);
+
     // Silicon cluster matching to TPC track seeds
     if (G4TRACKING::use_truth_si_matching)
     {
@@ -278,6 +285,7 @@ void Tracking_Reco()
     actsFit->Verbosity(verbosity);
     /// If running with distortions, fit only the silicon+MMs first
     actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
+    actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
     se->registerSubsystem(actsFit);
 
     if (G4TRACKING::SC_CALIBMODE)
@@ -285,6 +293,9 @@ void Tracking_Reco()
       /// run tpc residual determination with silicon+MM track fit
       auto residuals = new PHTpcResiduals;
       residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
+      residuals->setSavehistograms( G4TRACKING::SC_SAVEHISTOGRAMS );
+      residuals->setHistogramOutputfile( G4TRACKING::SC_HISTOGRAMOUTPUT_FILENAME );
+      residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
       residuals->Verbosity(verbosity);
       se->registerSubsystem(residuals);
     }
@@ -330,6 +341,9 @@ void Tracking_Reco()
     pat_rec->set_track_map_name("SvtxTrackMap");
     se->registerSubsystem(pat_rec);
 
+    // correct for particle propagation in TPC
+    se->registerSubsystem(new PHTpcDeltaZCorrection);
+
     // Fitting of tracks using Acts Kalman Filter
     //==================================
 
@@ -346,7 +360,10 @@ void Tracking_Reco()
     {
       /// run tpc residual determination with silicon+MM track fit
       auto residuals = new PHTpcResiduals;
-      residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
+      residuals->setOutputfile( G4TRACKING::SC_ROOTOUTPUT_FILENAME );
+      residuals->setSavehistograms( G4TRACKING::SC_SAVEHISTOGRAMS );
+      residuals->setHistogramOutputfile( G4TRACKING::SC_HISTOGRAMOUTPUT_FILENAME );
+      residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
       residuals->Verbosity(verbosity);
       se->registerSubsystem(residuals);
     }
