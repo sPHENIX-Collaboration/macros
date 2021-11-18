@@ -297,7 +297,7 @@ void CEMC_Cells()
     {
       //          cemc_cells->etaphisize(i, 0.024, 0.024);
       const double radius = 95;
-      cemc_cells->cellsize(i, 2 * TMath::Pi() / 256. * radius, 2 * TMath::Pi() / 256. * radius);
+      cemc_cells->cellsize(i, 2 * M_PI / 256. * radius, 2 * M_PI / 256. * radius);
     }
     se->registerSubsystem(cemc_cells);
   }
