@@ -23,7 +23,6 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHCASeeding.h>
 #include <trackreco/PHGenFitTrackProjection.h>
 #include <trackreco/PHGhostRejection.h>
-#include <trackreco/PHHybridSeeding.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
 #include <trackreco/PHRaveVertexing.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
