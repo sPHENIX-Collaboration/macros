@@ -623,6 +623,24 @@ int Fun4All_G4_sPHENIX(
   //-----
 
   se->End();
+  se->PrintTimer("MakeActsGeometry_TOP");
+  se->PrintTimer("MvtxClusterizer_TOP");
+  se->PrintTimer("InttClusterizer_TOP");
+  se->PrintTimer("TpcClusterizer_TOP");
+  se->PrintTimer("MicromegasClusterizer_TOP");
+  se->PrintTimer("TpcClusterCleaner_TOP");
+  se->PrintTimer("PHActsSiliconSeeding_TOP");
+  se->PrintTimer("PHCASeeding_TOP");
+  se->PrintTimer("PrePropagatorPHTpcTrackSeedCircleFit_TOP");
+  se->PrintTimer("PHSimpleKFProp_TOP");
+  se->PrintTimer("PHTpcTrackSeedCircleFit_TOP");
+  se->PrintTimer("PHGhostRejection_TOP");
+  se->PrintTimer("PHSiliconTpcTrackMatching_TOP");
+  se->PrintTimer("PHMicromegasTpcTrackMatching_TOP");
+  se->PrintTimer("PHActsFirstTrkFitter_TOP");
+  se->PrintTimer("PHTrackCleaner_TOP");
+  se->PrintTimer("PHSimpleVertexFinder_TOP");
+  se->PrintTimer("PHActsVertexPropagator_TOP");
   std::cout << "All done" << std::endl;
   delete se;
   if (Enable::PRODUCTION)
