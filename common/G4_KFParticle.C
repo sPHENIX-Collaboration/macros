@@ -25,7 +25,7 @@ namespace Enable
 
 namespace KFParticle
 {
-  bool runQA = false;
+  bool QA = false;
 
   bool runUpsilonReco = false;
   std::string UpsilonName = "Upsilon";
@@ -85,6 +85,8 @@ void KFParticle_Upsilon_Reco()
 
   se->registerSubsystem(kfparticle);
 
+  KFParticle::runUpsilonReco = true;
+
   return;
 }
 
@@ -121,6 +123,8 @@ void KFParticle_D0_Reco()
 
   se->registerSubsystem(kfparticle);
 
+  KFParticle::runD0Reco = true;
+
   return;
 }
 
@@ -156,6 +160,8 @@ void KFParticle_Lambdac_Reco()
   kfparticle->setOutputName("KFParticleOutput_" + KFParticle::LambdacName + "_reconstruction.root");
 
   se->registerSubsystem(kfparticle);
+
+  KFParticle::runLambdacReco = true;
 
   return;
 }
