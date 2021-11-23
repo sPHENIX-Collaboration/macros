@@ -5,6 +5,7 @@
 
 #define HomogeneousField
 #include <kfparticle_sphenix/KFParticle_sPHENIX.h>
+#include <decayfinder/DecayFinder.h>
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -22,6 +23,26 @@ namespace Enable
   std::string KFPARTICLE_VERTEXMAP = "SvtxVertexMap";
 }  // namespace Enable
 
+namespace KFParticle
+{
+  bool runQA = false;
+
+  bool runUpsilonReco = false;
+  std::string UpsilonName = "Upsilon";
+  std::string UpsilonDecayDescriptor = UpsilonName + " -> e^+ e^-";
+  std::pair<float, float> UpsilonMassRange(8, 11);
+ 
+  bool runD0Reco = false;
+  std::string D0Name = "D0";
+  std::string D0DecayDescriptor = "[" + D0Name + " -> K^- pi^+]cc";
+  std::pair<float, float> D0MassRange(1.75, 1.95);
+
+  bool runLambdacReco = false;
+  std::string LambdacName = "Lambdac";
+  std::string LambdacDecayDescriptor = "[" + motherName + " -> proton^+ K^- pi^+]cc";
+  std::pair<float, float> LambdacMassRange(2.15, 2.45);
+} //namesppace KFParticle
+
 namespace KFParticleBaseCut
 {
   float minTrackPT = 0.5; // GeV
@@ -32,28 +53,20 @@ namespace KFParticleBaseCut
   float minMotherPT = 0; // GeV
 }  // namespace KFParticleBaseCut
 
-void KFParticleInit() {} //I guess this line isnt needed
-
 void KFParticle_Upsilon_Reco()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::KFPARTICLE_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  std::string motherName = "Upsilon";
-  KFParticle_sPHENIX *kfparticle = new KFParticle_sPHENIX("KFParticle_" + motherName + "_Reco");
+  KFParticle_sPHENIX *kfparticle = new KFParticle_sPHENIX("KFParticle_" + KFParticle::UpsilonName + "_Reco");
   kfparticle->Verbosity(verbosity);
+  kfparticle->setDecayDescriptor(KFParticle::UpsilonDecayDescriptor);
 
   kfparticle->saveDST(Enable::KFPARTICLE_APPEND_TO_DST);
   kfparticle->saveOutput(Enable::KFPARTICLE_SAVE_NTUPLE);
   kfparticle->doTruthMatching(Enable::KFPARTICLE_TRUTH_MATCH);
   kfparticle->getDetectorInfo(Enable::KFPARTICLE_DETECTOR_INFO);
-
-  std::string decayDescriptor = motherName + " -> e^+ e^-";
-  kfparticle->setDecayDescriptor(decayDescriptor);
-
-  kfparticle->setContainerName(motherName);
-  kfparticle->setOutputName("KFParticleOutput_" + motherName + "_reconstruction.root");
 
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
   kfparticle->setMinimumTrackIPchi2(0); // Upsilon decays are prompt, tracks are more likely to point to vertex
@@ -62,10 +75,13 @@ void KFParticle_Upsilon_Reco()
   kfparticle->setMaximumVertexchi2nDOF(KFParticleBaseCut::maxVertexchi2nDoF);
   kfparticle->setMaximumDaughterDCA(KFParticleBaseCut::maxTrackTrackDCA);
 
-  kfparticle->setMinimumMass(7);
-  kfparticle->setMaximumMass(11);
+  kfparticle->setMinimumMass(UpsilonMassRange.first);
+  kfparticle->setMaximumMass(UpsilonMassRange.second);
   kfparticle->setMotherPT(KFParticleBaseCut::minMotherPT);
   kfparticle->constrainToPrimaryVertex(false);
+
+  kfparticle->setContainerName(KFParticle::UpsilonName);
+  kfparticle->setOutputName("KFParticleOutput_" + KFParticle::UpsilonName + "_reconstruction.root");
 
   se->registerSubsystem(kfparticle);
 
@@ -79,20 +95,14 @@ void KFParticle_D0_Reco()
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  std::string motherName = "D0";
-  KFParticle_sPHENIX *kfparticle = new KFParticle_sPHENIX("KFParticle_" + motherName + "_Reco");
+  KFParticle_sPHENIX *kfparticle = new KFParticle_sPHENIX("KFParticle_" + KFParticle::D0Name + "_Reco");
   kfparticle->Verbosity(verbosity);
+  kfparticle->setDecayDescriptor(KFParticle::D0DecayDescriptor);
 
   kfparticle->saveDST(Enable::KFPARTICLE_APPEND_TO_DST);
   kfparticle->saveOutput(Enable::KFPARTICLE_SAVE_NTUPLE);
   kfparticle->doTruthMatching(Enable::KFPARTICLE_TRUTH_MATCH);
   kfparticle->getDetectorInfo(Enable::KFPARTICLE_DETECTOR_INFO);
-
-  std::string decayDescriptor = "[" + motherName + " -> K^- pi^+]cc";
-  kfparticle->setDecayDescriptor(decayDescriptor);
-
-  kfparticle->setContainerName(motherName);
-  kfparticle->setOutputName("KFParticleOutput_" + motherName + "_reconstruction.root");
 
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
   kfparticle->setMinimumTrackIPchi2(KFParticleBaseCut::minTrackIPchi2);
@@ -101,10 +111,13 @@ void KFParticle_D0_Reco()
   kfparticle->setMaximumVertexchi2nDOF(KFParticleBaseCut::maxVertexchi2nDoF);
   kfparticle->setMaximumDaughterDCA(KFParticleBaseCut::maxTrackTrackDCA);
 
-  kfparticle->setMinimumMass(1.750);
-  kfparticle->setMaximumMass(1.950);
+  kfparticle->setMinimumMass(D0MassRange.first);
+  kfparticle->setMaximumMass(D0MassRange.second);
   kfparticle->setMotherPT(KFParticleBaseCut::minMotherPT);
   kfparticle->constrainToPrimaryVertex(false);
+
+  kfparticle->setContainerName(KFParticle::D0Name);
+  kfparticle->setOutputName("KFParticleOutput_" + KFParticle::D0Name + "_reconstruction.root");
 
   se->registerSubsystem(kfparticle);
 
@@ -118,20 +131,14 @@ void KFParticle_Lambdac_Reco()
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  std::string motherName = "Lambdac";
-  KFParticle_sPHENIX *kfparticle = new KFParticle_sPHENIX("KFParticle_" + motherName + "_Reco");
+  KFParticle_sPHENIX *kfparticle = new KFParticle_sPHENIX("KFParticle_" + KFParticle::LambdacName + "_Reco");
   kfparticle->Verbosity(verbosity);
+  kfparticle->setDecayDescriptor(KFParticle::LambdacDecayDescriptor);
 
   kfparticle->saveDST(Enable::KFPARTICLE_APPEND_TO_DST);
   kfparticle->saveOutput(Enable::KFPARTICLE_SAVE_NTUPLE);
   kfparticle->doTruthMatching(Enable::KFPARTICLE_TRUTH_MATCH);
   kfparticle->getDetectorInfo(Enable::KFPARTICLE_DETECTOR_INFO);
-
-  std::string decayDescriptor = "[" + motherName + " -> proton^+ K^- pi^+]cc";
-  kfparticle->setDecayDescriptor(decayDescriptor);
-
-  kfparticle->setContainerName(motherName);
-  kfparticle->setOutputName("KFParticleOutput_" + motherName + "_reconstruction.root");
 
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
   kfparticle->setMinimumTrackIPchi2(KFParticleBaseCut::minTrackIPchi2);
@@ -140,15 +147,77 @@ void KFParticle_Lambdac_Reco()
   kfparticle->setMaximumVertexchi2nDOF(KFParticleBaseCut::maxVertexchi2nDoF);
   kfparticle->setMaximumDaughterDCA(KFParticleBaseCut::maxTrackTrackDCA);
 
-  kfparticle->setMinimumMass(2.150);
-  kfparticle->setMaximumMass(2.400);
+  kfparticle->setMinimumMass(LambdacMassRange.first);
+  kfparticle->setMaximumMass(LambdacMassRange.second);
   kfparticle->setMotherPT(KFParticleBaseCut::minMotherPT);
   kfparticle->constrainToPrimaryVertex(false);
+
+  kfparticle->setContainerName(KFParticle::LambdacName);
+  kfparticle->setOutputName("KFParticleOutput_" + KFParticle::LambdacName + "_reconstruction.root");
 
   se->registerSubsystem(kfparticle);
 
   return;
 }
 
+void KFParticle_QA()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::KFPARTICLE_VERBOSITY);
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  if (KFParticle::runUpsilonReco)
+  {
+    DecayFinder *UpsilonFinder = new DecayFinder("DecayFinder_" + KFParticle::UpsilonName);
+    UpsilonFinder->Verbosity(verbosity);
+    UpsilonFinder->setDecayDescriptor(KFParticle::UpsilonDecayDescriptor);
+    UpsilonFinder->saveDST(true);
+    UpsilonFinder->allowPi0(true);
+    UpsilonFinder->allowPhotons(true);
+    se->registerSubsystem(UpsilonFinder);
+
+    QAG4SimulationKFParticle *UpsilonQA = new QAG4SimulationKFParticle("QA_" + KFParticle::UpsilonName, 
+      								       KFParticle::UpsilonName, 
+								       UpsilonMassRange.first,  
+								       UpsilonMassRange.second);
+    se->registerSubsystem(UpsilonQA);
+  }
+
+  if (KFParticle::runD0Reco)
+  {
+    DecayFinder *D0Finder = new DecayFinder("DecayFinder_" + KFParticle::D0Name);
+    D0Finder->Verbosity(verbosity);
+    D0Finder->setDecayDescriptor(KFParticle::D0DecayDescriptor);
+    D0Finder->saveDST(true);
+    D0Finder->allowPi0(true);
+    D0Finder->allowPhotons(true);
+    se->registerSubsystem(D0Finder);
+
+    QAG4SimulationKFParticle *D0QA = new QAG4SimulationKFParticle("QA_" + KFParticle::D0Name,
+                                                                  KFParticle::D0Name,
+                                                                  D0MassRange.first,
+                                                                  D0MassRange.second);
+    se->registerSubsystem(D0QA);
+  }
+
+  if (KFParticle::runLambdacReco)
+  {
+    DecayFinder *LambdacFinder = new DecayFinder("DecayFinder_" + KFParticle::LambdacName);
+    LambdacFinder->Verbosity(verbosity);
+    LambdacFinder->setDecayDescriptor(KFParticle::LambdacDecayDescriptor);
+    LambdacFinder->saveDST(true);
+    LambdacFinder->allowPi0(true);
+    LambdacFinder->allowPhotons(true);
+    se->registerSubsystem(LambdacFinder);
+
+    QAG4SimulationKFParticle *LambdacQA = new QAG4SimulationKFParticle("QA_" + KFParticle::LambdacName, 
+                                                                       KFParticle::LambdacName, 
+                                                                       LambdacMassRange.first,  
+                                                                       LambdacMassRange.second);
+    se->registerSubsystem(LambdacQA);
+  }
+
+  return;
+}
 
 #endif
