@@ -31,16 +31,19 @@ namespace KFParticle
   std::string UpsilonName = "Upsilon";
   std::string UpsilonDecayDescriptor = UpsilonName + " -> e^+ e^-";
   std::pair<float, float> UpsilonMassRange(8, 11);
+  bool UpsilonTrigger = false;
  
   bool runD0Reco = false;
   std::string D0Name = "D0";
   std::string D0DecayDescriptor = "[" + D0Name + " -> K^- pi^+]cc";
   std::pair<float, float> D0MassRange(1.75, 1.95);
+  bool D0Trigger = false;
 
   bool runLambdacReco = false;
   std::string LambdacName = "Lambdac";
   std::string LambdacDecayDescriptor = "[" + motherName + " -> proton^+ K^- pi^+]cc";
   std::pair<float, float> LambdacMassRange(2.15, 2.45);
+  bool LambdacTrigger = false;
 } //namesppace KFParticle
 
 namespace KFParticleBaseCut
@@ -177,6 +180,7 @@ void KFParticle_QA()
     DecayFinder *UpsilonFinder = new DecayFinder("DecayFinder_" + KFParticle::UpsilonName);
     UpsilonFinder->Verbosity(verbosity);
     UpsilonFinder->setDecayDescriptor(KFParticle::UpsilonDecayDescriptor);
+    UpsilonFinder->triggerOnDecay(KFParticle::UpsilonTrigger);
     UpsilonFinder->saveDST(true);
     UpsilonFinder->allowPi0(true);
     UpsilonFinder->allowPhotons(true);
@@ -194,6 +198,7 @@ void KFParticle_QA()
     DecayFinder *D0Finder = new DecayFinder("DecayFinder_" + KFParticle::D0Name);
     D0Finder->Verbosity(verbosity);
     D0Finder->setDecayDescriptor(KFParticle::D0DecayDescriptor);
+    D0Finder->triggerOnDecay(KFParticle::D0Trigger);
     D0Finder->saveDST(true);
     D0Finder->allowPi0(true);
     D0Finder->allowPhotons(true);
@@ -211,6 +216,7 @@ void KFParticle_QA()
     DecayFinder *LambdacFinder = new DecayFinder("DecayFinder_" + KFParticle::LambdacName);
     LambdacFinder->Verbosity(verbosity);
     LambdacFinder->setDecayDescriptor(KFParticle::LambdacDecayDescriptor);
+    LambdacFinder->triggerOnDecay(KFParticle::LambdacTrigger);
     LambdacFinder->saveDST(true);
     LambdacFinder->allowPi0(true);
     LambdacFinder->allowPhotons(true);
