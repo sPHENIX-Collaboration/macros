@@ -19,6 +19,7 @@
 #include <G4_Pipe.C>
 #include <G4_PlugDoor.C>
 #include <G4_TPC.C>
+#include <G4_TrackingService.C>
 #include <G4_User.C>
 #include <G4_World.C>
 #include <G4_ZDC.C>
@@ -51,6 +52,7 @@ void G4Init()
   // load detector/material macros and execute Init() function
 
   if (Enable::PIPE) PipeInit();
+  if (Enable::TrackingService) TrackingServiceInit();
   if (Enable::MVTX) MvtxInit();
   if (Enable::INTT) InttInit();
   if (Enable::TPC) TPCInit();
@@ -118,6 +120,7 @@ int G4Setup()
   double radius = 0.;
 
   if (Enable::PIPE) radius = Pipe(g4Reco, radius);
+  if (Enable::TrackingService) TrackingService(g4Reco, radius);
   if (Enable::MVTX) radius = Mvtx(g4Reco, radius);
   if (Enable::INTT) radius = Intt(g4Reco, radius);
   if (Enable::TPC) radius = TPC(g4Reco, radius);
