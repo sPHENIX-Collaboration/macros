@@ -22,6 +22,8 @@
 #include <tpc/TpcClusterizer.h>
 #include <tpc/TpcClusterCleaner.h>
 #include <tpc/TpcSpaceChargeCorrection.h>
+#include <tpccalib/TpcDirectLaserReconstruction.h>
+
 #include <qa_modules/QAG4SimulationTpc.h>
 
 #include <fun4all/Fun4AllServer.h>
@@ -53,6 +55,9 @@ namespace G4TPC
   int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
   double tpc_outer_radius = 77. + 2.;
 
+  // TPC drift velocity scale
+  double drift_velocity_scale = 1.0;
+
   // distortions
   bool ENABLE_STATIC_DISTORTIONS = false;
   auto static_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/TPC/DistortionMaps/fluct_average.rev3.1side.3d.file0.h_negz.real_B1.4_E-400.0.ross_phi1_sphenix_phislice_lookup_r26xp40xz40.distortion_map.hist.root";
@@ -74,6 +79,13 @@ namespace G4TPC
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
 
+  // save histograms
+  bool DIRECT_LASER_SAVEHISTOGRAMS = false;
+
+  // space charge calibration output file
+  std::string DIRECT_LASER_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";
+  std::string DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME = "TpcDirectLaserReconstruction.root"; 
+  
 }  // namespace G4TPC
 
 void TPCInit()
@@ -157,7 +169,7 @@ double TPC(PHG4Reco* g4Reco,
 void TPC_Cells()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
-  Fun4AllServer* se = Fun4AllServer::instance();
+  auto se = Fun4AllServer::instance();
 
   // central membrane G4Hit generation
   if( G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS )
@@ -176,7 +188,7 @@ void TPC_Cells()
     /* use 5deg steps */
     static constexpr double deg_to_rad = M_PI/180.;
     directLaser->SetPhiStepping( 72, 0*deg_to_rad, 360*deg_to_rad );
-    directLaser->SetThetaStepping( 18, 0*deg_to_rad, 90*deg_to_rad );
+    directLaser->SetThetaStepping( 17, 5*deg_to_rad, 90*deg_to_rad );
     directLaser->SetDirectLaserAuto( true );
     se->registerSubsystem(directLaser);
   }
@@ -247,13 +259,18 @@ void TPC_Clustering()
   // For the Tpc
   //==========
   auto tpcclusterizer = new TpcClusterizer;
+  tpcclusterizer->set_drift_velocity_scale(G4TPC::drift_velocity_scale);
   tpcclusterizer->Verbosity(verbosity);
   se->registerSubsystem(tpcclusterizer);
 
-  auto tpcclustercleaner = new TpcClusterCleaner;
-  tpcclustercleaner->Verbosity(verbosity);
-  se->registerSubsystem(tpcclustercleaner);
-
+  
+  if( !G4TPC::ENABLE_DIRECT_LASER_HITS )
+  {
+    auto tpcclustercleaner = new TpcClusterCleaner;
+    tpcclustercleaner->Verbosity(verbosity);
+    se->registerSubsystem(tpcclustercleaner);
+  }
+  
   // space charge correction
   if( G4TPC::ENABLE_CORRECTIONS )
   {
@@ -261,6 +278,16 @@ void TPC_Clustering()
     tpcSpaceChargeCorrection->set_distortion_filename( G4TPC::correction_filename );
     tpcSpaceChargeCorrection->set_coordinates( G4TPC::correction_coordinates );
     se->registerSubsystem(tpcSpaceChargeCorrection);
+  }
+
+  // direct laser reconstruction
+  if( G4TPC::ENABLE_DIRECT_LASER_HITS )
+  { 
+    auto directLaserReconstruction = new TpcDirectLaserReconstruction;
+    directLaserReconstruction->set_outputfile( G4TPC::DIRECT_LASER_ROOTOUTPUT_FILENAME );
+    directLaserReconstruction->set_savehistograms( G4TPC::DIRECT_LASER_SAVEHISTOGRAMS );
+    directLaserReconstruction->set_histogram_outputfile( G4TPC::DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME );
+    se->registerSubsystem(directLaserReconstruction); 
   }
 
 }

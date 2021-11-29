@@ -1,6 +1,8 @@
 #ifndef MACRO_G4HIJETRECO_C
 #define MACRO_G4HIJETRECO_C
 
+#include <GlobalVariables.C>
+
 #include <g4jets/FastJetAlgo.h>
 #include <g4jets/JetReco.h>
 #include <g4jets/TowerJetInput.h>

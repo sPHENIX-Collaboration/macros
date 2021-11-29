@@ -284,6 +284,7 @@ int Fun4All_G4_sPHENIX(
   //  Enable::VERBOSITY = 1;
 
   // Enable::BBC = true;
+  // Enable::BBC_SUPPORT = true; // save hist in bbc support structure
   Enable::BBCFAKE = true;  // Smeared vtx and t0, use if you don't want real BBC in simulation
 
   Enable::PIPE = true;
@@ -347,6 +348,16 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALOUT_QA = Enable::HCALOUT_CLUSTER and Enable::QA && true;
 
   Enable::EPD = true;
+
+
+  Enable::BEAMLINE = true;
+//  Enable::BEAMLINE_ABSORBER = true;  // makes the beam line magnets sensitive volumes
+//  Enable::BEAMLINE_BLACKHOLE = true; // turns the beamline magnets into black holes
+  Enable::ZDC = true;
+//  Enable::ZDC_ABSORBER = true;
+//  Enable::ZDC_SUPPORT = true;
+  Enable::ZDC_TOWER = Enable::ZDC && true;
+  Enable::ZDC_EVAL = Enable::ZDC_TOWER && true;
 
   //! forward flux return plug door. Out of acceptance and off by default.
   //Enable::PLUGDOOR = true;
@@ -623,6 +634,24 @@ int Fun4All_G4_sPHENIX(
   //-----
 
   se->End();
+  se->PrintTimer("MakeActsGeometry_TOP");
+  se->PrintTimer("MvtxClusterizer_TOP");
+  se->PrintTimer("InttClusterizer_TOP");
+  se->PrintTimer("TpcClusterizer_TOP");
+  se->PrintTimer("MicromegasClusterizer_TOP");
+  se->PrintTimer("TpcClusterCleaner_TOP");
+  se->PrintTimer("PHActsSiliconSeeding_TOP");
+  se->PrintTimer("PHCASeeding_TOP");
+  se->PrintTimer("PrePropagatorPHTpcTrackSeedCircleFit_TOP");
+  se->PrintTimer("PHSimpleKFProp_TOP");
+  se->PrintTimer("PHTpcTrackSeedCircleFit_TOP");
+  se->PrintTimer("PHGhostRejection_TOP");
+  se->PrintTimer("PHSiliconTpcTrackMatching_TOP");
+  se->PrintTimer("PHMicromegasTpcTrackMatching_TOP");
+  se->PrintTimer("PHActsFirstTrkFitter_TOP");
+  se->PrintTimer("PHTrackCleaner_TOP");
+  se->PrintTimer("PHSimpleVertexFinder_TOP");
+  se->PrintTimer("PHActsVertexPropagator_TOP");
   std::cout << "All done" << std::endl;
   delete se;
   if (Enable::PRODUCTION)
