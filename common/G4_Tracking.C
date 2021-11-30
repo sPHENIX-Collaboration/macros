@@ -56,7 +56,7 @@ namespace Enable
 namespace G4TRACKING
 {
   // Space Charge calibration flag
-  bool SC_CALIBMODE = true;                                            // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
+  bool SC_CALIBMODE = false;                                            // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
   bool SC_USE_MICROMEGAS = true;
   bool SC_SAVEHISTOGRAMS = false;
   double SC_COLLISIONRATE = 50e3;                                      // leave at 50 KHz for now, scaling of distortion map not implemented yet
@@ -90,9 +90,6 @@ void TrackingInit()
   {
     G4MICROMEGAS::n_micromegas_layer = 0;
   }
-
-  // SC_CALIBMODE makes no sense if distortions are not present
-  G4TRACKING::SC_CALIBMODE = (G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS) && G4TRACKING::SC_CALIBMODE;
 
   /// Build the Acts geometry
   Fun4AllServer* se = Fun4AllServer::instance();
