@@ -28,6 +28,7 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSimpleKFProp.h>
 #include <trackreco/PHSimpleVertexFinder.h>
+#include <trackreco/PHTpcClusterMover.h>
 #include <trackreco/PHTpcDeltaZCorrection.h>
 #include <trackreco/PHTpcTrackSeedCircleFit.h>
 #include <trackreco/PHTrackCleaner.h>
@@ -189,15 +190,22 @@ void Tracking_Reco()
     // Associate TPC track stubs with silicon and Micromegas
     //=============================================
 
-    PHTpcTrackSeedCircleFit* vtxassoc = new PHTpcTrackSeedCircleFit();
+    /*
+     * add cluster mover to apply TPC distortion corrections to clusters belonging to tracks
+     * once the correction is applied, the cluster are moved back to TPC surfaces using local track angles
+     * moved clusters are stored in a separate map, called CORRECTED_TRKR_CLUSTER
+     */
+    if( G4TPC::ENABLE_CORRECTIONS ) se->registerSubsystem(new PHTpcClusterMover);
+
+    auto vtxassoc = new PHTpcTrackSeedCircleFit;
     vtxassoc->Verbosity(verbosity);
     se->registerSubsystem(vtxassoc);
 
     // Choose the best duplicate TPC track seed
-    PHGhostRejection* ghosts = new PHGhostRejection();
+    auto ghosts = new PHGhostRejection;
     ghosts->Verbosity(verbosity);
     se->registerSubsystem(ghosts);
-
+      
     // correct for particle propagation in TPC
     se->registerSubsystem(new PHTpcDeltaZCorrection);
 
