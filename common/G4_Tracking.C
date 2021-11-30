@@ -347,6 +347,13 @@ void Tracking_Reco()
     pat_rec->set_track_map_name("SvtxTrackMap");
     se->registerSubsystem(pat_rec);
 
+    /*
+     * add cluster mover to apply TPC distortion corrections to clusters belonging to tracks
+     * once the correction is applied, the cluster are moved back to TPC surfaces using local track angles
+     * moved clusters are stored in a separate map, called CORRECTED_TRKR_CLUSTER
+     */
+    if( G4TPC::ENABLE_CORRECTIONS ) se->registerSubsystem(new PHTpcClusterMover);
+    
     // correct for particle propagation in TPC
     se->registerSubsystem(new PHTpcDeltaZCorrection);
 
