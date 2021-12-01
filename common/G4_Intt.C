@@ -60,7 +60,7 @@ namespace G4INTT
 
 void InttInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 16.85 + 0.6);  // rail radius + rail outer radius
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 20.);  // estimated from display, can be made smaller but good enough
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 410. / 2.);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -410. / 2.);
   // the mvtx is not called if disabled but the default number of layers is set to 3, so we need to set it
