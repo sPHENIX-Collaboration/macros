@@ -28,6 +28,7 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSimpleKFProp.h>
 #include <trackreco/PHSimpleVertexFinder.h>
+#include <trackreco/PHTpcClusterMover.h>
 #include <trackreco/PHTpcDeltaZCorrection.h>
 #include <trackreco/PHTpcTrackSeedCircleFit.h>
 #include <trackreco/PHTrackCleaner.h>
@@ -55,7 +56,7 @@ namespace Enable
 namespace G4TRACKING
 {
   // Space Charge calibration flag
-  bool SC_CALIBMODE = true;                                            // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
+  bool SC_CALIBMODE = false;                                            // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
   bool SC_USE_MICROMEGAS = true;
   bool SC_SAVEHISTOGRAMS = false;
   double SC_COLLISIONRATE = 50e3;                                      // leave at 50 KHz for now, scaling of distortion map not implemented yet
@@ -89,9 +90,6 @@ void TrackingInit()
   {
     G4MICROMEGAS::n_micromegas_layer = 0;
   }
-
-  // SC_CALIBMODE makes no sense if distortions are not present
-  G4TRACKING::SC_CALIBMODE = (G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS) && G4TRACKING::SC_CALIBMODE;
 
   /// Build the Acts geometry
   Fun4AllServer* se = Fun4AllServer::instance();
@@ -189,15 +187,22 @@ void Tracking_Reco()
     // Associate TPC track stubs with silicon and Micromegas
     //=============================================
 
-    PHTpcTrackSeedCircleFit* vtxassoc = new PHTpcTrackSeedCircleFit();
+    /*
+     * add cluster mover to apply TPC distortion corrections to clusters belonging to tracks
+     * once the correction is applied, the cluster are moved back to TPC surfaces using local track angles
+     * moved clusters are stored in a separate map, called CORRECTED_TRKR_CLUSTER
+     */
+    if( G4TPC::ENABLE_CORRECTIONS ) se->registerSubsystem(new PHTpcClusterMover);
+
+    auto vtxassoc = new PHTpcTrackSeedCircleFit;
     vtxassoc->Verbosity(verbosity);
     se->registerSubsystem(vtxassoc);
 
     // Choose the best duplicate TPC track seed
-    PHGhostRejection* ghosts = new PHGhostRejection();
+    auto ghosts = new PHGhostRejection;
     ghosts->Verbosity(verbosity);
     se->registerSubsystem(ghosts);
-
+      
     // correct for particle propagation in TPC
     se->registerSubsystem(new PHTpcDeltaZCorrection);
 
@@ -339,6 +344,13 @@ void Tracking_Reco()
     pat_rec->set_track_map_name("SvtxTrackMap");
     se->registerSubsystem(pat_rec);
 
+    /*
+     * add cluster mover to apply TPC distortion corrections to clusters belonging to tracks
+     * once the correction is applied, the cluster are moved back to TPC surfaces using local track angles
+     * moved clusters are stored in a separate map, called CORRECTED_TRKR_CLUSTER
+     */
+    if( G4TPC::ENABLE_CORRECTIONS ) se->registerSubsystem(new PHTpcClusterMover);
+    
     // correct for particle propagation in TPC
     se->registerSubsystem(new PHTpcDeltaZCorrection);
 
