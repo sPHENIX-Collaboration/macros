@@ -16,8 +16,8 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 namespace Enable
 {
-  bool BBC = true;          // Actual BBC detector
-  bool BBC_SUPPORT = true;  // BBC Supports
+  bool BBC = false;          // Actual BBC detector
+  bool BBC_SUPPORT = false;  // BBC Supports
   bool BBCFAKE = false;     // Just generate fake bbc vtx, t0
   int  BBC_VERBOSITY = 0;
 }  // namespace Enable
