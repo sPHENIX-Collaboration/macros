@@ -70,6 +70,7 @@ void Micromegas(PHG4Reco* g4Reco)
 {
   const int mm_layer = G4MVTX::n_maps_layer + G4INTT::n_intt_layer + G4TPC::n_gas_layer;
   auto mm = new PHG4MicromegasSubsystem("MICROMEGAS", mm_layer);
+  mm->OverlapCheck( Enable::OVERLAPCHECK );
   mm->SetActive();
   mm->set_double_param("mm_length", 220);
   mm->set_double_param("mm_radius", G4MICROMEGAS::mm_radius);
