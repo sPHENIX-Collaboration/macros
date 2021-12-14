@@ -259,12 +259,10 @@ int Fun4All_G4_sPHENIX(
 
   // central tracking
   Enable::MVTX = true;
-  Enable::MVTX_OVERLAPCHECK = true;
   Enable::MVTX_CELL = Enable::MVTX && true;
   Enable::MVTX_CLUSTER = Enable::MVTX_CELL && true;
   Enable::MVTX_QA = Enable::MVTX_CLUSTER and Enable::QA && true;
   Enable::TrackingService = true;
-  Enable::TrackingService_OVERLAPCHECK = true;
 
   Enable::INTT = true;
   Enable::INTT_CELL = Enable::INTT && true;
