@@ -13,7 +13,7 @@
 #include <G4_HIJetReco.C>
 #include <G4_Input.C>
 #include <G4_Jets.C>
-//#include <G4_KFParticle.C>
+#include <G4_KFParticle.C>
 #include <G4_ParticleFlow.C>
 #include <G4_Production.C>
 #include <G4_TopoClusterReco.C>
@@ -522,9 +522,8 @@ int Fun4All_G4_sPHENIX(
   //======================
   // Run KFParticle on evt
   //======================
-  //if (Enable::KFPARTICLE && Input::UPSILON) KFParticle_Upsilon_Reco();
-  //if (Enable::KFPARTICLE && Input::DZERO) KFParticle_D0_Reco();
-  //if (Enable::KFPARTICLE && Input::LAMBDAC) KFParticle_Lambdac_Reco();
+  if (Enable::KFPARTICLE && Input::UPSILON) KFParticle_Upsilon_Reco();
+  if (Enable::KFPARTICLE && Input::DZERO) KFParticle_D0_Reco();
 
   //----------------------
   // Standard QAs
