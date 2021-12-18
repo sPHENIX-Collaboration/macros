@@ -8,6 +8,7 @@
 
 #include <g4intt/PHG4InttDefs.h>
 #include <g4intt/PHG4InttDigitizer.h>
+#include <g4intt/PHG4InttDeadMapLoader.h>
 #include <g4intt/PHG4InttHitReco.h>
 #include <g4intt/PHG4InttSubsystem.h>
 
@@ -25,7 +26,7 @@ R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
-namespace Enable
+  namespace Enable
 {
   bool INTT = false;
   bool INTT_OVERLAPCHECK = false;
@@ -40,9 +41,9 @@ namespace G4INTT
   int n_intt_layer = 4;           // must be 4 or 0, setting to zero removes INTT completely
   double intt_radius_max = 140.;  // including stagger radius (mm)
   int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
-                       PHG4InttDefs::SEGMENTATION_PHI,
-                       PHG4InttDefs::SEGMENTATION_PHI,
-                       PHG4InttDefs::SEGMENTATION_PHI};
+    PHG4InttDefs::SEGMENTATION_PHI,
+    PHG4InttDefs::SEGMENTATION_PHI,
+    PHG4InttDefs::SEGMENTATION_PHI};
   int nladder[4] = {12, 12, 16, 16};
   double sensor_radius[4] = {7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
 
@@ -51,10 +52,10 @@ namespace G4INTT
   enum enu_InttDeadMapType  // Dead map options for INTT
   {
     kInttNoDeadMap = 0,        // All channel in Intt is alive
-    kIntt4PercentDeadMap = 4,  // 4% of dead/masked area (2% sensor + 2% chip) as a typical FVTX Run14 production run.
-    kIntt8PercentDeadMap = 8   // 8% dead/masked area (6% sensor + 2% chip) as threshold of operational
+    kInttDeadMap = 1,  // with dead channel
   };
-  enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
+  //enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
+  enu_InttDeadMapType InttDeadMapOption = kInttDeadMap;  // Choose Intt deadmap here
 
 }  // namespace G4INTT
 
@@ -72,7 +73,7 @@ void InttInit()
 }
 
 double Intt(PHG4Reco* g4Reco, double radius,
-            const int absorberactive = 0)
+    const int absorberactive = 0)
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
   bool intt_overlapcheck = Enable::OVERLAPCHECK || Enable::INTT_OVERLAPCHECK;
@@ -105,7 +106,7 @@ double Intt(PHG4Reco* g4Reco, double radius,
   for (int i = 0; i < G4INTT::n_intt_layer; i++)
   {
     cout << " Intt layer " << i << " laddertype " << G4INTT::laddertype[i] << " nladders " << G4INTT::nladder[i]
-         << " sensor radius " << G4INTT::sensor_radius[i] << " offsetphi " << G4INTT::offsetphi[i] << endl;
+      << " sensor radius " << G4INTT::sensor_radius[i] << " offsetphi " << G4INTT::offsetphi[i] << endl;
     sitrack->set_int_param(i, "laddertype", G4INTT::laddertype[i]);
     sitrack->set_int_param(i, "nladder", G4INTT::nladder[i]);
     sitrack->set_double_param(i, "sensor_radius", G4INTT::sensor_radius[i]);  // expecting cm
@@ -122,6 +123,30 @@ void Intt_Cells()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
+
+  // Load pre-defined deadmaps
+  PHG4InttDeadMapLoader * deadMapINTT = new PHG4InttDeadMapLoader("INTT");
+
+  for (int i = 0; i < G4INTT::n_intt_layer; i++) { 
+    string DeadMapConfigName = Form("intt_layer%d/", i);
+
+    if (G4INTT::InttDeadMapOption == G4INTT::kInttDeadMap) {
+      string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap/"); 
+      //string DeadMapPath = "/sphenix/u/wxie/sphnx_software/INTT" + string("/DeadMap/"); 
+
+      DeadMapPath +=  DeadMapConfigName;
+
+      deadMapINTT->deadMapPath(G4MVTX::n_maps_layer + i, DeadMapPath);
+    } else {
+      cout <<"Tracking_Reco - fatal error - invalid InttDeadMapOption = "<<G4INTT::InttDeadMapOption<<endl;
+      exit(1);
+    }
+  }
+
+  deadMapINTT -> Verbosity(verbosity);
+  //deadMapINTT -> Verbosity(1);
+  se->registerSubsystem(deadMapINTT);
+
   // new storage containers
   PHG4InttHitReco* reco = new PHG4InttHitReco();
   // The timing windows are hard-coded in the INTT ladder model, they can be overridden here
@@ -134,25 +159,25 @@ void Intt_Cells()
   //===========
   // these should be used for the Intt
   /*
-	How threshold are calculated based on default FPHX settings
-	Four part information goes to the threshold calculation:
-	1. In 320 um thick silicon, the MIP e-h pair for a nominally indenting tracking is 3.87 MeV/cm * 320 um / 3.62 eV/e-h = 3.4e4 e-h pairs
-	2. From DOI: 10.1016/j.nima.2014.04.017, FPHX integrator amplifier gain is 100mV / fC. That translate MIP voltage to 550 mV.
-	3. From [FPHX Final Design Document](https://www.phenix.bnl.gov/WWW/fvtx/DetectorHardware/FPHX/FPHX2_June2009Revision.doc), the DAC0-7 setting for 8-ADC thresholds above the V_ref, as in Table 2 - Register Addresses and Defaults
-	4, From [FPHX Final Design Document](https://www.phenix.bnl.gov/WWW/fvtx/DetectorHardware/FPHX/FPHX2_June2009Revision.doc) section Front-end Program Bits, the formula to translate DAC setting to comparitor voltages.
-	The result threshold table based on FPHX default value is as following
-	| FPHX Register Address | Name            | Default value | Voltage - Vref (mV) | To electrons based on calibration | Electrons | Fraction to MIP |
-	|-----------------------|-----------------|---------------|---------------------|-----------------------------------|-----------|-----------------|
-	| 4                     | Threshold DAC 0 | 8             | 32                  | 2500                              | 2000      | 5.85E-02        |
-	| 5                     | Threshold DAC 1 | 16            | 64                  | 5000                              | 4000      | 1.17E-01        |
-	| 6                     | Threshold DAC 2 | 32            | 128                 | 10000                             | 8000      | 2.34E-01        |
-	| 7                     | Threshold DAC 3 | 48            | 192                 | 15000                             | 12000     | 3.51E-01        |
-	| 8                     | Threshold DAC 4 | 80            | 320                 | 25000                             | 20000     | 5.85E-01        |
-	| 9                     | Threshold DAC 5 | 112           | 448                 | 35000                             | 28000     | 8.18E-01        |
-	| 10                    | Threshold DAC 6 | 144           | 576                 | 45000                             | 36000     | 1.05E+00        |
-	| 11                    | Threshold DAC 7 | 176           | 704                 | 55000                             | 44000     | 1.29E+00        |
-	DAC0-7 threshold as fraction to MIP voltage are set to PHG4InttDigitizer::set_adc_scale as 3-bit ADC threshold as fractions to MIP energy deposition.
-      */
+     How threshold are calculated based on default FPHX settings
+     Four part information goes to the threshold calculation:
+     1. In 320 um thick silicon, the MIP e-h pair for a nominally indenting tracking is 3.87 MeV/cm * 320 um / 3.62 eV/e-h = 3.4e4 e-h pairs
+     2. From DOI: 10.1016/j.nima.2014.04.017, FPHX integrator amplifier gain is 100mV / fC. That translate MIP voltage to 550 mV.
+     3. From [FPHX Final Design Document](https://www.phenix.bnl.gov/WWW/fvtx/DetectorHardware/FPHX/FPHX2_June2009Revision.doc), the DAC0-7 setting for 8-ADC thresholds above the V_ref, as in Table 2 - Register Addresses and Defaults
+     4, From [FPHX Final Design Document](https://www.phenix.bnl.gov/WWW/fvtx/DetectorHardware/FPHX/FPHX2_June2009Revision.doc) section Front-end Program Bits, the formula to translate DAC setting to comparitor voltages.
+     The result threshold table based on FPHX default value is as following
+     | FPHX Register Address | Name            | Default value | Voltage - Vref (mV) | To electrons based on calibration | Electrons | Fraction to MIP |
+     |-----------------------|-----------------|---------------|---------------------|-----------------------------------|-----------|-----------------|
+     | 4                     | Threshold DAC 0 | 8             | 32                  | 2500                              | 2000      | 5.85E-02        |
+     | 5                     | Threshold DAC 1 | 16            | 64                  | 5000                              | 4000      | 1.17E-01        |
+     | 6                     | Threshold DAC 2 | 32            | 128                 | 10000                             | 8000      | 2.34E-01        |
+     | 7                     | Threshold DAC 3 | 48            | 192                 | 15000                             | 12000     | 3.51E-01        |
+     | 8                     | Threshold DAC 4 | 80            | 320                 | 25000                             | 20000     | 5.85E-01        |
+     | 9                     | Threshold DAC 5 | 112           | 448                 | 35000                             | 28000     | 8.18E-01        |
+     | 10                    | Threshold DAC 6 | 144           | 576                 | 45000                             | 36000     | 1.05E+00        |
+     | 11                    | Threshold DAC 7 | 176           | 704                 | 55000                             | 44000     | 1.29E+00        |
+     DAC0-7 threshold as fraction to MIP voltage are set to PHG4InttDigitizer::set_adc_scale as 3-bit ADC threshold as fractions to MIP energy deposition.
+     */
   std::vector<double> userrange;  // 3-bit ADC threshold relative to the mip_e at each layer.
   userrange.push_back(0.0584625322997416);
   userrange.push_back(0.116925064599483);
@@ -165,7 +190,8 @@ void Intt_Cells()
 
   // new containers
   PHG4InttDigitizer* digiintt = new PHG4InttDigitizer();
-  digiintt->Verbosity(verbosity);
+  digiintt->Verbosity(verbosity); 
+  //digiintt->Verbosity(3); 
   for (int i = 0; i < G4INTT::n_intt_layer; i++)
   {
     digiintt->set_adc_scale(G4MVTX::n_maps_layer + i, userrange);
@@ -183,7 +209,8 @@ void Intt_Clustering()
   InttClusterizer* inttclusterizer = new InttClusterizer("InttClusterizer", G4MVTX::n_maps_layer, G4MVTX::n_maps_layer + G4INTT::n_intt_layer - 1);
   inttclusterizer->Verbosity(verbosity);
   // no Z clustering for Intt type 1 layers (we DO want Z clustering for type 0 layers)
-  // turning off phi clustering for type 0 layers is not necessary, there is only one strip per sensor in phi
+  // turning off phi clustering for type 0 layers is not necessary, there is only one strip 
+  // per sensor in phi
   for (int i = G4MVTX::n_maps_layer; i < G4MVTX::n_maps_layer + G4INTT::n_intt_layer; i++)
   {
     if (G4INTT::laddertype[i - G4MVTX::n_maps_layer] == PHG4InttDefs::SEGMENTATION_PHI)
