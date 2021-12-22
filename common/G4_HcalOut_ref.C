@@ -153,6 +153,8 @@ void HCALOuter_Cells()
   // hc->set_double_param("tmax",60.0);
   // or all at once:
   // hc->set_timing_window(0.0,60.0);
+  // this sets all cells to a fixed energy for debugging
+  // hc->set_fixed_energy(1.);
   se->registerSubsystem(hc);
 
   return;
@@ -167,6 +169,13 @@ void HCALOuter_Towers()
   HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalOutRawTowerBuilder");
   TowerBuilder->Detector("HCALOUT");
   TowerBuilder->set_sim_tower_node_prefix("SIM");
+  // this sets specific decalibration factors
+  // for a given cell
+  // TowerBuilder->set_cell_decal_factor(1,10,0.1);
+  // for a whole tower
+  // TowerBuilder->set_tower_decal_factor(0,10,0.2);
+  // TowerBuilder->set_cell_decal_factor(1,10,0.1);
+  // TowerBuilder->set_tower_decal_factor(0,10,0.2);
   TowerBuilder->Verbosity(verbosity);
   se->registerSubsystem(TowerBuilder);
 
