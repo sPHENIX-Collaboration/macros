@@ -124,29 +124,30 @@ void Intt_Cells()
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  // Load pre-defined deadmaps
-  PHG4InttDeadMapLoader * deadMapINTT = new PHG4InttDeadMapLoader("INTT");
-
-  for (int i = 0; i < G4INTT::n_intt_layer; i++) { 
-    string DeadMapConfigName = Form("intt_layer%d/", i);
-
-    if (G4INTT::InttDeadMapOption == G4INTT::kInttDeadMap) {
-      string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap/"); 
-      //string DeadMapPath = "/sphenix/u/wxie/sphnx_software/INTT" + string("/DeadMap/"); 
-
-      DeadMapPath +=  DeadMapConfigName;
-
-      deadMapINTT->deadMapPath(G4MVTX::n_maps_layer + i, DeadMapPath);
-    } else {
-      cout <<"Tracking_Reco - fatal error - invalid InttDeadMapOption = "<<G4INTT::InttDeadMapOption<<endl;
-      exit(1);
+  if(G4INTT::InttDeadMapOption != G4INTT::kInttNoDeadMap) {
+    // Load pre-defined deadmaps
+    PHG4InttDeadMapLoader * deadMapINTT = new PHG4InttDeadMapLoader("INTT");
+    
+    for (int i = 0; i < G4INTT::n_intt_layer; i++) { 
+      string DeadMapConfigName = Form("intt_layer%d/", i);
+      
+      if (G4INTT::InttDeadMapOption == G4INTT::kInttDeadMap) {
+	string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap/"); 
+	//string DeadMapPath = "/sphenix/u/wxie/sphnx_software/INTT" + string("/DeadMap/"); 
+	
+	DeadMapPath +=  DeadMapConfigName;
+	
+	deadMapINTT->deadMapPath(G4MVTX::n_maps_layer + i, DeadMapPath);
+      } else {
+	cout <<"Tracking_Reco - fatal error - invalid InttDeadMapOption = "<<G4INTT::InttDeadMapOption<<endl;
+	exit(1);
+      }
     }
+    
+    deadMapINTT -> Verbosity(verbosity);
+    //deadMapINTT -> Verbosity(1);
+    se->registerSubsystem(deadMapINTT);
   }
-
-  deadMapINTT -> Verbosity(verbosity);
-  //deadMapINTT -> Verbosity(1);
-  se->registerSubsystem(deadMapINTT);
-
   // new storage containers
   PHG4InttHitReco* reco = new PHG4InttHitReco();
   // The timing windows are hard-coded in the INTT ladder model, they can be overridden here
