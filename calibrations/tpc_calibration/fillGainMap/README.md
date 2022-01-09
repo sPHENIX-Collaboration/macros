@@ -1,4 +1,4 @@
-# TPC Gain & IB maps generation macro.
+# TPC Gain & IBF maps generation macro.
 This macro is generating maps of Gain and IBF for the sPHENIX TPC.
 
 ## Input.
