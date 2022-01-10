@@ -46,10 +46,16 @@ source macros/run_files_300evts_AA_MDC2.sh 0 5
 -  As soon as files are available the histograms are inside;
 - To create bunch of bash files and condor job files to start condor jobs scripts are available:
 ```
-#Run through G4Hits:
+#Creating folders to store all the files:
+
+mkdir Out
+mkdir Files
+mkdir condor_macros
+
+#Creating 1000s job files to run over G4Hits:
 scripts/generate_run_files_300evts_AA_MDC2.py
 ```
-**Do not forget to change the lines:** 
+**Do not forget to change the path to your repositories:** 
 
 ```export MYINSTALL=/sphenix/user/shulga/tpc2019_install```
 
@@ -58,5 +64,12 @@ scripts/generate_run_files_300evts_AA_MDC2.py
 - Scripts above will also generate bash files to submit all jobs, *_all bash scripts created above should be provided executable rights before that_*:
 ```
 ../run_all_jobs*  
+```
 
+# Adding histograms from all files:
+The files contain histograms for 100 events each. Full map is ~10000 events. Thus, maps have to be integrated. 
+To make files smaller the Sumw2 arrays/matrices for histograms should not be stored.
+The tool to provide this functionality:
+```
+add_histos.py
 ```

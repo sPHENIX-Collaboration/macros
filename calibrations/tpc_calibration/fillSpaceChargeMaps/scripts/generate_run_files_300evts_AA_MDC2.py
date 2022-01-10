@@ -37,7 +37,7 @@ introduction = [
     "",
     "# Used to give jobs a directory with respect to file input ",
     "# and output.",
-    "Initialdir      = /sphenix/user/shulga/Work/IBF/DistortionMap/",
+    "Initialdir      = /sphenix/user/shulga/Work/SpaceCharge/macros/calibrations/tpc_calibration/fillSpaceChargeMaps/",
     "",
     "# Input file given to the job.",
     "#Input           = /dev/null",
@@ -79,13 +79,13 @@ for j, (start,end) in enumerate(zip(evt_start,evt_end)):
                 f_job.write("Arguments       = \"run job 300 evts AA {} {}\"".format(j,i)+"\n")
             if n_line==38:
                 f_job.write("# The job's stdout is sent to this file."+"\n")
-                f_job.write("Output          = /sphenix/user/shulga/Work/IBF/DistortionMap/Out/myjob_300evts_AA_{}_{}.out".format(j,i)+"\n")
+                f_job.write("Output          = /sphenix/user/shulga/Work/SpaceCharge/macros/calibrations/tpc_calibration/fillSpaceChargeMaps/Out/myjob_300evts_AA_{}_{}.out".format(j,i)+"\n")
                 f_job.write(""+"\n")
                 f_job.write("# The job's stderr is sent to this file."+"\n")
-                f_job.write("Error           = /sphenix/user/shulga/Work/IBF/DistortionMap/Out/myjob_300evts_AA_{}_{}.err".format(j,i)+"\n")
+                f_job.write("Error           = /sphenix/user/shulga/Work/SpaceCharge/macros/calibrations/tpc_calibration/fillSpaceChargeMaps/Out/myjob_300evts_AA_{}_{}.err".format(j,i)+"\n")
                 f_job.write(""+"\n")
                 f_job.write("# The condor log file for this job, useful when debugging."+"\n")
-                f_job.write("Log             = /sphenix/user/shulga/Work/IBF/DistortionMap/Out/condor_300evts_AA_{}_{}.log".format(j,i)+"\n")
+                f_job.write("Log             = /sphenix/user/shulga/Work/SpaceCharge/macros/calibrations/tpc_calibration/fillSpaceChargeMaps/Out/condor_300evts_AA_{}_{}.log".format(j,i)+"\n")
                 f_job.write(""+"\n")
     
             n_line+=1

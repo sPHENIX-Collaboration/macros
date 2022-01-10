@@ -7,8 +7,7 @@ import glob
 gROOT.SetBatch(True)
 
 dirName = '/sphenix/user/shulga/Work/IBF/DistortionMap/Files/'
-#bXs = [1508071, 3016509, 4524020, 6032112, 7540028, 9048092, 10556072, 12064371, 13572143, 15080178, 16588072, 18096105]
-bXs = [12064371, 13572143, 15080178, 16588072, 18096105]
+bXs = [1508071, 3016509, 4524020, 6032112, 7540028, 9048092, 10556072, 12064371, 13572143, 15080178, 16588072, 18096105]
 #bXs = [18096105]
 h_names = ['_h_hits','_h_R','_h_DC_E']
 for i in range(30):
@@ -18,14 +17,9 @@ for i in range(30):
 
 for ib,bX in enumerate(bXs):
     print(bX)
-    #name = 'avg_ADCBins_NoW_hist_G4Hits_sHijing_0-12fm_bX{}*'.format(bX)
     name = 'mdc2_ADCBins_UseFieldMaps_hist_G4Hits_sHijing_0-12fm_bX{}*'.format(bX)
-    #name = 'mdc2_ADCBins_NoFieldMaps_hist_G4Hits_sHijing_0-12fm_bX{}*'.format(bX)
-    #outputName = '/sphenix/user/shulga/Work/IBF/DistortionMap/Files/Summary_SC_NoW_hist_AA_event_10_bX{}.0.root'.format(bX)
     outputName = '/sphenix/user/shulga/Work/IBF/DistortionMap/Files/Summary_hist_mdc2_UseFieldMaps_AA_event_{}_bX{}.root'.format(ib,bX)
-    #outputName = '/sphenix/user/shulga/Work/IBF/DistortionMap/Files/Summary_hist_mdc2_NoFieldMaps_AA_event_{}_bX{}.root'.format(ib,bX)
-    #name = 'avg_ADCBins_W_hist_G4Hits_sHijing_0-12fm_bX{}*'.format(bX)
-    #outputName = '/sphenix/user/shulga/Work/IBF/DistortionMap/Files/Summary_SC_W_hist_AA_event_10_bX{}.0.root'.format(bX)
+
     filePattern = dirName+name
     files = sorted(glob.glob(filePattern))
     #print(files)
