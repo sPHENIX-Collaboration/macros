@@ -311,7 +311,7 @@ int fillSpaceChargeMaps::InitRun(PHCompositeNode *topNode)
   //cout << "fillSpaceChargeMaps::InitRun(PHCompositeNode *topNode) Initializing for Run XXX" << endl;
   std::string line;
   //AA collisions timestamps
-  std::string txt_file = "./timestamps_50kHz.txt";
+  std::string txt_file = "./data/timestamps_50kHz.txt";
   int start_line = 3;
   if(_collSyst==1){
     //pp collisions timestamps
@@ -345,7 +345,7 @@ int fillSpaceChargeMaps::InitRun(PHCompositeNode *topNode)
 
   TFile *MapsFile; 
   if(_fUseIBFMap){
-    MapsFile = new TFile("./IBF_Map.root","READ");
+    MapsFile = new TFile("./data/IBF_Map.root","READ");
     if ( MapsFile->IsOpen() ) printf("File opened successfully\n");
     _h_modules_anode       = (TH2F*)MapsFile ->Get("h_modules_anode")      ->Clone("_h_modules_anode");
     _h_modules_measuredibf = (TH2F*)MapsFile ->Get("h_modules_measuredibf")->Clone("_h_modules_measuredibf");
