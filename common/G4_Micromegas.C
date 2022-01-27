@@ -34,9 +34,6 @@ namespace G4MICROMEGAS
 
   // number of micromegas layers
   int n_micromegas_layer = 2;
-
-  // radius at which micromegas layers are installed
-  double mm_radius = 85;
   
 }  // namespace G4MICROMEGAS
 
@@ -66,8 +63,6 @@ void Micromegas(PHG4Reco* g4Reco)
   auto mm = new PHG4MicromegasSubsystem("MICROMEGAS", mm_layer);
   mm->OverlapCheck( Enable::OVERLAPCHECK );
   mm->SetActive();
-  mm->set_double_param("mm_length", 220);
-  mm->set_double_param("mm_radius", G4MICROMEGAS::mm_radius);
   g4Reco->registerSubsystem(mm);
 }
 
