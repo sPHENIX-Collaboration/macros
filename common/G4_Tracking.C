@@ -101,6 +101,7 @@ void TrackingInit()
   geom->setMagField(G4MAGNET::magfield);
   geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
   geom->add_fake_surfaces(G4TRACKING::add_fake_surfaces);
+  geom->build_mm_surfaces(Enable::MICROMEGAS);
   se->registerSubsystem(geom);
 }
 
