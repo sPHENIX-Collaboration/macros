@@ -197,7 +197,15 @@ void HCALOuter_Towers()
   TowerCalibration->Detector("HCALOUT");
   //  TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
   //  TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
-  TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+
+  //TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+
+  TowerCalibration->set_calib_algorithm(RawTowerCalibration::kDbfile_tbt_gain_corr);
+  TowerCalibration->set_UseConditionsDB(false);
+  //  TowerCalibration->set_CalibrationFileName("HCALOUT_GainsCalib1.22.txt"); // currently to be picked up in running directory
+  TowerCalibration->set_CalibrationFileName("HCALOUT_GainsCalib.txt"); // in calibrations repos, $CALIBRATIONROOT/HCALOUT/
+  
+  
   if (G4HCALOUT::TowerDigi == RawTowerDigitizer::kNo_digitization)
   {
     // 0.033 extracted from electron sims (edep(scintillator)/edep(total))
