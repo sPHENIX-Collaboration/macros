@@ -226,15 +226,15 @@ float TrackingService(PHG4Reco *g4Reco, float radius)
   //MVTX Layers
   cylinders.push_back(new ServiceStructure("L0_0", 0.005, 0., 0.066, LayerThickness, -18.680, -16.579, 5.050, 0));
   cones.push_back(new ServiceStructure("L0_1", 0.006, 0., 0.088, LayerThickness, -16.578, -9.186, 5.050, 2.997));
-  cylinders.push_back(new ServiceStructure("L0_2", 0.008, 0., 0.110, LayerThickness, -9.185, 0, 2.997, 0));
+  //cylinders.push_back(new ServiceStructure("L0_2", 0.008, 0., 0.110, LayerThickness, -9.185, 0, 2.997, 0));
 
   cylinders.push_back(new ServiceStructure("L1_0", 0.004, 0., 0.061, LayerThickness, -17.970, -15.851, 7.338, 0));
   cones.push_back(new ServiceStructure("L1_1", 0.006, 0., 0.085, LayerThickness, -15.850, -8.938, 7.338, 3.799));
-  cylinders.push_back(new ServiceStructure("L1_2", 0.008, 0., 0.116, LayerThickness, -8.937, 0, 3.799, 0));
+  //cylinders.push_back(new ServiceStructure("L1_2", 0.008, 0., 0.116, LayerThickness, -8.937, 0, 3.799, 0));
 
   cylinders.push_back(new ServiceStructure("L2_0", 0.004, 0., 0.058, LayerThickness, -22.300, -15.206, 9.580, 0));
   cones.push_back(new ServiceStructure("L2_1", 0.006, 0., 0.09, LayerThickness, -15.205, -8.538, 9.650, 4.574));
-  cylinders.push_back(new ServiceStructure("L2_2", 0.009, 0., 0.121, LayerThickness, -8.537, 0, 4.574, 0));
+  //cylinders.push_back(new ServiceStructure("L2_2", 0.009, 0., 0.121, LayerThickness, -8.537, 0, 4.574, 0));
 
   //CYSS
   cylinders.push_back(new ServiceStructure("CYSS_Cone_0", 0, 0, 0, CYSSConeThickness, -26.208, -15.68, 10.55, 0));
