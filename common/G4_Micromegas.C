@@ -52,7 +52,7 @@ void MicromegasInit()
   {
     G4TPC::n_gas_layer = 0;
   }
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 86.);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 88.);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 220. / 2.);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -220. / 2.);
 }
