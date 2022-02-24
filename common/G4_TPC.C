@@ -19,7 +19,11 @@
 
 #include <g4main/PHG4Reco.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wundefined-internal"
 #include <tpc/TpcClusterizer.h>
+#pragma GCC diagnostic pop
+
 #include <tpc/TpcClusterCleaner.h>
 #include <tpc/TpcLoadDistortionCorrection.h>
 
