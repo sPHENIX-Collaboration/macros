@@ -35,6 +35,7 @@
 
 R__LOAD_LIBRARY(libg4tpc.so)
 R__LOAD_LIBRARY(libtpc.so)
+R__LOAD_LIBRARY(libtpccalib.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
 namespace Enable
@@ -68,7 +69,7 @@ namespace G4TPC
   auto static_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/TPC/DistortionMaps/fluct_average.rev3.1side.3d.file0.h_negz.real_B1.4_E-400.0.ross_phi1_sphenix_phislice_lookup_r26xp40xz40.distortion_map.hist.root";
 
   bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
-  std::string time_ordered_distortion_filename = "/gpfs/mnt/gpfs02/sphenix/user/klest/TimeOrderedDistortions.root";
+  std::string time_ordered_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/TimeOrderedDistortions.root";
 
   // distortion corrections
   bool ENABLE_CORRECTIONS = false;
