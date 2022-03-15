@@ -18,10 +18,10 @@ R__LOAD_LIBRARY(libqa_modules.so)
 
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSiliconSeeding.h>
+#include <trackreco/PHActsTrackProjection.h>
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsVertexPropagator.h>
 #include <trackreco/PHCASeeding.h>
-#include <trackreco/PHGenFitTrackProjection.h>
 #include <trackreco/PHGhostRejection.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
 #include <trackreco/PHRaveVertexing.h>
@@ -418,7 +418,7 @@ void Tracking_Reco()
 
   // Track Projections
   //===============
-  PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
+  PHActsTrackProjection* projection = new PHActsTrackProjection();
   projection->Verbosity(verbosity);
   se->registerSubsystem(projection);
 
