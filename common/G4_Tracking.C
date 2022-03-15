@@ -24,7 +24,6 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHCASeeding.h>
 #include <trackreco/PHGhostRejection.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
-#include <trackreco/PHRaveVertexing.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSimpleKFProp.h>
 #include <trackreco/PHSimpleVertexFinder.h>
@@ -76,11 +75,6 @@ namespace G4TRACKING
                                               // Full truth track seeding
   bool use_full_truth_track_seeding = false;  // makes track seeds using truth info, used for both Acts and Genfit
   bool use_truth_vertexing = false;           // if true runs truth vertexing, if false runs PHSimpleVertexFinder
-
-  // Rave final vertexing (for QA)
-  bool use_rave_vertexing = true;  // Use Rave to find and fit for vertex after track fitting - used for QA only
-  // This is the setup we have been using  - smeared truth vertex for a single collision per event. Make it the default for now.
-  std::string vmethod("avf-smoothing:1");  // only good for 1 vertex events // vmethod is a string used to set the Rave final-vertexing method:
 
 }  // namespace G4TRACKING
 
@@ -404,18 +398,6 @@ void Tracking_Reco()
   // Common  to all sections
   //==================================
 
-  // Final vertex finding and fitting with RAVE
-  //==================================
-  if (G4TRACKING::use_rave_vertexing)
-  {
-    PHRaveVertexing* rave = new PHRaveVertexing();
-    //    rave->set_vertexing_method("kalman-smoothing:1");
-    rave->set_over_write_svtxvertexmap(false);
-    rave->set_svtxvertexmaprefit_node_name("SvtxVertexMapRave");
-    rave->Verbosity(verbosity);
-    se->registerSubsystem(rave);
-  }
-
   // Track Projections
   //===============
   PHActsTrackProjection* projection = new PHActsTrackProjection();
@@ -478,15 +460,6 @@ void Tracking_QA()
   // qa2->addEmbeddingID(2);
   qa2->Verbosity(verbosity);
   se->registerSubsystem(qa2);
-
-  if (G4TRACKING::use_rave_vertexing)
-  {
-    QAG4SimulationVertex* qav = new QAG4SimulationVertex();
-    // qav->addEmbeddingID(2);
-    qav->Verbosity(verbosity);
-    qav->setVertexMapName("SvtxVertexMapRave");
-    se->registerSubsystem(qav);
-  }
 
   //  Acts Kalman Filter vertex finder
   //=================================
