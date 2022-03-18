@@ -63,9 +63,9 @@ int Fun4All_G4_sPHENIX(
   // conditions DB flags
   //===============
   // tag
-  rc->set_StringFlag("XPLOAD_TAG","example_tag_1");
+  rc->set_StringFlag("XPLOAD_TAG","sPHENIX_ExampleGT_1");
   // database
-  rc->set_StringFlag("XPLOAD_CONFIG","test");
+  rc->set_StringFlag("XPLOAD_CONFIG","sPHENIX_cdb");
 
 
   //===============
