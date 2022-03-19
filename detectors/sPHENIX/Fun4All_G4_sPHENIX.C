@@ -64,8 +64,10 @@ int Fun4All_G4_sPHENIX(
   //===============
   // tag
   rc->set_StringFlag("XPLOAD_TAG","sPHENIX_ExampleGT_1");
-  // database
+  // database config
   rc->set_StringFlag("XPLOAD_CONFIG","sPHENIX_cdb");
+  // 64 bit timestamp
+  rc->set_uint64Flag("TIMESTAMP",12345678912345);
 
 
   //===============
