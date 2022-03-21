@@ -274,7 +274,7 @@ int Fun4All_G4_sPHENIX(
   Enable::MVTX_CELL = Enable::MVTX && true;
   Enable::MVTX_CLUSTER = Enable::MVTX_CELL && true;
   Enable::MVTX_QA = Enable::MVTX_CLUSTER && Enable::QA && true;
-  Enable::TrackingService = true;
+  Enable::TrackingService = false;
 
   Enable::INTT = true;
   Enable::INTT_CELL = Enable::INTT && true;

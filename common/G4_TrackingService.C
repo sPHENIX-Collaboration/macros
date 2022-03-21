@@ -18,7 +18,11 @@
 #include <string>
 #include <vector>
 
-//sPHENIX Tracking Services
+//MVTX Tracking Services
+
+//WARNING!!! DEPRECATED
+//The service material has been replaced by the compiled class in coresoftware for the MVTX
+//This is kept as reference only
 
 using namespace std;
 
