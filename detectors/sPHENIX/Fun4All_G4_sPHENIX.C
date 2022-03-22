@@ -148,11 +148,11 @@ int Fun4All_G4_sPHENIX(
     }
     else
     {
-      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
-                                                                                PHG4SimpleEventGenerator::Uniform,
-                                                                                PHG4SimpleEventGenerator::Uniform);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_function(PHG4SimpleEventGenerator::Gaus,
+                                                                                PHG4SimpleEventGenerator::Gaus,
+                                                                                PHG4SimpleEventGenerator::Gaus);
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_mean(0., 0., 0.);
-      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0., 0., 5.);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0.01, 0.01, 5.);
     }
     INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1, 1);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
