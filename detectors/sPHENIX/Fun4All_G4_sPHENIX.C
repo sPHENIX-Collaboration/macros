@@ -58,7 +58,6 @@ int Fun4All_G4_sPHENIX(
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
   rc->set_IntFlag("RANDOMSEED", TString(outputFile).Hash());
-
   //===============
   // conditions DB flags
   //===============
@@ -96,7 +95,7 @@ int Fun4All_G4_sPHENIX(
   //INPUTEMBED::listfile[0] = embed_input_file;
 
   Input::SIMPLE = true;
-  Input::SIMPLE_NUMBER = 2; // if you need 2 of them
+  Input::SIMPLE_NUMBER = 3; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
   //  Input::PYTHIA6 = true;
@@ -114,7 +113,7 @@ int Fun4All_G4_sPHENIX(
   //Input::LAMBDAC = false;
   //Input::LAMBDAC_VERBOSITY = 0;
   // Upsilon generator
-  Input::UPSILON = true;
+  Input::UPSILON = false;
   Input::UPSILON_NUMBER = 1; // if you need 3 of them
   //Input::UPSILON_VERBOSITY = 0;
 
@@ -140,9 +139,17 @@ int Fun4All_G4_sPHENIX(
   // add the settings for other with [1], next with [2]...
   if (Input::SIMPLE)
   {
+    // 10.1103/PhysRevC.83.024913 : 0-10%AuAu 200 GeV dNch_deta = 609.
+    static const double target_dNch_deta = 609;
+    // eta range
+    static const double deta_dphi = .5;
+    static const double eta_start = .2;
+    static const int n_pion = int(target_dNch_deta * deta_dphi * deta_dphi / 4);//number particle  per 1/4 batch
+
+
     // low pT pions
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 10);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi+", 10);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", n_pion);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi+", n_pion);
     if (Input::HEPMC || Input::EMBED)
     {
       INPUTGENERATOR::SimpleEventGenerator[0]->set_reuse_existing_vertex(true);
@@ -156,18 +163,27 @@ int Fun4All_G4_sPHENIX(
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_mean(0., 0., 0.);
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0.01, 0.01, 5.);
     }
-    INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1, 1);
-    INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(eta_start, eta_start + deta_dphi);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(0, deta_dphi);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.1, 2.);
 
     // high pT pions
-    INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi-", 10);
-    INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi+", 10);
+    INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi-", n_pion);
+    INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi+", n_pion);
     INPUTGENERATOR::SimpleEventGenerator[1]->set_reuse_existing_vertex(true);
     INPUTGENERATOR::SimpleEventGenerator[1]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
-    INPUTGENERATOR::SimpleEventGenerator[1]->set_eta_range(-1, 1);
-    INPUTGENERATOR::SimpleEventGenerator[1]->set_phi_range(-M_PI, M_PI);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_eta_range(eta_start, eta_start + deta_dphi);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_phi_range(0, deta_dphi);
     INPUTGENERATOR::SimpleEventGenerator[1]->set_pt_range(2, 50.);
+
+    // wide angle tracks for vertex finding
+    INPUTGENERATOR::SimpleEventGenerator[2]->add_particles("pi-", 3);
+    INPUTGENERATOR::SimpleEventGenerator[2]->add_particles("pi+", 3);
+    INPUTGENERATOR::SimpleEventGenerator[2]->set_reuse_existing_vertex(true);
+    INPUTGENERATOR::SimpleEventGenerator[2]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+    INPUTGENERATOR::SimpleEventGenerator[2]->set_eta_range(-1, 1);
+    INPUTGENERATOR::SimpleEventGenerator[2]->set_phi_range(-M_PI, M_PI);
+    INPUTGENERATOR::SimpleEventGenerator[2]->set_pt_range(60, 80.);
   }
   // Upsilons
   // if you run more than one of these Input::UPSILON_NUMBER > 1
