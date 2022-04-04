@@ -24,6 +24,7 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHCASeeding.h>
 #include <trackreco/PHGhostRejection.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
+#include <trackreco/PHSiliconSeedMerger.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSimpleKFProp.h>
 #include <trackreco/PHSimpleVertexFinder.h>
@@ -124,6 +125,10 @@ void Tracking_Reco()
     silicon_Seeding->Verbosity(verbosity);
     silicon_Seeding->fieldMapName(G4MAGNET::magfield);
     se->registerSubsystem(silicon_Seeding);
+
+    PHSiliconSeedMerger *merger = new PHSiliconSeedMerger();
+    merger->Verbosity(verbosity);
+    se->registerSubsystem(merger);
   }
 
   //================================================
