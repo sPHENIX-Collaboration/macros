@@ -228,10 +228,8 @@ void Tracking_Reco()
       silicon_match->Verbosity(verbosity);
       silicon_match->set_field(G4MAGNET::magfield);
       silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
-      silicon_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
       if (G4TRACKING::SC_CALIBMODE)
       {
-        silicon_match->set_collision_rate(G4TRACKING::SC_COLLISIONRATE);
         // search windows for initial matching with distortions
         // tuned values are 0.04 and 0.008 in distorted events
         silicon_match->set_phi_search_window(0.04);
