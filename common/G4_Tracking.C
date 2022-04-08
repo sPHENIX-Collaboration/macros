@@ -15,6 +15,7 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <QA.C>
 
 #include <g4eval/SvtxEvaluator.h>
+#include <g4eval/SvtxTruthRecoTableEval.h>
 
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSiliconSeeding.h>
@@ -440,6 +441,10 @@ void Tracking_Eval(const std::string& outputfile)
   eval->scan_for_primaries(true);  // defaults to only thrown particles for ntp_gtrack
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
+
+  SvtxTruthRecoTableEval *tables = new SvtxTruthRecoTableEval();
+  tables->Verbosity(verbosity);
+  se->registerSubsystem(tables);
 
   return;
 }
