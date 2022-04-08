@@ -50,9 +50,9 @@ namespace G4MVTXAlignment
 
 void MvtxInit()
 {
-  //BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 5);
-  //BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -20);
-  //BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 25.);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 12.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -165.);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 24.);
 }
 
 double Mvtx(PHG4Reco* g4Reco, double radius,
