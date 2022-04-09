@@ -29,10 +29,12 @@ R__LOAD_LIBRARY(libqa_modules.so)
 namespace Enable
 {
   bool INTT = false;
+  bool INTT_ABSORBER = false;
   bool INTT_OVERLAPCHECK = false;
   bool INTT_CELL = false;
   bool INTT_CLUSTER = false;
   bool INTT_QA = false;
+  bool INTT_SUPPORT = false;
   int INTT_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -98,6 +100,14 @@ double Intt(PHG4Reco* g4Reco, double radius,
   sitrack->Verbosity(verbosity);
   sitrack->SetActive(1);
   sitrack->OverlapCheck(intt_overlapcheck);
+  if (Enable::INTT_ABSORBER)
+  {
+    sitrack->SetAbsorberActive();
+  }
+  if (Enable::INTT_SUPPORT)
+  {
+    sitrack->set_int_param(PHG4InttDefs::SUPPORTPARAMS, "supportactive", 1);
+  }
   g4Reco->registerSubsystem(sitrack);
 
   // Set the laddertype and ladder spacing configuration
