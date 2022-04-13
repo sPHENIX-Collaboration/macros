@@ -274,9 +274,9 @@ void InputInit()
 
     if (Input::EMBED)
     {
-    INPUTGENERATOR::Pythia6->set_embedding_id(Input::EmbedId);
-    Input::PYTHIA6_EmbedId = Input::EmbedId;
-    Input::EmbedId++;
+      INPUTGENERATOR::Pythia6->set_embedding_id(Input::EmbedId);
+      Input::PYTHIA6_EmbedId = Input::EmbedId;
+      Input::EmbedId++;
     }
   }
   if (Input::PYTHIA8)
@@ -287,9 +287,9 @@ void InputInit()
 
     if (Input::EMBED)
     {
-    INPUTGENERATOR::Pythia8->set_embedding_id(Input::EmbedId);
-    Input::PYTHIA8_EmbedId = Input::EmbedId;
-    Input::EmbedId++;
+      INPUTGENERATOR::Pythia8->set_embedding_id(Input::EmbedId);
+      Input::PYTHIA8_EmbedId = Input::EmbedId;
+      Input::EmbedId++;
     }
   }
   if (Input::SARTRE)
@@ -306,9 +306,9 @@ void InputInit()
 
     if (Input::EMBED)
     {
-    INPUTGENERATOR::Sartre->set_embedding_id(Input::EmbedId);
-    Input::SARTRE_EmbedId = Input::EmbedId;
-    Input::EmbedId++;
+      INPUTGENERATOR::Sartre->set_embedding_id(Input::EmbedId);
+      Input::SARTRE_EmbedId = Input::EmbedId;
+      Input::EmbedId++;
     }
   }
   // single particle generators
@@ -318,12 +318,12 @@ void InputInit()
     {
       std::string name = "DZERO_" + std::to_string(i);
       PHG4ParticleGeneratorD0 *dzero = new PHG4ParticleGeneratorD0(name);
-    if (Input::EMBED)
-    {
-      dzero->Embed(Input::EmbedId);
-      Input::DZERO_EmbedIds.insert(Input::EmbedId);
-      Input::EmbedId++;
-    }
+      if (Input::EMBED)
+      {
+        dzero->Embed(Input::EmbedId);
+        Input::DZERO_EmbedIds.insert(Input::EmbedId);
+        Input::EmbedId++;
+      }
       INPUTGENERATOR::DZeroMesonGenerator.push_back(dzero);
     }
   }
@@ -333,12 +333,12 @@ void InputInit()
     {
       std::string name = "GUN_" + std::to_string(i);
       PHG4ParticleGun *gun = new PHG4ParticleGun(name);
-    if (Input::EMBED)
-    {
-      gun->Embed(Input::EmbedId);
-      Input::GUN_EmbedIds.insert(Input::EmbedId);
-      Input::EmbedId++;
-    }
+      if (Input::EMBED)
+      {
+        gun->Embed(Input::EmbedId);
+        Input::GUN_EmbedIds.insert(Input::EmbedId);
+        Input::EmbedId++;
+      }
       INPUTGENERATOR::Gun.push_back(gun);
     }
   }
@@ -348,12 +348,12 @@ void InputInit()
     {
       std::string name = "IONGUN_" + std::to_string(i);
       PHG4IonGun *iongun = new PHG4IonGun(name);
-    if (Input::EMBED)
-    {
-      iongun->Embed(Input::EmbedId);
-      Input::IONGUN_EmbedIds.insert(Input::EmbedId);
-      Input::EmbedId++;
-    }
+      if (Input::EMBED)
+      {
+        iongun->Embed(Input::EmbedId);
+        Input::IONGUN_EmbedIds.insert(Input::EmbedId);
+        Input::EmbedId++;
+      }
       INPUTGENERATOR::IonGun.push_back(iongun);
     }
   }
@@ -363,12 +363,12 @@ void InputInit()
     {
       std::string name = "PGEN_" + std::to_string(i);
       PHG4ParticleGenerator *pgen = new PHG4ParticleGenerator(name);
-    if (Input::EMBED)
-    {
-      pgen->Embed(Input::EmbedId);
-      Input::PGEN_EmbedIds.insert(Input::EmbedId);
-      Input::EmbedId++;
-    }
+      if (Input::EMBED)
+      {
+        pgen->Embed(Input::EmbedId);
+        Input::PGEN_EmbedIds.insert(Input::EmbedId);
+        Input::EmbedId++;
+      }
       INPUTGENERATOR::ParticleGenerator.push_back(pgen);
     }
   }
@@ -378,12 +378,12 @@ void InputInit()
     {
       std::string name = "EVTGENERATOR_" + std::to_string(i);
       PHG4SimpleEventGenerator *simple = new PHG4SimpleEventGenerator(name);
-    if (Input::EMBED)
-    {
-      simple->Embed(Input::EmbedId);
-      Input::PGEN_EmbedIds.insert(Input::EmbedId);
-      Input::EmbedId++;
-    }
+      if (Input::EMBED)
+      {
+        simple->Embed(Input::EmbedId);
+        Input::PGEN_EmbedIds.insert(Input::EmbedId);
+        Input::EmbedId++;
+      }
       INPUTGENERATOR::SimpleEventGenerator.push_back(simple);
     }
   }
@@ -393,12 +393,12 @@ void InputInit()
     {
       std::string name = "UPSILON_" + std::to_string(i);
       PHG4ParticleGeneratorVectorMeson *upsilon = new PHG4ParticleGeneratorVectorMeson(name);
-    if (Input::EMBED)
-    {
-      upsilon->Embed(Input::EmbedId);
-      Input::UPSILON_EmbedIds.insert(Input::EmbedId);
-      Input::EmbedId++;
-    }
+      if (Input::EMBED)
+      {
+        upsilon->Embed(Input::EmbedId);
+        Input::UPSILON_EmbedIds.insert(Input::EmbedId);
+        Input::EmbedId++;
+      }
       INPUTGENERATOR::VectorMesonGenerator.push_back(upsilon);
     }
   }
