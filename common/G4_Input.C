@@ -241,6 +241,13 @@ namespace INPUTMANAGER
 
 void InputInit()
 {
+  // for pileup sims embed id is 1, to distinguish particles
+  // which will be embedded (when Input::EMBED = true) into pileup sims
+  // we need to start at embedid = 2
+  if (Input::EMBED)
+  {
+    Input::EmbedId = 2;
+  }
   // first consistency checks - not all input generators play nice
   // with each other
   if (Input::READHITS && Input::EMBED)
