@@ -22,6 +22,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wundefined-internal"
 #include <tpc/TpcClusterizer.h>
+#include <tpc/TpcSimpleClusterizer.h>
 #pragma GCC diagnostic pop
 
 #include <tpc/TpcClusterCleaner.h>
@@ -63,6 +64,9 @@ namespace G4TPC
 
   // TPC drift velocity scale
   double drift_velocity_scale = 1.0;
+  
+  // use simple clusterizer
+  bool USE_SIMPLE_CLUSTERIZER = false;
 
   // distortions
   bool ENABLE_STATIC_DISTORTIONS = false;
@@ -260,11 +264,21 @@ void TPC_Clustering()
 
   // For the Tpc
   //==========
-  auto tpcclusterizer = new TpcClusterizer;
-  tpcclusterizer->set_drift_velocity_scale(G4TPC::drift_velocity_scale);
-  tpcclusterizer->Verbosity(verbosity);
-  se->registerSubsystem(tpcclusterizer);
+  if( G4TPC::USE_SIMPLE_CLUSTERIZER )
+  {
+    
+    auto tpcclusterizer = new TpcSimpleClusterizer;
+    tpcclusterizer->Verbosity(verbosity);
+    se->registerSubsystem(tpcclusterizer);
+    
+  } else {
 
+    auto tpcclusterizer = new TpcClusterizer;
+    tpcclusterizer->set_drift_velocity_scale(G4TPC::drift_velocity_scale);
+    tpcclusterizer->Verbosity(verbosity);
+    se->registerSubsystem(tpcclusterizer);
+
+  }
   
   if( !G4TPC::ENABLE_DIRECT_LASER_HITS )
   {
