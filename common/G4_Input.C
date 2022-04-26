@@ -194,6 +194,7 @@ namespace INPUTEMBED
 {
   map<unsigned int, std::string> filename;
   map<unsigned int, std::string> listfile;
+  bool REPEAT = true;
 }  // namespace INPUTEMBED
 
 namespace PYTHIA6
@@ -523,7 +524,10 @@ void InputManagers()
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
       hitsin->fileopen(iter->second);
       hitsin->Verbosity(Input::VERBOSITY);
-      hitsin->Repeat();
+      if (INPUTEMBED::REPEAT)
+      {
+        hitsin->Repeat();
+      }
       se->registerInputManager(hitsin);
     }
     for (auto iter = INPUTEMBED::listfile.begin(); iter != INPUTEMBED::listfile.end(); ++iter)
@@ -532,7 +536,10 @@ void InputManagers()
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
       hitsin->AddListFile(iter->second);
       hitsin->Verbosity(Input::VERBOSITY);
-      hitsin->Repeat();
+      if (INPUTEMBED::REPEAT)
+      {
+        hitsin->Repeat();
+      }
       se->registerInputManager(hitsin);
     }
   }
