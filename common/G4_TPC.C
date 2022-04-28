@@ -26,7 +26,6 @@
 #pragma GCC diagnostic pop
 
 #include <tpc/TpcClusterCleaner.h>
-#include <tpc/TpcLoadDistortionCorrection.h>
 
 #include <tpccalib/TpcDirectLaserReconstruction.h>
 
@@ -88,6 +87,9 @@ namespace G4TPC
   // save histograms
   bool DIRECT_LASER_SAVEHISTOGRAMS = false;
 
+  // do cluster <-> hit association
+  bool DO_HIT_ASSOCIATION = true;
+  
   // space charge calibration output file
   std::string DIRECT_LASER_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";
   std::string DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME = "TpcDirectLaserReconstruction.root"; 
@@ -276,6 +278,7 @@ void TPC_Clustering()
     auto tpcclusterizer = new TpcClusterizer;
     tpcclusterizer->set_drift_velocity_scale(G4TPC::drift_velocity_scale);
     tpcclusterizer->Verbosity(verbosity);
+    tpcclusterizer->set_do_hit_association( G4TPC::DO_HIT_ASSOCIATION );
     se->registerSubsystem(tpcclusterizer);
 
   }
@@ -285,14 +288,6 @@ void TPC_Clustering()
     auto tpcclustercleaner = new TpcClusterCleaner;
     tpcclustercleaner->Verbosity(verbosity);
     se->registerSubsystem(tpcclustercleaner);
-  }
-  
-  // space charge correction
-  if( G4TPC::ENABLE_CORRECTIONS )
-  {
-    auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
-    tpcLoadDistortionCorrection->set_distortion_filename( G4TPC::correction_filename );
-    se->registerSubsystem(tpcLoadDistortionCorrection);
   }
 
   // direct laser reconstruction
