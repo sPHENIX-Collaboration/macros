@@ -177,7 +177,8 @@ void Tracking_Reco_TrackSeed()
       seeder->useFixedClusterError(true);
       se->registerSubsystem(seeder);
 
-      // perform track circle fit to get firt estimate of track parameters at origin       auto vtxassoc2 = new PHTpcTrackSeedCircleFit("PrePropagatorPHTpcTrackSeedCircleFit");
+      // perform track circle fit to get firt estimate of track parameters at origin
+      auto vtxassoc2 = new PHTpcTrackSeedCircleFit("PrePropagatorPHTpcTrackSeedCircleFit");
       vtxassoc2->Verbosity(verbosity);
       se->registerSubsystem(vtxassoc2);
 
@@ -371,7 +372,7 @@ void Tracking_Reco()
    * just a wrapper around track seeding and track fitting methods, 
    * to minimize disruption to existing steering macros
    */
-  Tracking_Reco_TrackSeeding();
+  Tracking_Reco_TrackSeed();
   Tracking_Reco_TrackFit();
 }
 
