@@ -19,6 +19,7 @@
 #include <G4_Pipe.C>
 #include <G4_PlugDoor.C>
 #include <G4_TPC.C>
+#include <G4_TrackingService.C>
 #include <G4_User.C>
 #include <G4_World.C>
 #include <G4_ZDC.C>
@@ -51,6 +52,7 @@ void G4Init()
   // load detector/material macros and execute Init() function
 
   if (Enable::PIPE) PipeInit();
+  if (Enable::TrackingService) TrackingServiceInit();
   if (Enable::MVTX) MvtxInit();
   if (Enable::INTT) InttInit();
   if (Enable::TPC) TPCInit();
@@ -98,7 +100,8 @@ int G4Setup()
   if (stringline.fail())
   {  // conversion to double fails -> we have a string
 
-    if (G4MAGNET::magfield.find("sphenix3dbigmapxyz") != string::npos)
+    if (G4MAGNET::magfield.find("sphenix3dbigmapxyz") != string::npos ||
+        G4MAGNET::magfield == "CDB")
     {
       g4Reco->set_field_map(G4MAGNET::magfield, PHFieldConfig::Field3DCartesian);
     }
@@ -118,6 +121,7 @@ int G4Setup()
   double radius = 0.;
 
   if (Enable::PIPE) radius = Pipe(g4Reco, radius);
+  if (Enable::TrackingService) TrackingService(g4Reco, radius);
   if (Enable::MVTX) radius = Mvtx(g4Reco, radius);
   if (Enable::INTT) radius = Intt(g4Reco, radius);
   if (Enable::TPC) radius = TPC(g4Reco, radius);

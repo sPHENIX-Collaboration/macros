@@ -15,20 +15,22 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <QA.C>
 
 #include <g4eval/SvtxEvaluator.h>
+#include <g4eval/SvtxTruthRecoTableEval.h>
 
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSiliconSeeding.h>
+#include <trackreco/PHActsTrackProjection.h>
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsVertexPropagator.h>
 #include <trackreco/PHCASeeding.h>
-#include <trackreco/PHGenFitTrackProjection.h>
 #include <trackreco/PHGhostRejection.h>
-#include <trackreco/PHHybridSeeding.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
-#include <trackreco/PHRaveVertexing.h>
+#include <trackreco/PHSiliconSeedMerger.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSimpleKFProp.h>
 #include <trackreco/PHSimpleVertexFinder.h>
+#include <trackreco/PHTpcClusterMover.h>
+#include <trackreco/PHTpcDeltaZCorrection.h>
 #include <trackreco/PHTpcTrackSeedCircleFit.h>
 #include <trackreco/PHTrackCleaner.h>
 #include <trackreco/PHTrackSeeding.h>
@@ -36,8 +38,8 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHTruthTrackSeeding.h>
 #include <trackreco/PHTruthVertexing.h>
 
+#include <tpc/TpcLoadDistortionCorrection.h>
 #include <tpccalib/PHTpcResiduals.h>
-#include <tpccalib/TpcSpaceChargeReconstruction.h>
 
 #include <qa_modules/QAG4SimulationTracking.h>
 #include <qa_modules/QAG4SimulationUpsilon.h>
@@ -56,16 +58,20 @@ namespace Enable
 namespace G4TRACKING
 {
   // Space Charge calibration flag
-  bool SC_CALIBMODE = true;                                            // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
+  bool SC_CALIBMODE = false;                                            // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
+  bool SC_USE_MICROMEGAS = true;
+  bool SC_SAVEHISTOGRAMS = false;
   double SC_COLLISIONRATE = 50e3;                                      // leave at 50 KHz for now, scaling of distortion map not implemented yet
   std::string SC_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";  // space charge calibration output file
+  std::string SC_HISTOGRAMOUTPUT_FILENAME = "TpcResiduals.root"; // space charge calibration output file
 
   // Vertexing
   bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
 
   // set to false to disable adding fake surfaces (TPC, Micromegas) to MakeActsGeom
   bool add_fake_surfaces = true;
-
+  bool init_acts_magfield = true;
+  
   // Truth seeding options for diagnostics (can use any or all)
   bool use_truth_silicon_seeding = false;     // if true runs truth silicon seeding instead of acts silicon seeding
   bool use_truth_tpc_seeding = false;         // if true runs truth silicon seeding instead of reco TPC seeding
@@ -73,11 +79,6 @@ namespace G4TRACKING
                                               // Full truth track seeding
   bool use_full_truth_track_seeding = false;  // makes track seeds using truth info, used for both Acts and Genfit
   bool use_truth_vertexing = false;           // if true runs truth vertexing, if false runs PHSimpleVertexFinder
-
-  // Rave final vertexing (for QA)
-  bool use_rave_vertexing = true;  // Use Rave to find and fit for vertex after track fitting - used for QA only
-  // This is the setup we have been using  - smeared truth vertex for a single collision per event. Make it the default for now.
-  std::string vmethod("avf-smoothing:1");  // only good for 1 vertex events // vmethod is a string used to set the Rave final-vertexing method:
 
 }  // namespace G4TRACKING
 
@@ -88,20 +89,21 @@ void TrackingInit()
     G4MICROMEGAS::n_micromegas_layer = 0;
   }
 
-  // SC_CALIBMODE makes no sense if distortions are not present
-  G4TRACKING::SC_CALIBMODE = (G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS) && G4TRACKING::SC_CALIBMODE;
-
   /// Build the Acts geometry
-  Fun4AllServer* se = Fun4AllServer::instance();
+  auto se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
   /// Geometry must be built before any Acts modules
   MakeActsGeometry* geom = new MakeActsGeometry();
   geom->Verbosity(verbosity);
+  
+  geom->loadMagField(G4TRACKING::init_acts_magfield);
   geom->setMagField(G4MAGNET::magfield);
   geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
   geom->add_fake_surfaces(G4TRACKING::add_fake_surfaces);
+  geom->build_mm_surfaces(Enable::MICROMEGAS);
   se->registerSubsystem(geom);
+  
 }
 
 void Tracking_Reco()
@@ -109,6 +111,16 @@ void Tracking_Reco()
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
 
+  // space charge correction
+  /* corrections are applied in the track finding, and via PHTpcClusterMover before the final track fit */
+  if( G4TPC::ENABLE_CORRECTIONS )
+  {
+    auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
+    tpcLoadDistortionCorrection->set_distortion_filename( G4TPC::correction_filename );
+    se->registerSubsystem(tpcLoadDistortionCorrection);
+  }
+
+  
   // Assemble silicon clusters into track stubs - needed for initial vertex finding
   //============================================================
   if (G4TRACKING::use_truth_silicon_seeding)
@@ -129,6 +141,10 @@ void Tracking_Reco()
     silicon_Seeding->Verbosity(verbosity);
     silicon_Seeding->fieldMapName(G4MAGNET::magfield);
     se->registerSubsystem(silicon_Seeding);
+
+    PHSiliconSeedMerger *merger = new PHSiliconSeedMerger();
+    merger->Verbosity(verbosity);
+    se->registerSubsystem(merger);
   }
 
   //================================================
@@ -187,14 +203,24 @@ void Tracking_Reco()
     // Associate TPC track stubs with silicon and Micromegas
     //=============================================
 
-    PHTpcTrackSeedCircleFit* vtxassoc = new PHTpcTrackSeedCircleFit();
+    /*
+     * add cluster mover to apply TPC distortion corrections to clusters belonging to tracks
+     * once the correction is applied, the cluster are moved back to TPC surfaces using local track angles
+     * moved clusters are stored in a separate map, called CORRECTED_TRKR_CLUSTER
+     */
+    if( G4TPC::ENABLE_CORRECTIONS ) se->registerSubsystem(new PHTpcClusterMover);
+
+    auto vtxassoc = new PHTpcTrackSeedCircleFit;
     vtxassoc->Verbosity(verbosity);
     se->registerSubsystem(vtxassoc);
 
     // Choose the best duplicate TPC track seed
-    PHGhostRejection* ghosts = new PHGhostRejection();
+    auto ghosts = new PHGhostRejection;
     ghosts->Verbosity(verbosity);
     se->registerSubsystem(ghosts);
+      
+    // correct for particle propagation in TPC
+    se->registerSubsystem(new PHTpcDeltaZCorrection);
 
     // Silicon cluster matching to TPC track seeds
     if (G4TRACKING::use_truth_si_matching)
@@ -218,10 +244,8 @@ void Tracking_Reco()
       silicon_match->Verbosity(verbosity);
       silicon_match->set_field(G4MAGNET::magfield);
       silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
-      silicon_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
       if (G4TRACKING::SC_CALIBMODE)
       {
-        silicon_match->set_collision_rate(G4TRACKING::SC_COLLISIONRATE);
         // search windows for initial matching with distortions
         // tuned values are 0.04 and 0.008 in distorted events
         silicon_match->set_phi_search_window(0.04);
@@ -278,6 +302,7 @@ void Tracking_Reco()
     actsFit->Verbosity(verbosity);
     /// If running with distortions, fit only the silicon+MMs first
     actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
+    actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
     se->registerSubsystem(actsFit);
 
     if (G4TRACKING::SC_CALIBMODE)
@@ -285,34 +310,41 @@ void Tracking_Reco()
       /// run tpc residual determination with silicon+MM track fit
       auto residuals = new PHTpcResiduals;
       residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
+      residuals->setSavehistograms( G4TRACKING::SC_SAVEHISTOGRAMS );
+      residuals->setHistogramOutputfile( G4TRACKING::SC_HISTOGRAMOUTPUT_FILENAME );
+      residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
       residuals->Verbosity(verbosity);
       se->registerSubsystem(residuals);
     }
 
-    // Choose the best silicon matched track for each TPC track seed
-    PHTrackCleaner* cleaner = new PHTrackCleaner();
-    cleaner->Verbosity(verbosity);
-    se->registerSubsystem(cleaner);
-
-    if (G4TRACKING::use_truth_vertexing)
+    if (!G4TRACKING::SC_CALIBMODE)
     {
-      PHTruthVertexing* vtxing = new PHTruthVertexing();
-      vtxing->associate_tracks(true);
-      std::string trackmapnamef = "SvtxTrackMap";
-      vtxing->set_track_map_name(trackmapnamef);
-      se->registerSubsystem(vtxing);
+      // Choose the best silicon matched track for each TPC track seed
+      auto cleaner = new PHTrackCleaner;
+      cleaner->Verbosity(verbosity);
+      se->registerSubsystem(cleaner);
+      
+      if (G4TRACKING::use_truth_vertexing)
+      {
+        auto vtxing = new PHTruthVertexing;
+        vtxing->associate_tracks(true);
+        std::string trackmapnamef = "SvtxTrackMap";
+        vtxing->set_track_map_name(trackmapnamef);
+        se->registerSubsystem(vtxing);
+      }
+      else
+      {
+        auto vtxfinder = new PHSimpleVertexFinder;
+        vtxfinder->Verbosity(verbosity);
+        se->registerSubsystem(vtxfinder);
+      }
+      
+      /// Propagate track positions to the vertex position
+      auto vtxProp = new PHActsVertexPropagator;
+      vtxProp->Verbosity(verbosity);
+      se->registerSubsystem(vtxProp);
     }
-    else
-    {
-      PHSimpleVertexFinder* vtxfinder = new PHSimpleVertexFinder();
-      vtxfinder->Verbosity(verbosity);
-      se->registerSubsystem(vtxfinder);
-    }
-
-    /// Propagate track positions to the vertex position
-    PHActsVertexPropagator* vtxProp = new PHActsVertexPropagator();
-    vtxProp->Verbosity(verbosity);
-    se->registerSubsystem(vtxProp);
+  
   }
 
   //=========================================================
@@ -330,6 +362,16 @@ void Tracking_Reco()
     pat_rec->set_track_map_name("SvtxTrackMap");
     se->registerSubsystem(pat_rec);
 
+    /*
+     * add cluster mover to apply TPC distortion corrections to clusters belonging to tracks
+     * once the correction is applied, the cluster are moved back to TPC surfaces using local track angles
+     * moved clusters are stored in a separate map, called CORRECTED_TRKR_CLUSTER
+     */
+    if( G4TPC::ENABLE_CORRECTIONS ) se->registerSubsystem(new PHTpcClusterMover);
+    
+    // correct for particle propagation in TPC
+    se->registerSubsystem(new PHTpcDeltaZCorrection);
+
     // Fitting of tracks using Acts Kalman Filter
     //==================================
 
@@ -346,54 +388,53 @@ void Tracking_Reco()
     {
       /// run tpc residual determination with silicon+MM track fit
       auto residuals = new PHTpcResiduals;
-      residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
+      residuals->setOutputfile( G4TRACKING::SC_ROOTOUTPUT_FILENAME );
+      residuals->setSavehistograms( G4TRACKING::SC_SAVEHISTOGRAMS );
+      residuals->setHistogramOutputfile( G4TRACKING::SC_HISTOGRAMOUTPUT_FILENAME );
+      residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
       residuals->Verbosity(verbosity);
       se->registerSubsystem(residuals);
     }
-
-    if (G4TRACKING::use_truth_vertexing)
+   
+    if (!G4TRACKING::SC_CALIBMODE)
     {
-      PHTruthVertexing* vtxing = new PHTruthVertexing();
-      vtxing->associate_tracks(true);
-      std::string trackmapnamef = "SvtxTrackMap";
-      vtxing->set_track_map_name(trackmapnamef);
-      se->registerSubsystem(vtxing);
-    }
-    else
-    {
-      PHSimpleVertexFinder* vtxfinder = new PHSimpleVertexFinder();
-      vtxfinder->Verbosity(verbosity);
-      se->registerSubsystem(vtxfinder);
-    }
 
-    /// Propagate track positions to the vertex position
-    PHActsVertexPropagator* vtxProp = new PHActsVertexPropagator();
-    vtxProp->Verbosity(verbosity);
-    se->registerSubsystem(vtxProp);
+      if (G4TRACKING::use_truth_vertexing)
+      {
+        auto vtxing = new PHTruthVertexing;
+        vtxing->associate_tracks(true);
+        std::string trackmapnamef = "SvtxTrackMap";
+        vtxing->set_track_map_name(trackmapnamef);
+        se->registerSubsystem(vtxing);
+      }
+      else
+      {
+        auto vtxfinder = new PHSimpleVertexFinder;
+        vtxfinder->Verbosity(verbosity);
+        se->registerSubsystem(vtxfinder);
+      }
+      
+      /// Propagate track positions to the vertex position
+      auto vtxProp = new PHActsVertexPropagator;
+      vtxProp->Verbosity(verbosity);
+      se->registerSubsystem(vtxProp);
+    
+    }
   }
 
   //==================================
   // Common  to all sections
   //==================================
 
-  // Final vertex finding and fitting with RAVE
-  //==================================
-  if (G4TRACKING::use_rave_vertexing)
-  {
-    PHRaveVertexing* rave = new PHRaveVertexing();
-    //    rave->set_vertexing_method("kalman-smoothing:1");
-    rave->set_over_write_svtxvertexmap(false);
-    rave->set_svtxvertexmaprefit_node_name("SvtxVertexMapRave");
-    rave->Verbosity(verbosity);
-    se->registerSubsystem(rave);
-  }
-
   // Track Projections
   //===============
-  PHGenFitTrackProjection* projection = new PHGenFitTrackProjection();
-  projection->Verbosity(verbosity);
-  se->registerSubsystem(projection);
-
+  if (!G4TRACKING::SC_CALIBMODE)
+  {
+    auto projection = new PHActsTrackProjection;
+    projection->Verbosity(verbosity);
+    se->registerSubsystem(projection);
+  }
+  
   return;
 }
 
@@ -428,6 +469,10 @@ void Tracking_Eval(const std::string& outputfile)
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
+  SvtxTruthRecoTableEval *tables = new SvtxTruthRecoTableEval();
+  tables->Verbosity(verbosity);
+  se->registerSubsystem(tables);
+
   return;
 }
 
@@ -450,15 +495,6 @@ void Tracking_QA()
   // qa2->addEmbeddingID(2);
   qa2->Verbosity(verbosity);
   se->registerSubsystem(qa2);
-
-  if (G4TRACKING::use_rave_vertexing)
-  {
-    QAG4SimulationVertex* qav = new QAG4SimulationVertex();
-    // qav->addEmbeddingID(2);
-    qav->Verbosity(verbosity);
-    qav->setVertexMapName("SvtxVertexMapRave");
-    se->registerSubsystem(qav);
-  }
 
   //  Acts Kalman Filter vertex finder
   //=================================

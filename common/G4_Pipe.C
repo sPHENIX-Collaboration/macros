@@ -20,11 +20,11 @@ namespace Enable
 
 namespace G4PIPE
 {
-  double be_pipe_radius = 2.0005;     // 4.001 cm inner diameter from spec sheet
-  double be_pipe_thickness = 0.0760;  // 760 um based on spec sheet
+  double be_pipe_radius = 2.0;     // 4.0 cm inner diameter from Dans drawing
+  double be_pipe_thickness = 0.0762;  // 760 um based on Dans drawing
   double be_pipe_length = 80.0;       // +/- 40 cm
 
-  double al_pipe_radius = 2.0005;     // same as Be pipe
+  double al_pipe_radius = 2.0;     // same as Be pipe
   double al_pipe_thickness = 0.1600;  // 1.6 mm based on spec
   double al_pipe_length = 171.44;     // extension beyond +/- 40 cm
 
