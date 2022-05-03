@@ -33,6 +33,7 @@ namespace Enable
   bool MVTX_QA = false;
   bool MVTX_ABSORBER = false;
   int MVTX_VERBOSITY = 0;
+  bool MVTX_SRO = false;
 
 }  // namespace Enable
 
@@ -92,6 +93,7 @@ void Mvtx_Cells()
   // new storage containers
   PHG4MvtxHitReco* maps_hits = new PHG4MvtxHitReco("MVTX");
   maps_hits->Verbosity(verbosity);
+  maps_hits->set_int_param("mvtx_in_sphenix_srdo",  Enable::MVTX_SRO);
   for (int ilayer = 0; ilayer < G4MVTX::n_maps_layer; ilayer++)
   {
     // override the default timing window for this layer - default is +/- 5000 ns
