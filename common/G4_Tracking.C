@@ -15,6 +15,7 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <QA.C>
 
 #include <g4eval/SvtxEvaluator.h>
+#include <g4eval/SvtxTruthRecoTableEval.h>
 
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSiliconSeeding.h>
@@ -24,6 +25,7 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHCASeeding.h>
 #include <trackreco/PHGhostRejection.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
+#include <trackreco/PHSiliconSeedMerger.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSimpleKFProp.h>
 #include <trackreco/PHSimpleVertexFinder.h>
@@ -36,6 +38,7 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHTruthTrackSeeding.h>
 #include <trackreco/PHTruthVertexing.h>
 
+#include <tpc/TpcLoadDistortionCorrection.h>
 #include <tpccalib/PHTpcResiduals.h>
 
 #include <qa_modules/QAG4SimulationTracking.h>
@@ -67,7 +70,8 @@ namespace G4TRACKING
 
   // set to false to disable adding fake surfaces (TPC, Micromegas) to MakeActsGeom
   bool add_fake_surfaces = true;
-
+  bool init_acts_magfield = true;
+  
   // Truth seeding options for diagnostics (can use any or all)
   bool use_truth_silicon_seeding = false;     // if true runs truth silicon seeding instead of acts silicon seeding
   bool use_truth_tpc_seeding = false;         // if true runs truth silicon seeding instead of reco TPC seeding
@@ -86,17 +90,20 @@ void TrackingInit()
   }
 
   /// Build the Acts geometry
-  Fun4AllServer* se = Fun4AllServer::instance();
+  auto se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
   /// Geometry must be built before any Acts modules
   MakeActsGeometry* geom = new MakeActsGeometry();
   geom->Verbosity(verbosity);
+  
+  geom->loadMagField(G4TRACKING::init_acts_magfield);
   geom->setMagField(G4MAGNET::magfield);
   geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
   geom->add_fake_surfaces(G4TRACKING::add_fake_surfaces);
   geom->build_mm_surfaces(Enable::MICROMEGAS);
   se->registerSubsystem(geom);
+  
 }
 
 void Tracking_Reco()
@@ -104,6 +111,16 @@ void Tracking_Reco()
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
 
+  // space charge correction
+  /* corrections are applied in the track finding, and via PHTpcClusterMover before the final track fit */
+  if( G4TPC::ENABLE_CORRECTIONS )
+  {
+    auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
+    tpcLoadDistortionCorrection->set_distortion_filename( G4TPC::correction_filename );
+    se->registerSubsystem(tpcLoadDistortionCorrection);
+  }
+
+  
   // Assemble silicon clusters into track stubs - needed for initial vertex finding
   //============================================================
   if (G4TRACKING::use_truth_silicon_seeding)
@@ -124,6 +141,10 @@ void Tracking_Reco()
     silicon_Seeding->Verbosity(verbosity);
     silicon_Seeding->fieldMapName(G4MAGNET::magfield);
     se->registerSubsystem(silicon_Seeding);
+
+    PHSiliconSeedMerger *merger = new PHSiliconSeedMerger();
+    merger->Verbosity(verbosity);
+    se->registerSubsystem(merger);
   }
 
   //================================================
@@ -223,10 +244,8 @@ void Tracking_Reco()
       silicon_match->Verbosity(verbosity);
       silicon_match->set_field(G4MAGNET::magfield);
       silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
-      silicon_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
       if (G4TRACKING::SC_CALIBMODE)
       {
-        silicon_match->set_collision_rate(G4TRACKING::SC_COLLISIONRATE);
         // search windows for initial matching with distortions
         // tuned values are 0.04 and 0.008 in distorted events
         silicon_match->set_phi_search_window(0.04);
@@ -437,6 +456,10 @@ void Tracking_Eval(const std::string& outputfile)
   eval->scan_for_primaries(true);  // defaults to only thrown particles for ntp_gtrack
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
+
+  SvtxTruthRecoTableEval *tables = new SvtxTruthRecoTableEval();
+  tables->Verbosity(verbosity);
+  se->registerSubsystem(tables);
 
   return;
 }

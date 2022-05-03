@@ -194,6 +194,7 @@ namespace INPUTEMBED
 {
   map<unsigned int, std::string> filename;
   map<unsigned int, std::string> listfile;
+  bool REPEAT = true;
 }  // namespace INPUTEMBED
 
 namespace PYTHIA6
@@ -241,6 +242,13 @@ namespace INPUTMANAGER
 
 void InputInit()
 {
+  // for pileup sims embed id is 1, to distinguish particles
+  // which will be embedded (when Input::EMBED = true) into pileup sims
+  // we need to start at embedid = 2
+  if (Input::EMBED)
+  {
+    Input::EmbedId = 2;
+  }
   // first consistency checks - not all input generators play nice
   // with each other
   if (Input::READHITS && Input::EMBED)
@@ -516,7 +524,10 @@ void InputManagers()
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
       hitsin->fileopen(iter->second);
       hitsin->Verbosity(Input::VERBOSITY);
-      hitsin->Repeat();
+      if (INPUTEMBED::REPEAT)
+      {
+        hitsin->Repeat();
+      }
       se->registerInputManager(hitsin);
     }
     for (auto iter = INPUTEMBED::listfile.begin(); iter != INPUTEMBED::listfile.end(); ++iter)
@@ -525,7 +536,10 @@ void InputManagers()
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
       hitsin->AddListFile(iter->second);
       hitsin->Verbosity(Input::VERBOSITY);
-      hitsin->Repeat();
+      if (INPUTEMBED::REPEAT)
+      {
+        hitsin->Repeat();
+      }
       se->registerInputManager(hitsin);
     }
   }
