@@ -335,10 +335,14 @@ void Tracking_Reco_TrackFit()
      * propagate tracks to EMCAL
      */ 
     
-    // Choose the best silicon matched track for each TPC track seed
-    auto cleaner = new PHTrackCleaner;
-    cleaner->Verbosity(verbosity);
-    se->registerSubsystem(cleaner);
+    if( !G4TRACKING::use_full_truth_track_seeding )
+    {
+      // Choose the best silicon matched track for each TPC track seed
+      /* this breaks in truth_track seeding mode because there is no TpcSeed */
+      auto cleaner = new PHTrackCleaner;
+      cleaner->Verbosity(verbosity);
+      se->registerSubsystem(cleaner);
+    }
     
     if (G4TRACKING::use_truth_vertexing)
     {
