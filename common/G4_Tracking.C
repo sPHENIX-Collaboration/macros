@@ -317,30 +317,34 @@ void Tracking_Reco()
       se->registerSubsystem(residuals);
     }
 
-    // Choose the best silicon matched track for each TPC track seed
-    PHTrackCleaner* cleaner = new PHTrackCleaner();
-    cleaner->Verbosity(verbosity);
-    se->registerSubsystem(cleaner);
-
-    if (G4TRACKING::use_truth_vertexing)
+    if (!G4TRACKING::SC_CALIBMODE)
     {
-      PHTruthVertexing* vtxing = new PHTruthVertexing();
-      vtxing->associate_tracks(true);
-      std::string trackmapnamef = "SvtxTrackMap";
-      vtxing->set_track_map_name(trackmapnamef);
-      se->registerSubsystem(vtxing);
+      // Choose the best silicon matched track for each TPC track seed
+      auto cleaner = new PHTrackCleaner;
+      cleaner->Verbosity(verbosity);
+      se->registerSubsystem(cleaner);
+      
+      if (G4TRACKING::use_truth_vertexing)
+      {
+        auto vtxing = new PHTruthVertexing;
+        vtxing->associate_tracks(true);
+        std::string trackmapnamef = "SvtxTrackMap";
+        vtxing->set_track_map_name(trackmapnamef);
+        se->registerSubsystem(vtxing);
+      }
+      else
+      {
+        auto vtxfinder = new PHSimpleVertexFinder;
+        vtxfinder->Verbosity(verbosity);
+        se->registerSubsystem(vtxfinder);
+      }
+      
+      /// Propagate track positions to the vertex position
+      auto vtxProp = new PHActsVertexPropagator;
+      vtxProp->Verbosity(verbosity);
+      se->registerSubsystem(vtxProp);
     }
-    else
-    {
-      PHSimpleVertexFinder* vtxfinder = new PHSimpleVertexFinder();
-      vtxfinder->Verbosity(verbosity);
-      se->registerSubsystem(vtxfinder);
-    }
-
-    /// Propagate track positions to the vertex position
-    PHActsVertexPropagator* vtxProp = new PHActsVertexPropagator();
-    vtxProp->Verbosity(verbosity);
-    se->registerSubsystem(vtxProp);
+  
   }
 
   //=========================================================
@@ -391,26 +395,31 @@ void Tracking_Reco()
       residuals->Verbosity(verbosity);
       se->registerSubsystem(residuals);
     }
-
-    if (G4TRACKING::use_truth_vertexing)
+   
+    if (!G4TRACKING::SC_CALIBMODE)
     {
-      PHTruthVertexing* vtxing = new PHTruthVertexing();
-      vtxing->associate_tracks(true);
-      std::string trackmapnamef = "SvtxTrackMap";
-      vtxing->set_track_map_name(trackmapnamef);
-      se->registerSubsystem(vtxing);
-    }
-    else
-    {
-      PHSimpleVertexFinder* vtxfinder = new PHSimpleVertexFinder();
-      vtxfinder->Verbosity(verbosity);
-      se->registerSubsystem(vtxfinder);
-    }
 
-    /// Propagate track positions to the vertex position
-    PHActsVertexPropagator* vtxProp = new PHActsVertexPropagator();
-    vtxProp->Verbosity(verbosity);
-    se->registerSubsystem(vtxProp);
+      if (G4TRACKING::use_truth_vertexing)
+      {
+        auto vtxing = new PHTruthVertexing;
+        vtxing->associate_tracks(true);
+        std::string trackmapnamef = "SvtxTrackMap";
+        vtxing->set_track_map_name(trackmapnamef);
+        se->registerSubsystem(vtxing);
+      }
+      else
+      {
+        auto vtxfinder = new PHSimpleVertexFinder;
+        vtxfinder->Verbosity(verbosity);
+        se->registerSubsystem(vtxfinder);
+      }
+      
+      /// Propagate track positions to the vertex position
+      auto vtxProp = new PHActsVertexPropagator;
+      vtxProp->Verbosity(verbosity);
+      se->registerSubsystem(vtxProp);
+    
+    }
   }
 
   //==================================
@@ -419,10 +428,13 @@ void Tracking_Reco()
 
   // Track Projections
   //===============
-  PHActsTrackProjection* projection = new PHActsTrackProjection();
-  projection->Verbosity(verbosity);
-  se->registerSubsystem(projection);
-
+  if (!G4TRACKING::SC_CALIBMODE)
+  {
+    auto projection = new PHActsTrackProjection;
+    projection->Verbosity(verbosity);
+    se->registerSubsystem(projection);
+  }
+  
   return;
 }
 
