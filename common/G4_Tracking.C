@@ -16,6 +16,7 @@ R__LOAD_LIBRARY(libqa_modules.so)
 
 #include <g4eval/SvtxEvaluator.h>
 #include <g4eval/SvtxTruthRecoTableEval.h>
+#include <g4eval/TrackSeedTrackMapConverter.h>
 
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSiliconSeeding.h>
