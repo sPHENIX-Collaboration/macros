@@ -29,7 +29,6 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSimpleKFProp.h>
 #include <trackreco/PHSimpleVertexFinder.h>
-#include <trackreco/PHTpcClusterMover.h>
 #include <trackreco/PHTpcDeltaZCorrection.h>
 #include <trackreco/PHTpcTrackSeedCircleFit.h>
 #include <trackreco/PHTrackCleaner.h>
@@ -105,7 +104,7 @@ void TrackingInit()
   se->registerSubsystem(geom);
 
   // space charge correction
-  /* corrections are applied in the track finding, and via PHTpcClusterMover before the final track fit */
+  /* corrections are applied in the track finding, and via TpcClusterMover before the final track fit */
   if( G4TPC::ENABLE_CORRECTIONS )
   {
     auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
@@ -295,13 +294,6 @@ void Tracking_Reco_TrackFit()
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   auto se = Fun4AllServer::instance();
 
-  /*
-  * add cluster mover to apply TPC distortion corrections to clusters belonging to tracks
-  * once the correction is applied, the cluster are moved back to TPC surfaces using local track angles
-  * moved clusters are stored in a separate map, called CORRECTED_TRKR_CLUSTER
-  */
-  if( G4TPC::ENABLE_CORRECTIONS ) se->registerSubsystem(new PHTpcClusterMover);
-  
   // correct clusters for particle propagation in TPC
   se->registerSubsystem(new PHTpcDeltaZCorrection);
   
