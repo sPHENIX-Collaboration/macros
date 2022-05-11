@@ -1,5 +1,9 @@
 Various macros and files for running tower slope modules in various situations:
 
+macros/correction files for running tower slope method on MDC2 files, 
+OR using various decalibration/calibration updates to the sim and reco frameworks in coresoftware, 
+including the database accessor wrapper class for accessing calibrations "conditions DB"  files.
+
 Macro/script for running over MDC2 Hits files (Production 4 only) 
 -------------------------------------------
 run_calo_fromMDC2Hits_towslope_Fun4All_G4_Calo.C
