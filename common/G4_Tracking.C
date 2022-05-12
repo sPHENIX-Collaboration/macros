@@ -423,6 +423,10 @@ void Tracking_QA()
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
+  SvtxTruthRecoTableEval *tables = new SvtxTruthRecoTableEval();
+  tables->Verbosity(verbosity);
+  se->registerSubsystem(tables);
+
   QAG4SimulationTracking* qa = new QAG4SimulationTracking();
   //  qa->addEmbeddingID(2);
   qa->Verbosity(verbosity);
