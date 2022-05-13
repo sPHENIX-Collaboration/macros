@@ -29,7 +29,6 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSimpleKFProp.h>
 #include <trackreco/PHSimpleVertexFinder.h>
-#include <trackreco/PHTpcClusterMover.h>
 #include <trackreco/PHTpcDeltaZCorrection.h>
 #include <trackreco/PHTrackCleaner.h>
 #include <trackreco/PHTrackSeeding.h>
@@ -108,7 +107,7 @@ void TrackingInit()
   se->registerSubsystem(geom);
 
   // space charge correction
-  /* corrections are applied in the track finding, and via PHTpcClusterMover before the final track fit */
+  /* corrections are applied in the track finding, and via TpcClusterMover before the final track fit */
   if( G4TPC::ENABLE_CORRECTIONS )
   {
     auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
@@ -293,13 +292,6 @@ void Tracking_Reco_TrackFit()
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   auto se = Fun4AllServer::instance();
 
-  /*
-  * add cluster mover to apply TPC distortion corrections to clusters belonging to tracks
-  * once the correction is applied, the cluster are moved back to TPC surfaces using local track angles
-  * moved clusters are stored in a separate map, called CORRECTED_TRKR_CLUSTER
-  */
-  if( G4TPC::ENABLE_CORRECTIONS ) se->registerSubsystem(new PHTpcClusterMover);
-  
   // correct clusters for particle propagation in TPC
   se->registerSubsystem(new PHTpcDeltaZCorrection);
   
@@ -378,6 +370,21 @@ void Tracking_Reco()
   Tracking_Reco_TrackFit();
 }
 
+void build_truthreco_tables()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+  Fun4AllServer* se = Fun4AllServer::instance();
+  
+  // this module builds high level truth track association table.
+  // If this module is used, this table should be called before any evaluator calls.
+  // Removing this module, evaluation will still work but trace truth association through the layers of G4-hit-cluster
+  SvtxTruthRecoTableEval *tables = new SvtxTruthRecoTableEval();
+  tables->Verbosity(verbosity);
+  se->registerSubsystem(tables);
+
+  return;
+}
+
 void Tracking_Eval(const std::string& outputfile)
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
@@ -387,6 +394,8 @@ void Tracking_Eval(const std::string& outputfile)
   //---------------
 
   Fun4AllServer* se = Fun4AllServer::instance();
+
+  build_truthreco_tables();
 
   //----------------
   // Tracking evaluation
@@ -409,10 +418,6 @@ void Tracking_Eval(const std::string& outputfile)
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
-  SvtxTruthRecoTableEval *tables = new SvtxTruthRecoTableEval();
-  tables->Verbosity(verbosity);
-  se->registerSubsystem(tables);
-
   return;
 }
 
@@ -425,6 +430,8 @@ void Tracking_QA()
   //---------------
 
   Fun4AllServer* se = Fun4AllServer::instance();
+
+  build_truthreco_tables();
 
   QAG4SimulationTracking* qa = new QAG4SimulationTracking();
   //  qa->addEmbeddingID(2);

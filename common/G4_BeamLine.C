@@ -35,9 +35,9 @@ namespace Enable
 
 namespace G4BEAMLINE
 {
-// the beampipes seem to add 2 no_overlaps - needs to be looked at
-// but this z position takes care of our current overlap issues
-  double starting_z =  G4PIPE::be_pipe_length / 2. + G4PIPE::al_pipe_length + G4PIPE::al_pipe_cone_length + G4PIPE::al_pipe_ext_length + 2*no_overlapp;
+  // the beampipes seem to add 2 no_overlaps - needs to be looked at
+  // but this z position takes care of our current overlap issues
+  double starting_z =  G4PIPE::max_z + 2*no_overlapp;
   double enclosure_z_max = 2050. + (700-starting_z);
   double enclosure_r_max = 30.;  // 30cm radius to cover magnets
   double enclosure_center = 0.5 * (starting_z + enclosure_z_max);

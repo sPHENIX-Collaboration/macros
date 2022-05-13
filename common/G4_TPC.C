@@ -27,6 +27,8 @@
 
 #include <tpc/TpcClusterCleaner.h>
 
+#include <tpccalib/PHTpcCentralMembraneClusterizer.h>
+#include <tpccalib/PHTpcCentralMembraneMatcher.h>
 #include <tpccalib/TpcDirectLaserReconstruction.h>
 
 #include <qa_modules/QAG4SimulationTpc.h>
@@ -299,7 +301,17 @@ void TPC_Clustering()
     directLaserReconstruction->set_histogram_outputfile( G4TPC::DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME );
     se->registerSubsystem(directLaserReconstruction); 
   }
-
+  
+  // central membrane reconstruction
+  if( G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS )
+  {
+    // central membrane clusterizer
+    se->registerSubsystem(new PHTpcCentralMembraneClusterizer);
+    
+    // match central membrane clusters to pads and generate distortion correction
+    auto centralMembraneMatcher = new PHTpcCentralMembraneMatcher;
+    se->registerSubsystem(centralMembraneMatcher);
+  }
 }
 
 
