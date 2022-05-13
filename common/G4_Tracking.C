@@ -372,6 +372,21 @@ void Tracking_Reco()
   Tracking_Reco_TrackFit();
 }
 
+void build_truthreco_tables()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+  Fun4AllServer* se = Fun4AllServer::instance();
+  
+  // this module builds high level truth track association table.
+  // If this module is used, this table should be called before any evaluator calls.
+  // Removing this module, evaluation will still work but trace truth association through the layers of G4-hit-cluster
+  SvtxTruthRecoTableEval *tables = new SvtxTruthRecoTableEval();
+  tables->Verbosity(verbosity);
+  se->registerSubsystem(tables);
+
+  return;
+}
+
 void Tracking_Eval(const std::string& outputfile)
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
@@ -382,12 +397,7 @@ void Tracking_Eval(const std::string& outputfile)
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  // this module builds high level truth track association table.
-  // If this module is used, this table should be called before any evaluator calls.
-  // Removing this module, evaluation will still work but trace truth association through the layers of G4-hit-cluster
-  SvtxTruthRecoTableEval *tables = new SvtxTruthRecoTableEval();
-  tables->Verbosity(verbosity);
-  se->registerSubsystem(tables);
+  build_truthreco_tables();
 
   //----------------
   // Tracking evaluation
@@ -423,9 +433,7 @@ void Tracking_QA()
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  SvtxTruthRecoTableEval *tables = new SvtxTruthRecoTableEval();
-  tables->Verbosity(verbosity);
-  se->registerSubsystem(tables);
+  build_truthreco_tables();
 
   QAG4SimulationTracking* qa = new QAG4SimulationTracking();
   //  qa->addEmbeddingID(2);
