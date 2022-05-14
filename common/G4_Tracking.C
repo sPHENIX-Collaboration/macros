@@ -16,6 +16,7 @@ R__LOAD_LIBRARY(libqa_modules.so)
 
 #include <g4eval/SvtxEvaluator.h>
 #include <g4eval/SvtxTruthRecoTableEval.h>
+#include <g4eval/TrackSeedTrackMapConverter.h>
 
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSiliconSeeding.h>
@@ -23,14 +24,12 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsVertexPropagator.h>
 #include <trackreco/PHCASeeding.h>
-#include <trackreco/PHGhostRejection.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
 #include <trackreco/PHSiliconSeedMerger.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSimpleKFProp.h>
 #include <trackreco/PHSimpleVertexFinder.h>
 #include <trackreco/PHTpcDeltaZCorrection.h>
-#include <trackreco/PHTpcTrackSeedCircleFit.h>
 #include <trackreco/PHTrackCleaner.h>
 #include <trackreco/PHTrackSeeding.h>
 #include <trackreco/PHTruthSiliconAssociation.h>
@@ -78,6 +77,10 @@ namespace G4TRACKING
                                               // Full truth track seeding
   bool use_full_truth_track_seeding = false;  // makes track seeds using truth info, used for both Acts and Genfit
   bool use_truth_vertexing = false;           // if true runs truth vertexing, if false runs PHSimpleVertexFinder
+
+  // Runs a converter from TrackSeed object to SvtxTrack object to enable
+  // use of the various evaluation tools already available
+  bool convert_seeds_to_svtxtracks = false;
 
 }  // namespace G4TRACKING
 
@@ -176,11 +179,6 @@ void Tracking_Reco_TrackSeed()
       seeder->useFixedClusterError(true);
       se->registerSubsystem(seeder);
 
-      // perform track circle fit to get firt estimate of track parameters at origin
-      auto vtxassoc2 = new PHTpcTrackSeedCircleFit("PrePropagatorPHTpcTrackSeedCircleFit");
-      vtxassoc2->Verbosity(verbosity);
-      se->registerSubsystem(vtxassoc2);
-
       // expand stubs in the TPC using simple kalman filter
       auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
       cprop->set_field_dir(G4MAGNET::magfield_rescale);
@@ -195,16 +193,6 @@ void Tracking_Reco_TrackSeed()
       se->registerSubsystem(cprop);
     }
 
-    // redo circle fit on fully propagated tracks
-    auto vtxassoc = new PHTpcTrackSeedCircleFit;
-    vtxassoc->Verbosity(verbosity);
-    se->registerSubsystem(vtxassoc);
-
-    // Choose the best duplicate TPC track seed
-    auto ghosts = new PHGhostRejection;
-    ghosts->Verbosity(verbosity);
-    se->registerSubsystem(ghosts);
-  
     // match silicon track seeds to TPC track seeds
     if (G4TRACKING::use_truth_si_matching)
     {
@@ -286,7 +274,17 @@ void Tracking_Reco_TrackSeed()
    * at this stage tracks are fully assembled. They contain clusters spaning Silicon detectors, TPC and Micromegas
    * they are ready to be fit.
    */ 
+   if(G4TRACKING::convert_seeds_to_svtxtracks)
+	{
+	  TrackSeedTrackMapConverter *converter = new TrackSeedTrackMapConverter();
+	  // Default set to full SvtxTrackSeeds. Can be set to 
+	  // SiliconTrackSeedContainer or TpcTrackSeedContainer 
+	  converter->setTrackSeedName("SvtxTrackSeedContainer");
+	  converter->Verbosity(verbosity);
+	  se->registerSubsystem(converter);
+      }
   
+
 }
 
 void Tracking_Reco_TrackFit()
