@@ -135,7 +135,7 @@ void Tracking_Reco_TrackSeed()
       // track stubs are given the location of the truth vertex in this module
       auto pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingSilicon");
       pat_rec->Verbosity(verbosity);
-      pat_rec->set_track_map_name("SvtxSiliconTrackMap");
+      pat_rec->set_track_map_name("SiliconTrackSeedContainer");
       pat_rec->set_min_layer(0);
       pat_rec->set_max_layer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
       se->registerSubsystem(pat_rec);
@@ -157,7 +157,7 @@ void Tracking_Reco_TrackSeed()
       // track stubs are given the position odf the truth vertex in this module
       auto pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingTpc");
       pat_rec->Verbosity(verbosity);
-      pat_rec->set_track_map_name("SvtxTrackMap");
+      pat_rec->set_track_map_name("TpcTrackSeedContainer");
       pat_rec->set_min_layer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
       pat_rec->set_max_layer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer + G4TPC::n_gas_layer);
       se->registerSubsystem(pat_rec);
@@ -264,7 +264,7 @@ void Tracking_Reco_TrackSeed()
     // Includes clusters for TPC, silicon and MM's
     auto pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingFull");
     pat_rec->Verbosity(verbosity);
-    pat_rec->set_track_map_name("SvtxTrackMap");
+    pat_rec->set_track_map_name("SvtxTrackSeedContainer");
     se->registerSubsystem(pat_rec);
 
   }
