@@ -129,7 +129,7 @@ void TPCInit()
     G4INTT::n_intt_layer = 0;
   }
 
-  // Set the drift velocity in the cluster Z crossing correction module
+  // Set the (static) drift velocity in the cluster Z crossing correction module
   TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity;
 }
 
@@ -207,6 +207,7 @@ void TPC_Cells()
     directLaser->SetPhiStepping( 72, 0*deg_to_rad, 360*deg_to_rad );
     directLaser->SetThetaStepping( 17, 5*deg_to_rad, 90*deg_to_rad );
     directLaser->SetDirectLaserAuto( true );
+    directLaser->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity);
     se->registerSubsystem(directLaser);
   }
 
