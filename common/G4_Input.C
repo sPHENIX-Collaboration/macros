@@ -2,6 +2,7 @@
 #define MACRO_G4INPUT_C
 
 #include <GlobalVariables.C>
+#include <G4_TPC.C>
 
 #include <phpythia6/PHPythia6.h>
 
@@ -215,7 +216,7 @@ namespace SARTRE
 namespace PILEUP
 {
   string pileupfile = "/sphenix/sim/sim01/sphnxpro/MDC1/sHijing_HepMC/data/sHijing_0_20fm-0000000001-00000.dat";
-  double TpcDriftVelocity = 8.0 / 1000.0;
+  double TpcDriftVelocity = G4TPC::tpc_drift_velocity;
 }  // namespace PILEUP
 
 // collection of pointers to particle generators we can grab in the Fun4All macro
