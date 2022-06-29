@@ -209,6 +209,8 @@ void Tracking_Reco_TrackSeed()
       silicon_match->Verbosity(verbosity);
       silicon_match->set_field(G4MAGNET::magfield);
       silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
+      silicon_match->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity);
+      silicon_match->set_pp_mode(false);
       if (G4TRACKING::SC_CALIBMODE)
       {
         // search windows for initial matching with distortions
@@ -293,8 +295,12 @@ void Tracking_Reco_TrackFit()
   auto se = Fun4AllServer::instance();
 
   // correct clusters for particle propagation in TPC
-  se->registerSubsystem(new PHTpcDeltaZCorrection);
+  auto deltazcorr = new PHTpcDeltaZCorrection;
+  deltazcorr->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity);
+  deltazcorr->Verbosity(verbosity);
+  se->registerSubsystem(deltazcorr);
   
+
   // perform final track fit with ACTS
   auto actsFit = new PHActsTrkFitter;
   actsFit->Verbosity(verbosity);
