@@ -64,8 +64,12 @@ namespace G4TPC
   int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
   double tpc_outer_radius = 77. + 2.;
 
-  // drift velocity is set here for all relevant modules
-  double tpc_drift_velocity = 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
+  // the drift velocity is set here for all relevant modules
+  double tpc_drift_velocity_sim = 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
+  // Allow the possibility of making the reco drift velocity different from the smulation value
+  double  sim_reco_drift_velocity_difference = 0.0;
+  //double  sim_reco_drift_velocity_difference = 0.2;
+  double tpc_drift_velocity_reco = tpc_drift_velocity_sim + sim_reco_drift_velocity_difference;
 
   // TPC drift velocity scale
   double drift_velocity_scale = 1.0;
@@ -130,7 +134,7 @@ void TPCInit()
   }
 
   // Set the (static) drift velocity in the cluster Z crossing correction module
-  TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity;
+  TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
 }
 
 //! TPC end cap, wagon wheel, electronics
@@ -207,7 +211,7 @@ void TPC_Cells()
     directLaser->SetPhiStepping( 72, 0*deg_to_rad, 360*deg_to_rad );
     directLaser->SetThetaStepping( 17, 5*deg_to_rad, 90*deg_to_rad );
     directLaser->SetDirectLaserAuto( true );
-    directLaser->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity);
+    directLaser->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
     se->registerSubsystem(directLaser);
   }
 
@@ -237,8 +241,8 @@ void TPC_Cells()
   }
 
   // override the default drift velocity parameter specification
-  edrift->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity);
-  padplane->SetDriftVelocity(G4TPC::tpc_drift_velocity);
+  edrift->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
+  padplane->SetDriftVelocity(G4TPC::tpc_drift_velocity_sim);
 
   // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
   // They represent effects not due to ideal gas properties and ideal readout plane behavior
@@ -291,7 +295,8 @@ void TPC_Clustering()
   } else {
 
     auto tpcclusterizer = new TpcClusterizer;
-    tpcclusterizer->set_drift_velocity_scale(G4TPC::drift_velocity_scale);
+    tpcclusterizer->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
+    tpcclusterizer->set_drift_velocity_scale(G4TPC::drift_velocity_scale);  // do not use
     tpcclusterizer->Verbosity(verbosity);
     tpcclusterizer->set_do_hit_association( G4TPC::DO_HIT_ASSOCIATION );
     se->registerSubsystem(tpcclusterizer);
