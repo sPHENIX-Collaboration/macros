@@ -20,8 +20,8 @@ namespace Input
 
 namespace DstOut
 {
-  string OutputDir = ".";
-  string OutputFile = "test.root";
+  std::string OutputDir = ".";
+  std::string OutputFile = "test.root";
 }  // namespace DstOut
 
 // Global settings affecting multiple subsystems
@@ -32,6 +32,7 @@ namespace Enable
   bool DSTOUT_COMPRESS = false;
   bool OVERLAPCHECK = false;
   bool SUPPORT = false;
+  bool XPLOAD = false;
   int VERBOSITY = 0;
 }  // namespace Enable
 
@@ -55,7 +56,7 @@ namespace G4P6DECAYER
 // our various tracking macro
 namespace TRACKING
 {
-  string TrackNodeName = "SvtxTrackMap";
+  std::string TrackNodeName = "SvtxTrackMap";
 }
 
 namespace G4MAGNET
@@ -64,6 +65,13 @@ namespace G4MAGNET
   // MagnetInit() functions. If used standalone (without the G4_Magnet include)
   // like in the tracking - those need to be set in the Fun4All macro
   double magfield_rescale = NAN;
-  string magfield;
+  std::string magfield;
 }  // namespace G4MAGNET
+
+namespace XPLOAD
+{
+  std::string config = "sPHENIX_cdb";
+  std::string tag = "TEST";
+  uint64_t timestamp = 12345678912345;
+}
 #endif
