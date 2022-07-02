@@ -58,6 +58,7 @@ namespace G4CEMC
 
   // Digitization (default photon digi):
   RawTowerDigitizer::enu_digi_algorithm TowerDigi = RawTowerDigitizer::kSimple_photon_digitization;
+  //  RawTowerDigitizer::enu_digi_algorithm TowerDigi = RawTowerDigitizer::kNo_digitization;
   // directly pass the energy of sim tower to digitized tower
   // kNo_digitization
   // simple digitization with photon statistics, single amplitude ADC conversion and pedestal
@@ -357,10 +358,12 @@ void CEMC_Towers()
 
   const double photoelectron_per_GeV = 500;  //500 photon per total GeV deposition
 
+  bool doSimple = true;
+
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
   TowerDigitizer->Detector("CEMC");
   TowerDigitizer->Verbosity(verbosity);
-  TowerDigitizer->set_digi_algorithm(G4CEMC::TowerDigi);
+  TowerDigitizer->set_digi_algorithm(G4CEMC::TowerDigi); 
   TowerDigitizer->set_variable_pedestal(true);  //read ped central and width from calibrations file comment next 2 lines if true
                                                 //  TowerDigitizer->set_pedstal_central_ADC(0);
                                                 //  TowerDigitizer->set_pedstal_width_ADC(8);  // eRD1 test beam setting
@@ -370,14 +373,63 @@ void CEMC_Towers()
                                                         //  TowerDigitizer->set_zero_suppression_ADC(16);  // eRD1 test beam setting
   TowerDigitizer->GetParameters().ReadFromFile("CEMC", "xml", 0, 0,
                                                string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
+
+
+  // tower digitizer settings for doing decalibration -JEF May '22
+
+  TowerDigitizer->set_UseConditionsDB(false);
+
+  //---------------
+  // if conditions db is enabled in the line above, how to handle filename
+  // needs decided see below examples  (TBD by Chris P)
+  //------------------
+  // Some standard decal files specification where full decal is happening
+  // uses the same db file accessor api as for TowerCalib and thus format 
+  // (format can change along with accessor internals, but user
+  // needs to know/give a readable format file).
+  // Decal tower by tow. factors in file are apply as a multiplicative 
+  // factor to raw energy/adc see below about adc level
+  //---
+  //  TowerDigitizer->set_DoTowerDecal(true,"emcal_corr_sec12bands.root",false);
+  //  TowerDigitizer->set_DoTowerDecal(true,"emcal_corr1_29.root",false);
+  TowerDigitizer->set_DoTowerDecal(true,"emcal_newPatternCinco.root",false);
+
+  // third parameter (doInverse) specifies if you want 
+  //to instead apply the reciprocal  of the TowbyTow factors 
+  // in the db file as a multiplicative factor 
+  // here is an example of that
+  //TowerDigitizer->set_DoTowerDecal(true,"emcal_newPatternCinco.root",true);
+
+  // in actuality we do not actually suffer from digitization
+  // effects on the entire pulse amplitude but rather sample
+  //  ~12-14 times (pulse/pedestal itself about ~8 times)
+  // and both the pedestal and pulse are extracted as continuous 
+  // (or near continous) quantities.  In the near future the 
+  // simple ("old fashioned") digitization scheme needs to implement
+  // a full sim of the pulse extraction procedure. 
+  // therefore for now when running in decal mode, as a temporary
+  // more realistic approximation of this procedure, we change the 
+  // energy response to continuous adc/energy values rather than digitized.
+  // this behavior currently only occurs if running in the decal mode
+  // ....
+  // If you want to apply this non-digitizing part of the code
+  // WITHOUT mod'ing the energy (ie w/o decal), call the DoDecal function without 
+  // specifiying a filename as in the following example
+  // 
+  //  TowerDigitizer->set_DoTowerDecal(true, "",false);
+
   se->registerSubsystem(TowerDigitizer);
+  
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
   TowerCalibration->Detector("CEMC");
   TowerCalibration->Verbosity(verbosity);
+  
+
+
 
   if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal)
-  {
+    {
     if (G4CEMC::TowerDigi == RawTowerDigitizer::kNo_digitization)
     {
       // just use sampling fraction set previously
@@ -399,6 +451,12 @@ void CEMC_Towers()
     }
     else
     {
+      
+      if (!doSimple) 
+	{
+
+
+      //for tower by tower cal
       TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
       TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
 								string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
@@ -406,6 +464,43 @@ void CEMC_Towers()
       //    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);                                                             // overall energy scale based on 4-GeV photon simulations
       TowerCalibration->set_variable_pedestal(true);                                                                                                  //read pedestals from calibrations file comment next line if true
       //    TowerCalibration->set_pedstal_ADC(0);
+      ///////////////////////////
+
+	}
+      else // dosimple
+	{
+
+	  TowerCalibration->set_calib_algorithm(RawTowerCalibration::kDbfile_tbt_gain_corr);
+	  TowerCalibration->set_UseConditionsDB(false);
+
+	  // Some standard db calo calibration files specification 
+	  //  
+	  // uses the db file accessor api and thus format 
+	  // (format can change along with accessor internals, but user
+	  // needs to know/give a readable format file).
+	  // Decal tower by tow. factors in file are apply as a multiplicative 
+
+	  //TowerCalibration->set_CalibrationFileName("emcal_corr1_29.root");
+	  //TowerCalibration->set_CalibrationFileName("inv_emcal_corr_sec12bands.root");
+	  TowerCalibration->set_CalibrationFileName("emcal_corr1_00.root");
+	  //TowerCalibration->set_CalibrationFileName("emcal_newPatternCinco.root");
+
+	  // since for this loop we avert the tower by tower improvements 
+	  // in the kTower_by_tower xml-file based cemc calibration 
+	  // which can be reimplemented in the new tower by tower dbfile format
+	  // but for now we make a single overall reduction factor of 0.87
+	  // that matches the same average calibration correction
+	  // changing the following line to the one after it.  -JEF
+	  //          TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);                                                             // overall energy scale based on 4-GeV photon simulations
+          TowerCalibration->set_calib_const_GeV_ADC(0.87 * 1./ photoelectron_per_GeV / 0.9715);                                                             // overall energy scale based on 4-GeV photon simulations
+	  TowerCalibration->set_pedstal_ADC(0);
+	  // note that in the TowerCalibration object, the pedestal subtraction is no
+	  // longer applied, the above line simply follows suit with all the other 
+	  // "calib_algorithms" on that object
+
+	  ///////////////////////////
+	}
+      
     }
   }
   else
@@ -434,10 +529,6 @@ void CEMC_Clusters()
     ClusterBuilder->set_threshold_energy(0.030);  // This threshold should be the same as in CEMCprof_Thresh**.root file below
     std::string emc_prof = getenv("CALIBRATIONROOT");
     emc_prof += "/EmcProfile/CEMCprof_Thresh30MeV.root";
-    if (Enable::XPLOAD)
-    {
-      emc_prof = "CDB";
-    }
     ClusterBuilder->LoadProfile(emc_prof);
     se->registerSubsystem(ClusterBuilder);
   }
