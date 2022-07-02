@@ -32,7 +32,14 @@ void MagnetFieldInit()
   }
   if (G4MAGNET::magfield.empty())
   {
-    G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dbigmapxyz.root");
+    if (Enable::XPLOAD)
+    {
+      G4MAGNET::magfield = "CDB";
+    }
+    else
+    {
+      G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dbigmapxyz.root");
+    }
   }
 }
 

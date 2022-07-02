@@ -58,16 +58,6 @@ int Fun4All_G4_sPHENIX(
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
   rc->set_IntFlag("RANDOMSEED", TString(outputFile).Hash());
-  //===============
-  // conditions DB flags
-  //===============
-  // tag
-  rc->set_StringFlag("XPLOAD_TAG","sPHENIX_ExampleGT_1");
-  // database config
-  rc->set_StringFlag("XPLOAD_CONFIG","sPHENIX_cdb");
-  // 64 bit timestamp
-  rc->set_uint64Flag("TIMESTAMP",12345678912345);
-
 
   //===============
   // Input options
@@ -304,6 +294,8 @@ int Fun4All_G4_sPHENIX(
   Enable::TrackingService = false;
 
   Enable::INTT = true;
+//  Enable::INTT_ABSORBER = true; // enables layerwise support structure readout
+//  Enable::INTT_SUPPORT = true; // enable global support structure readout
   Enable::INTT_CELL = Enable::INTT && true;
   Enable::INTT_CLUSTER = Enable::INTT_CELL && true;
   Enable::INTT_QA = Enable::INTT_CLUSTER && Enable::QA && true;
@@ -371,6 +363,7 @@ int Fun4All_G4_sPHENIX(
 
   Enable::GLOBAL_RECO = true;
   //Enable::GLOBAL_FASTSIM = true;
+
   //Enable::KFPARTICLE = true;
   //Enable::KFPARTICLE_VERBOSITY = 1;
   //Enable::KFPARTICLE_TRUTH_MATCH = true;
@@ -402,6 +395,17 @@ int Fun4All_G4_sPHENIX(
   // run user provided code (from local G4_User.C)
   //Enable::USER = true;
 
+  //===============
+  // conditions DB flags
+  //===============
+  //Enable::XPLOAD = true;
+  // tag
+  rc->set_StringFlag("XPLOAD_TAG",XPLOAD::tag);
+  // database config
+  rc->set_StringFlag("XPLOAD_CONFIG",XPLOAD::config);
+  // 64 bit timestamp
+  rc->set_uint64Flag("TIMESTAMP",XPLOAD::timestamp);
+
   //---------------
   // World Settings
   //---------------
@@ -414,7 +418,7 @@ int Fun4All_G4_sPHENIX(
 
   //  G4MAGNET::magfield =  string(getenv("CALIBRATIONROOT"))+ string("/Field/Map/sphenix3dbigmapxyz.root");  // default map from the calibration database
   //  G4MAGNET::magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
-  G4MAGNET::magfield_rescale = 1.;  // make consistent with expected Babar field strength of 1.4T
+//  G4MAGNET::magfield_rescale = 1.;  // make consistent with expected Babar field strength of 1.4T
 
   //---------------
   // Pythia Decayer
@@ -629,7 +633,8 @@ int Fun4All_G4_sPHENIX(
     return 0;
   }
   // if we run the particle generator and use 0 it'll run forever
-  if (nEvents == 0 && !Input::HEPMC && !Input::READHITS)
+  // for embedding it runs forever if the repeat flag is set
+  if (nEvents == 0 && !Input::HEPMC && !Input::READHITS && INPUTEMBED::REPEAT)
   {
     cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
     cout << "it will run forever, so I just return without running anything" << endl;
