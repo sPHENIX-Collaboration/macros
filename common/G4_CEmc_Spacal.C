@@ -434,6 +434,10 @@ void CEMC_Clusters()
     ClusterBuilder->set_threshold_energy(0.030);  // This threshold should be the same as in CEMCprof_Thresh**.root file below
     std::string emc_prof = getenv("CALIBRATIONROOT");
     emc_prof += "/EmcProfile/CEMCprof_Thresh30MeV.root";
+    if (Enable::XPLOAD)
+    {
+      emc_prof = "CDB";
+    }
     ClusterBuilder->LoadProfile(emc_prof);
     se->registerSubsystem(ClusterBuilder);
   }
