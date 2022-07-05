@@ -64,16 +64,10 @@ namespace G4TPC
   int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
   double tpc_outer_radius = 77. + 2.;
 
-  // the drift velocity is set here for all relevant modules
-  double tpc_drift_velocity_sim = 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
-  // Allow the possibility of making the reco drift velocity different from the smulation value
-  double  sim_reco_drift_velocity_difference = 0.0;
-  //double  sim_reco_drift_velocity_difference = 0.2;
-  double tpc_drift_velocity_reco = tpc_drift_velocity_sim + sim_reco_drift_velocity_difference;
+  // drift velocity is set here for all relevant modules
+  double tpc_drift_velocity_sim= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
+  double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
 
-  // TPC drift velocity scale
-  double drift_velocity_scale = 1.0;
-  
   // use simple clusterizer
   bool USE_SIMPLE_CLUSTERIZER = false;
 
@@ -295,8 +289,6 @@ void TPC_Clustering()
   } else {
 
     auto tpcclusterizer = new TpcClusterizer;
-    tpcclusterizer->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
-    tpcclusterizer->set_drift_velocity_scale(G4TPC::drift_velocity_scale);  // do not use
     tpcclusterizer->Verbosity(verbosity);
     tpcclusterizer->set_do_hit_association( G4TPC::DO_HIT_ASSOCIATION );
     se->registerSubsystem(tpcclusterizer);

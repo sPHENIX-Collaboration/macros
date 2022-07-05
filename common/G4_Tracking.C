@@ -97,6 +97,7 @@ void TrackingInit()
 
   // Geometry must be built before any Acts modules
   MakeActsGeometry* geom = new MakeActsGeometry();
+  geom->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
   geom->Verbosity(verbosity);
   
   geom->loadMagField(G4TRACKING::init_acts_magfield);
@@ -165,7 +166,6 @@ void Tracking_Reco_TrackSeed()
     } else {
       
       auto seeder = new PHCASeeding("PHCASeeding");
-      seeder->StDriftVelocity(G4TPC::tpc_drift_velocity_reco);
       seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
       if (G4MAGNET::magfield.find("3d") != std::string::npos)
       {
@@ -182,7 +182,6 @@ void Tracking_Reco_TrackSeed()
 
       // expand stubs in the TPC using simple kalman filter
       auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
-      sprop->StDriftVelocity(G4TPC::tpc_drift_velocity_reco);
       cprop->set_field_dir(G4MAGNET::magfield_rescale);
       if (G4MAGNET::magfield.find("3d") != std::string::npos)
       {
@@ -211,7 +210,6 @@ void Tracking_Reco_TrackSeed()
       silicon_match->Verbosity(verbosity);
       silicon_match->set_field(G4MAGNET::magfield);
       silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
-      silicon_match->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_reco);
       silicon_match->set_pp_mode(false);
       if (G4TRACKING::SC_CALIBMODE)
       {
@@ -298,7 +296,6 @@ void Tracking_Reco_TrackFit()
 
   // correct clusters for particle propagation in TPC
   auto deltazcorr = new PHTpcDeltaZCorrection;
-  deltazcorr->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_reco);
   deltazcorr->Verbosity(verbosity);
   se->registerSubsystem(deltazcorr);
   
