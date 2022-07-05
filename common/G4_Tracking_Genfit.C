@@ -362,7 +362,6 @@ void Tracking_Reco()
 	  silicon_match->Verbosity(verbosity);
 	  silicon_match->set_field(G4MAGNET::magfield);
 	  silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
-	  silicon_match->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_reco);
 	  silicon_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
 	  if (G4TRACKING::SC_CALIBMODE)
 	    {
