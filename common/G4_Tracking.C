@@ -16,6 +16,7 @@ R__LOAD_LIBRARY(libqa_modules.so)
 
 #include <g4eval/SvtxEvaluator.h>
 #include <g4eval/SvtxTruthRecoTableEval.h>
+#include <g4eval/TrackSeedTrackMapConverter.h>
 
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSiliconSeeding.h>
@@ -23,15 +24,12 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsVertexPropagator.h>
 #include <trackreco/PHCASeeding.h>
-#include <trackreco/PHGhostRejection.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
 #include <trackreco/PHSiliconSeedMerger.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSimpleKFProp.h>
 #include <trackreco/PHSimpleVertexFinder.h>
-#include <trackreco/PHTpcClusterMover.h>
 #include <trackreco/PHTpcDeltaZCorrection.h>
-#include <trackreco/PHTpcTrackSeedCircleFit.h>
 #include <trackreco/PHTrackCleaner.h>
 #include <trackreco/PHTrackSeeding.h>
 #include <trackreco/PHTruthSiliconAssociation.h>
@@ -80,6 +78,10 @@ namespace G4TRACKING
   bool use_full_truth_track_seeding = false;  // makes track seeds using truth info, used for both Acts and Genfit
   bool use_truth_vertexing = false;           // if true runs truth vertexing, if false runs PHSimpleVertexFinder
 
+  // Runs a converter from TrackSeed object to SvtxTrack object to enable
+  // use of the various evaluation tools already available
+  bool convert_seeds_to_svtxtracks = false;
+
 }  // namespace G4TRACKING
 
 void TrackingInit()
@@ -95,6 +97,7 @@ void TrackingInit()
 
   // Geometry must be built before any Acts modules
   MakeActsGeometry* geom = new MakeActsGeometry();
+  geom->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
   geom->Verbosity(verbosity);
   
   geom->loadMagField(G4TRACKING::init_acts_magfield);
@@ -105,7 +108,7 @@ void TrackingInit()
   se->registerSubsystem(geom);
 
   // space charge correction
-  /* corrections are applied in the track finding, and via PHTpcClusterMover before the final track fit */
+  /* corrections are applied in the track finding, and via TpcClusterMover before the final track fit */
   if( G4TPC::ENABLE_CORRECTIONS )
   {
     auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
@@ -133,7 +136,7 @@ void Tracking_Reco_TrackSeed()
       // track stubs are given the location of the truth vertex in this module
       auto pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingSilicon");
       pat_rec->Verbosity(verbosity);
-      pat_rec->set_track_map_name("SvtxSiliconTrackMap");
+      pat_rec->set_track_map_name("SiliconTrackSeedContainer");
       pat_rec->set_min_layer(0);
       pat_rec->set_max_layer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
       se->registerSubsystem(pat_rec);
@@ -155,7 +158,7 @@ void Tracking_Reco_TrackSeed()
       // track stubs are given the position odf the truth vertex in this module
       auto pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingTpc");
       pat_rec->Verbosity(verbosity);
-      pat_rec->set_track_map_name("SvtxTrackMap");
+      pat_rec->set_track_map_name("TpcTrackSeedContainer");
       pat_rec->set_min_layer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
       pat_rec->set_max_layer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer + G4TPC::n_gas_layer);
       se->registerSubsystem(pat_rec);
@@ -177,11 +180,6 @@ void Tracking_Reco_TrackSeed()
       seeder->useFixedClusterError(true);
       se->registerSubsystem(seeder);
 
-      // perform track circle fit to get firt estimate of track parameters at origin
-      auto vtxassoc2 = new PHTpcTrackSeedCircleFit("PrePropagatorPHTpcTrackSeedCircleFit");
-      vtxassoc2->Verbosity(verbosity);
-      se->registerSubsystem(vtxassoc2);
-
       // expand stubs in the TPC using simple kalman filter
       auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
       cprop->set_field_dir(G4MAGNET::magfield_rescale);
@@ -196,16 +194,6 @@ void Tracking_Reco_TrackSeed()
       se->registerSubsystem(cprop);
     }
 
-    // redo circle fit on fully propagated tracks
-    auto vtxassoc = new PHTpcTrackSeedCircleFit;
-    vtxassoc->Verbosity(verbosity);
-    se->registerSubsystem(vtxassoc);
-
-    // Choose the best duplicate TPC track seed
-    auto ghosts = new PHGhostRejection;
-    ghosts->Verbosity(verbosity);
-    se->registerSubsystem(ghosts);
-  
     // match silicon track seeds to TPC track seeds
     if (G4TRACKING::use_truth_si_matching)
     {
@@ -222,6 +210,7 @@ void Tracking_Reco_TrackSeed()
       silicon_match->Verbosity(verbosity);
       silicon_match->set_field(G4MAGNET::magfield);
       silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
+      silicon_match->set_pp_mode(false);
       if (G4TRACKING::SC_CALIBMODE)
       {
         // search windows for initial matching with distortions
@@ -277,7 +266,7 @@ void Tracking_Reco_TrackSeed()
     // Includes clusters for TPC, silicon and MM's
     auto pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingFull");
     pat_rec->Verbosity(verbosity);
-    pat_rec->set_track_map_name("SvtxTrackMap");
+    pat_rec->set_track_map_name("SvtxTrackSeedContainer");
     se->registerSubsystem(pat_rec);
 
   }
@@ -287,7 +276,17 @@ void Tracking_Reco_TrackSeed()
    * at this stage tracks are fully assembled. They contain clusters spaning Silicon detectors, TPC and Micromegas
    * they are ready to be fit.
    */ 
+   if(G4TRACKING::convert_seeds_to_svtxtracks)
+	{
+	  TrackSeedTrackMapConverter *converter = new TrackSeedTrackMapConverter();
+	  // Default set to full SvtxTrackSeeds. Can be set to 
+	  // SiliconTrackSeedContainer or TpcTrackSeedContainer 
+	  converter->setTrackSeedName("SvtxTrackSeedContainer");
+	  converter->Verbosity(verbosity);
+	  se->registerSubsystem(converter);
+      }
   
+
 }
 
 void Tracking_Reco_TrackFit()
@@ -295,16 +294,12 @@ void Tracking_Reco_TrackFit()
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   auto se = Fun4AllServer::instance();
 
-  /*
-  * add cluster mover to apply TPC distortion corrections to clusters belonging to tracks
-  * once the correction is applied, the cluster are moved back to TPC surfaces using local track angles
-  * moved clusters are stored in a separate map, called CORRECTED_TRKR_CLUSTER
-  */
-  if( G4TPC::ENABLE_CORRECTIONS ) se->registerSubsystem(new PHTpcClusterMover);
-  
   // correct clusters for particle propagation in TPC
-  se->registerSubsystem(new PHTpcDeltaZCorrection);
+  auto deltazcorr = new PHTpcDeltaZCorrection;
+  deltazcorr->Verbosity(verbosity);
+  se->registerSubsystem(deltazcorr);
   
+
   // perform final track fit with ACTS
   auto actsFit = new PHActsTrkFitter;
   actsFit->Verbosity(verbosity);
@@ -380,6 +375,21 @@ void Tracking_Reco()
   Tracking_Reco_TrackFit();
 }
 
+void build_truthreco_tables()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+  Fun4AllServer* se = Fun4AllServer::instance();
+  
+  // this module builds high level truth track association table.
+  // If this module is used, this table should be called before any evaluator calls.
+  // Removing this module, evaluation will still work but trace truth association through the layers of G4-hit-cluster
+  SvtxTruthRecoTableEval *tables = new SvtxTruthRecoTableEval();
+  tables->Verbosity(verbosity);
+  se->registerSubsystem(tables);
+
+  return;
+}
+
 void Tracking_Eval(const std::string& outputfile)
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
@@ -389,6 +399,8 @@ void Tracking_Eval(const std::string& outputfile)
   //---------------
 
   Fun4AllServer* se = Fun4AllServer::instance();
+
+  build_truthreco_tables();
 
   //----------------
   // Tracking evaluation
@@ -411,10 +423,6 @@ void Tracking_Eval(const std::string& outputfile)
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
-  SvtxTruthRecoTableEval *tables = new SvtxTruthRecoTableEval();
-  tables->Verbosity(verbosity);
-  se->registerSubsystem(tables);
-
   return;
 }
 
@@ -427,6 +435,8 @@ void Tracking_QA()
   //---------------
 
   Fun4AllServer* se = Fun4AllServer::instance();
+
+  build_truthreco_tables();
 
   QAG4SimulationTracking* qa = new QAG4SimulationTracking();
   //  qa->addEmbeddingID(2);
