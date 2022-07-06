@@ -216,7 +216,7 @@ namespace SARTRE
 namespace PILEUP
 {
   string pileupfile = "/sphenix/sim/sim01/sphnxpro/MDC1/sHijing_HepMC/data/sHijing_0_20fm-0000000001-00000.dat";
-  double TpcDriftVelocity = G4TPC::tpc_drift_velocity;
+  double TpcDriftVelocity = G4TPC::tpc_drift_velocity_sim;
 }  // namespace PILEUP
 
 // collection of pointers to particle generators we can grab in the Fun4All macro
