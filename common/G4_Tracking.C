@@ -82,10 +82,15 @@ namespace G4TRACKING
   // use of the various evaluation tools already available
   bool convert_seeds_to_svtxtracks = false;
 
-}  // namespace G4TRACKING
 
-void TrackingInit()
+void ActsGeomInit()
 {
+  static bool wasCalled = false;
+  if (wasCalled)
+  {
+    return;
+  }
+  wasCalled = true;
   if (!Enable::MICROMEGAS)
   {
     G4MICROMEGAS::n_micromegas_layer = 0;
@@ -106,11 +111,17 @@ void TrackingInit()
   geom->add_fake_surfaces(G4TRACKING::add_fake_surfaces);
   geom->build_mm_surfaces(Enable::MICROMEGAS);
   se->registerSubsystem(geom);
+}
+}  // namespace G4TRACKING
 
+void TrackingInit()
+{
+  G4TRACKING::ActsGeomInit();
   // space charge correction
   /* corrections are applied in the track finding, and via TpcClusterMover before the final track fit */
   if( G4TPC::ENABLE_CORRECTIONS )
   {
+    auto se = Fun4AllServer::instance();
     auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
     tpcLoadDistortionCorrection->set_distortion_filename( G4TPC::correction_filename );
     se->registerSubsystem(tpcLoadDistortionCorrection);
