@@ -6,6 +6,7 @@
 #include <G4_Intt.C>
 #include <G4_Mvtx.C>
 #include <G4_TPC.C>
+#include <G4_Tracking.C>
 
 #include <g4micromegas/PHG4MicromegasDigitizer.h>
 #include <g4micromegas/PHG4MicromegasHitReco.h>
@@ -21,21 +22,17 @@
 R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libg4micromegas.so)
 
+// some of the micromegas variables have been moved to GlobalVariables.C:
+// bool MICROMEGAS = false; // moved to GlobalVariables.C
+// int n_micromegas_layer = 2;
+// because they are also needed in other macros
+
 namespace Enable
 {
-  bool MICROMEGAS = false;
   bool MICROMEGAS_CELL = false;
   bool MICROMEGAS_CLUSTER = false;
   bool MICROMEGAS_QA = false;
 }  // namespace Enable
-
-namespace G4MICROMEGAS
-{
-
-  // number of micromegas layers
-  int n_micromegas_layer = 2;
-  
-}  // namespace G4MICROMEGAS
 
 void MicromegasInit()
 {
@@ -68,6 +65,8 @@ void Micromegas(PHG4Reco* g4Reco)
 
 void Micromegas_Cells()
 {
+// the acts geometry needs to go here since it will be used by the PHG4MicromegasHitReco
+  G4TRACKING::ActsGeomInit();
   auto se = Fun4AllServer::instance();
   // micromegas
   auto reco = new PHG4MicromegasHitReco;
