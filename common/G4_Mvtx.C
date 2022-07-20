@@ -101,7 +101,7 @@ void Mvtx_Cells()
     // override the default timing window for this layer - default is +/- 5000 ns
     maps_hits->set_timing_window(ilayer, -maps_readout_window, maps_readout_window + extended_readout_time);
   }
-  std::cout << "MVTX readout window is from " << -maps_readout_window << " to " <<  maps_readout_window + extended_readout_time << std::endl;
+  std::cout << "PHG4MvtxHitReco: readout window is from " << -maps_readout_window << " to " <<  maps_readout_window + extended_readout_time << std::endl;
   se->registerSubsystem(maps_hits);
 
   PHG4MvtxDigitizer* digimvtx = new PHG4MvtxDigitizer();

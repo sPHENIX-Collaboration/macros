@@ -72,7 +72,7 @@ namespace G4TRACKING
   
   // Truth seeding options for diagnostics (can use any or all)
   bool use_truth_silicon_seeding = false;     // if true runs truth silicon seeding instead of acts silicon seeding
-  bool use_truth_tpc_seeding = true;         // if true runs truth silicon seeding instead of reco TPC seeding
+  bool use_truth_tpc_seeding = false;         // if true runs truth silicon seeding instead of reco TPC seeding
   bool use_truth_si_matching = false;         // if true, associates silicon clusters using best truth track match to TPC seed tracks - for diagnostics only
                                               // Full truth track seeding
   bool use_full_truth_track_seeding = false;  // makes track seeds using truth info, used for both Acts and Genfit
@@ -126,11 +126,13 @@ void TrackingInit()
     tpcLoadDistortionCorrection->set_distortion_filename( G4TPC::correction_filename );
     se->registerSubsystem(tpcLoadDistortionCorrection);
   }
-  
+
 }
 
 void Tracking_Reco_TrackSeed()
 {
+  // !!!! THIS IS TEMPORARY, UNTIL CA SEEDER CAN HANDLE TRACKS FROM LARGE Z !!!!!
+  if(TRACKING::pp_mode) G4TRACKING::use_truth_tpc_seeding = true;  
   
   // set up verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
@@ -222,6 +224,7 @@ void Tracking_Reco_TrackSeed()
       silicon_match->set_field(G4MAGNET::magfield);
       silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
       silicon_match->set_pp_mode(TRACKING::pp_mode);
+      std::cout << "PHSiliconTpcTrackMatching pp_mode set to " << TRACKING::pp_mode << std::endl;
       if (G4TRACKING::SC_CALIBMODE)
       {
         // search windows for initial matching with distortions
@@ -307,13 +310,13 @@ void Tracking_Reco_TrackFit()
 
   // correct clusters for particle propagation in TPC
   auto deltazcorr = new PHTpcDeltaZCorrection;
-  deltazcorr->Verbosity(verbosity);
+  deltazcorr->Verbosity(1);
   se->registerSubsystem(deltazcorr);
   
 
   // perform final track fit with ACTS
   auto actsFit = new PHActsTrkFitter;
-  actsFit->Verbosity(0);
+  actsFit->Verbosity(2);
   
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
@@ -346,7 +349,7 @@ void Tracking_Reco_TrackFit()
       // Choose the best silicon matched track for each TPC track seed
       /* this breaks in truth_track seeding mode because there is no TpcSeed */
       auto cleaner = new PHTrackCleaner;
-      cleaner->Verbosity(verbosity);
+      cleaner->Verbosity(5);
       se->registerSubsystem(cleaner);
     }
     
@@ -433,7 +436,8 @@ void Tracking_Eval(const std::string& outputfile)
   if(TRACKING::pp_mode) embed_scan = false;
   eval->scan_for_embedded(embed_scan);   // take all tracks if false - take only embedded tracks if true
   eval->scan_for_primaries(embed_scan);  // defaults to only thrown particles for ntp_gtrack
-  eval->Verbosity(verbosity);
+  std::cout << "SvtxEvaluator: pp_mode set to " << TRACKING::pp_mode << " and scan_for_embedded set to " << embed_scan << std::endl;
+  eval->Verbosity(1);
   se->registerSubsystem(eval);
 
   return;
