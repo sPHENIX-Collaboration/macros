@@ -7,6 +7,8 @@
 #include <g4calo/HcalRawTowerBuilder.h>
 #include <g4calo/RawTowerDigitizer.h>
 
+#include <g4ohcal/PHG4OHCalSubsystem.h>
+
 #include <g4detectors/PHG4HcalCellReco.h>
 #include <g4detectors/PHG4OuterHcalSubsystem.h>
 
@@ -17,6 +19,7 @@
 #include <caloreco/RawClusterBuilderGraph.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
+
 #include <qa_modules/QAG4SimulationCalorimeter.h>
 
 #include <fun4all/Fun4AllServer.h>
@@ -25,6 +28,7 @@ R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libg4ohcal.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
 namespace Enable
@@ -37,6 +41,7 @@ namespace Enable
   bool HCALOUT_CLUSTER = false;
   bool HCALOUT_EVAL = false;
   bool HCALOUT_QA = false;
+  bool HCALOUT_OLD = true;
   int HCALOUT_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -44,6 +49,9 @@ namespace G4HCALOUT
 {
   double outer_radius = 264.71;
   double size_z = 304.91 * 2;
+  double phistart = 0.026598397;
+  double tower_emin = NAN;
+  int light_scint_model = -1;
 
   // Digitization (default photon digi):
   RawTowerDigitizer::enu_digi_algorithm TowerDigi = RawTowerDigitizer::kSimple_photon_digitization;
@@ -82,44 +90,68 @@ double HCalOuter(PHG4Reco *g4Reco,
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALOUT_OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
 
-  PHG4OuterHcalSubsystem *hcal = new PHG4OuterHcalSubsystem("HCALOUT");
-  // hcal->set_double_param("inner_radius", 183.3);
-  //-----------------------------------------
-  // the light correction can be set in a single call
-  // hcal->set_double_param("light_balance_inner_corr", NAN);
-  // hcal->set_double_param("light_balance_inner_radius", NAN);
-  // hcal->set_double_param("light_balance_outer_corr", NAN);
-  // hcal->set_double_param("light_balance_outer_radius", NAN);
-  // hcal->set_double_param("magnet_cutout_radius", 195.31);
-  // hcal->set_double_param("magnet_cutout_scinti_radius", 195.96);
-  // hcal->SetLightCorrection(NAN,NAN,NAN,NAN);
-  //-----------------------------------------
-  // hcal->set_double_param("outer_radius", G4HCALOUT::outer_radius);
-  // hcal->set_double_param("place_x", 0.);
-  // hcal->set_double_param("place_y", 0.);
-  // hcal->set_double_param("place_z", 0.);
-  // hcal->set_double_param("rot_x", 0.);
-  // hcal->set_double_param("rot_y", 0.);
-  // hcal->set_double_param("rot_z", 0.);
-  // hcal->set_double_param("scinti_eta_coverage", 1.1);
-  // hcal->set_double_param("scinti_gap", 0.85);
-  // hcal->set_double_param("scinti_gap_neighbor", 0.1);
-  // hcal->set_double_param("scinti_inner_radius",183.89);
-  // hcal->set_double_param("scinti_outer_radius",263.27);
-  // hcal->set_double_param("scinti_tile_thickness", 0.7);
-  // hcal->set_double_param("size_z", G4HCALOUT::size_z);
-  // hcal->set_double_param("steplimits", NAN);
-  // hcal->set_double_param("tilt_angle", -11.23);
+  PHG4DetectorSubsystem *hcal;
+  if (Enable::HCALOUT_OLD)
+  {
+    hcal = new PHG4OuterHcalSubsystem("HCALOUT");
+    if (! isfinite(G4HCALOUT::phistart))
+    {
+      G4HCALOUT::phistart = 0.026598397; // offet in phi (from zero) extracted from geantinos
+    }
+    
+    // hcal->set_double_param("inner_radius", 183.3);
+    //-----------------------------------------
+    // the light correction can be set in a single call
+    // hcal->set_double_param("light_balance_inner_corr", NAN);
+    // hcal->set_double_param("light_balance_inner_radius", NAN);
+    // hcal->set_double_param("light_balance_outer_corr", NAN);
+    // hcal->set_double_param("light_balance_outer_radius", NAN);
+    // hcal->set_double_param("magnet_cutout_radius", 195.31);
+    // hcal->set_double_param("magnet_cutout_scinti_radius", 195.96);
+    // hcal->SetLightCorrection(NAN,NAN,NAN,NAN);
+    //-----------------------------------------
+    // hcal->set_double_param("outer_radius", G4HCALOUT::outer_radius);
+    // hcal->set_double_param("place_x", 0.);
+    // hcal->set_double_param("place_y", 0.);
+    // hcal->set_double_param("place_z", 0.);
+    // hcal->set_double_param("rot_x", 0.);
+    // hcal->set_double_param("rot_y", 0.);
+    // hcal->set_double_param("rot_z", 0.);
+    // hcal->set_double_param("scinti_eta_coverage", 1.1);
+    // hcal->set_double_param("scinti_gap", 0.85);
+    // hcal->set_double_param("scinti_gap_neighbor", 0.1);
+    // hcal->set_double_param("scinti_inner_radius",183.89);
+    // hcal->set_double_param("scinti_outer_radius",263.27);
+    // hcal->set_double_param("scinti_tile_thickness", 0.7);
+    // hcal->set_double_param("size_z", G4HCALOUT::size_z);
+    // hcal->set_double_param("steplimits", NAN);
+    // hcal->set_double_param("tilt_angle", -11.23);
 
-  // hcal->set_int_param("light_scint_model", 1);
-  // hcal->set_int_param("magnet_cutout_first_scinti", 8);
-  // hcal->set_int_param("ncross", 0);
-  // hcal->set_int_param("n_towers", 64);
-  // hcal->set_int_param("n_scinti_plates_per_tower", 5);
-  // hcal->set_int_param("n_scinti_tiles", 12);
+    // hcal->set_int_param("light_scint_model", 1);
+    // hcal->set_int_param("magnet_cutout_first_scinti", 8);
+    // hcal->set_int_param("ncross", 0);
+    // hcal->set_int_param("n_towers", 64);
+    // hcal->set_int_param("n_scinti_plates_per_tower", 5);
+    // hcal->set_int_param("n_scinti_tiles", 12);
 
-  // hcal->set_string_param("material", "Steel_1006");
+    // hcal->set_string_param("material", "Steel_1006");
+  }
+  else
+  {
+    hcal = new PHG4OHCalSubsystem("HCALOUT");
+std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/OuterHCalAbsorberTiles_merged.gdml";
+    hcal->set_string_param("GDMPath",hcaltiles);
+    if (! isfinite(G4HCALOUT::phistart))
+    {
+      G4HCALOUT::phistart = -0.0248462127; // offet in phi (from zero) extracted from geantinos
+    }
 
+  }
+
+  if (G4HCALOUT::light_scint_model >= 0)
+  {
+    hcal->set_int_param("light_scint_model", G4HCALOUT::light_scint_model);
+  }
   hcal->SetActive();
   hcal->SuperDetector("HCALOUT");
   if (AbsorberActive)
@@ -169,6 +201,11 @@ void HCALOuter_Towers()
   HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalOutRawTowerBuilder");
   TowerBuilder->Detector("HCALOUT");
   TowerBuilder->set_sim_tower_node_prefix("SIM");
+  TowerBuilder->set_double_param("phistart",G4HCALOUT::phistart);
+  if (isfinite(G4HCALOUT::tower_emin))
+  {
+    TowerBuilder->set_double_param("emin",G4HCALOUT::tower_emin);
+  }
   // this sets specific decalibration factors
   // for a given cell
   // TowerBuilder->set_cell_decal_factor(1,10,0.1);

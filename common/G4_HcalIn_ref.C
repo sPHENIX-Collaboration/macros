@@ -8,6 +8,8 @@
 #include <g4calo/HcalRawTowerBuilder.h>
 #include <g4calo/RawTowerDigitizer.h>
 
+#include <g4ihcal/PHG4IHCalSubsystem.h>
+
 #include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4detectors/PHG4HcalCellReco.h>
 #include <g4detectors/PHG4InnerHcalSubsystem.h>
@@ -19,6 +21,7 @@
 #include <caloreco/RawClusterBuilderGraph.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
+
 #include <qa_modules/QAG4SimulationCalorimeter.h>
 
 #include <fun4all/Fun4AllServer.h>
@@ -27,6 +30,7 @@ R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
+R__LOAD_LIBRARY(libg4ihcal.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
 void HCalInner_SupportRing(PHG4Reco *g4Reco);
@@ -42,6 +46,7 @@ namespace Enable
   bool HCALIN_EVAL = false;
   bool HCALIN_QA = false;
   bool HCALIN_SUPPORT = false;
+  bool HCALIN_OLD = true;
   int HCALIN_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -50,7 +55,9 @@ namespace G4HCALIN
   double support_ring_outer_radius = 178.0 - 0.001;
   double support_ring_z_ring2 = (2150 + 2175) / 2. / 10.;
   double dz = 25. / 10.;
-
+  double phistart = NAN;
+  double tower_emin = NAN;
+  int light_scint_model = -1;
   //Inner HCal absorber material selector:
   //false - old version, absorber material is SS310
   //true - default Choose if you want Aluminum
@@ -100,60 +107,81 @@ double HCalInner(PHG4Reco *g4Reco,
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALIN_OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
 
+  PHG4DetectorSubsystem *hcal;
   // all sizes are in cm!
-  PHG4InnerHcalSubsystem *hcal = new PHG4InnerHcalSubsystem("HCALIN");
-  // these are the parameters you can change with their default settings
-  // hcal->set_string_param("material","SS310");
-  if (G4HCALIN::inner_hcal_material_Al)
+  if (Enable::HCALIN_OLD)
   {
-    if (verbosity > 0)
+    hcal = new PHG4InnerHcalSubsystem("HCALIN");
+    if (! isfinite(G4HCALIN::phistart))
     {
-      cout << "HCalInner - construct inner HCal absorber with G4_Al" << endl;
+      G4HCALIN::phistart = 0.0328877688; // offet in phi (from zero) extracted from geantinos
     }
-    hcal->set_string_param("material", "G4_Al");
+    // these are the parameters you can change with their default settings
+    // hcal->set_string_param("material","SS310");
+    if (G4HCALIN::inner_hcal_material_Al)
+    {
+      if (verbosity > 0)
+      {
+	cout << "HCalInner - construct inner HCal absorber with G4_Al" << endl;
+      }
+      hcal->set_string_param("material", "G4_Al");
+    }
+    else
+    {
+      if (verbosity > 0)
+      {
+	cout << "HCalInner - construct inner HCal absorber with SS310" << endl;
+      }
+      hcal->set_string_param("material", "SS310");
+    }
+    // hcal->set_double_param("inner_radius", 117.27);
+    //-----------------------------------------
+    // the light correction can be set in a single call
+    // hcal->set_double_param("light_balance_inner_corr", NAN);
+    // hcal->set_double_param("light_balance_inner_radius", NAN);
+    // hcal->set_double_param("light_balance_outer_corr", NAN);
+    // hcal->set_double_param("light_balance_outer_radius", NAN);
+    // hcal->SetLightCorrection(NAN,NAN,NAN,NAN);
+    //-----------------------------------------
+    // hcal->set_double_param("outer_radius", 134.42);
+    // hcal->set_double_param("place_x", 0.);
+    // hcal->set_double_param("place_y", 0.);
+    // hcal->set_double_param("place_z", 0.);
+    // hcal->set_double_param("rot_x", 0.);
+    // hcal->set_double_param("rot_y", 0.);
+    // hcal->set_double_param("rot_z", 0.);
+    // hcal->set_double_param("scinti_eta_coverage", 1.1);
+    // hcal->set_double_param("scinti_gap_neighbor", 0.1);
+    // hcal->set_double_param("scinti_inner_gap", 0.85);
+    // hcal->set_double_param("scinti_outer_gap", 1.22 * (5.0 / 4.0));
+    // hcal->set_double_param("scinti_outer_radius", 133.3);
+    // hcal->set_double_param("scinti_tile_thickness", 0.7);
+    // hcal->set_double_param("size_z", 175.94 * 2);
+    // hcal->set_double_param("steplimits", NAN);
+    // hcal->set_double_param("tilt_angle", 36.15);
+
+    // hcal->set_int_param("light_scint_model", 1);
+    // hcal->set_int_param("ncross", 0);
+    // hcal->set_int_param("n_towers", 64);
+    // hcal->set_int_param("n_scinti_plates_per_tower", 4);
+    // hcal->set_int_param("n_scinti_tiles", 12);
+
+    // hcal->set_string_param("material", "SS310");
   }
   else
   {
-    if (verbosity > 0)
+    hcal = new PHG4IHCalSubsystem("HCALIN");
+    std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/InnerHCalAbsorberTiles_merged.gdml";
+    hcal->set_string_param("GDMPath",hcaltiles);
+    if (! isfinite(G4HCALIN::phistart))
     {
-      cout << "HCalInner - construct inner HCal absorber with SS310" << endl;
+      G4HCALIN::phistart = 0.0295080867; // extracted from geantinos
     }
-    hcal->set_string_param("material", "SS310");
   }
-  // hcal->set_double_param("inner_radius", 117.27);
-  //-----------------------------------------
-  // the light correction can be set in a single call
-  // hcal->set_double_param("light_balance_inner_corr", NAN);
-  // hcal->set_double_param("light_balance_inner_radius", NAN);
-  // hcal->set_double_param("light_balance_outer_corr", NAN);
-  // hcal->set_double_param("light_balance_outer_radius", NAN);
-  // hcal->SetLightCorrection(NAN,NAN,NAN,NAN);
-  //-----------------------------------------
-  // hcal->set_double_param("outer_radius", 134.42);
-  // hcal->set_double_param("place_x", 0.);
-  // hcal->set_double_param("place_y", 0.);
-  // hcal->set_double_param("place_z", 0.);
-  // hcal->set_double_param("rot_x", 0.);
-  // hcal->set_double_param("rot_y", 0.);
-  // hcal->set_double_param("rot_z", 0.);
-  // hcal->set_double_param("scinti_eta_coverage", 1.1);
-  // hcal->set_double_param("scinti_gap_neighbor", 0.1);
-  // hcal->set_double_param("scinti_inner_gap", 0.85);
-  // hcal->set_double_param("scinti_outer_gap", 1.22 * (5.0 / 4.0));
-  // hcal->set_double_param("scinti_outer_radius", 133.3);
-  // hcal->set_double_param("scinti_tile_thickness", 0.7);
-  // hcal->set_double_param("size_z", 175.94 * 2);
-  // hcal->set_double_param("steplimits", NAN);
-  // hcal->set_double_param("tilt_angle", 36.15);
-
-  // hcal->set_int_param("light_scint_model", 1);
-  // hcal->set_int_param("ncross", 0);
-  // hcal->set_int_param("n_towers", 64);
-  // hcal->set_int_param("n_scinti_plates_per_tower", 4);
-  // hcal->set_int_param("n_scinti_tiles", 12);
-
-  // hcal->set_string_param("material", "SS310");
-
+  if (G4HCALIN::light_scint_model >= 0)
+  {
+    hcal->set_int_param("light_scint_model", G4HCALIN::light_scint_model);
+  }
   hcal->SetActive();
   hcal->SuperDetector("HCALIN");
   if (AbsorberActive)
@@ -242,6 +270,11 @@ void HCALInner_Towers()
   HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalInRawTowerBuilder");
   TowerBuilder->Detector("HCALIN");
   TowerBuilder->set_sim_tower_node_prefix("SIM");
+  TowerBuilder->set_double_param("phistart",G4HCALIN::phistart);
+  if (isfinite(G4HCALIN::tower_emin))
+  {
+    TowerBuilder->set_double_param("emin",G4HCALIN::tower_emin);
+  }
   // this sets specific decalibration factors
   // for a given cell
   // TowerBuilder->set_cell_decal_factor(1,10,0.1);
