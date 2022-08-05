@@ -52,6 +52,7 @@ namespace G4HCALOUT
   double phistart = 0.026598397;
   double tower_emin = NAN;
   int light_scint_model = -1;
+  int tower_energy_source = -1;
 
   // Digitization (default photon digi):
   RawTowerDigitizer::enu_digi_algorithm TowerDigi = RawTowerDigitizer::kSimple_photon_digitization;
@@ -176,7 +177,7 @@ void HCALOuter_Cells()
 
   PHG4HcalCellReco *hc = new PHG4HcalCellReco("HCALOUT_CELLRECO");
   hc->Detector("HCALOUT");
-  //  hc->Verbosity(2);
+  hc->Verbosity(verbosity);
   // check for energy conservation - needs modified "infinite" timing cuts
   // 0-999999999
   //  hc->checkenergy();
@@ -206,6 +207,10 @@ void HCALOuter_Towers()
   {
     TowerBuilder->set_double_param("emin",G4HCALOUT::tower_emin);
   }
+  if (G4HCALOUT::tower_energy_source >= 0)
+  {
+    TowerBuilder->set_int_param("tower_energy_source",G4HCALOUT::tower_energy_source);
+  }
   // this sets specific decalibration factors
   // for a given cell
   // TowerBuilder->set_cell_decal_factor(1,10,0.1);
@@ -226,6 +231,7 @@ void HCALOuter_Towers()
   TowerDigitizer->set_photonelec_ADC(16. / 5.);
   TowerDigitizer->set_photonelec_yield_visible_GeV(16. / 5 / (0.2e-3));
   TowerDigitizer->set_zero_suppression_ADC(-0);  // no-zero suppression
+  TowerDigitizer->Verbosity(verbosity);
   se->registerSubsystem(TowerDigitizer);
 
   const double visible_sample_fraction_HCALOUT = 3.38021e-02;  // /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV.root_qa.rootQA_Draw_HCALOUT_G4Hit.pdf
@@ -245,6 +251,7 @@ void HCALOuter_Towers()
     TowerCalibration->set_calib_const_GeV_ADC(0.2e-3 / visible_sample_fraction_HCALOUT);
   }
   TowerCalibration->set_pedstal_ADC(0);
+  TowerCalibration->Verbosity(verbosity);
   se->registerSubsystem(TowerCalibration);
 
   return;
