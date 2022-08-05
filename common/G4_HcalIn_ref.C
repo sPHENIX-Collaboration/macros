@@ -58,6 +58,8 @@ namespace G4HCALIN
   double phistart = NAN;
   double tower_emin = NAN;
   int light_scint_model = -1;
+  int tower_energy_source = -1;
+
   //Inner HCal absorber material selector:
   //false - old version, absorber material is SS310
   //true - default Choose if you want Aluminum
@@ -246,7 +248,7 @@ void HCALInner_Cells()
 
   PHG4HcalCellReco *hc = new PHG4HcalCellReco("HCALIN_CELLRECO");
   hc->Detector("HCALIN");
-  //  hc->Verbosity(2);
+  hc->Verbosity(verbosity);
   // check for energy conservation - needs modified "infinite" timing cuts
   // 0-999999999
   //  hc->checkenergy();
@@ -275,6 +277,10 @@ void HCALInner_Towers()
   {
     TowerBuilder->set_double_param("emin",G4HCALIN::tower_emin);
   }
+  if (G4HCALIN::tower_energy_source >= 0)
+  {
+    TowerBuilder->set_int_param("tower_energy_source",G4HCALIN::tower_energy_source);
+  }
   // this sets specific decalibration factors
   // for a given cell
   // TowerBuilder->set_cell_decal_factor(1,10,0.1);
@@ -293,6 +299,7 @@ void HCALInner_Towers()
   TowerDigitizer->set_photonelec_ADC(32. / 5.);
   TowerDigitizer->set_photonelec_yield_visible_GeV(32. / 5 / (0.4e-3));
   TowerDigitizer->set_zero_suppression_ADC(-0);  // no-zero suppression
+  TowerDigitizer->Verbosity(verbosity);
   se->registerSubsystem(TowerDigitizer);
 
   //Default sampling fraction for SS310
@@ -315,6 +322,7 @@ void HCALInner_Towers()
     TowerCalibration->set_calib_const_GeV_ADC(0.4e-3 / visible_sample_fraction_HCALIN);
   }
   TowerCalibration->set_pedstal_ADC(0);
+  TowerCalibration->Verbosity(verbosity);
   se->registerSubsystem(TowerCalibration);
 
   return;
