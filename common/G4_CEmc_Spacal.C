@@ -315,14 +315,20 @@ void CEMC_Clusters()
   }
 
   RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
-
-  clusterCorrection->Get_eclus_CalibrationParameters().ReadFromFile("CEMC_RECALIB", "xml", 0, 0,
-                                                                    //raw location
-                                                                    string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
-
-  clusterCorrection->Get_ecore_CalibrationParameters().ReadFromFile("CEMC_ECORE_RECALIB", "xml", 0, 0,
-                                                                    //raw location
-                                                                    string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+  if (Enable::XPLOAD)
+  {
+    clusterCorrection->Get_eclus_CalibrationParameters().ReadFromCDB("CEMCRECALIB");
+    clusterCorrection->Get_ecore_CalibrationParameters().ReadFromCDB("CEMC_ECORE_RECALIB");
+  }
+  else
+  {
+    clusterCorrection->Get_eclus_CalibrationParameters().ReadFromFile("CEMC_RECALIB", "xml", 0, 0,
+								      //raw location
+								      string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+    clusterCorrection->Get_ecore_CalibrationParameters().ReadFromFile("CEMC_ECORE_RECALIB", "xml", 0, 0,
+								      //raw location
+								      string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+  }
 
   clusterCorrection->Verbosity(verbosity);
   se->registerSubsystem(clusterCorrection);
