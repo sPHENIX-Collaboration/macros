@@ -157,7 +157,6 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
   cemc->set_int_param("azimuthal_seg_visible", 1);
   cemc->set_int_param("construction_verbose", 0);
   cemc->Verbosity(0);
-
   cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
   cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2018ProjTilted/"));
   cemc->set_double_param("radius", radius);            // overwrite minimal radius
@@ -252,8 +251,15 @@ void CEMC_Towers()
   TowerDigitizer->set_photonelec_yield_visible_GeV(photoelectron_per_GeV / sampling_fraction);
   TowerDigitizer->set_variable_zero_suppression(true);  //read zs values from calibrations file comment next line if true
                                                         //  TowerDigitizer->set_zero_suppression_ADC(16);  // eRD1 test beam setting
-  TowerDigitizer->GetParameters().ReadFromFile("CEMC", "xml", 0, 0,
+  if (Enable::XPLOAD)
+  {
+    TowerDigitizer->GetParameters().ReadFromCDB("EMCTOWERCALIB");
+  }
+  else
+  {
+    TowerDigitizer->GetParameters().ReadFromFile("CEMC", "xml", 0, 0,
                                                string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
+  }
   se->registerSubsystem(TowerDigitizer);
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
@@ -268,8 +274,15 @@ void CEMC_Towers()
     else
     {
       TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
+  if (Enable::XPLOAD)
+  {
+    TowerCalibration->GetCalibrationParameters().ReadFromCDB("EMCTOWERCALIB");
+  }
+  else
+  {
       TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
 								string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
+  }
       TowerCalibration->set_variable_GeV_ADC(true);                                                                                                   //read GeV per ADC from calibrations file comment next line if true
       //    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);                                                             // overall energy scale based on 4-GeV photon simulations
       TowerCalibration->set_variable_pedestal(true);                                                                                                  //read pedestals from calibrations file comment next line if true
