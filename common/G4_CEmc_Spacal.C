@@ -89,7 +89,7 @@ void CEmcInit(const int i = 0)
 double
 CEmc(PHG4Reco *g4Reco, double radius, const int crossings)
 {
-    return CEmc_2DProjectiveSpacal(/*PHG4Reco**/ g4Reco, /*double*/ radius, /*const int */ crossings);
+  return CEmc_2DProjectiveSpacal(/*PHG4Reco**/ g4Reco, /*double*/ radius, /*const int */ crossings);
 }
 
 //! 2D full projective SPACAL
@@ -157,8 +157,15 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
   cemc->set_int_param("azimuthal_seg_visible", 1);
   cemc->set_int_param("construction_verbose", 0);
   cemc->Verbosity(0);
-  cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
-  cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2018ProjTilted/"));
+  if (Enable::XPLOAD)
+  {
+    cemc->UseCDB("CEMC_GEOMETRY");
+  }
+  else
+  {
+    cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
+    cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2018ProjTilted/"));
+  }
   cemc->set_double_param("radius", radius);            // overwrite minimal radius
   cemc->set_double_param("thickness", cemcthickness);  // overwrite thickness
 
@@ -234,10 +241,10 @@ void CEMC_Towers()
   se->registerSubsystem(TowerBuilder);
 
   double sampling_fraction = 1;
-    //      sampling_fraction = 0.02244; //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.3/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
-    //    sampling_fraction = 2.36081e-02;  //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
-    //    sampling_fraction = 1.90951e-02; // 2017 Tilt porjective SPACAL, 8 GeV photon, eta = 0.3 - 0.4
-    sampling_fraction = 2e-02;  // 2017 Tilt porjective SPACAL, tower-by-tower calibration
+  //      sampling_fraction = 0.02244; //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.3/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
+  //    sampling_fraction = 2.36081e-02;  //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
+  //    sampling_fraction = 1.90951e-02; // 2017 Tilt porjective SPACAL, 8 GeV photon, eta = 0.3 - 0.4
+  sampling_fraction = 2e-02;                 // 2017 Tilt porjective SPACAL, tower-by-tower calibration
   const double photoelectron_per_GeV = 500;  //500 photon per total GeV deposition
 
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
@@ -258,7 +265,7 @@ void CEMC_Towers()
   else
   {
     TowerDigitizer->GetParameters().ReadFromFile("CEMC", "xml", 0, 0,
-                                               string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
+                                                 string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
   }
   se->registerSubsystem(TowerDigitizer);
 
@@ -266,28 +273,28 @@ void CEMC_Towers()
   TowerCalibration->Detector("CEMC");
   TowerCalibration->Verbosity(verbosity);
 
-    if (G4CEMC::TowerDigi == RawTowerDigitizer::kNo_digitization)
-    {
-      // just use sampling fraction set previously
-      TowerCalibration->set_calib_const_GeV_ADC(1.0 / sampling_fraction);
-    }
-    else
-    {
-      TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
-  if (Enable::XPLOAD)
+  if (G4CEMC::TowerDigi == RawTowerDigitizer::kNo_digitization)
   {
-    TowerCalibration->GetCalibrationParameters().ReadFromCDB("EMCTOWERCALIB");
+    // just use sampling fraction set previously
+    TowerCalibration->set_calib_const_GeV_ADC(1.0 / sampling_fraction);
   }
   else
   {
-      TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
-								string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
-  }
-      TowerCalibration->set_variable_GeV_ADC(true);                                                                                                   //read GeV per ADC from calibrations file comment next line if true
-      //    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);                                                             // overall energy scale based on 4-GeV photon simulations
-      TowerCalibration->set_variable_pedestal(true);                                                                                                  //read pedestals from calibrations file comment next line if true
-      //    TowerCalibration->set_pedstal_ADC(0);
+    TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
+    if (Enable::XPLOAD)
+    {
+      TowerCalibration->GetCalibrationParameters().ReadFromCDB("EMCTOWERCALIB");
     }
+    else
+    {
+      TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
+                                                                string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
+    }
+    TowerCalibration->set_variable_GeV_ADC(true);  //read GeV per ADC from calibrations file comment next line if true
+    //    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);                                                             // overall energy scale based on 4-GeV photon simulations
+    TowerCalibration->set_variable_pedestal(true);  //read pedestals from calibrations file comment next line if true
+    //    TowerCalibration->set_pedstal_ADC(0);
+  }
   se->registerSubsystem(TowerCalibration);
 
   return;
@@ -332,11 +339,11 @@ void CEMC_Clusters()
   else
   {
     clusterCorrection->Get_eclus_CalibrationParameters().ReadFromFile("CEMC_RECALIB", "xml", 0, 0,
-								      //raw location
-								      string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+                                                                      //raw location
+                                                                      string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
     clusterCorrection->Get_ecore_CalibrationParameters().ReadFromFile("CEMC_ECORE_RECALIB", "xml", 0, 0,
-								      //raw location
-								      string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+                                                                      //raw location
+                                                                      string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
   }
 
   clusterCorrection->Verbosity(verbosity);
