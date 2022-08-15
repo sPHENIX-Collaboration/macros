@@ -16,10 +16,10 @@ R__LOAD_LIBRARY(libg4detectors.so)
 
 namespace Enable
 {
-  bool BBC = false;
-  bool BBC_SUPPORT = false;
-  bool BBCFAKE = false;
-  int BBC_VERBOSITY = 0;
+  bool BBC = false;          // Actual BBC detector
+  bool BBC_SUPPORT = false;  // BBC Supports
+  bool BBCFAKE = false;     // Just generate fake bbc vtx, t0
+  int  BBC_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4BBC
@@ -51,6 +51,7 @@ void Bbc(PHG4Reco* g4Reco)
   {
     PHG4BbcSubsystem* bbc = new PHG4BbcSubsystem("BBC");
     bbc->SuperDetector("BBC");
+    bbc->OverlapCheck( Enable::OVERLAPCHECK );
     bbc->SetActive();
     if (SupportActive)
     {

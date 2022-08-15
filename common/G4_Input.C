@@ -2,6 +2,7 @@
 #define MACRO_G4INPUT_C
 
 #include <GlobalVariables.C>
+#include <G4_TPC.C>
 
 #include <phpythia6/PHPythia6.h>
 
@@ -194,6 +195,7 @@ namespace INPUTEMBED
 {
   map<unsigned int, std::string> filename;
   map<unsigned int, std::string> listfile;
+  bool REPEAT = true;
 }  // namespace INPUTEMBED
 
 namespace PYTHIA6
@@ -214,7 +216,7 @@ namespace SARTRE
 namespace PILEUP
 {
   string pileupfile = "/sphenix/sim/sim01/sphnxpro/MDC1/sHijing_HepMC/data/sHijing_0_20fm-0000000001-00000.dat";
-  double TpcDriftVelocity = 8.0 / 1000.0;
+  double TpcDriftVelocity = G4TPC::tpc_drift_velocity_sim;
 }  // namespace PILEUP
 
 // collection of pointers to particle generators we can grab in the Fun4All macro
@@ -241,6 +243,13 @@ namespace INPUTMANAGER
 
 void InputInit()
 {
+  // for pileup sims embed id is 1, to distinguish particles
+  // which will be embedded (when Input::EMBED = true) into pileup sims
+  // we need to start at embedid = 2
+  if (Input::EMBED)
+  {
+    Input::EmbedId = 2;
+  }
   // first consistency checks - not all input generators play nice
   // with each other
   if (Input::READHITS && Input::EMBED)
@@ -470,7 +479,7 @@ void InputRegister()
   }
   // here are the various utility modules which read particles and
   // put them onto the G4 particle stack
-  if (Input::HEPMC or Input::PYTHIA8 or Input::PYTHIA6 or Input::READEIC)
+  if (Input::HEPMC or Input::PYTHIA8 or Input::PYTHIA6 or Input::SARTRE or Input::READEIC)
   {
     if (Input::HEPMC)
     {
@@ -516,7 +525,10 @@ void InputManagers()
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
       hitsin->fileopen(iter->second);
       hitsin->Verbosity(Input::VERBOSITY);
-      hitsin->Repeat();
+      if (INPUTEMBED::REPEAT)
+      {
+        hitsin->Repeat();
+      }
       se->registerInputManager(hitsin);
     }
     for (auto iter = INPUTEMBED::listfile.begin(); iter != INPUTEMBED::listfile.end(); ++iter)
@@ -525,7 +537,10 @@ void InputManagers()
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
       hitsin->AddListFile(iter->second);
       hitsin->Verbosity(Input::VERBOSITY);
-      hitsin->Repeat();
+      if (INPUTEMBED::REPEAT)
+      {
+        hitsin->Repeat();
+      }
       se->registerInputManager(hitsin);
     }
   }
