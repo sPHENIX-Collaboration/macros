@@ -57,6 +57,8 @@ namespace G4P6DECAYER
 namespace TRACKING
 {
   std::string TrackNodeName = "SvtxTrackMap";
+  double pp_mode = false;
+  double pp_extended_readout_time = 7000.0;  // ns
 }
 
 namespace G4MAGNET

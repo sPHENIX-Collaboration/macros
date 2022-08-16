@@ -165,9 +165,13 @@ void Intt_Cells()
   }
   // new storage containers
   PHG4InttHitReco* reco = new PHG4InttHitReco();
-  // The timing windows are hard-coded in the INTT ladder model, they can be overridden here
-  //reco->set_double_param("tmax",80.0);
-  //reco->set_double_param("tmin",-20.0);
+
+  // The timing window defaults are set in the INTT ladder model, they can be overridden here
+  double extended_readout_time = 0.0;
+  if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+  reco->set_double_param("tmax", 80.0 + extended_readout_time);
+  reco->set_double_param("tmin", -20.0);
+  std::cout << "INTT readout window is set to -20 to " << 80.0 + extended_readout_time << std::endl;
   reco->Verbosity(verbosity);
   se->registerSubsystem(reco);
 
