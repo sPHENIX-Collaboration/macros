@@ -97,11 +97,10 @@ void Mvtx_Cells()
   double maps_readout_window = 5000.0;  // ns
   double extended_readout_time = 0.0;
   if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
-  for (int ilayer = 0; ilayer < G4MVTX::n_maps_layer; ilayer++)
-  {
-    // override the default timing window for this layer - default is +/- 5000 ns
-    maps_hits->set_timing_window(ilayer, -maps_readout_window, maps_readout_window + extended_readout_time);
-  }
+  // override the default timing window - default is +/- 5000 ns
+  maps_hits->set_double_param("mvtx_tmin",  -maps_readout_window);
+  maps_hits->set_double_param("mvtx_tmax",  maps_readout_window + extended_readout_time);
+
   std::cout << "PHG4MvtxHitReco: readout window is from " << -maps_readout_window << " to " <<  maps_readout_window + extended_readout_time << std::endl;
   se->registerSubsystem(maps_hits);
 

@@ -184,7 +184,7 @@ void Tracking_Reco_TrackSeed()
       {
         seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
       }
-      seeder->Verbosity(0);
+      seeder->Verbosity(verbosity);
       seeder->SetLayerRange(7, 55);
       seeder->SetSearchWindow(0.01, 0.02);  // (eta width, phi width)
       seeder->SetMinHitsPerCluster(0);
@@ -220,7 +220,7 @@ void Tracking_Reco_TrackSeed()
       // The normal silicon association methods
       // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
       auto silicon_match = new PHSiliconTpcTrackMatching;
-      silicon_match->Verbosity(1);
+      silicon_match->Verbosity(verbosity);
       silicon_match->set_field(G4MAGNET::magfield);
       silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
       silicon_match->set_pp_mode(TRACKING::pp_mode);
@@ -310,13 +310,13 @@ void Tracking_Reco_TrackFit()
 
   // correct clusters for particle propagation in TPC
   auto deltazcorr = new PHTpcDeltaZCorrection;
-  deltazcorr->Verbosity(1);
+  deltazcorr->Verbosity(verbosity);
   se->registerSubsystem(deltazcorr);
   
 
   // perform final track fit with ACTS
   auto actsFit = new PHActsTrkFitter;
-  actsFit->Verbosity(2);
+  actsFit->Verbosity(verbosity);
   
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
@@ -349,7 +349,7 @@ void Tracking_Reco_TrackFit()
       // Choose the best silicon matched track for each TPC track seed
       /* this breaks in truth_track seeding mode because there is no TpcSeed */
       auto cleaner = new PHTrackCleaner;
-      cleaner->Verbosity(5);
+      cleaner->Verbosity(verbosity);
       se->registerSubsystem(cleaner);
     }
     
@@ -437,7 +437,7 @@ void Tracking_Eval(const std::string& outputfile)
   eval->scan_for_embedded(embed_scan);   // take all tracks if false - take only embedded tracks if true
   eval->scan_for_primaries(embed_scan);  // defaults to only thrown particles for ntp_gtrack
   std::cout << "SvtxEvaluator: pp_mode set to " << TRACKING::pp_mode << " and scan_for_embedded set to " << embed_scan << std::endl;
-  eval->Verbosity(1);
+  eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
   return;
