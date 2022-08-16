@@ -7,6 +7,7 @@
 #include <G4Setup_sPHENIX.C>
 #include <G4_Bbc.C>
 #include <G4_CaloTrigger.C>
+#include <G4_Centrality.C>
 #include <G4_DSTReader.C>
 #include <G4_Global.C>
 #include <G4_HIJetReco.C>
@@ -35,9 +36,9 @@ R__LOAD_LIBRARY(libfun4all.so)
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
     const int process = 0,
-    const string &embed_input_str0 = "DST_TRUTH_G4HIT_sHijing_0_12fm_50kHz_bkg_0_12fm-0000000001-0",
-    const string &embed_input_str1 = "DST_TRKR_G4HIT_sHijing_0_12fm_50kHz_bkg_0_12fm-0000000001-0",
-    const string &embed_input_str2 = "DST_CALO_G4HIT_sHijing_0_12fm_50kHz_bkg_0_12fm-0000000001-0",
+    const string &embed_input_str0 = "DST_TRUTH_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-0",
+    const string &embed_input_str1 = "DST_TRKR_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-0",
+    const string &embed_input_str2 = "DST_CALO_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-0",
     const string &outputFile_str = "G4sPHENIX.root",
     const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const int skip = 0,
@@ -77,6 +78,7 @@ int Fun4All_G4_sPHENIX(
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
   rc->set_IntFlag("RANDOMSEED", TString(outputFile).Hash());
+
 
   //===============
   // Input options
@@ -160,11 +162,11 @@ int Fun4All_G4_sPHENIX(
     }
     else
     {
-      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_function(PHG4SimpleEventGenerator::Uniform,
-                                                                                PHG4SimpleEventGenerator::Uniform,
-                                                                                PHG4SimpleEventGenerator::Uniform);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_function(PHG4SimpleEventGenerator::Gaus,
+                                                                                PHG4SimpleEventGenerator::Gaus,
+                                                                                PHG4SimpleEventGenerator::Gaus);
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_mean(0., 0., 0.);
-      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0., 0., 10.);
+      INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0.01, 0.01, 5.);
     }
     INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1, 1);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
@@ -269,7 +271,7 @@ int Fun4All_G4_sPHENIX(
   //  Enable::DSTREADER = true;
 
   // turn the display on (default off)
-  Enable::DISPLAY = false;
+   //Enable::DISPLAY = true;
 
   //======================
   // What to run
@@ -294,18 +296,21 @@ int Fun4All_G4_sPHENIX(
   Enable::MVTX = true;
   Enable::MVTX_CELL = Enable::MVTX && true;
   Enable::MVTX_CLUSTER = Enable::MVTX_CELL && true;
-  Enable::MVTX_QA = Enable::MVTX_CLUSTER and Enable::QA && true;
+  Enable::MVTX_QA = Enable::MVTX_CLUSTER && Enable::QA && true;
+  Enable::TrackingService = false;
 
   Enable::INTT = true;
+//  Enable::INTT_ABSORBER = true; // enables layerwise support structure readout
+//  Enable::INTT_SUPPORT = true; // enable global support structure readout
   Enable::INTT_CELL = Enable::INTT && true;
   Enable::INTT_CLUSTER = Enable::INTT_CELL && true;
-  Enable::INTT_QA = Enable::INTT_CLUSTER and Enable::QA && true;
+  Enable::INTT_QA = Enable::INTT_CLUSTER && Enable::QA && true;
 
   Enable::TPC = true;
   Enable::TPC_ABSORBER = true;
   Enable::TPC_CELL = Enable::TPC && true;
   Enable::TPC_CLUSTER = Enable::TPC_CELL && true;
-  Enable::TPC_QA = Enable::TPC_CLUSTER and Enable::QA && true;
+  Enable::TPC_QA = Enable::TPC_CLUSTER && Enable::QA && true;
 
   Enable::MICROMEGAS = true;
   Enable::MICROMEGAS_CELL = Enable::MICROMEGAS && true;
@@ -313,8 +318,8 @@ int Fun4All_G4_sPHENIX(
   Enable::MICROMEGAS_QA = Enable::MICROMEGAS_CLUSTER && Enable::QA && true;
 
   Enable::TRACKING_TRACK = true;
-  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && false;
-  Enable::TRACKING_QA = Enable::TRACKING_TRACK and Enable::QA && true;
+  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;
+  Enable::TRACKING_QA = Enable::TRACKING_TRACK && Enable::QA && true;
 
   //  cemc electronics + thin layer of W-epoxy to get albedo from cemc
   //  into the tracking, cannot run together with CEMC
@@ -326,7 +331,7 @@ int Fun4All_G4_sPHENIX(
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
-  Enable::CEMC_QA = Enable::CEMC_CLUSTER and Enable::QA && true;
+  Enable::CEMC_QA = Enable::CEMC_CLUSTER && Enable::QA && true;
 
   Enable::HCALIN = false;
   Enable::HCALIN_ABSORBER = true;
@@ -334,7 +339,7 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
   Enable::HCALIN_CLUSTER = Enable::HCALIN_TOWER && true;
   Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && true;
-  Enable::HCALIN_QA = Enable::HCALIN_CLUSTER and Enable::QA && true;
+  Enable::HCALIN_QA = Enable::HCALIN_CLUSTER && Enable::QA && true;
 
   Enable::MAGNET = false;
   Enable::MAGNET_ABSORBER = false;
@@ -345,10 +350,9 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
   Enable::HCALOUT_CLUSTER = Enable::HCALOUT_TOWER && true;
   Enable::HCALOUT_EVAL = Enable::HCALOUT_CLUSTER && true;
-  Enable::HCALOUT_QA = Enable::HCALOUT_CLUSTER and Enable::QA && true;
+  Enable::HCALOUT_QA = Enable::HCALOUT_CLUSTER && Enable::QA && true;
 
   Enable::EPD = true;
-
 
   Enable::BEAMLINE = true;
 //  Enable::BEAMLINE_ABSORBER = true;  // makes the beam line magnets sensitive volumes
@@ -365,6 +369,7 @@ int Fun4All_G4_sPHENIX(
 
   Enable::GLOBAL_RECO = true;
   //Enable::GLOBAL_FASTSIM = true;
+
   //Enable::KFPARTICLE = true;
   //Enable::KFPARTICLE_VERBOSITY = 1;
   //Enable::KFPARTICLE_TRUTH_MATCH = true;
@@ -374,7 +379,7 @@ int Fun4All_G4_sPHENIX(
 
   Enable::JETS = false;
   Enable::JETS_EVAL = Enable::JETS && true;
-  Enable::JETS_QA = Enable::JETS and Enable::QA && true;
+  Enable::JETS_QA = Enable::JETS && Enable::QA && true;
 
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
   // single particle / p+p-only simulations, or for p+Au / Au+Au
@@ -385,6 +390,8 @@ int Fun4All_G4_sPHENIX(
   Enable::TOPOCLUSTER = false && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
   // particle flow jet reconstruction - needs topoClusters!
   Enable::PARTICLEFLOW = true && Enable::TOPOCLUSTER;
+  // centrality reconstruction
+  Enable::CENTRALITY = true;
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
@@ -393,6 +400,17 @@ int Fun4All_G4_sPHENIX(
 
   // run user provided code (from local G4_User.C)
   //Enable::USER = true;
+
+  //===============
+  // conditions DB flags
+  //===============
+  //Enable::XPLOAD = true;
+  // tag
+  rc->set_StringFlag("XPLOAD_TAG",XPLOAD::tag);
+  // database config
+  rc->set_StringFlag("XPLOAD_CONFIG",XPLOAD::config);
+  // 64 bit timestamp
+  rc->set_uint64Flag("TIMESTAMP",XPLOAD::timestamp);
 
   //---------------
   // World Settings
@@ -404,9 +422,9 @@ int Fun4All_G4_sPHENIX(
   // Magnet Settings
   //---------------
 
-  //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
   //  G4MAGNET::magfield =  string(getenv("CALIBRATIONROOT"))+ string("/Field/Map/sphenix3dbigmapxyz.root");  // default map from the calibration database
-  G4MAGNET::magfield_rescale = 1.;  // make consistent with expected Babar field strength of 1.4T
+  //  G4MAGNET::magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
+//  G4MAGNET::magfield_rescale = 1.;  // make consistent with expected Babar field strength of 1.4T
 
   //---------------
   // Pythia Decayer
@@ -499,6 +517,15 @@ int Fun4All_G4_sPHENIX(
   }
 
   //-----------------
+  // Centrality Determination
+  //-----------------
+
+  if (Enable::CENTRALITY)
+  {
+      Centrality();
+  }
+
+  //-----------------
   // Calo Trigger Simulation
   //-----------------
 
@@ -546,7 +573,6 @@ int Fun4All_G4_sPHENIX(
   //======================
   if (Enable::KFPARTICLE && Input::UPSILON) KFParticle_Upsilon_Reco();
   if (Enable::KFPARTICLE && Input::DZERO) KFParticle_D0_Reco();
-  //if (Enable::KFPARTICLE && Input::LAMBDAC) KFParticle_Lambdac_Reco();
 
   //----------------------
   // Standard QAs
@@ -564,7 +590,7 @@ int Fun4All_G4_sPHENIX(
   if (Enable::MICROMEGAS_QA) Micromegas_QA();
   if (Enable::TRACKING_QA) Tracking_QA();
 
-  if (Enable::TRACKING_QA and Enable::CEMC_QA and Enable::HCALIN_QA and Enable::HCALOUT_QA) QA_G4CaloTracking();
+  if (Enable::TRACKING_QA && Enable::CEMC_QA && Enable::HCALIN_QA && Enable::HCALOUT_QA) QA_G4CaloTracking();
 
   //--------------
   // Set up Input Managers
@@ -613,7 +639,8 @@ int Fun4All_G4_sPHENIX(
     return 0;
   }
   // if we run the particle generator and use 0 it'll run forever
-  if (nEvents == 0 && !Input::HEPMC && !Input::READHITS)
+  // for embedding it runs forever if the repeat flag is set
+  if (nEvents == 0 && !Input::HEPMC && !Input::READHITS && INPUTEMBED::REPEAT)
   {
     cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
     cout << "it will run forever, so I just return without running anything" << endl;
@@ -634,24 +661,7 @@ int Fun4All_G4_sPHENIX(
   //-----
 
   se->End();
-  se->PrintTimer("MakeActsGeometry_TOP");
-  se->PrintTimer("MvtxClusterizer_TOP");
-  se->PrintTimer("InttClusterizer_TOP");
-  se->PrintTimer("TpcClusterizer_TOP");
-  se->PrintTimer("MicromegasClusterizer_TOP");
-  se->PrintTimer("TpcClusterCleaner_TOP");
-  se->PrintTimer("PHActsSiliconSeeding_TOP");
-  se->PrintTimer("PHCASeeding_TOP");
-  se->PrintTimer("PrePropagatorPHTpcTrackSeedCircleFit_TOP");
-  se->PrintTimer("PHSimpleKFProp_TOP");
-  se->PrintTimer("PHTpcTrackSeedCircleFit_TOP");
-  se->PrintTimer("PHGhostRejection_TOP");
-  se->PrintTimer("PHSiliconTpcTrackMatching_TOP");
-  se->PrintTimer("PHMicromegasTpcTrackMatching_TOP");
-  se->PrintTimer("PHActsFirstTrkFitter_TOP");
-  se->PrintTimer("PHTrackCleaner_TOP");
-  se->PrintTimer("PHSimpleVertexFinder_TOP");
-  se->PrintTimer("PHActsVertexPropagator_TOP");
+  se->PrintTimer();
   std::cout << "All done" << std::endl;
   delete se;
   if (Enable::PRODUCTION)
