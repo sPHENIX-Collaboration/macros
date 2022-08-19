@@ -114,10 +114,6 @@ double HCalInner(PHG4Reco *g4Reco,
   if (Enable::HCALIN_OLD)
   {
     hcal = new PHG4InnerHcalSubsystem("HCALIN");
-    if (! isfinite(G4HCALIN::phistart))
-    {
-      G4HCALIN::phistart = 0.0328877688; // offet in phi (from zero) extracted from geantinos
-    }
     // these are the parameters you can change with their default settings
     // hcal->set_string_param("material","SS310");
     if (G4HCALIN::inner_hcal_material_Al)
@@ -175,10 +171,6 @@ double HCalInner(PHG4Reco *g4Reco,
     hcal = new PHG4IHCalSubsystem("HCALIN");
     std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/InnerHCalAbsorberTiles_merged.gdml";
     hcal->set_string_param("GDMPath",hcaltiles);
-    if (! isfinite(G4HCALIN::phistart))
-    {
-      G4HCALIN::phistart = 0.0295080867; // extracted from geantinos
-    }
   }
   if (G4HCALIN::light_scint_model >= 0)
   {
@@ -272,6 +264,17 @@ void HCALInner_Towers()
   HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalInRawTowerBuilder");
   TowerBuilder->Detector("HCALIN");
   TowerBuilder->set_sim_tower_node_prefix("SIM");
+  if (! isfinite(G4HCALIN::phistart))
+  {
+    if (Enable::HCALIN_OLD)
+    {
+      G4HCALIN::phistart = 0.0328877688; // offet in phi (from zero) extracted from geantinos
+    }
+    else
+    {
+      G4HCALIN::phistart = 0.0295080867; // extracted from geantinos
+    }
+  }
   TowerBuilder->set_double_param("phistart",G4HCALIN::phistart);
   if (isfinite(G4HCALIN::tower_emin))
   {
