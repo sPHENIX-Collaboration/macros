@@ -21,6 +21,11 @@
 #include <G4_User.C>
 #include <QA.C>
 
+#include <ffamodules/FlagHandler.h>
+#include <ffamodules/HeadReco.h>
+#include <ffamodules/SyncReco.h>
+#include <ffamodules/XploadInterface.h>
+
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
@@ -29,6 +34,7 @@
 #include <phool/recoConsts.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
+R__LOAD_LIBRARY(libffamodules.so)
 
 // For HepMC Hijing
 // try inputFile = /sphenix/sim/sim01/sphnxpro/sHijing_HepMC/sHijing_0-12fm.dat
@@ -221,6 +227,22 @@ int Fun4All_G4_sPHENIX(
   }
   // register all input generators with Fun4All
   InputRegister();
+
+  if (! Input::READHITS)
+  {
+    rc->set_IntFlag("RUNNUMBER",1);
+
+    SyncReco *sync = new SyncReco();
+    se->registerSubsystem(sync);
+
+    HeadReco *head = new HeadReco();
+    se->registerSubsystem(head);
+  }
+// Flag Handler is always needed to read flags from input (if used)
+// and update our rc flags with them. At the end it saves all flags
+// again on the DST in the Flags node under the RUN node
+  FlagHandler *flag = new FlagHandler();
+  se->registerSubsystem(flag);
 
   // set up production relatedstuff
   //   Enable::PRODUCTION = true;

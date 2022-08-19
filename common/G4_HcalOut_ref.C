@@ -49,7 +49,7 @@ namespace G4HCALOUT
 {
   double outer_radius = 264.71;
   double size_z = 304.91 * 2;
-  double phistart = 0.026598397;
+  double phistart = NAN;
   double tower_emin = NAN;
   int light_scint_model = -1;
   int tower_energy_source = -1;
@@ -95,11 +95,6 @@ double HCalOuter(PHG4Reco *g4Reco,
   if (Enable::HCALOUT_OLD)
   {
     hcal = new PHG4OuterHcalSubsystem("HCALOUT");
-    if (! isfinite(G4HCALOUT::phistart))
-    {
-      G4HCALOUT::phistart = 0.026598397; // offet in phi (from zero) extracted from geantinos
-    }
-    
     // hcal->set_double_param("inner_radius", 183.3);
     //-----------------------------------------
     // the light correction can be set in a single call
@@ -142,11 +137,6 @@ double HCalOuter(PHG4Reco *g4Reco,
     hcal = new PHG4OHCalSubsystem("HCALOUT");
 std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/OuterHCalAbsorberTiles_merged.gdml";
     hcal->set_string_param("GDMPath",hcaltiles);
-    if (! isfinite(G4HCALOUT::phistart))
-    {
-      G4HCALOUT::phistart = -0.0248462127; // offet in phi (from zero) extracted from geantinos
-    }
-
   }
 
   if (G4HCALOUT::light_scint_model >= 0)
@@ -202,6 +192,17 @@ void HCALOuter_Towers()
   HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalOutRawTowerBuilder");
   TowerBuilder->Detector("HCALOUT");
   TowerBuilder->set_sim_tower_node_prefix("SIM");
+  if (! isfinite(G4HCALOUT::phistart))
+  {
+    if (Enable::HCALOUT_OLD)
+    {
+      G4HCALOUT::phistart = 0.026598397; // offet in phi (from zero) extracted from geantinos
+    }
+    else
+    {
+      G4HCALOUT::phistart = -0.0248462127; // offet in phi (from zero) extracted from geantinos
+    }
+  }
   TowerBuilder->set_double_param("phistart",G4HCALOUT::phistart);
   if (isfinite(G4HCALOUT::tower_emin))
   {
