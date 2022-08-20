@@ -605,7 +605,10 @@ void InputManagers()
     INPUTMANAGER::HepMCPileupInputManager->AddFile(PILEUP::pileupfile);
     INPUTMANAGER::HepMCPileupInputManager->set_collision_rate(Input::PILEUPRATE);
     double time_window = 105.5 / PILEUP::TpcDriftVelocity;
-    INPUTMANAGER::HepMCPileupInputManager->set_time_window(-time_window, time_window);
+    double extended_readout_time = 0.0;
+    if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+    INPUTMANAGER::HepMCPileupInputManager->set_time_window(-time_window, time_window + extended_readout_time);
+    cout << "Pileup window is from " << -time_window << " to " <<  time_window + extended_readout_time << endl;
     se->registerInputManager(INPUTMANAGER::HepMCPileupInputManager);
   }
 }

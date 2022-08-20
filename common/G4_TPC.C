@@ -234,6 +234,12 @@ void TPC_Cells()
     edrift->setTpcDistortion( distortionMap );
   }
 
+  double tpc_readout_time = 105.5/ G4TPC::tpc_drift_velocity_sim;  // ns
+  double extended_readout_time = 0.0;
+  if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+  edrift->set_double_param("max_time", tpc_readout_time + extended_readout_time);
+  std::cout << "PHG4TpcElectronDrift readout window is from 0 to " <<  tpc_readout_time + extended_readout_time << std::endl;
+
   // override the default drift velocity parameter specification
   edrift->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
   padplane->SetDriftVelocity(G4TPC::tpc_drift_velocity_sim);
