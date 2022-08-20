@@ -57,6 +57,8 @@ namespace G4P6DECAYER
 namespace TRACKING
 {
   std::string TrackNodeName = "SvtxTrackMap";
+  double pp_mode = false;
+  double pp_extended_readout_time = 7000.0;  // ns
 }
 
 namespace G4MAGNET
@@ -73,5 +75,17 @@ namespace XPLOAD
   std::string config = "sPHENIX_cdb";
   std::string tag = "TEST";
   uint64_t timestamp = 12345678912345;
+}  // namespace XPLOAD
+
+namespace Enable
+{
+  bool MICROMEGAS = false;
 }
+
+namespace G4MICROMEGAS
+{
+  // number of micromegas layers
+  int n_micromegas_layer = 2;
+}  // namespace G4MICROMEGAS
+
 #endif

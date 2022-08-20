@@ -82,10 +82,15 @@ namespace G4TRACKING
   // use of the various evaluation tools already available
   bool convert_seeds_to_svtxtracks = false;
 
-}  // namespace G4TRACKING
 
-void TrackingInit()
+void ActsGeomInit()
 {
+  static bool wasCalled = false;
+  if (wasCalled)
+  {
+    return;
+  }
+  wasCalled = true;
   if (!Enable::MICROMEGAS)
   {
     G4MICROMEGAS::n_micromegas_layer = 0;
@@ -97,6 +102,7 @@ void TrackingInit()
 
   // Geometry must be built before any Acts modules
   MakeActsGeometry* geom = new MakeActsGeometry();
+  geom->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
   geom->Verbosity(verbosity);
   
   geom->loadMagField(G4TRACKING::init_acts_magfield);
@@ -105,20 +111,28 @@ void TrackingInit()
   geom->add_fake_surfaces(G4TRACKING::add_fake_surfaces);
   geom->build_mm_surfaces(Enable::MICROMEGAS);
   se->registerSubsystem(geom);
+}
+}  // namespace G4TRACKING
 
+void TrackingInit()
+{
+  G4TRACKING::ActsGeomInit();
   // space charge correction
   /* corrections are applied in the track finding, and via TpcClusterMover before the final track fit */
   if( G4TPC::ENABLE_CORRECTIONS )
   {
+    auto se = Fun4AllServer::instance();
     auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
     tpcLoadDistortionCorrection->set_distortion_filename( G4TPC::correction_filename );
     se->registerSubsystem(tpcLoadDistortionCorrection);
   }
-  
+
 }
 
 void Tracking_Reco_TrackSeed()
 {
+  // !!!! THIS IS TEMPORARY, UNTIL CA SEEDER CAN HANDLE TRACKS FROM LARGE Z !!!!!
+  if(TRACKING::pp_mode) G4TRACKING::use_truth_tpc_seeding = true;  
   
   // set up verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
@@ -209,8 +223,8 @@ void Tracking_Reco_TrackSeed()
       silicon_match->Verbosity(verbosity);
       silicon_match->set_field(G4MAGNET::magfield);
       silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
-      silicon_match->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity);
-      silicon_match->set_pp_mode(false);
+      silicon_match->set_pp_mode(TRACKING::pp_mode);
+      std::cout << "PHSiliconTpcTrackMatching pp_mode set to " << TRACKING::pp_mode << std::endl;
       if (G4TRACKING::SC_CALIBMODE)
       {
         // search windows for initial matching with distortions
@@ -234,7 +248,7 @@ void Tracking_Reco_TrackSeed()
       // Match TPC track stubs from CA seeder to clusters in the micromegas layers
       auto mm_match = new PHMicromegasTpcTrackMatching;
       mm_match->Verbosity(verbosity);
-      mm_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
+       mm_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
       if (G4TRACKING::SC_CALIBMODE)
       {
         // calibration pass with distorted tracks
@@ -296,7 +310,6 @@ void Tracking_Reco_TrackFit()
 
   // correct clusters for particle propagation in TPC
   auto deltazcorr = new PHTpcDeltaZCorrection;
-  deltazcorr->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity);
   deltazcorr->Verbosity(verbosity);
   se->registerSubsystem(deltazcorr);
   
@@ -419,8 +432,11 @@ void Tracking_Eval(const std::string& outputfile)
   eval->do_vtx_eval_light(true);
   eval->do_eval_light(true);
   eval->set_use_initial_vertex(G4TRACKING::g4eval_use_initial_vertex);
-  eval->scan_for_embedded(true);   // take all tracks if false - take only embedded tracks if true
-  eval->scan_for_primaries(true);  // defaults to only thrown particles for ntp_gtrack
+  bool embed_scan = true;
+  if(TRACKING::pp_mode) embed_scan = false;
+  eval->scan_for_embedded(embed_scan);   // take all tracks if false - take only embedded tracks if true
+  eval->scan_for_primaries(embed_scan);  // defaults to only thrown particles for ntp_gtrack
+  std::cout << "SvtxEvaluator: pp_mode set to " << TRACKING::pp_mode << " and scan_for_embedded set to " << embed_scan << std::endl;
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 

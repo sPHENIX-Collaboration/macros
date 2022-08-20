@@ -216,7 +216,7 @@ namespace SARTRE
 namespace PILEUP
 {
   string pileupfile = "/sphenix/sim/sim01/sphnxpro/MDC1/sHijing_HepMC/data/sHijing_0_20fm-0000000001-00000.dat";
-  double TpcDriftVelocity = G4TPC::tpc_drift_velocity;
+  double TpcDriftVelocity = G4TPC::tpc_drift_velocity_sim;
 }  // namespace PILEUP
 
 // collection of pointers to particle generators we can grab in the Fun4All macro
@@ -605,7 +605,10 @@ void InputManagers()
     INPUTMANAGER::HepMCPileupInputManager->AddFile(PILEUP::pileupfile);
     INPUTMANAGER::HepMCPileupInputManager->set_collision_rate(Input::PILEUPRATE);
     double time_window = 105.5 / PILEUP::TpcDriftVelocity;
-    INPUTMANAGER::HepMCPileupInputManager->set_time_window(-time_window, time_window);
+    double extended_readout_time = 0.0;
+    if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+    INPUTMANAGER::HepMCPileupInputManager->set_time_window(-time_window, time_window + extended_readout_time);
+    cout << "Pileup window is from " << -time_window << " to " <<  time_window + extended_readout_time << endl;
     se->registerInputManager(INPUTMANAGER::HepMCPileupInputManager);
   }
 }
