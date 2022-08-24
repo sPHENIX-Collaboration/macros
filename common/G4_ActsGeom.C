@@ -22,12 +22,7 @@ namespace ACTSGEOM
 {
   void ActsGeomInit()
   {
-    static bool wasCalled = false;
-    if (wasCalled)
-    {
-      return;
-    }
-    wasCalled = true;
+  
     if (!Enable::MICROMEGAS)
     {
       G4MICROMEGAS::n_micromegas_layer = 0;
@@ -45,7 +40,6 @@ namespace ACTSGEOM
     geom->loadMagField(G4TRACKING::init_acts_magfield);
     geom->setMagField(G4MAGNET::magfield);
     geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
-    geom->add_fake_surfaces(G4TRACKING::add_fake_surfaces);
     geom->build_mm_surfaces(Enable::MICROMEGAS);
     se->registerSubsystem(geom);
   }
