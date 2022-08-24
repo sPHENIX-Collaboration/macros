@@ -66,11 +66,6 @@ namespace G4TRACKING
 
   // Vertexing
   bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
-
-  // set to false to disable adding fake surfaces (TPC, Micromegas) to MakeActsGeom
-// now declared in GlobalVariables.C
-  // bool add_fake_surfaces = true;
-  // bool init_acts_magfield = true;
   
   // Truth seeding options for diagnostics (can use any or all)
   bool use_truth_silicon_seeding = false;     // if true runs truth silicon seeding instead of acts silicon seeding
