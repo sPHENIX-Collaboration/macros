@@ -88,4 +88,17 @@ namespace G4MICROMEGAS
   int n_micromegas_layer = 2;
 }  // namespace G4MICROMEGAS
 
+namespace G4TPC
+{
+ double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
+}
+
+namespace G4TRACKING
+{
+  // set to false to disable adding fake surfaces (TPC, Micromegas) to MakeActsGeom
+  bool add_fake_surfaces = true;
+  bool init_acts_magfield = true;
+}
+
+
 #endif
