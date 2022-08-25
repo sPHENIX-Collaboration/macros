@@ -57,7 +57,7 @@ namespace G4P6DECAYER
 namespace TRACKING
 {
   std::string TrackNodeName = "SvtxTrackMap";
-  double pp_mode = false;
+  bool pp_mode = false;
   double pp_extended_readout_time = 7000.0;  // ns
 }
 
@@ -95,8 +95,6 @@ namespace G4TPC
 
 namespace G4TRACKING
 {
-  // set to false to disable adding fake surfaces (TPC, Micromegas) to MakeActsGeom
-  bool add_fake_surfaces = true;
   bool init_acts_magfield = true;
 }
 
