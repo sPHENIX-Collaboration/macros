@@ -45,7 +45,7 @@ int Fun4All_G4_sPHENIX(
     const string& embed_input_str0 = "DST_TRUTH_G4HIT_pythia8_Charm_3MHz-0000000040-0",
     const string& embed_input_str1 = "DST_TRKR_G4HIT_pythia8_Charm_3MHz-0000000040-0",
     const string& embed_input_str2 = "DST_CALO_G4HIT_pythia8_Charm_3MHz-0000000040-0",
-    const string &outputFile = "G4sPHENIX.root",
+    const string &outputFile_str = "G4sPHENIX.root",
     const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const int skip = 0,
     const string &outdir = ".")
@@ -399,7 +399,7 @@ int Fun4All_G4_sPHENIX(
 
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && false;
 
-  Enable::JETS = (Enable::GLOBAL_RECO || Enable::GLOBAL_FASTSIM) && true;
+  Enable::JETS = (Enable::GLOBAL_RECO || Enable::GLOBAL_FASTSIM) && false;
   Enable::JETS_EVAL = Enable::JETS && true;
   Enable::JETS_QA = Enable::JETS && Enable::QA && true;
 
