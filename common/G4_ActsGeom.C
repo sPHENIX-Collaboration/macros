@@ -22,7 +22,13 @@ namespace ACTSGEOM
 {
   void ActsGeomInit()
   {
-  
+    static bool wasCalled = false;
+    if (wasCalled)
+    {
+      return;
+    }
+    wasCalled = true;
+
     if (!Enable::MICROMEGAS)
     {
       G4MICROMEGAS::n_micromegas_layer = 0;
