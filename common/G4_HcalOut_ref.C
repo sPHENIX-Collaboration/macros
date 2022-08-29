@@ -200,7 +200,7 @@ void HCALOuter_Towers()
     }
     else
     {
-      G4HCALOUT::phistart = -0.0248462127; // offet in phi (from zero) extracted from geantinos
+      G4HCALOUT::phistart = -0.024960211; // offet in phi (from zero) extracted from geantinos
     }
   }
   TowerBuilder->set_double_param("phistart",G4HCALOUT::phistart);
