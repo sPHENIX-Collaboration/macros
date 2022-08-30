@@ -46,7 +46,7 @@ namespace Enable
   bool HCALIN_EVAL = false;
   bool HCALIN_QA = false;
   bool HCALIN_SUPPORT = false;
-  bool HCALIN_OLD = true;
+  bool HCALIN_OLD = false;
   int HCALIN_VERBOSITY = 0;
 }  // namespace Enable
 

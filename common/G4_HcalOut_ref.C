@@ -41,7 +41,7 @@ namespace Enable
   bool HCALOUT_CLUSTER = false;
   bool HCALOUT_EVAL = false;
   bool HCALOUT_QA = false;
-  bool HCALOUT_OLD = true;
+  bool HCALOUT_OLD = false;
   int HCALOUT_VERBOSITY = 0;
 }  // namespace Enable
 
