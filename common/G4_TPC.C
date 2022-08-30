@@ -2,10 +2,11 @@
 #define MACRO_G4TPC_C
 
 #include <GlobalVariables.C>
-#include <QA.C>
 
+#include <G4_ActsGeom.C>
 #include <G4_Intt.C>
 #include <G4_Mvtx.C>
+#include <QA.C>
 
 #include <g4tpc/PHG4TpcCentralMembrane.h>
 #include <g4tpc/PHG4TpcDigitizer.h>
@@ -66,7 +67,8 @@ namespace G4TPC
 
   // drift velocity is set here for all relevant modules
   double tpc_drift_velocity_sim= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
-  double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
+//  double tpc_drift_velocity_reco now set in GlobalVariables.C
+//  double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
 
   // use simple clusterizer
   bool USE_SIMPLE_CLUSTERIZER = false;
@@ -276,7 +278,7 @@ void TPC_Cells()
 void TPC_Clustering()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
-
+  ACTSGEOM::ActsGeomInit();
   Fun4AllServer* se = Fun4AllServer::instance();
 
   //-------------

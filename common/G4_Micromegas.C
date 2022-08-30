@@ -3,6 +3,7 @@
 
 #include <GlobalVariables.C>
 
+#include <G4_ActsGeom.C>
 #include <G4_Intt.C>
 #include <G4_Mvtx.C>
 #include <G4_TPC.C>
@@ -66,7 +67,7 @@ void Micromegas(PHG4Reco* g4Reco)
 void Micromegas_Cells()
 {
 // the acts geometry needs to go here since it will be used by the PHG4MicromegasHitReco
-  G4TRACKING::ActsGeomInit();
+  ACTSGEOM::ActsGeomInit();
   auto se = Fun4AllServer::instance();
   // micromegas
   auto reco = new PHG4MicromegasHitReco;
