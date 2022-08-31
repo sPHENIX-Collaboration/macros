@@ -684,6 +684,7 @@ int Fun4All_G4_sPHENIX(
   //-----
 
   se->End();
+  se->PrintTimers();
   std::cout << "All done" << std::endl;
   delete se;
   if (Enable::PRODUCTION)
