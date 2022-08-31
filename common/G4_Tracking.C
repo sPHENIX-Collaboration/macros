@@ -8,6 +8,7 @@ R__LOAD_LIBRARY(libqa_modules.so)
 
 #include <GlobalVariables.C>
 
+#include <G4_ActsGeom.C>
 #include <G4_Intt.C>
 #include <G4_Micromegas.C>
 #include <G4_Mvtx.C>
@@ -65,10 +66,6 @@ namespace G4TRACKING
 
   // Vertexing
   bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
-
-  // set to false to disable adding fake surfaces (TPC, Micromegas) to MakeActsGeom
-  bool add_fake_surfaces = true;
-  bool init_acts_magfield = true;
   
   // Truth seeding options for diagnostics (can use any or all)
   bool use_truth_silicon_seeding = false;     // if true runs truth silicon seeding instead of acts silicon seeding
@@ -82,41 +79,11 @@ namespace G4TRACKING
   // use of the various evaluation tools already available
   bool convert_seeds_to_svtxtracks = false;
 
-
-void ActsGeomInit()
-{
-  static bool wasCalled = false;
-  if (wasCalled)
-  {
-    return;
-  }
-  wasCalled = true;
-  if (!Enable::MICROMEGAS)
-  {
-    G4MICROMEGAS::n_micromegas_layer = 0;
-  }
-
-  // Build the Acts geometry
-  auto se = Fun4AllServer::instance();
-  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
-
-  // Geometry must be built before any Acts modules
-  MakeActsGeometry* geom = new MakeActsGeometry();
-  geom->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
-  geom->Verbosity(verbosity);
-  
-  geom->loadMagField(G4TRACKING::init_acts_magfield);
-  geom->setMagField(G4MAGNET::magfield);
-  geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
-  geom->add_fake_surfaces(G4TRACKING::add_fake_surfaces);
-  geom->build_mm_surfaces(Enable::MICROMEGAS);
-  se->registerSubsystem(geom);
-}
 }  // namespace G4TRACKING
 
 void TrackingInit()
 {
-  G4TRACKING::ActsGeomInit();
+  ACTSGEOM::ActsGeomInit();
   // space charge correction
   /* corrections are applied in the track finding, and via TpcClusterMover before the final track fit */
   if( G4TPC::ENABLE_CORRECTIONS )

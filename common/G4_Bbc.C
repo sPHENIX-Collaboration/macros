@@ -40,7 +40,7 @@ void BbcInit()
   {
     BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 300.);
     BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -300.);
-    BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 15.0);
+    BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 125.0);
   }
 }
 
