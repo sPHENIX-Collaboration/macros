@@ -79,7 +79,7 @@ namespace XPLOAD
 
 namespace Enable
 {
-  bool MICROMEGAS = false;
+  bool MICROMEGAS = true;
 }
 
 namespace G4MICROMEGAS
