@@ -42,6 +42,7 @@ R__LOAD_LIBRARY(libffamodules.so)
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
     const string &inputFile = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
+    const double inputpT = 4,
     const string &outputFile = "G4sPHENIX.root",
     const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const int skip = 0,
@@ -63,7 +64,7 @@ int Fun4All_G4_sPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  //  rc->set_IntFlag("RANDOMSEED", 12345);
+  rc->set_IntFlag("RANDOMSEED", TString(outputFile).Hash());
 
 
   //===============
@@ -136,7 +137,7 @@ int Fun4All_G4_sPHENIX(
   // add the settings for other with [1], next with [2]...
   if (Input::SIMPLE)
   {
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 5);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles(inputFile, 1); // here a particle's name is passed down via inputFile
     if (Input::HEPMC || Input::EMBED)
     {
       INPUTGENERATOR::SimpleEventGenerator[0]->set_reuse_existing_vertex(true);
@@ -152,7 +153,7 @@ int Fun4All_G4_sPHENIX(
     }
     INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1, 1);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
-    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.1, 20.);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(inputpT, inputpT); // force fixed pT
   }
   // Upsilons
   // if you run more than one of these Input::UPSILON_NUMBER > 1
@@ -306,7 +307,7 @@ int Fun4All_G4_sPHENIX(
   Enable::MICROMEGAS_QA = Enable::MICROMEGAS_CLUSTER && Enable::QA && true;
 
   Enable::TRACKING_TRACK = (Enable::MICROMEGAS_CLUSTER && Enable::TPC_CLUSTER && Enable::INTT_CLUSTER && Enable::MVTX_CLUSTER) && true;
-  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;
+  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && false;
   Enable::TRACKING_QA = Enable::TRACKING_TRACK && Enable::QA && true;
 
   //  cemc electronics + thin layer of W-epoxy to get albedo from cemc
@@ -318,16 +319,16 @@ int Fun4All_G4_sPHENIX(
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
-  Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
-  Enable::CEMC_QA = Enable::CEMC_CLUSTER && Enable::QA && true;
+  Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && false;
+  Enable::CEMC_QA = Enable::CEMC_CLUSTER and Enable::QA && true;
 
   Enable::HCALIN = true;
   Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
   Enable::HCALIN_CLUSTER = Enable::HCALIN_TOWER && true;
-  Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && true;
-  Enable::HCALIN_QA = Enable::HCALIN_CLUSTER && Enable::QA && true;
+  Enable::HCALIN_EVAL = Enable::HCALIN_CLUSTER && false;
+  Enable::HCALIN_QA = Enable::HCALIN_CLUSTER and Enable::QA && true;
 
   Enable::MAGNET = true;
   Enable::MAGNET_ABSORBER = true;
@@ -337,8 +338,8 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALOUT_CELL = Enable::HCALOUT && true;
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
   Enable::HCALOUT_CLUSTER = Enable::HCALOUT_TOWER && true;
-  Enable::HCALOUT_EVAL = Enable::HCALOUT_CLUSTER && true;
-  Enable::HCALOUT_QA = Enable::HCALOUT_CLUSTER && Enable::QA && true;
+  Enable::HCALOUT_EVAL = Enable::HCALOUT_CLUSTER && false;
+  Enable::HCALOUT_QA = Enable::HCALOUT_CLUSTER and Enable::QA && true;
 
   Enable::EPD = true;
 
@@ -650,6 +651,10 @@ int Fun4All_G4_sPHENIX(
   //-----
 
   se->End();
+
+  se->PrintTimer();
+  se->PrintMemoryTracker();
+
   std::cout << "All done" << std::endl;
   delete se;
   if (Enable::PRODUCTION)
