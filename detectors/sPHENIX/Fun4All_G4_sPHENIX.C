@@ -29,6 +29,8 @@
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
+#include <phgeom/PHGeomUtility.h>
+#include <TGeoManager.h>
 
 #include <phool/PHRandomSeed.h>
 #include <phool/recoConsts.h>
@@ -48,7 +50,7 @@ int Fun4All_G4_sPHENIX(
     const string &outdir = ".")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0);
+  se->Verbosity(01);
 
   //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
   PHRandomSeed::Verbosity(1);
@@ -270,8 +272,8 @@ int Fun4All_G4_sPHENIX(
   Enable::QA = true;
 
   // Global options (enabled for all enables subsystems - if implemented)
-  //  Enable::ABSORBER = true;
-  //  Enable::OVERLAPCHECK = true;
+  Enable::ABSORBER = true;
+  Enable::OVERLAPCHECK = true;
   //  Enable::VERBOSITY = 1;
 
   // Enable::BBC = true;
@@ -650,6 +652,19 @@ int Fun4All_G4_sPHENIX(
   //-----
 
   se->End();
+  
+  se->PrintTimer();
+
+  // Geometry export:
+  PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
+  g4->Dump_GDML("Fun4All_G4_sPHENIX.gdml");
+
+  cout <<"======================================================="<<endl;
+  cout <<"TGeoManager overlap checks"<<endl;
+  cout <<"======================================================="<<endl;
+  PHGeomUtility::GetTGeoManager( se->topNode()) -> CheckOverlaps();
+  PHGeomUtility::GetTGeoManager( se->topNode()) -> PrintOverlaps();
+  
   std::cout << "All done" << std::endl;
   delete se;
   if (Enable::PRODUCTION)
