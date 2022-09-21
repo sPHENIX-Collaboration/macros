@@ -270,6 +270,25 @@ void Tracking_Reco_TrackSeed()
 
 }
 
+void vertexing()
+{
+  Fun4AllServer* se = Fun4AllServer::instance();
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+  if (G4TRACKING::use_truth_vertexing)
+    {
+      auto vtxing = new PHTruthVertexing;
+      vtxing->associate_tracks(true);
+      std::string trackmapnamef = "SvtxTrackMap";
+      vtxing->set_track_map_name(trackmapnamef);
+      se->registerSubsystem(vtxing);
+    } else {
+    auto vtxfinder = new PHSimpleVertexFinder;
+    vtxfinder->Verbosity(verbosity);
+    se->registerSubsystem(vtxfinder);
+  }
+  
+}
+
 void Tracking_Reco_TrackFit()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
@@ -320,18 +339,7 @@ void Tracking_Reco_TrackFit()
       se->registerSubsystem(cleaner);
     }
     
-    if (G4TRACKING::use_truth_vertexing)
-    {
-      auto vtxing = new PHTruthVertexing;
-      vtxing->associate_tracks(true);
-      std::string trackmapnamef = "SvtxTrackMap";
-      vtxing->set_track_map_name(trackmapnamef);
-      se->registerSubsystem(vtxing);
-    } else {
-      auto vtxfinder = new PHSimpleVertexFinder;
-      vtxfinder->Verbosity(verbosity);
-      se->registerSubsystem(vtxfinder);
-    }
+    vertexing();
     
     // Propagate track positions to the vertex position
     auto vtxProp = new PHActsVertexPropagator;
@@ -353,7 +361,15 @@ void Tracking_Reco()
    * to minimize disruption to existing steering macros
    */
   Tracking_Reco_TrackSeed();
-  Tracking_Reco_TrackFit();
+
+  if(G4TRACKING::convert_seeds_to_svtxtracks)
+    {
+      vertexing();
+    }
+  else
+    {
+      Tracking_Reco_TrackFit();
+    }
 }
 
 void build_truthreco_tables()
@@ -380,8 +396,7 @@ void Tracking_Eval(const std::string& outputfile)
   //---------------
 
   Fun4AllServer* se = Fun4AllServer::instance();
-
-  build_truthreco_tables();
+  build_truthreco_tables(); 
 
   //----------------
   // Tracking evaluation
