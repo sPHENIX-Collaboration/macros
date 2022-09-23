@@ -144,6 +144,8 @@ double HCalOuter(PHG4Reco *g4Reco,
     hcal = new PHG4OHCalSubsystem("HCALOUT");
 std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/OuterHCalAbsorberTiles_merged.gdml";
     hcal->set_string_param("GDMPath",hcaltiles);
+    hcal->set_string_param("IronFieldMapPath", G4MAGNET::magfield_OHCAL_steel);
+    hcal->set_double_param("IronFieldMapScale", G4MAGNET::magfield_rescale);
   }
 
   if (G4HCALOUT::light_scint_model >= 0)
