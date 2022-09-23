@@ -198,7 +198,7 @@ double HCalInner(PHG4Reco *g4Reco,
 
   radius = hcal->get_double_param("outer_radius");
 
-  HCalInner_SupportRing(g4Reco);
+  // HCalInner_SupportRing(g4Reco);
 
   radius += no_overlapp;
   return radius;
@@ -233,6 +233,7 @@ void HCalInner_SupportRing(PHG4Reco *g4Reco)
     cyl->set_double_param("length", G4HCALIN::dz);
     cyl->set_string_param("material", "SS310");
     cyl->set_double_param("thickness", G4HCALIN::support_ring_outer_radius - innerradius);
+    cyl->OverlapCheck(Enable::OVERLAPCHECK);
     if (AbsorberActive)
     {
       cyl->SetActive();
