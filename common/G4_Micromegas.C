@@ -82,16 +82,16 @@ void Micromegas_Clustering()
   auto se = Fun4AllServer::instance();
   auto mm_clus = new MicromegasClusterizer;
   mm_clus->set_cluster_version(G4TRACKING::cluster_version);
-  se->registerSubsystem();
+  se->registerSubsystem(mm_clus);
 }
 
 void Micromegas_QA()
 {
   auto se = Fun4AllServer::instance();
-  auto qa = new QAG4SimulationMicromegas;
-  qa->Verbosity(Enable::QA_VERBOSITY);
-  qa->set_cluster_version(G4TRACKING::cluster_version);
-  se->registerSubsystem(qa);
+  auto qa_mm = new QAG4SimulationMicromegas;
+  qa_mm->Verbosity(Enable::QA_VERBOSITY);
+  qa_mm->set_cluster_version(G4TRACKING::cluster_version);
+  se->registerSubsystem(qa_mm);
 }
 
 #endif
