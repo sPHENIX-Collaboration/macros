@@ -92,6 +92,13 @@ double HCalOuter(PHG4Reco *g4Reco,
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
 
   PHG4DetectorSubsystem *hcal;
+  //  Mephi Maps
+  //  Maps are different for old/new but how to set is identical
+  //  here are the ones for the old outer hcal since the new maps do not exist yet
+  //  use hcal->set_string_param("MapFileName",""); to disable map
+  //  hcal->set_string_param("MapFileName",std::string(getenv("CALIBRATIONROOT")) + "/HCALOUT/tilemap/oHCALMaps092021.root");
+  //  hcal->set_string_param("MapHistoName","hCombinedMap");
+
   if (Enable::HCALOUT_OLD)
   {
     hcal = new PHG4OuterHcalSubsystem("HCALOUT");
