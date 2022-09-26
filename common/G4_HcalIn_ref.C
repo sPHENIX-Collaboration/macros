@@ -110,6 +110,16 @@ double HCalInner(PHG4Reco *g4Reco,
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
 
   PHG4DetectorSubsystem *hcal;
+  //  Mephi Maps
+  //  Maps are different for old/new but how to set is identical
+  //  here are the ones for the gdml based inner hcal
+  //  use hcal->set_string_param("MapFileName",""); to disable map
+  //  hcal->set_string_param("MapFileName",std::string(getenv("CALIBRATIONROOT")) + "/HCALIN/tilemap/ihcalgdmlmap09212022.root");
+  //  hcal->set_string_param("MapHistoName","ihcalcombinedgdmlnormtbyt");
+  //  use hcal->set_string_param("MapFileName",""); to disable map
+  //  hcal->set_string_param("MapFileName",std::string(getenv("CALIBRATIONROOT")) + "/HCALIN/tilemap/ihcalgdmlmap09212022.root");
+  //  hcal->set_string_param("MapHistoName","ihcalcombinedgdmlnormtbyt");
+
   // all sizes are in cm!
   if (Enable::HCALIN_OLD)
   {
@@ -171,9 +181,6 @@ double HCalInner(PHG4Reco *g4Reco,
     hcal = new PHG4IHCalSubsystem("HCALIN");
     std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/InnerHCalAbsorberTiles_merged.gdml";
     hcal->set_string_param("GDMPath",hcaltiles);
-    //  use hcal->set_string_param("MapFileName",""); to disable map
-    //  hcal->set_string_param("MapFileName",std::string(getenv("CALIBRATIONROOT")) + "/HCALIN/tilemap/ihcalgdmlmap09212022.root");
-    //  hcal->set_string_param("MapHistoName","ihcalcombinedgdmlnormtbyt");
   }
   if (G4HCALIN::light_scint_model >= 0)
   {
