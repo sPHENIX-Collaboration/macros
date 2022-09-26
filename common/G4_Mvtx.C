@@ -127,6 +127,7 @@ void Mvtx_Clustering()
   //================
   MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
   mvtxclusterizer->Verbosity(verbosity);
+  mvtxclusterizer->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(mvtxclusterizer);
 }
 
@@ -137,6 +138,7 @@ void Mvtx_QA()
   Fun4AllServer* se = Fun4AllServer::instance();
   QAG4SimulationMvtx* qa = new QAG4SimulationMvtx;
   qa->Verbosity(verbosity);
+  qa->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(qa);
 }
 
