@@ -110,6 +110,16 @@ double HCalInner(PHG4Reco *g4Reco,
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
 
   PHG4DetectorSubsystem *hcal;
+  //  Mephi Maps
+  //  Maps are different for old/new but how to set is identical
+  //  here are the ones for the gdml based inner hcal
+  //  use hcal->set_string_param("MapFileName",""); to disable map
+  //  hcal->set_string_param("MapFileName",std::string(getenv("CALIBRATIONROOT")) + "/HCALIN/tilemap/ihcalgdmlmap09212022.root");
+  //  hcal->set_string_param("MapHistoName","ihcalcombinedgdmlnormtbyt");
+  //  use hcal->set_string_param("MapFileName",""); to disable map
+  //  hcal->set_string_param("MapFileName",std::string(getenv("CALIBRATIONROOT")) + "/HCALIN/tilemap/ihcalgdmlmap09212022.root");
+  //  hcal->set_string_param("MapHistoName","ihcalcombinedgdmlnormtbyt");
+
   // all sizes are in cm!
   if (Enable::HCALIN_OLD)
   {
@@ -198,6 +208,7 @@ double HCalInner(PHG4Reco *g4Reco,
 void HCalInner_SupportRing(PHG4Reco *g4Reco)
 {
   bool AbsorberActive = Enable::SUPPORT || Enable::HCALIN_SUPPORT;
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALIN_OVERLAPCHECK;
 
   const double z_ring1 = (2025 + 2050) / 2. / 10.;
   const double innerradius_sphenix = 116.;
@@ -226,6 +237,7 @@ void HCalInner_SupportRing(PHG4Reco *g4Reco)
     {
       cyl->SetActive();
     }
+    cyl->OverlapCheck(OverlapCheck);
     g4Reco->registerSubsystem(cyl);
   }
 
