@@ -171,6 +171,9 @@ double HCalInner(PHG4Reco *g4Reco,
     hcal = new PHG4IHCalSubsystem("HCALIN");
     std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/InnerHCalAbsorberTiles_merged.gdml";
     hcal->set_string_param("GDMPath",hcaltiles);
+    //  use hcal->set_string_param("MapFileName",""); to disable map
+    //  hcal->set_string_param("MapFileName",std::string(getenv("CALIBRATIONROOT")) + "/HCALIN/tilemap/ihcalgdmlmap09212022.root");
+    //  hcal->set_string_param("MapHistoName","ihcalcombinedgdmlnormtbyt");
   }
   if (G4HCALIN::light_scint_model >= 0)
   {
@@ -198,6 +201,7 @@ double HCalInner(PHG4Reco *g4Reco,
 void HCalInner_SupportRing(PHG4Reco *g4Reco)
 {
   bool AbsorberActive = Enable::SUPPORT || Enable::HCALIN_SUPPORT;
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALIN_OVERLAPCHECK;
 
   const double z_ring1 = (2025 + 2050) / 2. / 10.;
   const double innerradius_sphenix = 116.;
@@ -226,6 +230,7 @@ void HCalInner_SupportRing(PHG4Reco *g4Reco)
     {
       cyl->SetActive();
     }
+    cyl->OverlapCheck(OverlapCheck);
     g4Reco->registerSubsystem(cyl);
   }
 
