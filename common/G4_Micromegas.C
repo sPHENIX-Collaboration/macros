@@ -82,7 +82,7 @@ void Micromegas_Clustering()
   auto se = Fun4AllServer::instance();
   auto mm_clus = new MicromegasClusterizer;
   mm_clus->set_cluster_version(G4TRACKING::cluster_version);
-  se->registerSubsystem();
+  se->registerSubsystem(mm_clus);
 }
 
 void Micromegas_QA()
