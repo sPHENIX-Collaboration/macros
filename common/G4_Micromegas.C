@@ -3,6 +3,7 @@
 
 #include <GlobalVariables.C>
 
+#include <G4_ActsGeom.C>
 #include <G4_Intt.C>
 #include <G4_Mvtx.C>
 #include <G4_TPC.C>
@@ -66,7 +67,7 @@ void Micromegas(PHG4Reco* g4Reco)
 void Micromegas_Cells()
 {
 // the acts geometry needs to go here since it will be used by the PHG4MicromegasHitReco
-  G4TRACKING::ActsGeomInit();
+  ACTSGEOM::ActsGeomInit();
   auto se = Fun4AllServer::instance();
   // micromegas
   auto reco = new PHG4MicromegasHitReco;
@@ -79,7 +80,9 @@ void Micromegas_Cells()
 void Micromegas_Clustering()
 {
   auto se = Fun4AllServer::instance();
-  se->registerSubsystem(new MicromegasClusterizer);
+  auto mm_clus = new MicromegasClusterizer;
+  mm_clus->set_cluster_version(G4TRACKING::cluster_version);
+  se->registerSubsystem(mm_clus);
 }
 
 void Micromegas_QA()
@@ -87,6 +90,7 @@ void Micromegas_QA()
   auto se = Fun4AllServer::instance();
   auto qa = new QAG4SimulationMicromegas;
   qa->Verbosity(Enable::QA_VERBOSITY);
+  qa->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(qa);
 }
 

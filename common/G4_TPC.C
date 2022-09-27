@@ -2,10 +2,11 @@
 #define MACRO_G4TPC_C
 
 #include <GlobalVariables.C>
-#include <QA.C>
 
+#include <G4_ActsGeom.C>
 #include <G4_Intt.C>
 #include <G4_Mvtx.C>
+#include <QA.C>
 
 #include <g4tpc/PHG4TpcCentralMembrane.h>
 #include <g4tpc/PHG4TpcDigitizer.h>
@@ -66,7 +67,8 @@ namespace G4TPC
 
   // drift velocity is set here for all relevant modules
   double tpc_drift_velocity_sim= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
-  double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
+//  double tpc_drift_velocity_reco now set in GlobalVariables.C
+//  double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
 
   // use simple clusterizer
   bool USE_SIMPLE_CLUSTERIZER = false;
@@ -234,6 +236,12 @@ void TPC_Cells()
     edrift->setTpcDistortion( distortionMap );
   }
 
+  double tpc_readout_time = 105.5/ G4TPC::tpc_drift_velocity_sim;  // ns
+  double extended_readout_time = 0.0;
+  if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+  edrift->set_double_param("max_time", tpc_readout_time + extended_readout_time);
+  std::cout << "PHG4TpcElectronDrift readout window is from 0 to " <<  tpc_readout_time + extended_readout_time << std::endl;
+
   // override the default drift velocity parameter specification
   edrift->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
   padplane->SetDriftVelocity(G4TPC::tpc_drift_velocity_sim);
@@ -270,7 +278,7 @@ void TPC_Cells()
 void TPC_Clustering()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
-
+  ACTSGEOM::ActsGeomInit();
   Fun4AllServer* se = Fun4AllServer::instance();
 
   //-------------
@@ -290,6 +298,7 @@ void TPC_Clustering()
 
     auto tpcclusterizer = new TpcClusterizer;
     tpcclusterizer->Verbosity(verbosity);
+    tpcclusterizer->set_cluster_version(G4TRACKING::cluster_version);
     tpcclusterizer->set_do_hit_association( G4TPC::DO_HIT_ASSOCIATION );
     se->registerSubsystem(tpcclusterizer);
 
@@ -299,6 +308,7 @@ void TPC_Clustering()
   {
     auto tpcclustercleaner = new TpcClusterCleaner;
     tpcclustercleaner->Verbosity(verbosity);
+    tpcclustercleaner->set_cluster_version(G4TRACKING::cluster_version);
     se->registerSubsystem(tpcclustercleaner);
   }
 
@@ -332,6 +342,7 @@ void TPC_QA()
   Fun4AllServer* se = Fun4AllServer::instance();
   QAG4SimulationTpc * qa =  new QAG4SimulationTpc;
   qa->Verbosity(verbosity);
+  qa->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(qa);
 }
 

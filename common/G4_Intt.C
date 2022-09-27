@@ -49,7 +49,7 @@ namespace G4INTT
   int nladder[4] = {12, 12, 16, 16};
   double sensor_radius[4] = {7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
 
-  double offsetphi[4] = {-0.5 * 360.0 / nladder[0], 0.0, -0.5 * 360.0 / nladder[2], 0.0 };
+  double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
 
   enum enu_InttDeadMapType  // Dead map options for INTT
   {
@@ -165,9 +165,13 @@ void Intt_Cells()
   }
   // new storage containers
   PHG4InttHitReco* reco = new PHG4InttHitReco();
-  // The timing windows are hard-coded in the INTT ladder model, they can be overridden here
-  //reco->set_double_param("tmax",80.0);
-  //reco->set_double_param("tmin",-20.0);
+
+  // The timing window defaults are set in the INTT ladder model, they can be overridden here
+  double extended_readout_time = 0.0;
+  if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+  reco->set_double_param("tmax", 80.0 + extended_readout_time);
+  reco->set_double_param("tmin", -20.0);
+  std::cout << "INTT readout window is set to -20 to " << 80.0 + extended_readout_time << std::endl;
   reco->Verbosity(verbosity);
   se->registerSubsystem(reco);
 
@@ -224,6 +228,7 @@ void Intt_Clustering()
 
   InttClusterizer* inttclusterizer = new InttClusterizer("InttClusterizer", G4MVTX::n_maps_layer, G4MVTX::n_maps_layer + G4INTT::n_intt_layer - 1);
   inttclusterizer->Verbosity(verbosity);
+  inttclusterizer->set_cluster_version(G4TRACKING::cluster_version);
   // no Z clustering for Intt type 1 layers (we DO want Z clustering for type 0 layers)
   // turning off phi clustering for type 0 layers is not necessary, there is only one strip
   // per sensor in phi
@@ -244,6 +249,7 @@ void Intt_QA()
   Fun4AllServer* se = Fun4AllServer::instance();
   QAG4SimulationIntt* qa = new QAG4SimulationIntt;
   qa->Verbosity(verbosity);
+  qa->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(qa);
 }
 

@@ -12,6 +12,7 @@
 
 #include <g4main/PHG4Reco.h>
 
+#include <mvtx/MvtxHitPruner.h>
 #include <mvtx/MvtxClusterizer.h>
 #include <qa_modules/QAG4SimulationMvtx.h>
 
@@ -92,11 +93,15 @@ void Mvtx_Cells()
   // new storage containers
   PHG4MvtxHitReco* maps_hits = new PHG4MvtxHitReco("MVTX");
   maps_hits->Verbosity(verbosity);
-  for (int ilayer = 0; ilayer < G4MVTX::n_maps_layer; ilayer++)
-  {
-    // override the default timing window for this layer - default is +/- 5000 ns
-    maps_hits->set_timing_window(ilayer, -5000, 5000);
-  }
+
+  double maps_readout_window = 5000.0;  // ns
+  double extended_readout_time = 0.0;
+  if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+  // override the default timing window - default is +/- 5000 ns
+  maps_hits->set_double_param("mvtx_tmin",  -maps_readout_window);
+  maps_hits->set_double_param("mvtx_tmax",  maps_readout_window + extended_readout_time);
+
+  std::cout << "PHG4MvtxHitReco: readout window is from " << -maps_readout_window << " to " <<  maps_readout_window + extended_readout_time << std::endl;
   se->registerSubsystem(maps_hits);
 
   PHG4MvtxDigitizer* digimvtx = new PHG4MvtxDigitizer();
@@ -113,10 +118,16 @@ void Mvtx_Clustering()
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
 
+ // prune the extra MVTX hits due to multiple strobes per hit
+  MvtxHitPruner* mvtxhitpruner = new MvtxHitPruner();
+  mvtxhitpruner->Verbosity(verbosity);
+  se->registerSubsystem(mvtxhitpruner);
+    
   // For the Mvtx layers
   //================
   MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
   mvtxclusterizer->Verbosity(verbosity);
+  mvtxclusterizer->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(mvtxclusterizer);
 }
 
@@ -127,6 +138,7 @@ void Mvtx_QA()
   Fun4AllServer* se = Fun4AllServer::instance();
   QAG4SimulationMvtx* qa = new QAG4SimulationMvtx;
   qa->Verbosity(verbosity);
+  qa->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(qa);
 }
 

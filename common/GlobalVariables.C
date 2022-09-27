@@ -57,6 +57,8 @@ namespace G4P6DECAYER
 namespace TRACKING
 {
   std::string TrackNodeName = "SvtxTrackMap";
+  bool pp_mode = false;
+  double pp_extended_readout_time = 7000.0;  // ns
 }
 
 namespace G4MAGNET
@@ -85,5 +87,17 @@ namespace G4MICROMEGAS
   // number of micromegas layers
   int n_micromegas_layer = 2;
 }  // namespace G4MICROMEGAS
+
+namespace G4TPC
+{
+ double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
+}
+
+namespace G4TRACKING
+{
+  bool init_acts_magfield = true;
+  int cluster_version = 4;
+}
+
 
 #endif

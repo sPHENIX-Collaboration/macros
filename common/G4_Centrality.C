@@ -28,7 +28,14 @@ void Centrality()
 
   PHG4CentralityReco *cent = new PHG4CentralityReco();
   cent->Verbosity(verbosity);
-  cent->GetCalibrationParameters().ReadFromFile("centrality", "xml", 0, 0, string(getenv("CALIBRATIONROOT")) + string("/Centrality/"));
+  if (Enable::XPLOAD)
+  {
+    cent->GetCalibrationParameters().ReadFromCDB("CENTRALITY");
+  }
+  else
+  {
+    cent->GetCalibrationParameters().ReadFromFile("centrality", "xml", 0, 0, string(getenv("CALIBRATIONROOT")) + string("/Centrality/"));
+  }
   se->registerSubsystem( cent );
   
   return;
