@@ -155,7 +155,7 @@ void Tracking_Reco_TrackSeed()
       }
       seeder->Verbosity(verbosity);
       seeder->SetLayerRange(7, 55);
-      seeder->SetSearchWindow(0.01, 0.02);  // (eta width, phi width)
+      seeder->SetSearchWindow(1.5, 0.05);  // (z width, phi width)
       seeder->SetMinHitsPerCluster(0);
       seeder->SetMinClustersPerTrack(3);
       seeder->useConstBField(false);
