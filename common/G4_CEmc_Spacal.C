@@ -100,7 +100,7 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::CEMC_OVERLAPCHECK;
 
   double emc_inner_radius = 92;  // emc inner radius from engineering drawing
-  double cemcthickness = 24.00000 - no_overlapp;
+  double cemcthickness = 22.50000 - no_overlapp;
 
   //max radius is 116 cm;
   double emc_outer_radius = emc_inner_radius + cemcthickness;  // outer radius
