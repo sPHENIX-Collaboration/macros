@@ -155,7 +155,7 @@ void Tracking_Reco_TrackSeed()
       }
       seeder->Verbosity(verbosity);
       seeder->SetLayerRange(7, 55);
-      seeder->SetSearchWindow(0.01, 0.02);  // (eta width, phi width)
+      seeder->SetSearchWindow(1.5, 0.05);  // (z width, phi width)
       seeder->SetMinHitsPerCluster(0);
       seeder->SetMinClustersPerTrack(3);
       seeder->useConstBField(false);
@@ -218,11 +218,8 @@ void Tracking_Reco_TrackSeed()
       // Match TPC track stubs from CA seeder to clusters in the micromegas layers
       auto mm_match = new PHMicromegasTpcTrackMatching;
       mm_match->Verbosity(verbosity);
-       mm_match->set_sc_calib_mode(G4TRACKING::SC_CALIBMODE);
       if (G4TRACKING::SC_CALIBMODE)
       {
-        // calibration pass with distorted tracks
-        mm_match->set_collision_rate(G4TRACKING::SC_COLLISIONRATE);
         // configuration is potentially with different search windows
         mm_match->set_rphi_search_window_lyr1(0.2);
         mm_match->set_rphi_search_window_lyr2(13.0);

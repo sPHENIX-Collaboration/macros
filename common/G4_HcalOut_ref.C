@@ -47,8 +47,8 @@ namespace Enable
 
 namespace G4HCALOUT
 {
-  double outer_radius = 264.71;
-  double size_z = 304.91 * 2;
+  double outer_radius = 269.317  + 5;
+  double size_z = 639.240 + 10;
   double phistart = NAN;
   double tower_emin = NAN;
   int light_scint_model = -1;
@@ -92,6 +92,13 @@ double HCalOuter(PHG4Reco *g4Reco,
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
 
   PHG4DetectorSubsystem *hcal;
+  //  Mephi Maps
+  //  Maps are different for old/new but how to set is identical
+  //  here are the ones for the old outer hcal since the new maps do not exist yet
+  //  use hcal->set_string_param("MapFileName",""); to disable map
+  //  hcal->set_string_param("MapFileName",std::string(getenv("CALIBRATIONROOT")) + "/HCALOUT/tilemap/oHCALMaps092021.root");
+  //  hcal->set_string_param("MapHistoName","hCombinedMap");
+
   if (Enable::HCALOUT_OLD)
   {
     hcal = new PHG4OuterHcalSubsystem("HCALOUT");
@@ -137,12 +144,15 @@ double HCalOuter(PHG4Reco *g4Reco,
     hcal = new PHG4OHCalSubsystem("HCALOUT");
 std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/OuterHCalAbsorberTiles_merged.gdml";
     hcal->set_string_param("GDMPath",hcaltiles);
+    hcal->set_string_param("IronFieldMapPath", G4MAGNET::magfield_OHCAL_steel);
+    hcal->set_double_param("IronFieldMapScale", G4MAGNET::magfield_rescale);
   }
 
   if (G4HCALOUT::light_scint_model >= 0)
   {
     hcal->set_int_param("light_scint_model", G4HCALOUT::light_scint_model);
   }
+  // hcal->set_int_param("field_check", 1); // for validating the field in HCal
   hcal->SetActive();
   hcal->SuperDetector("HCALOUT");
   if (AbsorberActive)
@@ -200,7 +210,7 @@ void HCALOuter_Towers()
     }
     else
     {
-      G4HCALOUT::phistart = -0.024960211; // offet in phi (from zero) extracted from geantinos
+      G4HCALOUT::phistart = M_PI ; // reset phi angle start after HCal coordinate system correction
     }
   }
   TowerBuilder->set_double_param("phistart",G4HCALOUT::phistart);

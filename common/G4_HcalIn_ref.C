@@ -110,6 +110,16 @@ double HCalInner(PHG4Reco *g4Reco,
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
 
   PHG4DetectorSubsystem *hcal;
+  //  Mephi Maps
+  //  Maps are different for old/new but how to set is identical
+  //  here are the ones for the gdml based inner hcal
+  //  use hcal->set_string_param("MapFileName",""); to disable map
+  //  hcal->set_string_param("MapFileName",std::string(getenv("CALIBRATIONROOT")) + "/HCALIN/tilemap/ihcalgdmlmap09212022.root");
+  //  hcal->set_string_param("MapHistoName","ihcalcombinedgdmlnormtbyt");
+  //  use hcal->set_string_param("MapFileName",""); to disable map
+  //  hcal->set_string_param("MapFileName",std::string(getenv("CALIBRATIONROOT")) + "/HCALIN/tilemap/ihcalgdmlmap09212022.root");
+  //  hcal->set_string_param("MapHistoName","ihcalcombinedgdmlnormtbyt");
+
   // all sizes are in cm!
   if (Enable::HCALIN_OLD)
   {
@@ -188,7 +198,7 @@ double HCalInner(PHG4Reco *g4Reco,
 
   radius = hcal->get_double_param("outer_radius");
 
-  HCalInner_SupportRing(g4Reco);
+  // HCalInner_SupportRing(g4Reco);
 
   radius += no_overlapp;
   return radius;
@@ -198,6 +208,7 @@ double HCalInner(PHG4Reco *g4Reco,
 void HCalInner_SupportRing(PHG4Reco *g4Reco)
 {
   bool AbsorberActive = Enable::SUPPORT || Enable::HCALIN_SUPPORT;
+  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALIN_OVERLAPCHECK;
 
   const double z_ring1 = (2025 + 2050) / 2. / 10.;
   const double innerradius_sphenix = 116.;
@@ -222,10 +233,12 @@ void HCalInner_SupportRing(PHG4Reco *g4Reco)
     cyl->set_double_param("length", G4HCALIN::dz);
     cyl->set_string_param("material", "SS310");
     cyl->set_double_param("thickness", G4HCALIN::support_ring_outer_radius - innerradius);
+    cyl->OverlapCheck(Enable::OVERLAPCHECK);
     if (AbsorberActive)
     {
       cyl->SetActive();
     }
+    cyl->OverlapCheck(OverlapCheck);
     g4Reco->registerSubsystem(cyl);
   }
 
@@ -272,7 +285,7 @@ void HCALInner_Towers()
     }
     else
     {
-      G4HCALIN::phistart = 0.0295080867; // extracted from geantinos
+      G4HCALIN::phistart = M_PI ; // // reset phi angle start after HCal coordinate system correction
     }
   }
   TowerBuilder->set_double_param("phistart",G4HCALIN::phistart);
