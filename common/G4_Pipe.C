@@ -40,7 +40,8 @@ namespace G4PIPE
   double outer_pipe_thickness = 0.1397;             // 1.397 mm or 0.055"
   double outer_pipe_cone_length = 38.1;
   double outer_pipe_ext_radius = 3.81;    // past the cone
-  double outer_pipe_ext_length = 67.087;    // extension beyond conical part
+//  double outer_pipe_ext_length = 67.087;    // extension beyond conical part
+  double outer_pipe_ext_length = 100.;    // extension beyond conical part through epd
 
   // maximum extent of the central part of beampipe (the forward regions are implemented in G4_Beamline.C)
   double max_z = be_pipe_zshift + be_pipe_length / 2. + al_pipe_north_length + al_pipe_north_ext_length +
@@ -57,7 +58,6 @@ void PipeInit()
 
 double Pipe(PHG4Reco* g4Reco, double radius)
 {
-cout << "**** STAR PIPE ***************" << endl;
   bool AbsorberActive = Enable::ABSORBER || Enable::PIPE_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::PIPE_OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY, Enable::PIPE_VERBOSITY);
