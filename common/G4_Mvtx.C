@@ -68,14 +68,14 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   for (int ilayer = 0; ilayer < G4MVTX::n_maps_layer; ilayer++)
   {
     double radius_lyr = PHG4MvtxDefs::mvtxdat[ilayer][PHG4MvtxDefs::kRmd];
-    mvtx->set_double_param(ilayer, "layer_z_offset", G4MVTXAlignment::z_offset[ilayer]);
+//    mvtx->set_double_param(ilayer, "layer_z_offset", G4MVTXAlignment::z_offset[ilayer]);
     if (verbosity)
     {
       cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << endl;
     }
     radius = radius_lyr / 10.;
   }
-  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "alignment_path",  G4MVTXAlignment::alignment_path);
+//  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "alignment_path",  G4MVTXAlignment::alignment_path);
   mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v1.gdml"));
 
   mvtx->SetActive();
