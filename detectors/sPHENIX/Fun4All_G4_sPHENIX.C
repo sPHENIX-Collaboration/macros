@@ -136,27 +136,27 @@ int Fun4All_G4_sPHENIX(
   // add the settings for other with [1], next with [2]...
   if (Input::SIMPLE)
   {
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 5);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 1);
       
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("D+", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("D-", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("D0", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("anit_D0", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("Ds+", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("Ds-", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("D0", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("J/psi", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("lambda_c+", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("anti_lambda_c+", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("xi_c+", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("xi_c0", 5);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("D+", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("D-", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("D0", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("anti_D0", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("Ds+", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("Ds-", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("D0", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("J/psi", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("lambda_c+", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("anti_lambda_c+", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("xi_c+", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("xi_c0", 1);
       
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("B+", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("B-", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("B0", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("anti_B0", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("Bs0", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("anti_Bs0", 5);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("B+", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("B-", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("B0", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("anti_B0", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("Bs0", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("anti_Bs0", 1);
       
     if (Input::HEPMC || Input::EMBED)
     {
