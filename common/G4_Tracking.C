@@ -125,7 +125,6 @@ void Tracking_Reco_TrackSeed()
       silicon_Seeding->Verbosity(verbosity);
       std::cout << "SETTING SI SEED CV" << std::endl;
       silicon_Seeding->set_cluster_version(G4TRACKING::cluster_version);
-      silicon_Seeding->fieldMapName(G4MAGNET::magfield);
       se->registerSubsystem(silicon_Seeding);
       
       auto merger = new PHSiliconSeedMerger;
