@@ -98,9 +98,6 @@ void TrackingInit()
 
 void Tracking_Reco_TrackSeed()
 {
-  // !!!! THIS IS TEMPORARY, UNTIL CA SEEDER CAN HANDLE TRACKS FROM LARGE Z !!!!!
-  if(TRACKING::pp_mode) G4TRACKING::use_truth_tpc_seeding = true;  
-  
   // set up verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   
