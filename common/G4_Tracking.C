@@ -115,7 +115,6 @@ void convert_seeds()
 
 void Tracking_Reco_TrackSeed()
 {
-
   // set up verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   
