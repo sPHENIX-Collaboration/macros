@@ -187,8 +187,6 @@ void Tracking_Reco_TrackSeed()
       // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
       auto silicon_match = new PHSiliconTpcTrackMatching;
       silicon_match->Verbosity(verbosity);
-      silicon_match->set_field(G4MAGNET::magfield);
-      silicon_match->set_field_dir(G4MAGNET::magfield_rescale);
       silicon_match->set_pp_mode(TRACKING::pp_mode);
       std::cout << "PHSiliconTpcTrackMatching pp_mode set to " << TRACKING::pp_mode << std::endl;
       if (G4TRACKING::SC_CALIBMODE)
