@@ -81,7 +81,7 @@ namespace G4TRACKING
 
   // Flag to run commissioning seeding workflow with tuned parameters for
   // misaligned + distorted tracks
-  bool use_commissioning_seeding = true;
+  bool use_commissioning_seeding = false;
 
 }  // namespace G4TRACKING
 
