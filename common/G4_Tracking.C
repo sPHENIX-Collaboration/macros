@@ -370,8 +370,8 @@ void Tracking_Reco_CommissioningTrackSeed()
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
   silicon_Seeding->set_cluster_version(G4TRACKING::cluster_version);
-  silicon_Seeding->sigmaScattering(125.);
-  silicon_Seeding->setRPhiSearchWindow(0.3);
+  silicon_Seeding->sigmaScattering(50.);
+  silicon_Seeding->setRPhiSearchWindow(0.4);
   se->registerSubsystem(silicon_Seeding);
   
   auto merger = new PHSiliconSeedMerger;
@@ -418,7 +418,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   silicon_match->set_pp_mode(TRACKING::pp_mode);
   
   silicon_match->set_phi_search_window(0.2);
-  silicon_match->set_eta_search_window(0.01);
+  silicon_match->set_eta_search_window(0.015);
   silicon_match->set_x_search_window(std::numeric_limits<double>::max());  
   silicon_match->set_y_search_window(std::numeric_limits<double>::max());  
   silicon_match->set_z_search_window(std::numeric_limits<double>::max());  
