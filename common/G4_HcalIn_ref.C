@@ -285,7 +285,7 @@ void HCALInner_Towers()
     }
     else
     {
-      G4HCALIN::phistart = M_PI ; // // reset phi angle start after HCal coordinate system correction
+      G4HCALIN::phistart = 0. ; // // reset phi angle start after HCal coordinate system correction
     }
   }
   TowerBuilder->set_double_param("phistart",G4HCALIN::phistart);
