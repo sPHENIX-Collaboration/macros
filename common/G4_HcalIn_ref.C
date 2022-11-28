@@ -285,7 +285,7 @@ void HCALInner_Towers()
     }
     else
     {
-      G4HCALIN::phistart = 0. ; // // reset phi angle start after HCal coordinate system correction
+      G4HCALIN::phistart = 0.0445549893; // offet in phi (from zero) extracted from geantinos
     }
   }
   TowerBuilder->set_double_param("phistart",G4HCALIN::phistart);
