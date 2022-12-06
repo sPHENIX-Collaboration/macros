@@ -21,6 +21,9 @@
 #include <G4_User.C>
 #include <QA.C>
 
+//quick test of the decayer QA module on Jenkins
+#include <qa_modules/QAG4Decayer.h>
+
 #include <ffamodules/FlagHandler.h>
 #include <ffamodules/HeadReco.h>
 #include <ffamodules/SyncReco.h>
@@ -602,6 +605,9 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::TRACKING_QA && Enable::CEMC_QA && Enable::HCALIN_QA && Enable::HCALOUT_QA) QA_G4CaloTracking();
 
+  //quick test of the decayer QA module on Jenkins
+  se->registerSubsystem(new QAG4Decayer());
+    
   //--------------
   // Set up Input Managers
   //--------------
@@ -665,7 +671,7 @@ int Fun4All_G4_sPHENIX(
   //-----
 
   if (Enable::QA) QA_Output(outputroot + "_qa.root");
-
+    
   //-----
   // Exit
   //-----
