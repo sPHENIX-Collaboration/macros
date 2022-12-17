@@ -312,6 +312,7 @@ void Tracking_Reco_TrackFit()
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
   actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
+  actsFit->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(actsFit);
   
   if (G4TRACKING::SC_CALIBMODE)
