@@ -89,7 +89,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl->set_double_param("radius", G4PIPE::be_pipe_radius);  // inner radius
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::be_pipe_length);
-  cyl->set_string_param("material", "G4_Be");
+  cyl->set_string_param("material", "G4_Al");
   cyl->set_double_param("thickness", G4PIPE::be_pipe_thickness);
   cyl->SuperDetector("PIPE");
   if (AbsorberActive) cyl->SetActive();
