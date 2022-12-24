@@ -22,7 +22,7 @@ namespace G4PIPE
 {
   // STAR Beampipe for sPHENIX - based on STAR DWG 30006
   double be_pipe_radius = 2.00025;       // 4.0005 cm inner diameter
-  double be_pipe_thickness = 1.5;     // the wall thickness of the aluminum sections of both the new and old central sPHENIX beam pipe have/had wall thickness of 0.050-0.063" (about 1.25-1.5mm)
+  double be_pipe_thickness = 0.15;     // the wall thickness of the aluminum sections of both the new and old central sPHENIX beam pipe have/had wall thickness of 0.050-0.063" (about 1.25-1.5mm)
   double be_pipe_length = 120.015;       // 120 cm or 47.25"
   double be_pipe_zshift = -41.1639;      // amount Be pipe is shifted south
 
