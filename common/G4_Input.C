@@ -24,9 +24,6 @@
 #include <phhepmc/HepMCFlowAfterBurner.h>
 #include <phhepmc/PHHepMCGenHelper.h>
 
-#include <phsartre/PHSartre.h>
-#include <phsartre/PHSartreParticleTrigger.h>
-
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDummyInputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -39,7 +36,6 @@ R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
-R__LOAD_LIBRARY(libPHSartre.so)
 R__LOAD_LIBRARY(libFermimotionAfterburner.so)
 
 namespace Input
@@ -50,9 +46,6 @@ namespace Input
 
   bool PYTHIA8 = false;
   int PYTHIA8_EmbedId = 0;
-
-  bool SARTRE = false;
-  int SARTRE_EmbedId = 0;
 
   // Single/multiple particle generators
   bool DZERO = false;
@@ -89,7 +82,7 @@ namespace Input
   int EmbedId = 1;
 
   //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
-  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
   void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen)
   {
     if (HepMCGen == nullptr)
@@ -113,7 +106,7 @@ namespace Input
 
   //! apply EIC beam parameter to any HepMC generator following EIC CDR,
   //! including in-time collision's space time shift, beam crossing angle and angular divergence
-  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
   void ApplyEICBeamParameter(PHHepMCGenHelper *HepMCGen)
   {
     if (HepMCGen == nullptr)
@@ -208,11 +201,6 @@ namespace PYTHIA8
   string config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg";
 }
 
-namespace SARTRE
-{
-  string config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/sartre.cfg";
-}
-
 namespace PILEUP
 {
   string pileupfile = "/sphenix/sim/sim01/sphnxpro/MDC1/sHijing_HepMC/data/sHijing_0_20fm-0000000001-00000.dat";
@@ -230,8 +218,6 @@ namespace INPUTGENERATOR
   std::vector<PHG4ParticleGun *> Gun;
   PHPythia6 *Pythia6 = nullptr;
   PHPythia8 *Pythia8 = nullptr;
-  PHSartre *Sartre = nullptr;
-  PHSartreParticleTrigger *SartreTrigger = nullptr;
   ReadEICFiles *EICFileReader = nullptr;
 }  // namespace INPUTGENERATOR
 
@@ -257,7 +243,7 @@ void InputInit()
     cout << "Reading Hits and Embedding into background at the same time is not supported" << endl;
     gSystem->Exit(1);
   }
-  if (Input::READHITS && (Input::PYTHIA6 || Input::PYTHIA8 || Input::SARTRE || Input::SIMPLE || Input::GUN || Input::UPSILON || Input::HEPMC))
+  if (Input::READHITS && (Input::PYTHIA6 || Input::PYTHIA8 || Input::SIMPLE || Input::GUN || Input::UPSILON || Input::HEPMC))
   {
     cout << "Reading Hits and running G4 simultanously is not supported" << endl;
     gSystem->Exit(1);
@@ -293,22 +279,6 @@ void InputInit()
 
     INPUTGENERATOR::Pythia8->set_embedding_id(Input::EmbedId);
     Input::PYTHIA8_EmbedId = Input::EmbedId;
-    Input::EmbedId++;
-  }
-  if (Input::SARTRE)
-  {
-    gSystem->Load("libPHSartre.so");
-    INPUTGENERATOR::Sartre = new PHSartre();
-    INPUTGENERATOR::Sartre->set_config_file(SARTRE::config_file);
-    // particle trigger to enhance forward J/Psi -> ee
-    INPUTGENERATOR::SartreTrigger = new PHSartreParticleTrigger("MySartreTrigger");
-    INPUTGENERATOR::SartreTrigger->AddParticles(-11);
-    //INPUTGENERATOR::SartreTrigger->SetEtaHighLow(4.0,1.4);
-    INPUTGENERATOR::SartreTrigger->SetEtaHighLow(1.0, -1.1);  // central arm
-    INPUTGENERATOR::SartreTrigger->PrintConfig();
-
-    INPUTGENERATOR::Sartre->set_embedding_id(Input::EmbedId);
-    Input::SARTRE_EmbedId = Input::EmbedId;
     Input::EmbedId++;
   }
   // single particle generators
@@ -407,11 +377,6 @@ void InputRegister()
   {
     se->registerSubsystem(INPUTGENERATOR::Pythia8);
   }
-  if (Input::SARTRE)
-  {
-    INPUTGENERATOR::Sartre->register_trigger((PHSartreGenTrigger *) INPUTGENERATOR::SartreTrigger);
-    se->registerSubsystem(INPUTGENERATOR::Sartre);
-  }
   if (Input::DZERO)
   {
     int verbosity = max(Input::DZERO_VERBOSITY, Input::VERBOSITY);
@@ -479,7 +444,7 @@ void InputRegister()
   }
   // here are the various utility modules which read particles and
   // put them onto the G4 particle stack
-  if (Input::HEPMC or Input::PYTHIA8 or Input::PYTHIA6 or Input::SARTRE or Input::READEIC)
+  if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6 || Input::READEIC)
   {
     if (Input::HEPMC)
     {
