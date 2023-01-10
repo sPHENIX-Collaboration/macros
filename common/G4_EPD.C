@@ -16,12 +16,18 @@ namespace Enable
   bool EPD_OVERLAPCHECK = false;
 }  // namespace Enable
 
+namespace G4EPD
+{
+  double dz = 6.;
+  double place_z = 316.;
+}
+
 void EPDInit()
 {
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 90.);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 91.);
   // using default z-position and add 10 cm for tile thickness
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -310.);
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 310.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -G4EPD::place_z - G4EPD::dz/2. - no_overlapp);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4EPD::place_z + G4EPD::dz/2. + no_overlapp);
 }
 
 void EPD(PHG4Reco* g4Reco)
