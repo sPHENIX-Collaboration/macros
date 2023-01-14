@@ -475,8 +475,11 @@ int Fun4All_pi0_SIMPLE_EMBED_JF(
     return 0;
   }
 
-	CaloCalibEmc_Pi0 *eval_pi2 = new CaloCalibEmc_Pi0("dummy", outputroot+"_piemc.root");
-	//eval_pi2->set_centrality_nclusters_cut(350);
+  CaloCalibEmc_Pi0 *eval_pi2 = new CaloCalibEmc_Pi0("dummy", outputroot+"_piemc.root");
+                                                // this call is needed for embedding
+  eval_pi2->set_centrality_nclusters_cut(350);  // which uses more central events
+                                                // than we will for data to enhance Bkg
+                                                // to match the enhanced signal from embed
   se->registerSubsystem(eval_pi2);
   cout << "successful registration of pi0 " << endl;
 
