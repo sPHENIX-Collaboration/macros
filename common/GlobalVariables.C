@@ -68,6 +68,7 @@ namespace G4MAGNET
   // like in the tracking - those need to be set in the Fun4All macro
   double magfield_rescale = NAN;
   std::string magfield;
+  std::string magfield_OHCAL_steel;
 }  // namespace G4MAGNET
 
 namespace XPLOAD
