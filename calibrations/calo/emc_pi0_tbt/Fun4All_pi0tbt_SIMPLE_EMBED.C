@@ -119,7 +119,7 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_mean(0., 0., 0.);
       INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0.01, 0.01, 5.);
     }
-    INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-0.3, 0.3);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1.1, 1.1);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(1.6, 5.);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_power_law_n(-6.5);
