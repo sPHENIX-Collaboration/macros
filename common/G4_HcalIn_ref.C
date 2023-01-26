@@ -33,7 +33,7 @@ R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4ihcal.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
-void HCalInner_SupportRing(PHG4Reco *g4Reco);
+//void HCalInner_SupportRing(PHG4Reco *g4Reco);
 
 namespace Enable
 {
@@ -53,7 +53,8 @@ namespace Enable
 namespace G4HCALIN
 {
   double inch = 2.54;
-  double support_ring_outer_radius = 74.061 * inch - 15;
+  double support_ring_outer_radius = 177.323; //actual radius is 74.061 inches but truncated to not overlap with outer HCal envelope
+  //double support_ring_outer_radius = 74.061 * inch;
   double support_ring_z = 175.375 * inch / 2;
   double dz = 4. * inch;
   double phistart = NAN;
@@ -199,14 +200,14 @@ double HCalInner(PHG4Reco *g4Reco,
 
   radius = hcal->get_double_param("outer_radius");
 
-  HCalInner_SupportRing(g4Reco);
+  //HCalInner_SupportRing(g4Reco);
 
   radius += no_overlapp;
   return radius;
 }
 
 //! A rough version of the inner HCal support ring, updated Jan 2023
-void HCalInner_SupportRing(PHG4Reco *g4Reco)
+/*void HCalInner_SupportRing(PHG4Reco *g4Reco)
 {
   bool AbsorberActive = Enable::SUPPORT || Enable::HCALIN_SUPPORT;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALIN_OVERLAPCHECK;
@@ -244,7 +245,7 @@ void HCalInner_SupportRing(PHG4Reco *g4Reco)
   }
 
   return;
-}
+  }*/
 
 void HCALInner_Cells()
 {
