@@ -33,8 +33,6 @@ R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4ihcal.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
-//void HCalInner_SupportRing(PHG4Reco *g4Reco);
-
 namespace Enable
 {
   bool HCALIN = false;
@@ -53,10 +51,10 @@ namespace Enable
 namespace G4HCALIN
 {
   double inch = 2.54;
-  double support_ring_outer_radius = 177.323; //actual radius is 74.061 inches but truncated to not overlap with outer HCal envelope
-  //double support_ring_outer_radius = 74.061 * inch;
+  double support_ring_outer_radius = 177.323; 
   double support_ring_z = 175.375 * inch / 2;
   double dz = 4. * inch;
+
   double phistart = NAN;
   double tower_emin = NAN;
   int light_scint_model = -1;
@@ -205,47 +203,6 @@ double HCalInner(PHG4Reco *g4Reco,
   radius += no_overlapp;
   return radius;
 }
-
-//! A rough version of the inner HCal support ring, updated Jan 2023
-/*void HCalInner_SupportRing(PHG4Reco *g4Reco)
-{
-  bool AbsorberActive = Enable::SUPPORT || Enable::HCALIN_SUPPORT;
-  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALIN_OVERLAPCHECK;
-
-  const double innerradius_sphenix = 56.188 * G4HCALIN::inch;
-  const double innerradius_ephenix_hadronside = 138.;
-  const double z_rings[] =
-    {-G4HCALIN::support_ring_z, G4HCALIN::support_ring_z};
-  const double length = 4. * G4HCALIN::inch;
-
-  PHG4CylinderSubsystem *cyl;
-
-  for (int i = 0; i < 2; i++)
-  {
-    double innerradius = innerradius_sphenix;
-    if (z_rings[i] > 0 && G4HCALIN::inner_hcal_eic == 1)
-    {
-      innerradius = innerradius_ephenix_hadronside;
-    }
-    cyl = new PHG4CylinderSubsystem("HCALIN_SPT_N1", i);
-    cyl->set_double_param("place_z", z_rings[i]);
-    cyl->SuperDetector("HCALIN_SPT");
-    cyl->set_double_param("radius", innerradius);
-    cyl->set_int_param("lengthviarapidity", 0);
-    cyl->set_double_param("length", G4HCALIN::dz);
-    cyl->set_string_param("material", "G4_Al");
-    cyl->set_double_param("thickness", G4HCALIN::support_ring_outer_radius - innerradius);
-    cyl->OverlapCheck(Enable::OVERLAPCHECK);
-    if (AbsorberActive)
-    {
-      cyl->SetActive();
-    }
-    cyl->OverlapCheck(OverlapCheck);
-    g4Reco->registerSubsystem(cyl);
-  }
-
-  return;
-  }*/
 
 void HCALInner_Cells()
 {

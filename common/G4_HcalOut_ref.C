@@ -146,7 +146,24 @@ double HCalOuter(PHG4Reco *g4Reco,
     hcal->set_string_param("GDMPath",hcaltiles);
     hcal->set_string_param("IronFieldMapPath", G4MAGNET::magfield_OHCAL_steel);
     hcal->set_double_param("IronFieldMapScale", G4MAGNET::magfield_rescale);
+  }
 
+  if (G4HCALOUT::light_scint_model >= 0)
+  {
+    hcal->set_int_param("light_scint_model", G4HCALOUT::light_scint_model);
+  }
+  // hcal->set_int_param("field_check", 1); // for validating the field in HCal
+  hcal->SetActive();
+  hcal->SuperDetector("HCALOUT");
+  if (AbsorberActive)
+  {
+    hcal->SetAbsorberActive();
+  }
+  hcal->OverlapCheck(OverlapCheck);
+  g4Reco->registerSubsystem(hcal);
+
+  if (!Enable::HCALOUT_OLD)
+  {
     //HCal support rings, approximated as solid rings
     //note there is only one ring on either side, but to allow part of the ring inside the HCal envelope two rings are used
     const double inch = 2.54;
@@ -176,7 +193,6 @@ double HCalOuter(PHG4Reco *g4Reco,
 	  {
 	    cyl->SetActive();
 	  }
-	cyl->OverlapCheck(OverlapCheck);
 	g4Reco->registerSubsystem(cyl);
 
 	//rings inside outer HCal envelope
@@ -188,30 +204,15 @@ double HCalOuter(PHG4Reco *g4Reco,
         cylout->set_double_param("length", support_ring_dz);
         cylout->set_string_param("material", "G4_Al");
         cylout->set_double_param("thickness", support_ring_outer_radius - (hcal_envelope_radius + 0.1));
-        cylout->OverlapCheck(Enable::OVERLAPCHECK);
         if (AbsorberActive)
           {
             cylout->SetActive();
           }
-	//cylout->SetMotherSubsystem(hcal);
+	cylout->SetMotherSubsystem(hcal);
         cylout->OverlapCheck(OverlapCheck);
         g4Reco->registerSubsystem(cylout);
       }
   }
-
-  if (G4HCALOUT::light_scint_model >= 0)
-  {
-    hcal->set_int_param("light_scint_model", G4HCALOUT::light_scint_model);
-  }
-  // hcal->set_int_param("field_check", 1); // for validating the field in HCal
-  hcal->SetActive();
-  hcal->SuperDetector("HCALOUT");
-  if (AbsorberActive)
-  {
-    hcal->SetAbsorberActive();
-  }
-  hcal->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(hcal);
 
   radius = hcal->get_double_param("outer_radius");
 
