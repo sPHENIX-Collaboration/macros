@@ -188,6 +188,8 @@ double HCalOuter(PHG4Reco *g4Reco,
 	cyl->set_double_param("length", support_ring_dz);
 	cyl->set_string_param("material", "G4_Al");
 	cyl->set_double_param("thickness", hcal_envelope_radius - 0.1 - innerradius);
+	cyl->set_double_param("start_phi_rad",1.867);
+	cyl->set_double_param("delta_phi_rad",5.692);
 	cyl->OverlapCheck(Enable::OVERLAPCHECK);
 	if (AbsorberActive)
 	  {
@@ -204,7 +206,9 @@ double HCalOuter(PHG4Reco *g4Reco,
         cylout->set_double_param("length", support_ring_dz);
         cylout->set_string_param("material", "G4_Al");
         cylout->set_double_param("thickness", support_ring_outer_radius - (hcal_envelope_radius + 0.1));
-        if (AbsorberActive)
+        cylout->set_double_param("start_phi_rad",1.867);
+	cylout->set_double_param("delta_phi_rad",5.692);
+	if (AbsorberActive)
           {
             cylout->SetActive();
           }
