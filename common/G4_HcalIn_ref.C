@@ -241,7 +241,6 @@ void HCALInner_Towers()
     if (Enable::HCALIN_OLD)
     {
       G4HCALIN::phistart = 0.0328877688; // offet in phi (from zero) extracted from geantinos
-      G4HCALIN::tower_energy_source = HcalRawTowerBuilder::kRawLightYield; //the mephi maps are kinda weird for the old HCal
     }
     else
     {
