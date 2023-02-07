@@ -48,7 +48,7 @@ int Fun4All_G4_sPHENIX(
     const string &outdir = ".")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0);
+  se->Verbosity(1);
 
   //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
   PHRandomSeed::Verbosity(1);
@@ -70,7 +70,7 @@ int Fun4All_G4_sPHENIX(
   // Input options
   //===============
   // verbosity setting (applies to all input managers)
-  Input::VERBOSITY = 0;
+  Input::VERBOSITY = 20000000;
   // First enable the input generators
   // Either:
   // read previously generated g4-hits files, in this case it opens a DST and skips
