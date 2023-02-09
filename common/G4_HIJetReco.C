@@ -34,6 +34,7 @@ namespace G4HIJETS
 
 void HIJetReco()
 {
+
   int verbosity = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
 
   //---------------
@@ -55,50 +56,60 @@ void HIJetReco()
   truthjetreco->Verbosity(verbosity);
   se->registerSubsystem(truthjetreco);
 
-  RetowerCEMC *rcemc = new RetowerCEMC();
-  rcemc->Verbosity(verbosity);
-  se->registerSubsystem(rcemc);
+
+
+  RetowerCEMC *rcemc = new RetowerCEMC(); 
+  rcemc->Verbosity(verbosity); 
+  rcemc->set_towerinfo(true);
+  se->registerSubsystem(rcemc); 
 
   JetReco *towerjetreco = new JetReco();
-  towerjetreco->add_input(new TowerJetInput(Jet::CEMC_TOWER_RETOWER));
-  towerjetreco->add_input(new TowerJetInput(Jet::HCALIN_TOWER));
-  towerjetreco->add_input(new TowerJetInput(Jet::HCALOUT_TOWER));
-  towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.2), "AntiKt_Tower_HIRecoSeedsRaw_r02");
+  towerjetreco->add_input(new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER));
+  towerjetreco->add_input(new TowerJetInput(Jet::HCALIN_TOWERINFO));
+  towerjetreco->add_input(new TowerJetInput(Jet::HCALOUT_TOWERINFO));
+  towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.2), "AntiKt_TowerInfo_HIRecoSeedsRaw_r02");
   towerjetreco->set_algo_node("ANTIKT");
   towerjetreco->set_input_node("TOWER");
-  towerjetreco->Verbosity(verbosity);
+  towerjetreco->Verbosity(verbosity); 
   se->registerSubsystem(towerjetreco);
 
-  DetermineTowerBackground *dtb = new DetermineTowerBackground();
-  dtb->SetBackgroundOutputName("TowerBackground_Sub1");
+ DetermineTowerBackground *dtb = new DetermineTowerBackground();
+  dtb->SetBackgroundOutputName("TowerInfoBackground_Sub1");
   dtb->SetFlow(G4HIJETS::do_flow);
   dtb->SetSeedType(0);
   dtb->SetSeedJetD(3);
-  dtb->Verbosity(verbosity);
+  dtb->set_towerinfo(true);
+  dtb->Verbosity(verbosity); 
   se->registerSubsystem(dtb);
+
 
   CopyAndSubtractJets *casj = new CopyAndSubtractJets();
   casj->SetFlowModulation(G4HIJETS::do_flow);
-  casj->Verbosity(verbosity);
+  casj->Verbosity(verbosity); 
+  casj->set_towerinfo(true);
   se->registerSubsystem(casj);
+  
 
   DetermineTowerBackground *dtb2 = new DetermineTowerBackground();
-  dtb2->SetBackgroundOutputName("TowerBackground_Sub2");
+  dtb2->SetBackgroundOutputName("TowerInfoBackground_Sub2");
   dtb2->SetFlow(G4HIJETS::do_flow);
   dtb2->SetSeedType(1);
   dtb2->SetSeedJetPt(7);
-  dtb2->Verbosity(verbosity);
+  dtb2->Verbosity(verbosity); 
+  dtb2->set_towerinfo(true);
   se->registerSubsystem(dtb2);
+  
 
   SubtractTowers *st = new SubtractTowers();
   st->SetFlowModulation(G4HIJETS::do_flow);
   st->Verbosity(verbosity);
+  st->set_towerinfo(true);
   se->registerSubsystem(st);
 
   towerjetreco = new JetReco();
-  towerjetreco->add_input(new TowerJetInput(Jet::CEMC_TOWER_SUB1));
-  towerjetreco->add_input(new TowerJetInput(Jet::HCALIN_TOWER_SUB1));
-  towerjetreco->add_input(new TowerJetInput(Jet::HCALOUT_TOWER_SUB1));
+  towerjetreco->add_input(new TowerJetInput(Jet::CEMC_TOWERINFO_SUB1));
+  towerjetreco->add_input(new TowerJetInput(Jet::HCALIN_TOWERINFO_SUB1));
+  towerjetreco->add_input(new TowerJetInput(Jet::HCALOUT_TOWERINFO_SUB1));
   towerjetreco->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.2, verbosity), "AntiKt_Tower_r02_Sub1");
   towerjetreco->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.3, verbosity), "AntiKt_Tower_r03_Sub1");
   towerjetreco->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.4, verbosity), "AntiKt_Tower_r04_Sub1");
