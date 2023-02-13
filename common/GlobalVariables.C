@@ -16,6 +16,16 @@ namespace Input
 
   bool UPSILON = false;
   std::set<int> UPSILON_EmbedIds;
+
+  //! nominal beam parameter configuration choices for BEAM_CONFIGURATION
+  enum BeamConfiguration
+  {
+    AA_COLLISION = 0,
+    pA_COLLISION,
+    pp_COLLISION
+  };
+
+  BeamConfiguration BEAM_CONFIGURATION = AA_COLLISION;
 }  // namespace Input
 
 namespace DstOut

@@ -95,6 +95,9 @@ int Fun4All_G4_sPHENIX(
   // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
+  // Enable this is emulating the nominal pp/pA/AA collision vertex distribution
+  // Input::BEAM_CONFIGURATION = AA_COLLISION; // AA_COLLISION (default), pA_COLLISION, pp_COLLISION
+
   //  Input::PYTHIA6 = true;
 
   // Input::PYTHIA8 = true;
@@ -183,12 +186,14 @@ int Fun4All_G4_sPHENIX(
   if (Input::PYTHIA6)
   {
     //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    //! Nominal collision species is selected by Input::BEAM_CONFIGURATION
     Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia6);
   }
   // pythia8
   if (Input::PYTHIA8)
   {
     //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    //! Nominal collision species is selected by Input::BEAM_CONFIGURATION
     Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia8);
   }
 
@@ -200,6 +205,7 @@ int Fun4All_G4_sPHENIX(
   if (Input::HEPMC)
   {
     //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    //! Nominal collision species is selected by Input::BEAM_CONFIGURATION
     Input::ApplysPHENIXBeamParameter(INPUTMANAGER::HepMCInputManager);
 
     // optional overriding beam parameters
@@ -223,6 +229,7 @@ int Fun4All_G4_sPHENIX(
   if (Input::PILEUPRATE > 0)
   {
     //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+    //! Nominal collision species is selected by Input::BEAM_CONFIGURATION
     Input::ApplysPHENIXBeamParameter(INPUTMANAGER::HepMCPileupInputManager);
   }
   // register all input generators with Fun4All
