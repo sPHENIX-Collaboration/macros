@@ -96,7 +96,7 @@ int Fun4All_G4_sPHENIX(
   // Input::SIMPLE_VERBOSITY = 1;
 
   // Enable this is emulating the nominal pp/pA/AA collision vertex distribution
-  // Input::BEAM_CONFIGURATION = AA_COLLISION; // AA_COLLISION (default), pA_COLLISION, pp_COLLISION
+  // Input::BEAM_CONFIGURATION = Input::AA_COLLISION; // Input::AA_COLLISION (default), Input::pA_COLLISION, Input::pp_COLLISION
 
   //  Input::PYTHIA6 = true;
 
