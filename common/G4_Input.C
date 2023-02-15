@@ -88,7 +88,7 @@ namespace Input
   {
     if (HepMCGen == nullptr)
     {
-      std::cout << "ApplysPHENIXBeamParameter_pp(): Fatal Error - null input pointer HepMCGen" << std::endl;
+      std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
       exit(1);
     }
     HepMCGen->set_beam_direction_theta_phi(1e-3, 0, M_PI - 1e-3, 0);  //2mrad x-ing of sPHENIX per sPH-TRG-2022-001
