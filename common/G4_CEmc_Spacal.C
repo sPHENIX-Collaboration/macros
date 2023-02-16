@@ -100,7 +100,7 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::CEMC_OVERLAPCHECK;
 
   double emc_inner_radius = 92;  // emc inner radius from engineering drawing
-  double cemcthickness = 24.00000 - no_overlapp;
+  double cemcthickness = 22.50000 - no_overlapp;
 
   //max radius is 116 cm;
   double emc_outer_radius = emc_inner_radius + cemcthickness;  // outer radius
@@ -164,7 +164,7 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
   else
   {
     cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
-    cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2018ProjTilted/"));
+    cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2023ProjTilted/"));
   }
   cemc->set_double_param("radius", radius);            // overwrite minimal radius
   cemc->set_double_param("thickness", cemcthickness);  // overwrite thickness

@@ -38,7 +38,7 @@ namespace G4BEAMLINE
   // the beampipes seem to add 2 no_overlaps - needs to be looked at
   // but this z position takes care of our current overlap issues
   double starting_z =  G4PIPE::max_z + 2*no_overlapp;
-  double enclosure_z_max = 2050. + (700-starting_z);
+  double enclosure_z_max = 2050. + (800-starting_z);
   double enclosure_r_max = 30.;  // 30cm radius to cover magnets
   double enclosure_center = 0.5 * (starting_z + enclosure_z_max);
   double skin_thickness = 0.; // if center of magnet iron is black hole - thickness of Fe surrounding it

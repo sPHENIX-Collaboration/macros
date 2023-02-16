@@ -16,6 +16,16 @@ namespace Input
 
   bool UPSILON = false;
   std::set<int> UPSILON_EmbedIds;
+
+  //! nominal beam parameter configuration choices for BEAM_CONFIGURATION
+  enum BeamConfiguration
+  {
+    AA_COLLISION = 0,
+    pA_COLLISION,
+    pp_COLLISION
+  };
+
+  BeamConfiguration BEAM_CONFIGURATION = AA_COLLISION;
 }  // namespace Input
 
 namespace DstOut
@@ -68,6 +78,7 @@ namespace G4MAGNET
   // like in the tracking - those need to be set in the Fun4All macro
   double magfield_rescale = NAN;
   std::string magfield;
+  std::string magfield_OHCAL_steel;
 }  // namespace G4MAGNET
 
 namespace XPLOAD
@@ -96,6 +107,7 @@ namespace G4TPC
 namespace G4TRACKING
 {
   bool init_acts_magfield = true;
+  int cluster_version = 4;
 }
 
 
