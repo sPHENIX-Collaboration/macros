@@ -4,8 +4,11 @@
 #include <GlobalVariables.C>
 
 #include <g4epd/PHG4EPDSubsystem.h>
+#include <g4epd/PHG4EPDModuleReco.h>
 
 #include <g4main/PHG4Reco.h>
+
+#include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libg4epd.so)
 
@@ -13,6 +16,7 @@ namespace Enable
 {
   bool EPD = false;
   bool EPD_SUPPORT = false;
+  bool EPD_TILE = false;
   bool EPD_OVERLAPCHECK = false;
 }  // namespace Enable
 
@@ -41,6 +45,15 @@ void EPD(PHG4Reco* g4Reco)
   epd->SetActive();
 
   g4Reco->registerSubsystem(epd);
+}
+
+void EPD_Tiles()
+{
+    Fun4AllServer *se = Fun4AllServer::instance();
+    PHG4EPDModuleReco *TileBuilder = new PHG4EPDModuleReco("EPDTileBuilder");
+    TileBuilder->Detector("EPD");
+    TileBuilder->set_double_param("epdmpv",2.064e-6);
+    se->registerSubsystem(TileBuilder);
 }
 
 #endif /* COMMON_G4EPD_C */
