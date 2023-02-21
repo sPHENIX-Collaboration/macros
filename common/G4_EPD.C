@@ -15,7 +15,6 @@ R__LOAD_LIBRARY(libg4epd.so)
 namespace Enable
 {
   bool EPD = false;
-  bool EPD_SUPPORT = false;
   bool EPD_TILE = false;
   bool EPD_OVERLAPCHECK = false;
 }  // namespace Enable
