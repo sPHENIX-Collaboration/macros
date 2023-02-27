@@ -2,6 +2,7 @@
 #define MACRO_GLOBALVARIABLES_C
 
 #include <g4decayer/EDecayType.hh>
+
 #include <set>
 
 double no_overlapp = 0.0001;
@@ -108,6 +109,12 @@ namespace G4TRACKING
 {
   bool init_acts_magfield = true;
   int cluster_version = 4;
+}
+
+namespace EVTGENDECAYER
+{
+   std::string DecayFile = ""; //The default is no need to force decay anything and use the default file DECAY.DEC from the official EvtGen software
+							   //DECAY.DEC is located at: https://gitlab.cern.ch/evtgen/evtgen/-/blob/master/DECAY.DEC
 }
 
 
