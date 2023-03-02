@@ -70,7 +70,7 @@ int Fun4All_G4_sPHENIX(
   // Input options
   //===============
   // verbosity setting (applies to all input managers)
-  Input::VERBOSITY = 20000000;
+  Input::VERBOSITY = 0;
   // First enable the input generators
   // Either:
   // read previously generated g4-hits files, in this case it opens a DST and skips
