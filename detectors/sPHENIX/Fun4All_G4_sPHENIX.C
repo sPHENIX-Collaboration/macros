@@ -138,7 +138,7 @@ int Fun4All_G4_sPHENIX(
   //Input::LAMBDAC = false;
   //Input::LAMBDAC_VERBOSITY = 0;
   // Upsilon generator
-  Input::UPSILON = true;
+  Input::UPSILON = false;
   Input::UPSILON_NUMBER = 1; // if you need 3 of them
   //Input::UPSILON_VERBOSITY = 0;
 
