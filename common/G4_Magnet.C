@@ -32,7 +32,8 @@ void MagnetFieldInit()
   }
   if (G4MAGNET::magfield.empty())
   {
-    G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dbigmapxyz.root");
+    G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dbigmapxyz_gap_rebuild.root");
+    G4MAGNET::magfield_OHCAL_steel = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dbigmapxyz_steel_rebuild.root");
   }
 }
 

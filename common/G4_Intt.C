@@ -228,6 +228,7 @@ void Intt_Clustering()
 
   InttClusterizer* inttclusterizer = new InttClusterizer("InttClusterizer", G4MVTX::n_maps_layer, G4MVTX::n_maps_layer + G4INTT::n_intt_layer - 1);
   inttclusterizer->Verbosity(verbosity);
+  inttclusterizer->set_cluster_version(G4TRACKING::cluster_version);
   // no Z clustering for Intt type 1 layers (we DO want Z clustering for type 0 layers)
   // turning off phi clustering for type 0 layers is not necessary, there is only one strip
   // per sensor in phi
@@ -248,6 +249,7 @@ void Intt_QA()
   Fun4AllServer* se = Fun4AllServer::instance();
   QAG4SimulationIntt* qa = new QAG4SimulationIntt;
   qa->Verbosity(verbosity);
+  qa->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(qa);
 }
 
