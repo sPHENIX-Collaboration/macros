@@ -35,7 +35,7 @@ namespace G4PIPE
   double flange_thickness = 6.934/2 - (al_pipe_radius + al_pipe_thickness); // Atlas 2.75" flange, radial thickness
   double flange_length = 1.2825;                                                // Atlas 2.75" flange
 
-  double outer_pipe_precone_length = 1.613;
+  double outer_pipe_precone_length = 22.86;
   double outer_pipe_precone_radius = 2.00025;       // same as Be pipe
   double outer_pipe_thickness = 0.1397;             // 1.397 mm or 0.055"
   double outer_pipe_cone_length = 38.1;
@@ -151,13 +151,13 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   g4Reco->registerSubsystem(cyl);
 
   // north flange 1B
-  // Ti half, towards IP
-  cyl = new PHG4CylinderSubsystem("N_FLANGE_1B_TI", ilayer++);
+  // SS half, towards IP
+  cyl = new PHG4CylinderSubsystem("N_FLANGE_1B_SS", ilayer++);
   cyl->set_double_param("place_z", flange_place_z + 0.25*G4PIPE::flange_length);
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::flange_length/2);
-  cyl->set_string_param("material", "G4_Ti");
+  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
   if (AbsorberActive) cyl->SetActive();
@@ -192,13 +192,13 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(cyl);
 
-  // Ti half, away from IP
-  cyl = new PHG4CylinderSubsystem("N_FLANGE_2A_TI", ilayer++);
+  // SS half, away from IP
+  cyl = new PHG4CylinderSubsystem("N_FLANGE_2A_SS", ilayer++);
   cyl->set_double_param("place_z", flange_place_z - 0.25*G4PIPE::flange_length);
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::flange_length/2);
-  cyl->set_string_param("material", "G4_Ti");
+  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
   if (AbsorberActive) cyl->SetActive();
@@ -206,13 +206,13 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   g4Reco->registerSubsystem(cyl);
 
   // north flange 2B
-  // Ti half, towards IP
-  cyl = new PHG4CylinderSubsystem("N_FLANGE_2B_TI", ilayer++);
+  // SS half, towards IP
+  cyl = new PHG4CylinderSubsystem("N_FLANGE_2B_SS", ilayer++);
   cyl->set_double_param("place_z", flange_place_z + 0.25*G4PIPE::flange_length);
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::flange_length/2);
-  cyl->set_string_param("material", "G4_Ti");
+  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
   if (AbsorberActive) cyl->SetActive();
@@ -247,7 +247,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   g4Reco->registerSubsystem(cyl);
 
   cyl = new PHG4CylinderSubsystem("S_AL_PIPE", ilayer++);
-  cyl->set_double_param("place_z", south_pipe_place_z + no_overlapp);
+  cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp);
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::al_pipe_south_length);
@@ -287,13 +287,13 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   g4Reco->registerSubsystem(cyl);
 
   // south flange 1B
-  // Ti half, towards IP
-  cyl = new PHG4CylinderSubsystem("S_FLANGE_1B_TI", ilayer++);
+  // SS half, towards IP
+  cyl = new PHG4CylinderSubsystem("S_FLANGE_1B_SS", ilayer++);
   cyl->set_double_param("place_z", flange_place_z - 0.25*G4PIPE::flange_length);
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::flange_length/2);
-  cyl->set_string_param("material", "G4_Ti");
+  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
   if (AbsorberActive) cyl->SetActive();
