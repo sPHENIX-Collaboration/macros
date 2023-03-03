@@ -42,9 +42,9 @@ R__LOAD_LIBRARY(libffamodules.so)
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
     const int process = 0,
-    const string &embed_input_str0 = "DST_TRUTH_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-0",
-    const string &embed_input_str1 = "DST_TRKR_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-0",
-    const string &embed_input_str2 = "DST_CALO_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-0",
+    const string &embed_input_str0 = "DST_TRUTH_G4HIT_pi_100_2000MeV_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000006-0",
+    const string &embed_input_str1 = "DST_TRKR_G4HIT_pi_100_2000MeV_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000006-0",
+    const string &embed_input_str2 = "DST_CALO_G4HIT_pi_100_2000MeV_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000006-0",
     const string &outputFile_str = "G4sPHENIX.root",
     const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const int skip = 0,
@@ -96,8 +96,11 @@ int Fun4All_G4_sPHENIX(
   // read previously generated g4-hits files, in this case it opens a DST and skips
   // the simulations step completely. The G4Setup macro is only loaded to get information
   // about the number of layers used for the cell reco code
-  //  Input::READHITS = true;
-  INPUTREADHITS::filename[0] = inputFile;
+  Input::READHITS = true;
+  INPUTREADHITS::filename[0] = embed_infile0;
+  INPUTREADHITS::filename[1] = embed_infile1;
+  INPUTREADHITS::filename[2] = embed_infile2;
+  
   // if you use a filelist
   // INPUTREADHITS::listfile[0] = inputFile;
   // Or:
@@ -106,14 +109,14 @@ int Fun4All_G4_sPHENIX(
   // Further choose to embed newly simulated events to a previous simulation. Not compatible with `readhits = true`
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
-  Input::EMBED = true;
+  Input::EMBED = false;
   INPUTEMBED::filename[0] = embed_infile0;
   INPUTEMBED::filename[1] = embed_infile1;
   INPUTEMBED::filename[2] = embed_infile2;
   // if you use a filelist
   //INPUTEMBED::listfile[0] = embed_input_file;
 
-  Input::SIMPLE = true;
+  Input::SIMPLE = false;
   Input::SIMPLE_NUMBER = 2; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
