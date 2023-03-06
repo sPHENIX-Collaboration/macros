@@ -57,12 +57,12 @@ int Fun4All_G4_sPHENIX(
   PHRandomSeed::Verbosity(1);
 
    // construct the input and output file names
-  char num_field[500];
-  sprintf(num_field,"%04d.root", process);
-  string numin = num_field;
-  string embed_infile0 = embed_input_str0 + numin;
-  string embed_infile1 = embed_input_str1 + numin;
-  string embed_infile2 = embed_input_str2 + numin;
+  //char num_field[500];
+  //sprintf(num_field,"%04d.root", process);
+  //string numin = num_field;
+  string embed_infile0 = embed_input_str0;
+  string embed_infile1 = embed_input_str1;
+  string embed_infile2 = embed_input_str2;
 
   cout << "Embedding input file0: " << embed_infile0 << endl;
   cout << "Embedding input file1: " << embed_infile1 << endl;
