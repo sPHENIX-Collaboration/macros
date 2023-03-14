@@ -5,6 +5,7 @@ R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 R__LOAD_LIBRARY(libqa_modules.so)
+R__LOAD_LIBRARY(libtrackeralign.so)
 
 #include <GlobalVariables.C>
 
@@ -38,7 +39,11 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHTruthVertexing.h>
 
 #include <tpc/TpcLoadDistortionCorrection.h>
+
 #include <tpccalib/PHTpcResiduals.h>
+
+#include <trackermillepedealignment/MakeMilleFiles.h>
+#include <trackermillepedealignment/HelicalFitter.h>
 
 #include <qa_modules/QAG4SimulationTracking.h>
 #include <qa_modules/QAG4SimulationUpsilon.h>
@@ -81,7 +86,7 @@ namespace G4TRACKING
 
   // Flag to run commissioning seeding workflow with tuned parameters for
   // misaligned + distorted tracks
-  bool use_commissioning_seeding = false;
+  bool use_alignment = false;
 
 }  // namespace G4TRACKING
 
@@ -308,10 +313,12 @@ void Tracking_Reco_TrackFit()
   // perform final track fit with ACTS
   auto actsFit = new PHActsTrkFitter;
   actsFit->Verbosity(verbosity);
+  actsFit->commissioning(G4TRACKING::use_alignment);
   actsFit->set_cluster_version(G4TRACKING::cluster_version);
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
   actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
+  actsFit->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(actsFit);
   
   if (G4TRACKING::SC_CALIBMODE)
@@ -450,6 +457,26 @@ void Tracking_Reco_CommissioningTrackSeed()
       convert_seeds();
     }
 }
+
+void alignment(std::string datafilename = "mille_output_data_file", 
+	       std::string steeringfilename = "mille_steer")
+{
+  Fun4AllServer *se = Fun4AllServer::instance();
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+
+  auto mille = new MakeMilleFiles;
+  mille->Verbosity(verbosity);
+  mille->set_datafile_name(datafilename + ".bin");
+  mille->set_steeringfile_name(steeringfilename + ".txt");
+  se->registerSubsystem(mille);
+
+  auto helical = new HelicalFitter;
+  helical->Verbosity(verbosity);
+  helical->set_datafile_name(datafilename + "_helical.bin");
+  helical->set_steeringfile_name(steeringfilename + "_helical.txt");
+  se->registerSubsystem(helical);
+
+}
  
 void Tracking_Reco()
 {
@@ -457,7 +484,7 @@ void Tracking_Reco()
    * just a wrapper around track seeding and track fitting methods, 
    * to minimize disruption to existing steering macros
    */
-  if(G4TRACKING::use_commissioning_seeding)
+  if(G4TRACKING::use_alignment)
     {
       Tracking_Reco_CommissioningTrackSeed();
     }
@@ -474,6 +501,12 @@ void Tracking_Reco()
     {
       Tracking_Reco_TrackFit();
     }
+
+  if(G4TRACKING::use_alignment)
+    {
+      alignment();
+    }
+
 }
 
 void build_truthreco_tables()

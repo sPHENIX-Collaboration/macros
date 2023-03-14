@@ -81,27 +81,71 @@ namespace Input
   int VERBOSITY = 0;
   int EmbedId = 1;
 
-  //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
+  //! apply reference sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2022-001 and past RHIC experience
   //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
-  void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen)
+  //! \param[in] collision_type select the beam configuration with Input::BeamConfiguration
+  void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen, const Input::BeamConfiguration & beam_config)
   {
     if (HepMCGen == nullptr)
     {
       std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
       exit(1);
     }
-    HepMCGen->set_beam_direction_theta_phi(1e-3, 0, M_PI - 1e-3, 0);  //2mrad x-ing of sPHENIX per sPH-TRG-2020-001
+    HepMCGen->set_beam_direction_theta_phi(1e-3, 0, M_PI - 1e-3, 0);  //2mrad x-ing of sPHENIX per sPH-TRG-2022-001
 
-    HepMCGen->set_vertex_distribution_width(
-        100e-4,         // approximation from past RICH data
-        100e-4,         // approximation from past RICH data
-        7,              // sPH-TRG-2020-001. Fig 3.2
-        20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+    switch (beam_config)
+    {
+    case AA_COLLISION:
+      // heavy ion mode
+
+      HepMCGen->set_vertex_distribution_width(
+          100e-4,         // approximation from past STAR/Run16 AuAu data
+          100e-4,         // approximation from past STAR/Run16 AuAu data
+          7,              // sPH-TRG-2022-001. Fig B.2
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+    case pA_COLLISION:
+
+      // pA mode
+
+      HepMCGen->set_vertex_distribution_width(
+          100e-4,         // set to be similar to AA
+          100e-4,         // set to be similar to AA
+          8,              // sPH-TRG-2022-001. Fig B.4
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+    case pp_COLLISION:
+
+      // pp mode
+
+      HepMCGen->set_vertex_distribution_width(
+          120e-4,         // approximation from past PHENIX data
+          120e-4,         // approximation from past PHENIX data
+          10,              // sPH-TRG-2022-001. Fig B.3
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+    default:
+      std::cout <<"ApplysPHENIXBeamParameter: invalid beam_config = "<<beam_config<<std::endl;
+
+      exit(1);
+
+    }
+
     HepMCGen->set_vertex_distribution_function(
         PHHepMCGenHelper::Gaus,
         PHHepMCGenHelper::Gaus,
         PHHepMCGenHelper::Gaus,
         PHHepMCGenHelper::Gaus);
+  }
+
+  //! apply sPHENIX nominal beam parameter according to the beam collision setting of Input::IS_PP_COLLISION
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
+  void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen)
+  {
+    ApplysPHENIXBeamParameter(HepMCGen, Input::BEAM_CONFIGURATION);
   }
 
   //! apply EIC beam parameter to any HepMC generator following EIC CDR,
