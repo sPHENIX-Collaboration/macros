@@ -290,8 +290,7 @@ void vertexing()
     auto vtxfinder = new PHSimpleVertexFinder;
     vtxfinder->Verbosity(verbosity);
     se->registerSubsystem(vtxfinder);
-  }
-  
+  }  
 }
 
 void Tracking_Reco_TrackFit()
@@ -313,6 +312,7 @@ void Tracking_Reco_TrackFit()
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
   actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
   se->registerSubsystem(actsFit);
+  
   
   if (G4TRACKING::SC_CALIBMODE)
   {
@@ -355,6 +355,8 @@ void Tracking_Reco_TrackFit()
     auto projection = new PHActsTrackProjection;
     projection->Verbosity(verbosity);
     se->registerSubsystem(projection);
+    
+
   }
   
 }
@@ -474,6 +476,7 @@ void Tracking_Reco()
     {
       Tracking_Reco_TrackFit();
     }
+
 }
 
 void build_truthreco_tables()
