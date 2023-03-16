@@ -34,21 +34,13 @@
 #include <phool/PHRandomSeed.h>
 #include <phool/recoConsts.h>
 
-#include <trackingdiagnostics/KshortReconstruction.h>
-#include <trackingdiagnostics/helixResiduals.h>
-
-
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
-R__LOAD_LIBRARY(libTrackingDiagnostics.so)
-
-
 
 // For HepMC Hijing
 // try inputFile = /sphenix/sim/sim01/sphnxpro/sHijing_HepMC/sHijing_0-12fm.dat
 
 int Fun4All_G4_sPHENIX(
-    const int process = 0,
     const int nEvents = 1,
     const string &inputFile = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const string &outputFile = "G4sPHENIX.root",
@@ -57,7 +49,7 @@ int Fun4All_G4_sPHENIX(
     const string &outdir = ".")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(1);
+  se->Verbosity(0);
 
   //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
   PHRandomSeed::Verbosity(1);
@@ -72,7 +64,7 @@ int Fun4All_G4_sPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  //rc->set_IntFlag("RANDOMSEED", 123);  // dont leave on while running condor jobs will run same events
+  //  rc->set_IntFlag("RANDOMSEED", 12345);
 
 
   //===============
@@ -100,7 +92,7 @@ int Fun4All_G4_sPHENIX(
   // if you use a filelist
   //INPUTEMBED::listfile[0] = embed_input_file;
 
-  //Input::SIMPLE = true;
+  Input::SIMPLE = true;
   // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
@@ -109,7 +101,7 @@ int Fun4All_G4_sPHENIX(
 
   //  Input::PYTHIA6 = true;
 
-   Input::PYTHIA8 = true;
+  // Input::PYTHIA8 = true;
 
   //  Input::GUN = true;
   //  Input::GUN_NUMBER = 3; // if you need 3 of them
@@ -149,10 +141,6 @@ int Fun4All_G4_sPHENIX(
   if (Input::SIMPLE)
   {
     INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 5);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi+", 5);
-    //INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("kaon0S", 1);
-
-
     if (Input::HEPMC || Input::EMBED)
     {
       INPUTGENERATOR::SimpleEventGenerator[0]->set_reuse_existing_vertex(true);
@@ -168,33 +156,18 @@ int Fun4All_G4_sPHENIX(
     }
     INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1, 1);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
-    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.1, 5.);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.1, 20.);
   }
   // Upsilons
   // if you run more than one of these Input::UPSILON_NUMBER > 1
   // add the settings for other with [1], next with [2]...
-  // if (Input::UPSILON)
-  // {
-  //   INPUTGENERATOR::VectorMesonGenerator[0]->add_decay_particles("e", 0);
-  //   INPUTGENERATOR::VectorMesonGenerator[0]->set_rapidity_range(-1, 1);
-  //   INPUTGENERATOR::VectorMesonGenerator[0]->set_pt_range(0., 10.);
-  //   // Y species - select only one, last one wins
-  //   INPUTGENERATOR::VectorMesonGenerator[0]->set_upsilon_1s();
-  //   if (Input::HEPMC || Input::EMBED)
-  //   {
-  //     INPUTGENERATOR::VectorMesonGenerator[0]->set_reuse_existing_vertex(true);
-  //     INPUTGENERATOR::VectorMesonGenerator[0]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
-  //   }
-  // }
   if (Input::UPSILON)
   {
-    INPUTGENERATOR::VectorMesonGenerator[0]->set_mass(0.4976);
-    INPUTGENERATOR::VectorMesonGenerator[0]->add_decay_particles("mu", 0);
-    //INPUTGENERATOR::VectorMesonGenerator[0]->set_decay_types("pi", 0);
+    INPUTGENERATOR::VectorMesonGenerator[0]->add_decay_particles("e", 0);
     INPUTGENERATOR::VectorMesonGenerator[0]->set_rapidity_range(-1, 1);
-    INPUTGENERATOR::VectorMesonGenerator[0]->set_pt_range(1., 3.);
-    INPUTGENERATOR::VectorMesonGenerator[0]->set_width(0.01);
-    
+    INPUTGENERATOR::VectorMesonGenerator[0]->set_pt_range(0., 10.);
+    // Y species - select only one, last one wins
+    INPUTGENERATOR::VectorMesonGenerator[0]->set_upsilon_1s();
     if (Input::HEPMC || Input::EMBED)
     {
       INPUTGENERATOR::VectorMesonGenerator[0]->set_reuse_existing_vertex(true);
@@ -275,7 +248,6 @@ int Fun4All_G4_sPHENIX(
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
 
-
   // set up production relatedstuff
   //   Enable::PRODUCTION = true;
 
@@ -299,7 +271,7 @@ int Fun4All_G4_sPHENIX(
   //======================
 
   // QA, main switch
-  //Enable::QA = true;
+  Enable::QA = true;
 
   // Global options (enabled for all enables subsystems - if implemented)
   //  Enable::ABSORBER = true;
@@ -338,16 +310,16 @@ int Fun4All_G4_sPHENIX(
   Enable::MICROMEGAS_QA = Enable::MICROMEGAS_CLUSTER && Enable::QA && true;
 
   Enable::TRACKING_TRACK = (Enable::MICROMEGAS_CLUSTER && Enable::TPC_CLUSTER && Enable::INTT_CLUSTER && Enable::MVTX_CLUSTER) && true;
-  //Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;  // turns evaluator on and off
-  //Enable::TRACKING_DIAGNOSTICS = Enable::TRACKING_TRACK && true;
+  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;
+  Enable::TRACKING_QA = Enable::TRACKING_TRACK && Enable::QA && true;
+  Enable::TRACKING_DIAGNOSTICS = Enable::TRACKING_TRACK && true;
 
-  //Enable::TRACKING_QA = Enable::TRACKING_TRACK && Enable::QA && true;
 
   //  cemc electronics + thin layer of W-epoxy to get albedo from cemc
   //  into the tracking, cannot run together with CEMC
   //  Enable::CEMCALBEDO = true;
 
-  //Enable::CEMC = true;
+  Enable::CEMC = true;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
@@ -355,7 +327,7 @@ int Fun4All_G4_sPHENIX(
   Enable::CEMC_EVAL = Enable::CEMC_CLUSTER && true;
   Enable::CEMC_QA = Enable::CEMC_CLUSTER && Enable::QA && true;
 
-  // Enable::HCALIN = true;
+  Enable::HCALIN = true;
   Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
@@ -366,7 +338,7 @@ int Fun4All_G4_sPHENIX(
   Enable::MAGNET = true;
   Enable::MAGNET_ABSORBER = true;
 
-  // Enable::HCALOUT = true;
+  Enable::HCALOUT = true;
   Enable::HCALOUT_ABSORBER = true;
   Enable::HCALOUT_CELL = Enable::HCALOUT && true;
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
@@ -400,7 +372,7 @@ int Fun4All_G4_sPHENIX(
 
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && false;
 
-  // Enable::JETS = (Enable::GLOBAL_RECO || Enable::GLOBAL_FASTSIM) && true;
+  Enable::JETS = (Enable::GLOBAL_RECO || Enable::GLOBAL_FASTSIM) && true;
   Enable::JETS_EVAL = Enable::JETS && true;
   Enable::JETS_QA = Enable::JETS && Enable::QA && true;
 
@@ -529,16 +501,14 @@ int Fun4All_G4_sPHENIX(
     Tracking_Reco();
   }
 
-
-
-
-  G4KshortReconstruction(process);
-
-  seedResiduals("residuals.root");
-
-
-
-
+  if(Enable::TRACKING_DIAGNOSTICS)
+    {
+      const std::string kshortFile = "./kshort_" + outputFile;
+      const std::string residualsFile = "./residuals_" + outputFile;
+ 
+      G4KshortReconstruction(kshortFile);
+      seedResiduals(residualsFile);
+    }
 
   //-----------------
   // Global Vertexing
@@ -588,34 +558,27 @@ int Fun4All_G4_sPHENIX(
   //----------------------
   // Simulation evaluation
   //----------------------
-  string outputroot = "eval_output/"; //outputFile;
-  //string remove_this = ".root";
-  //size_t pos = outputroot.find(remove_this);
-  // if (pos != string::npos)
-  // {
-  //   outputroot.erase(pos, remove_this.length());
-  // }
+  string outputroot = outputFile;
+  string remove_this = ".root";
+  size_t pos = outputroot.find(remove_this);
+  if (pos != string::npos)
+  {
+    outputroot.erase(pos, remove_this.length());
+  }
 
-  char name[500];
-  sprintf(name,"eval_output/g4svtx_eval_%i.root",process);
+  if (Enable::TRACKING_EVAL) Tracking_Eval(outputroot + "_g4svtx_eval.root");
 
-  if (Enable::TRACKING_EVAL) Tracking_Eval(name); // "_g4svtx_eval.root");
+  if (Enable::CEMC_EVAL) CEMC_Eval(outputroot + "_g4cemc_eval.root");
 
-  //Tracking_Diagnostics(process);
+  if (Enable::HCALIN_EVAL) HCALInner_Eval(outputroot + "_g4hcalin_eval.root");
 
-  if (Enable::CEMC_EVAL) CEMC_Eval("_g4cemc_eval.root");
+  if (Enable::HCALOUT_EVAL) HCALOuter_Eval(outputroot + "_g4hcalout_eval.root");
 
-  if (Enable::HCALIN_EVAL) HCALInner_Eval("_g4hcalin_eval.root");
+  if (Enable::JETS_EVAL) Jet_Eval(outputroot + "_g4jet_eval.root");
 
-  if (Enable::HCALOUT_EVAL) HCALOuter_Eval("_g4hcalout_eval.root");
-
-  if (Enable::JETS_EVAL) Jet_Eval("_g4jet_eval.root");
-
-  if (Enable::DSTREADER) G4DSTreader("_DSTReader.root");
+  if (Enable::DSTREADER) G4DSTreader(outputroot + "_DSTReader.root");
 
   if (Enable::USER) UserAnalysisInit();
-
-  
 
   //======================
   // Run KFParticle on evt
@@ -695,8 +658,6 @@ int Fun4All_G4_sPHENIX(
     cout << "it will run forever, so I just return without running anything" << endl;
     return 0;
   }
-
-
 
   se->skip(skip);
   se->run(nEvents);

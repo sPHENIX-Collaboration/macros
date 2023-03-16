@@ -57,6 +57,8 @@ namespace Enable
   bool TRACKING_EVAL = false;
   int TRACKING_VERBOSITY = 0;
   bool TRACKING_QA = false;
+  bool TRACKING_DIAGNOSTICS = false;
+
 }  // namespace Enable
 
 namespace G4TRACKING

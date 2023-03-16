@@ -11,15 +11,16 @@ R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 #include <fun4all/Fun4AllServer.h>
 
 
-void G4KshortReconstruction(const int process)
+
+void G4KshortReconstruction(const std::string outputfile)
 {
   Fun4AllServer* se         = Fun4AllServer::instance();
   KshortReconstruction *ksr = new KshortReconstruction();
-  ksr->set_output_number(process);
+  ksr->set_output_file(outputfile);
   se->registerSubsystem(ksr);
 }
 
-void seedResiduals(const string outputfile)
+void seedResiduals(const std::string outputfile)
 {
   Fun4AllServer* se  = Fun4AllServer::instance();
 
@@ -31,8 +32,15 @@ void seedResiduals(const string outputfile)
 
   TrackingInit();
 
-  helixResiduals *eval = new helixResiduals("eval_residuals", outputfile);
+  helixResiduals *eval = new helixResiduals("eval_residuals");
+  eval->set_output_file(outputfile);
   se->registerSubsystem(eval);
   
+}
+
+void Tracking_Diagnostics(const std::string outputfile)
+{
+  G4KshortReconstruction(outputfile);
+  seedResiduals(outputfile);
 }
 #endif
