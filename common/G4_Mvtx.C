@@ -43,7 +43,7 @@ namespace G4MVTX
   double radius_offset = 0.7;  // clearance around radius
 }  // namespace G4MVTX
 
-namespace G4MVTXAlignment 
+namespace G4MVTXAlignment
 {
   std::string alignment_path = string(getenv("CALIBRATIONROOT")) + "/Tracking/MVTX/alignment";
   double z_offset[] = {0.0, 0.0, 200.0};
@@ -76,7 +76,7 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
     radius = radius_lyr / 10.;
   }
 //  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "alignment_path",  G4MVTXAlignment::alignment_path);
-  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v1.gdml"));
+  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave.gdml"));
 
   mvtx->SetActive();
   mvtx->OverlapCheck(maps_overlapcheck);
@@ -122,7 +122,7 @@ void Mvtx_Clustering()
   MvtxHitPruner* mvtxhitpruner = new MvtxHitPruner();
   mvtxhitpruner->Verbosity(verbosity);
   se->registerSubsystem(mvtxhitpruner);
-    
+
   // For the Mvtx layers
   //================
   MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
