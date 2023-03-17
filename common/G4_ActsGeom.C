@@ -57,7 +57,6 @@ namespace ACTSGEOM
     geom->loadMagField(G4TRACKING::init_acts_magfield);
     geom->setMagField(G4MAGNET::magfield);
     geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
-    geom->build_mm_surfaces(Enable::MICROMEGAS);
     se->registerSubsystem(geom);
   }
 }  // namespace ACTSGEOM

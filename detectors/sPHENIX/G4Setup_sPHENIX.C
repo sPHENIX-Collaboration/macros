@@ -87,10 +87,13 @@ int G4Setup()
   PHG4Reco *g4Reco = new PHG4Reco();
   g4Reco->set_rapidity_coverage(1.1);  // according to drawings
   WorldInit(g4Reco);
+  //PYTHIA 6
   if (G4P6DECAYER::decayType != EDecayType::kAll)
   {
     g4Reco->set_force_decay(G4P6DECAYER::decayType);
   }
+  //EvtGen 
+  g4Reco->CustomizeEvtGenDecay(EVTGENDECAYER::DecayFile); 
 
   double fieldstrength;
   istringstream stringline(G4MAGNET::magfield);
