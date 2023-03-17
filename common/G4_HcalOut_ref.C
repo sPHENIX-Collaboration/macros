@@ -47,8 +47,8 @@ namespace Enable
 
 namespace G4HCALOUT
 {
-  double outer_radius = 264.71;
-  double size_z = 304.91 * 2;
+  double outer_radius = 269.317  + 5;
+  double size_z = 639.240 + 10;
   double phistart = NAN;
   double tower_emin = NAN;
   int light_scint_model = -1;
@@ -92,6 +92,13 @@ double HCalOuter(PHG4Reco *g4Reco,
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
 
   PHG4DetectorSubsystem *hcal;
+  //  Mephi Maps
+  //  Maps are different for old/new but how to set is identical
+  //  here are the ones for the old outer hcal since the new maps do not exist yet
+  //  use hcal->set_string_param("MapFileName",""); to disable map
+  //  hcal->set_string_param("MapFileName",std::string(getenv("CALIBRATIONROOT")) + "/HCALOUT/tilemap/oHCALMaps092021.root");
+  //  hcal->set_string_param("MapHistoName","hCombinedMap");
+
   if (Enable::HCALOUT_OLD)
   {
     hcal = new PHG4OuterHcalSubsystem("HCALOUT");
@@ -135,14 +142,17 @@ double HCalOuter(PHG4Reco *g4Reco,
   else
   {
     hcal = new PHG4OHCalSubsystem("HCALOUT");
-std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/OuterHCalAbsorberTiles_merged.gdml";
+    std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/OuterHCalAbsorberTiles_merged.gdml";
     hcal->set_string_param("GDMPath",hcaltiles);
+    hcal->set_string_param("IronFieldMapPath", G4MAGNET::magfield_OHCAL_steel);
+    hcal->set_double_param("IronFieldMapScale", G4MAGNET::magfield_rescale);
   }
 
   if (G4HCALOUT::light_scint_model >= 0)
   {
     hcal->set_int_param("light_scint_model", G4HCALOUT::light_scint_model);
   }
+  // hcal->set_int_param("field_check", 1); // for validating the field in HCal
   hcal->SetActive();
   hcal->SuperDetector("HCALOUT");
   if (AbsorberActive)
@@ -151,6 +161,62 @@ std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/Outer
   }
   hcal->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(hcal);
+
+  if (!Enable::HCALOUT_OLD)
+  {
+    //HCal support rings, approximated as solid rings
+    //note there is only one ring on either side, but to allow part of the ring inside the HCal envelope two rings are used
+    const double inch = 2.54;
+    const double support_ring_outer_radius = 74.061 * inch;
+    const double innerradius = 56.188 * inch;
+    const double hcal_envelope_radius = 182.423 - 5.;
+    const double support_ring_z = 175.375 * inch / 2.;
+    const double support_ring_dz = 4. * inch;
+    const double z_rings[] =
+      {-support_ring_z, support_ring_z};
+    PHG4CylinderSubsystem *cyl;
+    PHG4CylinderSubsystem *cylout;
+
+    for (int i = 0; i < 2; i++)
+      {
+	//rings outside of HCal envelope
+	cyl = new PHG4CylinderSubsystem("HCAL_SPT_N1", i);
+	cyl->set_double_param("place_z", z_rings[i]);
+	cyl->SuperDetector("HCALIN_SPT");
+	cyl->set_double_param("radius", innerradius);
+	cyl->set_int_param("lengthviarapidity", 0);
+	cyl->set_double_param("length", support_ring_dz);
+	cyl->set_string_param("material", "G4_Al");
+	cyl->set_double_param("thickness", hcal_envelope_radius - 0.1 - innerradius);
+	cyl->set_double_param("start_phi_rad",1.867);
+	cyl->set_double_param("delta_phi_rad",5.692);
+	cyl->OverlapCheck(Enable::OVERLAPCHECK);
+	if (AbsorberActive)
+	  {
+	    cyl->SetActive();
+	  }
+	g4Reco->registerSubsystem(cyl);
+
+	//rings inside outer HCal envelope
+        cylout = new PHG4CylinderSubsystem("HCAL_SPT_N1", i+2);
+        cylout->set_double_param("place_z", z_rings[i]);
+        cylout->SuperDetector("HCALIN_SPT");
+        cylout->set_double_param("radius", hcal_envelope_radius + 0.1); //add a mm to avoid overlaps
+        cylout->set_int_param("lengthviarapidity", 0);
+        cylout->set_double_param("length", support_ring_dz);
+        cylout->set_string_param("material", "G4_Al");
+        cylout->set_double_param("thickness", support_ring_outer_radius - (hcal_envelope_radius + 0.1));
+        cylout->set_double_param("start_phi_rad",1.867);
+	cylout->set_double_param("delta_phi_rad",5.692);
+	if (AbsorberActive)
+          {
+            cylout->SetActive();
+          }
+	cylout->SetMotherSubsystem(hcal);
+        cylout->OverlapCheck(OverlapCheck);
+        g4Reco->registerSubsystem(cylout);
+      }
+  }
 
   radius = hcal->get_double_param("outer_radius");
 
@@ -200,7 +266,7 @@ void HCALOuter_Towers()
     }
     else
     {
-      G4HCALOUT::phistart = -0.024960211; // offet in phi (from zero) extracted from geantinos
+      G4HCALOUT::phistart = 0.0240615415; // offet in phi (from zero) extracted from geantinos
     }
   }
   TowerBuilder->set_double_param("phistart",G4HCALOUT::phistart);

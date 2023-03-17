@@ -315,8 +315,19 @@ void CEMC_Clusters()
     std::string emc_prof = getenv("CALIBRATIONROOT");
     emc_prof += "/EmcProfile/CEMCprof_Thresh30MeV.root";
     ClusterBuilder->LoadProfile(emc_prof);
-    //    ClusterBuilder->set_UseTowerInfo(1); // to use towerinfo objects rather than old RawTower
+    //    ClusterBuilder->set_UseTowerInfo(0);
     se->registerSubsystem(ClusterBuilder);
+
+    RawClusterBuilderTemplate *ClusterBuilder2 = new RawClusterBuilderTemplate("EmcRawClusterBuilderTemplate2");
+    ClusterBuilder2->Detector("CEMC");
+    ClusterBuilder2->Verbosity(verbosity);
+    ClusterBuilder2->set_threshold_energy(0.030);  // This threshold should be the same as in CEMCprof_Thresh**.root file below
+    std::string emc_prof2 = getenv("CALIBRATIONROOT");
+    emc_prof2 += "/EmcProfile/CEMCprof_Thresh30MeV.root";
+    ClusterBuilder2->LoadProfile(emc_prof2);
+    ClusterBuilder2->set_UseTowerInfo(1);
+    se->registerSubsystem(ClusterBuilder2);
+
   }
   else if (G4CEMC::Cemc_clusterizer == G4CEMC::kCemcGraphClusterizer)
   {
@@ -332,9 +343,6 @@ void CEMC_Clusters()
   }
 
   RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
-
-    //    clusterCorrection->set_UseTowerInfo(1); // to use towerinfo objects rather than old RawTower
-
   if (Enable::XPLOAD)
   {
     clusterCorrection->Get_eclus_CalibrationParameters().ReadFromCDB("CEMCRECALIB");
@@ -352,6 +360,29 @@ void CEMC_Clusters()
 
   clusterCorrection->Verbosity(verbosity);
   se->registerSubsystem(clusterCorrection);
+
+
+  RawClusterPositionCorrection *clusterCorrection2 = new RawClusterPositionCorrection("CEMC");
+
+  clusterCorrection2->set_UseTowerInfo(1);
+  if (Enable::XPLOAD)
+  {
+    clusterCorrection2->Get_eclus_CalibrationParameters().ReadFromCDB("CEMCRECALIB");
+    clusterCorrection2->Get_ecore_CalibrationParameters().ReadFromCDB("CEMC_ECORE_RECALIB");
+  }
+  else
+  {
+    clusterCorrection2->Get_eclus_CalibrationParameters().ReadFromFile("CEMC_RECALIB", "xml", 0, 0,
+                                                                      //raw location
+                                                                      string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+    clusterCorrection2->Get_ecore_CalibrationParameters().ReadFromFile("CEMC_ECORE_RECALIB", "xml", 0, 0,
+                                                                      //raw location
+                                                                      string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+  }
+
+  clusterCorrection2->Verbosity(verbosity);
+  se->registerSubsystem(clusterCorrection2);
+
 
   return;
 }
