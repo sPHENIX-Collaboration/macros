@@ -14,7 +14,7 @@ namespace Enable
   bool MAGNET = false;
   bool MAGNET_ABSORBER = false;
   bool MAGNET_OVERLAPCHECK = false;
-  int  MAGNET_VERBOSITY = 0;
+  int MAGNET_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4MAGNET
