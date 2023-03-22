@@ -2,7 +2,6 @@
 #define MACRO_G4MICROMEGAS_C
 
 #include <GlobalVariables.C>
-#include <G4_TrackingVariables.C>
 
 #include <G4_ActsGeom.C>
 #include <G4_Intt.C>
@@ -28,6 +27,13 @@ R__LOAD_LIBRARY(libg4micromegas.so)
 // bool MICROMEGAS = false; // moved to GlobalVariables.C
 // int n_micromegas_layer = 2;
 // because they are also needed in other macros
+
+namespace Enable
+{
+  bool MICROMEGAS_CELL = false;
+  bool MICROMEGAS_CLUSTER = false;
+  bool MICROMEGAS_QA = false;
+}  // namespace Enable
 
 void MicromegasInit()
 {

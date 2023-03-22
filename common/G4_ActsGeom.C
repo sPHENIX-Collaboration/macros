@@ -1,11 +1,13 @@
 #ifndef MACRO_G4ACTSGEOM_C
 #define MACRO_G4ACTSGEOM_C
 
+R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
+R__LOAD_LIBRARY(libqa_modules.so)
 
 #include <GlobalVariables.C>
-#include <G4_TrackingVariables.C>
+
 #include <G4_Magnet.C>
 
 #pragma GCC diagnostic push
@@ -18,6 +20,12 @@ R__LOAD_LIBRARY(libtpccalib.so)
 
 namespace ACTSGEOM
 {
+
+  unsigned int mvtxMisalignment = 1;
+  unsigned int inttMisalignment = 1;
+  unsigned int tpcMisalignment = 1;
+  unsigned int tpotMisalignment = 1;
+
   void ActsGeomInit()
   {
     static bool wasCalled = false;
@@ -47,8 +55,8 @@ namespace ACTSGEOM
     geom->misalignmentFactor(TrkrDefs::TrkrId::micromegasId, ACTSGEOM::tpotMisalignment);
     
     geom->loadMagField(G4TRACKING::init_acts_magfield);
-    geom->setMagField(G4TRACKING::magfield);
-    geom->setMagFieldRescale(G4TRACKING::magfield_rescale);
+    geom->setMagField(G4MAGNET::magfield);
+    geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
     se->registerSubsystem(geom);
   }
 }  // namespace ACTSGEOM
