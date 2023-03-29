@@ -58,6 +58,8 @@ namespace Enable
   bool TRACKING_EVAL = false;
   int TRACKING_VERBOSITY = 0;
   bool TRACKING_QA = false;
+  bool TRACKING_DIAGNOSTICS = false;
+
 }  // namespace Enable
 
 namespace G4TRACKING
@@ -297,8 +299,7 @@ void vertexing()
     auto vtxfinder = new PHSimpleVertexFinder;
     vtxfinder->Verbosity(verbosity);
     se->registerSubsystem(vtxfinder);
-  }
-  
+  }  
 }
 
 void Tracking_Reco_TrackFit()
@@ -322,6 +323,7 @@ void Tracking_Reco_TrackFit()
   actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
   actsFit->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(actsFit);
+  
   
   if (G4TRACKING::SC_CALIBMODE)
   {
@@ -365,6 +367,8 @@ void Tracking_Reco_TrackFit()
     auto projection = new PHActsTrackProjection;
     projection->Verbosity(verbosity);
     se->registerSubsystem(projection);
+    
+
   }
   
 }
@@ -506,6 +510,7 @@ void Tracking_Reco()
     {
       Tracking_Reco_TrackFit();
     }
+
 
   if(G4TRACKING::use_alignment)
     {
