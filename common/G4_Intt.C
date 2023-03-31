@@ -26,41 +26,6 @@ R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
-namespace Enable
-{
-  bool INTT = false;
-  bool INTT_ABSORBER = false;
-  bool INTT_OVERLAPCHECK = false;
-  bool INTT_CELL = false;
-  bool INTT_CLUSTER = false;
-  bool INTT_QA = false;
-  bool INTT_SUPPORT = false;
-  int INTT_VERBOSITY = 0;
-}  // namespace Enable
-
-namespace G4INTT
-{
-  int n_intt_layer = 4;           // must be 4 or 0, setting to zero removes INTT completely
-  double intt_radius_max = 140.;  // including stagger radius (mm)
-  int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
-                       PHG4InttDefs::SEGMENTATION_PHI,
-                       PHG4InttDefs::SEGMENTATION_PHI,
-                       PHG4InttDefs::SEGMENTATION_PHI};
-  int nladder[4] = {12, 12, 16, 16};
-  double sensor_radius[4] = {7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
-
-  double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
-
-  enum enu_InttDeadMapType  // Dead map options for INTT
-  {
-    kInttNoDeadMap = 0,  // All channel in Intt is alive
-    kInttDeadMap = 1,    // with dead channel
-  };
-  //enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
-  enu_InttDeadMapType InttDeadMapOption = kInttDeadMap;  // Choose Intt deadmap here
-
-}  // namespace G4INTT
-
 void InttInit()
 {
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 20.);  // estimated from display, can be made smaller but good enough

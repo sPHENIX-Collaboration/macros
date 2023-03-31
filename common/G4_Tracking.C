@@ -52,46 +52,6 @@ R__LOAD_LIBRARY(libtrackeralign.so)
 
 #include <fun4all/Fun4AllServer.h>
 
-namespace Enable
-{
-  bool TRACKING_TRACK = false;
-  bool TRACKING_EVAL = false;
-  int TRACKING_VERBOSITY = 0;
-  bool TRACKING_QA = false;
-}  // namespace Enable
-
-namespace G4TRACKING
-{
-  // Space Charge calibration flag
-  bool SC_CALIBMODE = false;                                            // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
-  bool SC_USE_MICROMEGAS = true;
-  bool SC_SAVEHISTOGRAMS = false;
-  double SC_COLLISIONRATE = 50e3;                                      // leave at 50 KHz for now, scaling of distortion map not implemented yet
-  std::string SC_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";  // space charge calibration output file
-  std::string SC_HISTOGRAMOUTPUT_FILENAME = "TpcResiduals.root"; // space charge calibration output file
-
-  // Vertexing
-  bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
-  
-  // Truth seeding options for diagnostics (can use any or all)
-  bool use_truth_silicon_seeding = false;     // if true runs truth silicon seeding instead of acts silicon seeding
-  bool use_truth_tpc_seeding = false;         // if true runs truth silicon seeding instead of reco TPC seeding
-  bool use_truth_si_matching = false;         // if true, associates silicon clusters using best truth track match to TPC seed tracks - for diagnostics only
-                                              // Full truth track seeding
-  bool use_full_truth_track_seeding = false;  // makes track seeds using truth info, used for both Acts and Genfit
-  bool use_truth_vertexing = false;           // if true runs truth vertexing, if false runs PHSimpleVertexFinder
-
-  // Runs a converter from TrackSeed object to SvtxTrack object to enable
-  // use of the various evaluation tools already available
-  bool convert_seeds_to_svtxtracks = false;
-
-  // Flag to run commissioning seeding workflow with tuned parameters for
-  // misaligned + distorted tracks
-  bool use_alignment = false;
-  bool filter_conversion_electrons = false;
-
-}  // namespace G4TRACKING
-
 void TrackingInit()
 {
   ACTSGEOM::ActsGeomInit();
@@ -319,7 +279,7 @@ void Tracking_Reco_TrackFit()
   actsFit->set_cluster_version(G4TRACKING::cluster_version);
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-  actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
+  //  actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
   actsFit->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(actsFit);
   

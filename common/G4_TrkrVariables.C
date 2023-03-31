@@ -34,7 +34,7 @@ namespace Enable
   bool TPC_CLUSTER = false;
   bool TPC_QA = false;
 
-  bool TPC_ENDCAP = true;
+  bool TPC_ENDCAP = false;
 
   int TPC_VERBOSITY = 0;
 
