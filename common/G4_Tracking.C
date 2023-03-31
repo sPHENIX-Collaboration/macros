@@ -257,8 +257,7 @@ void vertexing()
     auto vtxfinder = new PHSimpleVertexFinder;
     vtxfinder->Verbosity(verbosity);
     se->registerSubsystem(vtxfinder);
-  }
-  
+  }  
 }
 
 void Tracking_Reco_TrackFit()
@@ -279,9 +278,9 @@ void Tracking_Reco_TrackFit()
   actsFit->set_cluster_version(G4TRACKING::cluster_version);
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-  //  actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
   actsFit->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(actsFit);
+  
   
   if (G4TRACKING::SC_CALIBMODE)
   {
@@ -290,6 +289,7 @@ void Tracking_Reco_TrackFit()
     * store in dedicated structure for distortion correction
     */
     auto residuals = new PHTpcResiduals;
+    residuals->setClusterVersion(G4TRACKING::cluster_version);
     residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
     residuals->setSavehistograms( G4TRACKING::SC_SAVEHISTOGRAMS );
     residuals->setHistogramOutputfile( G4TRACKING::SC_HISTOGRAMOUTPUT_FILENAME );
@@ -324,6 +324,8 @@ void Tracking_Reco_TrackFit()
     auto projection = new PHActsTrackProjection;
     projection->Verbosity(verbosity);
     se->registerSubsystem(projection);
+    
+
   }
   
 }
@@ -465,6 +467,7 @@ void Tracking_Reco()
     {
       Tracking_Reco_TrackFit();
     }
+
 
   if(G4TRACKING::use_alignment)
     {
