@@ -11,6 +11,7 @@
 #include <g4intt/PHG4InttDigitizer.h>
 #include <g4intt/PHG4InttHitReco.h>
 #include <g4intt/PHG4InttSubsystem.h>
+#include <g4intt/PHG4InttTruthClusterizer.h>
 
 #include <g4main/PHG4Reco.h>
 
@@ -23,6 +24,7 @@
 #include <vector>
 
 R__LOAD_LIBRARY(libg4intt.so)
+R__LOAD_LIBRARY(libg4tracking_io.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
@@ -223,7 +225,6 @@ void Intt_Cells()
   PHG4InttHitReco* hitreco = (PHG4InttHitReco*) se->getSubsysReco("PHG4InttHitReco");
   if (hitreco) {
     PHG4InttTruthClusterizer* digitruth = hitreco->get_truth_clusterizer();
-    digitruth->say_hi();
     for (int i = 0; i < G4INTT::n_intt_layer; i++)
     {
       digitruth->set_adc_scale(G4MVTX::n_maps_layer + i, userrange);
