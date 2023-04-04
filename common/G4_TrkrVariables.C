@@ -34,7 +34,7 @@ namespace Enable
   bool TPC_CLUSTER = false;
   bool TPC_QA = false;
 
-  bool TPC_ENDCAP = false;
+  bool TPC_ENDCAP = true;
 
   int TPC_VERBOSITY = 0;
 
@@ -46,7 +46,7 @@ namespace Enable
   bool TRACKING_EVAL = false;
   int TRACKING_VERBOSITY = 0;
   bool TRACKING_QA = false;
-  
+  bool TRACKING_DIAGNOSTICS = false;
 }  // namespace Enable
 
 
