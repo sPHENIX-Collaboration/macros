@@ -15,6 +15,8 @@ TestCDBHistos.C creates a few histograms and writes them to test.root
 Do not mix CDBTTree and CDBHistos, you can only save only one or the other (likely, have't tried that)
 
 
-TestCDBInsert.C inserts test.root into the cdb using your configuration. Modify this macro to use your own global tag.
+TestCDBInsert.C inserts test.root into the cdb using your configuration. Modify this macro to use your own global tag. The macro will give errors when you run it multiple times because the global tag and the payload type exist now. Don't worry about those.
 
 TestCDBRead.C reads the file back from the cdb trying different time stamps. The limited validity range does not work yet
+
+

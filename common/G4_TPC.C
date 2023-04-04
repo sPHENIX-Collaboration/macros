@@ -271,7 +271,7 @@ void TPC_Cells()
   digitpc->Verbosity(verbosity);
   cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
        << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << endl;
-
+  digitpc ->set_skip_noise_flag(false);
   se->registerSubsystem(digitpc);
 
 }
