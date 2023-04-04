@@ -52,7 +52,7 @@ int Fun4All_G4_sPHENIX(
   se->Verbosity(1);
 
   //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
-  PHRandomSeed::Verbosity(1);
+  PHRandomSeed::Verbosity(0);
 
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
