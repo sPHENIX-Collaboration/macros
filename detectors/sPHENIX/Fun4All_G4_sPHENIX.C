@@ -386,7 +386,7 @@ int Fun4All_G4_sPHENIX(
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && false;
 
   Enable::JETS = (Enable::GLOBAL_RECO || Enable::GLOBAL_FASTSIM) && true;
-  Enable::JETS_EVAL = Enable::JETS && true;
+  Enable::JETS_EVAL = Enable::JETS && false;
   Enable::JETS_QA = Enable::JETS && Enable::QA && true;
 
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
