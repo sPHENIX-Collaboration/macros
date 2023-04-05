@@ -2,7 +2,8 @@
 #define MACRO_G4INPUT_C
 
 #include <GlobalVariables.C>
-#include <G4_TPC.C>
+#include <G4_TrkrVariables.C>
+//#include <G4_TPC.C>
 
 #include <phpythia6/PHPythia6.h>
 
