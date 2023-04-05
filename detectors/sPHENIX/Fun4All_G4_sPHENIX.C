@@ -65,7 +65,14 @@ int Fun4All_G4_sPHENIX(
   // or set it to a fixed value so you can debug your code
   rc->set_IntFlag("RANDOMSEED", TString(outputFile).Hash());
 
-
+  string outputroot = outputFile;
+  string remove_this = ".root";
+  size_t pos = outputroot.find(remove_this);
+  if (pos != string::npos)
+  {
+    outputroot.erase(pos, remove_this.length());
+  }
+  
   //===============
   // Input options
   //===============
@@ -92,7 +99,7 @@ int Fun4All_G4_sPHENIX(
   //INPUTEMBED::listfile[0] = embed_input_file;
 
   Input::SIMPLE = true;
-  Input::SIMPLE_NUMBER = 2; // if you need 2 of them
+  //Input::SIMPLE_NUMBER = 2; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
   // Enable this is emulating the nominal pp/pA/AA collision vertex distribution
@@ -113,8 +120,8 @@ int Fun4All_G4_sPHENIX(
   //Input::LAMBDAC = false;
   //Input::LAMBDAC_VERBOSITY = 0;
   // Upsilon generator
-  Input::UPSILON = true;
-  Input::UPSILON_NUMBER = 1; // if you need 3 of them
+  Input::UPSILON = false;
+  //Input::UPSILON_NUMBER = 1; // if you need 3 of them
   //Input::UPSILON_VERBOSITY = 0;
 
   //  Input::HEPMC = true;
@@ -140,8 +147,8 @@ int Fun4All_G4_sPHENIX(
   if (Input::SIMPLE)
   {
     // low pT pions
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 10);
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi+", 10);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 3);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi+", 3);
     if (Input::HEPMC || Input::EMBED)
     {
       INPUTGENERATOR::SimpleEventGenerator[0]->set_reuse_existing_vertex(true);
@@ -157,16 +164,9 @@ int Fun4All_G4_sPHENIX(
     }
     INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1, 1);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
-    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.1, 2.);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.5, 4.);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_power_law_n(-4);
 
-    // high pT pions
-    INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi-", 10);
-    INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi+", 10);
-    INPUTGENERATOR::SimpleEventGenerator[1]->set_reuse_existing_vertex(true);
-    INPUTGENERATOR::SimpleEventGenerator[1]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
-    INPUTGENERATOR::SimpleEventGenerator[1]->set_eta_range(-1, 1);
-    INPUTGENERATOR::SimpleEventGenerator[1]->set_phi_range(-M_PI, M_PI);
-    INPUTGENERATOR::SimpleEventGenerator[1]->set_pt_range(2, 50.);
   }
   // Upsilons
   // if you run more than one of these Input::UPSILON_NUMBER > 1
@@ -321,7 +321,12 @@ int Fun4All_G4_sPHENIX(
 
   Enable::TRACKING_TRACK = (Enable::MICROMEGAS_CLUSTER && Enable::TPC_CLUSTER && Enable::INTT_CLUSTER && Enable::MVTX_CLUSTER) && true;
   Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && false;
-  Enable::TRACKING_QA = Enable::TRACKING_TRACK && Enable::QA && true;
+  Enable::TRACKING_QA = Enable::TRACKING_TRACK && Enable::QA && false;
+
+  G4TRACKING::SC_CALIBMODE = true;
+  G4TRACKING::SC_SAVEHISTOGRAMS = true;
+  G4TRACKING::SC_USE_MICROMEGAS=true;
+  G4TRACKING::SC_HISTOGRAMOUTPUT_FILENAME= std::string(outputroot + "_residuals.root");
 
   //  cemc electronics + thin layer of W-epoxy to get albedo from cemc
   //  into the tracking, cannot run together with CEMC
@@ -556,13 +561,7 @@ int Fun4All_G4_sPHENIX(
   //----------------------
   // Simulation evaluation
   //----------------------
-  string outputroot = outputFile;
-  string remove_this = ".root";
-  size_t pos = outputroot.find(remove_this);
-  if (pos != string::npos)
-  {
-    outputroot.erase(pos, remove_this.length());
-  }
+
 
   if (Enable::TRACKING_EVAL) Tracking_Eval(outputroot + "_g4svtx_eval.root");
 
