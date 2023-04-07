@@ -251,6 +251,8 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
   {
     string name = "beamPipe" + nm[i];
     PHG4CylinderSubsystem *pipe = new PHG4CylinderSubsystem(name, G4BEAMLINE::pipe_id_offset + i);
+    if (Enable::BEAMLINE_BLACKHOLE) pipe->BlackHole();
+    pipe->set_color(1,0,0,1.);
     pipe->set_double_param("radius", qir[i]);
     pipe->set_double_param("thickness", qor[i] - qir[i]);
     pipe->set_double_param("length", qlen[i]);
@@ -320,6 +322,8 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
       pipe->SetMotherSubsystem(G4BEAMLINE::BackwardBeamLineEnclosure);
     }
     if (AbsorberActive) pipe->SetActive();
+    if (Enable::BEAMLINE_BLACKHOLE) pipe->BlackHole();
+    pipe->set_color(1,0,0,1.);
     pipe->SuperDetector("PIPE");
     pipe->OverlapCheck(OverlapCheck);
     g4Reco->registerSubsystem(pipe);

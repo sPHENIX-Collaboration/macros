@@ -1,0 +1,22 @@
+Setup:
+
+modify mycdb.json, replace  /sphenix/user/pinkenbu/cdbtest/ by an area you can write to (make sure it exists). Leave the other fields in the read_dir_list unchanged - in case your tests need other existing calibrations. The master copy of this is $NOPAYLOADCLIENT_CONF in case there are updates I forgot to merge with mycdb.json
+
+set NOPAYLOADCLIENT_CONF to this file (if you stay in this dir you don't need the full path):
+
+setenv NOPAYLOADCLIENT_CONF mycdb.json
+or when using bash
+export NOPAYLOADCLIENT_CONF=mycdb.json
+
+TestCDBTTree.C creates a small CDBTTree object and writes it to test.root
+
+TestCDBHistos.C creates a few histograms and writes them to test.root
+
+Do not mix CDBTTree and CDBHistos, you can only save only one or the other (likely, have't tried that)
+
+
+TestCDBInsert.C inserts test.root into the cdb using your configuration. Modify this macro to use your own global tag. The macro will give errors when you run it multiple times because the global tag and the payload type exist now. Don't worry about those.
+
+TestCDBRead.C reads the file back from the cdb trying different time stamps. The limited validity range does not work yet
+
+
