@@ -52,7 +52,7 @@ int Fun4All_G4_sPHENIX(
   se->Verbosity(0);
 
   //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
-  PHRandomSeed::Verbosity(0);
+  PHRandomSeed::Verbosity(1);
 
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
@@ -140,7 +140,7 @@ int Fun4All_G4_sPHENIX(
   // add the settings for other with [1], next with [2]...
   if (Input::SIMPLE)
   {
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 5);
     if (Input::HEPMC || Input::EMBED)
     {
       INPUTGENERATOR::SimpleEventGenerator[0]->set_reuse_existing_vertex(true);
