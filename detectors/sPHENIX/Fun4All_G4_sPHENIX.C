@@ -65,14 +65,6 @@ int Fun4All_G4_sPHENIX(
   // or set it to a fixed value so you can debug your code
   rc->set_IntFlag("RANDOMSEED", TString(outputFile).Hash());
 
-  string outputroot = outputFile;
-  string remove_this = ".root";
-  size_t pos = outputroot.find(remove_this);
-  if (pos != string::npos)
-  {
-    outputroot.erase(pos, remove_this.length());
-  }
-  
   //===============
   // Input options
   //===============
@@ -299,34 +291,33 @@ int Fun4All_G4_sPHENIX(
   Enable::MVTX = true;
   Enable::MVTX_CELL = Enable::MVTX && true;
   Enable::MVTX_CLUSTER = Enable::MVTX_CELL && true;
-  Enable::MVTX_QA = Enable::MVTX_CLUSTER && Enable::QA && true;
+  Enable::MVTX_QA = Enable::MVTX_CLUSTER && Enable::QA && false;
 
   Enable::INTT = true;
 //  Enable::INTT_ABSORBER = true; // enables layerwise support structure readout
 //  Enable::INTT_SUPPORT = true; // enable global support structure readout
   Enable::INTT_CELL = Enable::INTT && true;
   Enable::INTT_CLUSTER = Enable::INTT_CELL && true;
-  Enable::INTT_QA = Enable::INTT_CLUSTER && Enable::QA && true;
+  Enable::INTT_QA = Enable::INTT_CLUSTER && Enable::QA && false;
 
   Enable::TPC = true;
   Enable::TPC_ABSORBER = true;
   Enable::TPC_CELL = Enable::TPC && true;
   Enable::TPC_CLUSTER = Enable::TPC_CELL && true;
-  Enable::TPC_QA = Enable::TPC_CLUSTER && Enable::QA && true;
+  Enable::TPC_QA = Enable::TPC_CLUSTER && Enable::QA && false;
 
   Enable::MICROMEGAS = true;
   Enable::MICROMEGAS_CELL = Enable::MICROMEGAS && true;
   Enable::MICROMEGAS_CLUSTER = Enable::MICROMEGAS_CELL && true;
-  Enable::MICROMEGAS_QA = Enable::MICROMEGAS_CLUSTER && Enable::QA && true;
+  Enable::MICROMEGAS_QA = Enable::MICROMEGAS_CLUSTER && Enable::QA && false;
 
   Enable::TRACKING_TRACK = (Enable::MICROMEGAS_CLUSTER && Enable::TPC_CLUSTER && Enable::INTT_CLUSTER && Enable::MVTX_CLUSTER) && true;
   Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && false;
   Enable::TRACKING_QA = Enable::TRACKING_TRACK && Enable::QA && false;
 
   G4TRACKING::SC_CALIBMODE = true;
-  G4TRACKING::SC_SAVEHISTOGRAMS = true;
   G4TRACKING::SC_USE_MICROMEGAS=true;
-  G4TRACKING::SC_HISTOGRAMOUTPUT_FILENAME= std::string(outputroot + "_residuals.root");
+
 
   //  cemc electronics + thin layer of W-epoxy to get albedo from cemc
   //  into the tracking, cannot run together with CEMC
@@ -561,8 +552,14 @@ int Fun4All_G4_sPHENIX(
   //----------------------
   // Simulation evaluation
   //----------------------
-
-
+  string outputroot = outputFile;
+  string remove_this = ".root";
+  size_t pos = outputroot.find(remove_this);
+  if (pos != string::npos)
+  {
+    outputroot.erase(pos, remove_this.length());
+  }
+  
   if (Enable::TRACKING_EVAL) Tracking_Eval(outputroot + "_g4svtx_eval.root");
 
   if (Enable::CEMC_EVAL) CEMC_Eval(outputroot + "_g4cemc_eval.root");
@@ -598,6 +595,8 @@ int Fun4All_G4_sPHENIX(
   if (Enable::TPC_QA) TPC_QA();
   if (Enable::MICROMEGAS_QA) Micromegas_QA();
   if (Enable::TRACKING_QA) Tracking_QA();
+
+  Distortions_QA();
 
   if (Enable::TRACKING_QA && Enable::CEMC_QA && Enable::HCALIN_QA && Enable::HCALOUT_QA) QA_G4CaloTracking();
 
