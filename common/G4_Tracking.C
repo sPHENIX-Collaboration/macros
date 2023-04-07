@@ -526,8 +526,8 @@ void Tracking_Eval(const std::string& outputfile)
                            G4TPC::n_gas_layer,
                            G4MICROMEGAS::n_micromegas_layer);
   eval->do_cluster_eval(true);
-  eval->do_g4hit_eval(true);
-  eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
+  eval->do_g4hit_eval(false);
+  eval->do_hit_eval(false);  // enable to see the hits that includes the chamber physics...
   eval->do_gpoint_eval(true);
   eval->do_vtx_eval_light(true);
   eval->do_eval_light(true);
