@@ -42,66 +42,6 @@ R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
-namespace Enable
-{
-  bool TPC = false;
-  bool TPC_ABSORBER = false;
-  bool TPC_OVERLAPCHECK = false;
-  bool TPC_CELL = false;
-  bool TPC_CLUSTER = false;
-  bool TPC_QA = false;
-
-  bool TPC_ENDCAP = true;
-
-  int TPC_VERBOSITY = 0;
-}  // namespace Enable
-
-namespace G4TPC
-{
-  int n_tpc_layer_inner = 16;
-  int tpc_layer_rphi_count_inner = 1152;
-  int n_tpc_layer_mid = 16;
-  int n_tpc_layer_outer = 16;
-  int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
-  double tpc_outer_radius = 77. + 2.;
-
-  // drift velocity is set here for all relevant modules
-  double tpc_drift_velocity_sim= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
-//  double tpc_drift_velocity_reco now set in GlobalVariables.C
-//  double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
-
-  // use simple clusterizer
-  bool USE_SIMPLE_CLUSTERIZER = false;
-
-  // distortions
-  bool ENABLE_STATIC_DISTORTIONS = false;
-  auto static_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only.distortion_map.hist.root";
-
-  bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
-  std::string time_ordered_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/TimeOrderedDistortions.root";
-
-  // distortion corrections
-  bool ENABLE_CORRECTIONS = false;
-  auto correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
-
-  // enable central membrane g4hits generation
-  bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
-  
-  // enable direct laser g4hits generation
-  bool ENABLE_DIRECT_LASER_HITS = false;
-
-  // save histograms
-  bool DIRECT_LASER_SAVEHISTOGRAMS = false;
-
-  // do cluster <-> hit association
-  bool DO_HIT_ASSOCIATION = true;
-  
-  // space charge calibration output file
-  std::string DIRECT_LASER_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";
-  std::string DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME = "TpcDirectLaserReconstruction.root"; 
-  
-}  // namespace G4TPC
-
 void TPCInit()
 {
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4TPC::tpc_outer_radius);
