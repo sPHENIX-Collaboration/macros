@@ -2,6 +2,8 @@
 #define MACRO_G4MVTX_C
 
 #include <GlobalVariables.C>
+//#include <Trkr_TruthTables.C>
+
 #include <QA.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
@@ -25,29 +27,6 @@ R__LOAD_LIBRARY(libg4mvtx.so)
 R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
-namespace Enable
-{
-  bool MVTX = false;
-  bool MVTX_OVERLAPCHECK = false;
-  bool MVTX_CELL = false;
-  bool MVTX_CLUSTER = false;
-  bool MVTX_QA = false;
-  bool MVTX_ABSORBER = false;
-  int MVTX_VERBOSITY = 0;
-
-}  // namespace Enable
-
-namespace G4MVTX
-{
-  int n_maps_layer = 3;        // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
-  double radius_offset = 0.7;  // clearance around radius
-}  // namespace G4MVTX
-
-namespace G4MVTXAlignment
-{
-  std::string alignment_path = string(getenv("CALIBRATIONROOT")) + "/Tracking/MVTX/alignment";
-  double z_offset[] = {0.0, 0.0, 200.0};
-}
 
 void MvtxInit()
 {
