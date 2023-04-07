@@ -13,6 +13,7 @@
 #include <qa_modules/QAG4SimulationTracking.h>
 #include <qa_modules/QAG4SimulationUpsilon.h>
 #include <qa_modules/QAG4SimulationVertex.h>
+#include <qa_modules/QAG4SimulationDistortions.h>
 
 R__LOAD_LIBRARY(libqa_modules.so)
 
@@ -99,6 +100,21 @@ void Tracking_QA()
     }
     se->registerSubsystem(qa);
   }
+}
+
+void Distortions_QA()
+{
+   int verbosity = std::max(Enable::QA_VERBOSITY, Enable::TRACKING_VERBOSITY);
+
+  //---------------
+  // Fun4All server
+  //---------------
+
+  Fun4AllServer* se = Fun4AllServer::instance();
+  
+  auto qa = new QAG4SimulationsDistortions();
+  qa->Verbosity(verbosity);
+  se->registerSubsystem(qa);
 }
 
 #endif

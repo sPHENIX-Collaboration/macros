@@ -49,6 +49,7 @@ R__LOAD_LIBRARY(libtrackeralign.so)
 #include <qa_modules/QAG4SimulationTracking.h>
 #include <qa_modules/QAG4SimulationUpsilon.h>
 #include <qa_modules/QAG4SimulationVertex.h>
+#include <qa_modules/QAG4SimulationDistortions.h>
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -586,4 +587,19 @@ void Tracking_QA()
   }
 }
 
+void Distortions_QA()
+{
+  int verbosity = std::max(Enable::QA_VERBOSITY, Enable::TRACKING_VERBOSITY);
+
+  //---------------
+  // Fun4All server
+  //---------------
+
+  Fun4AllServer* se = Fun4AllServer::instance();
+
+  auto qa = new QAG4SimulationDistortions();
+  qa->Verbosity(verbosity);
+  se->registerSubsystem(qa);
+
+}
 #endif
