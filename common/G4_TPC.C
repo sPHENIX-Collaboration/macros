@@ -85,7 +85,7 @@ namespace G4TPC
   auto correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
 
   // enable central membrane g4hits generation
-  bool ENABLE_CENTRAL_MEMBRANE_HITS = true;
+  bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
   
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
