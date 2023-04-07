@@ -542,8 +542,8 @@ int Fun4All_G4_sPHENIX(
 
   if(Enable::TRACKING_DIAGNOSTICS)
     {
-      const std::string kshortFile = "./kshort_" + outputFile;
-      const std::string residualsFile = "./residuals_" + outputFile;
+      const std::string kshortFile = "./kshort_" + outputFile_str;
+      const std::string residualsFile = "./residuals_" + outputFile_str;
  
       G4KshortReconstruction(kshortFile);
       seedResiduals(residualsFile);
