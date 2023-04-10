@@ -267,10 +267,19 @@ void TPC_Clustering()
   if( G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS )
   {
     // central membrane clusterizer
-    se->registerSubsystem(new PHTpcCentralMembraneClusterizer);
+    auto centralMembraneClusterizer = new PHTpcCentralMembraneClusterizer;
+    centralMembraneClusterizer->Verbosity(verbosity);
+    centralMembraneClusterizer->set_histos_on(true);
+    centralMembraneClusterizer->set_modulo_threshold(5);
+    centralMembraneClusterizer->set_metaCluster_threshold(18);
+    se->registerSubsystem(centralMembraneClusterizer);
     
+
     // match central membrane clusters to pads and generate distortion correction
     auto centralMembraneMatcher = new PHTpcCentralMembraneMatcher;
+    centralMembraneMatcher->setSavehistograms( true );
+    centralMembraneMatcher->Verbosity( verbosity );
+    centralMembraneMatcher->setNMatchIter(2);
     se->registerSubsystem(centralMembraneMatcher);
   }
 }
