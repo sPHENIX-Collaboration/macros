@@ -292,8 +292,6 @@ void Tracking_Reco_TrackFit()
     auto residuals = new PHTpcResiduals;
     residuals->setClusterVersion(G4TRACKING::cluster_version);
     residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
-    residuals->setSavehistograms( G4TRACKING::SC_SAVEHISTOGRAMS );
-    residuals->setHistogramOutputfile( G4TRACKING::SC_HISTOGRAMOUTPUT_FILENAME );
     residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
     residuals->Verbosity(verbosity);
     se->registerSubsystem(residuals);
