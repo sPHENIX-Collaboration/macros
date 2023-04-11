@@ -112,7 +112,7 @@ void Distortions_QA()
 
   Fun4AllServer* se = Fun4AllServer::instance();
   
-  auto qa = new QAG4SimulationsDistortions();
+  auto qa = new QAG4SimulationDistortions();
   qa->Verbosity(verbosity);
   se->registerSubsystem(qa);
 }
