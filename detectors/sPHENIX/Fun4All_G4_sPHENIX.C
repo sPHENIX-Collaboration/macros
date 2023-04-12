@@ -157,7 +157,7 @@ int Fun4All_G4_sPHENIX(
     }
     INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1, 1);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
-    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.5, 4.);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.5, 20);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_power_law_n(-4);
 
   }
