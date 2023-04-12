@@ -49,6 +49,7 @@ R__LOAD_LIBRARY(libtrackeralign.so)
 #include <qa_modules/QAG4SimulationTracking.h>
 #include <qa_modules/QAG4SimulationUpsilon.h>
 #include <qa_modules/QAG4SimulationVertex.h>
+#include <qa_modules/QAG4SimulationDistortions.h>
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -291,8 +292,6 @@ void Tracking_Reco_TrackFit()
     auto residuals = new PHTpcResiduals;
     residuals->setClusterVersion(G4TRACKING::cluster_version);
     residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
-    residuals->setSavehistograms( G4TRACKING::SC_SAVEHISTOGRAMS );
-    residuals->setHistogramOutputfile( G4TRACKING::SC_HISTOGRAMOUTPUT_FILENAME );
     residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
     residuals->Verbosity(verbosity);
     se->registerSubsystem(residuals);
@@ -525,8 +524,8 @@ void Tracking_Eval(const std::string& outputfile)
                            G4TPC::n_gas_layer,
                            G4MICROMEGAS::n_micromegas_layer);
   eval->do_cluster_eval(true);
-  eval->do_g4hit_eval(true);
-  eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
+  eval->do_g4hit_eval(false);
+  eval->do_hit_eval(false);  // enable to see the hits that includes the chamber physics...
   eval->do_gpoint_eval(true);
   eval->do_vtx_eval_light(true);
   eval->do_eval_light(true);
@@ -586,4 +585,19 @@ void Tracking_QA()
   }
 }
 
+void Distortions_QA()
+{
+  int verbosity = std::max(Enable::QA_VERBOSITY, Enable::TRACKING_VERBOSITY);
+
+  //---------------
+  // Fun4All server
+  //---------------
+
+  Fun4AllServer* se = Fun4AllServer::instance();
+
+  auto qa = new QAG4SimulationDistortions();
+  qa->Verbosity(verbosity);
+  se->registerSubsystem(qa);
+
+}
 #endif

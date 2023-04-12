@@ -90,11 +90,14 @@ void Bbc_Reco()
     BbcVertexFastSimReco* bbcvertex = new BbcVertexFastSimReco();
     bbcvertex->set_z_smearing(G4BBC::z_smearing);
     bbcvertex->set_t_smearing(G4BBC::t_smearing);
+    bbcvertex->Verbosity(verbosity);
+
     se->registerSubsystem(bbcvertex);
   }
   if (Enable::BBCRECO)
   {
     BbcSimReco* bbcrec = new BbcSimReco();
+    bbcrec->Verbosity(verbosity);
     se->registerSubsystem(bbcrec);
   }
   return;
