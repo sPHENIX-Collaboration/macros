@@ -28,13 +28,6 @@ R__LOAD_LIBRARY(libg4micromegas.so)
 // int n_micromegas_layer = 2;
 // because they are also needed in other macros
 
-namespace Enable
-{
-  bool MICROMEGAS_CELL = false;
-  bool MICROMEGAS_CLUSTER = false;
-  bool MICROMEGAS_QA = false;
-}  // namespace Enable
-
 void MicromegasInit()
 {
   if (!Enable::MVTX)
