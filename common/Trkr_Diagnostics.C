@@ -1,9 +1,9 @@
-#ifndef MACRO_G4TRACKINGDIAGNOSTICS_C
-#define MACRO_G4TRACKINGDIAGNOSTICS_C
+#ifndef MACRO_TRKRDIAGNOSTICS_C
+#define MACRO_TRKRDIAGNOSTICS_C
 
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 
-#include <G4_Tracking.C>
+#include <Trkr_RecoInit.C>
 
 #include <trackingdiagnostics/KshortReconstruction.h>
 #include <trackingdiagnostics/helixResiduals.h>

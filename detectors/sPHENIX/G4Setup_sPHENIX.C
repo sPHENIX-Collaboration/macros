@@ -11,14 +11,16 @@
 #include <G4_HcalIn_ref.C>
 #include <G4_HcalOut_ref.C>
 #include <G4_BeamLine.C>
-#include <G4_Intt.C>
 #include <G4_Magnet.C>
+/*#include <G4_Mvtx.C>
+#include <G4_Intt.C>
+#include <G4_TPC.C>
 #include <G4_Micromegas.C>
-#include <G4_Mvtx.C>
+*/
+#include <G4_TrkrSimulation.C>
 #include <G4_PSTOF.C>
 #include <G4_Pipe.C>
 #include <G4_PlugDoor.C>
-#include <G4_TPC.C>
 #include <G4_User.C>
 #include <G4_World.C>
 #include <G4_ZDC.C>
