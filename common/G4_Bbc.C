@@ -5,11 +5,12 @@
 
 #include <g4detectors/PHG4BbcSubsystem.h>
 
+#include <g4bbc/BbcSimReco.h>
 #include <g4bbc/BbcVertexFastSimReco.h>
+
 #include <g4main/PHG4Reco.h>
 
 #include <fun4all/Fun4AllServer.h>
-
 
 R__LOAD_LIBRARY(libg4bbc.so)
 R__LOAD_LIBRARY(libg4detectors.so)
@@ -18,8 +19,9 @@ namespace Enable
 {
   bool BBC = false;          // Actual BBC detector
   bool BBC_SUPPORT = false;  // BBC Supports
-  bool BBCFAKE = false;     // Just generate fake bbc vtx, t0
-  int  BBC_VERBOSITY = 0;
+  bool BBCRECO = false;      // run Bbc reconstruction
+  bool BBCFAKE = false;      // Just generate fake bbc vtx, t0
+  int BBC_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4BBC
@@ -51,7 +53,7 @@ void Bbc(PHG4Reco* g4Reco)
   {
     PHG4BbcSubsystem* bbc = new PHG4BbcSubsystem("BBC");
     bbc->SuperDetector("BBC");
-    bbc->OverlapCheck( Enable::OVERLAPCHECK );
+    bbc->OverlapCheck(Enable::OVERLAPCHECK);
     bbc->SetActive();
     if (SupportActive)
     {
@@ -72,6 +74,12 @@ void Bbc_Reco()
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
+  if (Enable::BBCFAKE && Enable::BBCRECO)
+  {
+    cout << "Enable::BBCFAKE and Enable::BBCRECO cannot be enabled together" << endl;
+    gSystem->Exit(1);
+  }
+
   if (Enable::BBCFAKE)
   {
     if (verbosity > 0)
@@ -82,9 +90,16 @@ void Bbc_Reco()
     BbcVertexFastSimReco* bbcvertex = new BbcVertexFastSimReco();
     bbcvertex->set_z_smearing(G4BBC::z_smearing);
     bbcvertex->set_t_smearing(G4BBC::t_smearing);
+    bbcvertex->Verbosity(verbosity);
+
     se->registerSubsystem(bbcvertex);
   }
-
+  if (Enable::BBCRECO)
+  {
+    BbcSimReco* bbcrec = new BbcSimReco();
+    bbcrec->Verbosity(verbosity);
+    se->registerSubsystem(bbcrec);
+  }
   return;
 }
 #endif

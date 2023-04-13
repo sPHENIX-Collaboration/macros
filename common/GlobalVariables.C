@@ -2,7 +2,7 @@
 #define MACRO_GLOBALVARIABLES_C
 
 #include <g4decayer/EDecayType.hh>
-
+#include <G4_TrkrVariables.C>
 #include <set>
 
 double no_overlapp = 0.0001;

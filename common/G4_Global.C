@@ -12,6 +12,7 @@ namespace Enable
 {
   bool GLOBAL_RECO = false;
   bool GLOBAL_FASTSIM = false;
+  int GLOBAL_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4GLOBAL
@@ -26,13 +27,12 @@ void GlobalInit() {}
 
 void Global_Reco()
 {
-  //---------------
-  // Fun4All server
-  //---------------
+  int verbosity = std::max(Enable::VERBOSITY, Enable::GLOBAL_VERBOSITY);
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
   GlobalVertexReco* gblvertex = new GlobalVertexReco();
+  gblvertex->Verbosity(verbosity);
   se->registerSubsystem(gblvertex);
 
   return;
@@ -40,9 +40,7 @@ void Global_Reco()
 
 void Global_FastSim()
 {
-  //---------------
-  // Fun4All server
-  //---------------
+  int verbosity = std::max(Enable::VERBOSITY, Enable::GLOBAL_VERBOSITY);
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
@@ -51,6 +49,8 @@ void Global_FastSim()
   gblvertex->set_y_smearing(G4GLOBAL::y_smearing);
   gblvertex->set_z_smearing(G4GLOBAL::z_smearing);
   gblvertex->set_t_smearing(G4GLOBAL::t_smearing);
+  gblvertex->Verbosity(verbosity);
+
   se->registerSubsystem(gblvertex);
 
   return;
