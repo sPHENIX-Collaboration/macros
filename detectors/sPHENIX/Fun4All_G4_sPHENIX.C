@@ -17,8 +17,14 @@
 #include <G4_ParticleFlow.C>
 #include <G4_Production.C>
 #include <G4_TopoClusterReco.C>
-#include <G4_Tracking.C>
-#include <G4_TrackingDiagnostics.C>
+
+#include <Trkr_RecoInit.C>
+#include <Trkr_Clustering.C>
+#include <Trkr_Reco.C>
+#include <Trkr_Eval.C>
+#include <Trkr_QA.C>
+
+#include <Trkr_Diagnostics.C>
 #include <G4_User.C>
 #include <QA.C>
 
