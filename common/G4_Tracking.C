@@ -57,11 +57,11 @@ void TrackingInit()
 {
 
   std::cout << "G4_Tracking is now obsolete as of macros PR612. "
-	    << std::endl "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
+	    << std::endl << "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
 	    << std::endl
-	    << "The switch is not difficult and just requires adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
+	    << "The switch is not difficult and just requires updating your macros repo and adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
 	    << std::endl;
-  gSystem->exit(1);
+  gSystem->Exit(1);
 
   ACTSGEOM::ActsGeomInit();
   // space charge correction
@@ -456,11 +456,11 @@ void Tracking_Reco()
 {
 
   std::cout << "G4_Tracking is now obsolete as of macros PR612. "
-	    << std::endl "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
+	    << std::endl << "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
 	    << std::endl
-	    << "The switch is not difficult and just requires adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
+	    << "The switch is not difficult and just requires updating your macros repo and adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
 	    << std::endl;
-  gSystem->exit(1);
+  gSystem->Exit(1);
 
   /*
    * just a wrapper around track seeding and track fitting methods, 
@@ -495,11 +495,11 @@ void Tracking_Reco()
 void  Filter_Conversion_Electrons(std::string ntuple_outfile)
 {
   std::cout << "G4_Tracking is now obsolete as of macros PR612. "
-	    << std::endl "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
+	    << std::endl << "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
 	    << std::endl
-	    << "The switch is not difficult and just requires adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
+	    << "The switch is not difficult and just requires updating your macros repo and adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
 	    << std::endl;
-  gSystem->exit(1);
+  gSystem->Exit(1);
   Fun4AllServer* se = Fun4AllServer::instance();
   SecondaryVertexFinder* secvert = new SecondaryVertexFinder;
   secvert->Verbosity(0);
@@ -530,11 +530,11 @@ void Tracking_Eval(const std::string& outputfile)
 {
 
   std::cout << "G4_Tracking is now obsolete as of macros PR612. "
-	    << std::endl "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
+	    << std::endl << "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
 	    << std::endl
-	    << "The switch is not difficult and just requires adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
+	    << "The switch is not difficult and just requires updating your macros repo and adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
 	    << std::endl;
-  gSystem->exit(1);
+  gSystem->Exit(1);
 
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
@@ -578,11 +578,11 @@ void Tracking_QA()
 {
 
   std::cout << "G4_Tracking is now obsolete as of macros PR612. "
-	    << std::endl "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
+	    << std::endl << "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
 	    << std::endl
-	    << "The switch is not difficult and just requires adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
+	    << "The switch is not difficult and just requires updating your macros repo and adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
 	    << std::endl;
-  gSystem->exit(1);
+  gSystem->Exit(1);
 
   int verbosity = std::max(Enable::QA_VERBOSITY, Enable::TRACKING_VERBOSITY);
 
