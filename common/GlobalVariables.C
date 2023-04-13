@@ -2,7 +2,7 @@
 #define MACRO_GLOBALVARIABLES_C
 
 #include <g4decayer/EDecayType.hh>
-
+#include <G4_TrkrVariables.C>
 #include <set>
 
 double no_overlapp = 0.0001;
@@ -108,7 +108,7 @@ namespace G4TPC
 namespace G4TRACKING
 {
   bool init_acts_magfield = true;
-  int cluster_version = 4;
+  int cluster_version = 5;
 }
 
 namespace EVTGENDECAYER
