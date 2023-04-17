@@ -20,6 +20,7 @@
 
 #include <Trkr_RecoInit.C>
 #include <Trkr_Clustering.C>
+#include <Trkr_LaserClustering.C>
 #include <Trkr_Reco.C>
 #include <Trkr_Eval.C>
 #include <Trkr_QA.C>
@@ -502,7 +503,17 @@ int Fun4All_G4_sPHENIX(
     }
   if (Enable::MVTX_CLUSTER) Mvtx_Clustering();
   if (Enable::INTT_CLUSTER) Intt_Clustering();
-  if (Enable::TPC_CLUSTER) TPC_Clustering();
+  if (Enable::TPC_CLUSTER)
+    {
+      if(G4TPC::ENABLE_DIRECT_LASER_HITS || G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS)
+	{
+	  TPC_LaserClustering();
+	}
+      else
+	{
+	  TPC_Clustering();
+	}
+    }
   if (Enable::MICROMEGAS_CLUSTER) Micromegas_Clustering();
 
   if (Enable::TRACKING_TRACK)
