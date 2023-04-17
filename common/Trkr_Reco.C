@@ -203,6 +203,7 @@ void Tracking_Reco_TrackFit()
     * store in dedicated structure for distortion correction
     */
     auto residuals = new PHTpcResiduals;
+    residuals->setClusterVersion(G4TRACKING::cluster_version);
     residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
     residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
     residuals->Verbosity(verbosity);
