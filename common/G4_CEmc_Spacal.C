@@ -157,7 +157,7 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
   cemc->set_int_param("azimuthal_seg_visible", 1);
   cemc->set_int_param("construction_verbose", 0);
   cemc->Verbosity(0);
-  if (Enable::XPLOAD)
+  if (Enable::CDB)
   {
     cemc->UseCDB("CEMC_GEOMETRY");
   }
@@ -258,7 +258,7 @@ void CEMC_Towers()
   TowerDigitizer->set_photonelec_yield_visible_GeV(photoelectron_per_GeV / sampling_fraction);
   TowerDigitizer->set_variable_zero_suppression(true);  //read zs values from calibrations file comment next line if true
                                                         //  TowerDigitizer->set_zero_suppression_ADC(16);  // eRD1 test beam setting
-  if (Enable::XPLOAD)
+  if (Enable::CDB)
   {
     TowerDigitizer->GetParameters().ReadFromCDB("EMCTOWERCALIB");
   }
@@ -281,7 +281,7 @@ void CEMC_Towers()
   else
   {
     TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
-    if (Enable::XPLOAD)
+    if (Enable::CDB)
     {
       TowerCalibration->GetCalibrationParameters().ReadFromCDB("EMCTOWERCALIB");
     }
@@ -335,7 +335,7 @@ void CEMC_Clusters()
 
     //    clusterCorrection->set_UseTowerInfo(1); // to use towerinfo objects rather than old RawTower
 
-  if (Enable::XPLOAD)
+  if (Enable::CDB)
   {
     clusterCorrection->Get_eclus_CalibrationParameters().ReadFromCDB("CEMCRECALIB");
     clusterCorrection->Get_ecore_CalibrationParameters().ReadFromCDB("CEMC_ECORE_RECALIB");
