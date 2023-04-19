@@ -81,7 +81,8 @@ void TPC_LaserClustering()
       // central membrane clusterizer
       auto centralMembraneClusterizer = new PHTpcCentralMembraneClusterizer;
       centralMembraneClusterizer->Verbosity(verbosity);
-      centralMembraneClusterizer->set_histos_on( false );
+      //      centralMembraneClusterizer->Verbosity(1);
+      centralMembraneClusterizer->set_histos_on( true );
       centralMembraneClusterizer->set_modulo_threshold(5);
       centralMembraneClusterizer->set_metaCluster_threshold(18);
       se->registerSubsystem(centralMembraneClusterizer);
@@ -89,8 +90,9 @@ void TPC_LaserClustering()
 
       // match central membrane clusters to pads and generate distortion correction
       auto centralMembraneMatcher = new PHTpcCentralMembraneMatcher;
-      centralMembraneMatcher->setSavehistograms( false );
+      centralMembraneMatcher->setSavehistograms( true );
       centralMembraneMatcher->Verbosity( verbosity );
+      //centralMembraneMatcher->Verbosity( 1 );
       centralMembraneMatcher->setNMatchIter(2);
       se->registerSubsystem(centralMembraneMatcher);
     }

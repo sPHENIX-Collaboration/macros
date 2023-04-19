@@ -104,7 +104,7 @@ namespace G4TPC
   bool USE_SIMPLE_CLUSTERIZER = false;
 
   // distortions
-  bool ENABLE_STATIC_DISTORTIONS = false;
+  bool ENABLE_STATIC_DISTORTIONS = true;
   auto static_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only.distortion_map.hist.root";
 
   bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
@@ -115,7 +115,7 @@ namespace G4TPC
   auto correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
 
   // enable central membrane g4hits generation
-  bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
+  bool ENABLE_CENTRAL_MEMBRANE_HITS = true;
   
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
