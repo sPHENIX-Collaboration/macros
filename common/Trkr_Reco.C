@@ -252,7 +252,8 @@ void Tracking_Reco_CommissioningTrackSeed()
   silicon_Seeding->Verbosity(verbosity);
   silicon_Seeding->set_cluster_version(G4TRACKING::cluster_version);
   silicon_Seeding->sigmaScattering(50.);
-  silicon_Seeding->setRPhiSearchWindow(0.4);
+  silicon_Seeding->setRPhiSearchWindow(2.);
+  silicon_Seeding->helixcut(0.01);
   se->registerSubsystem(silicon_Seeding);
 
   auto merger = new PHSiliconSeedMerger;
