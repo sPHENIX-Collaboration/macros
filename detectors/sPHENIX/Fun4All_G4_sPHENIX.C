@@ -32,7 +32,7 @@
 #include <ffamodules/FlagHandler.h>
 #include <ffamodules/HeadReco.h>
 #include <ffamodules/SyncReco.h>
-#include <ffamodules/XploadInterface.h>
+#include <ffamodules/CDBInterface.h>
 
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
@@ -287,6 +287,7 @@ int Fun4All_G4_sPHENIX(
 
   // Enable::BBC = true;
   // Enable::BBC_SUPPORT = true; // save hist in bbc support structure
+  // Enable::BBCRECO = Enable::BBC && true
   Enable::BBCFAKE = true;  // Smeared vtx and t0, use if you don't want real BBC in simulation
 
   Enable::PIPE = true;
@@ -410,14 +411,11 @@ int Fun4All_G4_sPHENIX(
   //===============
   // conditions DB flags
   //===============
-  //Enable::XPLOAD = true;
-  // tag
-  rc->set_StringFlag("XPLOAD_TAG",XPLOAD::tag);
-  // database config
-  rc->set_StringFlag("XPLOAD_CONFIG",XPLOAD::config);
+  Enable::CDB = true;
+  // global tag
+  rc->set_StringFlag("CDB_GLOBALTAG",CDB::global_tag);
   // 64 bit timestamp
-  rc->set_uint64Flag("TIMESTAMP",XPLOAD::timestamp);
-
+  rc->set_uint64Flag("TIMESTAMP",CDB::timestamp);
   //---------------
   // World Settings
   //---------------
@@ -455,7 +453,7 @@ int Fun4All_G4_sPHENIX(
   // Detector Division
   //------------------
 
-  if (Enable::BBC || Enable::BBCFAKE) Bbc_Reco();
+  if ((Enable::BBC && Enable::BBCRECO) || Enable::BBCFAKE) Bbc_Reco();
 
   if (Enable::MVTX_CELL) Mvtx_Cells();
   if (Enable::INTT_CELL) Intt_Cells();
@@ -696,6 +694,7 @@ int Fun4All_G4_sPHENIX(
   // Exit
   //-----
 
+//  CDBInterface::instance()->Print(); // print used DB files
   se->End();
   std::cout << "All done" << std::endl;
   delete se;
