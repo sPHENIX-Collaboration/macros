@@ -7,6 +7,7 @@
 
 #include <g4bbc/BbcDigitization.h>
 #include <g4bbc/BbcVertexFastSimReco.h>
+#include <bbc/BbcReconstruction.h>
 
 #include <g4main/PHG4Reco.h>
 
@@ -96,9 +97,13 @@ void Bbc_Reco()
   }
   if (Enable::BBCRECO)
   {
-    auto bbcrec = new BbcDigitization();
-    bbcrec->Verbosity(verbosity);
-    se->registerSubsystem(bbcrec);
+    auto bbcdigi = new BbcDigitization();
+    bbcdigi->Verbosity(verbosity);
+    se->registerSubsystem(bbcdigi);
+
+    auto bbcreco = new BbcReconstruction();
+    bbcreco->Verbosity(verbosity);
+    se->registerSubsystem(bbcreco);
   }
   return;
 }
