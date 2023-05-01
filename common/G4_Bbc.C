@@ -5,7 +5,7 @@
 
 #include <g4detectors/PHG4BbcSubsystem.h>
 
-#include <g4bbc/BbcSimReco.h>
+#include <g4bbc/BbcDigitization.h>
 #include <g4bbc/BbcVertexFastSimReco.h>
 
 #include <g4main/PHG4Reco.h>
@@ -96,7 +96,7 @@ void Bbc_Reco()
   }
   if (Enable::BBCRECO)
   {
-    BbcSimReco* bbcrec = new BbcSimReco();
+    auto bbcrec = new BbcDigitization();
     bbcrec->Verbosity(verbosity);
     se->registerSubsystem(bbcrec);
   }
