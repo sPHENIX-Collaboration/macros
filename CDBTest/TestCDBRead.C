@@ -1,11 +1,11 @@
 #ifndef TESTCDBREAD_C
 #define TESTCDBREAD_C
 
-#include <sphenixnpc/sphenixnpc.h>
+#include <ffamodules/CDBInterface.h>
 
 #include <phool/recoConsts.h>
 
-R__LOAD_LIBRARY(libsphenixnpc.so)
+R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libphool.so)
 
 void TestCDBRead()
@@ -13,20 +13,26 @@ void TestCDBRead()
   recoConsts *rc = recoConsts::instance();
 // please choose a unique name, if it is your username it's easier to see who created it
   rc->set_StringFlag("CDB_GLOBALTAG","pinkenbu"); 
+  rc->set_uint64Flag("TIMESTAMP",6);
 // 1000000 is the insert timestamp. Higher timestamps work, lower time stamps do not
-  sphenixnpc *cdb = sphenixnpc::instance(rc->get_StringFlag("CDB_GLOBALTAG"));
+  CDBInterface *cdb = CDBInterface::instance();
   cout << "using insert timestamp to retrieve" << endl;
-  cout << cdb->getCalibrationFile("TestBeginValidity",10) << endl;
+  rc->set_uint64Flag("TIMESTAMP",10);
+  cout << cdb->getUrl("TestBeginValidity") << endl;
   cout << "using larger timestamp to retrieve" << endl;
-  cout << cdb->getCalibrationFile("TestBeginValidity",100) << endl;
+  rc->set_uint64Flag("TIMESTAMP",100);
+  cout << cdb->getUrl("TestBeginValidity") << endl;
   cout << "using smaller timestamp to retrieve" << endl;
-  cout << cdb->getCalibrationFile("TestBeginValidity",1) << endl;
+  rc->set_uint64Flag("TIMESTAMP",1);
+  cout << cdb->getUrl("TestBeginValidity") << endl;
 
   cout << "using timestamp in range to retrieve calibration" << endl;
-  cout << cdb->getCalibrationFile("TestBeingEndValidity",15) << endl;
+  rc->set_uint64Flag("TIMESTAMP",15);
+  cout << cdb->getUrl("TestBeginEndValidity") << endl;
   cout << "using timestamp outside range to retrieve calibration" << endl;
-  cout << cdb->getCalibrationFile("TestBeingEndValidity",25) << endl;
-   
+  rc->set_uint64Flag("TIMESTAMP",25);
+  cout << cdb->getUrl("TestBeginEndValidity") << endl;
+  gSystem->Exit(0);
   return;
 }
 
