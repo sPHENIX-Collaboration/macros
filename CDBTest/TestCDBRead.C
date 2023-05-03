@@ -1,10 +1,7 @@
 #ifndef TESTCDBREAD_C
 #define TESTCDBREAD_C
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmacro-redefined"
 #include <sphenixnpc/sphenixnpc.h>
-#pragma GCC diagnostic pop
 
 #include <phool/recoConsts.h>
 
