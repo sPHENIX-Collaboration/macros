@@ -34,6 +34,9 @@ void Tracking_Eval(const std::string& outputfile)
   eval->do_gpoint_eval(true);
   eval->do_vtx_eval_light(true);
   eval->do_eval_light(true);
+  eval->do_track_eval(true);
+  eval->do_gtrack_eval(true);
+  eval->do_track_match(true);
   eval->set_use_initial_vertex(G4TRACKING::g4eval_use_initial_vertex);
   bool embed_scan = true;
   if(TRACKING::pp_mode) embed_scan = false;
@@ -42,7 +45,7 @@ void Tracking_Eval(const std::string& outputfile)
   std::cout << "SvtxEvaluator: pp_mode set to " << TRACKING::pp_mode << " and scan_for_embedded set to " << embed_scan << std::endl;
   eval->Verbosity(verbosity);
   eval->set_cluster_version(G4TRACKING::cluster_version);
-
+ 
   se->registerSubsystem(eval);
 
   return;
