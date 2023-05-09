@@ -13,7 +13,7 @@ void TestCDBInsert()
   recoConsts *rc = recoConsts::instance();
 // please choose a unique name, if it is your username it's easier to see who created it
   rc->set_StringFlag("CDB_GLOBALTAG","pinkenbu");
-  sphenixnpc *cdb = sphenixnpc::instance(rc->get_StringFlag("CDB_GLOBALTAG"));
+  sphenixnpc *cdb = new sphenixnpc(rc->get_StringFlag("CDB_GLOBALTAG"));
   cdb->createDomain("TestBeginValidity");
   cdb->insertcalib("TestBeginValidity","test.root",10);
   cdb->createDomain("TestBeingEndValidity");
