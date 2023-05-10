@@ -183,7 +183,6 @@ double HCalInner(PHG4Reco *g4Reco,
     // std::string hcaltiles = "/sphenix/u/shuhang98/calibrations/InnerHCalAbsorberTiles_merged.gdml";
     std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/InnerHCalAbsorberTiles_merged.gdml";
     hcal->set_string_param("GDMPath", hcaltiles);
-    hcal->set_int_param("saveg4hit", Enable::HCALIN_G4Hit);
   }
   if (G4HCALIN::light_scint_model >= 0)
   {
@@ -206,6 +205,7 @@ double HCalInner(PHG4Reco *g4Reco,
       G4HCALIN::phistart = 0.0445549893;  // offet in phi (from zero) extracted from geantinos
     }
   }
+  hcal->set_int_param("saveg4hit", Enable::HCALIN_G4Hit);
   hcal->set_double_param("phistart", G4HCALIN::phistart);
   hcal->OverlapCheck(OverlapCheck);
 

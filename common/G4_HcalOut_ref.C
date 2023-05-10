@@ -148,7 +148,6 @@ double HCalOuter(PHG4Reco *g4Reco,
     hcal->set_string_param("GDMPath", hcaltiles);
     hcal->set_string_param("IronFieldMapPath", G4MAGNET::magfield_OHCAL_steel);
     hcal->set_double_param("IronFieldMapScale", G4MAGNET::magfield_rescale);
-    hcal->set_int_param("saveg4hit", Enable::HCALOUT_G4Hit);
   }
 
   if (G4HCALOUT::light_scint_model >= 0)
@@ -174,6 +173,7 @@ double HCalOuter(PHG4Reco *g4Reco,
       G4HCALOUT::phistart = 0.0240615415;  // offet in phi (from zero) extracted from geantinos
     }
   }
+  hcal->set_int_param("saveg4hit", Enable::HCALOUT_G4Hit);
   hcal->set_double_param("phistart", G4HCALOUT::phistart);
   g4Reco->registerSubsystem(hcal);
 
