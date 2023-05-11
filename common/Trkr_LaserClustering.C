@@ -94,6 +94,7 @@ void TPC_LaserClustering()
       centralMembraneMatcher->Verbosity( verbosity );
       //centralMembraneMatcher->Verbosity( 1 );
       centralMembraneMatcher->setNMatchIter(2);
+      //centralMembraneMatcher->set_useOnly_nClus2(true);
       se->registerSubsystem(centralMembraneMatcher);
     }
 }

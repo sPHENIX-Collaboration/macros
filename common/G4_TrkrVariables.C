@@ -104,15 +104,18 @@ namespace G4TPC
   bool USE_SIMPLE_CLUSTERIZER = false;
 
   // distortions
-  bool ENABLE_STATIC_DISTORTIONS = true;
+  bool ENABLE_STATIC_DISTORTIONS = false;
   auto static_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only.distortion_map.hist.root";
-
-  bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
-  std::string time_ordered_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/TimeOrderedDistortions.root";
+  //auto static_distortion_filename = "/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_event_0_bX99528306_5.distortion_map.hist.root";
+  
+  bool ENABLE_TIME_ORDERED_DISTORTIONS = true;
+  //  std::string time_ordered_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/TimeOrderedDistortions.root";
+  std::string time_ordered_distortion_filename = "/sphenix/user/rcorliss/distortion_maps/2023.02/TimeOrderedDistortions.root";
 
   // distortion corrections
-  bool ENABLE_CORRECTIONS = false;
-  auto correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
+  bool ENABLE_CORRECTIONS = true;
+  //auto correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
+  auto correction_filename = "/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_smoothed_average.correction_map.hist.root";
 
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = true;
