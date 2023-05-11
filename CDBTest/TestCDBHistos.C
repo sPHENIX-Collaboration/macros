@@ -2,7 +2,7 @@
 
 R__LOAD_LIBRARY(libcdbobjects.so)
 
-void TestCDBHistos(const std::string &fname = "test.root")
+void TestCDBHistos(const std::string &fname = "testhistos.root")
 {
   CDBHistos *cdbhistos = new CDBHistos(fname);
   TH1 *h1 = new TH1F("h1","best 1d ever",100,0,1);
@@ -22,22 +22,19 @@ void TestCDBHistos(const std::string &fname = "test.root")
   }
   cdbhistos->WriteCDBHistos();
   delete cdbhistos;
-//  gSystem->Exit(0);
 }
 
-CDBHistos *TestWrite(const std::string &fname = "test.root")
+CDBHistos *TestWrite(const std::string &fname = "testhistos.root")
 {
   CDBHistos *cdbhistos = new CDBHistos(fname);
   return cdbhistos;
 }
 
-CDBHistos *Read(const std::string &fname = "test.root")
+CDBHistos *Read(const std::string &fname = "testhistos.root")
 {
-CDBHistos *cdbhistos = new CDBHistos(fname);
-cdbhistos->LoadCalibrations();
+  CDBHistos *cdbhistos = new CDBHistos(fname);
+  cdbhistos->LoadCalibrations();
   cdbhistos->Print();
   cdbhistos->getHisto("h1")->Draw();
   return cdbhistos;
-//  delete cdbhistos;
-//  gSystem->Exit(0);
 }

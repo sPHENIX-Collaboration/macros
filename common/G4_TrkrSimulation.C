@@ -373,9 +373,15 @@ void TPC_Cells()
     // setup phi and theta steps
     /* use 5deg steps */
     static constexpr double deg_to_rad = M_PI/180.;
-    directLaser->SetPhiStepping( 72, 0*deg_to_rad, 360*deg_to_rad );
-    directLaser->SetThetaStepping( 17, 5*deg_to_rad, 90*deg_to_rad );
-    directLaser->SetDirectLaserAuto( true );
+    directLaser->SetPhiStepping( 144, 0*deg_to_rad, 360*deg_to_rad );           
+    directLaser->SetThetaStepping( 36, 0*deg_to_rad, 90*deg_to_rad );           
+    //directLaser->SetArbitraryThetaPhi(50*deg_to_rad, 145*deg_to_rad);
+    directLaser->SetDirectLaserAuto( true );                                    
+    //__Variable stepping: hitting all of the central membrane____________        
+    //directLaser->SetDirectLaserPatternfromFile( true );                         
+    //directLaser->SetFileStepping(13802);                                        
+    //___________________________________________________________________     
+
     directLaser->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
     se->registerSubsystem(directLaser);
   }
