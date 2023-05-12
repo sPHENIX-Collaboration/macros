@@ -157,15 +157,8 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
   cemc->set_int_param("azimuthal_seg_visible", 1);
   cemc->set_int_param("construction_verbose", 0);
   cemc->Verbosity(0);
-  if (Enable::CDB)
-  {
-    cemc->UseCDB("CEMC_GEOMETRY");
-  }
-  else
-  {
-    cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
-    cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2023ProjTilted/"));
-  }
+  cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
+  cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2023ProjTilted/"));
   cemc->set_double_param("radius", radius);            // overwrite minimal radius
   cemc->set_double_param("thickness", cemcthickness);  // overwrite thickness
 
