@@ -374,13 +374,14 @@ void HCALOuter_Clusters()
   return;
 }
 
-void HCALOuter_Eval(const std::string &outputfile)
+void HCALOuter_Eval(const std::string &outputfile, int start_event = 0)
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("HCALOUTEVALUATOR", "HCALOUT", outputfile);
+  eval->set_event(start_event);
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
