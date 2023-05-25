@@ -48,7 +48,7 @@ namespace ACTSGEOM
     MakeActsGeometry* geom = new MakeActsGeometry();
     geom->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
     geom->Verbosity(verbosity);
-    for(int i = 0; i < 58; i++)
+    for(int i = 0; i < 57; i++)
       {
 	if(i<3) {
 	  geom->misalignmentFactor(i, ACTSGEOM::mvtxMisalignment);
