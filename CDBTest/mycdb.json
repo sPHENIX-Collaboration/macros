@@ -1,8 +1,8 @@
 {
-  "base_url": "helm-test1.apps.rcf.bnl.gov",
+  "base_url": "nopayloaddb.apps.rcf.bnl.gov",
   "api_res":  "/api/cdb_rest/",
   "write_dir": "/sphenix/user/pinkenbu/cdbtest/",
-  "read_dir_list": ["/cvmfs/sphenix.sdcc.bnl.gov/calibrations/sphnxpro/cdbtest/", "/sphenix/cvmfscalib/sphnxpro/cdbtest/","/sphenix/user/pinkenbu/cdbtest/" ],
+  "read_dir_list": ["/cvmfs/sphenix.sdcc.bnl.gov/calibrations/sphnxpro/cdb/", "/sphenix/cvmfscalib/sphnxpro/cdb/","/sphenix/user/pinkenbu/cdbtest/" ],
   "n_retries": 5,
   "print_time_stamps": false,
   "cache_life_time": 10,
