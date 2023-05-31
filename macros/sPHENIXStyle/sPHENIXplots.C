@@ -8,7 +8,7 @@ void sPHENIXplots()
 {
   SetsPhenixStyle();
 
-  TCanvas *c = new TCanvas("c", "c", 685, 600);
+  TCanvas *c = new TCanvas("c", "c", 685, 630);
   gPad->SetLogz();
   gPad->SetRightMargin(0.15);
 
