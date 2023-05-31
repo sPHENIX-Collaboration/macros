@@ -102,6 +102,12 @@ double TPC(PHG4Reco* g4Reco,
   tpc->SetActive();
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);  // 1cm steps
+
+  // copied from PHG4PadPlaneReadout
+  tpc->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
+  tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer); 
+  tpc->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
+  tpc->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
   
   if (AbsorberActive)
     {
