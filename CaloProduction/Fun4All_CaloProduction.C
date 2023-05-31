@@ -26,7 +26,7 @@ R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libffamodules.so)
 
-void Fun4All_CaloProduction(const std::string &fname = "/gpfs/mnt/gpfs02/sphenix/user/trinn/combined_event_prdfs/calib-00007377-0000.prdf", const std::string &outfile = "testfile.root", int nskip = 0, int nevents = 0)
+void Fun4All_CaloProduction(const std::string &fname = "/sphenix/user/trinn/combined_event_prdfs/calib-00007377-0000.prdf", const std::string &outfile = "testfile.root", int nskip = 0, int nevents = 0)
 { 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
