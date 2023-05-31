@@ -272,6 +272,7 @@ void Intt_Cells()
 
 void TPCInit()
 {
+  std::cout << "G4_TrkrSimulation::TpcInit" << std::endl;
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4TPC::tpc_outer_radius);
 
   if (Enable::TPC_ENDCAP)
@@ -323,6 +324,7 @@ void TPC_Endcaps(PHG4Reco* g4Reco)
 double TPC(PHG4Reco* g4Reco,
            double radius)
 {
+  std::cout << "G4_TrkrSimulation::TPC" << std::endl;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::TPC_OVERLAPCHECK;
   bool AbsorberActive = Enable::ABSORBER || Enable::TPC_ABSORBER;
 
@@ -330,6 +332,12 @@ double TPC(PHG4Reco* g4Reco,
   tpc->SetActive();
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);  // 1cm steps
+
+  // copied from PHG4PadPlaneReadout
+  tpc->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
+  tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
+  tpc->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
+  tpc->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
   
   if (AbsorberActive)
     {
