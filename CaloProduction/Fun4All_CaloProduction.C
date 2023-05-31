@@ -71,3 +71,5 @@ void Fun4All_CaloProduction(const std::string &fname = "/gpfs/mnt/gpfs02/sphenix
   se->PrintTimer();
   gSystem->Exit(0);
 }
+
+#endif
