@@ -335,7 +335,7 @@ int Fun4All_G4_sPHENIX(
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
-  Enable::CEMC_EVAL = Enable::CEMC_G4Hit && CEMC_Enable::CEMC_CLUSTER && true;
+  Enable::CEMC_EVAL = Enable::CEMC_G4Hit && Enable::CEMC_CLUSTER && true;
   Enable::CEMC_QA = Enable::CEMC_CLUSTER && Enable::QA && true;
 
   Enable::HCALIN = true;
