@@ -9,11 +9,13 @@
 #include <G4_EPD.C>
 #include <G4_HcalIn_ref.C>
 #include <G4_HcalOut_ref.C>
+#include <G4_TrkrVariables.C>
+/*
 #include <G4_Intt.C>
 #include <G4_Magnet.C>
 #include <G4_Mvtx.C>
 #include <G4_TPC.C>
-
+*/
 #include <g4eval/PHG4DSTReader.h>
 
 #include <fun4all/Fun4AllServer.h>

@@ -2,6 +2,8 @@
 #define MACRO_G4MVTX_C
 
 #include <GlobalVariables.C>
+//#include <Trkr_TruthTables.C>
+
 #include <QA.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
@@ -25,29 +27,6 @@ R__LOAD_LIBRARY(libg4mvtx.so)
 R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
-namespace Enable
-{
-  bool MVTX = false;
-  bool MVTX_OVERLAPCHECK = false;
-  bool MVTX_CELL = false;
-  bool MVTX_CLUSTER = false;
-  bool MVTX_QA = false;
-  bool MVTX_ABSORBER = false;
-  int MVTX_VERBOSITY = 0;
-
-}  // namespace Enable
-
-namespace G4MVTX
-{
-  int n_maps_layer = 3;        // must be 0-3, setting it to zero removes Mvtx completely, n < 3 gives the first n layers
-  double radius_offset = 0.7;  // clearance around radius
-}  // namespace G4MVTX
-
-namespace G4MVTXAlignment 
-{
-  std::string alignment_path = string(getenv("CALIBRATIONROOT")) + "/Tracking/MVTX/alignment";
-  double z_offset[] = {0.0, 0.0, 200.0};
-}
 
 void MvtxInit()
 {
@@ -68,15 +47,15 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   for (int ilayer = 0; ilayer < G4MVTX::n_maps_layer; ilayer++)
   {
     double radius_lyr = PHG4MvtxDefs::mvtxdat[ilayer][PHG4MvtxDefs::kRmd];
-    mvtx->set_double_param(ilayer, "layer_z_offset", G4MVTXAlignment::z_offset[ilayer]);
+//    mvtx->set_double_param(ilayer, "layer_z_offset", G4MVTXAlignment::z_offset[ilayer]);
     if (verbosity)
     {
       cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << endl;
     }
     radius = radius_lyr / 10.;
   }
-  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "alignment_path",  G4MVTXAlignment::alignment_path);
-  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave_v1.gdml"));
+//  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "alignment_path",  G4MVTXAlignment::alignment_path);
+  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave.gdml"));
 
   mvtx->SetActive();
   mvtx->OverlapCheck(maps_overlapcheck);
@@ -122,11 +101,12 @@ void Mvtx_Clustering()
   MvtxHitPruner* mvtxhitpruner = new MvtxHitPruner();
   mvtxhitpruner->Verbosity(verbosity);
   se->registerSubsystem(mvtxhitpruner);
-    
+
   // For the Mvtx layers
   //================
   MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
   mvtxclusterizer->Verbosity(verbosity);
+  mvtxclusterizer->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(mvtxclusterizer);
 }
 
@@ -137,6 +117,7 @@ void Mvtx_QA()
   Fun4AllServer* se = Fun4AllServer::instance();
   QAG4SimulationMvtx* qa = new QAG4SimulationMvtx;
   qa->Verbosity(verbosity);
+  qa->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(qa);
 }
 

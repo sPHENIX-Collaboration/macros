@@ -26,41 +26,6 @@ R__LOAD_LIBRARY(libg4intt.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
-namespace Enable
-{
-  bool INTT = false;
-  bool INTT_ABSORBER = false;
-  bool INTT_OVERLAPCHECK = false;
-  bool INTT_CELL = false;
-  bool INTT_CLUSTER = false;
-  bool INTT_QA = false;
-  bool INTT_SUPPORT = false;
-  int INTT_VERBOSITY = 0;
-}  // namespace Enable
-
-namespace G4INTT
-{
-  int n_intt_layer = 4;           // must be 4 or 0, setting to zero removes INTT completely
-  double intt_radius_max = 140.;  // including stagger radius (mm)
-  int laddertype[4] = {PHG4InttDefs::SEGMENTATION_PHI,
-                       PHG4InttDefs::SEGMENTATION_PHI,
-                       PHG4InttDefs::SEGMENTATION_PHI,
-                       PHG4InttDefs::SEGMENTATION_PHI};
-  int nladder[4] = {12, 12, 16, 16};
-  double sensor_radius[4] = {7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
-
-  double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
-
-  enum enu_InttDeadMapType  // Dead map options for INTT
-  {
-    kInttNoDeadMap = 0,  // All channel in Intt is alive
-    kInttDeadMap = 1,    // with dead channel
-  };
-  //enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
-  enu_InttDeadMapType InttDeadMapOption = kInttDeadMap;  // Choose Intt deadmap here
-
-}  // namespace G4INTT
-
 void InttInit()
 {
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 20.);  // estimated from display, can be made smaller but good enough
@@ -228,6 +193,7 @@ void Intt_Clustering()
 
   InttClusterizer* inttclusterizer = new InttClusterizer("InttClusterizer", G4MVTX::n_maps_layer, G4MVTX::n_maps_layer + G4INTT::n_intt_layer - 1);
   inttclusterizer->Verbosity(verbosity);
+  inttclusterizer->set_cluster_version(G4TRACKING::cluster_version);
   // no Z clustering for Intt type 1 layers (we DO want Z clustering for type 0 layers)
   // turning off phi clustering for type 0 layers is not necessary, there is only one strip
   // per sensor in phi
@@ -248,6 +214,7 @@ void Intt_QA()
   Fun4AllServer* se = Fun4AllServer::instance();
   QAG4SimulationIntt* qa = new QAG4SimulationIntt;
   qa->Verbosity(verbosity);
+  qa->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(qa);
 }
 

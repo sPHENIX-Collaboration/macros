@@ -28,13 +28,6 @@ R__LOAD_LIBRARY(libg4micromegas.so)
 // int n_micromegas_layer = 2;
 // because they are also needed in other macros
 
-namespace Enable
-{
-  bool MICROMEGAS_CELL = false;
-  bool MICROMEGAS_CLUSTER = false;
-  bool MICROMEGAS_QA = false;
-}  // namespace Enable
-
 void MicromegasInit()
 {
   if (!Enable::MVTX)
@@ -80,15 +73,18 @@ void Micromegas_Cells()
 void Micromegas_Clustering()
 {
   auto se = Fun4AllServer::instance();
-  se->registerSubsystem(new MicromegasClusterizer);
+  auto mm_clus = new MicromegasClusterizer;
+  mm_clus->set_cluster_version(G4TRACKING::cluster_version);
+  se->registerSubsystem(mm_clus);
 }
 
 void Micromegas_QA()
 {
   auto se = Fun4AllServer::instance();
-  auto qa = new QAG4SimulationMicromegas;
-  qa->Verbosity(Enable::QA_VERBOSITY);
-  se->registerSubsystem(qa);
+  auto qa_mm = new QAG4SimulationMicromegas;
+  qa_mm->Verbosity(Enable::QA_VERBOSITY);
+  qa_mm->set_cluster_version(G4TRACKING::cluster_version);
+  se->registerSubsystem(qa_mm);
 }
 
 #endif
