@@ -30,6 +30,13 @@ void listPayloadTypes()
   return;
 }
 
+void listPayloadIOVs(uint64_t iov)
+{
+  if (!uti) uti = new CDBUtils();
+  uti->listPayloadIOVs(iov);
+  return;
+}
+
 void createGlobalTag(const std::string &tagname)
 {
   if (!uti) uti = new CDBUtils();
@@ -65,6 +72,12 @@ int setGlobalTag(const std::string &tagname)
   return iret;
 }
 
+int cloneGlobalTag(const std::string &source, const std::string &target)
+{
+  if (!uti) uti = new CDBUtils();
+  int iret = uti->cloneGlobalTag(source, target);
+  return iret;
+}
 
 
 int createPayloadType(const std::string &pt)
