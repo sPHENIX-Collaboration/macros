@@ -333,7 +333,6 @@ double TPC(PHG4Reco* g4Reco,
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);  // 1cm steps
 
-  // copied from PHG4TpcPadPlaneReadout
   tpc->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
   tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
   tpc->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
@@ -434,13 +433,6 @@ void TPC_Cells()
   // defaults are 0.085 and 0.105, they can be changed here to get a different resolution
   edrift->registerPadPlane(padplane);
   se->registerSubsystem(edrift);
-
-  // The pad plane readout default is set in PHG4TpcPadPlaneReadout
-
-  // We may want to change the number of inner layers, and can do that here
-  padplane->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);  // sPHENIX layer number of first Tpc readout layer
-  padplane->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
-  padplane->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
 
   // Tpc digitizer
   //=========
