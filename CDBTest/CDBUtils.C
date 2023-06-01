@@ -113,6 +113,12 @@ std::string getCalibration(const std::string &pl_type, uint64_t iov)
   return uti->getUrl(pl_type,iov);
 }
 
+void clearCache()
+{
+  if (!uti) uti = new CDBUtils();
+  return uti->clearCache();
+}
+
 void TestCDBInsert()
 {
   recoConsts *rc = recoConsts::instance();
