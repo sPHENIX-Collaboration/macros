@@ -95,7 +95,7 @@ namespace G4MICROMEGAS
 
 namespace G4TPC
 {
- double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
+ double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas, it is very close to our Ar-CF4 mixture
 }
 
 namespace G4TRACKING

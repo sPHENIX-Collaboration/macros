@@ -96,7 +96,7 @@ namespace G4TPC
   double tpc_outer_radius = 77. + 2.;
 
   // drift velocity is set here for all relevant modules
-  double tpc_drift_velocity_sim= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
+  double tpc_drift_velocity_sim= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas, it is very close to our Ar-CF4 mixture
 //  double tpc_drift_velocity_reco now set in GlobalVariables.C
 //  double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
 
