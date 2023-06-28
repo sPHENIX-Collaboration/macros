@@ -56,6 +56,12 @@ void Fun4All_CaloProduction(const std::string &fname = "/sphenix/user/trinn/comb
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   se->registerSubsystem(ca2);
 
+  //default is FAST
+  CaloTowerBuilder *ca3 = new CaloTowerBuilder();
+  ca3->set_detector_type(CaloTowerBuilder::ZDC);
+  ca3->set_nsamples(31);
+  se->registerSubsystem(ca3);
+
   Fun4AllInputManager *in = new Fun4AllPrdfInputManager("in");
   in->fileopen(fname);
   se->registerInputManager(in);
