@@ -3,6 +3,7 @@
 
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloWaveformProcessing.h>
+#include <caloreco/CaloGeomMapping.h>
 
 #include <ffamodules/FlagHandler.h>
 #include <ffamodules/HeadReco.h>
@@ -61,6 +62,18 @@ void Fun4All_CaloProduction(const std::string &fname = "/sphenix/user/trinn/comb
   ca3->set_detector_type(CaloTowerBuilder::ZDC);
   ca3->set_nsamples(31);
   se->registerSubsystem(ca3);
+
+  CaloGeomMapping *cgm = new CaloGeomMapping();
+  cgm->set_detector_name("CEMC");
+  se->registerSubsystem(cgm);
+
+  CaloGeomMapping *cgm1 = new CaloGeomMapping();
+  cgm1->set_detector_name("HCALIN");
+  se->registerSubsystem(cgm1);
+
+  CaloGeomMapping *cgm2 = new CaloGeomMapping();
+  cgm2->set_detector_name("HCALOUT");
+  se->registerSubsystem(cgm2);
 
   Fun4AllInputManager *in = new Fun4AllPrdfInputManager("in");
   in->fileopen(fname);
