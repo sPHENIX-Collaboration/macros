@@ -24,5 +24,11 @@ void sPHENIXplots()
   h->SetYTitle("y-axis title [arb. units]");
   h->Draw("col z");
   leg->Draw("same");
+  TLatex l;
+  l.SetNDC();
+  l.SetTextFont(43);
+  l.SetTextSize(25);
+  l.DrawLatex(0.7, 0.965, "#it{7/21/2023}");
+
   c->Print("plot1.pdf");
 }
