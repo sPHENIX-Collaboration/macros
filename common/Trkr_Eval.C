@@ -44,7 +44,6 @@ void Tracking_Eval(const std::string& outputfile)
   eval->scan_for_primaries(embed_scan);  // defaults to only thrown particles for ntp_gtrack
   std::cout << "SvtxEvaluator: pp_mode set to " << TRACKING::pp_mode << " and scan_for_embedded set to " << embed_scan << std::endl;
   eval->Verbosity(verbosity);
-  eval->set_cluster_version(G4TRACKING::cluster_version);
  
   se->registerSubsystem(eval);
 

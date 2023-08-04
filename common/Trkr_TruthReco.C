@@ -82,7 +82,6 @@ void Tracking_Reco_TrackSeed()
       auto silicon_Seeding = new PHActsSiliconSeeding;
       silicon_Seeding->Verbosity(verbosity);
       std::cout << "SETTING SI SEED CV" << std::endl;
-      silicon_Seeding->set_cluster_version(G4TRACKING::cluster_version);
       se->registerSubsystem(silicon_Seeding);
       
       auto merger = new PHSiliconSeedMerger;
@@ -129,7 +128,6 @@ void Tracking_Reco_TrackSeed()
       cprop->useConstBField(false);
       cprop->useFixedClusterError(true);
       cprop->set_max_window(5.);
-      cprop->set_cluster_version(G4TRACKING::cluster_version);
       cprop->Verbosity(verbosity);
       se->registerSubsystem(cprop);
     }
@@ -253,7 +251,6 @@ void Tracking_Reco_TrackFit()
   auto actsFit = new PHActsTrkFitter;
   actsFit->Verbosity(verbosity);
   //actsFit->commissioning(G4TRACKING::use_alignment);
-  actsFit->set_cluster_version(G4TRACKING::cluster_version);
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
   actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
@@ -267,7 +264,6 @@ void Tracking_Reco_TrackFit()
     * store in dedicated structure for distortion correction
     */
     auto residuals = new PHTpcResiduals;
-    residuals->setClusterVersion(G4TRACKING::cluster_version);
     residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
    
     residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
@@ -315,7 +311,6 @@ void Tracking_Reco_CommissioningTrackSeed()
 
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
-  silicon_Seeding->set_cluster_version(G4TRACKING::cluster_version);
   silicon_Seeding->sigmaScattering(50.);
   silicon_Seeding->setRPhiSearchWindow(0.4);
   se->registerSubsystem(silicon_Seeding);
@@ -350,7 +345,6 @@ void Tracking_Reco_CommissioningTrackSeed()
   cprop->useConstBField(false);
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
-  cprop->set_cluster_version(G4TRACKING::cluster_version);
   cprop->Verbosity(verbosity);
   se->registerSubsystem(cprop);
   
@@ -407,14 +401,12 @@ void alignment(std::string datafilename = "mille_output_data_file",
   mille->Verbosity(verbosity);
   mille->set_datafile_name(datafilename + ".bin");
   mille->set_steeringfile_name(steeringfilename + ".txt");
-  mille->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(mille);
 
   auto helical = new HelicalFitter;
   helical->Verbosity(0);
   helical->set_datafile_name(datafilename + "_helical.bin");
   helical->set_steeringfile_name(steeringfilename + "_helical.txt");
-  helical->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(helical);
 
 }
