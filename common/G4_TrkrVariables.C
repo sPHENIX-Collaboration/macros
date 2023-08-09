@@ -44,7 +44,11 @@ namespace Enable
 
   bool TRACKING_TRACK = false;
   bool TRACKING_EVAL = false;
-  int TRACKING_VERBOSITY = 0;
+  bool TRACK_MATCHING = false;
+  bool TRACK_MATCHING_TREE = false;
+  bool TRACK_MATCHING_TREE_CLUSTERS = false;
+  // 0=no output TTree file, 1=output for tracks only, 2=tracks+clusters
+  int  TRACKING_VERBOSITY = 0;
   bool TRACKING_QA = false;
   bool TRACKING_DIAGNOSTICS = false;
 }  // namespace Enable
