@@ -58,11 +58,6 @@ int Fun4All_G4_sPHENIX(
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
 
-  // Can enable writing out track matching (and track matching tree) here
-  // Enable::TRACK_MATCHING = true;
-  // Enable::TRACK_MATCHING_TREE = true;
-  // Enable::TRACK_MATCHING_TREE_CLUSTERS = true;
-
   //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
   PHRandomSeed::Verbosity(1);
 
@@ -327,9 +322,9 @@ int Fun4All_G4_sPHENIX(
   Enable::TRACKING_QA = Enable::TRACKING_TRACK && Enable::QA && true;
 
   // only do track matching if TRACKINGTRACK is also used
-  Enable::TRACK_MATCHING = Enable::TRACKING_TRACK && Enable::TRACK_MATCHING;
-  Enable::TRACK_MATCHING_TREE = Enable::TRACK_MATCHING && Enable::TRACK_MATCHING_TREE;
-  Enable::TRACK_MATCHING_TREE_CLUSTERS = Enable::TRACK_MATCHING_TREE && Enable::TRACK_MATCHING_TREE_CLUSTERS;
+  Enable::TRACK_MATCHING = Enable::TRACKING_TRACK && false;
+  Enable::TRACK_MATCHING_TREE = Enable::TRACK_MATCHING && false;
+  Enable::TRACK_MATCHING_TREE_CLUSTERS = Enable::TRACK_MATCHING_TREE && false;
 
   //Additional tracking tools 
   //Enable::TRACKING_DIAGNOSTICS = Enable::TRACKING_TRACK && true;
