@@ -321,6 +321,11 @@ int Fun4All_G4_sPHENIX(
   Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && true;
   Enable::TRACKING_QA = Enable::TRACKING_TRACK && Enable::QA && true;
 
+  // only do track matching if TRACKINGTRACK is also used
+  Enable::TRACK_MATCHING = Enable::TRACKING_TRACK && false;
+  Enable::TRACK_MATCHING_TREE = Enable::TRACK_MATCHING && false;
+  Enable::TRACK_MATCHING_TREE_CLUSTERS = Enable::TRACK_MATCHING_TREE && false;
+
   //Additional tracking tools 
   //Enable::TRACKING_DIAGNOSTICS = Enable::TRACKING_TRACK && true;
   //G4TRACKING::filter_conversion_electrons = true;
@@ -519,6 +524,8 @@ int Fun4All_G4_sPHENIX(
     Tracking_Reco();
   }
 
+  
+
   if(Enable::TRACKING_DIAGNOSTICS)
     {
       const std::string kshortFile = "./kshort_" + outputFile;
@@ -527,6 +534,7 @@ int Fun4All_G4_sPHENIX(
       G4KshortReconstruction(kshortFile);
       seedResiduals(residualsFile);
     }
+
 
   //-----------------
   // Global Vertexing
@@ -596,11 +604,14 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::DSTREADER) G4DSTreader(outputroot + "_DSTReader.root");
 
+
+
   if (Enable::USER) UserAnalysisInit();
 
   // Writes electrons from conversions to a new track map on the node tree
   // the ntuple file is for diagnostics, it is produced only if the flag is set in G4_Tracking.C
   if(G4TRACKING::filter_conversion_electrons) Filter_Conversion_Electrons(outputroot + "_secvert_ntuple.root");
+
 
   //======================
   // Run KFParticle on evt
@@ -625,6 +636,8 @@ int Fun4All_G4_sPHENIX(
   if (Enable::TRACKING_QA) Tracking_QA();
 
   if (Enable::TRACKING_QA && Enable::CEMC_QA && Enable::HCALIN_QA && Enable::HCALOUT_QA) QA_G4CaloTracking();
+
+  if (Enable::TRACK_MATCHING) Track_Matching(outputroot + "_g4trackmatching.root");
 
   //--------------
   // Set up Input Managers
