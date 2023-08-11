@@ -46,6 +46,7 @@ namespace Enable
   bool CEMC_EVAL = false;
   bool CEMC_QA = false;
   int CEMC_VERBOSITY = 0;
+  bool CEMC_G4Hit = 1;
 }  // namespace Enable
 
 namespace G4CEMC
@@ -326,8 +327,8 @@ void CEMC_Clusters()
 
   RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
 
-    //    clusterCorrection->set_UseTowerInfo(1); // to use towerinfo objects rather than old RawTower
-
+     //   clusterCorrection->set_UseTowerInfo(1); // to use towerinfo objects rather than old RawTower
+/*
   if (Enable::CDB)
   {
     clusterCorrection->Get_eclus_CalibrationParameters().ReadFromCDB("CEMCRECALIB");
@@ -342,7 +343,7 @@ void CEMC_Clusters()
                                                                       //raw location
                                                                       string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
   }
-
+*/
   clusterCorrection->Verbosity(verbosity);
   se->registerSubsystem(clusterCorrection);
 
