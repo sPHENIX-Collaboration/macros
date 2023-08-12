@@ -334,20 +334,20 @@ void CEMC_Clusters()
   if (!Enable::CEMC_G4Hit) clusterCorrection->set_UseTowerInfo(1);  // just use towerinfo
   //    clusterCorrection->set_UseTowerInfo(1); // to use towerinfo objects rather than old RawTower
 
-  if (Enable::CDB)
-  {
-    clusterCorrection->Get_eclus_CalibrationParameters().ReadFromCDB("CEMCRECALIB");
-    clusterCorrection->Get_ecore_CalibrationParameters().ReadFromCDB("CEMC_ECORE_RECALIB");
-  }
-  else
-  {
-    clusterCorrection->Get_eclus_CalibrationParameters().ReadFromFile("CEMC_RECALIB", "xml", 0, 0,
-                                                                      // raw location
-                                                                      string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
-    clusterCorrection->Get_ecore_CalibrationParameters().ReadFromFile("CEMC_ECORE_RECALIB", "xml", 0, 0,
-                                                                      // raw location
-                                                                      string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
-  }
+//  if (Enable::CDB)
+//  {
+//    clusterCorrection->Get_eclus_CalibrationParameters().ReadFromCDB("CEMCRECALIB");
+//    clusterCorrection->Get_ecore_CalibrationParameters().ReadFromCDB("CEMC_ECORE_RECALIB");
+//  }
+//  else
+//  {
+//    clusterCorrection->Get_eclus_CalibrationParameters().ReadFromFile("CEMC_RECALIB", "xml", 0, 0,
+//                                                                      // raw location
+//                                                                      string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+//    clusterCorrection->Get_ecore_CalibrationParameters().ReadFromFile("CEMC_ECORE_RECALIB", "xml", 0, 0,
+//                                                                      // raw location
+//                                                                      string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+//  }
 
   clusterCorrection->Verbosity(verbosity);
   se->registerSubsystem(clusterCorrection);
