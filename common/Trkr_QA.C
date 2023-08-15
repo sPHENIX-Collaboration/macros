@@ -24,7 +24,6 @@ void Mvtx_QA()
   Fun4AllServer* se = Fun4AllServer::instance();
   QAG4SimulationMvtx* qa = new QAG4SimulationMvtx;
   qa->Verbosity(verbosity);
-  qa->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(qa);
 }
 
@@ -35,7 +34,6 @@ void Intt_QA()
   Fun4AllServer* se = Fun4AllServer::instance();
   QAG4SimulationIntt* qa = new QAG4SimulationIntt;
   qa->Verbosity(verbosity);
-  qa->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(qa);
 }
 
@@ -46,7 +44,6 @@ void TPC_QA()
   Fun4AllServer* se = Fun4AllServer::instance();
   QAG4SimulationTpc * qa =  new QAG4SimulationTpc;
   qa->Verbosity(verbosity);
-  qa->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(qa);
 }
 
@@ -55,7 +52,6 @@ void Micromegas_QA()
   auto se = Fun4AllServer::instance();
   auto qa_mm = new QAG4SimulationMicromegas;
   qa_mm->Verbosity(Enable::QA_VERBOSITY);
-  qa_mm->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(qa_mm);
 }
 

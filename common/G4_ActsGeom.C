@@ -48,11 +48,18 @@ namespace ACTSGEOM
     MakeActsGeometry* geom = new MakeActsGeometry();
     geom->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
     geom->Verbosity(verbosity);
-     
-    geom->misalignmentFactor(TrkrDefs::TrkrId::mvtxId, ACTSGEOM::mvtxMisalignment);
-    geom->misalignmentFactor(TrkrDefs::TrkrId::inttId, ACTSGEOM::inttMisalignment);
-    geom->misalignmentFactor(TrkrDefs::TrkrId::tpcId, ACTSGEOM::tpcMisalignment);
-    geom->misalignmentFactor(TrkrDefs::TrkrId::micromegasId, ACTSGEOM::tpotMisalignment);
+    for(int i = 0; i < 57; i++)
+      {
+	if(i<3) {
+	  geom->misalignmentFactor(i, ACTSGEOM::mvtxMisalignment);
+	} else if (i < 7) {
+	  geom->misalignmentFactor(i, ACTSGEOM::inttMisalignment);
+	} else if (i < 55) {
+	  geom->misalignmentFactor(i, ACTSGEOM::tpcMisalignment);
+	} else {
+	  geom->misalignmentFactor(i, ACTSGEOM::tpotMisalignment);
+	}
+      }
     
     geom->loadMagField(G4TRACKING::init_acts_magfield);
     geom->setMagField(G4MAGNET::magfield);
