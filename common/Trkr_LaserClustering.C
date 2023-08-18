@@ -1,5 +1,5 @@
-#ifndef MACRO_TRKRCLUS_C
-#define MACRO_TRKRCLUS_C
+#ifndef MACRO_TRKRLASERCLUS_C
+#define MACRO_TRKRLASERCLUS_C
 
 #include <GlobalVariables.C>
 
@@ -28,7 +28,7 @@ R__LOAD_LIBRARY(libtpccalib.so)
 
 
 
-void TPC_Clustering()
+void TPC_LaserClustering()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
   ACTSGEOM::ActsGeomInit();
@@ -51,7 +51,6 @@ void TPC_Clustering()
 
     auto tpcclusterizer = new TpcClusterizer;
     tpcclusterizer->Verbosity(verbosity);
-    tpcclusterizer->set_cluster_version(G4TRACKING::cluster_version);
     tpcclusterizer->set_do_hit_association( G4TPC::DO_HIT_ASSOCIATION );
     se->registerSubsystem(tpcclusterizer);
 
@@ -61,7 +60,6 @@ void TPC_Clustering()
   {
     auto tpcclustercleaner = new TpcClusterCleaner;
     tpcclustercleaner->Verbosity(verbosity);
-    tpcclustercleaner->set_cluster_version(G4TRACKING::cluster_version);
     se->registerSubsystem(tpcclustercleaner);
   }
 
@@ -77,14 +75,23 @@ void TPC_Clustering()
   
   // central membrane reconstruction
   if( G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS )
-  {
-    // central membrane clusterizer
-    se->registerSubsystem(new PHTpcCentralMembraneClusterizer);
+    {
+      // central membrane clusterizer
+      auto centralMembraneClusterizer = new PHTpcCentralMembraneClusterizer;
+      centralMembraneClusterizer->Verbosity(verbosity);
+      centralMembraneClusterizer->set_histos_on( false );
+      centralMembraneClusterizer->set_modulo_threshold(5);
+      centralMembraneClusterizer->set_metaCluster_threshold(18);
+      se->registerSubsystem(centralMembraneClusterizer);
     
-    // match central membrane clusters to pads and generate distortion correction
-    auto centralMembraneMatcher = new PHTpcCentralMembraneMatcher;
-    se->registerSubsystem(centralMembraneMatcher);
-  }
+
+      // match central membrane clusters to pads and generate distortion correction
+      auto centralMembraneMatcher = new PHTpcCentralMembraneMatcher;
+      centralMembraneMatcher->setSavehistograms( false );
+      centralMembraneMatcher->Verbosity( verbosity );
+      centralMembraneMatcher->setNMatchIter(2);
+      se->registerSubsystem(centralMembraneMatcher);
+    }
 }
 
 

@@ -1,13 +1,15 @@
 #ifndef MACRO_G4GLOBAL_C
 #define MACRO_G4GLOBAL_C
 
+#include <GlobalVariables.C>
+
 #include <g4vertex/GlobalVertexFastSimReco.h>
-#include <g4vertex/GlobalVertexReco.h>
+#include <globalvertex/GlobalVertexReco.h>
 
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libg4vertex.so)
-
+R__LOAD_LIBRARY(libglobalvertex.so)
 namespace Enable
 {
   bool GLOBAL_RECO = false;
