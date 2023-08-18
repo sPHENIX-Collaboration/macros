@@ -558,7 +558,7 @@ int Fun4All_G4_sPHENIX(
     Tracking_Reco();
   }
 
-  
+  /*
 
   if(Enable::TRACKING_DIAGNOSTICS)
     {
@@ -568,7 +568,7 @@ int Fun4All_G4_sPHENIX(
       G4KshortReconstruction(kshortFile);
       seedResiduals(residualsFile);
     }
-
+  */
 
   //-----------------
   // Global Vertexing
