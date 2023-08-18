@@ -1,0 +1,94 @@
+# All local jobs are part of the vanilla universe.
+Universe        = vanilla
+
+# We want email if the job completed successfully. This can
+# be set to Always, Error, or Never.
+Notification    = Error
+
+# The executable we want to run.
+Executable      = /usr/local/bin/tcsh
+
+# The argument to pass to the executable.
+Arguments       = /sphenix/user/jfrantz/dataJune12/tsfitting/fruntz.csh  $(Process)
+
+# The requirement line specifies which machines we want to
+# run this job on.  Any arbitrary classad expression can
+# be used.
+#Requirements    = (CPU_Speed >= 1 && TotalDisk > 0)
+#Requirements    = (CPU_Speed >= 1 && CPU_Experiment == "sphenix")
+Requirements    = (CPU_Speed >= 1)
+
+# Rank is an expression that states how to rank machines which 
+# have already met the requirements expression.  Essentially, 
+# rank expresses preference.  A higher numeric value equals better 
+# rank.  Condor will give the job the machine with the highest rank.
+Rank		= CPU_Speed
+
+# This tells Condor the maximum virtual image size to which
+# you believe your program will grow during its execution.
+Image_Size      = 1500M
+
+# This flag is used to order one's submitted jobs within a submit
+# machine.  The jobs with the highest numbers get considered for 
+# scheduling first.
+Priority        = +20
+
+# Copy all of the user's current shell environment variables 
+# at the time of job submission.
+GetEnv          = TRUE
+
+# Used to give jobs a directory with respect to file input 
+# and output.
+#Initialdir	= /direct/phenix+hhj/jfrantz/pythia/log
+Initialdir	= /sphenix/user/jfrantz/dataJune12/
+
+# Input file given to the job.
+Input           = /dev/null
+
+#MAX_JOBS_RUNNING        = 400
+
+
+# The job's stdout is sent to this file.
+Output          = /sphenix/user/jfrantz/ecce/condor1/log/out/fff2$(Process).out
+
+# The job's stderr is sent to this file.
+Error           = /dev/null
+
+# The condor log file for this job, useful when debugging.
+Log             = /tmp/jfrantz/condor/log/fdtspy$(Process).log
+
+# Email address to send notification to.
+#Notify_user     = ugah@ugah.com
+
+# These are job flags which are non-Condor specific.
+# The "Experiment" flag should be set to the user's experiment:
+# star, phobos, phenix, brahms, atlas, etc.
++Experiment     = "general"
+
+# Since this is an analysis job we set this to "cas".
+# Note that this flag may not be used by all experiments.
+#+Job_Type       = "cas"
+#+Job_Type       = "highmem"
+
+RequestMemory = 1500
+
+# If analyzing disk resident files (scanning ntuples or DST's), NFS server could be brought down
+#concurrency_limits = READNFS
+
+# Preventing evicted jobs from holding up submission of other jobs
+PeriodicHold = (NumJobStarts>=1 && JobStatus == 1)
+
+periodic_remove = (JobStatus == 2) && (time() - EnteredCurrentStatus) > (40 * 60)
+
+# Transferring Output
+# All files in the condor_scratch_dir will be transferred back to your Initialdir
+#should_transfer_files = YES
+#when_to_transfer_output = ON_EXIT_OR_EVICT
+
+# Monitor website:  https://web.racf.bnl.gov/Facility/LinuxFarm/cm.html
+
+# This should be the last command and tells condor to queue the
+# job.  If a number is placed after the command (i.e. Queue 15)
+# then the job will be submitted N times.  Use the $(Process)
+# macro to make your input/output and log files unique.
+Queue 96
