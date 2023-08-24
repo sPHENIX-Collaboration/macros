@@ -48,6 +48,7 @@ void convert_seeds()
   // SiliconTrackSeedContainer or TpcTrackSeedContainer
   converter->setTrackSeedName("SvtxTrackSeedContainer");
   converter->Verbosity(verbosity);
+  converter->setFieldMap(G4MAGNET::magfield);
   se->registerSubsystem(converter);
 }
 
@@ -65,6 +66,12 @@ void Tracking_Reco_TrackSeed()
   {
     seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
   }
+  if (G4MAGNET::magfield.find(".root") == std::string::npos)
+  {
+    //! constant field
+    seeder->useConstBField(true);
+    seeder->constBField(std::stod(G4MAGNET::magfield));
+  }
   seeder->Verbosity(verbosity);
   seeder->SetLayerRange(7, 55);
   seeder->SetSearchWindow(50., 1.);  // (z width, phi width)
@@ -81,7 +88,13 @@ void Tracking_Reco_TrackSeed()
   {
     cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
   }
-  cprop->useConstBField(false);
+
+  if (G4MAGNET::magfield.find(".root") == std::string::npos)
+  {
+    //! constant field
+    cprop->useConstBField(true);
+    cprop->setConstBField(std::stod(G4MAGNET::magfield));
+  }
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
   cprop->Verbosity(verbosity);
@@ -135,7 +148,6 @@ void Tracking_Reco_TrackFit()
   auto actsFit = new PHActsTrkFitter;
   actsFit->Verbosity(verbosity);
   // actsFit->commissioning(G4TRACKING::use_alignment);
-  // actsFit->set_cluster_version(G4TRACKING::cluster_version);
   //  in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
   actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
@@ -152,7 +164,6 @@ void Tracking_Reco_TrackFit()
      * store in dedicated structure for distortion correction
      */
     auto residuals = new PHTpcResiduals;
-    // residuals->setClusterVersion(G4TRACKING::cluster_version);
     residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
     residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
     residuals->Verbosity(verbosity);
