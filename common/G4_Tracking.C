@@ -5,6 +5,7 @@ R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 R__LOAD_LIBRARY(libqa_modules.so)
+R__LOAD_LIBRARY(libtrackeralign.so)
 
 #include <GlobalVariables.C>
 
@@ -36,57 +37,32 @@ R__LOAD_LIBRARY(libqa_modules.so)
 #include <trackreco/PHTruthSiliconAssociation.h>
 #include <trackreco/PHTruthTrackSeeding.h>
 #include <trackreco/PHTruthVertexing.h>
+#include <trackreco/SecondaryVertexFinder.h>
 
 #include <tpc/TpcLoadDistortionCorrection.h>
+
 #include <tpccalib/PHTpcResiduals.h>
+
+#include <trackermillepedealignment/MakeMilleFiles.h>
+#include <trackermillepedealignment/HelicalFitter.h>
 
 #include <qa_modules/QAG4SimulationTracking.h>
 #include <qa_modules/QAG4SimulationUpsilon.h>
 #include <qa_modules/QAG4SimulationVertex.h>
+#include <qa_modules/QAG4SimulationDistortions.h>
 
 #include <fun4all/Fun4AllServer.h>
 
-namespace Enable
-{
-  bool TRACKING_TRACK = false;
-  bool TRACKING_EVAL = false;
-  int TRACKING_VERBOSITY = 0;
-  bool TRACKING_QA = false;
-}  // namespace Enable
-
-namespace G4TRACKING
-{
-  // Space Charge calibration flag
-  bool SC_CALIBMODE = false;                                            // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
-  bool SC_USE_MICROMEGAS = true;
-  bool SC_SAVEHISTOGRAMS = false;
-  double SC_COLLISIONRATE = 50e3;                                      // leave at 50 KHz for now, scaling of distortion map not implemented yet
-  std::string SC_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";  // space charge calibration output file
-  std::string SC_HISTOGRAMOUTPUT_FILENAME = "TpcResiduals.root"; // space charge calibration output file
-
-  // Vertexing
-  bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
-  
-  // Truth seeding options for diagnostics (can use any or all)
-  bool use_truth_silicon_seeding = false;     // if true runs truth silicon seeding instead of acts silicon seeding
-  bool use_truth_tpc_seeding = false;         // if true runs truth silicon seeding instead of reco TPC seeding
-  bool use_truth_si_matching = false;         // if true, associates silicon clusters using best truth track match to TPC seed tracks - for diagnostics only
-                                              // Full truth track seeding
-  bool use_full_truth_track_seeding = false;  // makes track seeds using truth info, used for both Acts and Genfit
-  bool use_truth_vertexing = false;           // if true runs truth vertexing, if false runs PHSimpleVertexFinder
-
-  // Runs a converter from TrackSeed object to SvtxTrack object to enable
-  // use of the various evaluation tools already available
-  bool convert_seeds_to_svtxtracks = false;
-
-  // Flag to run commissioning seeding workflow with tuned parameters for
-  // misaligned + distorted tracks
-  bool use_commissioning_seeding = false;
-
-}  // namespace G4TRACKING
-
 void TrackingInit()
 {
+
+  std::cout << "G4_Tracking is now obsolete as of macros PR612. "
+	    << std::endl << "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
+	    << std::endl
+	    << "The switch is not difficult and just requires updating your macros repo and adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
+	    << std::endl;
+  gSystem->Exit(1);
+
   ACTSGEOM::ActsGeomInit();
   // space charge correction
   /* corrections are applied in the track finding, and via TpcClusterMover before the final track fit */
@@ -115,6 +91,7 @@ void convert_seeds()
 
 void Tracking_Reco_TrackSeed()
 {
+
   // set up verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   
@@ -290,8 +267,7 @@ void vertexing()
     auto vtxfinder = new PHSimpleVertexFinder;
     vtxfinder->Verbosity(verbosity);
     se->registerSubsystem(vtxfinder);
-  }
-  
+  }  
 }
 
 void Tracking_Reco_TrackFit()
@@ -308,12 +284,13 @@ void Tracking_Reco_TrackFit()
   // perform final track fit with ACTS
   auto actsFit = new PHActsTrkFitter;
   actsFit->Verbosity(verbosity);
+  //actsFit->commissioning(G4TRACKING::use_alignment);
   actsFit->set_cluster_version(G4TRACKING::cluster_version);
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-  actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
   actsFit->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(actsFit);
+  
   
   if (G4TRACKING::SC_CALIBMODE)
   {
@@ -322,9 +299,8 @@ void Tracking_Reco_TrackFit()
     * store in dedicated structure for distortion correction
     */
     auto residuals = new PHTpcResiduals;
+    residuals->setClusterVersion(G4TRACKING::cluster_version);
     residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
-    residuals->setSavehistograms( G4TRACKING::SC_SAVEHISTOGRAMS );
-    residuals->setHistogramOutputfile( G4TRACKING::SC_HISTOGRAMOUTPUT_FILENAME );
     residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
     residuals->Verbosity(verbosity);
     se->registerSubsystem(residuals);
@@ -356,6 +332,8 @@ void Tracking_Reco_TrackFit()
     auto projection = new PHActsTrackProjection;
     projection->Verbosity(verbosity);
     se->registerSubsystem(projection);
+    
+
   }
   
 }
@@ -451,14 +429,44 @@ void Tracking_Reco_CommissioningTrackSeed()
       convert_seeds();
     }
 }
+
+void alignment(std::string datafilename = "mille_output_data_file", 
+	       std::string steeringfilename = "mille_steer")
+{
+  Fun4AllServer *se = Fun4AllServer::instance();
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+
+  auto mille = new MakeMilleFiles;
+  mille->Verbosity(verbosity);
+  mille->set_datafile_name(datafilename + ".bin");
+  mille->set_steeringfile_name(steeringfilename + ".txt");
+  mille->set_cluster_version(G4TRACKING::cluster_version);
+  se->registerSubsystem(mille);
+
+  auto helical = new HelicalFitter;
+  helical->Verbosity(0);
+  helical->set_datafile_name(datafilename + "_helical.bin");
+  helical->set_steeringfile_name(steeringfilename + "_helical.txt");
+  helical->set_cluster_version(G4TRACKING::cluster_version);
+  se->registerSubsystem(helical);
+
+}
  
 void Tracking_Reco()
 {
+
+  std::cout << "G4_Tracking is now obsolete as of macros PR612. "
+	    << std::endl << "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
+	    << std::endl
+	    << "The switch is not difficult and just requires updating your macros repo and adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
+	    << std::endl;
+  gSystem->Exit(1);
+
   /*
    * just a wrapper around track seeding and track fitting methods, 
    * to minimize disruption to existing steering macros
    */
-  if(G4TRACKING::use_commissioning_seeding)
+  if(G4TRACKING::use_alignment)
     {
       Tracking_Reco_CommissioningTrackSeed();
     }
@@ -475,7 +483,33 @@ void Tracking_Reco()
     {
       Tracking_Reco_TrackFit();
     }
+
+
+  if(G4TRACKING::use_alignment)
+    {
+      alignment();
+    }
+
 }
+
+void  Filter_Conversion_Electrons(std::string ntuple_outfile)
+{
+  std::cout << "G4_Tracking is now obsolete as of macros PR612. "
+	    << std::endl << "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
+	    << std::endl
+	    << "The switch is not difficult and just requires updating your macros repo and adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
+	    << std::endl;
+  gSystem->Exit(1);
+  Fun4AllServer* se = Fun4AllServer::instance();
+  SecondaryVertexFinder* secvert = new SecondaryVertexFinder;
+  secvert->Verbosity(0);
+  secvert->set_write_electrons_node(true);  // writes copy of filtered electron tracks to node tree
+  secvert->set_write_ntuple(false);  // writes ntuple for tuning cuts
+  secvert->setDecayParticleMass( 0.000511);  // for electrons
+  secvert->setOutfileName(ntuple_outfile);
+  se->registerSubsystem(secvert);
+}
+
 
 void build_truthreco_tables()
 {
@@ -494,6 +528,14 @@ void build_truthreco_tables()
 
 void Tracking_Eval(const std::string& outputfile)
 {
+
+  std::cout << "G4_Tracking is now obsolete as of macros PR612. "
+	    << std::endl << "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
+	    << std::endl
+	    << "The switch is not difficult and just requires updating your macros repo and adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
+	    << std::endl;
+  gSystem->Exit(1);
+
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
   //---------------
@@ -513,8 +555,8 @@ void Tracking_Eval(const std::string& outputfile)
                            G4TPC::n_gas_layer,
                            G4MICROMEGAS::n_micromegas_layer);
   eval->do_cluster_eval(true);
-  eval->do_g4hit_eval(true);
-  eval->do_hit_eval(true);  // enable to see the hits that includes the chamber physics...
+  eval->do_g4hit_eval(false);
+  eval->do_hit_eval(false);  // enable to see the hits that includes the chamber physics...
   eval->do_gpoint_eval(true);
   eval->do_vtx_eval_light(true);
   eval->do_eval_light(true);
@@ -534,6 +576,14 @@ void Tracking_Eval(const std::string& outputfile)
 
 void Tracking_QA()
 {
+
+  std::cout << "G4_Tracking is now obsolete as of macros PR612. "
+	    << std::endl << "Please switch to the new scheme for tracking, which is demosntrated in the PR at the following link: www.github.com/sPHENIX-Collaboration/macros/pull/612" 
+	    << std::endl
+	    << "The switch is not difficult and just requires updating your macros repo and adding the new relevant tracking includes into your main Fun4All macro instead of G4_Tracking."
+	    << std::endl;
+  gSystem->Exit(1);
+
   int verbosity = std::max(Enable::QA_VERBOSITY, Enable::TRACKING_VERBOSITY);
 
   //---------------
@@ -574,4 +624,19 @@ void Tracking_QA()
   }
 }
 
+void Distortions_QA()
+{
+  int verbosity = std::max(Enable::QA_VERBOSITY, Enable::TRACKING_VERBOSITY);
+
+  //---------------
+  // Fun4All server
+  //---------------
+
+  Fun4AllServer* se = Fun4AllServer::instance();
+
+  auto qa = new QAG4SimulationDistortions();
+  qa->Verbosity(verbosity);
+  se->registerSubsystem(qa);
+
+}
 #endif

@@ -1,4 +1,4 @@
-//Inner HCal reconstruction macro
+// Inner HCal reconstruction macro
 #ifndef MACRO_G4HCALINREF_C
 #define MACRO_G4HCALINREF_C
 
@@ -33,8 +33,6 @@ R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4ihcal.so)
 R__LOAD_LIBRARY(libqa_modules.so)
 
-void HCalInner_SupportRing(PHG4Reco *g4Reco);
-
 namespace Enable
 {
   bool HCALIN = false;
@@ -47,22 +45,25 @@ namespace Enable
   bool HCALIN_QA = false;
   bool HCALIN_SUPPORT = false;
   bool HCALIN_OLD = false;
+  bool HCALIN_G4Hit = true;
   int HCALIN_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4HCALIN
 {
-  double support_ring_outer_radius = 178.0 - 0.001;
-  double support_ring_z_ring2 = (2150 + 2175) / 2. / 10.;
-  double dz = 25. / 10.;
+  double inch = 2.54;
+  double support_ring_outer_radius = 177.323;
+  double support_ring_z = 175.375 * inch / 2;
+  double dz = 4. * inch;
+
   double phistart = NAN;
   double tower_emin = NAN;
   int light_scint_model = -1;
   int tower_energy_source = -1;
 
-  //Inner HCal absorber material selector:
-  //false - old version, absorber material is SS310
-  //true - default Choose if you want Aluminum
+  // Inner HCal absorber material selector:
+  // false - old version, absorber material is SS310
+  // true - default Choose if you want Aluminum
   bool inner_hcal_material_Al = true;
 
   int inner_hcal_eic = 0;
@@ -86,15 +87,15 @@ namespace G4HCALIN
   //! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
   enu_HCalIn_clusterizer HCalIn_clusterizer = kHCalInTemplateClusterizer;
   //! graph clusterizer, RawClusterBuilderGraph
-  //enu_HCalIn_clusterizer HCalIn_clusterizer = kHCalInGraphClusterizer;
+  // enu_HCalIn_clusterizer HCalIn_clusterizer = kHCalInGraphClusterizer;
 }  // namespace G4HCALIN
 
 // Init is called by G4Setup.C
 void HCalInnerInit(const int iflag = 0)
 {
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4HCALIN::support_ring_outer_radius);
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4HCALIN::support_ring_z_ring2 + G4HCALIN::dz / 2.);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -G4HCALIN::support_ring_z_ring2 - G4HCALIN::dz / 2.);
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4HCALIN::support_ring_z + G4HCALIN::dz / 2.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -G4HCALIN::support_ring_z - G4HCALIN::dz / 2.);
   if (iflag == 1)
   {
     G4HCALIN::inner_hcal_eic = 1;
@@ -130,7 +131,7 @@ double HCalInner(PHG4Reco *g4Reco,
     {
       if (verbosity > 0)
       {
-	cout << "HCalInner - construct inner HCal absorber with G4_Al" << endl;
+        cout << "HCalInner - construct inner HCal absorber with G4_Al" << endl;
       }
       hcal->set_string_param("material", "G4_Al");
     }
@@ -138,7 +139,7 @@ double HCalInner(PHG4Reco *g4Reco,
     {
       if (verbosity > 0)
       {
-	cout << "HCalInner - construct inner HCal absorber with SS310" << endl;
+        cout << "HCalInner - construct inner HCal absorber with SS310" << endl;
       }
       hcal->set_string_param("material", "SS310");
     }
@@ -179,8 +180,9 @@ double HCalInner(PHG4Reco *g4Reco,
   else
   {
     hcal = new PHG4IHCalSubsystem("HCALIN");
+    // std::string hcaltiles = "/sphenix/u/shuhang98/calibrations/InnerHCalAbsorberTiles_merged.gdml";
     std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/InnerHCalAbsorberTiles_merged.gdml";
-    hcal->set_string_param("GDMPath",hcaltiles);
+    hcal->set_string_param("GDMPath", hcaltiles);
   }
   if (G4HCALIN::light_scint_model >= 0)
   {
@@ -192,6 +194,19 @@ double HCalInner(PHG4Reco *g4Reco,
   {
     hcal->SetAbsorberActive();
   }
+  if (!isfinite(G4HCALIN::phistart))
+  {
+    if (Enable::HCALIN_OLD)
+    {
+      G4HCALIN::phistart = 0.0328877688;  // offet in phi (from zero) extracted from geantinos
+    }
+    else
+    {
+      G4HCALIN::phistart = 0.0445549893;  // offet in phi (from zero) extracted from geantinos
+    }
+  }
+  hcal->set_int_param("saveg4hit", Enable::HCALIN_G4Hit);
+  hcal->set_double_param("phistart", G4HCALIN::phistart);
   hcal->OverlapCheck(OverlapCheck);
 
   g4Reco->registerSubsystem(hcal);
@@ -204,49 +219,9 @@ double HCalInner(PHG4Reco *g4Reco,
   return radius;
 }
 
-//! A rough version of the inner HCal support ring, from Richie's CAD drawing. - Jin
-void HCalInner_SupportRing(PHG4Reco *g4Reco)
-{
-  bool AbsorberActive = Enable::SUPPORT || Enable::HCALIN_SUPPORT;
-  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALIN_OVERLAPCHECK;
-
-  const double z_ring1 = (2025 + 2050) / 2. / 10.;
-  const double innerradius_sphenix = 116.;
-  const double innerradius_ephenix_hadronside = 138.;
-  const double z_rings[] =
-      {-G4HCALIN::support_ring_z_ring2, -z_ring1, z_ring1, G4HCALIN::support_ring_z_ring2};
-
-  PHG4CylinderSubsystem *cyl;
-
-  for (int i = 0; i < 4; i++)
-  {
-    double innerradius = innerradius_sphenix;
-    if (z_rings[i] > 0 && G4HCALIN::inner_hcal_eic == 1)
-    {
-      innerradius = innerradius_ephenix_hadronside;
-    }
-    cyl = new PHG4CylinderSubsystem("HCALIN_SPT_N1", i);
-    cyl->set_double_param("place_z", z_rings[i]);
-    cyl->SuperDetector("HCALIN_SPT");
-    cyl->set_double_param("radius", innerradius);
-    cyl->set_int_param("lengthviarapidity", 0);
-    cyl->set_double_param("length", G4HCALIN::dz);
-    cyl->set_string_param("material", "SS310");
-    cyl->set_double_param("thickness", G4HCALIN::support_ring_outer_radius - innerradius);
-    cyl->OverlapCheck(Enable::OVERLAPCHECK);
-    if (AbsorberActive)
-    {
-      cyl->SetActive();
-    }
-    cyl->OverlapCheck(OverlapCheck);
-    g4Reco->registerSubsystem(cyl);
-  }
-
-  return;
-}
-
 void HCALInner_Cells()
 {
+  if (!Enable::HCALIN_G4Hit) return;
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -273,38 +248,39 @@ void HCALInner_Towers()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
-
-  HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalInRawTowerBuilder");
-  TowerBuilder->Detector("HCALIN");
-  TowerBuilder->set_sim_tower_node_prefix("SIM");
-  if (! isfinite(G4HCALIN::phistart))
+  if (Enable::HCALIN_G4Hit)
   {
-    if (Enable::HCALIN_OLD)
+    HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalInRawTowerBuilder");
+    TowerBuilder->Detector("HCALIN");
+    TowerBuilder->set_sim_tower_node_prefix("SIM");
+    if (!isfinite(G4HCALIN::phistart))
     {
-      G4HCALIN::phistart = 0.0328877688; // offet in phi (from zero) extracted from geantinos
+      if (Enable::HCALIN_OLD)
+      {
+        G4HCALIN::phistart = 0.0328877688;  // offet in phi (from zero) extracted from geantinos
+      }
+      else
+      {
+        G4HCALIN::phistart = 0.0445549893;  // offet in phi (from zero) extracted from geantinos
+      }
     }
-    else
+    TowerBuilder->set_double_param("phistart", G4HCALIN::phistart);
+    if (isfinite(G4HCALIN::tower_emin))
     {
-      G4HCALIN::phistart = 0.0445549893; // offet in phi (from zero) extracted from geantinos
+      TowerBuilder->set_double_param("emin", G4HCALIN::tower_emin);
     }
+    if (G4HCALIN::tower_energy_source >= 0)
+    {
+      TowerBuilder->set_int_param("tower_energy_source", G4HCALIN::tower_energy_source);
+    }
+    // this sets specific decalibration factors
+    // for a given cell
+    // TowerBuilder->set_cell_decal_factor(1,10,0.1);
+    // for a whole tower
+    // TowerBuilder->set_tower_decal_factor(0,10,0.2);
+    TowerBuilder->Verbosity(verbosity);
+    se->registerSubsystem(TowerBuilder);
   }
-  TowerBuilder->set_double_param("phistart",G4HCALIN::phistart);
-  if (isfinite(G4HCALIN::tower_emin))
-  {
-    TowerBuilder->set_double_param("emin",G4HCALIN::tower_emin);
-  }
-  if (G4HCALIN::tower_energy_source >= 0)
-  {
-    TowerBuilder->set_int_param("tower_energy_source",G4HCALIN::tower_energy_source);
-  }
-  // this sets specific decalibration factors
-  // for a given cell
-  // TowerBuilder->set_cell_decal_factor(1,10,0.1);
-  // for a whole tower
-  // TowerBuilder->set_tower_decal_factor(0,10,0.2);
-  TowerBuilder->Verbosity(verbosity);
-  se->registerSubsystem(TowerBuilder);
-
   // From 2016 Test beam sim
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalInRawTowerDigitizer");
   TowerDigitizer->Detector("HCALIN");
@@ -314,14 +290,15 @@ void HCALInner_Towers()
   TowerDigitizer->set_pedstal_width_ADC(1);  // From Jin's guess. No EMCal High Gain data yet! TODO: update
   TowerDigitizer->set_photonelec_ADC(32. / 5.);
   TowerDigitizer->set_photonelec_yield_visible_GeV(32. / 5 / (0.4e-3));
-  TowerDigitizer->set_zero_suppression_ADC(-0);  // no-zero suppression
+  TowerDigitizer->set_zero_suppression_ADC(-0);                 // no-zero suppression
   TowerDigitizer->Verbosity(verbosity);
+  if (!Enable::HCALIN_G4Hit) TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
   se->registerSubsystem(TowerDigitizer);
 
-  //Default sampling fraction for SS310
-  double visible_sample_fraction_HCALIN = 0.0631283;  //, /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV-0000.root_qa.rootQA_Draw_HCALIN_G4Hit.pdf
+  // Default sampling fraction for SS310
+  double visible_sample_fraction_HCALIN = 0.0631283;                                //, /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV-0000.root_qa.rootQA_Draw_HCALIN_G4Hit.pdf
 
-  if (G4HCALIN::inner_hcal_material_Al) visible_sample_fraction_HCALIN = 0.162166;  //for "G4_Al", Abhisek Sen <sen.abhisek@gmail.com>
+  if (G4HCALIN::inner_hcal_material_Al) visible_sample_fraction_HCALIN = 0.162166;  // for "G4_Al", Abhisek Sen <sen.abhisek@gmail.com>
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalInRawTowerCalibration");
   TowerCalibration->Detector("HCALIN");
@@ -339,6 +316,7 @@ void HCALInner_Towers()
   }
   TowerCalibration->set_pedstal_ADC(0);
   TowerCalibration->Verbosity(verbosity);
+  if (!Enable::HCALIN_G4Hit) TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
   se->registerSubsystem(TowerCalibration);
 
   return;
@@ -354,8 +332,9 @@ void HCALInner_Clusters()
   {
     RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("HcalInRawClusterBuilderTemplate");
     ClusterBuilder->Detector("HCALIN");
-    ClusterBuilder->SetCylindricalGeometry();  // has to be called after Detector()
+    ClusterBuilder->SetCylindricalGeometry();                     // has to be called after Detector()
     ClusterBuilder->Verbosity(verbosity);
+    if (!Enable::HCALIN_G4Hit) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
     se->registerSubsystem(ClusterBuilder);
   }
   else if (G4HCALIN::HCalIn_clusterizer == G4HCALIN::kHCalInGraphClusterizer)
@@ -363,6 +342,7 @@ void HCALInner_Clusters()
     RawClusterBuilderGraph *ClusterBuilder = new RawClusterBuilderGraph("HcalInRawClusterBuilderGraph");
     ClusterBuilder->Detector("HCALIN");
     ClusterBuilder->Verbosity(verbosity);
+    //if (!Enable::HCALIN_G4Hit) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
     se->registerSubsystem(ClusterBuilder);
   }
   else
@@ -373,12 +353,13 @@ void HCALInner_Clusters()
   return;
 }
 
-void HCALInner_Eval(const std::string &outputfile)
+void HCALInner_Eval(const std::string &outputfile, int start_event = 0)
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("HCALINEVALUATOR", "HCALIN", outputfile);
+  eval->set_event(start_event);
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
