@@ -1,0 +1,15 @@
+Universe 	= vanilla
+Executable 	= run_eventcombiner.sh
+Arguments       = $(runnumber)
+Output  	= /sphenix/user/sphnxpro/chp/eventcombine/$(runnumber).out
+Error 		= /sphenix/user/sphnxpro/chp/eventcombine/$(runnumber).err
+Log  		= /tmp/$(runnumber).log
+Initialdir  	=  /sphenix/u/sphnxpro/chp/eventcombine/condor
+PeriodicHold 	= (NumJobStarts>=1 && JobStatus == 1)
+accounting_group = group_sphenix.mdc2
+accounting_group_user = sphnxpro
+Requirements = (CPU_Type == "mdc2")
+request_memory = 4096MB
+Priority = 99
+job_lease_duration = 3600
+Queue runnumber from runnumbers.txt
