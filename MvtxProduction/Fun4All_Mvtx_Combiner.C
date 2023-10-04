@@ -37,7 +37,7 @@ void Fun4All_Mvtx_Combiner(int nEvents = 0,
   se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
   //rc->set_IntFlag("RUNNUMBER",20445);
-  Fun4AllEvtInputPoolManager *in = new Fun4AllEvtInputPoolManager("MvtxCob");
+  Fun4AllEvtInputPoolManager *in = new Fun4AllEvtInputPoolManager("Comb");
 
   //  in->Verbosity(10);
   int i = 0;
@@ -46,13 +46,13 @@ void Fun4All_Mvtx_Combiner(int nEvents = 0,
     auto* sngl= new SingleMvtxInput("MVTX_FLX" + to_string(i));
     sngl->Verbosity(3);
     sngl->AddListFile(infile);
-    in->registerStreamingInput(sngl);
+    in->registerStreamingInput(sngl, Fun4AllEvtInputPoolManager::MVTX);
     i++;
   }
   se->registerInputManager(in);
 
-//  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out","test.root");
-//  se->registerOutputManager(out);
+  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out","test.root");
+  se->registerOutputManager(out);
 
   se->run(nEvents);
 
