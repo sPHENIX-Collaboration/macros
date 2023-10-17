@@ -77,21 +77,18 @@ R__LOAD_LIBRARY(libffamodules.so)
 
   DeadHotMapLoader *towerMapCemc = new DeadHotMapLoader("CEMC");
   towerMapCemc -> detector("CEMC");
-  towerMapCemc -> runNumber(fname.substr(4,5));
   se->registerSubsystem(towerMapCemc);
 
   std::cout << "Loading ihcal deadmap" << std::endl;
 
   DeadHotMapLoader *towerMapHCalin = new DeadHotMapLoader("HCALIN");
   towerMapHCalin -> detector("HCALIN");
-  towerMapHCalin -> runNumber(fname.substr(4,5));
   se->registerSubsystem(towerMapHCalin);
 
   std::cout << "Loading ohcal deadmap" << std::endl;
 
   DeadHotMapLoader *towerMapHCalout = new DeadHotMapLoader("HCALOUT");
   towerMapHCalout -> detector("HCALOUT");
-  towerMapHCalout -> runNumber(fname.substr(4,5));
   se->registerSubsystem(towerMapHCalout);
 
   std::cout << "Loading cemc masker" << std::endl;
