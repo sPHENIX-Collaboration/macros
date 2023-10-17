@@ -35,7 +35,7 @@ R__LOAD_LIBRARY(libffamodules.so)
 
 
 #endif
-  void Fun4All_CaloProduction_PreQM23(string fname = "full-00007359-0000.prdf", const char *outfile = "testfile.root")
+void Fun4All_CaloProduction_PreQM23(string fname = "full-00007359-0000.prdf", const char *outfile = "testfile.root", int nEvents = 2)
 { 
    
   gSystem->Load("libg4dst");
@@ -110,7 +110,9 @@ R__LOAD_LIBRARY(libffamodules.so)
   std::cout << "Adding Geometry file" << std::endl;
 
   Fun4AllInputManager *intrue2 = new Fun4AllRunNodeInputManager("DST_GEO");
-  intrue2->AddFile("updated_geo.root");
+  CDBInterface *cdb = CDBInterface::instance();
+  std::string geoLocation = cdb->getUrl("calo_geo");
+  intrue2->AddFile(geoLocation);
   se->registerInputManager(intrue2);
 
   RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("EmcRawClusterBuilderTemplate");
@@ -138,7 +140,7 @@ R__LOAD_LIBRARY(libffamodules.so)
   out->StripNode("dud");
   se->registerOutputManager(out);
 
-  se->run();
+  se->run(nEvents);
   se->End();
   se->PrintTimer();
   std::cout << "All done!" << std::endl;
