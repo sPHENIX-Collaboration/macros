@@ -11,7 +11,7 @@ runnumber=$(printf "%08d" $1)
 for i in {0..23}
 do
 ebdc=$(printf "%02d" $i)
-ls -1 /sphenix/lustre01/sphnxpro/commissioning/tpc/beam/TPC_ebdc${ebdc}_beam-${runnumber}-* > tpc${ebdc}.list
+ls -1 /sphenix/lustre01/sphnxpro/commissioning/tpc/cosmics/TPC_ebdc${ebdc}_cosmics-${runnumber}-* > tpc${ebdc}.list
 if [ ! -s tpc${ebdc}.list ]
 then
   echo tpc${ebdc}.list empty, removing it
