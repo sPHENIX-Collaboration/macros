@@ -1,17 +1,17 @@
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
-#include <fun4allraw/SingleTpcInput.h>
-#include <fun4allraw/Fun4AllEvtInputPoolManager.h>
+#include <fun4allraw/SingleTpcPoolInput.h>
+#include <fun4allraw/Fun4AllStreamingInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 
 #include <phool/recoConsts.h>
 
+#include <ffarawmodules/TpcCheck.h>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
-
-SingleTpcInput *sngl[24]{};
 
 void Fun4All_Tpc_Combiner(int nEvents = 0,
 		      const string &input_file00 = "tpc00.list",
@@ -70,20 +70,26 @@ void Fun4All_Tpc_Combiner(int nEvents = 0,
   se->Verbosity(1);
 recoConsts *rc = recoConsts::instance();
 //rc->set_IntFlag("RUNNUMBER",20445);
-  Fun4AllEvtInputPoolManager *in = new Fun4AllEvtInputPoolManager("Comb");
+  Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
 //  in->Verbosity(10);
   int i=0;
   for (auto iter : infile)
   {
-    SingleTpcInput *sngl= new SingleTpcInput("TPC_" + to_string(i));
+    SingleTpcPoolInput *sngl= new SingleTpcPoolInput("TPC_" + to_string(i));
 //    sngl->Verbosity(3);
+    sngl->SetBcoRange(130);
     sngl->AddListFile(iter);
-    in->registerStreamingInput(sngl,Fun4AllEvtInputPoolManager::TPC);
+    in->registerStreamingInput(sngl,Fun4AllStreamingInputManager::TPC);
     i++;
   }
   se->registerInputManager(in);
 
-  // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out","test.root");
+   // TpcCheck *tpccheck = new TpcCheck();
+   // tpccheck->Verbosity(3);
+   // tpccheck->SetBcoRange(130);
+   // se->registerSubsystem(tpccheck);
+
+  // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out","tpc.root");
   // se->registerOutputManager(out);
 
    se->run(nEvents);
