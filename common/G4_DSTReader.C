@@ -3,7 +3,6 @@
 
 #include <GlobalVariables.C>
 
-#include <G4_Bbc.C>
 #include <G4_Mbd.C>
 #include <G4_BlackHole.C>
 #include <G4_CEmc_Spacal.C>
@@ -73,10 +72,6 @@ void G4DSTreader(const string &outputFile = "G4sPHENIXCells.root")
     if (Enable::TPC)
     {
       ana->AddNode("TPC");
-    }
-    if (Enable::BBC)
-    {
-      ana->AddNode("BBC");
     }
     if (Enable::MBD)
     {
