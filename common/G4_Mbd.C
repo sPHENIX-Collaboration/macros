@@ -3,7 +3,7 @@
 
 #include <GlobalVariables.C>
 
-#include <g4detectors/PHG4MbdSubsystem.h>
+#include <g4detectors/PHG4BbcSubsystem.h>
 
 #include <g4mbd/MbdDigitization.h>
 #include <g4mbd/MbdVertexFastSimReco.h>
@@ -52,8 +52,8 @@ void Mbd(PHG4Reco* g4Reco)
   bool SupportActive = Enable::SUPPORT || Enable::MBD_SUPPORT;
   if (Enable::MBD)
   {
-    PHG4MbdSubsystem* mbd = new PHG4MbdSubsystem("MBD");
-    mbd->SuperDetector("MBD");
+    PHG4BbcSubsystem* mbd = new PHG4BbcSubsystem("BBC");
+    mbd->SuperDetector("BBC");
     mbd->OverlapCheck(Enable::OVERLAPCHECK);
     mbd->SetActive();
     if (SupportActive)

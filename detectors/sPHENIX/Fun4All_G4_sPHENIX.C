@@ -287,7 +287,7 @@ int Fun4All_G4_sPHENIX(
 
   // Enable::MBD = true;
   // Enable::MBD_SUPPORT = true; // save hist in MBD/BBC support structure
-  // Enable::MBDRECO = Enable::MBD && true
+  // Enable::MBDRECO = Enable::MBD && true;
   Enable::MBDFAKE = true;  // Smeared vtx and t0, use if you don't want real MBD/BBC in simulation
 
   Enable::PIPE = true;
