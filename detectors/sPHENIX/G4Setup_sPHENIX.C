@@ -178,7 +178,7 @@ void ShowerCompress(int verbosity = 0)
   compress->AddHitContainer("G4HIT_BH_1");
   compress->AddHitContainer("G4HIT_BH_FORWARD_PLUS");
   compress->AddHitContainer("G4HIT_BH_FORWARD_NEG");
-  compress->AddHitContainer("G4HIT_MBD");
+  compress->AddHitContainer("G4HIT_BBC");
   compress->AddCellContainer("G4CELL_CEMC");
   compress->AddCellContainer("G4CELL_HCALIN");
   compress->AddCellContainer("G4CELL_HCALOUT");
@@ -215,7 +215,7 @@ void DstCompress(Fun4AllDstOutputManager *out)
     out->StripNode("G4HIT_BH_1");
     out->StripNode("G4HIT_BH_FORWARD_PLUS");
     out->StripNode("G4HIT_BH_FORWARD_NEG");
-    out->StripNode("G4HIT_MBD");
+    out->StripNode("G4HIT_BBC");
     out->StripNode("G4CELL_CEMC");
     out->StripNode("G4CELL_HCALIN");
     out->StripNode("G4CELL_HCALOUT");
