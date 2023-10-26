@@ -56,6 +56,7 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
   // // 64 bit timestamp
   rc->set_uint64Flag("TIMESTAMP", runnumber);
+  CDBInterface::instance()->Verbosity(1);
 
   /////////////////
   // build towers
@@ -180,7 +181,6 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
 
   std::cout << "Adding Geometry file" << std::endl;
   Fun4AllInputManager *intrue2 = new Fun4AllRunNodeInputManager("DST_GEO");
-  CDBInterface::instance()->Verbosity(10);
   std::string geoLocation = CDBInterface::instance()->getUrl("calo_geo");
   intrue2->AddFile(geoLocation);
   se->registerInputManager(intrue2);
@@ -227,6 +227,7 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   se->End();
   CDBInterface::instance()->Print(); // print used DB files
   se->PrintTimer();
+  delete se;
   std::cout << "All done!" << std::endl;
   gSystem->Exit(0);
 }
