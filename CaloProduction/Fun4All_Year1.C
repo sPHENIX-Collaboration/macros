@@ -56,7 +56,7 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   //===============
   // ENABLE::CDB = true;
   // global tag
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
+  rc->set_StringFlag("CDB_GLOBALTAG", "2023p002");
   // // 64 bit timestamp
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   CDBInterface::instance()->Verbosity(1);
