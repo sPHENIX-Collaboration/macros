@@ -76,7 +76,7 @@ namespace G4INTT
                        PHG4InttDefs::SEGMENTATION_PHI};
   int nladder[4] = {12, 12, 16, 16};
   double sensor_radius[4] = {7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
-  double offsetphi[4] = {-0.5 * 360.0 / nladder[0+2], 0.0, -0.5 * 360.0 / nladder[2+2], 0.0 }; // the final configuration, July/09/202
+  double offsetphi[4] = {0.5 * 360.0 / nladder[0], 0.0, 0.5 * 360.0 / nladder[2], 0.0 }; // the final configuration
 
   enum enu_InttDeadMapType  // Dead map options for INTT
   {
