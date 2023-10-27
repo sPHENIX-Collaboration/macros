@@ -120,7 +120,7 @@ int G4Setup()
 
   if (Enable::PIPE) radius = Pipe(g4Reco, radius);
   if (Enable::MVTX) radius = Mvtx(g4Reco, radius);
-  if (Enable::INTT) radius = Intt_Sim(g4Reco, radius);
+  if (Enable::INTT) radius = Intt(g4Reco, radius);
   if (Enable::TPC) radius = TPC(g4Reco, radius);
   if (Enable::MICROMEGAS) Micromegas(g4Reco);
   if (Enable::MBD) Mbd(g4Reco);

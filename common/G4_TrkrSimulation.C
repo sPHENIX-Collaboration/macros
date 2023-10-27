@@ -123,7 +123,7 @@ void InttInit()
   }
 }
 
-double Intt_Sim(PHG4Reco* g4Reco, double radius,
+double Intt(PHG4Reco* g4Reco, double radius,
             const int absorberactive = 0)
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
@@ -203,7 +203,7 @@ void Intt_Cells()
       }
       else
       {
-        cout << "G4_TrkrSimulation.C - fatal error - invalid InttDeadMapOption = " << G4INTT::InttDeadMapOption << endl;
+        cout << "G4_Intt.C - fatal error - invalid InttDeadMapOption = " << G4INTT::InttDeadMapOption << endl;
         exit(1);
       }
     }
