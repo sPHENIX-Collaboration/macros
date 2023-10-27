@@ -1,0 +1,242 @@
+#ifndef FUN4ALL_YEAR1_C
+#define FUN4ALL_YEAR1_C
+
+#include <caloreco/CaloTowerBuilder.h>
+#include <caloreco/CaloTowerCalib.h>
+#include <caloreco/CaloWaveformProcessing.h>
+#include <caloreco/DeadHotMapLoader.h>
+#include <caloreco/RawClusterBuilderTemplate.h>
+#include <caloreco/RawClusterDeadHotMask.h>
+#include <caloreco/RawClusterPositionCorrection.h>
+#include <caloreco/TowerInfoDeadHotMask.h>
+
+#include <ffamodules/CDBInterface.h>
+#include <ffamodules/FlagHandler.h>
+#include <ffamodules/HeadReco.h>
+#include <ffamodules/SyncReco.h>
+
+#include <fun4allraw/Fun4AllPrdfInputManager.h>
+
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllRunNodeInputManager.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllUtils.h>
+#include <fun4all/SubsysReco.h>
+
+#include <mbd/MbdReco.h>
+
+#include <phool/recoConsts.h>
+
+R__LOAD_LIBRARY(libfun4all.so)
+R__LOAD_LIBRARY(libfun4allraw.so)
+R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libffamodules.so)
+R__LOAD_LIBRARY(libmbd_io.so)
+
+void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commissioning/aligned_prdf/beam-00021796-0076.prdf", int nEvents = 5)
+{
+  bool enableMasking = 0;
+  bool enableTowerV2 = 1;
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+  se->Verbosity(0);
+
+  recoConsts *rc = recoConsts::instance();
+
+  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  int runnumber = runseg.first;
+  int segment = runseg.second;
+  char outfile[100];
+  sprintf(outfile, "DST_CALOR-%08d-%04d.root", runnumber, segment);
+  string fulloutfile = string("./") + outfile;
+  //===============
+  // conditions DB flags
+  //===============
+  // ENABLE::CDB = true;
+  // global tag
+  rc->set_StringFlag("CDB_GLOBALTAG", "2023p002");
+  // // 64 bit timestamp
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
+  CDBInterface::instance()->Verbosity(1);
+
+  // MBD/BBC Reconstruction
+  MbdReco *mbdreco = new MbdReco();
+  se->registerSubsystem( mbdreco );
+
+  /////////////////
+  // build towers
+  CaloTowerBuilder *ctbEMCal = new CaloTowerBuilder("EMCalBUILDER");
+  ctbEMCal->set_detector_type(CaloTowerBuilder::CEMC);
+  ctbEMCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+  if (enableTowerV2) ctbEMCal->set_builder_type(CaloTowerBuilder::kPRDFWaveform);
+  ctbEMCal->set_nsamples(31);
+  se->registerSubsystem(ctbEMCal);
+
+  if (enableTowerV2)
+  {
+    CaloTowerBuilder *ctbEMCal2 = new CaloTowerBuilder("EMCalBUILDER");
+    ctbEMCal2->set_detector_type(CaloTowerBuilder::CEMC);
+    ctbEMCal2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+    ctbEMCal2->set_builder_type(CaloTowerBuilder::kWaveformTowerv2);
+    ctbEMCal2->set_nsamples(31);
+    se->registerSubsystem(ctbEMCal2);
+  }
+
+  CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
+  ctbIHCal->set_detector_type(CaloTowerBuilder::HCALIN);
+  ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+  if (enableTowerV2) ctbIHCal->set_builder_type(CaloTowerBuilder::kPRDFWaveform);
+  ctbIHCal->set_nsamples(31);
+  se->registerSubsystem(ctbIHCal);
+
+  if (enableTowerV2)
+  {
+    CaloTowerBuilder *ctbIHCal2 = new CaloTowerBuilder("HCALINBUILDER");
+    ctbIHCal2->set_detector_type(CaloTowerBuilder::HCALIN);
+    ctbIHCal2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+    ctbIHCal2->set_builder_type(CaloTowerBuilder::kWaveformTowerv2);
+    ctbIHCal2->set_nsamples(31);
+    se->registerSubsystem(ctbIHCal2);
+  }
+
+  CaloTowerBuilder *ctbOHCal = new CaloTowerBuilder("HCALOUTBUILDER");
+  ctbOHCal->set_detector_type(CaloTowerBuilder::HCALOUT);
+  ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+  if (enableTowerV2) ctbOHCal->set_builder_type(CaloTowerBuilder::kPRDFWaveform);
+  ctbOHCal->set_nsamples(31);
+  se->registerSubsystem(ctbOHCal);
+
+  if (enableTowerV2)
+  {
+    CaloTowerBuilder *ctbOHCal2 = new CaloTowerBuilder("HCALOUTBUILDER");
+    ctbOHCal2->set_detector_type(CaloTowerBuilder::HCALOUT);
+    ctbOHCal2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+    ctbOHCal2->set_builder_type(CaloTowerBuilder::kWaveformTowerv2);
+    ctbOHCal2->set_nsamples(31);
+    se->registerSubsystem(ctbOHCal2);
+  }
+
+  CaloTowerBuilder *ca4 = new CaloTowerBuilder("zdc");
+  ca4->set_detector_type(CaloTowerBuilder::ZDC);
+  ca4->set_nsamples(31);
+  ca4->set_processing_type(CaloWaveformProcessing::FAST);
+  se->registerSubsystem(ca4);
+
+  ////////////////////
+  // Calibrate towers
+  std::cout << "Calibrating EMCal" << std::endl;
+  CaloTowerCalib *calibEMC = new CaloTowerCalib("CEMCCALIB");
+  calibEMC->set_detector_type(CaloTowerCalib::CEMC);
+  if (enableTowerV2) calibEMC->set_inputNodePrefix("TOWERSV2_");
+  if (enableTowerV2) calibEMC->set_use_TowerInfov2(true);
+  se->registerSubsystem(calibEMC);
+
+  std::cout << "Calibrating OHcal" << std::endl;
+  CaloTowerCalib *calibOHCal = new CaloTowerCalib("HCALOUT");
+  calibOHCal->set_detector_type(CaloTowerCalib::HCALOUT);
+  if (enableTowerV2) calibOHCal->set_inputNodePrefix("TOWERSV2_");
+  if (enableTowerV2) calibOHCal->set_use_TowerInfov2(true);
+  se->registerSubsystem(calibOHCal);
+
+  std::cout << "Calibrating IHcal" << std::endl;
+  CaloTowerCalib *calibIHCal = new CaloTowerCalib("HCALIN");
+  calibIHCal->set_detector_type(CaloTowerCalib::HCALIN);
+  if (enableTowerV2) calibIHCal->set_inputNodePrefix("TOWERSV2_");
+  if (enableTowerV2) calibIHCal->set_use_TowerInfov2(true);
+  se->registerSubsystem(calibIHCal);
+
+  std::cout << "Calibrating ZDC" << std::endl;
+  CaloTowerCalib *calibZDC = new CaloTowerCalib("ZDC");
+  calibZDC->set_detector_type(CaloTowerCalib::ZDC);
+  se->registerSubsystem(calibZDC);
+
+  /////////////
+  // masking
+  if (enableMasking)
+  {
+    std::cout << "Loading EMCal deadmap" << std::endl;
+    DeadHotMapLoader *towerMapCemc = new DeadHotMapLoader("CEMC");
+    towerMapCemc->detector("CEMC");
+    se->registerSubsystem(towerMapCemc);
+
+    std::cout << "Loading ihcal deadmap" << std::endl;
+    DeadHotMapLoader *towerMapHCalin = new DeadHotMapLoader("HCALIN");
+    towerMapHCalin->detector("HCALIN");
+    se->registerSubsystem(towerMapHCalin);
+
+    std::cout << "Loading ohcal deadmap" << std::endl;
+    DeadHotMapLoader *towerMapHCalout = new DeadHotMapLoader("HCALOUT");
+    towerMapHCalout->detector("HCALOUT");
+    se->registerSubsystem(towerMapHCalout);
+
+    std::cout << "Loading cemc masker" << std::endl;
+    TowerInfoDeadHotMask *towerMaskCemc = new TowerInfoDeadHotMask("CEMC");
+    towerMaskCemc->detector("CEMC");
+    se->registerSubsystem(towerMaskCemc);
+
+    std::cout << "Loading hcal maskers" << std::endl;
+    TowerInfoDeadHotMask *towerMaskHCalin = new TowerInfoDeadHotMask("HCALIN");
+    towerMaskHCalin->detector("HCALIN");
+    se->registerSubsystem(towerMaskHCalin);
+
+    TowerInfoDeadHotMask *towerMaskHCalout = new TowerInfoDeadHotMask("HCALOUT");
+    towerMaskHCalout->detector("HCALOUT");
+    se->registerSubsystem(towerMaskHCalout);
+  }
+
+  std::cout << "Adding Geometry file" << std::endl;
+  Fun4AllInputManager *intrue2 = new Fun4AllRunNodeInputManager("DST_GEO");
+  std::string geoLocation = CDBInterface::instance()->getUrl("calo_geo");
+  intrue2->AddFile(geoLocation);
+  se->registerInputManager(intrue2);
+
+  //////////////////
+  // Clusters
+  std::cout << "Building clusters" << std::endl;
+  RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("EmcRawClusterBuilderTemplate");
+  ClusterBuilder->Detector("CEMC");
+  ClusterBuilder->set_threshold_energy(0.030);  // for when using basic calibration
+  std::string emc_prof = getenv("CALIBRATIONROOT");
+  emc_prof += "/EmcProfile/CEMCprof_Thresh30MeV.root";
+  ClusterBuilder->LoadProfile(emc_prof);
+  ClusterBuilder->set_UseTowerInfo(1);  // to use towerinfo objects rather than old RawTower
+  se->registerSubsystem(ClusterBuilder);
+
+  if (enableMasking)
+  {
+    std::cout << "Masking clusters" << std::endl;
+    RawClusterDeadHotMask *clusterMask = new RawClusterDeadHotMask("clusterMask");
+    clusterMask->detector("CEMC");
+    se->registerSubsystem(clusterMask);
+  }
+
+  std::cout << "Applying Position Dependent Correction" << std::endl;
+  RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
+  clusterCorrection->set_UseTowerInfo(1);  // to use towerinfo objects rather than old RawTower
+  se->registerSubsystem(clusterCorrection);
+
+  Fun4AllInputManager *In = new Fun4AllPrdfInputManager("in");
+  In->AddFile(fname);
+  se->registerInputManager(In);
+
+  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", fulloutfile);
+  if (enableTowerV2)
+  {
+    out->StripNode("WAVEFORMS_HCALIN");
+    out->StripNode("WAVEFORMS_HCALOUT");
+    out->StripNode("WAVEFORMS_CEMC");
+  }
+  se->registerOutputManager(out);
+
+  se->run(nEvents);
+  se->End();
+  CDBInterface::instance()->Print(); // print used DB files
+  se->PrintTimer();
+  delete se;
+  std::cout << "All done!" << std::endl;
+  gSystem->Exit(0);
+}
+
+#endif

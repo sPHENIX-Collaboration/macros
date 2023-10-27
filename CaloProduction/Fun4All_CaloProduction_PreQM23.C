@@ -73,6 +73,12 @@ void Fun4All_CaloProduction_PreQM23(string fname = "full-00007359-0000.prdf", co
   calibIHCal -> set_detector_type(CaloTowerCalib::HCALIN);
   se -> registerSubsystem(calibIHCal);
 
+  std::cout << "Calibrating ZDC" << std::endl;
+
+  CaloTowerCalib *calibZDC = new CaloTowerCalib("ZDC");
+  calibZDC -> set_detector_type(CaloTowerCalib::ZDC);
+  se -> registerSubsystem(calibZDC);
+
   std::cout << "Loading EMCal deadmap" << std::endl;
 
   DeadHotMapLoader *towerMapCemc = new DeadHotMapLoader("CEMC");
