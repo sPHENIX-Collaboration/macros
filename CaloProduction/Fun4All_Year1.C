@@ -38,7 +38,12 @@ R__LOAD_LIBRARY(libmbd_io.so)
 void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commissioning/aligned_prdf/beam-00021796-0076.prdf", int nEvents = 5)
 {
   bool enableMasking = 0;
-  bool enableTowerV2 = 1;
+  // v1 uncomment:
+  // CaloTowerDefs::BuilderType buildertype = CaloTowerDefs:::kPRDFTowerv1;
+  // v2 uncomment:
+  CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kWaveformTowerv2;
+  // v3 uncomment:
+  // CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFWaveform;
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
@@ -63,63 +68,33 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
 
   // MBD/BBC Reconstruction
   MbdReco *mbdreco = new MbdReco();
-  se->registerSubsystem( mbdreco );
+  se->registerSubsystem(mbdreco);
 
   /////////////////
   // build towers
   CaloTowerBuilder *ctbEMCal = new CaloTowerBuilder("EMCalBUILDER");
-  ctbEMCal->set_detector_type(CaloTowerBuilder::CEMC);
+  ctbEMCal->set_detector_type(CaloTowerDefs::CEMC);
   ctbEMCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  if (enableTowerV2) ctbEMCal->set_builder_type(CaloTowerBuilder::kPRDFWaveform);
+  ctbEMCal->set_builder_type(buildertype);
   ctbEMCal->set_nsamples(31);
   se->registerSubsystem(ctbEMCal);
 
-  if (enableTowerV2)
-  {
-    CaloTowerBuilder *ctbEMCal2 = new CaloTowerBuilder("EMCalBUILDER");
-    ctbEMCal2->set_detector_type(CaloTowerBuilder::CEMC);
-    ctbEMCal2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-    ctbEMCal2->set_builder_type(CaloTowerBuilder::kWaveformTowerv2);
-    ctbEMCal2->set_nsamples(31);
-    se->registerSubsystem(ctbEMCal2);
-  }
-
   CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
-  ctbIHCal->set_detector_type(CaloTowerBuilder::HCALIN);
+  ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  if (enableTowerV2) ctbIHCal->set_builder_type(CaloTowerBuilder::kPRDFWaveform);
+  ctbIHCal->set_builder_type(buildertype);
   ctbIHCal->set_nsamples(31);
   se->registerSubsystem(ctbIHCal);
 
-  if (enableTowerV2)
-  {
-    CaloTowerBuilder *ctbIHCal2 = new CaloTowerBuilder("HCALINBUILDER");
-    ctbIHCal2->set_detector_type(CaloTowerBuilder::HCALIN);
-    ctbIHCal2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-    ctbIHCal2->set_builder_type(CaloTowerBuilder::kWaveformTowerv2);
-    ctbIHCal2->set_nsamples(31);
-    se->registerSubsystem(ctbIHCal2);
-  }
-
   CaloTowerBuilder *ctbOHCal = new CaloTowerBuilder("HCALOUTBUILDER");
-  ctbOHCal->set_detector_type(CaloTowerBuilder::HCALOUT);
+  ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
   ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  if (enableTowerV2) ctbOHCal->set_builder_type(CaloTowerBuilder::kPRDFWaveform);
+  ctbOHCal->set_builder_type(buildertype);
   ctbOHCal->set_nsamples(31);
   se->registerSubsystem(ctbOHCal);
 
-  if (enableTowerV2)
-  {
-    CaloTowerBuilder *ctbOHCal2 = new CaloTowerBuilder("HCALOUTBUILDER");
-    ctbOHCal2->set_detector_type(CaloTowerBuilder::HCALOUT);
-    ctbOHCal2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-    ctbOHCal2->set_builder_type(CaloTowerBuilder::kWaveformTowerv2);
-    ctbOHCal2->set_nsamples(31);
-    se->registerSubsystem(ctbOHCal2);
-  }
-
   CaloTowerBuilder *ca4 = new CaloTowerBuilder("zdc");
-  ca4->set_detector_type(CaloTowerBuilder::ZDC);
+  ca4->set_detector_type(CaloTowerDefs::ZDC);
   ca4->set_nsamples(31);
   ca4->set_processing_type(CaloWaveformProcessing::FAST);
   se->registerSubsystem(ca4);
@@ -128,28 +103,22 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   // Calibrate towers
   std::cout << "Calibrating EMCal" << std::endl;
   CaloTowerCalib *calibEMC = new CaloTowerCalib("CEMCCALIB");
-  calibEMC->set_detector_type(CaloTowerCalib::CEMC);
-  if (enableTowerV2) calibEMC->set_inputNodePrefix("TOWERSV2_");
-  if (enableTowerV2) calibEMC->set_use_TowerInfov2(true);
+  calibEMC->set_detector_type(CaloTowerDefs::CEMC);
   se->registerSubsystem(calibEMC);
 
   std::cout << "Calibrating OHcal" << std::endl;
   CaloTowerCalib *calibOHCal = new CaloTowerCalib("HCALOUT");
-  calibOHCal->set_detector_type(CaloTowerCalib::HCALOUT);
-  if (enableTowerV2) calibOHCal->set_inputNodePrefix("TOWERSV2_");
-  if (enableTowerV2) calibOHCal->set_use_TowerInfov2(true);
+  calibOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
   se->registerSubsystem(calibOHCal);
 
   std::cout << "Calibrating IHcal" << std::endl;
   CaloTowerCalib *calibIHCal = new CaloTowerCalib("HCALIN");
-  calibIHCal->set_detector_type(CaloTowerCalib::HCALIN);
-  if (enableTowerV2) calibIHCal->set_inputNodePrefix("TOWERSV2_");
-  if (enableTowerV2) calibIHCal->set_use_TowerInfov2(true);
+  calibIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   se->registerSubsystem(calibIHCal);
 
   std::cout << "Calibrating ZDC" << std::endl;
   CaloTowerCalib *calibZDC = new CaloTowerCalib("ZDC");
-  calibZDC->set_detector_type(CaloTowerCalib::ZDC);
+  calibZDC->set_detector_type(CaloTowerDefs::ZDC);
   se->registerSubsystem(calibZDC);
 
   /////////////
@@ -222,17 +191,11 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   se->registerInputManager(In);
 
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", fulloutfile);
-  if (enableTowerV2)
-  {
-    out->StripNode("WAVEFORMS_HCALIN");
-    out->StripNode("WAVEFORMS_HCALOUT");
-    out->StripNode("WAVEFORMS_CEMC");
-  }
   se->registerOutputManager(out);
 
   se->run(nEvents);
   se->End();
-  CDBInterface::instance()->Print(); // print used DB files
+  CDBInterface::instance()->Print();  // print used DB files
   se->PrintTimer();
   delete se;
   std::cout << "All done!" << std::endl;
