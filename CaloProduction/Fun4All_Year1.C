@@ -38,11 +38,11 @@ R__LOAD_LIBRARY(libmbd_io.so)
 void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commissioning/aligned_prdf/beam-00021796-0076.prdf", int nEvents = 5)
 {
   bool enableMasking = 0;
-// v1 uncomment:
-  //CaloTowerDefs::BuilderType buildertype = CaloTowerDefs:::kPRDFTowerv1;
-// v2 uncomment:
+  // v1 uncomment:
+  // CaloTowerDefs::BuilderType buildertype = CaloTowerDefs:::kPRDFTowerv1;
+  // v2 uncomment:
   CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kWaveformTowerv2;
-// v3 uncomment:
+  // v3 uncomment:
   // CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFWaveform;
 
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -68,7 +68,7 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
 
   // MBD/BBC Reconstruction
   MbdReco *mbdreco = new MbdReco();
-  se->registerSubsystem( mbdreco );
+  se->registerSubsystem(mbdreco);
 
   /////////////////
   // build towers
@@ -92,7 +92,6 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   ctbOHCal->set_builder_type(buildertype);
   ctbOHCal->set_nsamples(31);
   se->registerSubsystem(ctbOHCal);
-
 
   CaloTowerBuilder *ca4 = new CaloTowerBuilder("zdc");
   ca4->set_detector_type(CaloTowerDefs::ZDC);
@@ -196,7 +195,7 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
 
   se->run(nEvents);
   se->End();
-  CDBInterface::instance()->Print(); // print used DB files
+  CDBInterface::instance()->Print();  // print used DB files
   se->PrintTimer();
   delete se;
   std::cout << "All done!" << std::endl;
