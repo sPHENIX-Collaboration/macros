@@ -15,6 +15,7 @@
 
 R__LOAD_LIBRARY(libg4mbd.so)
 R__LOAD_LIBRARY(libg4detectors.so)
+R__LOAD_LIBRARY(libmbd.so)
 
 namespace Enable
 {
