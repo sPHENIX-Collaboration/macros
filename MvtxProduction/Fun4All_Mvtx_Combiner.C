@@ -48,7 +48,7 @@ void Fun4All_Mvtx_Combiner(int nEvents = 0,
   }
   se->registerInputManager(in);
 
-  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out","test.root");
+  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out","mvtx_raw_hits.root");
   se->registerOutputManager(out);
 
   se->run(nEvents);
