@@ -127,9 +127,24 @@ int Fun4All_G4_sPHENIX(
 
   //  Input::HEPMC = true;
   INPUTHEPMC::filename = inputFile;
+  //-----------------
+  // Hijing options (symmetrize hijing, add flow, add fermi motion)
+  //-----------------
+  //  INPUTHEPMC::HIJINGFLIP = true;
+  //  INPUTHEPMC::FLOW = true;
+  //  INPUTHEPMC::FLOW_VERBOSITY = 3;
+  //  INPUTHEPMC::FERMIMOTION = true;
+
 
   // Event pile up simulation with collision rate in Hz MB collisions.
-  //Input::PILEUPRATE = 100e3;
+  //Input::PILEUPRATE = 50e3; // 50 kHz for AuAu
+  //Input::PILEUPRATE = 3e6; // 3MHz for pp
+
+  // Enable this is emulating the nominal pp/pA/AA collision vertex distribution
+  // for HepMC records (hijing, pythia8)
+  //  Input::BEAM_CONFIGURATION = Input::AA_COLLISION; // for 2023 sims we want the AA geometry for no pileup sims
+  //  Input::BEAM_CONFIGURATION = Input::pp_COLLISION; // for 2024 sims we want the pp geometry for no pileup sims
+  //  Input::BEAM_CONFIGURATION = Input::pA_COLLISION; // for pAu sims we want the pA geometry for no pileup sims
 
   //-----------------
   // Initialize the selected Input/Event generation
