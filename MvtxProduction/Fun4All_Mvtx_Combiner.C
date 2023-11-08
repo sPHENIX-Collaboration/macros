@@ -44,14 +44,14 @@ void Fun4All_Mvtx_Combiner(int nEvents = 0,
   for (auto& infile : infiles)
   {
     auto* sngl= new SingleMvtxInput("MVTX_FLX" + to_string(i));
-    sngl->Verbosity(3);
+    sngl->Verbosity(0);
     sngl->AddListFile(infile);
     in->registerStreamingInput(sngl, Fun4AllEvtInputPoolManager::MVTX);
     i++;
   }
   se->registerInputManager(in);
 
-  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out","test.root");
+  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out","mvtx_raw_hits.root");
   se->registerOutputManager(out);
 
   se->run(nEvents);
