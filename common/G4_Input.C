@@ -3,7 +3,6 @@
 
 #include <GlobalVariables.C>
 #include <G4_TrkrVariables.C>
-//#include <G4_TPC.C>
 
 #include <phpythia6/PHPythia6.h>
 
@@ -19,6 +18,7 @@
 #include <g4main/ReadEICFiles.h>
 
 #include <fermimotionafterburner/FermimotionAfterburner.h>
+#include <hijingflipafterburner/HIJINGFlipAfterburner.h>
 
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phhepmc/Fun4AllHepMCPileupInputManager.h>
@@ -38,6 +38,7 @@ R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
 R__LOAD_LIBRARY(libFermimotionAfterburner.so)
+R__LOAD_LIBRARY(libHIJINGFlipAfterburner.so)
 
 namespace Input
 {
@@ -215,6 +216,7 @@ namespace INPUTHEPMC
   bool FLOW = false;
   int FLOW_VERBOSITY = 0;
   bool FERMIMOTION = false;
+  bool HIJINGFLIP = false;
 
 }  // namespace INPUTHEPMC
 
@@ -493,6 +495,11 @@ void InputRegister()
   {
     if (Input::HEPMC)
     {
+      if (INPUTHEPMC::HIJINGFLIP)
+      {
+	HIJINGFlipAfterburner *flip = new HIJINGFlipAfterburner();
+	se->registerSubsystem(flip); 
+      }
       // these need to be applied before the HepMCNodeReader since they
       // work on the hepmc records
       if (INPUTHEPMC::FLOW)
