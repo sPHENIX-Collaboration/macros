@@ -6,6 +6,7 @@
 #include <fun4allraw/SingleGl1PoolInput.h>
 #include <fun4allraw/SingleInttPoolInput.h>
 #include <fun4allraw/SingleMicromegasPoolInput.h>
+#include <fun4allraw/SingleMvtxPoolInput.h>
 #include <fun4allraw/SingleTpcPoolInput.h>
 
 #include <phool/recoConsts.h>
@@ -18,12 +19,22 @@ R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
 
-// SingleTpcPoolInput *tpc_sngl[24]{};
-// SingleInttPoolInput *intt_sngl[9]{};
-
 void Fun4All_Stream_Combiner(int nEvents = 0,
                              const string &input_gl1file = "gl1.list",
-                             const string &input_tpotfile = "tpot.list",
+                             const string &input_inttfile00 = "intt0.list",
+                             const string &input_inttfile01 = "intt1.list",
+                             const string &input_inttfile02 = "intt2.list",
+                             const string &input_inttfile03 = "intt3.list",
+                             const string &input_inttfile04 = "intt4.list",
+                             const string &input_inttfile05 = "intt5.list",
+                             const string &input_inttfile06 = "intt6.list",
+                             const string &input_inttfile07 = "intt7.list",
+                             const string &input_mvtxfile00 = "mvtx-flx0.list",
+                             const string &input_mvtxfile01 = "mvtx-flx1.list",
+                             const string &input_mvtxfile02 = "mvtx-flx2.list",
+                             const string &input_mvtxfile03 = "mvtx-flx3.list",
+                             const string &input_mvtxfile04 = "mvtx-flx4.list",
+                             const string &input_mvtxfile05 = "mvtx-flx5.list",
                              const string &input_tpcfile00 = "tpc00.list",
                              const string &input_tpcfile01 = "tpc01.list",
                              const string &input_tpcfile02 = "tpc02.list",
@@ -48,14 +59,8 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
                              const string &input_tpcfile21 = "tpc21.list",
                              const string &input_tpcfile22 = "tpc22.list",
                              const string &input_tpcfile23 = "tpc23.list",
-                             const string &input_inttfile00 = "intt0.list",
-                             const string &input_inttfile01 = "intt1.list",
-                             const string &input_inttfile02 = "intt2.list",
-                             const string &input_inttfile03 = "intt3.list",
-                             const string &input_inttfile04 = "intt4.list",
-                             const string &input_inttfile05 = "intt5.list",
-                             const string &input_inttfile06 = "intt6.list",
-                             const string &input_inttfile07 = "intt7.list")
+                             const string &input_tpotfile = "tpot.list"
+)
 {
   vector<string> tpc_infile;
   tpc_infile.push_back(input_tpcfile00);
@@ -93,11 +98,19 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
   intt_infile.push_back(input_inttfile06);
   intt_infile.push_back(input_inttfile07);
 
+  vector<string> mvtx_infile;
+  mvtx_infile.push_back(input_mvtxfile00);
+  mvtx_infile.push_back(input_mvtxfile01);
+  mvtx_infile.push_back(input_mvtxfile02);
+  mvtx_infile.push_back(input_mvtxfile03);
+  mvtx_infile.push_back(input_mvtxfile04);
+  mvtx_infile.push_back(input_mvtxfile05);
+
   vector<string> gl1_infile;
   gl1_infile.push_back(input_gl1file);
 
   vector<string> tpot_infile;
-  tpot_infile.push_back(input_tpotfile);
+ tpot_infile.push_back(input_tpotfile);
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
@@ -122,6 +135,17 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
     //    intt_sngl->Verbosity(3);
     intt_sngl->AddListFile(iter);
     in->registerStreamingInput(intt_sngl, Fun4AllStreamingInputManager::INTT);
+    i++;
+  }
+  i = 0;
+  for (auto iter : mvtx_infile)
+  {
+    SingleMvtxPoolInput *mvtx_sngl = new SingleMvtxPoolInput("MVTX_" + to_string(i));
+    //    mvtx_sngl->Verbosity(3);
+    mvtx_sngl->SetBcoRange(1000);
+    mvtx_sngl->SetNegativeBco(1000);
+    mvtx_sngl->AddListFile(iter);
+    in->registerStreamingInput(mvtx_sngl, Fun4AllStreamingInputManager::MVTX);
     i++;
   }
   i = 0;

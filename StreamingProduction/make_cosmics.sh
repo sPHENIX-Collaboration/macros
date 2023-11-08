@@ -14,3 +14,4 @@ sh intt_makecosmics.sh $1
 sh tpc_makecosmics.sh $1
 sh gl1_makecosmics.sh $1
 sh tpot_makecosmics.sh $1
+sh mvtx_makecosmics.sh $1
