@@ -82,7 +82,7 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   ctbEMCal->set_detector_type(CaloTowerDefs::CEMC);
   ctbEMCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbEMCal->set_builder_type(buildertype);
-  ctbEMCal->set_nsamples(31);
+  ctbEMCal->set_nsamples(16);
   se->registerSubsystem(ctbEMCal);
 
   CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
