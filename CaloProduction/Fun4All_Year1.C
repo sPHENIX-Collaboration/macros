@@ -3,6 +3,7 @@
 
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloTowerCalib.h>
+#include <caloreco/CaloTowerStatus.h>
 #include <caloreco/CaloWaveformProcessing.h>
 #include <caloreco/DeadHotMapLoader.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
@@ -104,6 +105,21 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   ca4->set_nsamples(31);
   ca4->set_processing_type(CaloWaveformProcessing::FAST);
   se->registerSubsystem(ca4);
+
+  //////////////////////////////
+  // set statuses on raw towers
+  std::cout << "status setters" << std::endl;
+  CaloTowerStatus *statusEMC = new CaloTowerStatus("CEMCSTATUS");
+  statusEMC->set_detector_type(CaloTowerDefs::CEMC);
+  se->registerSubsystem(statusEMC);
+
+  CaloTowerStatus *statusHCalIn = new CaloTowerStatus("HCALINSTATUS");
+  statusHCalIn->set_detector_type(CaloTowerDefs::HCALIN);
+  se->registerSubsystem(statusHCalIn);
+
+  CaloTowerStatus *statusHCALOUT = new CaloTowerStatus("HCALOUTSTATUS");
+  statusHCALOUT->set_detector_type(CaloTowerDefs::HCALOUT);
+  se->registerSubsystem(statusHCALOUT);
 
   ////////////////////
   // Calibrate towers
