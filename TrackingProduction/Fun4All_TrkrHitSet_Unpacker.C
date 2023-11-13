@@ -2,6 +2,7 @@
 #include <G4_Magnet.C>
 #include <G4_ActsGeom.C>
 #include <Trkr_Clustering.C>
+#include <Trkr_Reco_Cosmics.C>
 
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -13,6 +14,7 @@
 
 #include <phool/recoConsts.h>
 
+#include <mvtx/MvtxCombinedRawDataDecoder.h>
 #include <intt/InttCombinedRawDataDecoder.h>
 #include <tpc/TpcCombinedRawDataUnpacker.h>
 #include <micromegas/MicromegasCombinedDataDecoder.h>
@@ -23,14 +25,17 @@
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
+R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
-void Fun4All_TrkrHitSet_Unpacker(int nEvents = 0,
-			       const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming/",
-			       const std::string file = "cosmics_cosmics-",
-			       const int runnumber = 26211)
+void Fun4All_TrkrHitSet_Unpacker(
+    const int nEvents = 20,
+    const int runnumber = 26048,
+    const std::string outfilename = "cosmics.root",
+    const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all/",
+    const std::string file = "cosmics-")
 {
   std::string inputRawHitFile = dir + file;
   char filename[500];
@@ -42,8 +47,8 @@ void Fun4All_TrkrHitSet_Unpacker(int nEvents = 0,
   rc->set_IntFlag("RUNNUMBER",runnumber);
   
   Enable::CDB = true;
-  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dbigmapxyz_gap_rebuild.root");
-
+  G4MAGNET::magfield = "0.01";
+  //G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dbigmapxyz_gap_rebuild.root");
   //
   rc->set_StringFlag("CDB_GLOBALTAG","ProdA_2023");
   rc->set_uint64Flag("TIMESTAMP",6);
@@ -56,8 +61,11 @@ void Fun4All_TrkrHitSet_Unpacker(int nEvents = 0,
 
   auto hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->fileopen(filename);
+  //hitsin->AddListFile("filelist.list");
   se->registerInputManager(hitsin);
 
+  auto mvtxunpacker = new MvtxCombinedRawDataDecoder;
+  se->registerSubsystem(mvtxunpacker);
 
   auto inttunpacker = new InttCombinedRawDataDecoder;
   inttunpacker->Verbosity(1);
@@ -71,15 +79,21 @@ void Fun4All_TrkrHitSet_Unpacker(int nEvents = 0,
   se->registerSubsystem(tpotunpacker);
 
   ACTSGEOM::ActsGeomInit();
-
+  Mvtx_Clustering();
+  Intt_Clustering();
   TPC_Clustering();
+  Micromegas_Clustering();
 
-  auto ntp = new TrkrNtuplizer;
+  Tracking_Reco_TrackSeed();
+  convert_seeds();
+
+
+  auto ntp = new TrkrNtuplizer("TrkrNtuplizer",outfilename +".root");
   ntp->do_hit_eval(true);
   ntp->do_cluster_eval(true);
-  ntp->do_track_eval(false);
+  ntp->do_track_eval(true);
   ntp->do_siseed_eval(false);
-  ntp->do_tpcseed_eval(false);
+  ntp->do_tpcseed_eval(true);
   ntp->do_clus_trk_eval(false);
   ntp->do_vertex_eval(false);
   ntp->do_info_eval(false);
