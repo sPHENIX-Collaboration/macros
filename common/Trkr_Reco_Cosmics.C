@@ -69,16 +69,16 @@ void Tracking_Reco_TrackSeed()
   {
     seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
   }
+
   if (G4MAGNET::magfield.find(".root") == std::string::npos)
   {
-    std::cout << "setting const field?" << std::endl;
     //! constant field
     seeder->useConstBField(true);
     seeder->constBField(std::stod(G4MAGNET::magfield));
   }
   seeder->Verbosity(verbosity);
   seeder->SetLayerRange(7, 55);
-  seeder->SetSearchWindow(50., 1.);  // (z width, phi width)
+  seeder->SetSearchWindow(1.5, 0.05);  // (z width, phi width)
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
   seeder->useConstBField(false);
