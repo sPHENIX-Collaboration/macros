@@ -32,7 +32,8 @@ R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 void Fun4All_TrkrHitSet_Unpacker(
-    const int nEvents = 15,
+    const int nEvents = 2,
+    const std::string filelistname = "filelist1.list",
     const int runnumber = 26048,
     const std::string outfilename = "cosmics",
     const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all/",
@@ -43,7 +44,7 @@ void Fun4All_TrkrHitSet_Unpacker(
   sprintf(filename, "%s%08d-0000.root",inputRawHitFile.c_str(),runnumber);
  
   auto se = Fun4AllServer::instance();
-  se->Verbosity(1);
+  se->Verbosity(2);
   auto rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER",runnumber);
   
@@ -61,11 +62,12 @@ void Fun4All_TrkrHitSet_Unpacker(
   ACTSGEOM::ActsGeomInit();
 
   auto hitsin = new Fun4AllDstInputManager("InputManager");
-  hitsin->fileopen(filename);
-  //hitsin->AddListFile("filelist.list");
+  //hitsin->fileopen(filename);
+  hitsin->AddListFile(filelistname);
   se->registerInputManager(hitsin);
 
   auto mvtxunpacker = new MvtxCombinedRawDataDecoder;
+  mvtxunpacker->Verbosity(1);
   se->registerSubsystem(mvtxunpacker);
 
   auto inttunpacker = new InttCombinedRawDataDecoder;
@@ -76,7 +78,6 @@ void Fun4All_TrkrHitSet_Unpacker(
 
   auto tpotunpacker = new MicromegasCombinedDataDecoder;
   
-  //const char* calibrationFile = "/phenix/u/hpereira/sphenix/work/g4simulations/DST/TPOT_Pedestal-00009416-0000.root";
   std::string calibrationFile = CDBInterface::instance()->getUrl("TPOT_Pedestal");
   tpotunpacker->set_calibration_file(calibrationFile);
   se->registerSubsystem(tpotunpacker);
@@ -95,7 +96,7 @@ void Fun4All_TrkrHitSet_Unpacker(
   Tracking_Reco_TrackSeed();
   convert_seeds();
 
-  TString residoutfile = outfilename + runnumber + "_resid.root";
+  TString residoutfile = outfilename + filelistname + "_resid.root";
   std::string residstring(residoutfile.Data());
   
   auto resid = new TrackResiduals("TrackResiduals");
@@ -103,7 +104,7 @@ void Fun4All_TrkrHitSet_Unpacker(
   resid->alignment(false);
   se->registerSubsystem(resid);
 
-  TString ntupoutfile = outfilename + runnumber + "_ntup.root";
+  TString ntupoutfile = outfilename + filelistname + "_ntup.root";
   std::string ntupstring(ntupoutfile.Data());
 
   auto ntp = new TrkrNtuplizer("TrkrNtuplizer",ntupstring);
