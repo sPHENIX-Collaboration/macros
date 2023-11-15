@@ -77,8 +77,6 @@ namespace G4INTT
   int nladder[4] = {12, 12, 16, 16};
   double sensor_radius[4] = {7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
 
-  double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
-
   enum enu_InttDeadMapType  // Dead map options for INTT
   {
     kInttNoDeadMap = 0,  // All channel in Intt is alive

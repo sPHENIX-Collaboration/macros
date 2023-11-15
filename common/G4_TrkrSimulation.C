@@ -165,11 +165,10 @@ double Intt(PHG4Reco* g4Reco, double radius,
   for (int i = 0; i < G4INTT::n_intt_layer; i++)
   {
     cout << " Intt layer " << i << " laddertype " << G4INTT::laddertype[i] << " nladders " << G4INTT::nladder[i]
-         << " sensor radius " << G4INTT::sensor_radius[i] << " offsetphi " << G4INTT::offsetphi[i] << endl;
+         << " sensor radius " << G4INTT::sensor_radius[i]  << endl;
     sitrack->set_int_param(i, "laddertype", G4INTT::laddertype[i]);
     sitrack->set_int_param(i, "nladder", G4INTT::nladder[i]);
     sitrack->set_double_param(i, "sensor_radius", G4INTT::sensor_radius[i]);  // expecting cm
-    sitrack->set_double_param(i, "offsetphi", G4INTT::offsetphi[i]);          // expecting degrees
   }
 
   // outer radius marker (translation back to cm)
