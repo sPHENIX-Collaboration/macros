@@ -123,6 +123,8 @@ void Fun4All_TrkrHitSet_Unpacker(
 
   se->run(nEvents);
   se->End();
+  se->PrintTimer();
+
   delete se;
   std::cout << "Finished"<<std::endl;
   gSystem->Exit(0);
