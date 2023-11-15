@@ -33,7 +33,6 @@ R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 void Fun4All_TrkrHitSet_Unpacker(
     const int nEvents = 2,
-    const std::string filelistname = "filelist1.list",
     const int runnumber = 26048,
     const std::string outfilename = "cosmics",
     const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all/",
@@ -62,8 +61,7 @@ void Fun4All_TrkrHitSet_Unpacker(
   ACTSGEOM::ActsGeomInit();
 
   auto hitsin = new Fun4AllDstInputManager("InputManager");
-  //hitsin->fileopen(filename);
-  hitsin->AddListFile(filelistname);
+  hitsin->fileopen(filename);
   se->registerInputManager(hitsin);
 
   auto mvtxunpacker = new MvtxCombinedRawDataDecoder;
@@ -96,7 +94,7 @@ void Fun4All_TrkrHitSet_Unpacker(
   Tracking_Reco_TrackSeed();
   convert_seeds();
 
-  TString residoutfile = outfilename + filelistname + "_resid.root";
+  TString residoutfile = outfilename + runnumber + "_resid.root";
   std::string residstring(residoutfile.Data());
   
   auto resid = new TrackResiduals("TrackResiduals");
@@ -104,7 +102,7 @@ void Fun4All_TrkrHitSet_Unpacker(
   resid->alignment(false);
   se->registerSubsystem(resid);
 
-  TString ntupoutfile = outfilename + filelistname + "_ntup.root";
+  TString ntupoutfile = outfilename + runnumber + "_ntup.root";
   std::string ntupstring(ntupoutfile.Data());
 
   auto ntp = new TrkrNtuplizer("TrkrNtuplizer",ntupstring);
