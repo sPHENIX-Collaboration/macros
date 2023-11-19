@@ -71,7 +71,7 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   CDBInterface::instance()->Verbosity(1);
 
-// Sync Headers and Flags
+  // Sync Headers and Flags
   SyncReco *sync = new SyncReco();
   se->registerSubsystem(sync);
 
@@ -86,7 +86,7 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   se->registerSubsystem(mbdreco);
 
   // Official vertex storage
-  GlobalVertexReco* gvertex = new GlobalVertexReco();
+  GlobalVertexReco *gvertex = new GlobalVertexReco();
   se->registerSubsystem(gvertex);
 
   /////////////////
@@ -219,15 +219,18 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   std::cout << "Applying Position Dependent Correction" << std::endl;
   RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
   clusterCorrection->set_UseTowerInfo(1);  // to use towerinfo objects rather than old RawTower
+  se->registerSubsystem(clusterCorrection);
+
   ///////////////////////////////////////////
   // Calo node with software zero supression
-  if (addZeroSupCaloNodes){
+  if (addZeroSupCaloNodes)
+  {
     CaloTowerBuilder *ctbEMCal_SZ = new CaloTowerBuilder("EMCalBUILDER_ZS");
     ctbEMCal_SZ->set_detector_type(CaloTowerDefs::CEMC);
     ctbEMCal_SZ->set_processing_type(CaloWaveformProcessing::TEMPLATE);
     ctbEMCal_SZ->set_nsamples(8);
     ctbEMCal_SZ->set_outputNodePrefix("TOWERS_SZ_");
-    ctbEMCal_SZ->set_softwarezerosuppression(true,100000000);
+    ctbEMCal_SZ->set_softwarezerosuppression(true, 100000000);
     se->registerSubsystem(ctbEMCal_SZ);
 
     CaloTowerBuilder *ctbIHCal_SZ = new CaloTowerBuilder("HCALINBUILDER_ZS");
@@ -235,7 +238,7 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
     ctbIHCal_SZ->set_processing_type(CaloWaveformProcessing::TEMPLATE);
     ctbIHCal_SZ->set_nsamples(8);
     ctbIHCal_SZ->set_outputNodePrefix("TOWERS_SZ_");
-    ctbIHCal_SZ->set_softwarezerosuppression(true,100000000);
+    ctbIHCal_SZ->set_softwarezerosuppression(true, 100000000);
     se->registerSubsystem(ctbIHCal_SZ);
 
     CaloTowerBuilder *ctbOHCal_SZ = new CaloTowerBuilder("HCALOUTBUILDER_SZ");
@@ -243,9 +246,8 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
     ctbOHCal_SZ->set_processing_type(CaloWaveformProcessing::TEMPLATE);
     ctbOHCal_SZ->set_nsamples(8);
     ctbOHCal_SZ->set_outputNodePrefix("TOWERS_SZ_");
-    ctbOHCal_SZ->set_softwarezerosuppression(true,100000000);
+    ctbOHCal_SZ->set_softwarezerosuppression(true, 100000000);
     se->registerSubsystem(ctbOHCal_SZ);
-
 
     CaloTowerCalib *calibEMC_SZ = new CaloTowerCalib("CEMCCALIB_SZ");
     calibEMC_SZ->set_detector_type(CaloTowerDefs::CEMC);
@@ -265,9 +267,6 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
     calibOHCal_SZ->set_outputNodePrefix("TOWERINFO_SZ_CALIB_");
     se->registerSubsystem(calibOHCal_SZ);
   }
-
-
-  se->registerSubsystem(clusterCorrection);
 
   Fun4AllInputManager *In = new Fun4AllPrdfInputManager("in");
   In->AddFile(fname);
