@@ -77,6 +77,14 @@ void Fun4All_TrkrHitSet_Unpacker(
   se->registerSubsystem(tpotunpacker);
 
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfilename);
+  out->StripNode("MVTXRAWHIT");
+  out->StripNode("INTTRAWHIT");
+  out->StripNode("MICROMEGASRAWHIT");
+  out->StripNode("TPCRAWHIT");
+  out->StripNode("GL1RAWHIT");
+  out->StripNode("MVTXRAWEVTHEADER");
+  out->StripNode("MVTXEVENTHEADER");
+  
   se->registerOutputManager(out);
 
   se->run(nEvents);
