@@ -1,8 +1,4 @@
 #include <GlobalVariables.C>
-#include <G4_Magnet.C>
-#include <G4_ActsGeom.C>
-#include <Trkr_Clustering.C>
-#include <Trkr_Reco_Cosmics.C>
 
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -19,9 +15,6 @@
 #include <tpc/TpcCombinedRawDataUnpacker.h>
 #include <micromegas/MicromegasCombinedDataDecoder.h>
 
-#include <trackingdiagnostics/TrkrNtuplizer.h>
-#include <trackingdiagnostics/TrackResiduals.h>
-
 #include <stdio.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
@@ -30,7 +23,6 @@ R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libmicromegas.so)
-R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 void Fun4All_TrkrHitSet_Unpacker(
     const int nEvents = 2,
     const int runnumber = 26048,
