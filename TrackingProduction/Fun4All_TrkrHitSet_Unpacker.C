@@ -82,8 +82,6 @@ void Fun4All_TrkrHitSet_Unpacker(
   out->StripNode("MICROMEGASRAWHIT");
   out->StripNode("TPCRAWHIT");
   out->StripNode("GL1RAWHIT");
-  out->StripNode("MVTXRAWEVTHEADER");
-  out->StripNode("MVTXEVENTHEADER");
   
   se->registerOutputManager(out);
 
