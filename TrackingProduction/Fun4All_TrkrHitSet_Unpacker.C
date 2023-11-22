@@ -30,6 +30,7 @@ void Fun4All_TrkrHitSet_Unpacker(
     const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all/",
     const std::string file = "cosmics-")
 {
+  gSystem->Load("libg4dst.so");
   std::string inputRawHitFile = dir + file;
   char filename[500];
   sprintf(filename, "%s%08d-0000.root",inputRawHitFile.c_str(),runnumber);
