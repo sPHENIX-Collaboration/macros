@@ -1,6 +1,6 @@
 #include <GlobalVariables.C>
 
-#include "/gpfs/mnt/gpfs02/sphenix/user/jfrantz/install/sphenix/include/litecaloeval/LiteCaloEval.h"
+#include <litecaloeval/LiteCaloEval.h>
 R__LOAD_LIBRARY(libLiteCaloEvalTowSlope.so)
 
 // regular file, modified file, output file
