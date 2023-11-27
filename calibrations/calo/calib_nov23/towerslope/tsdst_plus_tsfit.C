@@ -7,6 +7,7 @@
 #include <fun4all/Fun4AllDstInputManager.h>
 //#include <rawwaveformtowerbuilder/RawWaveformTowerBuilder.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllUtils.h>
 
 #include <litecaloeval/LiteCaloEval.h>
 #include <caloreco/CaloTowerCalib.h>
@@ -15,6 +16,9 @@
 
 #include <phool/recoConsts.h>
 
+#include "createLocalEMCalCalibFile.C"
+#include "mergeCDBTTrees.C"
+#include "TSCtoCDBTTree.C"
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -27,7 +31,7 @@ R__LOAD_LIBRARY(libLiteCaloEvalTowSlope.so)
 #endif
 
 // to get files from my local area
-void tsdst_plus_tsfit(int nevents = 1e5, const char *fname = "/sphenix/user/sregmi/FINAL_VERSION/tower_slope_old_tower_method/3_RawWaveformTowerBuilder/macro/testoutput_400.root", const char * outfile =  "defout.root", const char * fitoutfile = "deffitout.root")
+void tsdst_plus_tsfit(int nevents = 1, const char *fname = "input.list", const char * outfile =  "defout.root", const char * fitoutfile = "deffitout.root")
 //,const int runNumber)
 {
 
@@ -42,8 +46,28 @@ void tsdst_plus_tsfit(int nevents = 1e5, const char *fname = "/sphenix/user/sreg
   else
     in->fileopen(fname);
 
-
   se->registerInputManager(in);
+
+
+  // initalize CDB to pull what we "think" is the "base" calibration
+  // into a local cdbttree so we can update it with the tower slope output 
+  recoConsts *rc = recoConsts::instance();
+  ifstream file(fname);
+  string first_file;
+  getline(file, first_file);
+
+  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(first_file);
+  int runnumber = runseg.first;
+  cout << "run number = " << runnumber << endl;
+
+  // global tag
+  rc->set_StringFlag("CDB_GLOBALTAG","MDC2");
+  // // 64 bit timestamp
+  rc->set_uint64Flag("TIMESTAMP",runnumber);   
+
+  string local_cdb_copy_name = "local_cdb_copy.root";
+  createLocalEMCalCalibFile(local_cdb_copy_name.c_str(),runnumber);
+
 
   //JF to Blair Nov 23 -- leaving these next blocks, similar code
   //  would be needed if we run a second iteration of towerslope
@@ -103,6 +127,11 @@ void tsdst_plus_tsfit(int nevents = 1e5, const char *fname = "/sphenix/user/sreg
 
   modlce.FitRelativeShifts(&modlce,110);
 
+
+  // create the cdbttree from tsc output andd multiply the corrections 
+  // into the base calibration to pickup for pi0 first iteration
+  TSCtoCDBTTree(fitoutfile,"tsc_output_cdb.root");
+  mergeCDBTTrees("tsc_output_cdb.root",local_cdb_copy_name.c_str(),"calib_post_TSC.root");
 
   gSystem->Exit(0);
 }
