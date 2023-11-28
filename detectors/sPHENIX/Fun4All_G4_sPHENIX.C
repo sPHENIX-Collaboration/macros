@@ -114,6 +114,8 @@ int Fun4All_G4_sPHENIX(
   //  Input::GUN_NUMBER = 3; // if you need 3 of them
   // Input::GUN_VERBOSITY = 1;
 
+  // Input::COSMIC = true;
+
   //D0 generator
   //Input::DZERO = false;
   //Input::DZERO_VERBOSITY = 0;
