@@ -39,7 +39,7 @@ R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 
-void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commissioning/aligned_prdf/beam-00021796-0076.prdf", int nEvents = 5)
+void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commissioning/aligned_prdf/beam-00021796-0076.prdf", int nEvents = 10)
 {
   bool enableMasking = 0;
   bool addZeroSupCaloNodes = 1;
@@ -66,7 +66,7 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   //===============
   // ENABLE::CDB = true;
   // global tag
-  rc->set_StringFlag("CDB_GLOBALTAG", "2023p004");
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
   // // 64 bit timestamp
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   CDBInterface::instance()->Verbosity(1);
@@ -124,14 +124,17 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   std::cout << "status setters" << std::endl;
   CaloTowerStatus *statusEMC = new CaloTowerStatus("CEMCSTATUS");
   statusEMC->set_detector_type(CaloTowerDefs::CEMC);
+  statusEMC->set_time_cut(1);
   se->registerSubsystem(statusEMC);
 
   CaloTowerStatus *statusHCalIn = new CaloTowerStatus("HCALINSTATUS");
   statusHCalIn->set_detector_type(CaloTowerDefs::HCALIN);
+  statusHCalIn->set_time_cut(2);
   se->registerSubsystem(statusHCalIn);
 
   CaloTowerStatus *statusHCALOUT = new CaloTowerStatus("HCALOUTSTATUS");
   statusHCALOUT->set_detector_type(CaloTowerDefs::HCALOUT);
+  statusHCALOUT->set_time_cut(2);
   se->registerSubsystem(statusHCALOUT);
 
   ////////////////////
