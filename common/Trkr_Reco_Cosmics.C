@@ -3,28 +3,19 @@
 
 #include <G4_TrkrVariables.C>
 
-#include <g4eval/SvtxTruthRecoTableEval.h>
 #include <g4eval/TrackSeedTrackMapConverter.h>
 
 #include <trackreco/MakeActsGeometry.h>
-#include <trackreco/PHActsSiliconSeeding.h>
-#include <trackreco/PHActsTrackProjection.h>
-#include <trackreco/PHActsTrkFitter.h>
-#include <trackreco/PHActsVertexPropagator.h>
 #include <trackreco/PHCASeeding.h>
 #include <trackreco/PHCosmicSeedCombiner.h>
 #include <trackreco/PHCosmicsTrkFitter.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
-#include <trackreco/PHSiliconHelicalPropagator.h>
-#include <trackreco/PHSiliconSeedMerger.h>
-#include <trackreco/PHSiliconTpcTrackMatching.h>
+#include <trackreco/PHCosmicSiliconPropagator.h>
 #include <trackreco/PHSimpleKFProp.h>
-#include <trackreco/PHSimpleVertexFinder.h>
 #include <trackreco/PHTpcDeltaZCorrection.h>
 #include <trackreco/PHTrackCleaner.h>
-#include <trackreco/PHTrackSeeding.h>
 #include <trackreco/SecondaryVertexFinder.h>
-
+#include <trackreco/PHSimpleVertexFinder.h>
 #include <tpc/TpcLoadDistortionCorrection.h>
 
 #include <tpccalib/PHTpcResiduals.h>
@@ -68,6 +59,7 @@ void Tracking_Reco_TrackSeed()
   if (G4MAGNET::magfield.find("3d") != std::string::npos)
   {
     seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
+    seeder->useConstBField(false);
   }
 
   if (G4MAGNET::magfield.find(".root") == std::string::npos)
@@ -81,7 +73,6 @@ void Tracking_Reco_TrackSeed()
   seeder->SetSearchWindow(1.5, 0.05);  // (z width, phi width)
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
-  seeder->useConstBField(false);
   seeder->useFixedClusterError(true);
   se->registerSubsystem(seeder);
 
@@ -104,8 +95,9 @@ void Tracking_Reco_TrackSeed()
   cprop->Verbosity(verbosity);
   se->registerSubsystem(cprop);
 
-  PHSiliconHelicalPropagator *hprop = new PHSiliconHelicalPropagator("HelicalPropagator");
+  PHCosmicSiliconPropagator *hprop = new PHCosmicSiliconPropagator("HelicalPropagator");
   hprop->Verbosity(verbosity);
+  hprop->zero_field();
   se->registerSubsystem(hprop);
 
   // Associate Micromegas clusters with the tracks
@@ -115,10 +107,10 @@ void Tracking_Reco_TrackSeed()
   mm_match->Verbosity(verbosity);
 
   // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
-  mm_match->set_rphi_search_window_lyr1(0.2);
+  mm_match->set_rphi_search_window_lyr1(2);
   mm_match->set_rphi_search_window_lyr2(13.0);
   mm_match->set_z_search_window_lyr1(26.0);
-  mm_match->set_z_search_window_lyr2(0.2);
+  mm_match->set_z_search_window_lyr2(2);
   mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
   mm_match->set_test_windows_printout(false);  // used for tuning search windows only
   se->registerSubsystem(mm_match);
