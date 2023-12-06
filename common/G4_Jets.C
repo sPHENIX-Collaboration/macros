@@ -4,11 +4,11 @@
 #include <GlobalVariables.C>
 #include <QA.C>
 
-#include <g4jets/ClusterJetInput.h>
-#include <g4jets/FastJetAlgo.h>
-#include <g4jets/JetReco.h>
-#include <g4jets/TowerJetInput.h>
-#include <g4jets/TrackJetInput.h>
+#include <jetbase/ClusterJetInput.h>
+#include <jetbase/FastJetAlgo.h>
+#include <jetbase/JetReco.h>
+#include <jetbase/TowerJetInput.h>
+#include <jetbase/TrackJetInput.h>
 #include <g4jets/TruthJetInput.h>
 
 #include <g4eval/JetEvaluator.h>
@@ -16,6 +16,7 @@
 
 #include <fun4all/Fun4AllServer.h>
 
+R__LOAD_LIBRARY(libjetbase.so)
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libqa_modules.so)

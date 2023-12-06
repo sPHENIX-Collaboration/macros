@@ -1,0 +1,14 @@
+Run event combiner in condor. Used for runs where all prdf's exist 
+(MBD, ZDC/sEPD, HCals) and the prdf files are in lustre under
+/sphenix/lustre01/sphnxpro/commissioning
+
+The list of runs to be processed is in runnumbers.txt, the condor bash script
+run_eventcombiner.sh creates the list files with the prdf's and runs the Fun4All_Combiner.C macro which reads in those lists. The output filepath is hardcoded in Fun4All_Combiner.C:
+
+  Fun4AllEventOutputManager *out = new Fun4AllEventOutputManager("EvtOut","/sphenix/lustre01/sphnxpro/commissioning/aligned_prdf/beam-%08d-%04d.prdf",20000);
+
+choose a directory you can write to. The output files will be named
+beam-00000<runnumber>-00<segment>.prdf. The run number is taken from the input 
+prdfs, the segment number starts with 0 and is then incremented for each new 
+output file. The size of the combined prdf files is set by the second parameter,
+it is the size in MB after which a new file is opened.

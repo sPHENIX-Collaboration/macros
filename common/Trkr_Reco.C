@@ -1,8 +1,6 @@
 #ifndef MACRO_TRKRRECO_C
 #define MACRO_TRKRRECO_C
 
-#include <GlobalVariables.C>
-
 #include <G4_TrkrVariables.C>
 //#include <G4_ActsGeom.C>
 
@@ -35,6 +33,8 @@
 
 #include <fun4all/Fun4AllServer.h>
 
+#include <string>
+
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 R__LOAD_LIBRARY(libtpc.so)
@@ -49,6 +49,7 @@ void convert_seeds()
   // Default set to full SvtxTrackSeeds. Can be set to 
   // SiliconTrackSeedContainer or TpcTrackSeedContainer 
   converter->setTrackSeedName("SvtxTrackSeedContainer");
+  converter->setFieldMap(G4MAGNET::magfield);
   converter->Verbosity(verbosity);
   se->registerSubsystem(converter);
 }
@@ -60,16 +61,12 @@ void Tracking_Reco_TrackSeed()
   
   // get fun4all server instance
   auto se = Fun4AllServer::instance();
-
+  
   // Assemble silicon clusters into track stubs 
   
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
-  std::cout << "SETTING SI SEED CV" << std::endl;
-  silicon_Seeding->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(silicon_Seeding);
-
-  std::cout << " cluster version: " << G4TRACKING::cluster_version << std::endl; 
 
   auto merger = new PHSiliconSeedMerger;
   merger->Verbosity(verbosity);
@@ -78,16 +75,23 @@ void Tracking_Reco_TrackSeed()
   
   auto seeder = new PHCASeeding("PHCASeeding");
   seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
+  
   if (G4MAGNET::magfield.find("3d") != std::string::npos)
     {
       seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
+      seeder->useConstBField(false);
+    }
+  if(G4MAGNET::magfield.find(".root") == std::string::npos)
+    {
+      //! constant field
+      seeder->useConstBField(true);
+      seeder->constBField(std::stod(G4MAGNET::magfield));
     }
   seeder->Verbosity(verbosity);
   seeder->SetLayerRange(7, 55);
   seeder->SetSearchWindow(1.5, 0.05);  // (z width, phi width)
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
-  seeder->useConstBField(false);
   seeder->useFixedClusterError(true);
   se->registerSubsystem(seeder);
   
@@ -98,10 +102,13 @@ void Tracking_Reco_TrackSeed()
     {
       cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
     }
-  cprop->useConstBField(false);
+  if(G4MAGNET::magfield.find(".root") == std::string::npos)
+    {
+      cprop->useConstBField(false);
+      cprop->setConstBField(std::stod(G4MAGNET::magfield));
+    }
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
-  cprop->set_cluster_version(G4TRACKING::cluster_version);
   cprop->Verbosity(verbosity);
   se->registerSubsystem(cprop);
   
@@ -189,12 +196,14 @@ void Tracking_Reco_TrackFit()
   // perform final track fit with ACTS
   auto actsFit = new PHActsTrkFitter;
   actsFit->Verbosity(verbosity);
-  //actsFit->commissioning(G4TRACKING::use_alignment);
-  actsFit->set_cluster_version(G4TRACKING::cluster_version);
+  actsFit->commissioning(G4TRACKING::use_alignment);
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
   actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
   actsFit->set_pp_mode(TRACKING::pp_mode);
+  actsFit->useActsEvaluator(false);
+  actsFit->useOutlierFinder(false);
+  actsFit->setFieldMap(G4MAGNET::magfield);
   se->registerSubsystem(actsFit);
   
   if (G4TRACKING::SC_CALIBMODE)
@@ -204,7 +213,6 @@ void Tracking_Reco_TrackFit()
     * store in dedicated structure for distortion correction
     */
     auto residuals = new PHTpcResiduals;
-    residuals->setClusterVersion(G4TRACKING::cluster_version);
     residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
     residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
     residuals->Verbosity(verbosity);
@@ -231,11 +239,16 @@ void Tracking_Reco_TrackFit()
     // Propagate track positions to the vertex position
     auto vtxProp = new PHActsVertexPropagator;
     vtxProp->Verbosity(verbosity);
+    vtxProp->fieldMap(G4MAGNET::magfield);
     se->registerSubsystem(vtxProp);
 
     // project tracks to EMCAL
     auto projection = new PHActsTrackProjection;
     projection->Verbosity(verbosity);
+    if(G4MAGNET::magfield.find(".root") == std::string::npos)
+      {
+	projection->setConstFieldVal(std::stod(G4MAGNET::magfield));
+      }
     se->registerSubsystem(projection);
   }
   
@@ -251,7 +264,6 @@ void Tracking_Reco_CommissioningTrackSeed()
 
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
-  silicon_Seeding->set_cluster_version(G4TRACKING::cluster_version);
   silicon_Seeding->sigmaScattering(50.);
   silicon_Seeding->setRPhiSearchWindow(2.);
   silicon_Seeding->helixcut(0.01);
@@ -287,7 +299,6 @@ void Tracking_Reco_CommissioningTrackSeed()
   cprop->useConstBField(false);
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
-  cprop->set_cluster_version(G4TRACKING::cluster_version);
   cprop->Verbosity(verbosity);
   se->registerSubsystem(cprop);
   
@@ -344,14 +355,12 @@ void alignment(std::string datafilename = "mille_output_data_file",
   mille->Verbosity(verbosity);
   mille->set_datafile_name(datafilename + ".bin");
   mille->set_steeringfile_name(steeringfilename + ".txt");
-  mille->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(mille);
 
   auto helical = new HelicalFitter;
   helical->Verbosity(0);
   helical->set_datafile_name(datafilename + "_helical.bin");
   helical->set_steeringfile_name(steeringfilename + "_helical.txt");
-  helical->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(helical);
 
 }
@@ -370,7 +379,7 @@ void Tracking_Reco()
     {
       Tracking_Reco_TrackSeed();
     }
-
+ 
   if(G4TRACKING::convert_seeds_to_svtxtracks)
     {
       vertexing();

@@ -30,6 +30,13 @@ void listPayloadTypes()
   return;
 }
 
+void listPayloadIOVs(uint64_t iov)
+{
+  if (!uti) uti = new CDBUtils();
+  uti->listPayloadIOVs(iov);
+  return;
+}
+
 void createGlobalTag(const std::string &tagname)
 {
   if (!uti) uti = new CDBUtils();
@@ -65,6 +72,12 @@ int setGlobalTag(const std::string &tagname)
   return iret;
 }
 
+int cloneGlobalTag(const std::string &source, const std::string &target)
+{
+  if (!uti) uti = new CDBUtils();
+  int iret = uti->cloneGlobalTag(source, target);
+  return iret;
+}
 
 
 int createPayloadType(const std::string &pt)
@@ -98,6 +111,30 @@ std::string getCalibration(const std::string &pl_type, uint64_t iov)
 {
   if (!uti) uti = new CDBUtils();
   return uti->getUrl(pl_type,iov);
+}
+
+void clearCache()
+{
+  if (!uti) uti = new CDBUtils();
+  return uti->clearCache();
+}
+
+void Verbosity(int verb)
+{
+  if (!uti) uti = new CDBUtils();
+  return uti->Verbosity(verb);
+}
+
+int deletePayloadIOV(const std::string& pl_type, uint64_t iov_start)
+{
+  if (!uti) uti = new CDBUtils();
+  return uti->deletePayloadIOV(pl_type,iov_start);
+}
+
+int deletePayloadIOV(const std::string& pl_type, uint64_t iov_start, uint64_t iov_end)
+{
+  if (!uti) uti = new CDBUtils();
+  return uti->deletePayloadIOV(pl_type,iov_start, iov_end);
 }
 
 void TestCDBInsert()

@@ -5,7 +5,7 @@
 
 #include <DisplayOn.C>
 #include <G4Setup_sPHENIX.C>
-#include <G4_Bbc.C>
+#include <G4_Mbd.C>
 #include <G4_CaloTrigger.C>
 #include <G4_Centrality.C>
 #include <G4_DSTReader.C>
@@ -115,6 +115,8 @@ int Fun4All_G4_sPHENIX(
   //  Input::GUN_NUMBER = 3; // if you need 3 of them
   // Input::GUN_VERBOSITY = 1;
 
+  // Input::COSMIC = true;
+
   //D0 generator
   //Input::DZERO = false;
   //Input::DZERO_VERBOSITY = 0;
@@ -128,9 +130,24 @@ int Fun4All_G4_sPHENIX(
 
   //  Input::HEPMC = true;
   INPUTHEPMC::filename = inputFile;
+  //-----------------
+  // Hijing options (symmetrize hijing, add flow, add fermi motion)
+  //-----------------
+  //  INPUTHEPMC::HIJINGFLIP = true;
+  //  INPUTHEPMC::FLOW = true;
+  //  INPUTHEPMC::FLOW_VERBOSITY = 3;
+  //  INPUTHEPMC::FERMIMOTION = true;
+
 
   // Event pile up simulation with collision rate in Hz MB collisions.
-  //Input::PILEUPRATE = 100e3;
+  //Input::PILEUPRATE = 50e3; // 50 kHz for AuAu
+  //Input::PILEUPRATE = 3e6; // 3MHz for pp
+
+  // Enable this is emulating the nominal pp/pA/AA collision vertex distribution
+  // for HepMC records (hijing, pythia8)
+  //  Input::BEAM_CONFIGURATION = Input::AA_COLLISION; // for 2023 sims we want the AA geometry for no pileup sims
+  //  Input::BEAM_CONFIGURATION = Input::pp_COLLISION; // for 2024 sims we want the pp geometry for no pileup sims
+  //  Input::BEAM_CONFIGURATION = Input::pA_COLLISION; // for pAu sims we want the pA geometry for no pileup sims
 
   //-----------------
   // Initialize the selected Input/Event generation
@@ -286,10 +303,10 @@ int Fun4All_G4_sPHENIX(
   //  Enable::OVERLAPCHECK = true;
   //  Enable::VERBOSITY = 1;
 
-  // Enable::BBC = true;
-  // Enable::BBC_SUPPORT = true; // save hist in bbc support structure
-  // Enable::BBCRECO = Enable::BBC && true
-  Enable::BBCFAKE = true;  // Smeared vtx and t0, use if you don't want real BBC in simulation
+  // Enable::MBD = true;
+  // Enable::MBD_SUPPORT = true; // save hist in MBD/BBC support structure
+  // Enable::MBDRECO = Enable::MBD && true;
+  Enable::MBDFAKE = true;  // Smeared vtx and t0, use if you don't want real MBD/BBC in simulation
 
   Enable::PIPE = true;
   Enable::PIPE_ABSORBER = true;
@@ -319,8 +336,13 @@ int Fun4All_G4_sPHENIX(
   Enable::MICROMEGAS_QA = Enable::MICROMEGAS_CLUSTER && Enable::QA && true;
 
   Enable::TRACKING_TRACK = (Enable::MICROMEGAS_CLUSTER && Enable::TPC_CLUSTER && Enable::INTT_CLUSTER && Enable::MVTX_CLUSTER) && true;
-  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && false;
+  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && Enable::GLOBAL_RECO && true;
   Enable::TRACKING_QA = Enable::TRACKING_TRACK && Enable::QA && true;
+
+  // only do track matching if TRACKINGTRACK is also used
+  Enable::TRACK_MATCHING = Enable::TRACKING_TRACK && false;
+  Enable::TRACK_MATCHING_TREE = Enable::TRACK_MATCHING && false;
+  Enable::TRACK_MATCHING_TREE_CLUSTERS = Enable::TRACK_MATCHING_TREE && false;
 
   //Additional tracking tools 
   //Enable::TRACKING_DIAGNOSTICS = Enable::TRACKING_TRACK && true;
@@ -376,7 +398,7 @@ int Fun4All_G4_sPHENIX(
   //Enable::PLUGDOOR = true;
   Enable::PLUGDOOR_ABSORBER = true;
 
-  Enable::GLOBAL_RECO = (Enable::BBCFAKE || Enable::TRACKING_TRACK) && true;
+  Enable::GLOBAL_RECO = (Enable::MBDFAKE || Enable::TRACKING_TRACK) && true;
   //Enable::GLOBAL_FASTSIM = true;
 
   //Enable::KFPARTICLE = true;
@@ -456,7 +478,7 @@ int Fun4All_G4_sPHENIX(
   // Detector Division
   //------------------
 
-  if ((Enable::BBC && Enable::BBCRECO) || Enable::BBCFAKE) Bbc_Reco();
+  if ((Enable::MBD && Enable::MBDRECO) || Enable::MBDFAKE) Mbd_Reco();
 
   if (Enable::MVTX_CELL) Mvtx_Cells();
   if (Enable::INTT_CELL) Intt_Cells();
@@ -522,6 +544,8 @@ int Fun4All_G4_sPHENIX(
     Tracking_Reco();
   }
 
+  
+
   if(Enable::TRACKING_DIAGNOSTICS)
     {
       const std::string kshortFile = "./kshort_" + outputFile;
@@ -530,6 +554,7 @@ int Fun4All_G4_sPHENIX(
       G4KshortReconstruction(kshortFile);
       seedResiduals(residualsFile);
     }
+
 
   //-----------------
   // Global Vertexing
@@ -599,11 +624,14 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::DSTREADER) G4DSTreader(outputroot + "_DSTReader.root");
 
+
+
   if (Enable::USER) UserAnalysisInit();
 
   // Writes electrons from conversions to a new track map on the node tree
   // the ntuple file is for diagnostics, it is produced only if the flag is set in G4_Tracking.C
   if(G4TRACKING::filter_conversion_electrons) Filter_Conversion_Electrons(outputroot + "_secvert_ntuple.root");
+
 
   //======================
   // Run KFParticle on evt
@@ -628,6 +656,8 @@ int Fun4All_G4_sPHENIX(
   if (Enable::TRACKING_QA) Tracking_QA();
 
   if (Enable::TRACKING_QA && Enable::CEMC_QA && Enable::HCALIN_QA && Enable::HCALOUT_QA) QA_G4CaloTracking();
+
+  if (Enable::TRACK_MATCHING) Track_Matching(outputroot + "_g4trackmatching.root");
 
   //--------------
   // Set up Input Managers

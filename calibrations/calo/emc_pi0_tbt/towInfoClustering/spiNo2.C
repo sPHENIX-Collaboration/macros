@@ -5,7 +5,7 @@
 
 #include <DisplayOn.C>
 #include <G4Setup_sPHENIX.C>
-#include <G4_Bbc.C>
+#include <G4_Mbd.C>
 #include <G4_CaloTrigger.C>
 #include <G4_DSTReader.C>
 #include <G4_Global.C>
@@ -228,7 +228,7 @@ int spiNo2(
   // Detector Division
   //------------------
 
-  if (Enable::BBC || Enable::BBCFAKE) Bbc_Reco();
+  if (Enable::MBD || Enable::MBDFAKE) Mbd_Reco();
 
   if (Enable::MVTX_CELL) Mvtx_Cells();
   if (Enable::INTT_CELL) Intt_Cells();

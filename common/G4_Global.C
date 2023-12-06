@@ -1,6 +1,8 @@
 #ifndef MACRO_G4GLOBAL_C
 #define MACRO_G4GLOBAL_C
 
+#include <GlobalVariables.C>
+
 #include <g4vertex/GlobalVertexFastSimReco.h>
 #include <globalvertex/GlobalVertexReco.h>
 
