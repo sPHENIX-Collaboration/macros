@@ -28,7 +28,7 @@ void Centrality()
 
   PHG4CentralityReco *cent = new PHG4CentralityReco();
   cent->Verbosity(verbosity);
-  if (Enable::XPLOAD)
+  if (Enable::CDB)
   {
     cent->GetCalibrationParameters().ReadFromCDB("CENTRALITY");
   }

@@ -39,11 +39,11 @@ namespace DstOut
 namespace Enable
 {
   bool ABSORBER = false;
+  bool CDB = false;
   bool DSTOUT = false;
   bool DSTOUT_COMPRESS = false;
   bool OVERLAPCHECK = false;
   bool SUPPORT = false;
-  bool XPLOAD = false;
   int VERBOSITY = 0;
 }  // namespace Enable
 
@@ -82,13 +82,6 @@ namespace G4MAGNET
   std::string magfield_OHCAL_steel;
 }  // namespace G4MAGNET
 
-namespace XPLOAD
-{
-  std::string config = "sPHENIX_cdb";
-  std::string tag = "TEST";
-  uint64_t timestamp = 12345678912345;
-}  // namespace XPLOAD
-
 namespace Enable
 {
   bool MICROMEGAS = false;
@@ -102,13 +95,12 @@ namespace G4MICROMEGAS
 
 namespace G4TPC
 {
- double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
+ double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas, it is very close to our Ar-CF4 mixture
 }
 
 namespace G4TRACKING
 {
   bool init_acts_magfield = true;
-  int cluster_version = 5;
 }
 
 namespace EVTGENDECAYER
@@ -117,5 +109,10 @@ namespace EVTGENDECAYER
 							   //DECAY.DEC is located at: https://gitlab.cern.ch/evtgen/evtgen/-/blob/master/DECAY.DEC
 }
 
+namespace CDB
+{
+  std::string global_tag = "MDC2";
+  uint64_t timestamp = 6;
+}
 
 #endif
