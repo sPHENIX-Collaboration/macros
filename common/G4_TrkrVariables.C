@@ -44,7 +44,11 @@ namespace Enable
 
   bool TRACKING_TRACK = false;
   bool TRACKING_EVAL = false;
-  int TRACKING_VERBOSITY = 0;
+  bool TRACK_MATCHING = false;
+  bool TRACK_MATCHING_TREE = false;
+  bool TRACK_MATCHING_TREE_CLUSTERS = false;
+  // 0=no output TTree file, 1=output for tracks only, 2=tracks+clusters
+  int  TRACKING_VERBOSITY = 0;
   bool TRACKING_QA = false;
   bool TRACKING_DIAGNOSTICS = false;
 }  // namespace Enable
@@ -73,8 +77,6 @@ namespace G4INTT
   int nladder[4] = {12, 12, 16, 16};
   double sensor_radius[4] = {7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
 
-  double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
-
   enum enu_InttDeadMapType  // Dead map options for INTT
   {
     kInttNoDeadMap = 0,  // All channel in Intt is alive
@@ -96,7 +98,7 @@ namespace G4TPC
   double tpc_outer_radius = 77. + 2.;
 
   // drift velocity is set here for all relevant modules
-  double tpc_drift_velocity_sim= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
+  double tpc_drift_velocity_sim= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas, it is very close to our Ar-CF4 mixture
 //  double tpc_drift_velocity_reco now set in GlobalVariables.C
 //  double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
 

@@ -353,12 +353,13 @@ void HCALInner_Clusters()
   return;
 }
 
-void HCALInner_Eval(const std::string &outputfile)
+void HCALInner_Eval(const std::string &outputfile, int start_event = 0)
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
   CaloEvaluator *eval = new CaloEvaluator("HCALINEVALUATOR", "HCALIN", outputfile);
+  eval->set_event(start_event);
   eval->Verbosity(verbosity);
   se->registerSubsystem(eval);
 
