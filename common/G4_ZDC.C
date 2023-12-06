@@ -18,7 +18,6 @@
 
 #include <calobase/RawTowerDefs.h>
 
-#include <caloreco/RawClusterBuilderFwd.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
 

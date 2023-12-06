@@ -1,0 +1,12 @@
+ls -1 /sphenix/lustre01/sphnxpro/commissioning/emcal/beam/beam_seb00-000$1-* > seb00.list
+ls -1 /sphenix/lustre01/sphnxpro/commissioning/emcal/beam/beam_seb01-000$1-* > seb01.list
+ls -1 /sphenix/lustre01/sphnxpro/commissioning/emcal/beam/beam_seb02-000$1-* > seb02.list
+ls -1 /sphenix/lustre01/sphnxpro/commissioning/emcal/beam/beam_seb03-000$1-* > seb03.list
+ls -1 /sphenix/lustre01/sphnxpro/commissioning/emcal/beam/beam_seb04-000$1-* > seb04.list
+ls -1 /sphenix/lustre01/sphnxpro/commissioning/emcal/beam/beam_seb05-000$1-* > seb05.list
+ls -1 /sphenix/lustre01/sphnxpro/commissioning/emcal/beam/beam_seb06-000$1-* > seb06.list
+ls -1 /sphenix/lustre01/sphnxpro/commissioning/emcal/beam/beam_seb07-000$1-* > seb07.list
+ls -1 /sphenix/lustre01/sphnxpro/commissioning/ZDC/beam/beam_seb14-000$1-* > seb14.list
+ls -1 /sphenix/lustre01/sphnxpro/commissioning/mbd/beam/beam_seb18-000$1-* > seb18.list
+ls -1 /sphenix/lustre01/sphnxpro/commissioning/HCal/beam/beam_East-000$1-* > hcaleast.list
+ls -1 /sphenix/lustre01/sphnxpro/commissioning/HCal/beam/beam_West-000$1-* > hcalwest.list
