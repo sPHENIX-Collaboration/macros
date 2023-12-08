@@ -1,5 +1,5 @@
-#ifndef FUN4ALL_YEAR1_C
-#define FUN4ALL_YEAR1_C
+#ifndef FUN4ALL_EMCAL_C
+#define FUN4ALL_EMCAL_C
 
 #include <caloreco/CaloTowerCalib.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
