@@ -20,13 +20,24 @@ export TargetDir="$PWD"/condorout
 
 iter=0
 
+while read dir; do 
+  rm inputdata.txt
+  for file in /sphenix/lustre01/sphnxpro/commissioning/DST_ana.387_2023p003/DST_CALOR-000"$dir"-*.root
+  do
+cat >>inputdata.txt<< EOF
+$file
+EOF
+done
+done < runList.txt # redirect the input of the
+
+
 if [ "$iter" -eq 0 ]; then
   root "../Fun4All_EMCal.C(0,\"inputdata.txt\",0,\"local_calib_copy.root\")"
   iter=$((iter+1))
 fi
 
 # upper bound on x determines number of iterations
-for((x=0;x<1;x++));
+for((x=0;x<7;x++));
 do
 
 if [ -d ${TargetDir} ]; then
