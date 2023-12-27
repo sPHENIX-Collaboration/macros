@@ -3,26 +3,19 @@
 
 #include <G4_TrkrVariables.C>
 
-#include <g4eval/SvtxTruthRecoTableEval.h>
 #include <g4eval/TrackSeedTrackMapConverter.h>
 
 #include <trackreco/MakeActsGeometry.h>
-#include <trackreco/PHActsSiliconSeeding.h>
-#include <trackreco/PHActsTrackProjection.h>
-#include <trackreco/PHActsTrkFitter.h>
-#include <trackreco/PHActsVertexPropagator.h>
 #include <trackreco/PHCASeeding.h>
+#include <trackreco/PHCosmicSeedCombiner.h>
+#include <trackreco/PHCosmicsTrkFitter.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
-#include <trackreco/PHSiliconHelicalPropagator.h>
-#include <trackreco/PHSiliconSeedMerger.h>
-#include <trackreco/PHSiliconTpcTrackMatching.h>
+#include <trackreco/PHCosmicSiliconPropagator.h>
 #include <trackreco/PHSimpleKFProp.h>
-#include <trackreco/PHSimpleVertexFinder.h>
 #include <trackreco/PHTpcDeltaZCorrection.h>
 #include <trackreco/PHTrackCleaner.h>
-#include <trackreco/PHTrackSeeding.h>
 #include <trackreco/SecondaryVertexFinder.h>
-
+#include <trackreco/PHSimpleVertexFinder.h>
 #include <tpc/TpcLoadDistortionCorrection.h>
 
 #include <tpccalib/PHTpcResiduals.h>
@@ -48,6 +41,8 @@ void convert_seeds()
   // SiliconTrackSeedContainer or TpcTrackSeedContainer
   converter->setTrackSeedName("SvtxTrackSeedContainer");
   converter->Verbosity(verbosity);
+  converter->cosmics();
+  converter->setFieldMap(G4MAGNET::magfield);
   se->registerSubsystem(converter);
 }
 
@@ -64,13 +59,20 @@ void Tracking_Reco_TrackSeed()
   if (G4MAGNET::magfield.find("3d") != std::string::npos)
   {
     seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
+    seeder->useConstBField(false);
+  }
+
+  if (G4MAGNET::magfield.find(".root") == std::string::npos)
+  {
+    //! constant field
+    seeder->useConstBField(true);
+    seeder->constBField(std::stod(G4MAGNET::magfield));
   }
   seeder->Verbosity(verbosity);
   seeder->SetLayerRange(7, 55);
-  seeder->SetSearchWindow(50., 1.);  // (z width, phi width)
+  seeder->SetSearchWindow(1.5, 0.05);  // (z width, phi width)
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
-  seeder->useConstBField(false);
   seeder->useFixedClusterError(true);
   se->registerSubsystem(seeder);
 
@@ -81,34 +83,41 @@ void Tracking_Reco_TrackSeed()
   {
     cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
   }
-  cprop->useConstBField(false);
+
+  if (G4MAGNET::magfield.find(".root") == std::string::npos)
+  {
+    //! constant field
+    cprop->useConstBField(true);
+    cprop->setConstBField(std::stod(G4MAGNET::magfield));
+  }
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
   cprop->Verbosity(verbosity);
   se->registerSubsystem(cprop);
 
-  PHSiliconHelicalPropagator *hprop = new PHSiliconHelicalPropagator("HelicalPropagator");
+  PHCosmicSiliconPropagator *hprop = new PHCosmicSiliconPropagator("HelicalPropagator");
   hprop->Verbosity(verbosity);
+  hprop->zero_field();
   se->registerSubsystem(hprop);
 
   // Associate Micromegas clusters with the tracks
-  if (Enable::MICROMEGAS)
-  {
-    // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-    auto mm_match = new PHMicromegasTpcTrackMatching;
-    mm_match->Verbosity(verbosity);
 
-    // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
-    mm_match->set_rphi_search_window_lyr1(0.2);
-    mm_match->set_rphi_search_window_lyr2(13.0);
-    mm_match->set_z_search_window_lyr1(26.0);
-    mm_match->set_z_search_window_lyr2(0.2);
-    mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
-    mm_match->set_test_windows_printout(false);  // used for tuning search windows only
-    se->registerSubsystem(mm_match);
-  }
+  // Match TPC track stubs from CA seeder to clusters in the micromegas layers
+  auto mm_match = new PHMicromegasTpcTrackMatching;
+  mm_match->Verbosity(verbosity);
 
-  convert_seeds();
+  // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
+  mm_match->set_rphi_search_window_lyr1(2);
+  mm_match->set_rphi_search_window_lyr2(13.0);
+  mm_match->set_z_search_window_lyr1(26.0);
+  mm_match->set_z_search_window_lyr2(2);
+  mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
+  mm_match->set_test_windows_printout(false);  // used for tuning search windows only
+  se->registerSubsystem(mm_match);
+
+  auto combiner = new PHCosmicSeedCombiner;
+  combiner->Verbosity(verbosity);
+  se->registerSubsystem(combiner);
 }
 
 void vertexing()
@@ -132,62 +141,15 @@ void Tracking_Reco_TrackFit()
   se->registerSubsystem(deltazcorr);
 
   // perform final track fit with ACTS
-  auto actsFit = new PHActsTrkFitter;
+  auto actsFit = new PHCosmicsTrkFitter;
   actsFit->Verbosity(verbosity);
   // actsFit->commissioning(G4TRACKING::use_alignment);
   // actsFit->set_cluster_version(G4TRACKING::cluster_version);
   //  in calibration mode, fit only Silicons and Micromegas hits
-  actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-  actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-  actsFit->set_pp_mode(TRACKING::pp_mode);
-  actsFit->useActsEvaluator(false);
+  actsFit->useActsEvaluator(true);
   actsFit->useOutlierFinder(false);
   actsFit->setFieldMap(G4MAGNET::magfield);
   se->registerSubsystem(actsFit);
-
-  if (G4TRACKING::SC_CALIBMODE)
-  {
-    /*
-     * in calibration mode, calculate residuals between TPC and fitted tracks,
-     * store in dedicated structure for distortion correction
-     */
-    auto residuals = new PHTpcResiduals;
-    // residuals->setClusterVersion(G4TRACKING::cluster_version);
-    residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
-    residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-    residuals->Verbosity(verbosity);
-    se->registerSubsystem(residuals);
-  }
-  else
-  {
-    /*
-     * in full tracking mode, run track cleaner, vertex finder,
-     * propagete tracks to vertex
-     * propagate tracks to EMCAL
-     */
-
-    if (!G4TRACKING::use_full_truth_track_seeding)
-    {
-      // Choose the best silicon matched track for each TPC track seed
-      /* this breaks in truth_track seeding mode because there is no TpcSeed */
-      auto cleaner = new PHTrackCleaner;
-      cleaner->Verbosity(verbosity);
-      se->registerSubsystem(cleaner);
-    }
-
-    vertexing();
-
-    // Propagate track positions to the vertex position
-    auto vtxProp = new PHActsVertexPropagator;
-    vtxProp->Verbosity(verbosity);
-    se->registerSubsystem(vtxProp);
-
-    // project tracks to EMCAL
-    auto projection = new PHActsTrackProjection;
-    projection->Verbosity(verbosity);
-
-    se->registerSubsystem(projection);
-  }
 }
 
 void alignment(std::string datafilename = "mille_output_data_file",
@@ -204,7 +166,7 @@ void alignment(std::string datafilename = "mille_output_data_file",
   se->registerSubsystem(mille);
 
   auto helical = new HelicalFitter;
-  helical->Verbosity(verbosity);
+  helical->Verbosity(0);
   helical->set_datafile_name(datafilename + "_helical.bin");
   helical->set_steeringfile_name(steeringfilename + "_helical.txt");
   // helical->set_cluster_version(G4TRACKING::cluster_version);
@@ -214,6 +176,14 @@ void alignment(std::string datafilename = "mille_output_data_file",
 void Tracking_Reco()
 {
   Tracking_Reco_TrackSeed();
+  if (G4TRACKING::convert_seeds_to_svtxtracks)
+  {
+    convert_seeds();
+  }
+  else
+  {
+    Tracking_Reco_TrackFit();
+  }
 
   vertexing();
 

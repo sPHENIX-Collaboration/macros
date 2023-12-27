@@ -119,6 +119,24 @@ void clearCache()
   return uti->clearCache();
 }
 
+void Verbosity(int verb)
+{
+  if (!uti) uti = new CDBUtils();
+  return uti->Verbosity(verb);
+}
+
+int deletePayloadIOV(const std::string& pl_type, uint64_t iov_start)
+{
+  if (!uti) uti = new CDBUtils();
+  return uti->deletePayloadIOV(pl_type,iov_start);
+}
+
+int deletePayloadIOV(const std::string& pl_type, uint64_t iov_start, uint64_t iov_end)
+{
+  if (!uti) uti = new CDBUtils();
+  return uti->deletePayloadIOV(pl_type,iov_start, iov_end);
+}
+
 void TestCDBInsert()
 {
   recoConsts *rc = recoConsts::instance();
