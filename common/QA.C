@@ -3,7 +3,7 @@
 
 #include <fun4all/Fun4AllServer.h>
 #include <qa_modules/QAG4SimulationCalorimeterSum.h>
-#include <qa_modules/QAHistManagerDef.h>
+#include <qautils/QAHistManagerDef.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libqa_modules.so)
