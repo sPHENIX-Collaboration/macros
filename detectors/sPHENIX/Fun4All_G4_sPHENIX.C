@@ -341,7 +341,10 @@ int Fun4All_G4_sPHENIX(
 
   Enable::GLOBAL_RECO = (Enable::MBDFAKE || Enable::MBDRECO || Enable::TRACKING_TRACK) && true;
   Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && Enable::GLOBAL_RECO && false;
-  Enable::TRACKING_QA = Enable::TRACKING_TRACK && Enable::QA && true;
+  Enable::TRACKING_QA = Enable::TRACKING_TRACK && Enable::QA && false;
+
+  G4TRACKING::SC_USE_MICROMEGAS=true;
+  G4TRACKING::SC_CALIBMODE = true;
 
   // only do track matching if TRACKINGTRACK is also used
   Enable::TRACK_MATCHING = Enable::TRACKING_TRACK && false;
