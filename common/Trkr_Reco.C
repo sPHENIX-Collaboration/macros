@@ -23,6 +23,7 @@
 #include <trackreco/PHTrackCleaner.h>
 #include <trackreco/PHTrackSeeding.h>
 #include <trackreco/SecondaryVertexFinder.h>
+#include <trackreco/TrackingIterationCounter.h>
 
 #include <tpc/TpcLoadDistortionCorrection.h>
 
@@ -159,17 +160,32 @@ void Tracking_Reco_TrackSeed()
     se->registerSubsystem(mm_match);
   }
 
-   /*
-   * all done
-   * at this stage tracks are fully assembled. They contain clusters spaning Silicon detectors, TPC and Micromegas
-   * they are ready to be fit.
-   */ 
-  if(G4TRACKING::convert_seeds_to_svtxtracks)
-    {
-      convert_seeds();
-    }
 }
 
+void Tracking_Reco_TrackSeed_pass1()
+{
+  Fun4AllServer* se = Fun4AllServer::instance();
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+
+  TrackingIterationCounter* counter = new TrackingIterationCounter("TrkrIter1");
+  /// Clusters already used are in the 0th iteration
+  counter->iteration(0);
+  se->registerSubsystem(counter);
+
+  PHActsSiliconSeeding* silseed = new PHActsSiliconSeeding("PHActsSiliconSeedingIt1");
+  silseed->Verbosity(verbosity);
+  silseed->searchInIntt();
+  silseed->iteration(1);
+  silseed->set_track_map_name("SiliconTrackSeedContainerIt1");
+  se->registerSubsystem(silseed);
+
+  PHSiliconSeedMerger* merger = new PHSiliconSeedMerger("SiliconSeedMargerIt1");
+  merger->Verbosity(verbosity);
+  merger->clusterOverlap(2);
+  merger->searchIntt();
+  merger->trackMapName("SiliconTrackSeedContainerIt1");
+  se->registerSubsystem(merger);
+}
 
 void vertexing()
 {
@@ -379,14 +395,25 @@ void Tracking_Reco()
     {
       Tracking_Reco_TrackSeed();
     }
- 
-  if(G4TRACKING::convert_seeds_to_svtxtracks)
+
+    if (G4TRACKING::convert_seeds_to_svtxtracks)
     {
+      convert_seeds();
       vertexing();
     }
   else
     {
       Tracking_Reco_TrackFit();
+    }
+
+    if (G4TRACKING::iterative_seeding)
+    {
+      Tracking_Reco_TrackSeed_pass1();
+    }
+    if (G4TRACKING::convert_seeds_to_svtxtracks)
+    {
+      convert_seeds();
+      vertexing();
     }
 
   if(G4TRACKING::use_alignment)
