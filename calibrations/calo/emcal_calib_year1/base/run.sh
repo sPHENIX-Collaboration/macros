@@ -22,7 +22,7 @@ iter=0
 
 while read dir; do 
   rm inputdata.txt
-  for file in /sphenix/lustre01/sphnxpro/commissioning/DST_ana.387_2023p003/DST_CALOR-000"$dir"-*.root
+  for file in /sphenix/lustre01/sphnxpro/commissioning/DST_ana395_2023p007/DST_CALO*-000"$dir"-*.root
   do
 cat >>inputdata.txt<< EOF
 $file
@@ -37,7 +37,7 @@ if [ "$iter" -eq 0 ]; then
 fi
 
 # upper bound on x determines number of iterations
-for((x=0;x<7;x++));
+for((x=0;x<10;x++));
 do
 
 if [ -d ${TargetDir} ]; then
@@ -56,7 +56,7 @@ while read dir; do
   rm inputdata.txt
   
   # creates a list of all files for a particular run
-  for file in /sphenix/lustre01/sphnxpro/commissioning/DST_ana.387_2023p003/DST_CALOR-000"$dir"-*.root
+  for file in /sphenix/lustre01/sphnxpro/commissioning/DST_ana395_2023p007/DST_CALO*-000"$dir"-*.root
   do
 cat >>inputdata.txt<< EOF
 $file
@@ -138,9 +138,9 @@ done < runList.txt # redirect the input of the
 # Set the directory where the files are located
 file_directory="${TargetDir}/OutDir*/DONE.root"
 
-while [ $(ls $file_directory | wc -l) -lt $((i-1)) ]; do
+while [ $(ls $file_directory | wc -l) -lt $((i)) ]; do
      current_file_count=$(ls $file_directory | wc -l)
-    echo "Waiting for $((i-1)) files, currently $current_file_count"
+    echo "Waiting for $((i)) files, currently $current_file_count"
     sleep 30  # Adjust the sleep duration as needed
 done
 
