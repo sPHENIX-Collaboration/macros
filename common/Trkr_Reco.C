@@ -4,7 +4,6 @@
 #include <G4_TrkrVariables.C>
 //#include <G4_ActsGeom.C>
 
-#include <g4eval/SvtxTruthRecoTableEval.h>
 #include <g4eval/TrackSeedTrackMapConverter.h>
 
 #include <trackreco/MakeActsGeometry.h>
@@ -33,8 +32,11 @@
 
 #include <fun4all/Fun4AllServer.h>
 
+#include <trackingdiagnostics/TrackContainerCombiner.h>
+
 #include <string>
 
+R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 R__LOAD_LIBRARY(libtpc.so)
@@ -48,9 +50,9 @@ void convert_seeds()
   TrackSeedTrackMapConverter* converter = new TrackSeedTrackMapConverter();
   // Default set to full SvtxTrackSeeds. Can be set to
   // SiliconTrackSeedContainer or TpcTrackSeedContainer
-  converter->setTrackSeedName("SvtxTrackSeedContainer");
+  converter->setTrackSeedName("SiliconTrackSeedContainer");
   converter->setFieldMap(G4MAGNET::magfield);
-  converter->Verbosity(verbosity);
+  converter->Verbosity(4);
   se->registerSubsystem(converter);
 }
 
@@ -187,6 +189,12 @@ void Tracking_Reco_TrackSeed_pass1()
   merger->searchIntt();
   merger->trackMapName("SiliconTrackSeedContainerIt1");
   se->registerSubsystem(merger);
+
+  TrackContainerCombiner* combiner = new TrackContainerCombiner;
+  combiner->newContainerName("SiliconTrackSeedContainer");
+  combiner->oldContainerName("SiliconTrackSeedContainerIt1");
+  combiner->Verbosity(verbosity);
+  se->registerSubsystem(combiner);
 }
 
 void vertexing()
@@ -351,10 +359,6 @@ void Tracking_Reco_CommissioningTrackSeed()
     mm_match->set_test_windows_printout(false);  // used for tuning search windows only
     se->registerSubsystem(mm_match);
   }
-  if (G4TRACKING::convert_seeds_to_svtxtracks)
-  {
-    convert_seeds();
-  }
 }
 
 void alignment(std::string datafilename = "mille_output_data_file",
@@ -404,11 +408,12 @@ void Tracking_Reco()
   if (G4TRACKING::iterative_seeding)
   {
     Tracking_Reco_TrackSeed_pass1();
-  }
-  if (G4TRACKING::convert_seeds_to_svtxtracks)
-  {
-    convert_seeds();
-    vertexing();
+
+    if (G4TRACKING::convert_seeds_to_svtxtracks)
+    {
+      convert_seeds();
+      vertexing();
+    }
   }
 
   if (G4TRACKING::use_alignment)
