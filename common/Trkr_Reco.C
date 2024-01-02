@@ -50,9 +50,9 @@ void convert_seeds()
   TrackSeedTrackMapConverter* converter = new TrackSeedTrackMapConverter();
   // Default set to full SvtxTrackSeeds. Can be set to
   // SiliconTrackSeedContainer or TpcTrackSeedContainer
-  converter->setTrackSeedName("SiliconTrackSeedContainer");
+  converter->setTrackSeedName("SvtxTrackSeedContainer");
   converter->setFieldMap(G4MAGNET::magfield);
-  converter->Verbosity(4);
+  converter->Verbosity(verbosity);
   se->registerSubsystem(converter);
 }
 
