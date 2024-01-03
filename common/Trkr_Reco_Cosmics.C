@@ -3,7 +3,7 @@
 
 #include <G4_TrkrVariables.C>
 
-#include <g4eval/TrackSeedTrackMapConverter.h>
+#include <trackingdiagnostics/TrackSeedTrackMapConverter.h>
 
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHCASeeding.h>
@@ -31,6 +31,7 @@ R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtrackeralign.so)
+R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 void convert_seeds()
 {
   Fun4AllServer *se = Fun4AllServer::instance();

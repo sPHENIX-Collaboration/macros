@@ -4,11 +4,10 @@
 #include <GlobalVariables.C>
 
 #include <G4_TrkrVariables.C>
-//#include <G4_ActsGeom.C>
 
 
 #include <g4eval/SvtxTruthRecoTableEval.h>
-#include <g4eval/TrackSeedTrackMapConverter.h>
+#include <trackingdiagnostics/TrackSeedTrackMapConverter.h>
 
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSiliconSeeding.h>
@@ -38,7 +37,7 @@
 
 #include <fun4all/Fun4AllServer.h>
 
-
+R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 R__LOAD_LIBRARY(libtrackeralign.so)

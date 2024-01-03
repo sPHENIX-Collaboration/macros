@@ -2,9 +2,8 @@
 #define MACRO_TRKRRECO_C
 
 #include <G4_TrkrVariables.C>
-//#include <G4_ActsGeom.C>
 
-#include <g4eval/TrackSeedTrackMapConverter.h>
+#include <trackingdiagnostics/TrackSeedTrackMapConverter.h>
 
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsSiliconSeeding.h>
