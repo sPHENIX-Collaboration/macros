@@ -485,6 +485,9 @@ void Micromegas_Cells()
   auto se = Fun4AllServer::instance();
   // micromegas
   auto reco = new PHG4MicromegasHitReco;
+  double extended_readout_time = 0.0;
+  if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+  reco->set_double_param("micromegas_tmax", 800.0+extended_readout_time);
   reco->Verbosity(0);
   se->registerSubsystem(reco);
 
