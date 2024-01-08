@@ -149,11 +149,11 @@ double Intt(PHG4Reco* g4Reco, double radius,
   sitrack->Verbosity(verbosity);
   sitrack->SetActive(1);
   sitrack->OverlapCheck(intt_overlapcheck);
-  if (Enable::INTT_ABSORBER)
+  if (Enable::INTT_ABSORBER || Enable::ABSORBER)
   {
     sitrack->SetAbsorberActive();
   }
-  if (Enable::INTT_SUPPORT)
+  if (Enable::INTT_SUPPORT || Enable::SUPPORT)
   {
     sitrack->set_int_param(PHG4InttDefs::SUPPORTPARAMS, "supportactive", 1);
   }
