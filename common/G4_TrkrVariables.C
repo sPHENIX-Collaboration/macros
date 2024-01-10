@@ -41,7 +41,8 @@ namespace Enable
   bool MICROMEGAS_CELL = false;
   bool MICROMEGAS_CLUSTER = false;
   bool MICROMEGAS_QA = false;
-
+  int MICROMEGAS_VERBOSITY = 0;
+  
   bool TRACKING_TRACK = false;
   bool TRACKING_EVAL = false;
   bool TRACK_MATCHING = false;
