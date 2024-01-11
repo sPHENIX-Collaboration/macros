@@ -32,14 +32,19 @@
 
 #include <phool/recoConsts.h>
 
+#include <centrality/CentralityReco.h>
+#include <calotrigger/MinimumBiasClassifier.h>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libcalotrigger.so)
+R__LOAD_LIBRARY(libcentrality.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 
-void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commissioning/aligned_prdf/beam-00021796-0076.prdf", int nEvents = 10)
+void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commissioning/aligned_prdf/beam-00021774-0000.prdf", int nEvents = 10)
 {
   bool enableMasking = 0;
   bool addZeroSupCaloNodes = 1;
@@ -270,6 +275,12 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
     calibOHCal_SZ->set_outputNodePrefix("TOWERINFO_SZ_CALIB_");
     se->registerSubsystem(calibOHCal_SZ);
   }
+
+  CentralityReco *centralityreco = new CentralityReco();
+  se->registerSubsystem(centralityreco);
+
+  MinimumBiasClassifier *minimumbiasclassifier = new MinimumBiasClassifier();
+  se->registerSubsystem(minimumbiasclassifier);
 
   Fun4AllInputManager *In = new Fun4AllPrdfInputManager("in");
   In->AddFile(fname);
