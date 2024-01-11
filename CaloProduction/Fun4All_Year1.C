@@ -35,6 +35,8 @@
 #include <centrality/CentralityReco.h>
 #include <calotrigger/MinimumBiasClassifier.h>
 
+#include <calovalid/CaloValid.h>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libcalo_reco.so)
@@ -43,6 +45,7 @@ R__LOAD_LIBRARY(libcentrality.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
+R__LOAD_LIBRARY(libcalovalid.so)
 
 void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commissioning/aligned_prdf/beam-00021774-0000.prdf", int nEvents = 10)
 {
@@ -64,8 +67,11 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   int runnumber = runseg.first;
   int segment = runseg.second;
   char outfile[100];
+  char outfile_hist[100];
   sprintf(outfile, "DST_CALOR-%08d-%04d.root", runnumber, segment);
+  sprintf(outfile_hist, "HIST_CALOR-%08d-%04d.root", runnumber, segment);
   string fulloutfile = string("./") + outfile;
+  string fulloutfile_hist = string("./") + outfile_hist;
   //===============
   // conditions DB flags
   //===============
@@ -281,6 +287,15 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
 
   MinimumBiasClassifier *minimumbiasclassifier = new MinimumBiasClassifier();
   se->registerSubsystem(minimumbiasclassifier);
+
+  ///////////////////////////////////
+  // Validation 
+  CaloValid *ca = new CaloValid("calomodulename",fulloutfile_hist);
+  ca->set_timing_cut_width(200);  //integers for timing width, > 1 : wider cut around max peak time
+  ca->apply_vertex_cut(false);
+  ca->set_vertex_cut(20.);
+  se->registerSubsystem(ca);
+
 
   Fun4AllInputManager *In = new Fun4AllPrdfInputManager("in");
   In->AddFile(fname);
