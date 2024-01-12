@@ -20,6 +20,7 @@
 
 #include <fermimotionafterburner/FermimotionAfterburner.h>
 #include <hijingflipafterburner/HIJINGFlipAfterburner.h>
+#include <reactionplaneafterburner/ReactionPlaneAfterburner.h>
 
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phhepmc/Fun4AllHepMCPileupInputManager.h>
@@ -40,6 +41,7 @@ R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
 R__LOAD_LIBRARY(libFermimotionAfterburner.so)
 R__LOAD_LIBRARY(libHIJINGFlipAfterburner.so)
+R__LOAD_LIBRARY(libReactionPlaneAfterburner.so)
 
 namespace Input
 {
@@ -221,6 +223,7 @@ namespace INPUTHEPMC
   int FLOW_VERBOSITY = 0;
   bool FERMIMOTION = false;
   bool HIJINGFLIP = false;
+  bool REACTIONPLANERAND = false;
 
 }  // namespace INPUTHEPMC
 
@@ -505,6 +508,12 @@ void InputRegister()
   {
     if (Input::HEPMC)
     {
+      if (INPUTHEPMC::REACTIONPLANERAND)
+      {
+        ReactionPlaneAfterburner *rp = new ReactionPlaneAfterburner();
+        se->registerSubsystem(rp);
+      }
+
       if (INPUTHEPMC::HIJINGFLIP)
       {
 	HIJINGFlipAfterburner *flip = new HIJINGFlipAfterburner();
