@@ -59,8 +59,7 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
                              const string &input_tpcfile21 = "tpc21.list",
                              const string &input_tpcfile22 = "tpc22.list",
                              const string &input_tpcfile23 = "tpc23.list",
-                             const string &input_tpotfile = "tpot.list"
-)
+                             const string &input_tpotfile = "tpot.list")
 {
   vector<string> tpc_infile;
   tpc_infile.push_back(input_tpcfile00);
@@ -110,12 +109,11 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
   gl1_infile.push_back(input_gl1file);
 
   vector<string> tpot_infile;
- tpot_infile.push_back(input_tpotfile);
+  tpot_infile.push_back(input_tpotfile);
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
-  // rc->set_IntFlag("RUNNUMBER",20445);
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
   //  in->Verbosity(2);
   int i = 0;
@@ -133,6 +131,8 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
   {
     SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + to_string(i));
     //    intt_sngl->Verbosity(3);
+    intt_sngl->SetNegativeBco(1);
+    intt_sngl->SetBcoRange(2);
     intt_sngl->AddListFile(iter);
     in->registerStreamingInput(intt_sngl, Fun4AllStreamingInputManager::INTT);
     i++;
@@ -151,34 +151,34 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
   i = 0;
   for (auto iter : gl1_infile)
   {
-    SingleGl1PoolInput *sngl = new SingleGl1PoolInput("GL1_" + to_string(i));
-    //    sngl->Verbosity(3);
-    sngl->AddListFile(iter);
-    in->registerStreamingInput(sngl, Fun4AllStreamingInputManager::GL1);
+    SingleGl1PoolInput *gl1_sngl = new SingleGl1PoolInput("GL1_" + to_string(i));
+    //    gl1_sngl->Verbosity(3);
+    gl1_sngl->AddListFile(iter);
+    in->registerStreamingInput(gl1_sngl, Fun4AllStreamingInputManager::GL1);
     i++;
   }
   i = 0;
   for (auto iter : tpot_infile)
   {
-    SingleMicromegasPoolInput *sngl = new SingleMicromegasPoolInput("MICROMEGAS_" + to_string(i));
+    SingleMicromegasPoolInput *mm_sngl = new SingleMicromegasPoolInput("MICROMEGAS_" + to_string(i));
     //   sngl->Verbosity(3);
-    sngl->SetBcoRange(100);
-    sngl->SetNegativeBco(2);
-    sngl->AddListFile(iter);
-    in->registerStreamingInput(sngl, Fun4AllStreamingInputManager::MICROMEGAS);
+    mm_sngl->SetBcoRange(100);
+    mm_sngl->SetNegativeBco(2);
+    mm_sngl->AddListFile(iter);
+    in->registerStreamingInput(mm_sngl, Fun4AllStreamingInputManager::MICROMEGAS);
     i++;
   }
 
   se->registerInputManager(in);
-  StreamingCheck *scheck = new StreamingCheck();
-  scheck->SetTpcBcoRange(130);
+  // StreamingCheck *scheck = new StreamingCheck();
+  // scheck->SetTpcBcoRange(130);
   // se->registerSubsystem(scheck);
   // TpcCheck *tpccheck = new TpcCheck();
   // tpccheck->Verbosity(3);
   // tpccheck->SetBcoRange(130);
   // se->registerSubsystem(tpccheck);
 
-  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "/sphenix/user/pinkenbu/streaming.root");
+  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "streaming.root");
   se->registerOutputManager(out);
 
   if (nEvents < 0)
