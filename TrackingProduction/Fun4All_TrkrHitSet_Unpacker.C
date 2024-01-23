@@ -1,19 +1,25 @@
+/*
+ * This macro is run in our daily CI and is intended as a minimum working
+ * example showing how to unpack the raw hits into the offline tracker hit
+ * format. No other reconstruction or analysis is performed
+ */
 #include <GlobalVariables.C>
 
-#include <fun4all/Fun4AllRunNodeInputManager.h>
+#include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
+
 #include <ffamodules/CDBInterface.h>
 
 #include <phool/recoConsts.h>
 
-#include <mvtx/MvtxCombinedRawDataDecoder.h>
 #include <intt/InttCombinedRawDataDecoder.h>
-#include <tpc/TpcCombinedRawDataUnpacker.h>
 #include <micromegas/MicromegasCombinedDataDecoder.h>
+#include <mvtx/MvtxCombinedRawDataDecoder.h>
+#include <tpc/TpcCombinedRawDataUnpacker.h>
 
 #include <stdio.h>
 
@@ -27,27 +33,27 @@ void Fun4All_TrkrHitSet_Unpacker(
     const int nEvents = 2,
     const int runnumber = 26048,
     const std::string outfilename = "cosmics",
-    const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all/",
+    const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all_3/",
     const std::string file = "cosmics-")
 {
   gSystem->Load("libg4dst.so");
   std::string inputRawHitFile = dir + file;
   char filename[500];
-  sprintf(filename, "%s%08d-0000.root",inputRawHitFile.c_str(),runnumber);
- 
+  sprintf(filename, "%s%08d-0000.root", inputRawHitFile.c_str(), runnumber);
+
   auto se = Fun4AllServer::instance();
   se->Verbosity(1);
   auto rc = recoConsts::instance();
-  rc->set_IntFlag("RUNNUMBER",runnumber);
-  
+  rc->set_IntFlag("RUNNUMBER", runnumber);
+
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG","ProdA_2023");
-  rc->set_uint64Flag("TIMESTAMP",6);
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
+  rc->set_uint64Flag("TIMESTAMP", 6);
 
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
   ingeo->AddFile(geofile);
-  se->registerInputManager(ingeo); 
+  se->registerInputManager(ingeo);
 
   auto hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->fileopen(filename);
@@ -64,7 +70,7 @@ void Fun4All_TrkrHitSet_Unpacker(
   se->registerSubsystem(tpcunpacker);
 
   auto tpotunpacker = new MicromegasCombinedDataDecoder;
-  
+
   std::string calibrationFile = CDBInterface::instance()->getUrl("TPOT_Pedestal");
   tpotunpacker->set_calibration_file(calibrationFile);
   se->registerSubsystem(tpotunpacker);
@@ -75,7 +81,7 @@ void Fun4All_TrkrHitSet_Unpacker(
   out->StripNode("MICROMEGASRAWHIT");
   out->StripNode("TPCRAWHIT");
   out->StripNode("GL1RAWHIT");
-  
+
   se->registerOutputManager(out);
 
   se->run(nEvents);
@@ -83,7 +89,6 @@ void Fun4All_TrkrHitSet_Unpacker(
   se->PrintTimer();
 
   delete se;
-  std::cout << "Finished"<<std::endl;
+  std::cout << "Finished" << std::endl;
   gSystem->Exit(0);
-
 }
