@@ -9,7 +9,9 @@
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsVertexPropagator.h>
+#include <trackreco/PHCosmicSeeder.h>
 #include <trackreco/PHCosmicSiliconPropagator.h>
+#include <trackreco/PHCosmicTrackMerger.h>
 #include <trackreco/PHCosmicsTrkFitter.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
 #include <trackreco/PHSiliconHelicalPropagator.h>
@@ -17,8 +19,6 @@
 #include <trackreco/PHTpcDeltaZCorrection.h>
 #include <trackreco/PHTrackCleaner.h>
 #include <trackreco/SecondaryVertexFinder.h>
-#include <trackreco/PHCosmicSeeder.h>
-#include <trackreco/PHCosmicTrackMerger.h>
 
 #include <tpc/TpcLoadDistortionCorrection.h>
 
