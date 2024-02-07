@@ -64,6 +64,7 @@ void Fun4All_TrkrHitSet_Unpacker(
   se->registerSubsystem(mvtxunpacker);
 
   auto inttunpacker = new InttCombinedRawDataDecoder;
+  inttunpacker->LoadHotChannelMapRemote("INTT_HotMap");
   se->registerSubsystem(inttunpacker);
 
   auto tpcunpacker = new TpcCombinedRawDataUnpacker;
