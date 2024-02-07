@@ -54,11 +54,11 @@ void MvtxInit()
 }
 
 double Mvtx(PHG4Reco* g4Reco, double radius,
-            const int absorberactive = 0)
+            const int supportactive = 0)
 {
   bool maps_overlapcheck = Enable::OVERLAPCHECK || Enable::MVTX_OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
-  bool AbsorberActive = Enable::ABSORBER || Enable::MVTX_ABSORBER;
+  bool SupportActive = Enable::SUPPORT || Enable::MVTX_SUPPORT;
 
   PHG4MvtxSubsystem* mvtx = new PHG4MvtxSubsystem("MVTX");
   mvtx->Verbosity(verbosity);
@@ -77,9 +77,9 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave.gdml"));
 
   mvtx->SetActive();
-  if (AbsorberActive)
+  if (SupportActive)
   {
-    mvtx->SetAbsorberActive();
+    mvtx->SetSupportActive();
   }
   mvtx->OverlapCheck(maps_overlapcheck);
   g4Reco->registerSubsystem(mvtx);

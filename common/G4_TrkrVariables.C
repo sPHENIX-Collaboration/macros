@@ -14,7 +14,7 @@ namespace Enable
   bool MVTX_CELL = false;
   bool MVTX_CLUSTER = false;
   bool MVTX_QA = false;
-  bool MVTX_ABSORBER = false;
+  bool MVTX_SUPPORT = false;
   
   int MVTX_VERBOSITY = 0;
   
