@@ -72,10 +72,10 @@ void Fun4All_TrkrClusteringSeeding(
   se->registerInputManager(hitsin);
 
   auto mvtxunpacker = new MvtxCombinedRawDataDecoder;
-  mvtxunpacker->Verbosity(1);
   se->registerSubsystem(mvtxunpacker);
 
   auto inttunpacker = new InttCombinedRawDataDecoder;
+  inttunpacker->LoadHotChannelMapRemote("INTT_HotMap");
   se->registerSubsystem(inttunpacker);
 
   auto tpcunpacker = new TpcCombinedRawDataUnpacker;
