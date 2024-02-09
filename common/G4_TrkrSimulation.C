@@ -487,9 +487,17 @@ void MicromegasInit()
 
 void Micromegas(PHG4Reco* g4Reco)
 {
+  bool overlapcheck = Enable::OVERLAPCHECK || Enable::MICROMEGAS_OVERLAPCHECK;
+  int verbosity = std::max(Enable::VERBOSITY, Enable::MICROMEGAS_VERBOSITY);
+  bool SupportActive = Enable::SUPPORT || Enable::MICROMEGAS_SUPPORT;
   const int mm_layer = G4MVTX::n_maps_layer + G4INTT::n_intt_layer + G4TPC::n_gas_layer;
   auto mm = new PHG4MicromegasSubsystem("MICROMEGAS", mm_layer);
-  mm->OverlapCheck( Enable::OVERLAPCHECK );
+  mm->Verbosity(verbosity);
+  if (SupportActive)
+  {
+    mm->SetSupportActive();
+  }
+  mm->OverlapCheck(overlapcheck );
   mm->SetActive();
   g4Reco->registerSubsystem(mm);
 }
