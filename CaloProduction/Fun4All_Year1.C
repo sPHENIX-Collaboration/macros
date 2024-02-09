@@ -282,12 +282,11 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
     se->registerSubsystem(calibOHCal_SZ);
   }
 
-  CentralityReco *centralityreco = new CentralityReco();
-  se->registerSubsystem(centralityreco);
-
   MinimumBiasClassifier *minimumbiasclassifier = new MinimumBiasClassifier();
   se->registerSubsystem(minimumbiasclassifier);
 
+  CentralityReco *centralityreco = new CentralityReco();
+  se->registerSubsystem(centralityreco);
   ///////////////////////////////////
   // Validation 
   CaloValid *ca = new CaloValid("calomodulename",fulloutfile_hist);
