@@ -14,7 +14,7 @@ namespace Enable
   bool MVTX_CELL = false;
   bool MVTX_CLUSTER = false;
   bool MVTX_QA = false;
-  bool MVTX_ABSORBER = false;
+  bool MVTX_SUPPORT = false;
   
   int MVTX_VERBOSITY = 0;
   
@@ -38,9 +38,11 @@ namespace Enable
 
   int TPC_VERBOSITY = 0;
 
+  bool MICROMEGAS_OVERLAPCHECK = false;
   bool MICROMEGAS_CELL = false;
   bool MICROMEGAS_CLUSTER = false;
   bool MICROMEGAS_QA = false;
+  bool MICROMEGAS_SUPPORT = false;
   int MICROMEGAS_VERBOSITY = 0;
   
   bool TRACKING_TRACK = false;
