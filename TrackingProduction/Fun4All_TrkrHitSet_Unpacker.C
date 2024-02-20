@@ -33,7 +33,7 @@ void Fun4All_TrkrHitSet_Unpacker(
     const int nEvents = 2,
     const int runnumber = 26048,
     const std::string outfilename = "cosmics",
-    const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all_3/",
+    const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all_4/",
     const std::string file = "cosmics-")
 {
   gSystem->Load("libg4dst.so");
