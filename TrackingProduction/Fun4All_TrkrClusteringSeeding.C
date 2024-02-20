@@ -42,7 +42,7 @@ void Fun4All_TrkrClusteringSeeding(
     const int nEvents = 2,
     const std::string filename = "cosmics-00025926-0005.root",
     const std::string outfilename = "cosmics",
-    const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all_3/")
+    const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all_4/")
 {
   std::string inputRawHitFile = dir + filename;
   auto pos = filename.find("0002");
