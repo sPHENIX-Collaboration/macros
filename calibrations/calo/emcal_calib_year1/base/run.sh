@@ -22,7 +22,7 @@ iter=0
 
 while read dir; do 
   rm inputdata.txt
-  for file in /sphenix/lustre01/sphnxpro/commissioning/DST_ana395_2023p007/DST_CALO*-000"$dir"-*.root
+  for file in /sphenix/lustre01/sphnxpro/commissioning/DST_ana.395_2023p007/DST_CALO*-000"$dir"-*.root
   do
 cat >>inputdata.txt<< EOF
 $file
@@ -36,18 +36,18 @@ if [ "$iter" -eq 0 ]; then
   iter=$((iter+1))
 fi
 
+
 # upper bound on x determines number of iterations
-for((x=0;x<10;x++));
+for((x=0;x<35;x++));
 do
 
 if [ -d ${TargetDir} ]; then
-  if [ -d ${TargetDir}/OutDir0 ]; then
+  if [ -n "$(ls -A ${TargetDir}/OutDir*)" ]; then
     rm -rf ${TargetDir}/OutDir*
   fi
 else
   mkdir ${TargetDir}
 fi
-condor_rm bseidlitz
 
 i=0
 while read dir; do 
@@ -63,8 +63,8 @@ $file
 EOF
 done
 
-  if [ "$iter" -eq 1 ]; then
-    j=8
+  if [ "$iter" -le 3 ]; then
+    j=16
   else
     j=100
   fi
@@ -161,10 +161,10 @@ hadd -k $hist_out $file_to_hadd
 ################################
 # FITTING (not done with condor
 
-if [ "$iter" -eq 1 ]; then
-  root "../doTscFit.C(\"${hist_out}\",\"local_calib_copy.root\")"
+if [ "$iter" -le 3 ]; then
+  root -b "../doTscFit.C(\"${hist_out}\",\"local_calib_copy.root\",$iter)"
 else
-  root "../doFitAndCalibUpdate.C(\"${hist_out}\",\"local_calib_copy.root\",$iter)"
+  root -b "../doFitAndCalibUpdate.C(\"${hist_out}\",\"local_calib_copy.root\",$iter)"
 fi
 
 iter=$((iter+1))
