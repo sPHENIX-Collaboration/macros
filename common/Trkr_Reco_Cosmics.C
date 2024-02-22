@@ -9,7 +9,9 @@
 #include <trackreco/MakeActsGeometry.h>
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsVertexPropagator.h>
+#include <trackreco/PHCosmicSeeder.h>
 #include <trackreco/PHCosmicSiliconPropagator.h>
+#include <trackreco/PHCosmicTrackMerger.h>
 #include <trackreco/PHCosmicsTrkFitter.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
 #include <trackreco/PHSiliconHelicalPropagator.h>
@@ -17,8 +19,6 @@
 #include <trackreco/PHTpcDeltaZCorrection.h>
 #include <trackreco/PHTrackCleaner.h>
 #include <trackreco/SecondaryVertexFinder.h>
-#include <trackreco/PHCosmicSeeder.h>
-#include <trackreco/PHCosmicTrackMerger.h>
 
 #include <tpc/TpcLoadDistortionCorrection.h>
 
@@ -65,7 +65,7 @@ void Tracking_Reco_TrackSeed()
 
   PHCosmicSiliconPropagator *hprop = new PHCosmicSiliconPropagator("HelicalPropagator");
   hprop->Verbosity(verbosity);
-  if(std::stof(G4MAGNET::magfield) < 0.1)
+  if (std::stof(G4MAGNET::magfield) < 0.1)
   {
     hprop->zero_field();
   }
@@ -77,7 +77,7 @@ void Tracking_Reco_TrackSeed()
 
   auto merger = new PHCosmicTrackMerger("PHCosmicMerger");
   merger->Verbosity(verbosity);
-   if(std::stof(G4MAGNET::magfield) < 0.1)
+  if (std::stof(G4MAGNET::magfield) < 0.1)
   {
     merger->zero_field();
   }
@@ -86,7 +86,7 @@ void Tracking_Reco_TrackSeed()
   PHCosmicSiliconPropagator *hprop2 = new PHCosmicSiliconPropagator("HelicalPropagator2");
   hprop2->Verbosity(verbosity);
   hprop2->resetSvtxSeedContainer();
-   if(std::stof(G4MAGNET::magfield) < 0.1)
+  if (std::stof(G4MAGNET::magfield) < 0.1)
   {
     hprop2->zero_field();
   }
@@ -96,7 +96,7 @@ void Tracking_Reco_TrackSeed()
 
   auto merger2 = new PHCosmicTrackMerger("PHCosmicMerger2");
   merger2->Verbosity(verbosity);
-   if(std::stof(G4MAGNET::magfield) < 0.1)
+  if (std::stof(G4MAGNET::magfield) < 0.1)
   {
     merger2->zero_field();
   }
