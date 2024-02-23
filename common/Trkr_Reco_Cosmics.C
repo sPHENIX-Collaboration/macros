@@ -60,45 +60,46 @@ void Tracking_Reco_TrackSeed()
   auto se = Fun4AllServer::instance();
 
   PHCosmicSeeder *seeder = new PHCosmicSeeder;
-  seeder->Verbosity(0);
+  seeder->Verbosity(verbosity);
   se->registerSubsystem(seeder);
 
   PHCosmicSiliconPropagator *hprop = new PHCosmicSiliconPropagator("HelicalPropagator");
   hprop->Verbosity(verbosity);
-  hprop->zero_field();
+  if (std::stof(G4MAGNET::magfield) < 0.1)
+  {
+    hprop->zero_field();
+  }
   hprop->set_dca_z_cut(2);
   hprop->set_dca_xy_cut(2);
   se->registerSubsystem(hprop);
 
   // Associate Micromegas clusters with the tracks
 
-  // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-  auto mm_match = new PHMicromegasTpcTrackMatching;
-  mm_match->Verbosity(verbosity);
-
-  // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
-  mm_match->set_rphi_search_window_lyr1(0.2);
-  mm_match->set_rphi_search_window_lyr2(13.0);
-  mm_match->set_z_search_window_lyr1(26.0);
-  mm_match->set_z_search_window_lyr2(0.2);
-  mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
-  mm_match->set_test_windows_printout(false);  // used for tuning search windows only
-  se->registerSubsystem(mm_match);
-
   auto merger = new PHCosmicTrackMerger("PHCosmicMerger");
   merger->Verbosity(verbosity);
+  if (std::stof(G4MAGNET::magfield) < 0.1)
+  {
+    merger->zero_field();
+  }
   se->registerSubsystem(merger);
 
   PHCosmicSiliconPropagator *hprop2 = new PHCosmicSiliconPropagator("HelicalPropagator2");
   hprop2->Verbosity(verbosity);
   hprop2->resetSvtxSeedContainer();
-  hprop2->zero_field();
-  hprop2->set_dca_z_cut(2.5);
-  hprop2->set_dca_xy_cut(2.5);
+  if (std::stof(G4MAGNET::magfield) < 0.1)
+  {
+    hprop2->zero_field();
+  }
+  hprop2->set_dca_z_cut(2);
+  hprop2->set_dca_xy_cut(2);
   se->registerSubsystem(hprop2);
 
   auto merger2 = new PHCosmicTrackMerger("PHCosmicMerger2");
   merger2->Verbosity(verbosity);
+  if (std::stof(G4MAGNET::magfield) < 0.1)
+  {
+    merger2->zero_field();
+  }
   se->registerSubsystem(merger2);
 }
 
