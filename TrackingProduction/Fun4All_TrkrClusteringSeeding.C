@@ -8,6 +8,7 @@
 #include <G4_ActsGeom.C>
 #include <G4_Magnet.C>
 #include <GlobalVariables.C>
+#include <QA.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco_Cosmics.C>
 
@@ -21,9 +22,16 @@
 
 #include <phool/recoConsts.h>
 
+#include <intt/InttClusterQA.h>
 #include <intt/InttCombinedRawDataDecoder.h>
+
+#include <micromegas/MicromegasClusterQA.h>
 #include <micromegas/MicromegasCombinedDataDecoder.h>
+
+#include <mvtx/MvtxClusterQA.h>
 #include <mvtx/MvtxCombinedRawDataDecoder.h>
+
+#include <tpc/TpcClusterQA.h>
 #include <tpc/TpcCombinedRawDataUnpacker.h>
 
 #include <trackingdiagnostics/TrackResiduals.h>
@@ -134,6 +142,18 @@ void Fun4All_TrkrClusteringSeeding(
   se->run(nEvents);
   se->End();
   se->PrintTimer();
+
+  if (Enable::QA)
+  {
+    se->registerSubsystem(new MvtxClusterQA);
+    se->registerSubsystem(new InttClusterQA);
+    se->registerSubsystem(new TpcClusterQA);
+    se->registerSubsystem(new MicromegasClusterQA);
+
+    TString qaname = outfilename + filename + "_qa.root";
+    std::string qaOutputFileName(qaname.Data());
+    QAHistManagerDef::saveQARootFile(qaOutputFileName);
+  }
 
   delete se;
   std::cout << "Finished" << std::endl;
