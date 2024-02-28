@@ -1,9 +1,13 @@
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
-#include <fun4allraw/SingleTpcPoolInput.h>
-#include <fun4allraw/Fun4AllStreamingInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+
+#include <fun4allraw/Fun4AllStreamingInputManager.h>
+#include <fun4allraw/InputManagerType.h>
+#include <fun4allraw/SingleTpcPoolInput.h>
 
 #include <phool/recoConsts.h>
 
@@ -79,7 +83,7 @@ recoConsts *rc = recoConsts::instance();
 //    sngl->Verbosity(3);
     sngl->SetBcoRange(130);
     sngl->AddListFile(iter);
-    in->registerStreamingInput(sngl,Fun4AllStreamingInputManager::TPC);
+    in->registerStreamingInput(sngl,InputManagerType::TPC);
     i++;
   }
   se->registerInputManager(in);

@@ -3,6 +3,7 @@
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4allraw/Fun4AllStreamingInputManager.h>
+#include <fun4allraw/InputManagerType.h>
 #include <fun4allraw/SingleInttPoolInput.h>
 
 #include <phool/recoConsts.h>
@@ -48,7 +49,7 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
     sngl->AddListFile(iter);
     sngl->SetNegativeBco(1);
     sngl->SetBcoRange(2);
-    in->registerStreamingInput(sngl, Fun4AllStreamingInputManager::INTT);
+    in->registerStreamingInput(sngl, InputManagerType::INTT);
     i++;
   }
 
