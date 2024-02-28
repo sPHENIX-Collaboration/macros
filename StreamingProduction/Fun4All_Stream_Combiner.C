@@ -3,6 +3,7 @@
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4allraw/Fun4AllStreamingInputManager.h>
+#include <fun4allraw/InputManagerType.h>
 #include <fun4allraw/SingleGl1PoolInput.h>
 #include <fun4allraw/SingleInttPoolInput.h>
 #include <fun4allraw/SingleMicromegasPoolInput.h>
@@ -123,7 +124,7 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
     //    tpc_sngl->Verbosity(3);
     tpc_sngl->SetBcoRange(130);
     tpc_sngl->AddListFile(iter);
-    in->registerStreamingInput(tpc_sngl, Fun4AllStreamingInputManager::TPC);
+    in->registerStreamingInput(tpc_sngl, InputManagerType::TPC);
     i++;
   }
   i = 0;
@@ -134,7 +135,7 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
     intt_sngl->SetNegativeBco(1);
     intt_sngl->SetBcoRange(2);
     intt_sngl->AddListFile(iter);
-    in->registerStreamingInput(intt_sngl, Fun4AllStreamingInputManager::INTT);
+    in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
     i++;
   }
   i = 0;
@@ -145,7 +146,7 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
     mvtx_sngl->SetBcoRange(1000);
     mvtx_sngl->SetNegativeBco(1000);
     mvtx_sngl->AddListFile(iter);
-    in->registerStreamingInput(mvtx_sngl, Fun4AllStreamingInputManager::MVTX);
+    in->registerStreamingInput(mvtx_sngl, InputManagerType::MVTX);
     i++;
   }
   i = 0;
@@ -154,7 +155,7 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
     SingleGl1PoolInput *gl1_sngl = new SingleGl1PoolInput("GL1_" + to_string(i));
     //    gl1_sngl->Verbosity(3);
     gl1_sngl->AddListFile(iter);
-    in->registerStreamingInput(gl1_sngl, Fun4AllStreamingInputManager::GL1);
+    in->registerStreamingInput(gl1_sngl, InputManagerType::GL1);
     i++;
   }
   i = 0;
@@ -165,7 +166,7 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
     mm_sngl->SetBcoRange(100);
     mm_sngl->SetNegativeBco(2);
     mm_sngl->AddListFile(iter);
-    in->registerStreamingInput(mm_sngl, Fun4AllStreamingInputManager::MICROMEGAS);
+    in->registerStreamingInput(mm_sngl, InputManagerType::MICROMEGAS);
     i++;
   }
 
