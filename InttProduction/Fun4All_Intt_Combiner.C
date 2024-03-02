@@ -10,9 +10,13 @@
 
 #include <ffarawmodules/InttCheck.h>
 
+#include <intt/InttCombinedRawDataDecoder.h>
+#include <Trkr_Clustering.C>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
+R__LOAD_LIBRARY(libintt.so)
 
 SingleInttPoolInput *sngl[9]{};
 
@@ -26,6 +30,10 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
                            const string &input_file06 = "intt6.list",
                            const string &input_file07 = "intt7.list")
 {
+  bool runTrkrHits = false;
+  bool runTkrkClus = false;
+  bool stripRawHit = false;
+
   vector<string> infile;
   infile.push_back(input_file00);
   infile.push_back(input_file01);
@@ -47,7 +55,8 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
     SingleInttPoolInput *sngl = new SingleInttPoolInput("INTT_" + to_string(i));
     //    sngl->Verbosity(3);
     sngl->AddListFile(iter);
-    sngl->SetNegativeBco(1);
+    int nBcoVal = runTrkrHits ? 0 : 2;
+    sngl->SetNegativeBco(nBcoVal);
     sngl->SetBcoRange(2);
     in->registerStreamingInput(sngl, InputManagerType::INTT);
     i++;
@@ -59,7 +68,24 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
   //  inttcheck->Verbosity(3);
   //  se->registerSubsystem(inttcheck);
 
-  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "intt-00020445.root");
+  if (runTrkrHits)
+  {
+    InttCombinedRawDataDecoder *myDecoder = new InttCombinedRawDataDecoder("myUnpacker");
+    myDecoder->runInttStandalone(true);
+    myDecoder->writeInttEventHeader(true);
+    se->registerSubsystem(myDecoder);
+  }
+
+  if (runTkrkClus)
+  {
+    Intt_Clustering(); //Be careful!!! INTT z-clustering may be off which is not what you want!
+  }
+
+  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "intt-00020869.root");
+  if (stripRawHit)
+  {
+    out->StripNode("INTTRAWHIT");
+  }
   se->registerOutputManager(out);
 
   se->run(nEvents);
