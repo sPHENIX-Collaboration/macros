@@ -4,6 +4,7 @@
  * format. No other reconstruction or analysis is performed
  */
 #include <GlobalVariables.C>
+#include <Trkr_Clustering.C>
 
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -15,11 +16,6 @@
 #include <ffamodules/CDBInterface.h>
 
 #include <phool/recoConsts.h>
-
-#include <intt/InttCombinedRawDataDecoder.h>
-#include <micromegas/MicromegasCombinedDataDecoder.h>
-#include <mvtx/MvtxCombinedRawDataDecoder.h>
-#include <tpc/TpcCombinedRawDataUnpacker.h>
 
 #include <stdio.h>
 
@@ -59,22 +55,10 @@ void Fun4All_TrkrHitSet_Unpacker(
   hitsin->fileopen(filename);
   se->registerInputManager(hitsin);
 
-  auto mvtxunpacker = new MvtxCombinedRawDataDecoder;
-  mvtxunpacker->Verbosity(1);
-  se->registerSubsystem(mvtxunpacker);
-
-  auto inttunpacker = new InttCombinedRawDataDecoder;
-  inttunpacker->LoadHotChannelMapRemote("INTT_HotMap");
-  se->registerSubsystem(inttunpacker);
-
-  auto tpcunpacker = new TpcCombinedRawDataUnpacker;
-  se->registerSubsystem(tpcunpacker);
-
-  auto tpotunpacker = new MicromegasCombinedDataDecoder;
-
-  std::string calibrationFile = CDBInterface::instance()->getUrl("TPOT_Pedestal");
-  tpotunpacker->set_calibration_file(calibrationFile);
-  se->registerSubsystem(tpotunpacker);
+  Mvtx_HitUnpacking();
+  Intt_HitUnpacking();
+  Tpc_HitUnpacking();
+  Micromegas_HitUnpacking();
 
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfilename);
   out->StripNode("MVTXRAWHIT");

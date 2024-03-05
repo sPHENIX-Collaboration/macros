@@ -3,12 +3,17 @@
 
 #include <GlobalVariables.C>
 
-#include <G4_TrkrVariables.C>
 #include <G4_ActsGeom.C>
+#include <G4_TrkrVariables.C>
 
-#include <mvtx/MvtxHitPruner.h>
-#include <mvtx/MvtxClusterizer.h>
+#include <intt/InttCombinedRawDataDecoder.h>
+#include <micromegas/MicromegasCombinedDataDecoder.h>
+#include <mvtx/MvtxCombinedRawDataDecoder.h>
+#include <tpc/TpcCombinedRawDataUnpacker.h>
+
 #include <intt/InttClusterizer.h>
+#include <mvtx/MvtxClusterizer.h>
+#include <mvtx/MvtxHitPruner.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wundefined-internal"
@@ -32,12 +37,21 @@ void ClusteringInit()
   ACTSGEOM::ActsGeomInit();
 }
 
+void Mvtx_HitUnpacking()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
+  Fun4AllServer* se = Fun4AllServer::instance();
+
+  auto mvtxunpacker = new MvtxCombinedRawDataDecoder;
+  mvtxunpacker->Verbosity(verbosity);
+  se->registerSubsystem(mvtxunpacker);
+}
 void Mvtx_Clustering()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
 
- // prune the extra MVTX hits due to multiple strobes per hit
+  // prune the extra MVTX hits due to multiple strobes per hit
   MvtxHitPruner* mvtxhitpruner = new MvtxHitPruner();
   mvtxhitpruner->Verbosity(verbosity);
   se->registerSubsystem(mvtxhitpruner);
@@ -48,7 +62,15 @@ void Mvtx_Clustering()
   mvtxclusterizer->Verbosity(verbosity);
   se->registerSubsystem(mvtxclusterizer);
 }
+void Intt_HitUnpacking()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
+  Fun4AllServer* se = Fun4AllServer::instance();
 
+  auto inttunpacker = new InttCombinedRawDataDecoder;
+  inttunpacker->Verbosity(verbosity);
+  se->registerSubsystem(inttunpacker);
+}
 void Intt_Clustering()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
@@ -69,6 +91,15 @@ void Intt_Clustering()
   se->registerSubsystem(inttclusterizer);
 }
 
+void Tpc_HitUnpacking()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
+  Fun4AllServer* se = Fun4AllServer::instance();
+
+  auto tpcunpacker = new TpcCombinedRawDataUnpacker;
+  tpcunpacker->Verbosity(verbosity);
+  se->registerSubsystem(tpcunpacker);
+}
 
 void TPC_Clustering()
 {
@@ -85,13 +116,23 @@ void TPC_Clustering()
 
   auto tpcclusterizer = new TpcClusterizer;
   tpcclusterizer->Verbosity(verbosity);
-  tpcclusterizer->set_do_hit_association( G4TPC::DO_HIT_ASSOCIATION );
+  tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
   se->registerSubsystem(tpcclusterizer);
-  
+
   auto tpcclustercleaner = new TpcClusterCleaner;
   tpcclustercleaner->Verbosity(verbosity);
   se->registerSubsystem(tpcclustercleaner);
+}
 
+void Micromegas_HitUnpacking()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::MICROMEGAS_VERBOSITY);
+  Fun4AllServer* se = Fun4AllServer::instance();
+
+  auto tpotunpacker = new MicromegasCombinedDataDecoder;
+  std::string calibrationFile = CDBInterface::instance()->getUrl("TPOT_Pedestal");
+  tpotunpacker->set_calibration_file(calibrationFile);
+  se->registerSubsystem(tpotunpacker);
 }
 
 void Micromegas_Clustering()
@@ -100,6 +141,5 @@ void Micromegas_Clustering()
   auto mm_clus = new MicromegasClusterizer;
   se->registerSubsystem(mm_clus);
 }
-
 
 #endif

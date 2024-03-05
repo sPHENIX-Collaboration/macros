@@ -23,16 +23,12 @@
 #include <phool/recoConsts.h>
 
 #include <intt/InttClusterQA.h>
-#include <intt/InttCombinedRawDataDecoder.h>
 
 #include <micromegas/MicromegasClusterQA.h>
-#include <micromegas/MicromegasCombinedDataDecoder.h>
 
 #include <mvtx/MvtxClusterQA.h>
-#include <mvtx/MvtxCombinedRawDataDecoder.h>
 
 #include <tpc/TpcClusterQA.h>
-#include <tpc/TpcCombinedRawDataUnpacker.h>
 
 #include <trackingdiagnostics/TrackResiduals.h>
 #include <trackingdiagnostics/TrkrNtuplizer.h>
@@ -71,6 +67,7 @@ void Fun4All_TrkrClusteringSeeding(
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
+  G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
   G4MAGNET::magfield = "0.01";
   G4MAGNET::magfield_rescale = 1;
   ACTSGEOM::ActsGeomInit();
@@ -79,22 +76,10 @@ void Fun4All_TrkrClusteringSeeding(
   hitsin->fileopen(inputRawHitFile);
   se->registerInputManager(hitsin);
 
-  auto mvtxunpacker = new MvtxCombinedRawDataDecoder;
-  se->registerSubsystem(mvtxunpacker);
-
-  auto inttunpacker = new InttCombinedRawDataDecoder;
-  inttunpacker->LoadHotChannelMapRemote("INTT_HotMap");
-  se->registerSubsystem(inttunpacker);
-
-  auto tpcunpacker = new TpcCombinedRawDataUnpacker;
-  se->registerSubsystem(tpcunpacker);
-
-  auto tpotunpacker = new MicromegasCombinedDataDecoder;
-
-  std::string calibrationFile = CDBInterface::instance()->getUrl("TPOT_Pedestal");
-  tpotunpacker->set_calibration_file(calibrationFile);
-  se->registerSubsystem(tpotunpacker);
-
+  Mvtx_HitUnpacking();
+  Intt_HitUnpacking();
+  Tpc_HitUnpacking();
+  Micromegas_HitUnpacking();
   Mvtx_Clustering();
   Intt_Clustering();
 
