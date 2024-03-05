@@ -4,7 +4,7 @@
  * format. No other reconstruction or analysis is performed
  */
 #include <GlobalVariables.C>
-#include <Trkr_Clustering.C> 
+#include <Trkr_Clustering.C>
 
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>

@@ -66,8 +66,8 @@ void Fun4All_TrkrClusteringSeeding(
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
- 
-  G4TPC::tpc_drift_velocity_reco = (8.0/1000)*107.0/105.0;
+
+  G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
   G4MAGNET::magfield = "0.01";
   G4MAGNET::magfield_rescale = 1;
   ACTSGEOM::ActsGeomInit();
