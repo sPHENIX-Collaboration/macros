@@ -6,6 +6,11 @@
 #include <G4_TrkrVariables.C>
 #include <G4_ActsGeom.C>
 
+#include <intt/InttCombinedRawDataDecoder.h>
+#include <micromegas/MicromegasCombinedDataDecoder.h>
+#include <mvtx/MvtxCombinedRawDataDecoder.h>
+#include <tpc/TpcCombinedRawDataUnpacker.h>
+
 #include <mvtx/MvtxHitPruner.h>
 #include <mvtx/MvtxClusterizer.h>
 #include <intt/InttClusterizer.h>
@@ -32,6 +37,16 @@ void ClusteringInit()
   ACTSGEOM::ActsGeomInit();
 }
 
+void Mvtx_HitUnpacking()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  auto mvtxunpacker = new MvtxCombinedRawDataDecoder;
+  mvtxunpacker->Verbosity(verbosity);
+  se->registerSubsystem(mvtxunpacker);
+
+}
 void Mvtx_Clustering()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
@@ -48,7 +63,16 @@ void Mvtx_Clustering()
   mvtxclusterizer->Verbosity(verbosity);
   se->registerSubsystem(mvtxclusterizer);
 }
+void Intt_HitUnpacking()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
+  Fun4AllServer *se = Fun4AllServer::instance();
 
+  auto inttunpacker = new InttCombinedRawDataDecoder;
+  inttunpacker->Verbosity(verbosity);
+  se->registerSubsystem(inttunpacker);
+
+}
 void Intt_Clustering()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
@@ -69,6 +93,15 @@ void Intt_Clustering()
   se->registerSubsystem(inttclusterizer);
 }
 
+void Tpc_HitUnpacking()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  auto tpcunpacker = new TpcCombinedRawDataUnpacker;
+  tpcunpacker->Verbosity(verbosity);
+  se->registerSubsystem(tpcunpacker);
+}
 
 void TPC_Clustering()
 {
@@ -91,6 +124,18 @@ void TPC_Clustering()
   auto tpcclustercleaner = new TpcClusterCleaner;
   tpcclustercleaner->Verbosity(verbosity);
   se->registerSubsystem(tpcclustercleaner);
+
+}
+
+void Micromegas_HitUnpacking()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::MICROMEGAS_VERBOSITY);
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  auto tpotunpacker = new MicromegasCombinedDataDecoder;
+  std::string calibrationFile = CDBInterface::instance()->getUrl("TPOT_Pedestal");
+  tpotunpacker->set_calibration_file(calibrationFile);
+  se->registerSubsystem(tpotunpacker);
 
 }
 
