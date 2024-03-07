@@ -10,14 +10,14 @@ namespace Enable
 {
   bool MVTX = false;
   bool MVTX_OVERLAPCHECK = false;
-  
+
   bool MVTX_CELL = false;
   bool MVTX_CLUSTER = false;
   bool MVTX_QA = false;
   bool MVTX_SUPPORT = false;
-  
+
   int MVTX_VERBOSITY = 0;
-  
+
   bool INTT = false;
   bool INTT_ABSORBER = false;
   bool INTT_OVERLAPCHECK = false;
@@ -44,7 +44,7 @@ namespace Enable
   bool MICROMEGAS_QA = false;
   bool MICROMEGAS_SUPPORT = false;
   int MICROMEGAS_VERBOSITY = 0;
-  
+
   bool TRACKING_TRACK = false;
   bool TRACKING_EVAL = false;
   bool TRACK_MATCHING = false;
@@ -109,6 +109,8 @@ namespace G4TPC
   bool USE_SIMPLE_CLUSTERIZER = false;
 
   // distortions
+  bool DISTORTIONS_USE_PHI_AS_RADIANS = true;
+
   bool ENABLE_STATIC_DISTORTIONS = false;
   auto static_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only.distortion_map.hist.root";
 
@@ -121,7 +123,7 @@ namespace G4TPC
 
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
-  
+
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
 
@@ -130,11 +132,11 @@ namespace G4TPC
 
   // do cluster <-> hit association
   bool DO_HIT_ASSOCIATION = true;
-  
+
   // space charge calibration output file
   std::string DIRECT_LASER_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";
-  std::string DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME = "TpcDirectLaserReconstruction.root"; 
-  
+  std::string DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME = "TpcDirectLaserReconstruction.root";
+
 }  // namespace G4TPC
 
 
@@ -148,7 +150,7 @@ namespace G4TRACKING
 
   // Vertexing
   bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
-  
+
   // Truth seeding options for diagnostics (can use any or all)
   bool use_truth_silicon_seeding = false;     // if true runs truth silicon seeding instead of acts silicon seeding
   bool use_truth_tpc_seeding = false;         // if true runs truth silicon seeding instead of reco TPC seeding
