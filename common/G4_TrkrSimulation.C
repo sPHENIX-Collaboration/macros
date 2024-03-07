@@ -336,37 +336,37 @@ double TPC(PHG4Reco* g4Reco,
   tpc->SetActive();
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);  // 1cm steps
- 
+
   tpc->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
   tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
   tpc->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
   tpc->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
-  
+
   if (AbsorberActive)
     {
       tpc->SetAbsorberActive();
     }
-  
+
   double extended_readout_time = 0.0;
-  if(TRACKING::pp_mode) 
+  if(TRACKING::pp_mode)
   {
     extended_readout_time = TRACKING::pp_extended_readout_time;
   }
-  
+
   tpc->set_double_param("extended_readout_time", extended_readout_time);
 
   tpc->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(tpc);
-  
+
   if (Enable::TPC_ENDCAP)
     {
       TPC_Endcaps(g4Reco);
     }
-  
+
   radius = G4TPC::tpc_outer_radius;
-  
+
   radius += no_overlapp;
-  
+
   return radius;
 }
 
@@ -392,14 +392,14 @@ void TPC_Cells()
     // setup phi and theta steps
     /* use 5deg steps */
     static constexpr double deg_to_rad = M_PI/180.;
-    directLaser->SetPhiStepping( 144, 0*deg_to_rad, 360*deg_to_rad );           
-    directLaser->SetThetaStepping( 36, 0*deg_to_rad, 90*deg_to_rad );           
+    directLaser->SetPhiStepping( 144, 0*deg_to_rad, 360*deg_to_rad );
+    directLaser->SetThetaStepping( 36, 0*deg_to_rad, 90*deg_to_rad );
     //directLaser->SetArbitraryThetaPhi(50*deg_to_rad, 145*deg_to_rad);
-    directLaser->SetDirectLaserAuto( true );                                    
-    //__Variable stepping: hitting all of the central membrane____________        
-    //directLaser->SetDirectLaserPatternfromFile( true );                         
-    //directLaser->SetFileStepping(13802);                                        
-    //___________________________________________________________________     
+    directLaser->SetDirectLaserAuto( true );
+    //__Variable stepping: hitting all of the central membrane____________
+    //directLaser->SetDirectLaserPatternfromFile( true );
+    //directLaser->SetFileStepping(13802);
+    //___________________________________________________________________
 
     directLaser->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
     se->registerSubsystem(directLaser);
@@ -423,6 +423,9 @@ void TPC_Cells()
   if( G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS )
   {
     auto distortionMap = new PHG4TpcDistortion;
+
+    distortionMap->set_read_phi_as_radians( G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS );
+
     distortionMap->set_do_static_distortions( G4TPC::ENABLE_STATIC_DISTORTIONS );
     distortionMap->set_static_distortion_filename( G4TPC::static_distortion_filename );
 
@@ -513,7 +516,7 @@ void Micromegas_Cells()
   reco->Verbosity(verbosity);
   double extended_readout_time = 0.0;
   if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
-  
+
   reco->set_double_param("micromegas_tmax", 800.0+extended_readout_time);
   se->registerSubsystem(reco);
 
