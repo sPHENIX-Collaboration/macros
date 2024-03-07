@@ -93,6 +93,7 @@ void Tracking_Reco_TrackSeed()
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
+  seeder->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
@@ -110,7 +111,18 @@ void Tracking_Reco_TrackSeed()
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
   cprop->Verbosity(verbosity);
+  cprop->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(cprop);
+
+ if(TRACKING::pp_mode)
+    {
+      // for pp mode, apply preliminary distortion corrections to TPC clusters before crossing is known
+      // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
+      auto prelim_distcorr = new PrelimDistortionCorrection;
+      prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
+      prelim_distcorr->Verbosity(verbosity);
+      se->registerSubsystem(prelim_distcorr);
+    }
 
   std::cout << "Tracking_Reco_TrackSeed - Using stub matching for Si matching " << std::endl;
   // The normal silicon association methods
@@ -310,6 +322,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   seeder->SetMinClustersPerTrack(3);
   seeder->useConstBField(false);
   seeder->useFixedClusterError(true);
+  seeder->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
@@ -323,7 +336,18 @@ void Tracking_Reco_CommissioningTrackSeed()
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
   cprop->Verbosity(verbosity);
+  cprop->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(cprop);
+
+ if(TRACKING::pp_mode)
+    {
+      // for pp mode, apply preliminary distortion corrections to TPC clusters before crossing is known
+      // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
+      auto prelim_distcorr = new PrelimDistortionCorrection;
+      prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
+      prelim_distcorr->Verbosity(verbosity);
+      se->registerSubsystem(prelim_distcorr);
+    }
 
   // match silicon track seeds to TPC track seeds
 

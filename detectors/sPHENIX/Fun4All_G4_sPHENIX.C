@@ -347,7 +347,15 @@ int Fun4All_G4_sPHENIX(
   //Additional tracking tools 
   //Enable::TRACKING_DIAGNOSTICS = Enable::TRACKING_TRACK && true;
   //G4TRACKING::filter_conversion_electrons = true;
+  // G4TRACKING::use_alignment = true;
+  TRACKING::pp_mode = true;
+  TRACKING::pp_extended_readout_time = 20000;
 
+  // simulate and correct distortions
+  G4TPC::ENABLE_STATIC_DISTORTIONS = true;
+  G4TPC::static_distortion_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_event_0_bX180961051_0.distortion_map.hist.root");  
+  G4TPC::ENABLE_CORRECTIONS = true;
+  G4TPC::correction_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_smoothed_average.correction_map.hist.root");
 
   //  cemc electronics + thin layer of W-epoxy to get albedo from cemc
   //  into the tracking, cannot run together with CEMC
@@ -713,6 +721,7 @@ int Fun4All_G4_sPHENIX(
 
   se->skip(skip);
   se->run(nEvents);
+  //se->PrintTimer();
 
   //-----
   // QA output
