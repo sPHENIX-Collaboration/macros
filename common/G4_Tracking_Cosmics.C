@@ -204,8 +204,8 @@ void vertexing()
   se->registerSubsystem(vtxfinder);
 }
 
-void alignment(std::string datafilename = "mille_output_data_file", 
-	       std::string steeringfilename = "mille_steer")
+void alignment(std::string &datafilename = "mille_output_data_file", 
+	       std::string &steeringfilename = "mille_steer")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
