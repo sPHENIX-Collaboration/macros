@@ -70,7 +70,7 @@ void Tracking_Reco_TrackSeed()
     hprop->zero_field();
   }
   hprop->set_dca_z_cut(2);
-  hprop->set_dca_xy_cut(2);
+  hprop->set_dca_xy_cut(1.);
   se->registerSubsystem(hprop);
 
   // Associate Micromegas clusters with the tracks
@@ -90,12 +90,15 @@ void Tracking_Reco_TrackSeed()
   {
     hprop2->zero_field();
   }
-  hprop2->set_dca_z_cut(2);
-  hprop2->set_dca_xy_cut(2);
+  hprop2->set_dca_z_cut(2.);
+  hprop2->set_dca_xy_cut(0.5);
+
   se->registerSubsystem(hprop2);
 
   auto merger2 = new PHCosmicTrackMerger("PHCosmicMerger2");
-  merger2->Verbosity(verbosity);
+  merger2->Verbosity(0);
+  merger2->dca_xycut(0.5);
+  merger2->dca_rzcut(1);
   if (std::stof(G4MAGNET::magfield) < 0.1)
   {
     merger2->zero_field();
