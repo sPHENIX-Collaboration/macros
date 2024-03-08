@@ -451,6 +451,8 @@ void Tracking_Reco()
 void Filter_Conversion_Electrons(std::string ntuple_outfile)
 {
   Fun4AllServer* se = Fun4AllServer::instance();
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+
   SecondaryVertexFinder* secvert = new SecondaryVertexFinder;
   secvert->Verbosity(verbosity);
   //  secvert->set_write_electrons_node(true);  // writes copy of filtered electron tracks to node tree
