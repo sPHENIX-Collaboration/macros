@@ -177,7 +177,7 @@ double HCalOuter(PHG4Reco *g4Reco,
   hcal->set_double_param("phistart", G4HCALOUT::phistart);
   g4Reco->registerSubsystem(hcal);
 
-  if (Enable::HCALOUT_RING && !Enable::HCALOUT_OLD)
+  if (!Enable::HCALOUT_OLD)
   {
     // HCal support rings, approximated as solid rings
     // note there is only one ring on either side, but to allow part of the ring inside the HCal envelope two rings are used
@@ -213,23 +213,27 @@ double HCalOuter(PHG4Reco *g4Reco,
       g4Reco->registerSubsystem(cyl);
 
       // rings inside outer HCal envelope
-      cylout = new PHG4CylinderSubsystem("HCAL_SPT_N1", i + 2);
-      cylout->set_double_param("place_z", z_rings[i]);
-      cylout->SuperDetector("HCALIN_SPT");
-      cylout->set_double_param("radius", hcal_envelope_radius + 0.1);  // add a mm to avoid overlaps
-      cylout->set_int_param("lengthviarapidity", 0);
-      cylout->set_double_param("length", support_ring_dz);
-      cylout->set_string_param("material", "G4_Al");
-      cylout->set_double_param("thickness", support_ring_outer_radius - (hcal_envelope_radius + 0.1));
-      cylout->set_double_param("start_phi_rad", 1.867);
-      cylout->set_double_param("delta_phi_rad", 5.692);
-      if (AbsorberActive)
-      {
-        cylout->SetActive();
-      }
-      cylout->SetMotherSubsystem(hcal);
-      cylout->OverlapCheck(OverlapCheck);
-      g4Reco->registerSubsystem(cylout);
+      //only use if we want to use the old version of the ring instead of the gdml implementation
+      if (Enable::HCALOUT_RING)
+	{ 
+	  cylout = new PHG4CylinderSubsystem("HCAL_SPT_N1", i + 2);
+	  cylout->set_double_param("place_z", z_rings[i]);
+	  cylout->SuperDetector("HCALIN_SPT");
+	  cylout->set_double_param("radius", hcal_envelope_radius + 0.1);  // add a mm to avoid overlaps
+	  cylout->set_int_param("lengthviarapidity", 0);
+	  cylout->set_double_param("length", support_ring_dz);
+	  cylout->set_string_param("material", "G4_Al");
+	  cylout->set_double_param("thickness", support_ring_outer_radius - (hcal_envelope_radius + 0.1));
+	  cylout->set_double_param("start_phi_rad", 1.867);
+	  cylout->set_double_param("delta_phi_rad", 5.692);
+	  if (AbsorberActive)
+	    {
+	      cylout->SetActive();
+	    }
+	  cylout->SetMotherSubsystem(hcal);
+	  cylout->OverlapCheck(OverlapCheck);
+	  g4Reco->registerSubsystem(cylout);
+	}
     }
   }
 
