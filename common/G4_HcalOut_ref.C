@@ -42,6 +42,7 @@ namespace Enable
   bool HCALOUT_EVAL = false;
   bool HCALOUT_QA = false;
   bool HCALOUT_OLD = false;
+  bool HCALOUT_RING = true;
   bool HCALOUT_G4Hit = true;
   int HCALOUT_VERBOSITY = 0;
 }  // namespace Enable
@@ -92,7 +93,7 @@ double HCalOuter(PHG4Reco *g4Reco,
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALOUT_OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
 
-  PHG4DetectorSubsystem *hcal;
+  PHG4DetectorSubsystem *hcal = nullptr;
   //  Mephi Maps
   //  Maps are different for old/new but how to set is identical
   //  here are the ones for the old outer hcal since the new maps do not exist yet
@@ -143,9 +144,8 @@ double HCalOuter(PHG4Reco *g4Reco,
   else
   {
     hcal = new PHG4OHCalSubsystem("HCALOUT");
-    std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/OuterHCalAbsorberTiles_merged.gdml";
-    // std::string hcaltiles = "/sphenix/u/shuhang98/calibrations/OuterHCalAbsorberTiles_merged.gdml";
-    hcal->set_string_param("GDMPath", hcaltiles);
+    // hcal->set_string_param("GDMPath", "mytestgdml.gdml"); // try other gdml file
+    // common setting with tracking, we likely want to move to the cdb with this
     hcal->set_string_param("IronFieldMapPath", G4MAGNET::magfield_OHCAL_steel);
     hcal->set_double_param("IronFieldMapScale", G4MAGNET::magfield_rescale);
   }
@@ -177,7 +177,7 @@ double HCalOuter(PHG4Reco *g4Reco,
   hcal->set_double_param("phistart", G4HCALOUT::phistart);
   g4Reco->registerSubsystem(hcal);
 
-  if (!Enable::HCALOUT_OLD)
+  if (Enable::HCALOUT_RING && !Enable::HCALOUT_OLD)
   {
     // HCal support rings, approximated as solid rings
     // note there is only one ring on either side, but to allow part of the ring inside the HCal envelope two rings are used
