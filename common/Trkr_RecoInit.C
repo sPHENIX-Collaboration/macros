@@ -18,17 +18,18 @@ void TrackingInit()
 
   ACTSGEOM::ActsGeomInit();
   // space charge correction
-  /* corrections are applied in the track finding, and via TpcClusterMover before the final track fit 
+  /* corrections are applied in the track finding, and via TpcClusterMover before the final track fit
    */
-  
+
   if( G4TPC::ENABLE_CORRECTIONS )
   {
     auto se = Fun4AllServer::instance();
     auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
+    tpcLoadDistortionCorrection->set_read_phi_as_radians( G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS );
     tpcLoadDistortionCorrection->set_distortion_filename( G4TPC::correction_filename );
     se->registerSubsystem(tpcLoadDistortionCorrection);
   }
- 
+
 }
 
 

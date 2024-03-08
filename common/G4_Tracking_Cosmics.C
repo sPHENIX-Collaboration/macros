@@ -68,6 +68,7 @@ void TrackingInit()
   {
     auto se = Fun4AllServer::instance();
     auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
+    tpcLoadDistortionCorrection->set_read_phi_as_radians( G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS );
     tpcLoadDistortionCorrection->set_distortion_filename( G4TPC::correction_filename );
     se->registerSubsystem(tpcLoadDistortionCorrection);
   }
@@ -90,13 +91,13 @@ void Tracking_Reco_TrackSeed()
 {
   // set up verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
-  
+
   // get fun4all server instance
   auto se = Fun4AllServer::instance();
 
   if (!G4TRACKING::use_full_truth_track_seeding)
-  {  
-    // Assemble TPC clusters into track stubs 
+  {
+    // Assemble TPC clusters into track stubs
     if (G4TRACKING::use_truth_tpc_seeding)
     {
       // For the TPC, for each truth particle, create a track and associate clusters with it using truth information, write to Svtx track map
@@ -109,7 +110,7 @@ void Tracking_Reco_TrackSeed()
       se->registerSubsystem(pat_rec);
 
     } else {
-      
+
       auto seeder = new PHCASeeding("PHCASeeding");
       seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
       if (G4MAGNET::magfield.find("3d") != std::string::npos)
@@ -143,7 +144,7 @@ void Tracking_Reco_TrackSeed()
     PHSiliconHelicalPropagator* hprop = new PHSiliconHelicalPropagator("HelicalPropagator");
     hprop->Verbosity(verbosity);
     se->registerSubsystem(hprop);
- 
+
     // Associate Micromegas clusters with the tracks
     if( Enable::MICROMEGAS )
     {
@@ -172,7 +173,7 @@ void Tracking_Reco_TrackSeed()
     }
 
   } else {
-    
+
     // full truth track finding
     std::cout << "Tracking_Reco_TrackSeed - Using full truth track seeding" << std::endl;
 
@@ -190,7 +191,7 @@ void Tracking_Reco_TrackSeed()
    * all done
    * at this stage tracks are fully assembled. They contain clusters spaning Silicon detectors, TPC and Micromegas
    * they are ready to be fit.
-   */ 
+   */
     convert_seeds();
 }
 
@@ -204,7 +205,7 @@ void vertexing()
   se->registerSubsystem(vtxfinder);
 }
 
-void alignment(std::string datafilename = "mille_output_data_file", 
+void alignment(std::string datafilename = "mille_output_data_file",
 	       std::string steeringfilename = "mille_steer")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -235,7 +236,7 @@ void build_truthreco_tables()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
-  
+
   // this module builds high level truth track association table.
   // If this module is used, this table should be called before any evaluator calls.
   // Removing this module, evaluation will still work but trace truth association through the layers of G4-hit-cluster
@@ -255,7 +256,7 @@ void Tracking_Eval(const std::string& outputfile)
   //---------------
 
   Fun4AllServer* se = Fun4AllServer::instance();
-  build_truthreco_tables(); 
+  build_truthreco_tables();
 
   //----------------
   // Tracking evaluation

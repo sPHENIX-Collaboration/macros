@@ -110,7 +110,7 @@ double HCalInner(PHG4Reco *g4Reco,
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALIN_OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
 
-  PHG4DetectorSubsystem *hcal;
+  PHG4DetectorSubsystem *hcal = nullptr;
   //  Mephi Maps
   //  Maps are different for old/new but how to set is identical
   //  here are the ones for the gdml based inner hcal
@@ -180,9 +180,7 @@ double HCalInner(PHG4Reco *g4Reco,
   else
   {
     hcal = new PHG4IHCalSubsystem("HCALIN");
-    // std::string hcaltiles = "/sphenix/u/shuhang98/calibrations/InnerHCalAbsorberTiles_merged.gdml";
-    std::string hcaltiles = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/InnerHCalAbsorberTiles_merged.gdml";
-    hcal->set_string_param("GDMPath", hcaltiles);
+    // hcal->set_string_param("GDMPath", "mytestgdml.gdml"); // try other gdml file
   }
   if (G4HCALIN::light_scint_model >= 0)
   {
