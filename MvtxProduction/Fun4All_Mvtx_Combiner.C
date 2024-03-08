@@ -1,9 +1,11 @@
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
-#include <fun4allraw/SingleMvtxPoolInput.h>
-#include <fun4allraw/Fun4AllStreamingInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
+
+#include <fun4allraw/Fun4AllStreamingInputManager.h>
+#include <fun4allraw/InputManagerType.h>
+#include <fun4allraw/SingleMvtxPoolInput.h>
 
 #include <phool/recoConsts.h>
 
@@ -43,7 +45,7 @@ void Fun4All_Mvtx_Combiner(int nEvents = 0,
 //    sngl->Verbosity(3);
     sngl->SetBcoRange(10);
     sngl->AddListFile(infile);
-    in->registerStreamingInput(sngl, Fun4AllStreamingInputManager::MVTX);
+    in->registerStreamingInput(sngl, InputManagerType::MVTX);
     i++;
   }
   se->registerInputManager(in);

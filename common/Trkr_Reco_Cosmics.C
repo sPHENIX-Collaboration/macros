@@ -3,19 +3,23 @@
 
 #include <G4_TrkrVariables.C>
 
-#include <g4eval/TrackSeedTrackMapConverter.h>
+#include <g4eval/SvtxTruthRecoTableEval.h>
+#include <trackingdiagnostics/TrackSeedTrackMapConverter.h>
 
 #include <trackreco/MakeActsGeometry.h>
-#include <trackreco/PHCASeeding.h>
-#include <trackreco/PHCosmicSeedCombiner.h>
+#include <trackreco/PHActsTrkFitter.h>
+#include <trackreco/PHActsVertexPropagator.h>
+#include <trackreco/PHCosmicSeeder.h>
+#include <trackreco/PHCosmicSiliconPropagator.h>
+#include <trackreco/PHCosmicTrackMerger.h>
 #include <trackreco/PHCosmicsTrkFitter.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
-#include <trackreco/PHCosmicSiliconPropagator.h>
-#include <trackreco/PHSimpleKFProp.h>
+#include <trackreco/PHSiliconHelicalPropagator.h>
+#include <trackreco/PHSimpleVertexFinder.h>
 #include <trackreco/PHTpcDeltaZCorrection.h>
 #include <trackreco/PHTrackCleaner.h>
 #include <trackreco/SecondaryVertexFinder.h>
-#include <trackreco/PHSimpleVertexFinder.h>
+
 #include <tpc/TpcLoadDistortionCorrection.h>
 
 #include <tpccalib/PHTpcResiduals.h>
@@ -31,6 +35,7 @@ R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtrackeralign.so)
+R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 void convert_seeds()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -54,70 +59,51 @@ void Tracking_Reco_TrackSeed()
   // get fun4all server instance
   auto se = Fun4AllServer::instance();
 
-  auto seeder = new PHCASeeding("PHCASeeding");
-  seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
-  if (G4MAGNET::magfield.find("3d") != std::string::npos)
-  {
-    seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
-    seeder->useConstBField(false);
-  }
-
-  if (G4MAGNET::magfield.find(".root") == std::string::npos)
-  {
-    //! constant field
-    seeder->useConstBField(true);
-    seeder->constBField(std::stod(G4MAGNET::magfield));
-  }
+  PHCosmicSeeder *seeder = new PHCosmicSeeder;
   seeder->Verbosity(verbosity);
-  seeder->SetLayerRange(7, 55);
-  seeder->SetSearchWindow(1.5, 0.05);  // (z width, phi width)
-  seeder->SetMinHitsPerCluster(0);
-  seeder->SetMinClustersPerTrack(3);
-  seeder->useFixedClusterError(true);
   se->registerSubsystem(seeder);
-
-  // expand stubs in the TPC using simple kalman filter
-  auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
-  cprop->set_field_dir(G4MAGNET::magfield_rescale);
-  if (G4MAGNET::magfield.find("3d") != std::string::npos)
-  {
-    cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
-  }
-
-  if (G4MAGNET::magfield.find(".root") == std::string::npos)
-  {
-    //! constant field
-    cprop->useConstBField(true);
-    cprop->setConstBField(std::stod(G4MAGNET::magfield));
-  }
-  cprop->useFixedClusterError(true);
-  cprop->set_max_window(5.);
-  cprop->Verbosity(verbosity);
-  se->registerSubsystem(cprop);
 
   PHCosmicSiliconPropagator *hprop = new PHCosmicSiliconPropagator("HelicalPropagator");
   hprop->Verbosity(verbosity);
-  hprop->zero_field();
+  if (std::stof(G4MAGNET::magfield) < 0.1)
+  {
+    hprop->zero_field();
+  }
+  hprop->set_dca_z_cut(2);
+  hprop->set_dca_xy_cut(1.);
   se->registerSubsystem(hprop);
 
   // Associate Micromegas clusters with the tracks
 
-  // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-  auto mm_match = new PHMicromegasTpcTrackMatching;
-  mm_match->Verbosity(verbosity);
+  auto merger = new PHCosmicTrackMerger("PHCosmicMerger");
+  merger->Verbosity(verbosity);
+  if (std::stof(G4MAGNET::magfield) < 0.1)
+  {
+    merger->zero_field();
+  }
+  se->registerSubsystem(merger);
 
-  // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
-  mm_match->set_rphi_search_window_lyr1(2);
-  mm_match->set_rphi_search_window_lyr2(13.0);
-  mm_match->set_z_search_window_lyr1(26.0);
-  mm_match->set_z_search_window_lyr2(2);
-  mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
-  mm_match->set_test_windows_printout(false);  // used for tuning search windows only
-  se->registerSubsystem(mm_match);
+  PHCosmicSiliconPropagator *hprop2 = new PHCosmicSiliconPropagator("HelicalPropagator2");
+  hprop2->Verbosity(verbosity);
+  hprop2->resetSvtxSeedContainer();
+  if (std::stof(G4MAGNET::magfield) < 0.1)
+  {
+    hprop2->zero_field();
+  }
+  hprop2->set_dca_z_cut(2.);
+  hprop2->set_dca_xy_cut(0.5);
 
-  auto combiner = new PHCosmicSeedCombiner;
-  combiner->Verbosity(verbosity);
-  se->registerSubsystem(combiner);
+  se->registerSubsystem(hprop2);
+
+  auto merger2 = new PHCosmicTrackMerger("PHCosmicMerger2");
+  merger2->Verbosity(0);
+  merger2->dca_xycut(0.5);
+  merger2->dca_rzcut(1);
+  if (std::stof(G4MAGNET::magfield) < 0.1)
+  {
+    merger2->zero_field();
+  }
+  se->registerSubsystem(merger2);
 }
 
 void vertexing()

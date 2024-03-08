@@ -7,6 +7,7 @@ void doFitAndCalibUpdate(const std::string &hist_fname = "base/combine_out/out2.
 
 
   pi0EtaByEta *caFit = new pi0EtaByEta("calomodulename", "bla.root");
+  //caFit->set_massTargetHistFile("/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/run10_uncorr_cls_mass.root");
   caFit->fitEtaSlices(hist_fname.c_str(), Form("fitout_iter%d.root", iter), calib_fname.c_str());
 
   size_t pos = calib_fname.find_last_of('.'); 
