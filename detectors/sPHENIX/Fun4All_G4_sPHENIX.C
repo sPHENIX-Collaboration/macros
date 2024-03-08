@@ -348,14 +348,16 @@ int Fun4All_G4_sPHENIX(
   //Enable::TRACKING_DIAGNOSTICS = Enable::TRACKING_TRACK && true;
   //G4TRACKING::filter_conversion_electrons = true;
   // G4TRACKING::use_alignment = true;
-  TRACKING::pp_mode = true;
-  TRACKING::pp_extended_readout_time = 20000;
 
-  // simulate and correct distortions
-  G4TPC::ENABLE_STATIC_DISTORTIONS = true;
-  G4TPC::static_distortion_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_event_0_bX180961051_0.distortion_map.hist.root");  
-  G4TPC::ENABLE_CORRECTIONS = true;
-  G4TPC::correction_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_smoothed_average.correction_map.hist.root");
+  // enable pp mode and set extended readout time
+  // TRACKING::pp_mode = true;
+  // TRACKING::pp_extended_readout_time = 20000;
+
+  // set flags to simulate and correct TPC distortions, specify distortion and correction files
+  //G4TPC::ENABLE_STATIC_DISTORTIONS = true;
+  //G4TPC::static_distortion_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_event_0_bX180961051_0.distortion_map.hist.root");  
+  //G4TPC::ENABLE_CORRECTIONS = true;
+  //G4TPC::correction_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_smoothed_average.correction_map.hist.root");
 
   //  cemc electronics + thin layer of W-epoxy to get albedo from cemc
   //  into the tracking, cannot run together with CEMC
@@ -392,11 +394,11 @@ int Fun4All_G4_sPHENIX(
   Enable::EPD_TILE = Enable::EPD && true;
 
   Enable::BEAMLINE = true;
-//  Enable::BEAMLINE_ABSORBER = true;  // makes the beam line magnets sensitive volumes
-//  Enable::BEAMLINE_BLACKHOLE = true; // turns the beamline magnets into black holes
+  //  Enable::BEAMLINE_ABSORBER = true;  // makes the beam line magnets sensitive volumes
+  //  Enable::BEAMLINE_BLACKHOLE = true; // turns the beamline magnets into black holes
   Enable::ZDC = true;
-//  Enable::ZDC_ABSORBER = true;
-//  Enable::ZDC_SUPPORT = true;
+  //  Enable::ZDC_ABSORBER = true;
+  //  Enable::ZDC_SUPPORT = true;
   Enable::ZDC_TOWER = Enable::ZDC && true;
   Enable::ZDC_EVAL = Enable::ZDC_TOWER && true;
 
@@ -721,7 +723,7 @@ int Fun4All_G4_sPHENIX(
 
   se->skip(skip);
   se->run(nEvents);
-  //se->PrintTimer();
+  //  se->PrintTimer();
 
   //-----
   // QA output

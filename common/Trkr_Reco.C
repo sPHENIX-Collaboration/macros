@@ -21,6 +21,7 @@
 #include <trackreco/PHTrackSeeding.h>
 #include <trackreco/SecondaryVertexFinder.h>
 #include <trackreco/TrackingIterationCounter.h>
+#include <trackreco/PrelimDistortionCorrection.h>
 
 #include <tpc/TpcLoadDistortionCorrection.h>
 
@@ -236,6 +237,7 @@ void Tracking_Reco_TrackFit()
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
   actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
   actsFit->set_pp_mode(TRACKING::pp_mode);
+  actsFit->set_use_clustermover(true); // default is true for now
   actsFit->useActsEvaluator(false);
   actsFit->useOutlierFinder(false);
   actsFit->setFieldMap(G4MAGNET::magfield);
@@ -267,6 +269,7 @@ void Tracking_Reco_TrackFit()
       /* this breaks in truth_track seeding mode because there is no TpcSeed */
       auto cleaner = new PHTrackCleaner;
       cleaner->Verbosity(verbosity);
+      //cleaner->set_quality_cut(30.0);
       se->registerSubsystem(cleaner);
     }
 
@@ -397,7 +400,7 @@ void alignment(std::string datafilename = "mille_output_data_file",
   se->registerSubsystem(mille);
 
   auto helical = new HelicalFitter;
-  helical->Verbosity(0);
+  helical->Verbosity(verbosity);
   helical->set_datafile_name(datafilename + "_helical.bin");
   helical->set_steeringfile_name(steeringfilename + "_helical.txt");
   se->registerSubsystem(helical);
@@ -449,7 +452,7 @@ void Filter_Conversion_Electrons(std::string ntuple_outfile)
 {
   Fun4AllServer* se = Fun4AllServer::instance();
   SecondaryVertexFinder* secvert = new SecondaryVertexFinder;
-  secvert->Verbosity(0);
+  secvert->Verbosity(verbosity);
   //  secvert->set_write_electrons_node(true);  // writes copy of filtered electron tracks to node tree
   //  secvert->set_write_ntuple(false);  // writes ntuple for tuning cuts
   secvert->setDecayParticleMass(0.000511);  // for electrons
