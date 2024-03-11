@@ -3,12 +3,12 @@
 
 #include <GlobalVariables.C>
 #include <G4_TrkrVariables.C>
-//#include <G4_TPC.C>
 
 #include <phpythia6/PHPythia6.h>
 
 #include <phpythia8/PHPythia8.h>
 
+#include <g4main/CosmicSpray.h>
 #include <g4main/HepMCNodeReader.h>
 #include <g4main/PHG4IonGun.h>
 #include <g4main/PHG4ParticleGenerator.h>
@@ -19,6 +19,8 @@
 #include <g4main/ReadEICFiles.h>
 
 #include <fermimotionafterburner/FermimotionAfterburner.h>
+#include <hijingflipafterburner/HIJINGFlipAfterburner.h>
+#include <reactionplaneafterburner/ReactionPlaneAfterburner.h>
 
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phhepmc/Fun4AllHepMCPileupInputManager.h>
@@ -38,6 +40,8 @@ R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
 R__LOAD_LIBRARY(libFermimotionAfterburner.so)
+R__LOAD_LIBRARY(libHIJINGFlipAfterburner.so)
+R__LOAD_LIBRARY(libReactionPlaneAfterburner.so)
 
 namespace Input
 {
@@ -81,6 +85,9 @@ namespace Input
   bool READHITS = false;
   int VERBOSITY = 0;
   int EmbedId = 1;
+
+  bool COSMIC = false;
+  double COSMIC_R = 650.;
 
   //! apply reference sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2022-001 and past RHIC experience
   //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
@@ -215,6 +222,8 @@ namespace INPUTHEPMC
   bool FLOW = false;
   int FLOW_VERBOSITY = 0;
   bool FERMIMOTION = false;
+  bool HIJINGFLIP = false;
+  bool REACTIONPLANERAND = false;
 
 }  // namespace INPUTHEPMC
 
@@ -264,6 +273,7 @@ namespace INPUTGENERATOR
   PHPythia6 *Pythia6 = nullptr;
   PHPythia8 *Pythia8 = nullptr;
   ReadEICFiles *EICFileReader = nullptr;
+  CosmicSpray *Cosmic = nullptr;
 }  // namespace INPUTGENERATOR
 
 namespace INPUTMANAGER
@@ -487,12 +497,28 @@ void InputRegister()
     INPUTGENERATOR::EICFileReader->Verbosity(Input::VERBOSITY);
     se->registerSubsystem(INPUTGENERATOR::EICFileReader);
   }
+  if (Input::COSMIC)
+  {
+    INPUTGENERATOR::Cosmic = new CosmicSpray("COSMIC", Input::COSMIC_R);
+    se->registerSubsystem(INPUTGENERATOR::Cosmic);
+  }
   // here are the various utility modules which read particles and
   // put them onto the G4 particle stack
   if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6 || Input::READEIC)
   {
     if (Input::HEPMC)
     {
+      if (INPUTHEPMC::REACTIONPLANERAND)
+      {
+        ReactionPlaneAfterburner *rp = new ReactionPlaneAfterburner();
+        se->registerSubsystem(rp);
+      }
+
+      if (INPUTHEPMC::HIJINGFLIP)
+      {
+	HIJINGFlipAfterburner *flip = new HIJINGFlipAfterburner();
+	se->registerSubsystem(flip); 
+      }
       // these need to be applied before the HepMCNodeReader since they
       // work on the hepmc records
       if (INPUTHEPMC::FLOW)

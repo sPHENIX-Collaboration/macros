@@ -10,14 +10,14 @@ namespace Enable
 {
   bool MVTX = false;
   bool MVTX_OVERLAPCHECK = false;
-  
+
   bool MVTX_CELL = false;
   bool MVTX_CLUSTER = false;
   bool MVTX_QA = false;
-  bool MVTX_ABSORBER = false;
-  
+  bool MVTX_SUPPORT = false;
+
   int MVTX_VERBOSITY = 0;
-  
+
   bool INTT = false;
   bool INTT_ABSORBER = false;
   bool INTT_OVERLAPCHECK = false;
@@ -38,13 +38,20 @@ namespace Enable
 
   int TPC_VERBOSITY = 0;
 
+  bool MICROMEGAS_OVERLAPCHECK = false;
   bool MICROMEGAS_CELL = false;
   bool MICROMEGAS_CLUSTER = false;
   bool MICROMEGAS_QA = false;
+  bool MICROMEGAS_SUPPORT = false;
+  int MICROMEGAS_VERBOSITY = 0;
 
   bool TRACKING_TRACK = false;
   bool TRACKING_EVAL = false;
-  int TRACKING_VERBOSITY = 0;
+  bool TRACK_MATCHING = false;
+  bool TRACK_MATCHING_TREE = false;
+  bool TRACK_MATCHING_TREE_CLUSTERS = false;
+  // 0=no output TTree file, 1=output for tracks only, 2=tracks+clusters
+  int  TRACKING_VERBOSITY = 0;
   bool TRACKING_QA = false;
   bool TRACKING_DIAGNOSTICS = false;
 }  // namespace Enable
@@ -73,8 +80,6 @@ namespace G4INTT
   int nladder[4] = {12, 12, 16, 16};
   double sensor_radius[4] = {7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
 
-  double offsetphi[4] = {0.0, 0.5 * 360.0 / nladder[1], 0.0, 0.5 * 360.0 / nladder[3]};
-
   enum enu_InttDeadMapType  // Dead map options for INTT
   {
     kInttNoDeadMap = 0,  // All channel in Intt is alive
@@ -96,7 +101,7 @@ namespace G4TPC
   double tpc_outer_radius = 77. + 2.;
 
   // drift velocity is set here for all relevant modules
-  double tpc_drift_velocity_sim= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
+  double tpc_drift_velocity_sim= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas, it is very close to our Ar-CF4 mixture
 //  double tpc_drift_velocity_reco now set in GlobalVariables.C
 //  double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
 
@@ -104,16 +109,18 @@ namespace G4TPC
   bool USE_SIMPLE_CLUSTERIZER = false;
 
   // distortions
+  bool DISTORTIONS_USE_PHI_AS_RADIANS = true;
+
   bool ENABLE_STATIC_DISTORTIONS = false;
   auto static_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only.distortion_map.hist.root";
   //auto static_distortion_filename = "/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_event_0_bX99528306_5.distortion_map.hist.root";
   
-  bool ENABLE_TIME_ORDERED_DISTORTIONS = true;
+  bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
   //  std::string time_ordered_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/TimeOrderedDistortions.root";
   std::string time_ordered_distortion_filename = "/sphenix/user/rcorliss/distortion_maps/2023.02/TimeOrderedDistortions.root";
 
   // distortion corrections
-  bool ENABLE_CORRECTIONS = true;
+  bool ENABLE_CORRECTIONS = false;
   //auto correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
   auto correction_filename = "/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_smoothed_average.correction_map.hist.root";
 
@@ -128,11 +135,11 @@ namespace G4TPC
 
   // do cluster <-> hit association
   bool DO_HIT_ASSOCIATION = true;
-  
+
   // space charge calibration output file
   std::string DIRECT_LASER_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";
-  std::string DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME = "TpcDirectLaserReconstruction.root"; 
-  
+  std::string DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME = "TpcDirectLaserReconstruction.root";
+
 }  // namespace G4TPC
 
 
@@ -146,7 +153,7 @@ namespace G4TRACKING
 
   // Vertexing
   bool g4eval_use_initial_vertex = true;  // if true, g4eval uses initial vertices in SvtxVertexMap, not final vertices in SvtxVertexMapRefit
-  
+
   // Truth seeding options for diagnostics (can use any or all)
   bool use_truth_silicon_seeding = false;     // if true runs truth silicon seeding instead of acts silicon seeding
   bool use_truth_tpc_seeding = false;         // if true runs truth silicon seeding instead of reco TPC seeding
@@ -158,6 +165,9 @@ namespace G4TRACKING
   // Runs a converter from TrackSeed object to SvtxTrack object to enable
   // use of the various evaluation tools already available
   bool convert_seeds_to_svtxtracks = false;
+
+  // Runs a second pass of seeding to pick up missed seeds in the first pass
+  bool iterative_seeding = false;
 
   // Flag to run commissioning seeding workflow with tuned parameters for
   // misaligned + distorted tracks

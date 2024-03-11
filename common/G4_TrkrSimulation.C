@@ -54,10 +54,11 @@ void MvtxInit()
 }
 
 double Mvtx(PHG4Reco* g4Reco, double radius,
-            const int absorberactive = 0)
+            const int supportactive = 0)
 {
   bool maps_overlapcheck = Enable::OVERLAPCHECK || Enable::MVTX_OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
+  bool SupportActive = Enable::SUPPORT || Enable::MVTX_SUPPORT;
 
   PHG4MvtxSubsystem* mvtx = new PHG4MvtxSubsystem("MVTX");
   mvtx->Verbosity(verbosity);
@@ -76,6 +77,10 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave.gdml"));
 
   mvtx->SetActive();
+  if (SupportActive)
+  {
+    mvtx->SetSupportActive();
+  }
   mvtx->OverlapCheck(maps_overlapcheck);
   g4Reco->registerSubsystem(mvtx);
   radius += G4MVTX::radius_offset;
@@ -149,11 +154,11 @@ double Intt(PHG4Reco* g4Reco, double radius,
   sitrack->Verbosity(verbosity);
   sitrack->SetActive(1);
   sitrack->OverlapCheck(intt_overlapcheck);
-  if (Enable::INTT_ABSORBER)
+  if (Enable::INTT_ABSORBER || Enable::ABSORBER)
   {
     sitrack->SetAbsorberActive();
   }
-  if (Enable::INTT_SUPPORT)
+  if (Enable::INTT_SUPPORT || Enable::SUPPORT)
   {
     sitrack->set_int_param(PHG4InttDefs::SUPPORTPARAMS, "supportactive", 1);
   }
@@ -165,11 +170,10 @@ double Intt(PHG4Reco* g4Reco, double radius,
   for (int i = 0; i < G4INTT::n_intt_layer; i++)
   {
     cout << " Intt layer " << i << " laddertype " << G4INTT::laddertype[i] << " nladders " << G4INTT::nladder[i]
-         << " sensor radius " << G4INTT::sensor_radius[i] << " offsetphi " << G4INTT::offsetphi[i] << endl;
+         << " sensor radius " << G4INTT::sensor_radius[i]  << endl;
     sitrack->set_int_param(i, "laddertype", G4INTT::laddertype[i]);
     sitrack->set_int_param(i, "nladder", G4INTT::nladder[i]);
     sitrack->set_double_param(i, "sensor_radius", G4INTT::sensor_radius[i]);  // expecting cm
-    sitrack->set_double_param(i, "offsetphi", G4INTT::offsetphi[i]);          // expecting degrees
   }
 
   // outer radius marker (translation back to cm)
@@ -272,6 +276,7 @@ void Intt_Cells()
 
 void TPCInit()
 {
+  std::cout << "G4_TrkrSimulation::TpcInit" << std::endl;
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4TPC::tpc_outer_radius);
 
   if (Enable::TPC_ENDCAP)
@@ -323,6 +328,7 @@ void TPC_Endcaps(PHG4Reco* g4Reco)
 double TPC(PHG4Reco* g4Reco,
            double radius)
 {
+  std::cout << "G4_TrkrSimulation::TPC" << std::endl;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::TPC_OVERLAPCHECK;
   bool AbsorberActive = Enable::ABSORBER || Enable::TPC_ABSORBER;
 
@@ -330,24 +336,37 @@ double TPC(PHG4Reco* g4Reco,
   tpc->SetActive();
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);  // 1cm steps
-  
+
+  tpc->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
+  tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
+  tpc->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
+  tpc->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
+
   if (AbsorberActive)
     {
       tpc->SetAbsorberActive();
     }
+
+  double extended_readout_time = 0.0;
+  if(TRACKING::pp_mode)
+  {
+    extended_readout_time = TRACKING::pp_extended_readout_time;
+  }
+
+  tpc->set_double_param("extended_readout_time", extended_readout_time);
+
   tpc->OverlapCheck(OverlapCheck);
-  
   g4Reco->registerSubsystem(tpc);
-  
+
   if (Enable::TPC_ENDCAP)
     {
       TPC_Endcaps(g4Reco);
     }
-  
+
   radius = G4TPC::tpc_outer_radius;
-  
+
   radius += no_overlapp;
-  
+
   return radius;
 }
 
@@ -373,14 +392,14 @@ void TPC_Cells()
     // setup phi and theta steps
     /* use 5deg steps */
     static constexpr double deg_to_rad = M_PI/180.;
-    directLaser->SetPhiStepping( 144, 0*deg_to_rad, 360*deg_to_rad );           
-    directLaser->SetThetaStepping( 36, 0*deg_to_rad, 90*deg_to_rad );           
+    directLaser->SetPhiStepping( 144, 0*deg_to_rad, 360*deg_to_rad );
+    directLaser->SetThetaStepping( 36, 0*deg_to_rad, 90*deg_to_rad );
     //directLaser->SetArbitraryThetaPhi(50*deg_to_rad, 145*deg_to_rad);
-    directLaser->SetDirectLaserAuto( true );                                    
-    //__Variable stepping: hitting all of the central membrane____________        
-    //directLaser->SetDirectLaserPatternfromFile( true );                         
-    //directLaser->SetFileStepping(13802);                                        
-    //___________________________________________________________________     
+    directLaser->SetDirectLaserAuto( true );
+    //__Variable stepping: hitting all of the central membrane____________
+    //directLaser->SetDirectLaserPatternfromFile( true );
+    //directLaser->SetFileStepping(13802);
+    //___________________________________________________________________
 
     directLaser->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
     se->registerSubsystem(directLaser);
@@ -394,6 +413,9 @@ void TPC_Cells()
 
   auto padplane = new PHG4TpcPadPlaneReadout;
   padplane->Verbosity(verbosity);
+  double extended_readout_time = 0.0;
+  if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+  padplane->SetReadoutTime(extended_readout_time);
 
   auto edrift = new PHG4TpcElectronDrift;
   edrift->Detector("TPC");
@@ -401,6 +423,9 @@ void TPC_Cells()
   if( G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS )
   {
     auto distortionMap = new PHG4TpcDistortion;
+
+    distortionMap->set_read_phi_as_radians( G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS );
+
     distortionMap->set_do_static_distortions( G4TPC::ENABLE_STATIC_DISTORTIONS );
     distortionMap->set_static_distortion_filename( G4TPC::static_distortion_filename );
 
@@ -412,9 +437,8 @@ void TPC_Cells()
   }
 
   double tpc_readout_time = 105.5/ G4TPC::tpc_drift_velocity_sim;  // ns
-  double extended_readout_time = 0.0;
-  if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
-  edrift->set_double_param("max_time", tpc_readout_time + extended_readout_time);
+  edrift->set_double_param("max_time", tpc_readout_time);
+  edrift->set_double_param("extended_readout_time", extended_readout_time);
   std::cout << "PHG4TpcElectronDrift readout window is from 0 to " <<  tpc_readout_time + extended_readout_time << std::endl;
 
   // override the default drift velocity parameter specification
@@ -424,15 +448,9 @@ void TPC_Cells()
   // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
   // They represent effects not due to ideal gas properties and ideal readout plane behavior
   // defaults are 0.085 and 0.105, they can be changed here to get a different resolution
+
   edrift->registerPadPlane(padplane);
   se->registerSubsystem(edrift);
-
-  // The pad plane readout default is set in PHG4TpcPadPlaneReadout
-
-  // We may want to change the number of inner layers, and can do that here
-  padplane->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);  // sPHENIX layer number of first Tpc readout layer
-  padplane->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
-  padplane->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
 
   // Tpc digitizer
   //=========
@@ -472,9 +490,17 @@ void MicromegasInit()
 
 void Micromegas(PHG4Reco* g4Reco)
 {
+  bool overlapcheck = Enable::OVERLAPCHECK || Enable::MICROMEGAS_OVERLAPCHECK;
+  int verbosity = std::max(Enable::VERBOSITY, Enable::MICROMEGAS_VERBOSITY);
+  bool SupportActive = Enable::SUPPORT || Enable::MICROMEGAS_SUPPORT;
   const int mm_layer = G4MVTX::n_maps_layer + G4INTT::n_intt_layer + G4TPC::n_gas_layer;
   auto mm = new PHG4MicromegasSubsystem("MICROMEGAS", mm_layer);
-  mm->OverlapCheck( Enable::OVERLAPCHECK );
+  mm->Verbosity(verbosity);
+  if (SupportActive)
+  {
+    mm->SetSupportActive();
+  }
+  mm->OverlapCheck(overlapcheck );
   mm->SetActive();
   g4Reco->registerSubsystem(mm);
 }
@@ -484,9 +510,14 @@ void Micromegas_Cells()
 // the acts geometry needs to go here since it will be used by the PHG4MicromegasHitReco
   ACTSGEOM::ActsGeomInit();
   auto se = Fun4AllServer::instance();
+  int verbosity = std::max(Enable::VERBOSITY, Enable::MICROMEGAS_VERBOSITY);
   // micromegas
   auto reco = new PHG4MicromegasHitReco;
-  reco->Verbosity(0);
+  reco->Verbosity(verbosity);
+  double extended_readout_time = 0.0;
+  if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+
+  reco->set_double_param("micromegas_tmax", 800.0+extended_readout_time);
   se->registerSubsystem(reco);
 
   se->registerSubsystem(new PHG4MicromegasDigitizer);

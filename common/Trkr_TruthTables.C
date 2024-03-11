@@ -5,6 +5,8 @@
 
 #include <g4eval/SvtxTruthRecoTableEval.h>
 
+#include <fun4all/Fun4AllServer.h>
+
 R__LOAD_LIBRARY(libg4eval.so)
 
 void build_truthreco_tables()
