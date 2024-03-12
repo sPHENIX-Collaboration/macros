@@ -112,14 +112,14 @@ namespace G4TPC
   bool DISTORTIONS_USE_PHI_AS_RADIANS = true;
 
   bool ENABLE_STATIC_DISTORTIONS = false;
-  auto static_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only.distortion_map.hist.root";
+  std::string static_distortion_filename = "TPC_STATIC_DISTORTION";
 
   bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
-  std::string time_ordered_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/TimeOrderedDistortions.root";
+  std::string time_ordered_distortion_filename = "TPC_TIMEORDERED_DISTORTION";
 
   // distortion corrections
   bool ENABLE_CORRECTIONS = false;
-  auto correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
+  std::string correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
 
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;

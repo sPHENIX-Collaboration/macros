@@ -427,11 +427,22 @@ void TPC_Cells()
     distortionMap->set_read_phi_as_radians( G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS );
 
     distortionMap->set_do_static_distortions( G4TPC::ENABLE_STATIC_DISTORTIONS );
-    distortionMap->set_static_distortion_filename( G4TPC::static_distortion_filename );
-
-    distortionMap->set_do_time_ordered_distortions( G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS );
-    distortionMap->set_time_ordered_distortion_filename( G4TPC::time_ordered_distortion_filename );
-
+    if (isRootFile(G4TPC::static_distortion_filename))
+    {
+      distortionMap->set_static_distortion_filename(G4TPC::static_distortion_filename);
+    }
+    else
+    {
+      distortionMap->set_static_distortion_filename( CDBInterface::instance()->getUrl(G4TPC::static_distortion_filename));
+    }
+    if (isRootFile(G4TPC::time_ordered_distortion_filename))
+    {
+      distortionMap->set_time_ordered_distortion_filename(G4TPC::time_ordered_distortion_filename);
+    }
+    else
+    {
+      distortionMap->set_time_ordered_distortion_filename(CDBInterface::instance()->getUrl(G4TPC::time_ordered_distortion_filename));
+    }
     distortionMap->Init();
     edrift->setTpcDistortion( distortionMap );
   }

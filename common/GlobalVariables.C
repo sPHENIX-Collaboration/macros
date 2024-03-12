@@ -115,4 +115,20 @@ namespace CDB
   uint64_t timestamp = 6;
 }
 
+// multi purpose functions
+// cheap check via extension if we have a root file (pre c++17)
+bool isRootFile(const std::string &fname)
+{
+  std::string tmp = fname;
+  size_t i = fname.rfind('.', fname.length());
+  if (i != string::npos)
+  {
+    if (fname.substr(i+1, fname.length() - i) == "root")
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 #endif
