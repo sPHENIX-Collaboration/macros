@@ -51,11 +51,10 @@ namespace Enable
   bool TRACK_MATCHING_TREE = false;
   bool TRACK_MATCHING_TREE_CLUSTERS = false;
   // 0=no output TTree file, 1=output for tracks only, 2=tracks+clusters
-  int  TRACKING_VERBOSITY = 0;
+  int TRACKING_VERBOSITY = 0;
   bool TRACKING_QA = false;
   bool TRACKING_DIAGNOSTICS = false;
 }  // namespace Enable
-
 
 namespace G4MVTX
 {
@@ -67,7 +66,7 @@ namespace G4MVTXAlignment
 {
   std::string alignment_path = string(getenv("CALIBRATIONROOT")) + "/Tracking/MVTX/alignment";
   double z_offset[] = {0.0, 0.0, 200.0};
-}
+}  // namespace G4MVTXAlignment
 
 namespace G4INTT
 {
@@ -85,11 +84,10 @@ namespace G4INTT
     kInttNoDeadMap = 0,  // All channel in Intt is alive
     kInttDeadMap = 1,    // with dead channel
   };
-  //enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
+  // enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
   enu_InttDeadMapType InttDeadMapOption = kInttDeadMap;  // Choose Intt deadmap here
 
 }  // namespace G4INTT
-
 
 namespace G4TPC
 {
@@ -101,9 +99,9 @@ namespace G4TPC
   double tpc_outer_radius = 77. + 2.;
 
   // drift velocity is set here for all relevant modules
-  double tpc_drift_velocity_sim= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas, it is very close to our Ar-CF4 mixture
-//  double tpc_drift_velocity_reco now set in GlobalVariables.C
-//  double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
+  double tpc_drift_velocity_sim = 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas, it is very close to our Ar-CF4 mixture
+                                                 //  double tpc_drift_velocity_reco now set in GlobalVariables.C
+                                                 //  double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
 
   // use simple clusterizer
   bool USE_SIMPLE_CLUSTERIZER = false;
@@ -139,11 +137,10 @@ namespace G4TPC
 
 }  // namespace G4TPC
 
-
 namespace G4TRACKING
 {
   // Space Charge calibration flag
-  bool SC_CALIBMODE = false;                                            // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
+  bool SC_CALIBMODE = false;  // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
   bool SC_USE_MICROMEGAS = true;
   double SC_COLLISIONRATE = 50e3;                                      // leave at 50 KHz for now, scaling of distortion map not implemented yet
   std::string SC_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";  // space charge calibration output file
