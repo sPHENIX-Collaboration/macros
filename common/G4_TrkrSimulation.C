@@ -1,9 +1,9 @@
 #ifndef MACRO_G4TRKRSIM_C
 #define MACRO_G4TRKRSIM_C
 
-#include <GlobalVariables.C>
-#include <G4_TrkrVariables.C>
 #include <G4_ActsGeom.C>
+#include <G4_TrkrVariables.C>
+#include <GlobalVariables.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4mvtx/PHG4MvtxDefs.h>
@@ -66,14 +66,14 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   for (int ilayer = 0; ilayer < G4MVTX::n_maps_layer; ilayer++)
   {
     double radius_lyr = PHG4MvtxDefs::mvtxdat[ilayer][PHG4MvtxDefs::kRmd];
-//    mvtx->set_double_param(ilayer, "layer_z_offset", G4MVTXAlignment::z_offset[ilayer]);
+    //    mvtx->set_double_param(ilayer, "layer_z_offset", G4MVTXAlignment::z_offset[ilayer]);
     if (verbosity)
     {
       cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << endl;
     }
     radius = radius_lyr / 10.;
   }
-//  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "alignment_path",  G4MVTXAlignment::alignment_path);
+  //  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "alignment_path",  G4MVTXAlignment::alignment_path);
   mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave.gdml"));
 
   mvtx->SetActive();
@@ -97,23 +97,22 @@ void Mvtx_Cells()
 
   double maps_readout_window = 5000.0;  // ns
   double extended_readout_time = 0.0;
-  if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+  if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
   // override the default timing window - default is +/- 5000 ns
-  maps_hits->set_double_param("mvtx_tmin",  -maps_readout_window);
-  maps_hits->set_double_param("mvtx_tmax",  maps_readout_window + extended_readout_time);
+  maps_hits->set_double_param("mvtx_tmin", -maps_readout_window);
+  maps_hits->set_double_param("mvtx_tmax", maps_readout_window + extended_readout_time);
 
-  std::cout << "PHG4MvtxHitReco: readout window is from " << -maps_readout_window << " to " <<  maps_readout_window + extended_readout_time << std::endl;
+  std::cout << "PHG4MvtxHitReco: readout window is from " << -maps_readout_window << " to " << maps_readout_window + extended_readout_time << std::endl;
   se->registerSubsystem(maps_hits);
 
   PHG4MvtxDigitizer* digimvtx = new PHG4MvtxDigitizer();
   digimvtx->Verbosity(verbosity);
   // energy deposit in 25 microns = 9.6 KeV = 1000 electrons collected after recombination
-  //digimvtx->set_adc_scale(0.95e-6);  // default set in code is 0.95e-06, which is 99 electrons
+  // digimvtx->set_adc_scale(0.95e-6);  // default set in code is 0.95e-06, which is 99 electrons
   se->registerSubsystem(digimvtx);
 
   return;
 }
-
 
 void InttInit()
 {
@@ -170,7 +169,7 @@ double Intt(PHG4Reco* g4Reco, double radius,
   for (int i = 0; i < G4INTT::n_intt_layer; i++)
   {
     cout << " Intt layer " << i << " laddertype " << G4INTT::laddertype[i] << " nladders " << G4INTT::nladder[i]
-         << " sensor radius " << G4INTT::sensor_radius[i]  << endl;
+         << " sensor radius " << G4INTT::sensor_radius[i] << endl;
     sitrack->set_int_param(i, "laddertype", G4INTT::laddertype[i]);
     sitrack->set_int_param(i, "nladder", G4INTT::nladder[i]);
     sitrack->set_double_param(i, "sensor_radius", G4INTT::sensor_radius[i]);  // expecting cm
@@ -199,7 +198,7 @@ void Intt_Cells()
       if (G4INTT::InttDeadMapOption == G4INTT::kInttDeadMap)
       {
         string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap/");
-        //string DeadMapPath = "/sphenix/u/wxie/sphnx_software/INTT" + string("/DeadMap/");
+        // string DeadMapPath = "/sphenix/u/wxie/sphnx_software/INTT" + string("/DeadMap/");
 
         DeadMapPath += DeadMapConfigName;
 
@@ -213,7 +212,7 @@ void Intt_Cells()
     }
 
     deadMapINTT->Verbosity(verbosity);
-    //deadMapINTT -> Verbosity(1);
+    // deadMapINTT -> Verbosity(1);
     se->registerSubsystem(deadMapINTT);
   }
   // new storage containers
@@ -221,7 +220,7 @@ void Intt_Cells()
 
   // The timing window defaults are set in the INTT ladder model, they can be overridden here
   double extended_readout_time = 0.0;
-  if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+  if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
   reco->set_double_param("tmax", 80.0 + extended_readout_time);
   reco->set_double_param("tmin", -20.0);
   std::cout << "INTT readout window is set to -20 to " << 80.0 + extended_readout_time << std::endl;
@@ -264,7 +263,7 @@ void Intt_Cells()
   // new containers
   PHG4InttDigitizer* digiintt = new PHG4InttDigitizer();
   digiintt->Verbosity(verbosity);
-  //digiintt->Verbosity(3);
+  // digiintt->Verbosity(3);
   for (int i = 0; i < G4INTT::n_intt_layer; i++)
   {
     digiintt->set_adc_scale(G4MVTX::n_maps_layer + i, userrange);
@@ -343,12 +342,12 @@ double TPC(PHG4Reco* g4Reco,
   tpc->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
 
   if (AbsorberActive)
-    {
-      tpc->SetAbsorberActive();
-    }
+  {
+    tpc->SetAbsorberActive();
+  }
 
   double extended_readout_time = 0.0;
-  if(TRACKING::pp_mode)
+  if (TRACKING::pp_mode)
   {
     extended_readout_time = TRACKING::pp_extended_readout_time;
   }
@@ -359,9 +358,9 @@ double TPC(PHG4Reco* g4Reco,
   g4Reco->registerSubsystem(tpc);
 
   if (Enable::TPC_ENDCAP)
-    {
-      TPC_Endcaps(g4Reco);
-    }
+  {
+    TPC_Endcaps(g4Reco);
+  }
 
   radius = G4TPC::tpc_outer_radius;
 
@@ -376,7 +375,7 @@ void TPC_Cells()
   auto se = Fun4AllServer::instance();
 
   // central membrane G4Hit generation
-  if( G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS )
+  if (G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS)
   {
     auto centralMembrane = new PHG4TpcCentralMembrane;
     centralMembrane->setCentralMembraneDelay(0);
@@ -385,20 +384,20 @@ void TPC_Cells()
   }
 
   // direct laser G4Hit generation
-  if( G4TPC::ENABLE_DIRECT_LASER_HITS )
+  if (G4TPC::ENABLE_DIRECT_LASER_HITS)
   {
     auto directLaser = new PHG4TpcDirectLaser;
 
     // setup phi and theta steps
     /* use 5deg steps */
-    static constexpr double deg_to_rad = M_PI/180.;
-    directLaser->SetPhiStepping( 144, 0*deg_to_rad, 360*deg_to_rad );
-    directLaser->SetThetaStepping( 36, 0*deg_to_rad, 90*deg_to_rad );
-    //directLaser->SetArbitraryThetaPhi(50*deg_to_rad, 145*deg_to_rad);
-    directLaser->SetDirectLaserAuto( true );
+    static constexpr double deg_to_rad = M_PI / 180.;
+    directLaser->SetPhiStepping(144, 0 * deg_to_rad, 360 * deg_to_rad);
+    directLaser->SetThetaStepping(36, 0 * deg_to_rad, 90 * deg_to_rad);
+    // directLaser->SetArbitraryThetaPhi(50*deg_to_rad, 145*deg_to_rad);
+    directLaser->SetDirectLaserAuto(true);
     //__Variable stepping: hitting all of the central membrane____________
-    //directLaser->SetDirectLaserPatternfromFile( true );
-    //directLaser->SetFileStepping(13802);
+    // directLaser->SetDirectLaserPatternfromFile( true );
+    // directLaser->SetFileStepping(13802);
     //___________________________________________________________________
 
     directLaser->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
@@ -414,32 +413,43 @@ void TPC_Cells()
   auto padplane = new PHG4TpcPadPlaneReadout;
   padplane->Verbosity(verbosity);
   double extended_readout_time = 0.0;
-  if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+  if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
   padplane->SetReadoutTime(extended_readout_time);
 
   auto edrift = new PHG4TpcElectronDrift;
   edrift->Detector("TPC");
   edrift->Verbosity(verbosity);
-  if( G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS )
+  if (G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS)
   {
     auto distortionMap = new PHG4TpcDistortion;
 
-    distortionMap->set_read_phi_as_radians( G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS );
+    distortionMap->set_read_phi_as_radians(G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS);
 
-    distortionMap->set_do_static_distortions( G4TPC::ENABLE_STATIC_DISTORTIONS );
-    distortionMap->set_static_distortion_filename( G4TPC::static_distortion_filename );
-
-    distortionMap->set_do_time_ordered_distortions( G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS );
-    distortionMap->set_time_ordered_distortion_filename( G4TPC::time_ordered_distortion_filename );
-
+    distortionMap->set_do_static_distortions(G4TPC::ENABLE_STATIC_DISTORTIONS);
+    if (isRootFile(G4TPC::static_distortion_filename))
+    {
+      distortionMap->set_static_distortion_filename(G4TPC::static_distortion_filename);
+    }
+    else
+    {
+      distortionMap->set_static_distortion_filename(CDBInterface::instance()->getUrl(G4TPC::static_distortion_filename));
+    }
+    if (isRootFile(G4TPC::time_ordered_distortion_filename))
+    {
+      distortionMap->set_time_ordered_distortion_filename(G4TPC::time_ordered_distortion_filename);
+    }
+    else
+    {
+      distortionMap->set_time_ordered_distortion_filename(CDBInterface::instance()->getUrl(G4TPC::time_ordered_distortion_filename));
+    }
     distortionMap->Init();
-    edrift->setTpcDistortion( distortionMap );
+    edrift->setTpcDistortion(distortionMap);
   }
 
-  double tpc_readout_time = 105.5/ G4TPC::tpc_drift_velocity_sim;  // ns
+  double tpc_readout_time = 105.5 / G4TPC::tpc_drift_velocity_sim;  // ns
   edrift->set_double_param("max_time", tpc_readout_time);
   edrift->set_double_param("extended_readout_time", extended_readout_time);
-  std::cout << "PHG4TpcElectronDrift readout window is from 0 to " <<  tpc_readout_time + extended_readout_time << std::endl;
+  std::cout << "PHG4TpcElectronDrift readout window is from 0 to " << tpc_readout_time + extended_readout_time << std::endl;
 
   // override the default drift velocity parameter specification
   edrift->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
@@ -463,9 +473,8 @@ void TPC_Cells()
   digitpc->Verbosity(verbosity);
   cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
        << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << endl;
-  digitpc ->set_skip_noise_flag(false);
+  digitpc->set_skip_noise_flag(false);
   se->registerSubsystem(digitpc);
-
 }
 
 void MicromegasInit()
@@ -500,14 +509,14 @@ void Micromegas(PHG4Reco* g4Reco)
   {
     mm->SetSupportActive();
   }
-  mm->OverlapCheck(overlapcheck );
+  mm->OverlapCheck(overlapcheck);
   mm->SetActive();
   g4Reco->registerSubsystem(mm);
 }
 
 void Micromegas_Cells()
 {
-// the acts geometry needs to go here since it will be used by the PHG4MicromegasHitReco
+  // the acts geometry needs to go here since it will be used by the PHG4MicromegasHitReco
   ACTSGEOM::ActsGeomInit();
   auto se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::MICROMEGAS_VERBOSITY);
@@ -517,7 +526,7 @@ void Micromegas_Cells()
   double extended_readout_time = 0.0;
   if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
 
-  reco->set_double_param("micromegas_tmax", 800.0+extended_readout_time);
+  reco->set_double_param("micromegas_tmax", 800.0 + extended_readout_time);
   se->registerSubsystem(reco);
 
   se->registerSubsystem(new PHG4MicromegasDigitizer);
