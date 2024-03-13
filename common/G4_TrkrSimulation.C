@@ -38,6 +38,8 @@
 
 #include <g4main/PHG4Reco.h>
 
+#include <ffamodules/CDBInterface.h>
+
 #include <cmath>
 #include <vector>
 
