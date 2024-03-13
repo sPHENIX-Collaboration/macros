@@ -55,10 +55,10 @@ void Fun4All_TrkrHitSet_Unpacker(
   hitsin->fileopen(filename);
   se->registerInputManager(hitsin);
 
-  Mvtx_HitUnpacking();
-  Intt_HitUnpacking();
+  //Mvtx_HitUnpacking();
+  //Intt_HitUnpacking();
   Tpc_HitUnpacking();
-  Micromegas_HitUnpacking();
+  //Micromegas_HitUnpacking();
 
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfilename);
   out->StripNode("MVTXRAWHIT");
