@@ -42,7 +42,7 @@ namespace Enable
   bool HCALOUT_EVAL = false;
   bool HCALOUT_QA = false;
   bool HCALOUT_OLD = false;
-  bool HCALOUT_RING = true;
+  bool HCALOUT_RING = false;
   bool HCALOUT_G4Hit = true;
   int HCALOUT_VERBOSITY = 0;
 }  // namespace Enable
@@ -144,6 +144,11 @@ double HCalOuter(PHG4Reco *g4Reco,
   else
   {
     hcal = new PHG4OHCalSubsystem("HCALOUT");
+    if (Enable::HCALOUT_RING)
+    {
+      std::string gdmlfile_no_ring =   string(getenv("CALIBRATIONROOT")) + "/HcalGeo/OuterHCalAbsorberTiles_merged.gdml"; 
+      hcal->set_string_param("GDMPath", gdmlfile_no_ring);
+    }
     // hcal->set_string_param("GDMPath", "mytestgdml.gdml"); // try other gdml file
     // common setting with tracking, we likely want to move to the cdb with this
     hcal->set_string_param("IronFieldMapPath", G4MAGNET::magfield_OHCAL_steel);
