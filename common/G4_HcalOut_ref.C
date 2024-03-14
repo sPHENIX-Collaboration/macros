@@ -71,6 +71,8 @@ namespace G4HCALOUT
     kHCalOutTemplateClusterizer
   };
 
+  bool useTowerInfoV2 = false;
+
   //! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
   enu_HCalOut_clusterizer HCalOut_clusterizer = kHCalOutTemplateClusterizer;
   //! graph clusterizer, RawClusterBuilderGraph
@@ -331,6 +333,8 @@ void HCALOuter_Towers()
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalOutRawTowerCalibration");
   TowerCalibration->Detector("HCALOUT");
+  TowerCalibration -> set_usetowerinfo_v2(G4HCALOUT::useTowerInfoV2);
+
   //  TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
   //  TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
