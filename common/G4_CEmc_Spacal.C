@@ -77,8 +77,7 @@ namespace G4CEMC
   enu_Cemc_clusterizer Cemc_clusterizer = kCemcTemplateClusterizer;
   //! graph clusterizer, RawClusterBuilderGraph
   // enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
-  
-  bool useTowerInfoV2 = false;
+
 }  // namespace G4CEMC
 
 // black hole parameters are set in CEmc function
@@ -269,7 +268,6 @@ void CEMC_Towers()
   se->registerSubsystem(TowerDigitizer);
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
-  TowerCalibration -> set_usetowerinfo_v2(G4CEMC::useTowerInfoV2);
   TowerCalibration->Detector("CEMC");
   TowerCalibration->Verbosity(verbosity);
   if (!Enable::CEMC_G4Hit) TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
