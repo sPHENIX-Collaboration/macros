@@ -83,7 +83,8 @@ namespace G4HCALIN
 
     kHCalInTemplateClusterizer
   };
-
+  
+  bool useTowerInfoV2 = false;
   //! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
   enu_HCalIn_clusterizer HCalIn_clusterizer = kHCalInTemplateClusterizer;
   //! graph clusterizer, RawClusterBuilderGraph
@@ -300,6 +301,7 @@ void HCALInner_Towers()
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalInRawTowerCalibration");
   TowerCalibration->Detector("HCALIN");
+  TowerCalibration -> set_usetowerinfo_v2(G4HCALIN::useTowerInfoV2);
   //  TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
   //  TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
