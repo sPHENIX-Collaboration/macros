@@ -77,6 +77,7 @@ namespace G4CEMC
   enu_Cemc_clusterizer Cemc_clusterizer = kCemcTemplateClusterizer;
   //! graph clusterizer, RawClusterBuilderGraph
   // enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
+  bool useTowerInfoV2 = false;
 
 }  // namespace G4CEMC
 
@@ -269,6 +270,7 @@ void CEMC_Towers()
 
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
   TowerCalibration->Detector("CEMC");
+  TowerCalibration->set_usetowerinfo_v2(G4CEMC::useTowerInfoV2);
   TowerCalibration->Verbosity(verbosity);
   if (!Enable::CEMC_G4Hit) TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
   if (G4CEMC::TowerDigi == RawTowerDigitizer::kNo_digitization)
