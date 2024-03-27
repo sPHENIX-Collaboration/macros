@@ -13,7 +13,7 @@ echo Submitting Pass 1 Condor Jobs
 set v=`cat $1`
 set nLines=`wc -l $fileList`
 set i=1
-set sigma=3.0
+set sigma=2.5
 
 while ( $i <= $#v )
 #while ( $i <= 1 )
