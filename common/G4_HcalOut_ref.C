@@ -42,7 +42,7 @@ namespace Enable
   bool HCALOUT_EVAL = false;
   bool HCALOUT_QA = false;
   bool HCALOUT_OLD = false;
-  bool HCALOUT_RING = true;
+  bool HCALOUT_RING = false;
   bool HCALOUT_G4Hit = true;
   int HCALOUT_VERBOSITY = 0;
 }  // namespace Enable

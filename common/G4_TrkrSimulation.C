@@ -444,6 +444,7 @@ void TPC_Cells()
     {
       distortionMap->set_time_ordered_distortion_filename(CDBInterface::instance()->getUrl(G4TPC::time_ordered_distortion_filename));
     }
+    distortionMap->set_do_ReachesReadout(G4TPC::ENABLE_REACHES_READOUT);
     distortionMap->Init();
     edrift->setTpcDistortion(distortionMap);
   }
