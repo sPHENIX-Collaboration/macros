@@ -19,7 +19,6 @@
 
 R__LOAD_LIBRARY(libcdbobjects.so)
 R__LOAD_LIBRARY(libfun4all.so)
-R__LOAD_LIBRARY(libtowerid.so)
 R__LOAD_LIBRARY(libmbd_io.so)
 R__LOAD_LIBRARY(libemcNoisyTowerFinder.so)
 #endif
@@ -33,6 +32,7 @@ void Fun4All_EMCalBadTowerID(const int nEvents = 5000, const char *inFile = "DST
   int segment = runseg.second;
 
   emcNoisyTowerFinder *calo = new emcNoisyTowerFinder("noisyTowerFinder",inName,cdbname,adccut_sg,adccut_k,sigmas_lo,sigmas_hi,SG_f,Kur_f,region_f);
+  calo -> set_Normalization(0);
   Fun4AllServer *se = Fun4AllServer::instance();
   recoConsts *rc = recoConsts::instance();
 	
