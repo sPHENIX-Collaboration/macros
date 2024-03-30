@@ -7,7 +7,7 @@ then
 fi
 
 runnumber=$(printf "%08d" $1)
-/bin/ls -1 /sphenix/lustre01/sphnxpro/commissioning/GL1/cosmics/GL1_cosmics-${runnumber}-* >gl1.list
+/bin/ls -1 /sphenix/lustre01/sphnxpro/commissioning/GL1/cosmics/GL1_cosmic*-${runnumber}-* >gl1.list
 if [ ! -s gl1.list ]
 then
   echo gl1.list empty, removing it
