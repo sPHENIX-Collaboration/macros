@@ -155,6 +155,7 @@ double Intt(PHG4Reco* g4Reco, double radius,
   sitrack->Verbosity(verbosity);
   sitrack->SetActive(1);
   sitrack->OverlapCheck(intt_overlapcheck);
+  sitrack->SetSurveyGeometry(false);
   if (Enable::INTT_ABSORBER || Enable::ABSORBER)
   {
     sitrack->SetAbsorberActive();
