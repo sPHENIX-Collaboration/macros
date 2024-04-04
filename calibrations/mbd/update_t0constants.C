@@ -1,5 +1,6 @@
 // 
 // update the t0 constants to correct the z-vertex
+// dz is the amount to move the current z-vertex
 //
 #include <mbd/MbdCalib.h>
 
