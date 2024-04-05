@@ -1,8 +1,19 @@
+#include <iostream>
+#include <fstream>
+
+#include <TString.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TH1F.h>
+#include <TH2F.h>
 #include <TF1.h>
+#include <TCanvas.h>
+#include <TPad.h>
+#include <TSystem.h>
 
 #include "get_runstr.h"
-#include "mbd/MbdCalib.h"
-#include "mbd/MbdDefs.h"
+#include <mbd/MbdCalib.h>
+#include <mbd/MbdDefs.h>
 #include "read_dstmbd.C"
 #include "recal_mbd_mip.C"
 
@@ -12,7 +23,9 @@ R__LOAD_LIBRARY(libmbd.so)
 #endif
 
 //pass0: do tt_t0 and tq_t0 offset calibration
-//pass1: 
+//pass1: do the slew correction
+//pass2: do the mip fits for charge calibration 
+
 void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 0, const int nevt = 0)
 {
   cout << "tfname " << tfname << endl;
@@ -37,7 +50,17 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
   {
     savefname += "calmbdtime_pass"; savefname += pass; savefname += ".root";
   }
-  else if ( pass>0 )
+  else if ( pass==1 || pass==2 )
+  {
+    savefname += "calmbdslew_pass"; savefname += pass; savefname += ".root";
+  }
+  else if ( pass==3 )
+  {
+    savefname += "calmbdq_pass"; savefname += pass; savefname += ".root";
+  }
+
+  // Load whatever calibrations are available at each pass
+  if ( pass>0 )
   {
     calfile = dir + "/mbd_tq_t0.calib";
     mcal->Download_TQT0( calfile.Data() );
@@ -45,14 +68,16 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
     calfile = dir + "/mbd_tt_t0.calib";
     mcal->Download_TTT0( calfile.Data() );
 
-    savefname += "calmbdq_pass"; savefname += pass; savefname += ".root";
   }
   if ( pass>1 )
   {
+    calfile = dir + "/mbd_slewcorr.calib";
+    mcal->Download_SlewCorr( calfile.Data() );
+  }
+  if ( pass>3 )
+  {
     calfile = dir + "/mbd_qfit.calib";
     mcal->Download_Gains( calfile.Data() );
-
-    savefname += "calmbd_pass"; savefname += pass; savefname += ".root";
   }
 
   TFile *savefile = new TFile(savefname,"RECREATE");
@@ -60,6 +85,8 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
   TH1 *h_q[NUM_PMT];
   TH1 *h_tt[NUM_PMT];
   TH1 *h_tq[NUM_PMT];
+
+  TH2 *h2_slew[NUM_PMT];
 
   TString title;
   for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
@@ -75,6 +102,13 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
     name = "h_tq"; name += ipmt;
     title = "tq"; title += ipmt;
     h_tq[ipmt] = new TH1F(name,title,7000,-150,31*17.76);
+
+    if ( pass>0 )
+    {
+      name = "h2_slew"; name += ipmt;
+      title = "slew curve, ch "; title += ipmt;
+      h2_slew[ipmt] = new TH2F(name,title,4000,-0.5,16000-0.5,1100,-5,6);
+    }
   }
   TH2 *h2_tq = new TH2F("h2_tq","ch vs tq",900,-150,150,NUM_PMT,-0.5,NUM_PMT-0.5);
   TH2 *h2_tt = new TH2F("h2_tt","ch vs tt",900,-150,150,NUM_PMT,-0.5,NUM_PMT-0.5);
@@ -85,6 +119,11 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
   {
     nentries = nevt;
   }
+
+  double armtime[2]{0.,0.};
+  double nhit[2]{0.,0.};
+  float  ttcorr[128] = {0.};
+
   for (int ientry=0; ientry<nentries; ientry++)
   {
     tree->GetEntry(ientry);
@@ -96,42 +135,66 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
       cout << "\t" << f_tt[127] << "\t" << f_tq[127] << "\t" << f_q[127] << endl;
     }
 
+    if ( pass>0 )
+    {
+      armtime[0] = 0.;
+      armtime[1] = 0.;
+      nhit[0] = 0.;
+      nhit[1] = 0.;
+    }
+
     for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
     {
-      int ifeech = (ipmt/8)*16 + 8 + ipmt%8;
-      float tt = f_tt[ipmt];
+      int arm = ipmt/64;
+
+      ttcorr[ipmt] = f_tt[ipmt];
       float tq = f_tq[ipmt];
 
       if ( pass>0 )
       {
-        if ( !isnan(mcal->get_tt0(ipmt)) )
+        if ( !isnan(mcal->get_tt0(ipmt)) && mcal->get_tt0(ipmt)>-100. && f_q[ipmt]>0. && f_q[ipmt]<16000. )
         {
-          tt -= mcal->get_tt0(ipmt);
+          ttcorr[ipmt] -= mcal->get_tt0(ipmt);
         }
-        if ( !isnan(mcal->get_tq0(ipmt)) )
+        if ( !isnan(mcal->get_tq0(ipmt)) && mcal->get_tq0(ipmt)>-100. )
         {
           tq -= mcal->get_tq0(ipmt);
         }
       }
+      if ( pass>1 )
+      {
+        // apply slewcorr if pass > 1
+        int feech = (ipmt / 8) * 16 + ipmt % 8;
+        if ( !isnan(mcal->get_tt0(ipmt)) && mcal->get_tt0(ipmt)>-100. && f_q[ipmt]>0. && f_q[ipmt]<16000. )
+        {
+          ttcorr[ipmt] -= mcal->get_scorr(feech,f_q[ipmt]);
+        }
+      }
 
-      h_tt[ipmt]->Fill( tt );
-      h2_tt->Fill( tt, ipmt );
+      h_tt[ipmt]->Fill( ttcorr[ipmt] );
+      h2_tt->Fill( ttcorr[ipmt], ipmt );
 
       h_tq[ipmt]->Fill( tq );
       h2_tq->Fill( tq, ipmt );
 
-      int arm = ipmt/64;
+      if ( pass==0 && fabs(f_tt[ipmt])<26. )
+      {
+        h_q[ipmt]->Fill( f_q[ipmt] );
+      }
+      else if ( pass>0 && fabs(ttcorr[ipmt])<26. )
+      {
+        h_q[ipmt]->Fill( f_q[ipmt] );
 
-      if ( pass==0 && tt>0. && tt<26. )
-      {
-        h_q[ipmt]->Fill( f_q[ipmt] );
-      }
-      else if ( pass==1 && fabs(tt)<26. )
-      {
-        h_q[ipmt]->Fill( f_q[ipmt] );
-      }
-      else if ( pass==2 && fabs(tq)<15 )
-      {
+        if ( f_q[ipmt] > 1000. && fabs(ttcorr[ipmt])<26. )
+        //if ( f_q[ipmt] > 2000. && fabs(ttcorr[ipmt])<26. )
+        {
+          nhit[arm] += 1.0;
+          armtime[arm] += ttcorr[ipmt];
+        }
+
+        // check charge
+        // why cuts on f_bn?
+        /*
         if ( arm==0 && f_bn[0]<30 )
         {
           h_q[ipmt]->Fill( f_q[ipmt] );
@@ -140,7 +203,31 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
         {
           h_q[ipmt]->Fill( f_q[ipmt] );
         }
+        */
       }
+    } // end loop over PMTs
+
+    // calc meantime for high amplitude
+    for (int iarm=0; iarm<2; iarm++)
+    {
+      if ( nhit[iarm]>1. )
+      {
+        armtime[iarm] = armtime[iarm]/nhit[iarm];
+      }
+      //cout << "aaa " << iarm << "\t" << nhit[iarm] << "\t" << armtime[iarm] << endl;
+    }
+
+    for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
+    {
+      //int ifeech = (ipmt/8)*16 + 8 + ipmt%8;  // time ifeech only
+      int arm = ipmt/64;
+
+      if ( nhit[arm]<2 || f_q[ipmt]<=0. ) continue;
+
+      double dt = ttcorr[ipmt] - armtime[arm];
+
+      //cout << "filling" << endl;
+      h2_slew[ipmt]->Fill( f_q[ipmt], dt );
     }
   }
 
@@ -157,7 +244,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
   else if ( pass>0 )
   {
     name = dir + "h2_ttcorr.png";
-    h2_tt->GetXaxis()->SetRangeUser( 0.,20 );
+    h2_tt->GetXaxis()->SetRangeUser( -5.,25 );
     gPad->Modified();
     gPad->Update();
   }
@@ -316,6 +403,22 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
   }
   ++cvindex;
 
+  if ( pass==1 || pass==2 )
+  {
+    //== Draw the slewcorr histograms
+    ac[cvindex] = new TCanvas("cal_slew","slew",425*1.5,550*1.5);
+
+    for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
+    {
+      h2_slew[ipmt]->Draw("colz");
+
+      name = dir + "h2_slew"; name += ipmt; name += "_pass"; name += pass; name += ".png";
+      cout << name << endl;
+      ac[cvindex]->Print( name );
+    }
+    ++cvindex;
+  }
+
   //== Draw the charge histograms
   ac[cvindex] = new TCanvas("cal_q","q",425*1.5,550*1.5);
   if ( pass==0 )
@@ -325,18 +428,19 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
 
   for (int ipmt=0; ipmt<NUM_PMT && pass==0; ipmt++)
   {
-      h_q[ipmt]->Draw();
+    h_q[ipmt]->Draw();
 
-      name = dir + "h_q"; name += ipmt; name += ".png";
-      cout << name << endl;
-      ac[cvindex]->Print( name );
+    name = dir + "h_adc"; name += ipmt; name += ".png";
+    cout << name << endl;
+    ac[cvindex]->Print( name );
   }
   ++cvindex;
+
 
   savefile->Write();
   //savefile->Close();
 
-  if ( pass>0 )
+  if ( pass==3 )
   {
     recal_mbd_mip( savefname, pass, nevt );
   }
