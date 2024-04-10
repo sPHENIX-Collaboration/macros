@@ -69,7 +69,11 @@ void Intt_HitUnpacking()
 
   auto inttunpacker = new InttCombinedRawDataDecoder;
   inttunpacker->Verbosity(verbosity);
-  inttunpacker->LoadHotChannelMapRemote("INTT_HotMap");
+  inttunpacker->SetCalib (
+		  "InttBadMap", // name of calibration
+		  InttCombinedRawDataDecoder::FROM_CDB,
+		  "INTT_HotMap"); // name of target file or CDB domain; default is also "InttBadMap"
+
   se->registerSubsystem(inttunpacker);
 }
 void Intt_Clustering()
