@@ -69,10 +69,12 @@ void Intt_HitUnpacking()
 
   auto inttunpacker = new InttCombinedRawDataDecoder;
   inttunpacker->Verbosity(verbosity);
-  inttunpacker->SetCalib (
-		  "InttBadMap", // name of calibration
-		  InttCombinedRawDataDecoder::FROM_CDB,
-		  "INTT_HotMap"); // name of target file or CDB domain; default is also "InttBadMap"
+
+  // Use the following
+  // inttunpacker->SetCalib("<calib>", InttCombinedRawDataDecoder::<method>, "<file or tag>")
+  // methods are ::SKIP, ::FROM_CDB, ::FROM_FILE
+  // To see what calibs are available, do
+  // inttunpacker->ShowCalibs();
 
   se->registerSubsystem(inttunpacker);
 }
