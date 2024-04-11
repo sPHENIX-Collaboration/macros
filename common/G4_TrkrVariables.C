@@ -118,8 +118,12 @@ namespace G4TPC
   bool ENABLE_REACHES_READOUT = true;
 
   // distortion corrections
-  bool ENABLE_CORRECTIONS = false;
-  std::string correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
+  bool ENABLE_STATIC_CORRECTIONS = false;
+  std::string static_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
+
+  // distortion corrections
+  bool ENABLE_AVERAGE_CORRECTIONS = false;
+  std::string average_correction_filename;
 
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
