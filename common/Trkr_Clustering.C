@@ -69,6 +69,7 @@ void Intt_HitUnpacking()
 
   auto inttunpacker = new InttCombinedRawDataDecoder;
   inttunpacker->Verbosity(verbosity);
+  inttunpacker->SetCalib("INTT_HotMap", InttCombinedRawDataDecoder::FROM_CDB);
 
   // Use the following
   // inttunpacker->SetCalib("<calib>", InttCombinedRawDataDecoder::<method>, "<file or tag>")
