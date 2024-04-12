@@ -73,6 +73,9 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
     InttCombinedRawDataDecoder *myDecoder = new InttCombinedRawDataDecoder("myUnpacker");
     myDecoder->runInttStandalone(true);
     myDecoder->writeInttEventHeader(true);
+    myDecoder->LoadHotChannelMapRemote("INTT_HotMap");
+    myDecoder->SetCalibDAC();
+    myDecoder->SetCalibBCO();
     se->registerSubsystem(myDecoder);
   }
 
