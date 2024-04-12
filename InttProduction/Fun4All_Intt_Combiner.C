@@ -30,9 +30,9 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
                            const string &input_file06 = "intt6.list",
                            const string &input_file07 = "intt7.list")
 {
-  bool runTrkrHits = false;
-  bool runTkrkClus = false;
-  bool stripRawHit = false;
+  bool runTrkrHits = true;
+  bool runTkrkClus = true;
+  bool stripRawHit = true;
 
   vector<string> infile;
   infile.push_back(input_file00);
@@ -47,6 +47,11 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
+
+  Enable::CDB = true;
+  rc->set_StringFlag("CDB_GLOBALTAG",CDB::global_tag);
+  rc->set_uint64Flag("TIMESTAMP",CDB::timestamp);
+
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
   //  in->Verbosity(10);
   int i = 0;
