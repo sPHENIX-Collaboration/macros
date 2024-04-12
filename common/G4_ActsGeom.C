@@ -26,6 +26,8 @@ namespace ACTSGEOM
   unsigned int tpcMisalignment = 1;
   unsigned int tpotMisalignment = 1;
 
+  bool inttsurvey = true;
+
   void ActsGeomInit()
   {
     static bool wasCalled = false;
@@ -64,6 +66,8 @@ namespace ACTSGEOM
     geom->loadMagField(G4TRACKING::init_acts_magfield);
     geom->setMagField(G4MAGNET::magfield);
     geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
+    std::cout << "ActsGeomInit: Use survey geometry? ACTSGEOM::inttsurvey=" << ACTSGEOM::inttsurvey << std::endl;
+    geom->set_intt_survey(ACTSGEOM::inttsurvey);
     se->registerSubsystem(geom);
   }
 }  // namespace ACTSGEOM

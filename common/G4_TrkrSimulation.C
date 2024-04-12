@@ -132,6 +132,7 @@ void InttInit()
 double Intt(PHG4Reco* g4Reco, double radius,
             const int absorberactive = 0)
 {
+  std::cout << "G4_TrkrSimulation::Intt" << std::endl;
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
   bool intt_overlapcheck = Enable::OVERLAPCHECK || Enable::INTT_OVERLAPCHECK;
 
@@ -155,6 +156,8 @@ double Intt(PHG4Reco* g4Reco, double radius,
   sitrack->Verbosity(verbosity);
   sitrack->SetActive(1);
   sitrack->OverlapCheck(intt_overlapcheck);
+  std::cout << "PHG4InttSubsystem: Use survey geometry? Enable::INTT_USEG4SURVEYGEOM=" << Enable::INTT_USEG4SURVEYGEOM << std::endl;
+  sitrack->SetSurveyGeometry(Enable::INTT_USEG4SURVEYGEOM);
   if (Enable::INTT_ABSORBER || Enable::ABSORBER)
   {
     sitrack->SetAbsorberActive();

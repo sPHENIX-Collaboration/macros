@@ -25,6 +25,7 @@ namespace Enable
   bool INTT_CLUSTER = false;
   bool INTT_QA = false;
   bool INTT_SUPPORT = false;
+  bool INTT_USEG4SURVEYGEOM = true;
   int INTT_VERBOSITY = 0;
 
   bool TPC = false;
