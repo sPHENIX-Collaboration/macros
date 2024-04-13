@@ -33,7 +33,17 @@ void MagnetFieldInit()
   if (G4MAGNET::magfield.empty())
   {
     G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dbigmapxyz_gap_rebuild.root");
+//    G4MAGNET::magfield = "FIELDMAP_GAP";
+  }
+  if (G4MAGNET::magfield_OHCAL_steel.empty())
+  {
     G4MAGNET::magfield_OHCAL_steel = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dbigmapxyz_steel_rebuild.root");
+//    G4MAGNET::magfield_OHCAL_steel = "FIELDMAP_STEEL";
+  }
+  if (G4MAGNET::magfield_tracking.empty())
+  {
+    G4MAGNET::magfield_tracking = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dtrackingmapxyz.root");
+//    G4MAGNET::magfield_tracking = "FIELDMAP_TRACKING";
   }
 }
 
