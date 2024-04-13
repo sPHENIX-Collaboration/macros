@@ -89,12 +89,13 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
     se->registerSubsystem(myDecoder);
   }
 
-  Enable::INTT = true;
-  G4Init();
-  G4Setup();
-
   if (runTkrkClus)
   {
+    //! Set up the geometry (TO BE CONFIRMED) 
+    Enable::INTT = true;
+    G4Init();
+    G4Setup();
+
     ClusteringInit();   // ActsGeomInit() is called here
     Intt_Clustering();  // Be careful!!! INTT z-clustering may be off which is not what you want!
   }
