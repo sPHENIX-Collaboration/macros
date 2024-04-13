@@ -11,6 +11,8 @@
 #include <ffarawmodules/InttCheck.h>
 
 #include <intt/InttCombinedRawDataDecoder.h>
+
+#include <G4Setup_sPHENIX.C>
 #include <Trkr_Clustering.C>
 
 R__LOAD_LIBRARY(libfun4all.so)
@@ -31,6 +33,9 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
                            const string &input_file07 = "intt7.list")
 {
   bool runTrkrHits = true;
+  bool applyHotChannel = true;
+  bool applyADCConversion = true;
+  bool applyBCOCut = true;
   bool runTkrkClus = true;
   bool stripRawHit = true;
 
@@ -49,8 +54,8 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
   recoConsts *rc = recoConsts::instance();
 
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG",CDB::global_tag);
-  rc->set_uint64Flag("TIMESTAMP",CDB::timestamp);
+  rc->set_StringFlag("CDB_GLOBALTAG", CDB::global_tag);
+  rc->set_uint64Flag("TIMESTAMP", CDB::timestamp);
 
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
   //  in->Verbosity(10);
@@ -78,15 +83,20 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
     InttCombinedRawDataDecoder *myDecoder = new InttCombinedRawDataDecoder("myUnpacker");
     myDecoder->runInttStandalone(true);
     myDecoder->writeInttEventHeader(true);
-    myDecoder->LoadHotChannelMapRemote("INTT_HotMap");
-    myDecoder->SetCalibDAC();
-    myDecoder->SetCalibBCO();
+    if (applyHotChannel) myDecoder->LoadHotChannelMapRemote("INTT_HotMap");
+    if (applyADCConversion) myDecoder->SetCalibDAC();
+    if (applyBCOCut) myDecoder->SetCalibBCO();
     se->registerSubsystem(myDecoder);
   }
 
+  Enable::INTT = true;
+  G4Init();
+  G4Setup();
+
   if (runTkrkClus)
   {
-    Intt_Clustering(); //Be careful!!! INTT z-clustering may be off which is not what you want!
+    ClusteringInit();   // ActsGeomInit() is called here
+    Intt_Clustering();  // Be careful!!! INTT z-clustering may be off which is not what you want!
   }
 
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "intt-00020869.root");
