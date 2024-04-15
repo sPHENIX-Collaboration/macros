@@ -25,8 +25,8 @@ void TrackingInit()
     auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
     tpcLoadDistortionCorrection->set_read_phi_as_radians( G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS );
 
-    if( G4TPC::ENABLE_STATIC_CORRECTIONS ) tpcLoadDistortionCorrection->set_correction_filename( 0, G4TPC::static_correction_filename );
-    if( G4TPC::ENABLE_AVERAGE_CORRECTIONS ) tpcLoadDistortionCorrection->set_correction_filename( 1, G4TPC::average_correction_filename );
+    if( G4TPC::ENABLE_STATIC_CORRECTIONS ) tpcLoadDistortionCorrection->set_correction_filename( TpcLoadDistortionCorrection::DistortionType_Static, G4TPC::static_correction_filename );
+    if( G4TPC::ENABLE_AVERAGE_CORRECTIONS ) tpcLoadDistortionCorrection->set_correction_filename( TpcLoadDistortionCorrection::DistortionType_Average, G4TPC::average_correction_filename );
 
     se->registerSubsystem(tpcLoadDistortionCorrection);
   }
