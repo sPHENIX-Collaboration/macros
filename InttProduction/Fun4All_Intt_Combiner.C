@@ -20,8 +20,6 @@ R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
 R__LOAD_LIBRARY(libintt.so)
 
-SingleInttPoolInput *sngl[9]{};
-
 void Fun4All_Intt_Combiner(int nEvents = 0,
                            const string &input_file00 = "intt0.list",
                            const string &input_file01 = "intt1.list",
@@ -83,14 +81,17 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
   int i = 0;
   for (auto iter : infile)
   {
-    SingleInttPoolInput *sngl = new SingleInttPoolInput("INTT_" + to_string(i));
-    //    sngl->Verbosity(3);
-    sngl->AddListFile(iter);
-    int nBcoVal = runTrkrHits ? 0 : 2;
-    sngl->SetNegativeBco(nBcoVal);
-    sngl->SetBcoRange(2);
-    in->registerStreamingInput(sngl, InputManagerType::INTT);
-    i++;
+    if (isGood(iter))
+    {
+      SingleInttPoolInput *sngl = new SingleInttPoolInput("INTT_" + to_string(i));
+      //    sngl->Verbosity(3);
+      sngl->AddListFile(iter);
+      int nBcoVal = runTrkrHits ? 0 : 2;
+      sngl->SetNegativeBco(nBcoVal);
+      sngl->SetBcoRange(2);
+      in->registerStreamingInput(sngl, InputManagerType::INTT);
+      i++;
+    }
   }
 
   se->registerInputManager(in);
@@ -136,4 +137,20 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
   se->End();
   delete se;
   gSystem->Exit(0);
+}
+
+bool isGood(const string &infile)
+{
+  ifstream intest;
+  intest.open(infile);
+  bool goodfile = false;
+  if (intest.is_open())
+  {
+    if (intest.peek() != std::ifstream::traits_type::eof()) // is it non zero?
+    {
+      goodfile = true;
+    }
+      intest.close();
+  }
+  return goodfile;
 }
