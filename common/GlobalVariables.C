@@ -80,6 +80,7 @@ namespace G4MAGNET
   double magfield_rescale = NAN;
   std::string magfield;
   std::string magfield_OHCAL_steel;
+  std::string magfield_tracking;
 }  // namespace G4MAGNET
 
 namespace Enable
