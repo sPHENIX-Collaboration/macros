@@ -34,10 +34,31 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
 {
   bool runTrkrHits = true;
   bool applyHotChannel = true;
-  bool applyADCConversion = true;
   bool applyBCOCut = true;
+  bool applyADCConversion = true;
   bool runTkrkClus = true;
+  bool usesurveygeom = false;
   bool stripRawHit = true;
+
+  TString outinitial = "intt-00020869";
+  TString outend = ".root";
+  if (applyHotChannel)
+  {
+    outinitial += "-HotDead";
+  }
+  if (applyBCOCut)
+  {
+    outinitial += "-BCO";
+  }
+  if (applyADCConversion)
+  {
+    outinitial += "-ADC";
+  }
+  if (usesurveygeom)
+  {
+    outinitial += "-Survey";
+  }
+  TString outname = outinitial + outend;
 
   vector<string> infile;
   infile.push_back(input_file00);
@@ -91,16 +112,19 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
 
   if (runTkrkClus)
   {
-    //! Set up the geometry (TO BE CONFIRMED) 
-    Enable::INTT = true;
-    G4Init();
-    G4Setup();
+    if (usesurveygeom)
+    {
+      Enable::INTT = true;
+      G4Init();
+      G4Setup();
 
-    ClusteringInit();   // ActsGeomInit() is called here
+      ClusteringInit();   // ActsGeomInit() is called here
+    }
+    
     Intt_Clustering();  // Be careful!!! INTT z-clustering may be off which is not what you want!
   }
 
-  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "intt-00020869.root");
+  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", outname.Data());
   if (stripRawHit)
   {
     out->StripNode("INTTRAWHIT");
