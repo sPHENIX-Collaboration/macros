@@ -11,14 +11,14 @@
 #include <ffarawmodules/InttCheck.h>
 
 #include <intt/InttCombinedRawDataDecoder.h>
+
+#include <G4Setup_sPHENIX.C>
 #include <Trkr_Clustering.C>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
 R__LOAD_LIBRARY(libintt.so)
-
-SingleInttPoolInput *sngl[9]{};
 
 void Fun4All_Intt_Combiner(int nEvents = 0,
                            const string &input_file00 = "intt0.list",
@@ -30,9 +30,33 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
                            const string &input_file06 = "intt6.list",
                            const string &input_file07 = "intt7.list")
 {
-  bool runTrkrHits = false;
-  bool runTkrkClus = false;
-  bool stripRawHit = false;
+  bool runTrkrHits = true;
+  bool applyHotChannel = true;
+  bool applyBCOCut = true;
+  bool applyADCConversion = true;
+  bool runTkrkClus = true;
+  bool usesurveygeom = false;
+  bool stripRawHit = true;
+
+  TString outinitial = "intt-00020869";
+  TString outend = ".root";
+  if (applyHotChannel)
+  {
+    outinitial += "-HotDead";
+  }
+  if (applyBCOCut)
+  {
+    outinitial += "-BCO";
+  }
+  if (applyADCConversion)
+  {
+    outinitial += "-ADC";
+  }
+  if (usesurveygeom)
+  {
+    outinitial += "-Survey";
+  }
+  TString outname = outinitial + outend;
 
   vector<string> infile;
   infile.push_back(input_file00);
@@ -47,19 +71,27 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
+
+  Enable::CDB = true;
+  rc->set_StringFlag("CDB_GLOBALTAG", CDB::global_tag);
+  rc->set_uint64Flag("TIMESTAMP", CDB::timestamp);
+
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
   //  in->Verbosity(10);
   int i = 0;
   for (auto iter : infile)
   {
-    SingleInttPoolInput *sngl = new SingleInttPoolInput("INTT_" + to_string(i));
-    //    sngl->Verbosity(3);
-    sngl->AddListFile(iter);
-    int nBcoVal = runTrkrHits ? 0 : 2;
-    sngl->SetNegativeBco(nBcoVal);
-    sngl->SetBcoRange(2);
-    in->registerStreamingInput(sngl, InputManagerType::INTT);
-    i++;
+    if (isGood(iter))
+    {
+      SingleInttPoolInput *sngl = new SingleInttPoolInput("INTT_" + to_string(i));
+      //    sngl->Verbosity(3);
+      sngl->AddListFile(iter);
+      int nBcoVal = runTrkrHits ? 0 : 2;
+      sngl->SetNegativeBco(nBcoVal);
+      sngl->SetBcoRange(2);
+      in->registerStreamingInput(sngl, InputManagerType::INTT);
+      i++;
+    }
   }
 
   se->registerInputManager(in);
@@ -73,15 +105,27 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
     InttCombinedRawDataDecoder *myDecoder = new InttCombinedRawDataDecoder("myUnpacker");
     myDecoder->runInttStandalone(true);
     myDecoder->writeInttEventHeader(true);
+    if (applyHotChannel) myDecoder->LoadHotChannelMapRemote("INTT_HotMap");
+    if (applyADCConversion) myDecoder->SetCalibDAC();
+    if (applyBCOCut) myDecoder->SetCalibBCO();
     se->registerSubsystem(myDecoder);
   }
 
   if (runTkrkClus)
   {
-    Intt_Clustering(); //Be careful!!! INTT z-clustering may be off which is not what you want!
+    if (usesurveygeom)
+    {
+      Enable::INTT = true;
+      G4Init();
+      G4Setup();
+
+      ClusteringInit();   // ActsGeomInit() is called here
+    }
+    
+    Intt_Clustering();  // Be careful!!! INTT z-clustering may be off which is not what you want!
   }
 
-  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "intt-00020869.root");
+  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", outname.Data());
   if (stripRawHit)
   {
     out->StripNode("INTTRAWHIT");
@@ -93,4 +137,20 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
   se->End();
   delete se;
   gSystem->Exit(0);
+}
+
+bool isGood(const string &infile)
+{
+  ifstream intest;
+  intest.open(infile);
+  bool goodfile = false;
+  if (intest.is_open())
+  {
+    if (intest.peek() != std::ifstream::traits_type::eof()) // is it non zero?
+    {
+      goodfile = true;
+    }
+      intest.close();
+  }
+  return goodfile;
 }
