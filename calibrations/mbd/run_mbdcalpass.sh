@@ -31,6 +31,7 @@ mkdir -p ${caldir}
 ln -sf /sphenix/user/chiu/sphenix_bbc/run2023/tpulser/results/00029705-0000/mbd_timecorr.calib ${caldir}/
 ln -sf /sphenix/user/chiu/sphenix_bbc/run2023/goodruns/results/00020869-0000/bbc_shape.calib ${caldir}/mbd_shape.calib
 ln -sf /sphenix/user/chiu/sphenix_bbc/run2023/goodruns/results/00020869-0000/bbc_sherr.calib ${caldir}/mbd_sherr.calib
+ln -sf /sphenix/user/chiu/sphenix_bbc/run2023/results/20869/mbd_slewcorr.calib ${caldir}/
 
 # if not interactive, run ROOT in batch mode
 if [ ! -z $PS1 ]
