@@ -17,16 +17,17 @@ void TrackingInit()
   G4MAGNET::magfield_rescale = 1.;
 
   ACTSGEOM::ActsGeomInit();
-  // space charge correction
-  /* corrections are applied in the track finding, and via TpcClusterMover before the final track fit
-   */
 
-  if( G4TPC::ENABLE_CORRECTIONS )
+  // space charge correction
+  if( G4TPC::ENABLE_STATIC_CORRECTIONS || G4TPC::ENABLE_AVERAGE_CORRECTIONS )
   {
     auto se = Fun4AllServer::instance();
     auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
     tpcLoadDistortionCorrection->set_read_phi_as_radians( G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS );
-    tpcLoadDistortionCorrection->set_distortion_filename( G4TPC::correction_filename );
+
+    if( G4TPC::ENABLE_STATIC_CORRECTIONS ) tpcLoadDistortionCorrection->set_correction_filename( TpcLoadDistortionCorrection::DistortionType_Static, G4TPC::static_correction_filename );
+    if( G4TPC::ENABLE_AVERAGE_CORRECTIONS ) tpcLoadDistortionCorrection->set_correction_filename( TpcLoadDistortionCorrection::DistortionType_Average, G4TPC::average_correction_filename );
+
     se->registerSubsystem(tpcLoadDistortionCorrection);
   }
 
