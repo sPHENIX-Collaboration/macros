@@ -105,9 +105,9 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
     InttCombinedRawDataDecoder *myDecoder = new InttCombinedRawDataDecoder("myUnpacker");
     myDecoder->runInttStandalone(true);
     myDecoder->writeInttEventHeader(true);
-    if (applyHotChannel) myDecoder->LoadHotChannelMapRemote("INTT_HotMap");
-    if (applyADCConversion) myDecoder->SetCalibDAC();
-    if (applyBCOCut) myDecoder->SetCalibBCO();
+    if (applyHotChannel)    myDecoder->SetCalib("INTT_HotMap", InttCombinedRawDataDecoder::FROM_CDB);
+    if (applyADCConversion) myDecoder->SetCalib("INTT_DACMAP", InttCombinedRawDataDecoder::FROM_CDB);
+    if (applyBCOCut)        myDecoder->SetCalib("INTT_BCOMAP", InttCombinedRawDataDecoder::FROM_CDB);
     se->registerSubsystem(myDecoder);
   }
 
