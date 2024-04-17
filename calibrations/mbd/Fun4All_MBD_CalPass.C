@@ -29,11 +29,8 @@ R__LOAD_LIBRARY(libglobalvertex.so)
 #endif
 
 void Fun4All_MBD_CalPass(const char *input_file = "/sphenix/user/pinkenbu/testprdf/beam-00002609-0000.prdf",
-    const int calpass = 0, const int nEvents = 0)
+    const int calpass = 0, const int nEvents = 0, const int usecdb = 0)
 {
-  recoConsts *rc = recoConsts::instance();
-  //rc->set_StringFlag("CDB_GLOBALTAG","2023p008"); 
-
   TString runseq = input_file;
   int idx = runseq.Last('/');
   runseq.Remove(0,idx+1);
@@ -41,15 +38,23 @@ void Fun4All_MBD_CalPass(const char *input_file = "/sphenix/user/pinkenbu/testpr
   runseq.Remove(0,idx+1);
   runseq.ReplaceAll(".prdf","");
 
-  int run_number = get_runnumber(input_file);
-  cout << "RUN\t" << run_number << endl;
-  rc->set_uint64Flag("TIMESTAMP", run_number);
+  recoConsts *rc = recoConsts::instance();
+  if ( usecdb )
+  {
+    rc->set_StringFlag("CDB_GLOBALTAG","2023p008"); 
+  }
+  else
+  {
+    int run_number = get_runnumber(input_file);
+    cout << "RUN\t" << run_number << endl;
+    rc->set_uint64Flag("TIMESTAMP", run_number);
 
-  // For local calibrations
-  TString bdir = "/sphenix/user/chiu/sphenix_bbc/run2023/results/";
-  bdir += run_number;
-  cout << bdir << endl;
-  rc->set_StringFlag("MBD_CALDIR",bdir.Data()); 
+    // For local calibrations
+    TString bdir = "./results/";
+    bdir += run_number;
+    cout << bdir << endl;
+    rc->set_StringFlag("MBD_CALDIR",bdir.Data()); 
+  }
 
   Fun4AllServer *se = Fun4AllServer::instance();
   //se->Verbosity(1);

@@ -1,6 +1,7 @@
 //
 // Do a recalibration from the saved histograms
 //
+#include <TSpectrum.h>
 #include "get_runstr.h"
 
 // Two gaussians
