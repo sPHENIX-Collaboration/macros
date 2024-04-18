@@ -18,20 +18,14 @@ fi
 
 type=$1
 runnumber=$(printf "%08d" $2)
-ls -1 /sphenix/lustre01/sphnxpro/commissioning/HCal/${type}/${type}_East-${runnumber}-* > hcaleast.list
-ls -1 /sphenix/lustre01/sphnxpro/commissioning/HCal/${type}/${type}_West-${runnumber}-* > hcalwest.list
-if [ ! -s hcaleast.list ]
+for i in {16..17}
+do
+seb=$(printf "seb%02d" $i)
+listname=$(printf "seb%02d.list" $i)
+/bin/ls -1 /sphenix/lustre01/sphnxpro/commissioning/HCal/${type}/${type}_${seb}-${runnumber}-* > ${listname}
+if [ ! -s ${listname} ]
 then
-  ls -1 /sphenix/lustre01/sphnxpro/commissioning/HCal/${type}/${type}_seb16-${runnumber}-* > hcaleast.list
-  if [ ! -s hcaleast.list ]
-  then
-    echo hcaleast.list empty, removing it
-    rm hcaleast.list
-  fi
-  ls -1 /sphenix/lustre01/sphnxpro/commissioning/HCal/${type}/${type}_seb17-${runnumber}-* > hcalwest.list
-  if [ ! -s hcalwest.list ]
-  then
-    echo hcalwest.list empty, removing it
-    rm hcalwest.list
-  fi
+  echo ${listname} empty, removing it
+  rm ${listname}
 fi
+done

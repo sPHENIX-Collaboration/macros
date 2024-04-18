@@ -13,9 +13,6 @@ R__LOAD_LIBRARY(libtpccalib.so)
 
 void TrackingInit()
 {
-  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dtrackingmapxyz_gap_rebuild.root");
-  G4MAGNET::magfield_rescale = 1.;
-
   ACTSGEOM::ActsGeomInit();
 
   // space charge correction

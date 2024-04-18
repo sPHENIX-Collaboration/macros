@@ -51,7 +51,7 @@ void convert_seeds()
   // Default set to full SvtxTrackSeeds. Can be set to
   // SiliconTrackSeedContainer or TpcTrackSeedContainer
   converter->setTrackSeedName("SvtxTrackSeedContainer");
-  converter->setFieldMap(G4MAGNET::magfield);
+  converter->setFieldMap(G4MAGNET::magfield_tracking);
   converter->Verbosity(verbosity);
   se->registerSubsystem(converter);
 }
@@ -75,18 +75,18 @@ void Tracking_Reco_TrackSeed()
   se->registerSubsystem(merger);
 
   auto seeder = new PHCASeeding("PHCASeeding");
-  seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
-
-  if (G4MAGNET::magfield.find("3d") != std::string::npos)
+  double fieldstrength = std::numeric_limits<double>::quiet_NaN(); // set by isConstantField if constant
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
+  if (ConstField)
+  {
+    seeder->useConstBField(true);
+    seeder->constBField(fieldstrength);
+  }
+  else
   {
     seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
     seeder->useConstBField(false);
-  }
-  if (G4MAGNET::magfield.find(".root") == std::string::npos)
-  {
-    //! constant field
-    seeder->useConstBField(true);
-    seeder->constBField(std::stod(G4MAGNET::magfield));
+    seeder->magFieldFile(G4MAGNET::magfield_tracking);  // to get charge sign right
   }
   seeder->Verbosity(verbosity);
   seeder->SetLayerRange(7, 55);
@@ -100,14 +100,15 @@ void Tracking_Reco_TrackSeed()
   // expand stubs in the TPC using simple kalman filter
   auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
   cprop->set_field_dir(G4MAGNET::magfield_rescale);
-  if (G4MAGNET::magfield.find("3d") != std::string::npos)
-  {
-    cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
-  }
-  if (G4MAGNET::magfield.find(".root") == std::string::npos)
+  if (ConstField)
   {
     cprop->useConstBField(false);
-    cprop->setConstBField(std::stod(G4MAGNET::magfield));
+    cprop->setConstBField(fieldstrength);
+  }
+  else
+  {
+    cprop->magFieldFile(G4MAGNET::magfield_tracking);
+    cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
   }
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
@@ -240,7 +241,7 @@ void Tracking_Reco_TrackFit()
   actsFit->set_use_clustermover(true); // default is true for now
   actsFit->useActsEvaluator(false);
   actsFit->useOutlierFinder(false);
-  actsFit->setFieldMap(G4MAGNET::magfield);
+  actsFit->setFieldMap(G4MAGNET::magfield_tracking);
   se->registerSubsystem(actsFit);
 
   if (G4TRACKING::SC_CALIBMODE)
@@ -278,15 +279,16 @@ void Tracking_Reco_TrackFit()
     // Propagate track positions to the vertex position
     auto vtxProp = new PHActsVertexPropagator;
     vtxProp->Verbosity(verbosity);
-    vtxProp->fieldMap(G4MAGNET::magfield);
+    vtxProp->fieldMap(G4MAGNET::magfield_tracking);
     se->registerSubsystem(vtxProp);
 
     // project tracks to EMCAL
     auto projection = new PHActsTrackProjection;
     projection->Verbosity(verbosity);
-    if (G4MAGNET::magfield.find(".root") == std::string::npos)
+    double fieldstrength = std::numeric_limits<double>::quiet_NaN();
+    if (isConstantField(G4MAGNET::magfield_tracking,fieldstrength))
     {
-      projection->setConstFieldVal(std::stod(G4MAGNET::magfield));
+      projection->setConstFieldVal(fieldstrength);
     }
     se->registerSubsystem(projection);
   }
@@ -314,8 +316,11 @@ void Tracking_Reco_CommissioningTrackSeed()
   // Assemble TPC clusters into track stubs
   auto seeder = new PHCASeeding("PHCASeeding");
   seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
-  if (G4MAGNET::magfield.find("3d") != std::string::npos)
+     double fieldstrength = std::numeric_limits<double>::quiet_NaN(); // set by isConstantField if constant
+      bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
+  if (!ConstField)
   {
+    seeder->magFieldFile(G4MAGNET::magfield_tracking);
     seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
   }
   seeder->Verbosity(verbosity);
@@ -331,7 +336,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   // expand stubs in the TPC using simple kalman filter
   auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
   cprop->set_field_dir(G4MAGNET::magfield_rescale);
-  if (G4MAGNET::magfield.find("3d") != std::string::npos)
+  if (!ConstField)
   {
     cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
   }

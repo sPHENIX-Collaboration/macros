@@ -32,33 +32,49 @@ R__LOAD_LIBRARY(libffarawmodules.so)
 static const int DDUMP = 0;  // how many events into ddump lists --> 0 - none
 
 void Fun4All_Prdf_Combiner(int nEvents = 0,
-                           const string &gl1input = "gl1.list",
-                           const string &mbdinput = "mbd.list",
-                           const string &hcalinput0 = "hcaleast.list",
-                           const string &hcalinput1 = "hcalwest.list",
-                           const string &cemcinput0 = "cemc00.list",
-                           const string &cemcinput1 = "cemc01.list",
-                           const string &cemcinput2 = "cemc02.list",
-                           const string &cemcinput3 = "cemc03.list",
-                           const string &cemcinput4 = "cemc04.list",
-                           const string &cemcinput5 = "cemc05.list",
-                           const string &cemcinput6 = "cemc06.list",
-                           const string &cemcinput7 = "cemc07.list",
-                           const string &zdcinput = "zdc.list")
+                           const string &gl1input = "gl1daq.list",
+                           const string &cemcinput00 = "seb00.list",
+                           const string &cemcinput01 = "seb01.list",
+                           const string &cemcinput02 = "seb02.list",
+                           const string &cemcinput03 = "seb03.list",
+                           const string &cemcinput04 = "seb04.list",
+                           const string &cemcinput05 = "seb05.list",
+                           const string &cemcinput06 = "seb06.list",
+                           const string &cemcinput07 = "seb07.list",
+                           const string &cemcinput08 = "seb08.list",
+                           const string &cemcinput09 = "seb09.list",
+                           const string &cemcinput10 = "seb10.list",
+                           const string &cemcinput11 = "seb11.list",
+                           const string &cemcinput12 = "seb12.list",
+                           const string &cemcinput13 = "seb13.list",
+                           const string &cemcinput14 = "seb14.list",
+                           const string &cemcinput15 = "seb15.list",
+                           const string &hcalinput0 = "seb16.list",
+                           const string &hcalinput1 = "seb17.list",
+                           const string &mbdinput = "seb18.list",
+                           const string &zdcinput = "seb20.list")
 {
   vector<string> hcalinfile;
   hcalinfile.push_back(hcalinput0);
   hcalinfile.push_back(hcalinput1);
 
   vector<string> cemcinfile;
-  cemcinfile.push_back(cemcinput0);
-  cemcinfile.push_back(cemcinput1);
-  cemcinfile.push_back(cemcinput2);
-  cemcinfile.push_back(cemcinput3);
-  cemcinfile.push_back(cemcinput4);
-  cemcinfile.push_back(cemcinput5);
-  cemcinfile.push_back(cemcinput6);
-  cemcinfile.push_back(cemcinput7);
+  cemcinfile.push_back(cemcinput00);
+  cemcinfile.push_back(cemcinput01);
+  cemcinfile.push_back(cemcinput02);
+  cemcinfile.push_back(cemcinput03);
+  cemcinfile.push_back(cemcinput04);
+  cemcinfile.push_back(cemcinput05);
+  cemcinfile.push_back(cemcinput06);
+  cemcinfile.push_back(cemcinput07);
+  cemcinfile.push_back(cemcinput08);
+  cemcinfile.push_back(cemcinput09);
+  cemcinfile.push_back(cemcinput10);
+  cemcinfile.push_back(cemcinput11);
+  cemcinfile.push_back(cemcinput12);
+  cemcinfile.push_back(cemcinput13);
+  cemcinfile.push_back(cemcinput14);
+  cemcinfile.push_back(cemcinput15);
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);

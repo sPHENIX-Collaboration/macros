@@ -47,7 +47,7 @@ void convert_seeds()
   converter->setTrackSeedName("SvtxTrackSeedContainer");
   converter->Verbosity(verbosity);
   converter->cosmics();
-  converter->setFieldMap(G4MAGNET::magfield);
+  converter->setFieldMap(G4MAGNET::magfield_tracking);
   se->registerSubsystem(converter);
 }
 
@@ -65,7 +65,9 @@ void Tracking_Reco_TrackSeed()
 
   PHCosmicSiliconPropagator *hprop = new PHCosmicSiliconPropagator("HelicalPropagator");
   hprop->Verbosity(verbosity);
-  if (std::stof(G4MAGNET::magfield) < 0.1)
+  double fieldstrength = std::numeric_limits<double>::quiet_NaN();
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
+  if (ConstField && fieldstrength < 0.1)
   {
     hprop->zero_field();
   }
@@ -77,7 +79,7 @@ void Tracking_Reco_TrackSeed()
 
   auto merger = new PHCosmicTrackMerger("PHCosmicMerger");
   merger->Verbosity(verbosity);
-  if (std::stof(G4MAGNET::magfield) < 0.1)
+  if (ConstField && fieldstrength < 0.1)
   {
     merger->zero_field();
   }
@@ -86,7 +88,7 @@ void Tracking_Reco_TrackSeed()
   PHCosmicSiliconPropagator *hprop2 = new PHCosmicSiliconPropagator("HelicalPropagator2");
   hprop2->Verbosity(verbosity);
   hprop2->resetSvtxSeedContainer();
-  if (std::stof(G4MAGNET::magfield) < 0.1)
+  if (ConstField && fieldstrength < 0.1)
   {
     hprop2->zero_field();
   }
@@ -99,7 +101,7 @@ void Tracking_Reco_TrackSeed()
   merger2->Verbosity(0);
   merger2->dca_xycut(0.5);
   merger2->dca_rzcut(1);
-  if (std::stof(G4MAGNET::magfield) < 0.1)
+  if (ConstField && fieldstrength < 0.1)
   {
     merger2->zero_field();
   }
@@ -134,7 +136,7 @@ void Tracking_Reco_TrackFit()
   //  in calibration mode, fit only Silicons and Micromegas hits
   actsFit->useActsEvaluator(true);
   actsFit->useOutlierFinder(false);
-  actsFit->setFieldMap(G4MAGNET::magfield);
+  actsFit->setFieldMap(G4MAGNET::magfield_tracking);
   se->registerSubsystem(actsFit);
 }
 
