@@ -40,8 +40,7 @@ void MagnetFieldInit()
   }
   if (G4MAGNET::magfield_tracking.empty())
   {
-    G4MAGNET::magfield_tracking = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dtrackingmapxyz.root");
-//    G4MAGNET::magfield_tracking = "FIELDMAP_TRACKING";
+    G4MAGNET::magfield_tracking = "FIELDMAP_TRACKING";
   }
 }
 
