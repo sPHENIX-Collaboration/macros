@@ -127,6 +127,14 @@ void InttInit()
   {
     G4MVTX::n_maps_layer = 0;
   }
+  if (!Enable::INTT_USEG4SURVEYGEOM)
+  {
+    G4INTT::sensor_radius[0] = 7.188 - 36e-4;
+    G4INTT::sensor_radius[1] = 7.732 - 36e-4;
+    G4INTT::sensor_radius[2] = 9.680 - 36e-4;
+    G4INTT::sensor_radius[3] = 10.262 - 36e-4;
+  
+  }
 }
 
 double Intt(PHG4Reco* g4Reco, double radius,
@@ -479,7 +487,7 @@ void TPC_Cells()
   digitpc->Verbosity(verbosity);
   cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
        << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << endl;
-  digitpc->set_skip_noise_flag(false);
+  digitpc->set_skip_noise_flag(true);
   se->registerSubsystem(digitpc);
 }
 

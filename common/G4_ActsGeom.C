@@ -26,7 +26,7 @@ namespace ACTSGEOM
   unsigned int tpcMisalignment = 1;
   unsigned int tpotMisalignment = 1;
 
-  bool inttsurvey = true;
+  bool inttsurvey = Enable::INTT_USEG4SURVEYGEOM;
 
   void ActsGeomInit()
   {
