@@ -124,7 +124,8 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
     Enable::INTT = true;
     Enable::TPC = true;
     Enable::MICROMEGAS = true;
-    Enable::INTT_USEG4SURVEYGEOM = usesurveygeom;
+    //! [TO CONFIRM] The switches for the ideal and survey geometries do not seem to work anymore. Is this intended?
+    Enable::INTT_USEG4SURVEYGEOM = usesurveygeom; 
     ACTSGEOM::inttsurvey = usesurveygeom;
     G4Init();
     G4Setup();
