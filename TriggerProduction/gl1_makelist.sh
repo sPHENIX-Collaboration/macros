@@ -15,9 +15,9 @@ fi
 type=$1
 runnumber=$(printf "%08d" $2)
 
-/bin/ls -1 /sphenix/lustre01/sphnxpro/commissioning/GL1/${type}/GL1_*-${runnumber}-* >gl1.list
-if [ ! -s gl1.list ]
+/bin/ls -1 /sphenix/lustre01/sphnxpro/commissioning/GL1/${type}/GL1_*-${runnumber}-* >gl1daq.list
+if [ ! -s gl1daq.list ]
 then
-  echo gl1.list empty, removing it
-  rm  gl1.list
+  echo gl1daq.list empty, removing it
+  rm  gl1daq.list
 fi

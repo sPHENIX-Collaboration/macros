@@ -20,4 +20,4 @@ sh gl1_makelist.sh $1 $2
 sh mbd_makelist.sh $1 $2
 sh hcal_makelist.sh $1 $2
 sh cemc_makelist.sh $1 $2
-sh zdc_makelist.sh $1 $2
+sh zdc_sepd_makelist.sh $1 $2

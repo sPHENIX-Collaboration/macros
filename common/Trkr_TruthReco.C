@@ -104,27 +104,30 @@ void Tracking_Reco_TrackSeed()
 
       auto seeder = new PHCASeeding("PHCASeeding");
       seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
-      if (G4MAGNET::magfield.find("3d") != std::string::npos)
+      double fieldstrength = std::numeric_limits<double>::quiet_NaN(); // set by isConstantField if constant
+      bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
+
+      if (!ConstField))
       {
         seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
+        seeder->useConstBField(false);
       }
       seeder->Verbosity(verbosity);
       seeder->SetLayerRange(7, 55);
       seeder->SetSearchWindow(1.5, 0.05);  // (z width, phi width)
       seeder->SetMinHitsPerCluster(0);
       seeder->SetMinClustersPerTrack(3);
-      seeder->useConstBField(false);
       seeder->useFixedClusterError(true);
       se->registerSubsystem(seeder);
 
       // expand stubs in the TPC using simple kalman filter
       auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
       cprop->set_field_dir(G4MAGNET::magfield_rescale);
-      if (G4MAGNET::magfield.find("3d") != std::string::npos)
+      if (!ConstField)
       {
         cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
+        cprop->useConstBField(false);
       }
-      cprop->useConstBField(false);
       cprop->useFixedClusterError(true);
       cprop->set_max_window(5.);
       cprop->Verbosity(verbosity);
