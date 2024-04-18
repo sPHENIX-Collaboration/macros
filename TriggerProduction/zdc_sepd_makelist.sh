@@ -14,9 +14,9 @@ fi
 
 type=$1
 runnumber=$(printf "%08d" $2)
-/bin/ls -1 /sphenix/lustre01/sphnxpro/commissioning/ZDC/${type}/${type}_seb14-${runnumber}-* >zdc.list
-if [ ! -s zdc.list ]
+/bin/ls -1 /sphenix/lustre01/sphnxpro/commissioning/ZDC/${type}/${type}_seb20-${runnumber}-* >seb20.list
+if [ ! -s seb20.list ]
 then
-  echo zdc.list empty, removing it
-  rm  zdc.list
+  echo seb20.list empty, removing it
+  rm  seb20.list
 fi
