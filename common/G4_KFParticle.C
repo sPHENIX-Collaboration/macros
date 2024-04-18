@@ -88,7 +88,7 @@ void KFParticle_Upsilon_Reco()
 
   kfparticle->setContainerName(KFPARTICLE::UpsilonName);
   kfparticle->setOutputName("KFParticleOutput_" + KFPARTICLE::UpsilonName + "_reconstruction.root");
-
+  kfparticle->magFieldFile(G4MAGNET::magfield_tracking);
   se->registerSubsystem(kfparticle);
 
   KFPARTICLE::runUpsilonReco = true;
