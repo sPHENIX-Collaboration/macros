@@ -132,4 +132,19 @@ bool isRootFile(const std::string &fname)
   return false;
 }
 
+bool isConstantField(const std::string &name, double &fieldstrength)
+{
+  istringstream stringline(G4MAGNET::magfield_tracking);
+  stringline >> fieldstrength;
+  if (stringline.fail())
+  {  // conversion to double fails -> we have a string (means fieldmap)
+    fieldstrength = std::numeric_limits<double>::quiet_NaN();
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+
 #endif
