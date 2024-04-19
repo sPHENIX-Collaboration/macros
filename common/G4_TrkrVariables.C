@@ -94,6 +94,14 @@ namespace G4INTT
 
   bool UseSurvey = true;
 
+  // This enum needs to be replaced/removed
+  enum enu_InttDeadMapType
+  {
+	  kInttNoDeadMap = 0,
+	  kInttDeadmap,
+  };
+  enu_InttDeadMapType InttDeadMapOption = kInttDeadMap;
+
 }  // namespace G4INTT
 
 namespace G4TPC

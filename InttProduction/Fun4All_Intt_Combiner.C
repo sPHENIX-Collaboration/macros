@@ -20,6 +20,8 @@ R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
 R__LOAD_LIBRARY(libintt.so)
 
+bool isGood(string const&);
+
 void Fun4All_Intt_Combiner(int nEvents = 0,
                            const string &input_file00 = "intt0.list",
                            const string &input_file01 = "intt1.list",
@@ -37,21 +39,21 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
   TString outname =  "intt-00020869";
   if (G4INTT::UseBadMap)
   {
-    outinitial += "-HotDead";
+    outname += "-HotDead";
   }
   if (G4INTT::UseBcoMap)
   {
-    outinitial += "-BCO";
+    outname += "-BCO";
   }
   if (G4INTT::UseDacMap)
   {
-    outinitial += "-ADC";
+    outname += "-ADC";
   }
   if (G4INTT::UseSurvey)
   {
-    outinitial += "-Survey";
+    outname += "-Survey";
   }
-  outname = outinitial + ".root";
+  outname = outname + ".root";
 
   vector<string> infile;
   infile.push_back(input_file00);
