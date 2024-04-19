@@ -80,13 +80,19 @@ namespace G4INTT
   int nladder[4] = {12, 12, 16, 16};
   double sensor_radius[4] = {7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
 
-  enum enu_InttDeadMapType  // Dead map options for INTT
-  {
-    kInttNoDeadMap = 0,  // All channel in Intt is alive
-    kInttDeadMap = 1,    // with dead channel
-  };
-  // enu_InttDeadMapType InttDeadMapOption = kInttNoDeadMap;  // Choose Intt deadmap here
-  enu_InttDeadMapType InttDeadMapOption = kInttDeadMap;  // Choose Intt deadmap here
+  bool UseBadMap = true; // Mask hot/bad channels
+  std::string BadMapTag = "INTT_HotMap";
+
+  bool UseBcoMap = true; // Keep only hits local to BCO peak
+  std::string BcoMapTag = "INTT_BCOMAP";
+
+  bool UseDacMap = true; // Convert digital signals back to analog thresholds
+  std::string DacMapTag = "INTT_DACMAP";
+
+  bool RunStandalone = false;
+  bool WriteEvtHeader = false;
+
+  bool UseSurvey = true;
 
 }  // namespace G4INTT
 

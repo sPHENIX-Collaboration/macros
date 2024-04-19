@@ -69,13 +69,32 @@ void Intt_HitUnpacking()
 
   auto inttunpacker = new InttCombinedRawDataDecoder;
   inttunpacker->Verbosity(verbosity);
-  inttunpacker->LoadHotChannelMapRemote("INTT_HotMap");
+
+  inttunpacker->runInttStandalone(G4INTT::RunStandalone);
+  inttunpacker->writeInttEventHeader(G4INTT::WriteEvtHeader);
+
+  if(G4INTT::UseBadMap) {
+	  inttunpacker->LoadHotChannelMapRemote(G4INTT::BadMapTag);
+  }
+  if(G4INTT::UseBcoMap) {
+	  inttunpacker->SetCalibBCO(G4INTT::BcoMapTag);
+  }
+  if(G4INTT::UseDacMap) {
+	  inttunpacker->SetCalibDAC(G4INTT::DacMapTag);
+  }
   se->registerSubsystem(inttunpacker);
 }
 void Intt_Clustering()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
+
+  if(G4INTT::UseSurvey) {
+	  Enable::INTT = true;
+	  G4Init();
+	  G4Setup();
+	  ClusteringInit(); // ActsGeomInit() is called here
+  }
 
   InttClusterizer* inttclusterizer = new InttClusterizer("InttClusterizer", G4MVTX::n_maps_layer, G4MVTX::n_maps_layer + G4INTT::n_intt_layer - 1);
   inttclusterizer->Verbosity(verbosity);
