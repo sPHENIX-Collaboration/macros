@@ -4,7 +4,6 @@
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
-R__LOAD_LIBRARY(libqa_modules.so)
 
 #include <GlobalVariables.C>
 

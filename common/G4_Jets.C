@@ -19,7 +19,7 @@
 R__LOAD_LIBRARY(libjetbase.so)
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libg4eval.so)
-R__LOAD_LIBRARY(libqa_modules.so)
+R__LOAD_LIBRARY(libsimqa_modules.so)
 
 namespace Enable
 {
