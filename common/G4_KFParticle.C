@@ -11,7 +11,7 @@
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libkfparticle_sphenix.so)
-R__LOAD_LIBRARY(libqa_kfparticle.so)
+R__LOAD_LIBRARY(libsimqa_kfparticle.so)
 R__LOAD_LIBRARY(libdecayfinder.so)
 
 namespace Enable
