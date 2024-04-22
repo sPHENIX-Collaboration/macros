@@ -41,6 +41,8 @@ namespace ACTSGEOM
       G4MICROMEGAS::n_micromegas_layer = 0;
     }
 
+    MagnetFieldInit();
+
     // Build the Acts geometry
     auto se = Fun4AllServer::instance();
     int verbosity = Enable::VERBOSITY;
