@@ -166,6 +166,9 @@ namespace G4TRACKING
   bool use_full_truth_track_seeding = false;  // makes track seeds using truth info, used for both Acts and Genfit
   bool use_truth_vertexing = false;           // if true runs truth vertexing, if false runs PHSimpleVertexFinder
 
+  // genfit track fitter
+  bool use_genfit_track_fitter = false;
+
   // Runs a converter from TrackSeed object to SvtxTrack object to enable
   // use of the various evaluation tools already available
   bool convert_seeds_to_svtxtracks = false;
