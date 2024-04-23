@@ -74,15 +74,10 @@ void Intt_HitUnpacking()
   inttunpacker->runInttStandalone(G4INTT::RunStandalone);
   inttunpacker->writeInttEventHeader(G4INTT::WriteEvtHeader);
 
-  if(G4INTT::UseBadMap) {
-	  inttunpacker->LoadHotChannelMapRemote(G4INTT::BadMapTag);
-  }
-  if(G4INTT::UseBcoMap) {
-	  inttunpacker->SetCalibBCO(G4INTT::BcoMapTag);
-  }
-  if(G4INTT::UseDacMap) {
-	  inttunpacker->SetCalibDAC(G4INTT::DacMapTag);
-  }
+  if(G4INTT::UseBadMap)inttunpacker->LoadBadMap();
+  if(G4INTT::UseBcoMap)inttunpacker->LoadBcoMap();
+  if(G4INTT::UseDacMap)inttunpacker->LoadDacMap();
+
   se->registerSubsystem(inttunpacker);
 }
 void Intt_Clustering()

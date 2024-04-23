@@ -81,13 +81,8 @@ namespace G4INTT
   double sensor_radius[4] = {7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
 
   bool UseBadMap = true; // Mask hot/bad channels
-  std::string BadMapTag = "INTT_HotMap";
-
   bool UseBcoMap = true; // Keep only hits local to BCO peak
-  std::string BcoMapTag = "INTT_BCOMAP";
-
   bool UseDacMap = true; // Convert digital signals back to analog thresholds
-  std::string DacMapTag = "INTT_DACMAP";
 
   bool RunStandalone = false;
   bool WriteEvtHeader = false;
