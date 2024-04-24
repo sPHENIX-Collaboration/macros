@@ -13,6 +13,8 @@
 #include <intt/InttCombinedRawDataDecoder.h>
 
 #include <G4Setup_sPHENIX.C>
+#include <G4_TrkrVariables.C>
+#include <G4_ActsGeom.C>
 #include <Trkr_Clustering.C>
 
 R__LOAD_LIBRARY(libfun4all.so)
@@ -20,61 +22,64 @@ R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
 R__LOAD_LIBRARY(libintt.so)
 
-void Fun4All_Intt_Combiner(int nEvents = 0,
-                           const string &input_file00 = "intt0.list",
-                           const string &input_file01 = "intt1.list",
-                           const string &input_file02 = "intt2.list",
-                           const string &input_file03 = "intt3.list",
-                           const string &input_file04 = "intt4.list",
-                           const string &input_file05 = "intt5.list",
-                           const string &input_file06 = "intt6.list",
-                           const string &input_file07 = "intt7.list")
+bool isGood(const string &infile)
 {
-  bool runTrkrHits = true;
-  bool applyHotChannel = true;
-  bool applyBCOCut = true;
-  bool applyADCConversion = true;
-  bool runTkrkClus = true;
-  bool usesurveygeom = false;
-  bool stripRawHit = true;
+  ifstream intest;
+  intest.open(infile);
+  bool goodfile = false;
+  if (intest.is_open())
+  {
+    if (intest.peek() != std::ifstream::traits_type::eof()) // is it non zero?
+    {
+      goodfile = true;
+    }
+      intest.close();
+  }
+  return goodfile;
+}
 
-  TString outinitial = "intt-00020869";
-  TString outend = ".root";
+void Fun4All_Intt_Combiner(int nEvents = 0,
+                           const int runnumber = 20869,
+                           const string cdbglobaltag = "ProdA_2023",
+                           const bool runTrkrHits = true,
+                           const bool applyHotChannel = true,
+                           const bool applyBCOCut = true,
+                           const bool applyADCConversion = true,  
+                           const bool runTkrkClus = true,
+                           const bool usesurveygeom = true,
+                           const bool stripRawHit = true)
+{
+
+  vector<string> infile = {"intt0.list", "intt1.list", "intt2.list", "intt3.list", "intt4.list", "intt5.list", "intt6.list", "intt7.list"};
+
+  TString outfilename = Form("intt-%08d.root", runnumber);
+  TString outdirinitial = "ProdDST";
   if (applyHotChannel)
   {
-    outinitial += "-HotDead";
+    outdirinitial += "-HotDead";
   }
   if (applyBCOCut)
   {
-    outinitial += "-BCO";
+    outdirinitial += "-BCO";
   }
   if (applyADCConversion)
   {
-    outinitial += "-ADC";
+    outdirinitial += "-ADC";
   }
   if (usesurveygeom)
   {
-    outinitial += "-Survey";
+    outdirinitial += "-Survey";
   }
-  TString outname = outinitial + outend;
 
-  vector<string> infile;
-  infile.push_back(input_file00);
-  infile.push_back(input_file01);
-  infile.push_back(input_file02);
-  infile.push_back(input_file03);
-  infile.push_back(input_file04);
-  infile.push_back(input_file05);
-  infile.push_back(input_file06);
-  infile.push_back(input_file07);
+  system(Form("mkdir -p %s", outdirinitial.Data()));
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
 
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", CDB::global_tag);
-  rc->set_uint64Flag("TIMESTAMP", CDB::timestamp);
+  rc->set_StringFlag("CDB_GLOBALTAG", cdbglobaltag);
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
 
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
   //  in->Verbosity(10);
@@ -106,26 +111,29 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
     myDecoder->runInttStandalone(true);
     myDecoder->writeInttEventHeader(true);
     if (applyHotChannel) myDecoder->LoadHotChannelMapRemote("INTT_HotMap");
-    if (applyADCConversion) myDecoder->SetCalibDAC();
-    if (applyBCOCut) myDecoder->SetCalibBCO();
+    string DACmap = (applyADCConversion) ? "INTT_DACMAP" : "";
+    string BCOmap = (applyBCOCut) ? "INTT_BCOMAP" : "";
+    myDecoder->SetCalibDAC(DACmap);
+    myDecoder->SetCalibBCO(BCOmap);
     se->registerSubsystem(myDecoder);
   }
 
   if (runTkrkClus)
   {
-    if (usesurveygeom)
-    {
-      Enable::INTT = true;
-      G4Init();
-      G4Setup();
-
-      ClusteringInit();   // ActsGeomInit() is called here
-    }
-    
+    Enable::MVTX = true;
+    Enable::INTT = true;
+    Enable::TPC = true;
+    Enable::MICROMEGAS = true;
+    //! [TO CONFIRM] The switches for the ideal and survey geometries do not seem to work anymore. Is this intended?
+    Enable::INTT_USEG4SURVEYGEOM = usesurveygeom; 
+    ACTSGEOM::inttsurvey = usesurveygeom;
+    G4Init();
+    G4Setup();
+    ClusteringInit();   // ActsGeomInit() is called here
     Intt_Clustering();  // Be careful!!! INTT z-clustering may be off which is not what you want!
   }
 
-  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", outname.Data());
+  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", Form("%s/%s", outdirinitial.Data(), outfilename.Data()));
   if (stripRawHit)
   {
     out->StripNode("INTTRAWHIT");
@@ -137,20 +145,4 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
   se->End();
   delete se;
   gSystem->Exit(0);
-}
-
-bool isGood(const string &infile)
-{
-  ifstream intest;
-  intest.open(infile);
-  bool goodfile = false;
-  if (intest.is_open())
-  {
-    if (intest.peek() != std::ifstream::traits_type::eof()) // is it non zero?
-    {
-      goodfile = true;
-    }
-      intest.close();
-  }
-  return goodfile;
 }
