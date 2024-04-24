@@ -88,15 +88,13 @@ namespace G4INTT
   bool RunStandalone = false;
   bool WriteEvtHeader = false;
 
-  bool UseSurvey = true;
-
   // This enum needs to be replaced/removed
   enum enu_InttDeadMapType
   {
 	  kInttNoDeadMap = 0,
-	  kInttDeadmap,
+	  kInttDeadMap,
   };
-  enu_InttDeadMapType InttDeadMapOption = kInttDeadMap;
+  enu_InttDeadMapType InttDeadMapOption = enu_InttDeadMapType::kInttDeadMap;
 
 }  // namespace G4INTT
 

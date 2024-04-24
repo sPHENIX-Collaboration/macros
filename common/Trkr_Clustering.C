@@ -85,7 +85,7 @@ void Intt_Clustering()
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  if(G4INTT::UseSurvey) {
+  if(Enable::INTT_USEG4SURVEYGEOM) {
 	  Enable::INTT = true;
 	  G4Init();
 	  G4Setup();
