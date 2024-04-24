@@ -22,13 +22,13 @@
 
 #include <phool/recoConsts.h>
 
-#include <intt/InttClusterQA.h>
+#include <trackingqa/InttClusterQA.h>
 
-#include <micromegas/MicromegasClusterQA.h>
+#include <trackingqa/MicromegasClusterQA.h>
 
-#include <mvtx/MvtxClusterQA.h>
+#include <trackingqa/MvtxClusterQA.h>
 
-#include <tpc/TpcClusterQA.h>
+#include <trackingqa/TpcClusterQA.h>
 
 #include <trackingdiagnostics/TrackResiduals.h>
 #include <trackingdiagnostics/TrkrNtuplizer.h>
@@ -42,6 +42,7 @@ R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
+R__LOAD_LIBRARY(libtrackingqa.so)
 void Fun4All_TrkrClusteringSeeding(
     const int nEvents = 2,
     const std::string filename = "cosmics-00025926-0005.root",
