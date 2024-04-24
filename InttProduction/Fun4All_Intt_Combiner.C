@@ -59,12 +59,13 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
 
   //! [TO CONFIRM] The switches for the ideal and survey geometries do not seem to work anymore. Is this intended?
   Enable::INTT_USEG4SURVEYGEOM = usesurveygeom;
+  ACTSGEOM::inttsurvey = usesurveygeom;
 
   TString outname = Form("ProdDST/intt-%08d", runnumber);
-  if (G4INTT::UseBadMap)outname += "-HotDead";
-  if (G4INTT::UseBcoMap)outname += "-BCO";
-  if (G4INTT::UseDacMap)outname += "-ADC";
-  if (G4INTT::UseSurvey)outname += "-Survey";
+  if (applyHotChannel)    outname += "-HotDead";
+  if (applyBCOCut)         outname += "-BCO";
+  if (applyADCConversion) outname += "-ADC";
+  if (usesurveygeom)      outname += "-Survey";
   outname = outname + ".root";
   system(Form("mkdir -p %s", outname.Data()));
 
@@ -107,6 +108,10 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
 
   if (runTkrkClus)
   {
+    Enable::MVTX = true;
+    Enable::INTT = true;
+    Enable::TPC = true;
+    Enable::MICROMEGAS = true;
     Intt_Clustering();  // Be careful!!! INTT z-clustering may be off which is not what you want!
   }
 
