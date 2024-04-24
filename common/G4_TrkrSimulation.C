@@ -127,6 +127,14 @@ void InttInit()
   {
     G4MVTX::n_maps_layer = 0;
   }
+  if (!Enable::INTT_USEG4SURVEYGEOM)
+  {
+    G4INTT::sensor_radius[0] = 7.188 - 36e-4;
+    G4INTT::sensor_radius[1] = 7.732 - 36e-4;
+    G4INTT::sensor_radius[2] = 9.680 - 36e-4;
+    G4INTT::sensor_radius[3] = 10.262 - 36e-4;
+  
+  }
 }
 
 double Intt(PHG4Reco* g4Reco, double radius,
