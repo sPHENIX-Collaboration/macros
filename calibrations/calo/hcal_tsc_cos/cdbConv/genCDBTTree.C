@@ -13,8 +13,8 @@ void genCDBTTree(){
   
   // get/apply temperture correction for 2024 -> 2023 calibration
   TFile* ftemp = new TFile("/sphenix/u/bseidlitz/work/macros/calibrations/calo/hcal_cosmics/tempAna/y23Ana/temp_corr_24to23.root");
-  TH2F* h_temp_corr_ohcal = (TH2F*) fin->Get("h_temp_corr_tbt_ohcal");
-  TH2F* h_temp_corr_ihcal = (TH2F*) fin->Get("h_temp_corr_tbt_ihcal");
+  TH2F* h_temp_corr_ohcal = (TH2F*) ftemp->Get("h_temp_corr_tbt_ohcal");
+  TH2F* h_temp_corr_ihcal = (TH2F*) ftemp->Get("h_temp_corr_tbt_ihcal");
    h_ohcal->Multiply(h_temp_corr_ohcal);
    h_ihcal->Multiply(h_temp_corr_ihcal);
   
