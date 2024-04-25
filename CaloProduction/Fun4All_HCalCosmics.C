@@ -160,6 +160,7 @@ void Fun4All_HCalCosmics(int nEvents = 5e1, const std::string &fname = "dst_trig
   CDBInterface::instance()->Print();  // print used DB files
   se->PrintTimer();
   delete se;
+
   std::cout << "All done!" << std::endl;
   gSystem->Exit(0);
 }
