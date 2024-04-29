@@ -127,11 +127,20 @@ void InttInit()
   {
     G4MVTX::n_maps_layer = 0;
   }
+  if (!Enable::INTT_USEG4SURVEYGEOM)
+  {
+    G4INTT::sensor_radius[0] = 7.188 - 36e-4;
+    G4INTT::sensor_radius[1] = 7.732 - 36e-4;
+    G4INTT::sensor_radius[2] = 9.680 - 36e-4;
+    G4INTT::sensor_radius[3] = 10.262 - 36e-4;
+  
+  }
 }
 
 double Intt(PHG4Reco* g4Reco, double radius,
             const int absorberactive = 0)
 {
+  std::cout << "G4_TrkrSimulation::Intt" << std::endl;
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
   bool intt_overlapcheck = Enable::OVERLAPCHECK || Enable::INTT_OVERLAPCHECK;
 
@@ -155,6 +164,8 @@ double Intt(PHG4Reco* g4Reco, double radius,
   sitrack->Verbosity(verbosity);
   sitrack->SetActive(1);
   sitrack->OverlapCheck(intt_overlapcheck);
+  std::cout << "PHG4InttSubsystem: Use survey geometry? Enable::INTT_USEG4SURVEYGEOM=" << Enable::INTT_USEG4SURVEYGEOM << std::endl;
+  sitrack->SetSurveyGeometry(Enable::INTT_USEG4SURVEYGEOM);
   if (Enable::INTT_ABSORBER || Enable::ABSORBER)
   {
     sitrack->SetAbsorberActive();
@@ -444,6 +455,7 @@ void TPC_Cells()
     {
       distortionMap->set_time_ordered_distortion_filename(CDBInterface::instance()->getUrl(G4TPC::time_ordered_distortion_filename));
     }
+    distortionMap->set_do_ReachesReadout(G4TPC::ENABLE_REACHES_READOUT);
     distortionMap->Init();
     edrift->setTpcDistortion(distortionMap);
   }

@@ -29,7 +29,7 @@ R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4ohcal.so)
-R__LOAD_LIBRARY(libqa_modules.so)
+R__LOAD_LIBRARY(libsimqa_modules.so)
 
 namespace Enable
 {
@@ -42,7 +42,7 @@ namespace Enable
   bool HCALOUT_EVAL = false;
   bool HCALOUT_QA = false;
   bool HCALOUT_OLD = false;
-  bool HCALOUT_RING = true;
+  bool HCALOUT_RING = false;
   bool HCALOUT_G4Hit = true;
   int HCALOUT_VERBOSITY = 0;
 }  // namespace Enable

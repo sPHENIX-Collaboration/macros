@@ -25,6 +25,7 @@ namespace Enable
   bool INTT_CLUSTER = false;
   bool INTT_QA = false;
   bool INTT_SUPPORT = false;
+  bool INTT_USEG4SURVEYGEOM = true;
   int INTT_VERBOSITY = 0;
 
   bool TPC = false;
@@ -77,7 +78,8 @@ namespace G4INTT
                        PHG4InttDefs::SEGMENTATION_PHI,
                        PHG4InttDefs::SEGMENTATION_PHI};
   int nladder[4] = {12, 12, 16, 16};
-  double sensor_radius[4] = {7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
+  //! default to survey geometry
+  double sensor_radius[4] = {7.453, 8.046, 9.934, 10.569};
 
   enum enu_InttDeadMapType  // Dead map options for INTT
   {
@@ -109,18 +111,23 @@ namespace G4TPC
   // distortions
   bool DISTORTIONS_USE_PHI_AS_RADIANS = true;
 
-  bool ENABLE_STATIC_DISTORTIONS = true;
-  auto static_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only.distortion_map.hist.root";
-  //auto static_distortion_filename = "/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_event_0_bX99528306_5.distortion_map.hist.root";
-  
-  bool ENABLE_TIME_ORDERED_DISTORTIONS = true;
-  std::string time_ordered_distortion_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/TimeOrderedDistortions.root";
-  //std::string time_ordered_distortion_filename = "/sphenix/user/rcorliss/distortion_maps/2023.02/TimeOrderedDistortions.root";
+  // static distortions
+  bool ENABLE_STATIC_DISTORTIONS = false;
+  std::string static_distortion_filename = "TPC_STATIC_DISTORTION";
 
-  // distortion corrections
-  bool ENABLE_CORRECTIONS = true;
-  auto correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
-  //auto correction_filename = "/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_smoothed_average.correction_map.hist.root";
+  // time-ordered distortion fluctuations
+  bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
+  std::string time_ordered_distortion_filename = "TPC_TIMEORDERED_DISTORTION";
+
+  bool ENABLE_REACHES_READOUT = true;
+
+  // static distortion corrections
+  bool ENABLE_STATIC_CORRECTIONS = false;
+  std::string static_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
+
+  // average distortion corrections
+  bool ENABLE_AVERAGE_CORRECTIONS = false;
+  std::string average_correction_filename;
 
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = true;
@@ -158,6 +165,9 @@ namespace G4TRACKING
                                               // Full truth track seeding
   bool use_full_truth_track_seeding = false;  // makes track seeds using truth info, used for both Acts and Genfit
   bool use_truth_vertexing = false;           // if true runs truth vertexing, if false runs PHSimpleVertexFinder
+
+  // genfit track fitter
+  bool use_genfit_track_fitter = false;
 
   // Runs a converter from TrackSeed object to SvtxTrack object to enable
   // use of the various evaluation tools already available

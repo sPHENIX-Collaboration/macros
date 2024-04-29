@@ -6,15 +6,22 @@
 if [ $# -eq 0 ]
   then
     echo "Creates needed lists of input files for the Intt for a given run"
-    echo "Usage: intt_makelist.sh <run number>"
+    echo "Usage: intt_makelist.sh <type> <run number>"
     exit 1
 fi
 
-runnumber=$(printf "%08d" $1)
+if [ $# -eq 1 ]
+then
+  echo "No type or runnumber supplied"
+  exit 0
+fi
+
+type=$1
+runnumber=$(printf "%08d" $2)
 
 for i in {0..7}
 do
-ls -1 /sphenix/lustre01/sphnxpro/commissioning/INTT/beam/beam_intt${i}-${runnumber}-* > intt${i}.list
+/bin/ls -1 /sphenix/lustre01/sphnxpro/commissioning/INTT/${type}/${type}_intt${i}-${runnumber}-* > intt${i}.list
 if [ ! -s intt${i}.list ]
 then
   echo intt${i}.list empty, removing it

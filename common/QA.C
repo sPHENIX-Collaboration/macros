@@ -2,11 +2,11 @@
 #define MACRO_QA_C
 
 #include <fun4all/Fun4AllServer.h>
-#include <qa_modules/QAG4SimulationCalorimeterSum.h>
+#include <simqa_modules/QAG4SimulationCalorimeterSum.h>
 #include <qautils/QAHistManagerDef.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
-R__LOAD_LIBRARY(libqa_modules.so)
+R__LOAD_LIBRARY(libsimqa_modules.so)
 
 namespace Enable
 {

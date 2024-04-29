@@ -11,7 +11,7 @@
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libkfparticle_sphenix.so)
-R__LOAD_LIBRARY(libqa_kfparticle.so)
+R__LOAD_LIBRARY(libsimqa_kfparticle.so)
 R__LOAD_LIBRARY(libdecayfinder.so)
 
 namespace Enable
@@ -88,7 +88,7 @@ void KFParticle_Upsilon_Reco()
 
   kfparticle->setContainerName(KFPARTICLE::UpsilonName);
   kfparticle->setOutputName("KFParticleOutput_" + KFPARTICLE::UpsilonName + "_reconstruction.root");
-
+  kfparticle->magFieldFile(G4MAGNET::magfield_tracking);
   se->registerSubsystem(kfparticle);
 
   KFPARTICLE::runUpsilonReco = true;

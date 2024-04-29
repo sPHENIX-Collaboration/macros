@@ -80,6 +80,7 @@ namespace G4MAGNET
   double magfield_rescale = NAN;
   std::string magfield;
   std::string magfield_OHCAL_steel;
+  std::string magfield_tracking;
 }  // namespace G4MAGNET
 
 namespace Enable
@@ -129,6 +130,21 @@ bool isRootFile(const std::string &fname)
     }
   }
   return false;
+}
+
+bool isConstantField(const std::string &name, double &fieldstrength)
+{
+  istringstream stringline(G4MAGNET::magfield_tracking);
+  stringline >> fieldstrength;
+  if (stringline.fail())
+  {  // conversion to double fails -> we have a string (means fieldmap)
+    fieldstrength = std::numeric_limits<double>::quiet_NaN();
+    return false;
+  }
+  else
+  {
+    return true;
+  }
 }
 
 #endif
