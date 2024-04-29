@@ -80,7 +80,7 @@ void TPC_LaserClustering()
 
       auto laserClusterizer = new LaserClusterizer;
       laserClusterizer->Verbosity(verbosity);
-      laserClusterizer->set_debug_name("/sphenix/user/bkimelman/CM_Matching_Mar13_2024_allDist/LaserClusterizer_debug.root");
+      laserClusterizer->set_debug_name("/sphenix/user/bkimelman/CM_Matching_Apr3_2024_allDist/LaserClusterizer_debug.root");
       se->registerSubsystem(laserClusterizer);
 
       /*
@@ -100,7 +100,7 @@ void TPC_LaserClustering()
       //centralMembraneMatcher->Verbosity( verbosity );
       centralMembraneMatcher->Verbosity( 1 );
       centralMembraneMatcher->setNMatchIter(2);
-      centralMembraneMatcher->setDebugOutputFile("/sphenix/user/bkimelman/CM_Matching_Mar13_2024_allDist/CMMatcher.root");
+      centralMembraneMatcher->setDebugOutputFile("/sphenix/user/bkimelman/CM_Matching_Apr3_2024_allDist/CMMatcher.root");
       //centralMembraneMatcher->set_useOnly_nClus2(true);
       se->registerSubsystem(centralMembraneMatcher);
     }
