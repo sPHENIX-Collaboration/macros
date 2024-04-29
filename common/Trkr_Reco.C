@@ -104,7 +104,7 @@ void Tracking_Reco_TrackSeed()
   cprop->set_field_dir(G4MAGNET::magfield_rescale);
   if (ConstField)
   {
-    cprop->useConstBField(false);
+    cprop->useConstBField(true);
     cprop->setConstBField(fieldstrength);
   }
   else
