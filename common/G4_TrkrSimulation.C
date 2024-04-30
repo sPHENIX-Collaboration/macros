@@ -230,6 +230,7 @@ void Intt_Cells()
   }
   // new storage containers
   PHG4InttHitReco* reco = new PHG4InttHitReco();
+  reco->setHotStripMaskFile("INTT_HotMap");
 
   // The timing window defaults are set in the INTT ladder model, they can be overridden here
   double extended_readout_time = 0.0;
