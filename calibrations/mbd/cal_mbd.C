@@ -24,9 +24,12 @@ R__LOAD_LIBRARY(libmbd.so)
 
 //pass0: do tt_t0 and tq_t0 offset calibration
 //pass1: do the slew correction
-//pass2: do the mip fits for charge calibration 
+//pass2: do the next iteration of the slew correction
+//pass3: do the mip fits for charge calibration 
 
-void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 0, const int nevt = 0)
+//runtype 0: au+au 200 GeV
+//runtype 1: p+p 200 GeV
+void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 0, const int nevt = 0, const int runtype = 0)
 {
   cout << "tfname " << tfname << endl;
   read_dstmbd( tfname );
@@ -37,6 +40,8 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
   dir += "/";
   TString name = "mkdir -p " + dir;
   gSystem->Exec( name );
+
+  cout << name << endl;
 
   //== Load in calib constants
   //Float_t tq_t0_offsets[NUM_PMT] = {};
@@ -57,6 +62,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
   else if ( pass==3 )
   {
     savefname += "calmbdq_pass"; savefname += pass; savefname += ".root";
+    cout << "saving to " << savefname << endl;
   }
 
   // Load whatever calibrations are available at each pass
@@ -436,13 +442,13 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
   }
   ++cvindex;
 
-
   savefile->Write();
   //savefile->Close();
 
   if ( pass==3 )
   {
-    recal_mbd_mip( savefname, pass, nevt );
+    recal_mbd_mip( tfname, pass, nevt, runtype );
   }
+
 }
 

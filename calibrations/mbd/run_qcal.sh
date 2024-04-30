@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # run_qcal.sh <fname>
-# do tq timing offset calibrations
+# do charge fits to get timing offset calibrations
 # <fname> is the name of the uncalibrated mbd dst file
 #
 
@@ -37,10 +37,8 @@ then
   BATCH=-b
 fi
 
-pass=2
-echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${pass},${qcalib_events}\)
-root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${pass},${qcalib_events}\)  # time calibrations
+pass=3
+runtype=1 # pp200
+echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${pass},${qcalib_events},${runtype}\)
+root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${pass},${qcalib_events},${runtype}\)  # time calibrations
 
-# pass2
-#echo root.exe $BATCH -q cal_bbc_mip.C\(\"${mbd_uncalrootf}\",2,${qcalib_events}\)
-#root.exe $BATCH -q cal_bbc_mip.C\(\"${mbd_uncalrootf}\",2,${qcalib_events}\)  # time calibrations
