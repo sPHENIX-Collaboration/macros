@@ -36,6 +36,7 @@ then
   BATCH=-b
 fi
 
-echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",0,${tcalib_events}\)
-root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",0,${tcalib_events}\)  # time calibrations
+pass=0
+echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${pass},${tcalib_events}\)
+root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${pass},${tcalib_events}\)  # time calibrations
 

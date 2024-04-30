@@ -46,7 +46,7 @@ void Fun4All_MBD_Prdf(int nEvents = 10, const char *input_file = "beam/beam_seb1
   rc->set_uint64Flag("TIMESTAMP", run_number);
 
   // For local calibrations
-  TString bdir = "/sphenix/user/chiu/sphenix_bbc/run2023/results/";
+  TString bdir = "./results/";
   bdir += run_number;
   cout << bdir << endl;
   rc->set_StringFlag("MBD_CALDIR",bdir.Data()); 
@@ -74,10 +74,9 @@ void Fun4All_MBD_Prdf(int nEvents = 10, const char *input_file = "beam/beam_seb1
 
   Fun4AllInputManager *in = new Fun4AllPrdfInputManager("PRDFin");
   in->fileopen(input_file);
-//  in->Verbosity(1);
+  //in->Verbosity(1);
   se->registerInputManager(in);
 
-  //TString outfile = "/sphenix/user/chiu/sphenix_bbc/run2023/goodruns/XXXDST_MBD-";
   TString outfile = "DST_MBD-";
   outfile += runseq;
   outfile += ".root";
