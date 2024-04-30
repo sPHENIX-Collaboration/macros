@@ -37,12 +37,12 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
                              const string &input_inttfile05 = "intt5.list",
                              const string &input_inttfile06 = "intt6.list",
                              const string &input_inttfile07 = "intt7.list",
-                             const string &input_mvtxfile00 = "mvtx.list",
-                             const string &input_mvtxfile01 = "mvtx.list",
-                             const string &input_mvtxfile02 = "mvtx.list",
-                             const string &input_mvtxfile03 = "mvtx.list",
-                             const string &input_mvtxfile04 = "mvtx.list",
-                             const string &input_mvtxfile05 = "mvtx.list",
+                             const string &input_mvtxfile00 = "mvtx0.list",
+                             const string &input_mvtxfile01 = "mvtx1.list",
+                             const string &input_mvtxfile02 = "mvtx2.list",
+                             const string &input_mvtxfile03 = "mvtx3.list",
+                             const string &input_mvtxfile04 = "mvtx4.list",
+                             const string &input_mvtxfile05 = "mvtx5.list",
                              const string &input_tpcfile00 = "tpc00.list",
                              const string &input_tpcfile01 = "tpc01.list",
                              const string &input_tpcfile02 = "tpc02.list",
@@ -127,7 +127,7 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
   se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
-  //  in->Verbosity(2);
+//  in->Verbosity(3);
 
 // create and register input managers
   int i = 0;
@@ -151,7 +151,7 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
     if (isGood(iter))
     {
     SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + to_string(i));
-    //    intt_sngl->Verbosity(3);
+//    intt_sngl->Verbosity(3);
     intt_sngl->SetNegativeBco(1);
     intt_sngl->SetBcoRange(2);
     intt_sngl->AddListFile(iter);
@@ -165,7 +165,7 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
     if (isGood(iter))
     {
     SingleMvtxPoolInput *mvtx_sngl = new SingleMvtxPoolInput("MVTX_" + to_string(i));
-    //    mvtx_sngl->Verbosity(3);
+//    mvtx_sngl->Verbosity(5);
     mvtx_sngl->SetBcoRange(1000);
     mvtx_sngl->SetNegativeBco(1000);
     mvtx_sngl->AddListFile(iter);
@@ -219,8 +219,16 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
 
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
+  // string outdir = "/sphenix/user/pinkenbu";
+  // string outfilename = "./gl1A.root";
+  // int neventsper = 1;
+  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "streaming.root");
 
-  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "/sphenix/user/pinkenbu/streaming1.root");
+  // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out",outfilename);
+  // out->UseFileRule();
+  // out->SetNEvents(neventsper);                       // number of events per output file
+  // out->SetClosingScript("stageout.sh");      // script to call on file close (not quite working yet...)
+  // out->SetClosingScriptArgs(outdir);  // additional beyond the name of the file
   se->registerOutputManager(out);
 
   if (nEvents < 0)

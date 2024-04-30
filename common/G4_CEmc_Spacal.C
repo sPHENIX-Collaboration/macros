@@ -33,7 +33,7 @@ R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
-R__LOAD_LIBRARY(libqa_modules.so)
+R__LOAD_LIBRARY(libsimqa_modules.so)
 
 namespace Enable
 {

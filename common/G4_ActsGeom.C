@@ -4,7 +4,6 @@
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
-R__LOAD_LIBRARY(libqa_modules.so)
 
 #include <GlobalVariables.C>
 
@@ -26,7 +25,7 @@ namespace ACTSGEOM
   unsigned int tpcMisalignment = 1;
   unsigned int tpotMisalignment = 1;
 
-  bool inttsurvey = true;
+  bool inttsurvey = Enable::INTT_USEG4SURVEYGEOM;
 
   void ActsGeomInit()
   {
@@ -41,6 +40,8 @@ namespace ACTSGEOM
     {
       G4MICROMEGAS::n_micromegas_layer = 0;
     }
+
+    MagnetFieldInit();
 
     // Build the Acts geometry
     auto se = Fun4AllServer::instance();

@@ -78,7 +78,8 @@ namespace G4INTT
                        PHG4InttDefs::SEGMENTATION_PHI,
                        PHG4InttDefs::SEGMENTATION_PHI};
   int nladder[4] = {12, 12, 16, 16};
-  double sensor_radius[4] = {7.188 - 36e-4, 7.732 - 36e-4, 9.680 - 36e-4, 10.262 - 36e-4};
+  //! default to survey geometry
+  double sensor_radius[4] = {7.453, 8.046, 9.934, 10.569};
 
   enum enu_InttDeadMapType  // Dead map options for INTT
   {
@@ -164,6 +165,9 @@ namespace G4TRACKING
                                               // Full truth track seeding
   bool use_full_truth_track_seeding = false;  // makes track seeds using truth info, used for both Acts and Genfit
   bool use_truth_vertexing = false;           // if true runs truth vertexing, if false runs PHSimpleVertexFinder
+
+  // genfit track fitter
+  bool use_genfit_track_fitter = false;
 
   // Runs a converter from TrackSeed object to SvtxTrack object to enable
   // use of the various evaluation tools already available
