@@ -6,7 +6,7 @@
 #define HomogeneousField
 #include <kfparticle_sphenix/KFParticle_sPHENIX.h>
 #include <decayfinder/DecayFinder.h>
-#include <qa_modules/QAG4SimulationKFParticle.h>
+#include <simqa_modules/QAG4SimulationKFParticle.h>
 
 #include <fun4all/Fun4AllServer.h>
 
