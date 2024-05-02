@@ -28,7 +28,6 @@ R__LOAD_LIBRARY(libmicromegas.so)
 void Fun4All_TrkrHitSet_Unpacker(
     const int nEvents = 2,
     const int runnumber = 26048,
-    const int sequence = 0000,
     const std::string outfilename = "cosmics",
     const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all_4/",
     const std::string file = "cosmics-")
@@ -36,7 +35,7 @@ void Fun4All_TrkrHitSet_Unpacker(
   gSystem->Load("libg4dst.so");
   std::string inputRawHitFile = dir + file;
   char filename[500];
-  sprintf(filename, "%s%08d-%04d.root", inputRawHitFile.c_str(), runnumber, sequence);
+  sprintf(filename, "%s%08d-0000.root", inputRawHitFile.c_str(), runnumber);
 
   auto se = Fun4AllServer::instance();
   se->Verbosity(1);
@@ -56,10 +55,10 @@ void Fun4All_TrkrHitSet_Unpacker(
   hitsin->fileopen(filename);
   se->registerInputManager(hitsin);
 
-  //Mvtx_HitUnpacking();
-  //Intt_HitUnpacking();
+  Mvtx_HitUnpacking();
+  Intt_HitUnpacking();
   Tpc_HitUnpacking();
-  //Micromegas_HitUnpacking();
+  Micromegas_HitUnpacking();
 
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfilename);
   out->StripNode("MVTXRAWHIT");
