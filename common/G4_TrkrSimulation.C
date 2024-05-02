@@ -393,7 +393,7 @@ void TPC_Cells()
   {
     auto centralMembrane = new PHG4TpcCentralMembrane;
     centralMembrane->setCentralMembraneDelay(0);
-    centralMembrane->setCentralMembraneEventModulo(1);
+    centralMembrane->setCentralMembraneEventModulo(5);
     se->registerSubsystem(centralMembrane);
   }
 
