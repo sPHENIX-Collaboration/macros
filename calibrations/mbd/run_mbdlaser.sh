@@ -6,16 +6,11 @@
 #
 
 prdf=$1
-calpass=$2
 
 nevts=0
-if [[ $# -gt 2 ]] 
+if [[ $# -gt 1 ]] 
 then
-  nevts=$3
-elif [[ $2 -eq 1 ]]
-then
-  # for calpass 1, we set nevts to 20K by default
-  nevts=20000
+  nevts=$2
 fi
 
 # get run number from prdf file
@@ -25,18 +20,12 @@ run=${run#*-}
 run=${run#000}
 
 # make calibration directory and fill it
-caldir=${PWD}/results/${run}
+caldir=results/${run}
 echo mkdir -p ${caldir}
 mkdir -p ${caldir}
 
 # link pass0 calibs
-# use existing PASS0DIR, otherwise default to
-if [ -z "$PASS0DIR" ]
-then
-  export PASS0DIR=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0/
-  echo "Setting PASS0DIR to $PASS0DIR"
-fi
-
+export PASS0DIR=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0/
 ln -sf ${PASS0DIR}/mbd_shape.calib ${caldir}/
 ln -sf ${PASS0DIR}/mbd_sherr.calib ${caldir}/
 ln -sf ${PASS0DIR}/mbd_timecorr.calib ${caldir}/
@@ -48,7 +37,14 @@ then
   BATCH=-b
 fi
 
-echo root.exe ${BATCH} -q Fun4All_MBD_CalPass.C\(\"${prdf}\",${calpass},${nevts}\)
-root.exe ${BATCH} -q Fun4All_MBD_CalPass.C\(\"${prdf}\",${calpass},${nevts}\)
+# get the samp_max
+pass=1
+smax_nevts=20000
+echo root.exe ${BATCH} -q Fun4All_MBD_CalPass.C\(\"${prdf}\",${pass},${smax_nevts}\)
+root.exe ${BATCH} -q Fun4All_MBD_CalPass.C\(\"${prdf}\",${pass},${smax_nevts}\)
 
+# now process the laser events and write out a DST
+pass=2
+echo root.exe ${BATCH} -q Fun4All_MBD_CalPass.C\(\"${prdf}\",${pass},${nevts}\)
+root.exe ${BATCH} -q Fun4All_MBD_CalPass.C\(\"${prdf}\",${pass},${nevts}\)
 

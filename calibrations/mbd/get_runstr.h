@@ -48,5 +48,14 @@ int get_runnumber(const char *fname)
 
 //} // namespace RUNSTR
 
+namespace MBDRUNS {
+  enum type {
+    AUAU200 = 0,
+    PP200,
+    SIMAUAU200,
+    SIMPP200
+  };
+}
+
 #endif  // __get_runstr__
 
