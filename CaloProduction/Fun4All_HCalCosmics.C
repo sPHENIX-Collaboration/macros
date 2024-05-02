@@ -34,7 +34,7 @@ R__LOAD_LIBRARY(libcentrality.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libLiteCaloEvalTowSlope.so)
 
-void Fun4All_HCalCosmics(int nEvents = 5e1, const std::string &fname = "dst_triggered_raw_cosmics-00040174.list") 
+void Fun4All_HCalCosmics(int nEvents = 5e2, const std::string &fname = "dst_triggered_raw_cosmics-00040174.list") 
 {
   bool useDSTRAW = true;
   // v1 uncomment:
@@ -153,6 +153,11 @@ void Fun4All_HCalCosmics(int nEvents = 5e1, const std::string &fname = "dst_trig
   se->registerInputManager(In);
 
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", fulloutfile);
+  out->StripNode("CEMCPackets");
+  out->StripNode("HCALPackets");
+  out->StripNode("ZDCPackets");
+  out->StripNode("SEPDPackets");
+  out->StripNode("MBDPackets");
   se->registerOutputManager(out);
 
   se->run(nEvents);
