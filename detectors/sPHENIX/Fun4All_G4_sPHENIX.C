@@ -110,8 +110,8 @@ int Fun4All_G4_sPHENIX(
 
   // Input::PYTHIA8 = true;
 
-  // Input::GUN = true;
-  // Input::GUN_NUMBER = 3; // if you need 3 of them
+  //  Input::GUN = true;
+  //  Input::GUN_NUMBER = 3; // if you need 3 of them
   // Input::GUN_VERBOSITY = 1;
 
   // Input::COSMIC = true;

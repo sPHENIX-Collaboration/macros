@@ -131,7 +131,7 @@ namespace G4TPC
 
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
-  
+
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
 
