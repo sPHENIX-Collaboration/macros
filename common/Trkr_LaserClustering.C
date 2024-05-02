@@ -15,8 +15,7 @@
 
 #include <tpc/TpcClusterCleaner.h>
 
-#include <tpccalib/PHTpcCentralMembraneClusterizer.h>
-#include <tpccalib/PHTpcCentralMembraneMatcher.h>
+#include <tpccalib/TpcCentralMembraneMatching.h>
 #include <tpccalib/TpcDirectLaserReconstruction.h>
 #include <micromegas/MicromegasClusterizer.h>
 
@@ -80,28 +79,12 @@ void TPC_LaserClustering()
 
       auto laserClusterizer = new LaserClusterizer;
       laserClusterizer->Verbosity(verbosity);
-      laserClusterizer->set_debug_name("/sphenix/user/bkimelman/CM_Matching_Apr3_2024_allDist/LaserClusterizer_debug.root");
       se->registerSubsystem(laserClusterizer);
 
-      /*
-      // central membrane clusterizer
-      auto centralMembraneClusterizer = new PHTpcCentralMembraneClusterizer;
-      centralMembraneClusterizer->Verbosity(verbosity);
-      //      centralMembraneClusterizer->Verbosity(1);
-      centralMembraneClusterizer->set_histos_on( true );
-      centralMembraneClusterizer->set_modulo_threshold(5);
-      centralMembraneClusterizer->set_metaCluster_threshold(18);
-      se->registerSubsystem(centralMembraneClusterizer);
-      */
-
       // match central membrane clusters to pads and generate distortion correction
-      auto centralMembraneMatcher = new PHTpcCentralMembraneMatcher;
-      centralMembraneMatcher->setSavehistograms( true );
-      //centralMembraneMatcher->Verbosity( verbosity );
-      centralMembraneMatcher->Verbosity( 1 );
+      auto centralMembraneMatcher = new TpcCentralMembraneMatching;
+      centralMembraneMatcher->Verbosity( verbosity );
       centralMembraneMatcher->setNMatchIter(2);
-      centralMembraneMatcher->setDebugOutputFile("/sphenix/user/bkimelman/CM_Matching_Apr3_2024_allDist/CMMatcher.root");
-      //centralMembraneMatcher->set_useOnly_nClus2(true);
       se->registerSubsystem(centralMembraneMatcher);
     }
 }
