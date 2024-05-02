@@ -46,7 +46,6 @@ void read_calibgains(const char *flist)
   while ( inflist >> calrunseq )
   {
     calfile = "results/" + calrunseq + "/mbd_qfit.calib";
-    //calfile = "results/" + calrunseq + "/bbc_qfit.calib";
     cout << calfile << endl;
     cal_mip_file.open( calfile );
 
@@ -79,10 +78,8 @@ void read_calibgains(const char *flist)
       cal_mip_file >> temp_pmt >> integ >> best_peak >> width 
         >> integerr >> best_peakerr >> widtherr >> chi2ndf;
 
-      /*
-      cout << temp_pmt << "\t" << integ << "\t" << best_peak << "\t" << width 
+      if ( ipmt==0 ) cout << temp_pmt << "\t" << integ << "\t" << best_peak << "\t" << width 
         << "\t" << integerr << "\t" << best_peakerr << "\t" << widtherr << "\t" << chi2ndf << endl;
-      */
 
       bqmean[temp_pmt][nruns] = best_peak;
       bqmeanerr[temp_pmt][nruns] = best_peakerr;
@@ -306,7 +303,7 @@ void plot_calibgains(const char *flist = "runseq.list")
     int irun = 0;
     while ( inflist >> calrunseq )
     {
-      calfile = "results/" + calrunseq + "/bbc_qfit.calib";
+      calfile = "results/" + calrunseq + "/mbd_qfit.calib";
       cout << calfile << endl;
       cal_mip_file.open( calfile );
 
