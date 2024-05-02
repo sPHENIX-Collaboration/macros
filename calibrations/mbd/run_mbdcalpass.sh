@@ -28,19 +28,19 @@ run=${run#000}
 caldir=${PWD}/results/${run}
 echo mkdir -p ${caldir}
 mkdir -p ${caldir}
-PASS0DIR=${PWD}/results/.PASS0
-#ln -sf /sphenix/user/chiu/sphenix_bbc/run2023/tpulser/results/00029705-0000/mbd_timecorr.calib ${caldir}/
-#ln -sf /sphenix/user/chiu/sphenix_bbc/run2023/goodruns/results/00020869-0000/bbc_shape.calib ${caldir}/mbd_shape.calib
-#ln -sf /sphenix/user/chiu/sphenix_bbc/run2023/goodruns/results/00020869-0000/bbc_sherr.calib ${caldir}/mbd_sherr.calib
-#ln -sf /sphenix/user/chiu/sphenix_bbc/run2023/results/20869/mbd_slewcorr.calib ${caldir}/
-#ln -sf /sphenix/user/chiu/sphenix_bbc/run2023/results/20869/mbd_tt_t0.calib ${caldir}/
-#ln -sf /sphenix/user/chiu/sphenix_bbc/run2023/results/20869/mbd_tq_t0.calib ${caldir}/
+
+# link pass0 calibs
+# use existing PASS0DIR, otherwise default to
+if [ -z "$PASS0DIR" ]
+then
+  export PASS0DIR=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0/
+  echo "Setting PASS0DIR to $PASS0DIR"
+fi
+
+ln -sf ${PASS0DIR}/mbd_shape.calib ${caldir}/
+ln -sf ${PASS0DIR}/mbd_sherr.calib ${caldir}/
 ln -sf ${PASS0DIR}/mbd_timecorr.calib ${caldir}/
-ln -sf ${PASS0DIR}/bbc_shape.calib ${caldir}/mbd_shape.calib
-ln -sf ${PASS0DIR}/bbc_sherr.calib ${caldir}/mbd_sherr.calib
 ln -sf ${PASS0DIR}/mbd_slewcorr.calib ${caldir}/
-#ln -sf ${PASS0DIR}/mbd_tt_t0.calib ${caldir}/
-#ln -sf ${PASS0DIR}/mbd_tq_t0.calib ${caldir}/
 
 # if not interactive, run ROOT in batch mode
 if [ ! -z $PS1 ]

@@ -167,7 +167,6 @@ void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax)
 // type0: auau200
 // type1: pp200
 // type
-//void recal_mbd_mip(const char *tfname = "calmbdq_pass3.root", const int pass = 3, const int nevt = 0, const int type = 0)
 void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 3, const int nevt = 0, const int type = 0)
 {
   cout << "tfname " << tfname << endl;
