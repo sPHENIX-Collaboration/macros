@@ -60,7 +60,7 @@ void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   // CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFWaveform;
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0);
+  se->Verbosity(10);
 
   recoConsts *rc = recoConsts::instance();
 
@@ -78,7 +78,7 @@ void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   //===============
   // ENABLE::CDB = true;
   // global tag
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
   // // 64 bit timestamp
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   CDBInterface::instance()->Verbosity(1);
@@ -264,9 +264,9 @@ void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
 
   ///////////////////////////////////
   // Validation 
-  CaloValid *ca = new CaloValid("CaloValid");
-  ca->set_timing_cut_width(200);  //integers for timing width, > 1 : wider cut around max peak time
-  se->registerSubsystem(ca);
+  // CaloValid *ca = new CaloValid("CaloValid");
+  // ca->set_timing_cut_width(200);  //integers for timing width, > 1 : wider cut around max peak time
+  // se->registerSubsystem(ca);
 
 
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
