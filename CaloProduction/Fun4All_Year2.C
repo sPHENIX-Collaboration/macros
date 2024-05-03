@@ -60,7 +60,7 @@ void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   // CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFWaveform;
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(10);
+  se->Verbosity(0);
 
   recoConsts *rc = recoConsts::instance();
 
