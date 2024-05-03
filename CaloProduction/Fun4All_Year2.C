@@ -124,7 +124,7 @@ void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   caZDC->set_detector_type(CaloTowerDefs::ZDC);
   caZDC->set_builder_type(buildertype);
   caZDC->set_processing_type(CaloWaveformProcessing::FAST);
-  caZDC->set_nsamples(12);
+  caZDC->set_nsamples(16);
   caZDC->set_offlineflag();
   se->registerSubsystem(caZDC);
 
