@@ -87,8 +87,8 @@ void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   se->registerSubsystem(flag);
 
   // MBD/BBC Reconstruction
-  //MbdReco *mbdreco = new MbdReco();
-  //se->registerSubsystem(mbdreco);
+  MbdReco *mbdreco = new MbdReco();
+  se->registerSubsystem(mbdreco);
 
   // Official vertex storage
   GlobalVertexReco *gvertex = new GlobalVertexReco();
@@ -176,7 +176,7 @@ void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   std::cout << "Calibrating ZDC" << std::endl;
   CaloTowerCalib *calibZDC = new CaloTowerCalib("ZDC");
   calibZDC->set_detector_type(CaloTowerDefs::ZDC);
-  //se->registerSubsystem(calibZDC);
+  se->registerSubsystem(calibZDC);
 
   /////////////////////
   // Geometry 
@@ -264,9 +264,9 @@ void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
 
   ///////////////////////////////////
   // Validation 
-  // CaloValid *ca = new CaloValid("CaloValid");
-  // ca->set_timing_cut_width(200);  //integers for timing width, > 1 : wider cut around max peak time
-  // se->registerSubsystem(ca);
+  CaloValid *ca = new CaloValid("CaloValid");
+  ca->set_timing_cut_width(200);  //integers for timing width, > 1 : wider cut around max peak time
+  se->registerSubsystem(ca);
 
 
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
