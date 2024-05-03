@@ -12,7 +12,7 @@
 #include <g4jets/TruthJetInput.h>
 
 #include <g4eval/JetEvaluator.h>
-#include <qa_modules/QAG4SimulationJet.h>
+#include <simqa_modules/QAG4SimulationJet.h>
 
 #include <fun4all/Fun4AllServer.h>
 
