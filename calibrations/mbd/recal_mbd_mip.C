@@ -241,7 +241,8 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
   if ( pass==3 ) 
   {
     calfname = dir; calfname += "mbd_qfit.calib";
-    cal_mip_file.open( name );
+    cal_mip_file.open( calfname );
+    std::cout << "Writing to " << calfname << std::endl;
   }
 
   // Fit ranges
