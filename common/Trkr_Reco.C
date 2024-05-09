@@ -23,6 +23,7 @@
 #include <trackreco/SecondaryVertexFinder.h>
 #include <trackreco/TrackingIterationCounter.h>
 #include <trackreco/PrelimDistortionCorrection.h>
+#include <trackreco/PHSiliconHelicalPropagator.h>
 
 #include <tpc/TpcLoadDistortionCorrection.h>
 
@@ -57,7 +58,77 @@ void convert_seeds()
   converter->Verbosity(verbosity);
   se->registerSubsystem(converter);
 }
+void Tracking_Reco_TrackSeed_ZeroField()
+{
+  // set up verbosity
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
+  // get fun4all server instance
+  auto se = Fun4AllServer::instance();
+
+  auto seeder = new PHCASeeding("PHCASeeding");
+  double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
+  if (ConstField)
+  {
+    seeder->useConstBField(true);
+    seeder->constBField(fieldstrength);
+  }
+  else
+  {
+    seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
+    seeder->useConstBField(false);
+    seeder->magFieldFile(G4MAGNET::magfield_tracking);  // to get charge sign right
+  }
+  seeder->Verbosity(verbosity);
+  seeder->SetLayerRange(7, 55);
+  seeder->SetSearchWindow(1.5, 0.05);  // (z width, phi width)
+  seeder->SetMinHitsPerCluster(0);
+  seeder->SetMinClustersPerTrack(3);
+  seeder->useFixedClusterError(true);
+  seeder->set_pp_mode(TRACKING::pp_mode);
+  se->registerSubsystem(seeder);
+
+  // expand stubs in the TPC using simple kalman filter
+  auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
+  cprop->set_field_dir(G4MAGNET::magfield_rescale);
+  if (ConstField)
+  {
+    cprop->useConstBField(true);
+    cprop->setConstBField(fieldstrength);
+  }
+  else
+  {
+    cprop->magFieldFile(G4MAGNET::magfield_tracking);
+    cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
+  }
+  cprop->useFixedClusterError(true);
+  cprop->set_max_window(5.);
+  cprop->Verbosity(verbosity);
+  cprop->set_pp_mode(TRACKING::pp_mode);
+  se->registerSubsystem(cprop);
+
+
+  PHSiliconHelicalPropagator* hprop = new PHSiliconHelicalPropagator("PHSiliconHelicalPropagator");
+  hprop->dca_xy_cut(0.3);
+  hprop->dca_z_cut(1.);
+  hprop->Verbosity(verbosity);
+  hprop->zeroField();
+  se->registerSubsystem(hprop);
+
+  auto mm_match = new PHMicromegasTpcTrackMatching;
+  mm_match->Verbosity(verbosity);
+
+  // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
+  mm_match->set_rphi_search_window_lyr1(0.4);
+  mm_match->set_rphi_search_window_lyr2(13.0);
+  mm_match->set_z_search_window_lyr1(26.0);
+  mm_match->set_z_search_window_lyr2(0.4);
+
+  mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
+  mm_match->set_test_windows_printout(true);  // used for tuning search windows only
+  se->registerSubsystem(mm_match);
+}
 void Tracking_Reco_TrackSeed()
 {
   // set up verbosity
