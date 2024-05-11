@@ -10,12 +10,12 @@
 #pragma GCC diagnostic ignored "-Wundefined-internal"
 #include <tpc/TpcClusterizer.h>
 #include <tpc/TpcSimpleClusterizer.h>
+#include <tpc/LaserClusterizer.h>
 #pragma GCC diagnostic pop
 
 #include <tpc/TpcClusterCleaner.h>
 
-#include <tpccalib/PHTpcCentralMembraneClusterizer.h>
-#include <tpccalib/PHTpcCentralMembraneMatcher.h>
+#include <tpccalib/TpcCentralMembraneMatching.h>
 #include <tpccalib/TpcDirectLaserReconstruction.h>
 #include <micromegas/MicromegasClusterizer.h>
 
@@ -76,18 +76,13 @@ void TPC_LaserClustering()
   // central membrane reconstruction
   if( G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS )
     {
-      // central membrane clusterizer
-      auto centralMembraneClusterizer = new PHTpcCentralMembraneClusterizer;
-      centralMembraneClusterizer->Verbosity(verbosity);
-      centralMembraneClusterizer->set_histos_on( false );
-      centralMembraneClusterizer->set_modulo_threshold(5);
-      centralMembraneClusterizer->set_metaCluster_threshold(18);
-      se->registerSubsystem(centralMembraneClusterizer);
-    
+
+      auto laserClusterizer = new LaserClusterizer;
+      laserClusterizer->Verbosity(verbosity);
+      se->registerSubsystem(laserClusterizer);
 
       // match central membrane clusters to pads and generate distortion correction
-      auto centralMembraneMatcher = new PHTpcCentralMembraneMatcher;
-      centralMembraneMatcher->setSavehistograms( false );
+      auto centralMembraneMatcher = new TpcCentralMembraneMatching;
       centralMembraneMatcher->Verbosity( verbosity );
       centralMembraneMatcher->setNMatchIter(2);
       se->registerSubsystem(centralMembraneMatcher);

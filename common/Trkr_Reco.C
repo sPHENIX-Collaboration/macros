@@ -13,6 +13,7 @@
 #include <trackreco/PHCASeeding.h>
 #include <trackreco/PHGenFitTrkFitter.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
+#include <trackreco/PHSiliconHelicalPropagator.h>
 #include <trackreco/PHSiliconSeedMerger.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSimpleKFProp.h>
@@ -20,9 +21,9 @@
 #include <trackreco/PHTpcDeltaZCorrection.h>
 #include <trackreco/PHTrackCleaner.h>
 #include <trackreco/PHTrackSeeding.h>
+#include <trackreco/PrelimDistortionCorrection.h>
 #include <trackreco/SecondaryVertexFinder.h>
 #include <trackreco/TrackingIterationCounter.h>
-#include <trackreco/PrelimDistortionCorrection.h>
 
 #include <tpc/TpcLoadDistortionCorrection.h>
 
@@ -57,8 +58,7 @@ void convert_seeds()
   converter->Verbosity(verbosity);
   se->registerSubsystem(converter);
 }
-
-void Tracking_Reco_TrackSeed()
+void Tracking_Reco_TrackSeed_ZeroField()
 {
   // set up verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
@@ -66,19 +66,9 @@ void Tracking_Reco_TrackSeed()
   // get fun4all server instance
   auto se = Fun4AllServer::instance();
 
-  // Assemble silicon clusters into track stubs
-
-  auto silicon_Seeding = new PHActsSiliconSeeding;
-  silicon_Seeding->Verbosity(verbosity);
-  se->registerSubsystem(silicon_Seeding);
-
-  auto merger = new PHSiliconSeedMerger;
-  merger->Verbosity(verbosity);
-  se->registerSubsystem(merger);
-
   auto seeder = new PHCASeeding("PHCASeeding");
-  double fieldstrength = std::numeric_limits<double>::quiet_NaN(); // set by isConstantField if constant
-  bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
+  double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
   if (ConstField)
   {
     seeder->useConstBField(true);
@@ -118,15 +108,95 @@ void Tracking_Reco_TrackSeed()
   cprop->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(cprop);
 
- if(TRACKING::pp_mode)
-    {
-      // for pp mode, apply preliminary distortion corrections to TPC clusters before crossing is known
-      // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
-      auto prelim_distcorr = new PrelimDistortionCorrection;
-      prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
-      prelim_distcorr->Verbosity(verbosity);
-      se->registerSubsystem(prelim_distcorr);
-    }
+  PHSiliconHelicalPropagator* hprop = new PHSiliconHelicalPropagator("PHSiliconHelicalPropagator");
+  hprop->dca_xy_cut(0.3);
+  hprop->dca_z_cut(1.);
+  hprop->Verbosity(verbosity);
+  hprop->zeroField();
+  se->registerSubsystem(hprop);
+
+  auto mm_match = new PHMicromegasTpcTrackMatching;
+  mm_match->Verbosity(verbosity);
+
+  // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
+  mm_match->set_rphi_search_window_lyr1(0.4);
+  mm_match->set_rphi_search_window_lyr2(13.0);
+  mm_match->set_z_search_window_lyr1(26.0);
+  mm_match->set_z_search_window_lyr2(0.4);
+
+  mm_match->set_min_tpc_layer(38);            // layer in TPC to start projection fit
+  mm_match->set_test_windows_printout(true);  // used for tuning search windows only
+  se->registerSubsystem(mm_match);
+}
+void Tracking_Reco_TrackSeed()
+{
+  // set up verbosity
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+
+  // get fun4all server instance
+  auto se = Fun4AllServer::instance();
+
+  // Assemble silicon clusters into track stubs
+
+  auto silicon_Seeding = new PHActsSiliconSeeding;
+  silicon_Seeding->Verbosity(verbosity);
+  se->registerSubsystem(silicon_Seeding);
+
+  auto merger = new PHSiliconSeedMerger;
+  merger->Verbosity(verbosity);
+  se->registerSubsystem(merger);
+
+  auto seeder = new PHCASeeding("PHCASeeding");
+  double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
+  if (ConstField)
+  {
+    seeder->useConstBField(true);
+    seeder->constBField(fieldstrength);
+  }
+  else
+  {
+    seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
+    seeder->useConstBField(false);
+    seeder->magFieldFile(G4MAGNET::magfield_tracking);  // to get charge sign right
+  }
+  seeder->Verbosity(verbosity);
+  seeder->SetLayerRange(7, 55);
+  seeder->SetSearchWindow(1.5, 0.05);  // (z width, phi width)
+  seeder->SetMinHitsPerCluster(0);
+  seeder->SetMinClustersPerTrack(3);
+  seeder->useFixedClusterError(true);
+  seeder->set_pp_mode(TRACKING::pp_mode);
+  se->registerSubsystem(seeder);
+
+  // expand stubs in the TPC using simple kalman filter
+  auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
+  cprop->set_field_dir(G4MAGNET::magfield_rescale);
+  if (ConstField)
+  {
+    cprop->useConstBField(true);
+    cprop->setConstBField(fieldstrength);
+  }
+  else
+  {
+    cprop->magFieldFile(G4MAGNET::magfield_tracking);
+    cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
+  }
+  cprop->useFixedClusterError(true);
+  cprop->set_max_window(5.);
+  cprop->Verbosity(verbosity);
+  cprop->set_pp_mode(TRACKING::pp_mode);
+  se->registerSubsystem(cprop);
+
+  if (TRACKING::pp_mode)
+  {
+    // for pp mode, apply preliminary distortion corrections to TPC clusters before crossing is known
+    // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
+    auto prelim_distcorr = new PrelimDistortionCorrection;
+    prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
+    prelim_distcorr->Verbosity(verbosity);
+    se->registerSubsystem(prelim_distcorr);
+  }
 
   std::cout << "Tracking_Reco_TrackSeed - Using stub matching for Si matching " << std::endl;
   // The normal silicon association methods
@@ -232,7 +302,7 @@ void Tracking_Reco_TrackFit()
   deltazcorr->Verbosity(verbosity);
   se->registerSubsystem(deltazcorr);
 
-  if( G4TRACKING::use_genfit_track_fitter )
+  if (G4TRACKING::use_genfit_track_fitter)
   {
     // perform final track fit with GENFIT
     auto genfitFit = new PHGenFitTrkFitter;
@@ -240,7 +310,7 @@ void Tracking_Reco_TrackFit()
     genfitFit->set_fit_silicon_mms(G4TRACKING::SC_CALIBMODE);
     se->registerSubsystem(genfitFit);
 
-    if( G4TRACKING::SC_CALIBMODE )
+    if (G4TRACKING::SC_CALIBMODE)
     {
       // Genfit based Tpc space charge Reconstruction
       auto tpcSpaceChargeReconstruction = new TpcSpaceChargeReconstruction;
@@ -250,9 +320,9 @@ void Tracking_Reco_TrackFit()
       tpcSpaceChargeReconstruction->set_grid_dimensions(36, 48, 80);
       se->registerSubsystem(tpcSpaceChargeReconstruction);
     }
-
-  } else {
-
+  }
+  else
+  {
     // perform final track fit with ACTS
     auto actsFit = new PHActsTrkFitter;
     actsFit->Verbosity(verbosity);
@@ -261,7 +331,7 @@ void Tracking_Reco_TrackFit()
     actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
     actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
     actsFit->set_pp_mode(TRACKING::pp_mode);
-    actsFit->set_use_clustermover(true); // default is true for now
+    actsFit->set_use_clustermover(true);  // default is true for now
     actsFit->useActsEvaluator(false);
     actsFit->useOutlierFinder(false);
     actsFit->setFieldMap(G4MAGNET::magfield_tracking);
@@ -270,9 +340,9 @@ void Tracking_Reco_TrackFit()
     if (G4TRACKING::SC_CALIBMODE)
     {
       /*
-      * in calibration mode, calculate residuals between TPC and fitted tracks,
-      * store in dedicated structure for distortion correction
-      */
+       * in calibration mode, calculate residuals between TPC and fitted tracks,
+       * store in dedicated structure for distortion correction
+       */
       auto residuals = new PHTpcResiduals;
       residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
       residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
@@ -297,13 +367,13 @@ void Tracking_Reco_TrackFit()
       /* this breaks in truth_track seeding mode because there is no TpcSeed */
       auto cleaner = new PHTrackCleaner;
       cleaner->Verbosity(verbosity);
-      //cleaner->set_quality_cut(30.0);
+      // cleaner->set_quality_cut(30.0);
       se->registerSubsystem(cleaner);
     }
 
     vertexing();
 
-    if( !G4TRACKING::use_genfit_track_fitter )
+    if (!G4TRACKING::use_genfit_track_fitter)
     {
       // Propagate track positions to the vertex position
       auto vtxProp = new PHActsVertexPropagator;
@@ -315,7 +385,7 @@ void Tracking_Reco_TrackFit()
       auto projection = new PHActsTrackProjection;
       projection->Verbosity(verbosity);
       double fieldstrength = std::numeric_limits<double>::quiet_NaN();
-      if (isConstantField(G4MAGNET::magfield_tracking,fieldstrength))
+      if (isConstantField(G4MAGNET::magfield_tracking, fieldstrength))
       {
         projection->setConstFieldVal(fieldstrength);
       }
@@ -345,9 +415,9 @@ void Tracking_Reco_CommissioningTrackSeed()
 
   // Assemble TPC clusters into track stubs
   auto seeder = new PHCASeeding("PHCASeeding");
-  seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
-     double fieldstrength = std::numeric_limits<double>::quiet_NaN(); // set by isConstantField if constant
-      bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
+  seeder->set_field_dir(G4MAGNET::magfield_rescale);                // to get charge sign right
+  double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
   if (!ConstField)
   {
     seeder->magFieldFile(G4MAGNET::magfield_tracking);
@@ -377,15 +447,15 @@ void Tracking_Reco_CommissioningTrackSeed()
   cprop->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(cprop);
 
- if(TRACKING::pp_mode)
-    {
-      // for pp mode, apply preliminary distortion corrections to TPC clusters before crossing is known
-      // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
-      auto prelim_distcorr = new PrelimDistortionCorrection;
-      prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
-      prelim_distcorr->Verbosity(verbosity);
-      se->registerSubsystem(prelim_distcorr);
-    }
+  if (TRACKING::pp_mode)
+  {
+    // for pp mode, apply preliminary distortion corrections to TPC clusters before crossing is known
+    // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
+    auto prelim_distcorr = new PrelimDistortionCorrection;
+    prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
+    prelim_distcorr->Verbosity(verbosity);
+    se->registerSubsystem(prelim_distcorr);
+  }
 
   // match silicon track seeds to TPC track seeds
 

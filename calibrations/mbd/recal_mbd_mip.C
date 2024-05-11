@@ -3,6 +3,13 @@
 //
 #include <TSpectrum.h>
 #include "get_runstr.h"
+#include <mbd/MbdCalib.h>
+
+
+#if defined(__CLING__)
+//R__LOAD_LIBRARY(libmbd_io.so)
+R__LOAD_LIBRARY(libmbd.so)
+#endif
 
 //using namespace MBDRUNS;
 
@@ -230,10 +237,12 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
   }
 
   ofstream cal_mip_file;
+  TString calfname;
   if ( pass==3 ) 
   {
-    name = dir + "mbd_qfit.calib";
-    cal_mip_file.open( name );
+    calfname = dir; calfname += "mbd_qfit.calib";
+    cal_mip_file.open( calfname );
+    std::cout << "Writing to " << calfname << std::endl;
   }
 
   // Fit ranges
@@ -461,6 +470,12 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
   if ( pass==3 )
   {
     cal_mip_file.close();
+
+    // Convert to CDB format
+    MbdCalib mcal;
+    mcal.Download_Gains( calfname.Data() );
+    calfname.ReplaceAll(".calib",".root");
+    mcal.Write_CDB_Gains( calfname.Data() );
   }
 
   savefile->Write();
