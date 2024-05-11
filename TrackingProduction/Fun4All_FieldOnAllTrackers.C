@@ -115,7 +115,7 @@ void Fun4All_FieldOnAllTrackers(
     auto converter = new TrackSeedTrackMapConverter;
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
-    converter->setTrackSeedName("SiliconTrackSeedContainer");
+    converter->setTrackSeedName("TpcTrackSeedContainer");
     converter->setFieldMap(G4MAGNET::magfield_tracking);
     converter->Verbosity(0);
     se->registerSubsystem(converter);
@@ -158,7 +158,7 @@ void Fun4All_FieldOnAllTrackers(
   resid->alignment(false);
   resid->clusterTree();
   resid->hitTree();
-  resid->Verbosity(10);
+  resid->Verbosity(0);
   se->registerSubsystem(resid);
 
   // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "/sphenix/tg/tg01/hf/jdosbo/tracking_development/Run24/Beam/41626/hitsets.root");
