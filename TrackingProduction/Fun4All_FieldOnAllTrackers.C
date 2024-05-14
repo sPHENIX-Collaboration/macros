@@ -12,6 +12,7 @@
 #include <G4_Mbd.C>
 #include <GlobalVariables.C>
 #include <QA.C>
+#include <Trkr_RecoInit.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco.C>
 
@@ -85,7 +86,7 @@ void Fun4All_FieldOnAllTrackers(
   G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
 
   G4MAGNET::magfield_rescale = 1;
-  ACTSGEOM::ActsGeomInit();
+  TrackingInit();
 
   auto hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->fileopen(inputtpcRawHitFile);
@@ -115,7 +116,7 @@ void Fun4All_FieldOnAllTrackers(
     auto converter = new TrackSeedTrackMapConverter;
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
-    converter->setTrackSeedName("TpcTrackSeedContainer");
+    converter->setTrackSeedName("SiliconTrackSeedContainer");
     converter->setFieldMap(G4MAGNET::magfield_tracking);
     converter->Verbosity(0);
     se->registerSubsystem(converter);
@@ -159,6 +160,7 @@ void Fun4All_FieldOnAllTrackers(
   resid->clusterTree();
   resid->hitTree();
   resid->Verbosity(0);
+  resid->linefitAll();
   se->registerSubsystem(resid);
 
   // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "/sphenix/tg/tg01/hf/jdosbo/tracking_development/Run24/Beam/41626/hitsets.root");

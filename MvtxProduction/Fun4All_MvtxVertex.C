@@ -9,6 +9,7 @@
 #include <G4_Magnet.C>
 #include <GlobalVariables.C>
 #include <Trkr_Clustering.C>
+#include <Trkr_RecoInit.C>
 #include <Trkr_Reco.C>
 
 #include <ffamodules/CDBInterface.h>
@@ -65,7 +66,7 @@ void Fun4All_MvtxVertex(
   G4MAGNET::magfield = "0.01";
   G4MAGNET::magfield_tracking = G4MAGNET::magfield;
   G4MAGNET::magfield_rescale = 1;
-  ACTSGEOM::ActsGeomInit();
+  TrackingInit();
 
   auto hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->fileopen(inputRawHitFile);

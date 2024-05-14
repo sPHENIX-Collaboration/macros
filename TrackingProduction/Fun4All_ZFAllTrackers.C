@@ -12,6 +12,7 @@
 #include <G4_Mbd.C>
 #include <GlobalVariables.C>
 #include <QA.C>
+#include <Trkr_RecoInit.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco.C>
 
@@ -63,6 +64,9 @@ void Fun4All_ZFAllTrackers(
   int runnumber = runseg.first;
   int segment = runseg.second;
 
+  ACTSGEOM::mvtxMisalignment = 100;
+  ACTSGEOM::inttMisalignment = 1000.;
+  ACTSGEOM::tpotMisalignment = 100.;
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
   std::string theOutfile = outfile.Data();
   auto se = Fun4AllServer::instance();
@@ -83,7 +87,7 @@ void Fun4All_ZFAllTrackers(
   G4MAGNET::magfield = "0.01";
   G4MAGNET::magfield_tracking = G4MAGNET::magfield;
   G4MAGNET::magfield_rescale = 1;
-  ACTSGEOM::ActsGeomInit();
+  TrackingInit();
 
   auto hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->fileopen(inputtpcRawHitFile);
@@ -113,7 +117,7 @@ void Fun4All_ZFAllTrackers(
     auto converter = new TrackSeedTrackMapConverter;
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
-    converter->setTrackSeedName("TpcTrackSeedContainer");
+    converter->setTrackSeedName("SvtxTrackSeedContainer");
     converter->setFieldMap(G4MAGNET::magfield_tracking);
     converter->Verbosity(0);
     converter->constField();
