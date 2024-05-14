@@ -12,6 +12,7 @@
 #include <G4_Mbd.C>
 #include <GlobalVariables.C>
 #include <QA.C>
+#include <Trkr_RecoInit.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco.C>
 
@@ -85,7 +86,7 @@ void Fun4All_FieldOnAllTrackers(
   G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
 
   G4MAGNET::magfield_rescale = 1;
-  ACTSGEOM::ActsGeomInit();
+  TrackingInit();
 
   auto hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->fileopen(inputtpcRawHitFile);
