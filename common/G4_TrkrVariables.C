@@ -94,7 +94,9 @@ namespace G4INTT
 namespace G4TPC
 {
   int n_tpc_layer_inner = 16;
-  int tpc_layer_rphi_count_inner = 1152;
+
+  int tpc_layer_rphi_count_inner = 1128; // 94 * 12
+
   int n_tpc_layer_mid = 16;
   int n_tpc_layer_outer = 16;
   int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
