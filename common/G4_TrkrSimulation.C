@@ -133,7 +133,7 @@ void InttInit()
     G4INTT::sensor_radius[1] = 7.732 - 36e-4;
     G4INTT::sensor_radius[2] = 9.680 - 36e-4;
     G4INTT::sensor_radius[3] = 10.262 - 36e-4;
-  
+
   }
 }
 
@@ -428,7 +428,10 @@ void TPC_Cells()
   padplane->Verbosity(verbosity);
   double extended_readout_time = 0.0;
   if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+
   padplane->SetReadoutTime(extended_readout_time);
+  padplane->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
+  padplane->SetDriftVelocity(G4TPC::tpc_drift_velocity_sim);
 
   auto edrift = new PHG4TpcElectronDrift;
   edrift->Detector("TPC");
@@ -468,7 +471,6 @@ void TPC_Cells()
 
   // override the default drift velocity parameter specification
   edrift->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
-  padplane->SetDriftVelocity(G4TPC::tpc_drift_velocity_sim);
 
   // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
   // They represent effects not due to ideal gas properties and ideal readout plane behavior

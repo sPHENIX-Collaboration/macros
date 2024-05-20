@@ -12,7 +12,6 @@
 #include <G4_Mbd.C>
 #include <GlobalVariables.C>
 #include <QA.C>
-#include <Trkr_RecoInit.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco.C>
 
@@ -38,6 +37,17 @@
 #include <trackreco/AzimuthalSeeder.h>
 
 #include <stdio.h>
+#include <float.h>
+
+#pragma GCC diagnostic push
+
+#pragma GCC diagnostic ignored "-Wundefined-internal"
+
+#include <kfparticle_sphenix/KFParticle_sPHENIX.h>
+
+#pragma GCC diagnostic pop
+
+R__LOAD_LIBRARY(libkfparticle_sphenix.so)
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
@@ -48,14 +58,14 @@ R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
 R__LOAD_LIBRARY(libEventDisplay.so)
-void Fun4All_ZFAllTrackers(
+
+void Fun4All_FieldOnAllTrackers_KFP(
     const int nEvents = 0,
-    const std::string tpcfilename = "DST_BEAM_run2pp_new_2023p013-00041626-0000.root",
-    const std::string tpcdir = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpcbeam/run_00041600_00041700/",
+    const std::string tpcfilename = "DST_BEAM_run2pp_new_2023p013-00041989-0000.root",
+    const std::string tpcdir = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpcbeam/run_00041900_00042000/",
     const std::string outfilename = "clusters_seeds",
-    const bool convertSeeds = true)
+    const bool convertSeeds = false)
 {
-  std::string inputtpcRawHitFile = tpcdir + tpcfilename;
 
   G4TRACKING::convert_seeds_to_svtxtracks = convertSeeds;
   std::cout << "Converting to seeds : " << G4TRACKING::convert_seeds_to_svtxtracks << std::endl;
@@ -64,11 +74,21 @@ void Fun4All_ZFAllTrackers(
   int runnumber = runseg.first;
   int segment = runseg.second;
 
+  string outDir = "myKShortReco/";
+  string outputFileName = "outputFile_" + to_string(runnumber) + "_" + to_string(segment) + ".root";
+
+  string outputRecoDir = outDir + "inReconstruction/";
+  string makeDirectory = "mkdir -p " + outputRecoDir;
+  system(makeDirectory.c_str());
+  string outputRecoFile = outputRecoDir + outputFileName;
+
+  std::string inputtpcRawHitFile = tpcdir + tpcfilename;
   ACTSGEOM::mvtxMisalignment = 100;
-  ACTSGEOM::inttMisalignment = 1000.;
+  ACTSGEOM::inttMisalignment = 100.;
   ACTSGEOM::tpotMisalignment = 100.;
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
   std::string theOutfile = outfile.Data();
+
   auto se = Fun4AllServer::instance();
   se->Verbosity(1);
   auto rc = recoConsts::instance();
@@ -84,23 +104,21 @@ void Fun4All_ZFAllTrackers(
   se->registerInputManager(ingeo);
 
   G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
-  G4MAGNET::magfield = "0.01";
-  G4MAGNET::magfield_tracking = G4MAGNET::magfield;
+
   G4MAGNET::magfield_rescale = 1;
-  TrackingInit();
+  ACTSGEOM::ActsGeomInit();
 
   auto hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->fileopen(inputtpcRawHitFile);
-  // hitsin->AddFile(inputMbd);
   se->registerInputManager(hitsin);
 
-  Mvtx_HitUnpacking();
-  Intt_HitUnpacking();
+  //Mvtx_HitUnpacking();
+  //Intt_HitUnpacking();
   Tpc_HitUnpacking();
   Micromegas_HitUnpacking();
 
-  Mvtx_Clustering();
-  Intt_Clustering();
+  //Mvtx_Clustering();
+  //Intt_Clustering();
 
   auto tpcclusterizer = new TpcClusterizer;
   tpcclusterizer->Verbosity(0);
@@ -110,17 +128,16 @@ void Fun4All_ZFAllTrackers(
 
   Micromegas_Clustering();
 
-  Tracking_Reco_TrackSeed_ZeroField();
+  Tracking_Reco_TrackSeed();
 
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
     auto converter = new TrackSeedTrackMapConverter;
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
-    converter->setTrackSeedName("SvtxTrackSeedContainer");
+    converter->setTrackSeedName("TpcTrackSeedContainer");
     converter->setFieldMap(G4MAGNET::magfield_tracking);
     converter->Verbosity(0);
-    converter->constField();
     se->registerSubsystem(converter);
   }
   else
@@ -143,6 +160,7 @@ void Fun4All_ZFAllTrackers(
     actsFit->setFieldMap(G4MAGNET::magfield_tracking);
     se->registerSubsystem(actsFit);
   }
+
   PHSimpleVertexFinder *finder = new PHSimpleVertexFinder;
   finder->Verbosity(0);
   finder->setDcaCut(0.5);
@@ -153,36 +171,55 @@ void Fun4All_ZFAllTrackers(
   finder->setOutlierPairCut(0.1);
   se->registerSubsystem(finder);
 
-  TString residoutfile = theOutfile + "_resid.root";
-  std::string residstring(residoutfile.Data());
+  //KFParticle setup
+  KFParticle_sPHENIX *kfparticle = new KFParticle_sPHENIX("myKShortReco");
+  kfparticle->Verbosity(1);
+  kfparticle->setDecayDescriptor("K_S0 -> pi^+ pi^-");
 
-  auto resid = new TrackResiduals("TrackResiduals");
-  resid->outfileName(residstring);
-  resid->alignment(false);
-  resid->clusterTree();
-  resid->hitTree();
-  resid->zeroField();
-  resid->Verbosity(0);
-  se->registerSubsystem(resid);
+  //Basic node selection and configuration
+  kfparticle->magFieldFile("FIELDMAP_TRACKING");
+  kfparticle->getAllPVInfo(false);
+  kfparticle->allowZeroMassTracks(true);
+  kfparticle->useFakePrimaryVertex(true);
 
-  // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "/sphenix/tg/tg01/hf/jdosbo/tracking_development/Run24/Beam/41626/hitsets.root");
-  // se->registerOutputManager(out);
-  if (Enable::QA)
-  {
-    se->registerSubsystem(new MvtxClusterQA);
-    se->registerSubsystem(new InttClusterQA);
-    se->registerSubsystem(new TpcClusterQA);
-    se->registerSubsystem(new MicromegasClusterQA);
-  }
+  kfparticle->constrainToPrimaryVertex(false);
+  kfparticle->setMotherIPchi2(FLT_MAX);
+  kfparticle->setFlightDistancechi2(-1.);
+  kfparticle->setMinDIRA(-1.1);
+  kfparticle->setDecayLengthRange(0., FLT_MAX);
+  kfparticle->setDecayTimeRange(-1*FLT_MAX, FLT_MAX);
+
+  //Track parameters
+  kfparticle->setMinMVTXhits(0);
+  kfparticle->setMinTPChits(20);
+  kfparticle->setMinimumTrackPT(-1.);
+  kfparticle->setMaximumTrackPTchi2(FLT_MAX);
+  kfparticle->setMinimumTrackIPchi2(-1.);
+  kfparticle->setMinimumTrackIP(-1.);
+  kfparticle->setMaximumTrackchi2nDOF(20.);
+
+  //Vertex parameters
+  kfparticle->setMaximumVertexchi2nDOF(50);
+  kfparticle->setMaximumDaughterDCA(1.);
+
+  //Parent parameters
+  kfparticle->setMotherPT(0);
+  kfparticle->setMinimumMass(0.300);
+  kfparticle->setMaximumMass(0.700);
+  kfparticle->setMaximumMotherVertexVolume(0.1);
+
+  kfparticle->setOutputName(outputRecoFile);
+
+  se->registerSubsystem(kfparticle);
+
   se->run(nEvents);
   se->End();
-  se->PrintTimer();
 
-  if (Enable::QA)
+  ifstream file(outputRecoFile.c_str());
+  if (file.good())
   {
-    TString qaname = theOutfile + "_qa.root";
-    std::string qaOutputFileName(qaname.Data());
-    QAHistManagerDef::saveQARootFile(qaOutputFileName);
+    string moveOutput = "mv " + outputRecoFile + " " + outDir;
+    system(moveOutput.c_str());
   }
 
   delete se;

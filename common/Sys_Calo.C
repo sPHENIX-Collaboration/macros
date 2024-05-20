@@ -50,12 +50,78 @@ namespace CALOSYS{
       true
     };
 
+
+    std::vector<std::string> OHCalinputprefix = {
+      "TOWERINFO_CALIB_", 
+      "TOWERINFO_CALIB_",
+      "TOWERINFO_CALIB_", 
+      "TOWERINFO_CALIB_"
+    };
+    std::vector<std::string> OHCaloutputprefix = {
+      "TOWERINFO_CALIB_SYST1", 
+      "TOWERINFO_CALIB_SYST2",
+      "TOWERINFO_CALIB_SYST3", 
+      "TOWERINFO_CALIB_SYST4"
+    };
+    std::vector<std::string> OHCalfieldname = {
+       "ohcal_sys", 
+       "ohcal_sys",
+       "ohcal_sys", 
+       "ohcal_sys"
+    };
+
+    std::vector<std::string> OHCalcaliburl = {
+      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ohcal_cos_syst_1.root",
+      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ohcal_cos_syst_2.root",
+      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ohcal_cos_syst_3.root",
+      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ohcal_cos_syst_4.root"
+    };
+    std::vector<bool> OHCaldosys = {
+      true, 
+      true,
+      true,
+      true
+    };
+
+
+    std::vector<std::string> IHCalinputprefix = {
+      "TOWERINFO_CALIB_", 
+      "TOWERINFO_CALIB_",
+      "TOWERINFO_CALIB_", 
+      "TOWERINFO_CALIB_"
+    };
+    std::vector<std::string> IHCaloutputprefix = {
+      "TOWERINFO_CALIB_SYST1", 
+      "TOWERINFO_CALIB_SYST2",
+      "TOWERINFO_CALIB_SYST3", 
+      "TOWERINFO_CALIB_SYST4"
+    };
+    std::vector<std::string> IHCalfieldname = {
+       "ihcal_sys", 
+       "ihcal_sys",
+       "ihcal_sys", 
+       "ihcal_sys"
+    };
+
+    std::vector<std::string> IHCalcaliburl = {
+      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ihcal_cos_syst_1.root",
+      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ihcal_cos_syst_2.root",
+      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ihcal_cos_syst_3.root",
+      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ihcal_cos_syst_4.root"
+    };
+    std::vector<bool> IHCaldosys = {
+      true, 
+      true,
+      true,
+      true
+    };
+/*
     std::vector<std::string> OHCalinputprefix = {"TOWERINFO_CALIB_", "TOWERINFO_CALIB_"};
     std::vector<std::string> OHCaloutputprefix = {"TOWERINFO_CALIB_SYSALL", "TOWERINFO_CALIB_SYSETA"};
     std::vector<std::string> OHCalfieldname = {"ohcal_sys", "ohcal_sys"};
     std::vector<std::string> OHCalcaliburl = {"/sphenix/user/shuhangli/DB/ohcalAllSys.root", "/sphenix/user/shuhangli/DB/ohcalEtaSys.root"};
     std::vector<bool> OHCaldosys = {true, true};
-
+*/
     std::vector<std::string> IHCalinputprefix = {"TOWERINFO_CALIB_", "TOWERINFO_CALIB_"};
     std::vector<std::string> IHCaloutputprefix = {"TOWERINFO_CALIB_SYSALL", "TOWERINFO_CALIB_SYSETA"};
     std::vector<std::string> IHCalfieldname = {"ihcal_sys", "ihcal_sys"};
@@ -85,7 +151,6 @@ void Register_Tower_sys(){
     }
 
     //OHCal
-/*
     for (int i = 0; i< (int) CALOSYS::OHCaldosys.size(); i++){
         if (CALOSYS::OHCaldosys[i]){
             //tower calib
@@ -102,7 +167,6 @@ void Register_Tower_sys(){
     }
 
     //IHCal
-
     for (int i = 0; i< (int) CALOSYS::IHCaldosys.size(); i++){
         if (CALOSYS::IHCaldosys[i]){
             //tower calib
@@ -117,7 +181,7 @@ void Register_Tower_sys(){
 
         }
     }
-*/
+
   std::cout << "All calo systematics added" << std::endl;
 }
 
