@@ -14,7 +14,8 @@ then
   BATCH=-b
 fi
 
-echo root.exe ${BATCH} -q Fun4All_MBD_Prdf.C\(${nevts},\"${prdf}\"\)
-root.exe ${BATCH} -q Fun4All_MBD_Prdf.C\(${nevts},\"${prdf}\"\)
+echo root.exe ${BATCH} -q Fun4All_MBD_Prdf.C\(\"${prdf}\",${nevts}\)
+#root.exe ${BATCH} -q Fun4All_MBD_Prdf.C\(\"${prdf}\",${nevts},\"ProdA_2024\"\)
+root.exe ${BATCH} -q Fun4All_MBD_Prdf.C\(\"${prdf}\",${nevts}\)
 
 
