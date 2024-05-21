@@ -2,19 +2,25 @@
 #define FUN4ALL_JETVALID_C
 
 // c++ utilities
-#include <regex>
+#include <fstream>
+#include <iostream>
+#include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 // coresoftware headers
 #include <g4centrality/PHG4CentralityReco.h>
 #include <ffamodules/CDBInterface.h>
+#include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllUtils.h>
 #include <phool/recoConsts.h>
-#include <QA/Jet/JetSeedCount.h>
-#include <QA/Jet/StructureinJets.h>
-#include <QA/Jet/TrksInJetQA.h>
+#include <jetqa/JetSeedCount.h>
+#include <jetqa/StructureinJets.h>
+#include <jetqa/TrksInJetQA.h>
 #include <qautils/QAHistManagerDef.h>
 
 // f4a macros
@@ -40,9 +46,8 @@ typedef std::vector<std::string> SVec;
 
 // macro body -----------------------------------------------------------------
 
-void Fun4all_JetValid(
-  const int  verb   = 0,
-  const int  run    = 0,
+void Fun4All_JetValid(
+  const int  verb   = 10,
   const int  nEvts  = 10,
   const int  nSkip  = 0,
   const SVec inputs = {
@@ -53,35 +58,61 @@ void Fun4all_JetValid(
     "../input/dst_trkr_cluster.list",
     "../input/dst_trackseeds.list",
     "../input/dst_tracks.list"
-  }
+  },
+  std::optional<int> run = std::nullopt
 ) {
 
   // macro options -----------------------------------------------------------
 
-  /* TODO will go here */
+  // general options
+  const std::string qaBaseFileName = "HIST_JET_QA";
+
+  /* TODO collect remaining options here */
 
   // initialize fun4all ------------------------------------------------------
+
+  // announce start of macro
+  std::cout << "\n -------- OwO -- Starting Jet QA Macro -- OwO -------- \n " << std::endl;
 
   // grab instances f4a, the cdb, etc.
   Fun4AllServer* se = Fun4AllServer::instance();
   CDBInterface*  cb = CDBInterface::instance();
   recoConsts*    rc = recoConsts::instance();
   se -> Verbosity(verb);
-  rc -> Verbosity(verb);
 
   // turn on cdb
   Enable::CDB = true;
 
+  // if needed, try to grab run from files
+  int runNum = 6;
+  int segNum = 0;
+  if (!run.has_value()) {
+
+    // grab first file from first input list
+    ifstream    firstList(inputs.at(0));
+    std::string firstFile("");
+    std::getline(firstList, firstFile);
+
+    // now extract the run and segment numbers...
+    std::pair<int, int> runAndSeg = Fun4AllUtils::GetRunSegment(firstFile);
+    runNum = runAndSeg.first;
+    segNum = runAndSeg.second;
+  } else {
+    runNum = run.value();
+  }
+
   // set cdb tags
   rc -> set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
-  rc -> set_uint64Flag("TIMESTAMP", 6);
+  rc -> set_uint64Flag("TIMESTAMP", runNum);
 
   // get url of geo file
-  const std::string inGeoFile = cdb -> getUrl("Tracking_Geometry");
+  const std::string inGeoFile = cb -> getUrl("Tracking_Geometry");
 
-  // register input managers
-  for (std::string input : inputs) {
-    /* TODO will go here */
+  // register dst input managers
+  for (size_t iInput = 0; iInput < inputs.size(); ++iInput) {
+    Fun4AllDstInputManager* inManager = new Fun4AllDstInputManager("InputManager" + std::to_string(iInput));
+    inManager -> AddListFile(inputs[iInput], 1);
+    se        -> registerInputManager(inManager);
   }
 
   // register geometry manager
@@ -119,11 +150,11 @@ void Fun4all_JetValid(
   JetSeedCount* jetSeedQA = new JetSeedCount("AntiKt_Tower_r04_Sub1", "", "seed_test.root");
   jetSeedQA -> setPtRange(5, 100);
   jetSeedQA -> setEtaRange(-1.1, 1.1);
-  se        -> registerSubsystem( jetSeedQA );
+  //se        -> registerSubsystem( jetSeedQA );  // FIXME unccomment when successfully debugged
 
   // intialize and register sum track vs. jet pt qa module
   StructureinJets* jetStructQA = new StructureinJets("AntiKt_Tower_r04_Sub1", "trk_sum_test.root");
-  se -> registerSubsystem(jetStructQA);  
+  //se -> registerSubsystem(jetStructQA);  // FIXME uncomment when successfully debugged
 
   // initialize and register track jet qa module
   TrksInJetQA* trksInJetQA = new TrksInJetQA("TrksInJetQANode_ClustJets");
@@ -152,11 +183,18 @@ void Fun4all_JetValid(
   se -> skip(nSkip);
   se -> End();
 
+  // create output file name
+  std::string qaFileName = qaBaseFileName;
+  qaFileName += "-" + std::to_string(runNum);
+  qaFileName += "-" + std::to_string(segNum);
+  qaFileName += ".root";
+
   // save qa output and exit
-  QAHistManagerDef::saveQARootFile("qa_test.root");
+  QAHistManagerDef::saveQARootFile(qaFileName);
   delete se;
 
-  // close and exit
+  // announce end and exit
+  std::cout << "\n -------- UwU -- Finished Jet QA Macro -- UwU -------- \n " << std::endl;
   gSystem -> Exit(0);
   return;
 
