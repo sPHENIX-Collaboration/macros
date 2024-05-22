@@ -59,15 +59,9 @@ void Fun4All_JetValid(
     "../input/dst_trackseeds.list",
     "../input/dst_tracks.list"
   },
-  std::optional<int> run = std::nullopt
+  const std::string  qaBase = "HIST_JET_QA",
+  std::optional<int> run    = std::nullopt
 ) {
-
-  // macro options -----------------------------------------------------------
-
-  // general options
-  const std::string qaBaseFileName = "HIST_JET_QA";
-
-  /* TODO collect remaining options here */
 
   // initialize fun4all ------------------------------------------------------
 
@@ -150,11 +144,11 @@ void Fun4All_JetValid(
   JetSeedCount* jetSeedQA = new JetSeedCount("AntiKt_Tower_r04_Sub1", "", "seed_test.root");
   jetSeedQA -> setPtRange(5, 100);
   jetSeedQA -> setEtaRange(-1.1, 1.1);
-  //se        -> registerSubsystem( jetSeedQA );  // FIXME unccomment when successfully debugged
+  se        -> registerSubsystem( jetSeedQA );
 
   // intialize and register sum track vs. jet pt qa module
   StructureinJets* jetStructQA = new StructureinJets("AntiKt_Tower_r04_Sub1", "trk_sum_test.root");
-  //se -> registerSubsystem(jetStructQA);  // FIXME uncomment when successfully debugged
+  //se -> registerSubsystem(jetStructQA);  // FIXME uncomment when file-writing issue is resolved 
 
   // initialize and register track jet qa module
   TrksInJetQA* trksInJetQA = new TrksInJetQA("TrksInJetQANode_ClustJets");
@@ -184,7 +178,7 @@ void Fun4All_JetValid(
   se -> End();
 
   // create output file name
-  std::string qaFileName = qaBaseFileName;
+  std::string qaFileName = qaBase;
   qaFileName += "-" + std::to_string(runNum);
   qaFileName += "-" + std::to_string(segNum);
   qaFileName += ".root";
