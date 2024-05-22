@@ -26,7 +26,13 @@ void Fun4All_xingshift(const std::string &fname = "/sphenix/lustre01/sphnxpro/co
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
 
-//recoConsts *rc = recoConsts::instance();
+  recoConsts *rc = recoConsts::instance();
+  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  int runnumber = runseg.first;
+  if (runnumber != 0)
+  {
+    rc->set_IntFlag("RUNNUMBER",runnumber);
+  }
 
   XingShiftCal *xingshift = new XingShiftCal();
   se->registerSubsystem(xingshift);
