@@ -71,7 +71,7 @@ namespace G4HCALOUT
     kHCalOutTemplateClusterizer
   };
 
-  bool useTowerInfoV2 = false;
+  bool useTowerInfoV2 = true;
 
   //! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
   enu_HCalOut_clusterizer HCalOut_clusterizer = kHCalOutTemplateClusterizer;

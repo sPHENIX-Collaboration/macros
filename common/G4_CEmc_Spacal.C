@@ -77,7 +77,7 @@ namespace G4CEMC
   enu_Cemc_clusterizer Cemc_clusterizer = kCemcTemplateClusterizer;
   //! graph clusterizer, RawClusterBuilderGraph
   // enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
-  bool useTowerInfoV2 = false;
+  bool useTowerInfoV2 = true;
 
 }  // namespace G4CEMC
 
