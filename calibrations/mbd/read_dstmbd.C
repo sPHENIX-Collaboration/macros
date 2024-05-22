@@ -4,16 +4,15 @@
 //
 #include <mbd/MbdDefs.h>
 
-const int NUM_PMT = MbdDefs::MBD_N_PMT;
 const int NUM_ARMS = 2;
 
 // Set up variables to read from TTree
 Int_t   f_evt;
 UShort_t f_clk;
 UShort_t f_femclk;
-Float_t f_tt[NUM_PMT];  // time from t-channels
-Float_t f_tq[NUM_PMT];  // time from q-channels
-Float_t f_q[NUM_PMT];   // charge
+Float_t f_tt[MbdDefs::MBD_N_PMT];  // time from t-channels
+Float_t f_tq[MbdDefs::MBD_N_PMT];  // time from q-channels
+Float_t f_q[MbdDefs::MBD_N_PMT];   // charge
 
 //Float_t f_bn[NUM_ARMS];   // num hit PMTs
 Short_t f_bn[NUM_ARMS];   // num hit PMTs
@@ -28,9 +27,6 @@ TTree *tree {nullptr};
 void read_dstmbd(const char *tfname = "beam_mbd-00009184-0000_mbd.root")
 {
   cout << "tfname " << tfname << endl;
-
-  const int NUM_PMT = 128;
-  const int NUM_ARMS = 2;
 
   // Set up TTree
   int is_dst = 0; // whether reading from DST or private root files
@@ -69,7 +65,7 @@ void read_dstmbd(const char *tfname = "beam_mbd-00009184-0000_mbd.root")
   }
   else
   {
-    for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
+    for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT; ipmt++)
     {
       name = "tt"; name += ipmt;
       tree->SetBranchAddress(name,&f_tt[ipmt]);
@@ -83,10 +79,10 @@ void read_dstmbd(const char *tfname = "beam_mbd-00009184-0000_mbd.root")
 
   // Event loop, each ientry is one triggered event
   int nentries = tree->GetEntries();
-  nentries=10;
   for (int ientry=0; ientry<nentries; ientry++)
   {
     tree->GetEntry(ientry);
+    //tree->GetEntry(ientry+100);
 
     if (ientry<10)
     {
