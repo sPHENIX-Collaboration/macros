@@ -353,7 +353,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
   silicon_Seeding->sigmaScattering(50.);
-  silicon_Seeding->setRPhiSearchWindow(0.4);
+  silicon_Seeding->setinttRPhiSearchWindow(0.4);
   se->registerSubsystem(silicon_Seeding);
 
   auto merger = new PHSiliconSeedMerger;

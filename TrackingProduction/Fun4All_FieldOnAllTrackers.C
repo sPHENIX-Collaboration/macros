@@ -114,7 +114,10 @@ void Fun4All_FieldOnAllTrackers(
    */
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
-  silicon_Seeding->seedAnalysis(true);
+  silicon_Seeding->searchInIntt();
+  silicon_Seeding->setinttRPhiSearchWindow(0.4);
+  silicon_Seeding->setinttZSearchWindow(1.6);
+  silicon_Seeding->seedAnalysis(false);
   se->registerSubsystem(silicon_Seeding);
 
   auto merger = new PHSiliconSeedMerger;
