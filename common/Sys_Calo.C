@@ -58,10 +58,10 @@ namespace CALOSYS{
       "TOWERINFO_CALIB_"
     };
     std::vector<std::string> OHCaloutputprefix = {
-      "TOWERINFO_CALIB_SYST1", 
-      "TOWERINFO_CALIB_SYST2",
-      "TOWERINFO_CALIB_SYST3", 
-      "TOWERINFO_CALIB_SYST4"
+      "TOWERINFO_CALIB_SYST1_", 
+      "TOWERINFO_CALIB_SYST2_",
+      "TOWERINFO_CALIB_SYST3_", 
+      "TOWERINFO_CALIB_SYST4_"
     };
     std::vector<std::string> OHCalfieldname = {
        "ohcal_sys", 
@@ -91,10 +91,10 @@ namespace CALOSYS{
       "TOWERINFO_CALIB_"
     };
     std::vector<std::string> IHCaloutputprefix = {
-      "TOWERINFO_CALIB_SYST1", 
-      "TOWERINFO_CALIB_SYST2",
-      "TOWERINFO_CALIB_SYST3", 
-      "TOWERINFO_CALIB_SYST4"
+      "TOWERINFO_CALIB_SYST1_", 
+      "TOWERINFO_CALIB_SYST2_",
+      "TOWERINFO_CALIB_SYST3_", 
+      "TOWERINFO_CALIB_SYST4_"
     };
     std::vector<std::string> IHCalfieldname = {
        "ihcal_sys", 
@@ -121,12 +121,12 @@ namespace CALOSYS{
     std::vector<std::string> OHCalfieldname = {"ohcal_sys", "ohcal_sys"};
     std::vector<std::string> OHCalcaliburl = {"/sphenix/user/shuhangli/DB/ohcalAllSys.root", "/sphenix/user/shuhangli/DB/ohcalEtaSys.root"};
     std::vector<bool> OHCaldosys = {true, true};
-*/
     std::vector<std::string> IHCalinputprefix = {"TOWERINFO_CALIB_", "TOWERINFO_CALIB_"};
     std::vector<std::string> IHCaloutputprefix = {"TOWERINFO_CALIB_SYSALL", "TOWERINFO_CALIB_SYSETA"};
     std::vector<std::string> IHCalfieldname = {"ihcal_sys", "ihcal_sys"};
     std::vector<std::string> IHCalcaliburl = {"/sphenix/user/shuhangli/DB/ihcalAllSys.root", "/sphenix/user/shuhangli/DB/ihcalEtaSys.root"};
     std::vector<bool> IHCaldosys = {true, true};
+*/
 
 
 }//namespace CALOSYS
