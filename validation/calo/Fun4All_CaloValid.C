@@ -33,7 +33,7 @@ R__LOAD_LIBRARY(libcentrality.so)
 
 #endif
 
-void Fun4All_CaloValid(int nevents = 1e5,const std::string &fname = "dst_calo-00023714.list")
+void Fun4All_CaloValid(int nevents = 1e5,const std::string &fname = "example.list")
 {
 
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -75,14 +75,15 @@ void Fun4All_CaloValid(int nevents = 1e5,const std::string &fname = "dst_calo-00
   //ca->set_debug(false);
   se->registerSubsystem(ca);
 
-  //se->Verbosity(5);
-  TString qaname = fulloutfile_hist;
-  std::string qaOutputFileName(qaname.Data());
-  QAHistManagerDef::saveQARootFile(qaOutputFileName);
 
   
   se->run(nevents); //update number of events as needed
   se->End();
+
+  TString qaname = fulloutfile_hist;
+  std::string qaOutputFileName(qaname.Data());
+  QAHistManagerDef::saveQARootFile(qaOutputFileName);
+
   cout << "JOB COMPLETE :)" <<endl;
 
 }
