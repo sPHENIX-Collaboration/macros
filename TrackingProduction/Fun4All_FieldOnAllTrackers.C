@@ -143,7 +143,7 @@ void Fun4All_FieldOnAllTrackers(
   }
   seeder->Verbosity(0);
   seeder->SetLayerRange(7, 55);
-  seeder->SetSearchWindow(5.5,0.05); // z-width and phi-width, default in macro at 1.5 and 0.05
+  seeder->SetSearchWindow(2.,0.05); // z-width and phi-width, default in macro at 1.5 and 0.05
   seeder->SetClusAdd_delta_window(3.0,0.06); //  (0.5, 0.005) are default; sdzdr_cutoff, d2/dr2(phi)_cutoff
   seeder->SetNClustersPerSeedRange(4,60); // default is 6, 6
   seeder->SetMinHitsPerCluster(0);
@@ -258,8 +258,8 @@ void Fun4All_FieldOnAllTrackers(
   resid->Verbosity(0);
   se->registerSubsystem(resid);
 
-  auto ntuplizer = new TrkrNtuplizer("TrkrNtuplizer");
-  se->registerSubsystem(ntuplizer);
+  //auto ntuplizer = new TrkrNtuplizer("TrkrNtuplizer");
+  //se->registerSubsystem(ntuplizer);
 
   // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "/sphenix/tg/tg01/hf/jdosbo/tracking_development/Run24/Beam/41626/hitsets.root");
   // se->registerOutputManager(out);
