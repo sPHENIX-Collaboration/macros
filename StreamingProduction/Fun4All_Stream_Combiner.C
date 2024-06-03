@@ -28,7 +28,7 @@ R__LOAD_LIBRARY(libffarawmodules.so)
 bool isGood(const string &infile);
 
 void Fun4All_Stream_Combiner(int nEvents = 0,
-                             const string &input_gl1file = "gl1.list",
+                             const string &input_gl1file = "gl1daq.list",
                              const string &input_inttfile00 = "intt0.list",
                              const string &input_inttfile01 = "intt1.list",
                              const string &input_inttfile02 = "intt2.list",
