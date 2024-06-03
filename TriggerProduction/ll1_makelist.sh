@@ -14,9 +14,10 @@ fi
 
 type=$1
 runnumber=$(printf "%08d" $2)
-/bin/ls -1 /sphenix/lustre01/sphnxpro/physics/ZDC/${type}/${type}_seb20-${runnumber}-* >seb20.list
-if [ ! -s seb20.list ]
+
+/bin/ls -1 /sphenix/lustre01/sphnxpro/physics/LL1/${type}/${type}_*-${runnumber}-* >ll1.list
+if [ ! -s ll1.list ]
 then
-  echo seb20.list empty, removing it
-  rm  seb20.list
+  echo ll1.list empty, removing it
+  rm  ll1.list
 fi
