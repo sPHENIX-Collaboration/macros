@@ -17,6 +17,7 @@ then
 fi
 
 sh gl1_makelist.sh $1 $2
+sh ll1_makelist.sh $1 $2
 sh mbd_makelist.sh $1 $2
 sh hcal_makelist.sh $1 $2
 sh cemc_makelist.sh $1 $2
