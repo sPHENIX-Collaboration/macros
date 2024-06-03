@@ -22,7 +22,7 @@ for i in {0..15}
 do
 seb=$(printf "seb%02d" $i)
 listname=$(printf "seb%02d.list" $i)
-/bin/ls -1 /sphenix/lustre01/sphnxpro/commissioning/emcal/${type}/${type}_${seb}-${runnumber}-* > ${listname}
+/bin/ls -1 /sphenix/lustre01/sphnxpro/physics/emcal/${type}/${type}_${seb}-${runnumber}-* > ${listname}
 if [ ! -s ${listname} ]
 then
   echo ${listname} empty, removing it
