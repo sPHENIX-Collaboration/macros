@@ -7,6 +7,7 @@
 #include <fun4allraw/SingleCemcTriggerInput.h>
 #include <fun4allraw/SingleGl1TriggerInput.h>
 #include <fun4allraw/SingleHcalTriggerInput.h>
+#include <fun4allraw/SingleLL1TriggerInput.h>
 #include <fun4allraw/SingleMbdTriggerInput.h>
 #include <fun4allraw/SingleZdcTriggerInput.h>
 
@@ -52,6 +53,7 @@ void Fun4All_Prdf_Combiner(int nEvents = 0,
                            const string &hcalinput0 = "seb16.list",
                            const string &hcalinput1 = "seb17.list",
                            const string &mbdinput = "seb18.list",
+                           const string &ll1input = "seb19.list",
                            const string &zdcinput = "seb20.list")
 {
   vector<string> hcalinfile;
@@ -79,47 +81,58 @@ void Fun4All_Prdf_Combiner(int nEvents = 0,
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
   Fun4AllPrdfInputTriggerManager *in = new Fun4AllPrdfInputTriggerManager("Comb");
-  //  in->Verbosity(1);
+  //in->Verbosity(2);
   // this one is the reference
-  ifstream ingl1(gl1input);
-  if (ingl1.is_open())
+  ifstream infile(gl1input);
+  if (infile.is_open())
   {
-    ingl1.close();
+    infile.close();
 
     SingleTriggerInput *gl1 = new SingleGl1TriggerInput("Gl1in");
-    //  gl1->Verbosity(10);
+    //gl1->Verbosity(10);
     gl1->enable_ddump(DDUMP);
     gl1->AddListFile(gl1input);
     in->registerTriggerInput(gl1, InputManagerType::GL1);
   }
-  ingl1.open(mbdinput);
-  if (ingl1.is_open())
+  infile.open(mbdinput);
+  if (infile.is_open())
   {
-    ingl1.close();
+    infile.close();
     SingleTriggerInput *mbd = new SingleMbdTriggerInput("Mbdin");
-    //  mbd->Verbosity(10);
+    //mbd->Verbosity(10);
     mbd->enable_ddump(DDUMP);
     mbd->AddListFile(mbdinput);
     in->registerTriggerInput(mbd, InputManagerType::MBD);
   }
 
-  ingl1.open(zdcinput);
-  if (ingl1.is_open())
+  infile.open(zdcinput);
+  if (infile.is_open())
   {
-    ingl1.close();
+    infile.close();
     SingleTriggerInput *zdc = new SingleZdcTriggerInput("Zdcin");
     //  mbd->Verbosity(10);
     zdc->enable_ddump(DDUMP);
     zdc->AddListFile(zdcinput);
     in->registerTriggerInput(zdc, InputManagerType::ZDC);
   }
+
+  infile.open(ll1input);
+  if (infile.is_open())
+  {
+    infile.close();
+    SingleTriggerInput *ll1 = new SingleLL1TriggerInput("LL1in");
+    //  mbd->Verbosity(10);
+    ll1->enable_ddump(DDUMP);
+    ll1->AddListFile(ll1input);
+    in->registerTriggerInput(ll1, InputManagerType::LL1);
+  }
   int inpt = 0;
   for (auto iter : hcalinfile)
   {
-    ingl1.open(iter);
-    if (ingl1.is_open())
+    infile.open(iter);
+    if (infile.is_open())
     {
-      ingl1.close();
+      infile.close();
       string name = "Hcalin_" + to_string(inpt);
       SingleTriggerInput *hcal = new SingleHcalTriggerInput(name);
       //    hcal->Verbosity(10);
@@ -133,10 +146,10 @@ void Fun4All_Prdf_Combiner(int nEvents = 0,
   inpt = 0;
   for (auto iter : cemcinfile)
   {
-    ingl1.open(iter);
-    if (ingl1.is_open())
+    infile.open(iter);
+    if (infile.is_open())
     {
-      ingl1.close();
+      infile.close();
 
       string name = "Cemcin_" + to_string(inpt);
       SingleTriggerInput *cemc = new SingleCemcTriggerInput(name);
@@ -159,7 +172,7 @@ void Fun4All_Prdf_Combiner(int nEvents = 0,
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
 
-  /*
+/*
     Gl1Check *gl1chk = new Gl1Check();
     gl1chk->enable_ddump(DDUMP);
     se->registerSubsystem(gl1chk);
@@ -181,7 +194,7 @@ void Fun4All_Prdf_Combiner(int nEvents = 0,
     se->registerSubsystem(zdcchk);
   */
   ClockDiffCheck *clkchk = new ClockDiffCheck();
-  // clkchk->Verbosity(3);
+  //clkchk->Verbosity(3);
   se->registerSubsystem(clkchk);
 
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("TriggerOut", "DST_PRDF.root");
