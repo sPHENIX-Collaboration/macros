@@ -1,5 +1,5 @@
-#ifndef FUN4ALL_JETVALID_C
-#define FUN4ALL_JETVALID_C
+#ifndef FUN4ALL_TRACKANDCALOJETVALID_C
+#define FUN4ALL_TRACKANDCALOJETVALID_C
 
 // c++ utilities
 #include <fstream>
@@ -46,7 +46,7 @@ typedef std::vector<std::string> SVec;
 
 // macro body -----------------------------------------------------------------
 
-void Fun4All_JetValid(
+void Fun4All_TrackAndCaloJetValid(
   const int  verb   = 10,
   const int  nEvts  = 10,
   const int  nSkip  = 0,
