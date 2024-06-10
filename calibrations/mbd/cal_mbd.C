@@ -44,7 +44,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
   cout << name << endl;
 
   //== Load in calib constants
-  //Float_t tq_t0_offsets[NUM_PMT] = {};
+  //Float_t tq_t0_offsets[MbdDefs::MBD_N_PMT] = {};
 
   MbdCalib *mcal = new MbdCalib();
   TString calfile = dir + "/mbd_sampmax.calib";
@@ -88,14 +88,14 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
 
   TFile *savefile = new TFile(savefname,"RECREATE");
 
-  TH1 *h_q[NUM_PMT];
-  TH1 *h_tt[NUM_PMT];
-  TH1 *h_tq[NUM_PMT];
+  TH1 *h_q[MbdDefs::MBD_N_PMT];
+  TH1 *h_tt[MbdDefs::MBD_N_PMT];
+  TH1 *h_tq[MbdDefs::MBD_N_PMT];
 
-  TH2 *h2_slew[NUM_PMT];
+  TH2 *h2_slew[MbdDefs::MBD_N_PMT];
 
   TString title;
-  for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
+  for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT; ipmt++)
   {
     name = "h_q"; name += ipmt;
     title = "q"; title += ipmt;
@@ -116,8 +116,8 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
       h2_slew[ipmt] = new TH2F(name,title,4000,-0.5,16000-0.5,1100,-5,6);
     }
   }
-  TH2 *h2_tq = new TH2F("h2_tq","ch vs tq",900,-150,150,NUM_PMT,-0.5,NUM_PMT-0.5);
-  TH2 *h2_tt = new TH2F("h2_tt","ch vs tt",900,-150,150,NUM_PMT,-0.5,NUM_PMT-0.5);
+  TH2 *h2_tq = new TH2F("h2_tq","ch vs tq",900,-150,150,MbdDefs::MBD_N_PMT,-0.5,MbdDefs::MBD_N_PMT-0.5);
+  TH2 *h2_tt = new TH2F("h2_tt","ch vs tt",900,-150,150,MbdDefs::MBD_N_PMT,-0.5,MbdDefs::MBD_N_PMT-0.5);
 
   // Event loop, each ientry is one triggered event
   int nentries = tree->GetEntries();
@@ -149,7 +149,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
       nhit[1] = 0.;
     }
 
-    for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
+    for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT; ipmt++)
     {
       int arm = ipmt/64;
 
@@ -187,7 +187,8 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
       {
         h_q[ipmt]->Fill( f_q[ipmt] );
       }
-      else if ( pass>0 && fabs(ttcorr[ipmt])<26. )
+      //else if ( pass>0 && fabs(ttcorr[ipmt])<26. )
+      else if ( pass>0 && (fabs(ttcorr[ipmt])<26.||f_q[ipmt]>40.) )  // to get around high threshold
       {
         h_q[ipmt]->Fill( f_q[ipmt] );
 
@@ -223,7 +224,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
       //cout << "aaa " << iarm << "\t" << nhit[iarm] << "\t" << armtime[iarm] << endl;
     }
 
-    for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
+    for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT; ipmt++)
     {
       //int ifeech = (ipmt/8)*16 + 8 + ipmt%8;  // time ifeech only
       int arm = ipmt/64;
@@ -292,7 +293,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
   double min_twindow = -25.;
   double max_twindow = 25.;
 
-  for (int ipmt=0; ipmt<NUM_PMT && pass==0; ipmt++)
+  for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT && pass==0; ipmt++)
   {
     // only look in the middle
     if ( ipmt==0 || ipmt==64 )
@@ -356,7 +357,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
     cal_tq_t0_file.open( name );
   }
 
-  for (int ipmt=0; ipmt<NUM_PMT && pass==0; ipmt++)
+  for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT && pass==0; ipmt++)
   {
     // only look in the middle
     if ( ipmt==0 || ipmt==64 )
@@ -414,7 +415,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
     //== Draw the slewcorr histograms
     ac[cvindex] = new TCanvas("cal_slew","slew",425*1.5,550*1.5);
 
-    for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
+    for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT; ipmt++)
     {
       h2_slew[ipmt]->Draw("colz");
 
@@ -432,7 +433,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int p
     gPad->SetLogy(1);
   }
 
-  for (int ipmt=0; ipmt<NUM_PMT && pass==0; ipmt++)
+  for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT && pass==0; ipmt++)
   {
     h_q[ipmt]->Draw();
 

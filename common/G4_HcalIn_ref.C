@@ -84,7 +84,7 @@ namespace G4HCALIN
     kHCalInTemplateClusterizer
   };
   
-  bool useTowerInfoV2 = false;
+  bool useTowerInfoV2 = true;
   //! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
   enu_HCalIn_clusterizer HCalIn_clusterizer = kHCalInTemplateClusterizer;
   //! graph clusterizer, RawClusterBuilderGraph

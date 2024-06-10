@@ -28,12 +28,8 @@ R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 #endif
 
-void Fun4All_MBD_Prdf(int nEvents = 10, const char *input_file = "beam/beam_seb18-000020868-0000.prdf")
+void Fun4All_MBD_Prdf(const char *input_file = "beam/beam_seb18-000020868-0000.prdf", const int nEvents = 0, const string& cdbtag = "")
 {
-  recoConsts *rc = recoConsts::instance();
-  //rc->set_StringFlag("CDB_GLOBALTAG","chiu"); 
-  //rc->set_StringFlag("CDB_GLOBALTAG","2023p008"); 
-
   TString runseq = input_file;
   int idx = runseq.Last('/');
   runseq.Remove(0,idx+1);
@@ -43,13 +39,28 @@ void Fun4All_MBD_Prdf(int nEvents = 10, const char *input_file = "beam/beam_seb1
 
   int run_number = get_runnumber(input_file);
   cout << "RUN\t" << run_number << endl;
-  rc->set_uint64Flag("TIMESTAMP", run_number);
+  recoConsts *rc = recoConsts::instance();
+  //rc->set_uint64Flag("TIMESTAMP", run_number);
 
-  // For local calibrations
-  TString bdir = "./results/";
-  bdir += run_number;
-  cout << bdir << endl;
-  rc->set_StringFlag("MBD_CALDIR",bdir.Data()); 
+  if ( cdbtag.size() != 0 )
+  {
+    rc->set_StringFlag("CDB_GLOBALTAG",cdbtag); 
+    //rc->set_StringFlag("CDB_GLOBALTAG","chiu"); 
+    //rc->set_StringFlag("CDB_GLOBALTAG","ProdA_2023"); 
+    //rc->set_StringFlag("CDB_GLOBALTAG","ProdA_2024"); 
+
+    cout << "Using CDB_GLOBALTAG " << cdbtag << endl;
+  }
+  else
+  {
+    // For local calibrations
+    TString bdir = "./results/";
+    bdir += run_number;
+    cout << bdir << endl;
+    rc->set_StringFlag("MBD_CALDIR",bdir.Data()); 
+
+    cout << "Using MBD_CALDIR " << bdir << endl;
+  }
 
   Fun4AllServer *se = Fun4AllServer::instance();
   //se->Verbosity(1);

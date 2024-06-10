@@ -405,7 +405,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
   silicon_Seeding->sigmaScattering(50.);
-  silicon_Seeding->setRPhiSearchWindow(2.);
+  silicon_Seeding->setinttRPhiSearchWindow(2.);
   silicon_Seeding->helixcut(0.01);
   se->registerSubsystem(silicon_Seeding);
 
