@@ -66,7 +66,9 @@ void Fun4All_TrackAndCaloJetValid(
   // initialize fun4all ------------------------------------------------------
 
   // announce start of macro
-  std::cout << "\n -------- OwO -- Starting Jet QA Macro -- OwO -------- \n " << std::endl;
+  std::cout << "\n -------- OwO -- Starting Jet QA Macro -- OwO -------- \n "
+            << "              [Using Track-and-Calo Jets]               "
+            << std::endl;
 
   // grab instances f4a, the cdb, etc.
   Fun4AllServer* se = Fun4AllServer::instance();
