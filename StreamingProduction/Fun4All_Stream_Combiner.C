@@ -166,8 +166,8 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
     {
     SingleMvtxPoolInput *mvtx_sngl = new SingleMvtxPoolInput("MVTX_" + to_string(i));
 //    mvtx_sngl->Verbosity(5);
-    mvtx_sngl->SetBcoRange(1000);
-    mvtx_sngl->SetNegativeBco(1000);
+    mvtx_sngl->SetBcoRange(100);
+    mvtx_sngl->SetNegativeBco(100);
     mvtx_sngl->AddListFile(iter);
     in->registerStreamingInput(mvtx_sngl, InputManagerType::MVTX);
     i++;
@@ -181,7 +181,7 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
     SingleTpcPoolInput *tpc_sngl = new SingleTpcPoolInput("TPC_" + to_string(i));
 //    tpc_sngl->Verbosity(2);
     //   tpc_sngl->DryRun();
-    tpc_sngl->SetBcoRange(130);
+    tpc_sngl->SetBcoRange(5);
     tpc_sngl->AddListFile(iter);
     in->registerStreamingInput(tpc_sngl, InputManagerType::TPC);
     i++;
@@ -195,7 +195,7 @@ void Fun4All_Stream_Combiner(int nEvents = 0,
     {
     SingleMicromegasPoolInput *mm_sngl = new SingleMicromegasPoolInput("MICROMEGAS_" + to_string(i));
     //   sngl->Verbosity(3);
-    mm_sngl->SetBcoRange(100);
+    mm_sngl->SetBcoRange(5);
     mm_sngl->SetNegativeBco(2);
     mm_sngl->AddListFile(iter);
     in->registerStreamingInput(mm_sngl, InputManagerType::MICROMEGAS);
