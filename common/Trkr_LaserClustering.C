@@ -84,7 +84,6 @@ void TPC_LaserClustering()
       // match central membrane clusters to pads and generate distortion correction
       auto centralMembraneMatcher = new TpcCentralMembraneMatching;
       centralMembraneMatcher->Verbosity( verbosity );
-      centralMembraneMatcher->setNMatchIter(2);
       se->registerSubsystem(centralMembraneMatcher);
     }
 }
