@@ -70,6 +70,9 @@ void Fun4All_FieldOnAllTrackers(
   auto rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
+  G4TPC::ENABLE_STATIC_CORRECTIONS = true;
+  G4TPC::static_correction_filename = "/sphenix/user/mitrankova/corresction_residual_map/residual_map_field_layers10iter.hist.root";
+
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
   rc->set_uint64Flag("TIMESTAMP", 6);
