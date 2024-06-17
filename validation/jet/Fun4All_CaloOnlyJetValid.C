@@ -18,6 +18,7 @@
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllUtils.h>
 #include <phool/recoConsts.h>
+#include <jetqa/JetKinematicCheck.h>
 #include <jetqa/JetSeedCount.h>
 #include <jetqa/StructureinJets.h>
 #include <jetqa/TrksInJetQA.h>
