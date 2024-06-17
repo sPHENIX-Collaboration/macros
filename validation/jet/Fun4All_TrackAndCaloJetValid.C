@@ -143,14 +143,16 @@ void Fun4All_TrackAndCaloJetValid(
   // register qa modules ------------------------------------------------------
 
   // initialize and register jet seed counter qa module
-  JetSeedCount* jetSeedQA = new JetSeedCount("AntiKt_Tower_r04_Sub1", "", "seed_test.root");
+  JetSeedCount* jetSeedQA = new JetSeedCount("AntiKt_Tower_r04_Sub1", "", "");
   jetSeedQA -> setPtRange(5., 100);
   jetSeedQA -> setEtaRange(-1.1, 1.1);
+  jetSeedQA -> setWriteToOutputFile(false);
   se        -> registerSubsystem( jetSeedQA );
 
   // intialize and register sum track vs. jet pt qa module
-  StructureinJets* jetStructQA = new StructureinJets("AntiKt_Tower_r04_Sub1", "trk_sum_test.root");
-  //se -> registerSubsystem(jetStructQA);  // FIXME uncomment when file-writing issue is resolved 
+  StructureinJets* jetStructQA = new StructureinJets("AntiKt_Tower_r04_Sub1", "");
+  jetStructQA -> writeToOutputFile(false);
+  se          -> registerSubsystem(jetStructQA);
 
   // initialize and register track jet qa module
   TrksInJetQA* trksInJetQA = new TrksInJetQA("TrksInJetQANode_ClustJets");

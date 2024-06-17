@@ -137,9 +137,10 @@ void Fun4All_CaloOnlyJetValid(
   // register qa modules ------------------------------------------------------
 
   // initialize and register jet seed counter qa module
-  JetSeedCount* jetSeedQA = new JetSeedCount("AntiKt_Tower_r04_Sub1", "", "seed_test.root");
+  JetSeedCount* jetSeedQA = new JetSeedCount("AntiKt_Tower_r04_Sub1", "", "");
   jetSeedQA -> setPtRange(5., 100.);
   jetSeedQA -> setEtaRange(-1.1, 1.1);
+  jetSeedQA -> setWriteToOutputFile(false);
   se        -> registerSubsystem( jetSeedQA );
 
   // initialize and register mass, eta, and pt qa module 
