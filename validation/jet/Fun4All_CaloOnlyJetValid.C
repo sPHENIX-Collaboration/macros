@@ -54,13 +54,7 @@ void Fun4All_CaloOnlyJetValid(
   const int  nEvts  = 10,
   const int  nSkip  = 0,
   const SVec inputs = {
-    "../input/dst_global.list",
-    "../input/dst_mbd_epd.list",
-    "../input/dst_calo_cluster.list",
-    "../input/dst_trkr_hit.list",
-    "../input/dst_trkr_cluster.list",
-    "../input/dst_trackseeds.list",
-    "../input/dst_tracks.list"
+    "./lists/runs/dst_calo_run2pp-00042586.list"
   },
   const std::string  qaBase = "HIST_JET_QA",
   std::optional<int> run    = std::nullopt
