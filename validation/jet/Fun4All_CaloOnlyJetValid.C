@@ -68,7 +68,7 @@ void Fun4All_CaloOnlyJetValid(
 
   // announce start of macro
   std::cout << "\n -------- OwO -- Starting Jet QA Macro -- OwO -------- \n "
-            << "                 [Using Calo-only Jets]               "
+            << "                [Using Calo-only Jets]\n"
             << std::endl;
 
   // grab instances f4a, the cdb, etc.

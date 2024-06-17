@@ -68,7 +68,7 @@ void Fun4All_TrackAndCaloJetValid(
 
   // announce start of macro
   std::cout << "\n -------- OwO -- Starting Jet QA Macro -- OwO -------- \n "
-            << "              [Using Track-and-Calo Jets]               "
+            << "              [Using Track-and-Calo Jets]\n"
             << std::endl;
 
   // grab instances f4a, the cdb, etc.
