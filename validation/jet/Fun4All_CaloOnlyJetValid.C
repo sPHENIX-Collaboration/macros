@@ -20,8 +20,6 @@
 #include <phool/recoConsts.h>
 #include <jetqa/JetKinematicCheck.h>
 #include <jetqa/JetSeedCount.h>
-#include <jetqa/StructureinJets.h>
-#include <jetqa/TrksInJetQA.h>
 #include <qautils/QAHistManagerDef.h>
 
 // f4a macros
@@ -31,7 +29,6 @@
 #include <GlobalVariables.C>
 #include <HIJetReco.C>
 #include <QA.C>
-#include <Trkr_Clustering.C>
 
 // load libraries
 R__LOAD_LIBRARY(libg4centrality.so)
@@ -102,20 +99,12 @@ void Fun4All_CaloOnlyJetValid(
   rc -> set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
   rc -> set_uint64Flag("TIMESTAMP", runNum);
 
-  // get url of geo file
-  const std::string inGeoFile = cb -> getUrl("Tracking_Geometry");
-
   // register dst input managers
   for (size_t iInput = 0; iInput < inputs.size(); ++iInput) {
     Fun4AllDstInputManager* inManager = new Fun4AllDstInputManager("InputManager" + std::to_string(iInput));
     inManager -> AddListFile(inputs[iInput], 1);
     se        -> registerInputManager(inManager);
   }
-
-  // register geometry manager
-  Fun4AllRunNodeInputManager* geoManager = new Fun4AllRunNodeInputManager("GeometryManager");
-  geoManager -> AddFile(inGeoFile.data());
-  se         -> registerInputManager(geoManager);
 
   // register & run necessary reconstruction ----------------------------------
 
