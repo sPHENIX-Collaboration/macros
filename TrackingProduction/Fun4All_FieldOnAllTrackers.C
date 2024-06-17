@@ -255,6 +255,7 @@ void Fun4All_FieldOnAllTrackers(
   resid->alignment(false);
   resid->clusterTree();
   resid->hitTree();
+  resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
   resid->Verbosity(0);
   se->registerSubsystem(resid);
 
