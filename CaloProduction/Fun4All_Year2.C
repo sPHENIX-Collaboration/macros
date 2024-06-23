@@ -58,7 +58,9 @@ void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   // v2 uncomment:
   CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kWaveformTowerv2;
   // v3 uncomment:
-   //CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFWaveform;
+  //CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFWaveform;
+  // v4 uncomment:
+  // CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv4;
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
@@ -74,13 +76,10 @@ void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   sprintf(outfile_hist, "HIST_CALOR-%08d-%04d.root", runnumber, segment);
   string fulloutfile = string("./") + outfile;
   string fulloutfile_hist = string("./") + outfile_hist;
-  //===============
+
   // conditions DB flags
-  //===============
-  // ENABLE::CDB = true;
-  // global tag
   rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
-  // // 64 bit timestamp
+  // 64 bit timestamp
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   CDBInterface::instance()->Verbosity(1);
 
@@ -146,22 +145,21 @@ void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   intrue2->AddFile(geoLocation);
   se->registerInputManager(intrue2);
 
-  Process_Calib();
+  Process_Calo_Calib();
 
   
   /////////////////
   // Centrality 
   //MinimumBiasClassifier *minimumbiasclassifier = new MinimumBiasClassifier();
   //se->registerSubsystem(minimumbiasclassifier);
-//
   //CentralityReco *centralityreco = new CentralityReco();
   //se->registerSubsystem(centralityreco);
 
   ///////////////////////////////////
   // Validation 
   CaloValid *ca = new CaloValid("CaloValid");
-  ca->set_timing_cut_width(200);  //integers for timing width, > 1 : wider cut around max peak time
-  //se->registerSubsystem(ca);
+  ca->set_timing_cut_width(200);
+  se->registerSubsystem(ca);
 
   
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");

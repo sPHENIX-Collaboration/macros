@@ -9,7 +9,7 @@
 
 R__LOAD_LIBRARY(libcalo_reco.so)
 
-void Process_Calib()
+void Process_Calo_Calib()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
 
@@ -70,10 +70,12 @@ void Process_Calib()
   ClusterBuilder->set_UseTowerInfo(1);  // to use towerinfo objects rather than old RawTower
   se->registerSubsystem(ClusterBuilder);
 
-  std::cout << "Applying Position Dependent Correction" << std::endl;
-  RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
-  clusterCorrection->set_UseTowerInfo(1);  // to use towerinfo objects rather than old RawTower
-  se->registerSubsystem(clusterCorrection);
+  // currently NOT included! 
+  //std::cout << "Applying Position Dependent Correction" << std::endl;
+  //RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
+  //clusterCorrection->set_UseTowerInfo(1);  // to use towerinfo objects rather than old RawTower
+ // se->registerSubsystem(clusterCorrection);
+
 }
 
 #endif
