@@ -50,7 +50,7 @@ R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 
-void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/physics/slurp/calophysics/run_00044500_00044600/DST_TRIGGERED_EVENT_run2pp_new_2024p001-00044524-0000.root", int nEvents = 10)
+void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commissioning/slurp/calobeam/run_00040700_00040800/DST_TRIGGERED_RAW_beam_new_2023p015-00040797-0001.root", int nEvents = 10)
 {
   bool addZeroSupCaloNodes = 0;
   // v1 uncomment:
