@@ -123,6 +123,10 @@ namespace G4TPC
 
   bool ENABLE_REACHES_READOUT = true;
 
+  // module edge distortion corrections
+  bool ENABLE_MODULE_EDGE_CORRECTIONS = true;
+  std::string module_edge_correction_filename = CDBInterface::instance()->getUrl("TPC_Module_Edge");
+
   // static distortion corrections
   bool ENABLE_STATIC_CORRECTIONS = false;
   std::string static_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
