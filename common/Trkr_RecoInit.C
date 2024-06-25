@@ -14,6 +14,8 @@ R__LOAD_LIBRARY(libtpccalib.so)
 void TrackingInit()
 {
   ACTSGEOM::ActsGeomInit();
+  G4TPC::module_edge_correction_filename = CDBInterface::instance()->getUrl("TPC_Module_Edge");
+
 
   // space charge correction
   if( G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS || G4TPC::ENABLE_STATIC_CORRECTIONS || G4TPC::ENABLE_AVERAGE_CORRECTIONS )

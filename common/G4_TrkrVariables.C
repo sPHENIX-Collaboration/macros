@@ -125,7 +125,7 @@ namespace G4TPC
 
   // module edge distortion corrections
   bool ENABLE_MODULE_EDGE_CORRECTIONS = true;
-  std::string module_edge_correction_filename = CDBInterface::instance()->getUrl("TPC_Module_Edge");
+  std::string module_edge_correction_filename = "";
 
   // static distortion corrections
   bool ENABLE_STATIC_CORRECTIONS = false;
