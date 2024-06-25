@@ -81,6 +81,9 @@ void Fun4All_Prdf_Combiner(int nEvents = 0,
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
   Fun4AllPrdfInputTriggerManager *in = new Fun4AllPrdfInputTriggerManager("Comb");
+  in->InitialPoolDepth(10);
+  in->SetPoolDepth(3);
+  in->Resync(true);
   //in->Verbosity(2);
   // this one is the reference
   ifstream infile(gl1input);
