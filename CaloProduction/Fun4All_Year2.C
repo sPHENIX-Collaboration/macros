@@ -50,7 +50,12 @@ R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 
-void Fun4All_Year2(const std::string &fname = "DST_TRIGGERED_RAW_beam_new_2023p015-00040797-0001.root", int nEvents = 100)
+void Fun4All_Year2(int nEvents=100,
+                   const std::string &fname = "DST_TRIGGERED_RAW_beam_new_2023p015-00040797-0001.root",
+                   const std::string& outfile= "DST_CALO-00000000-000000.root",
+                   const std::string& outfile_hist= "HIST_CALOQA-00000000-000000.root",
+                   const std::string& dbtag= "ProdA_2024"
+  )
 {
 
   // towerinfov1=kPRDFTowerv1, v2=:kWaveformTowerv2, v3=kPRDFWaveform, v4=kPRDFTowerv4
@@ -61,20 +66,8 @@ void Fun4All_Year2(const std::string &fname = "DST_TRIGGERED_RAW_beam_new_2023p0
 
   recoConsts *rc = recoConsts::instance();
 
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
-  int runnumber = runseg.first;
-  int segment = runseg.second;
-  char outfile[100];
-  char outfile_hist[100];
-  sprintf(outfile, "DST_CALOR-%08d-%05d.root", runnumber, segment);
-  sprintf(outfile_hist, "HIST_CALOR-%08d-%05d", runnumber, segment);
-  string fulloutfile = string("./") + outfile;
-  string fulloutfile_hist = string("./") + outfile_hist;
-
-  // conditions DB flags
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
-  // 64 bit timestamp
-  rc->set_uint64Flag("TIMESTAMP", runnumber);
+  // conditions DB flags and timestamp
+  rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
   CDBInterface::instance()->Verbosity(1);
 
   FlagHandler *flag = new FlagHandler();
@@ -130,7 +123,6 @@ void Fun4All_Year2(const std::string &fname = "DST_TRIGGERED_RAW_beam_new_2023p0
   caEPD->set_offlineflag();
   se->registerSubsystem(caEPD);
 
-
   /////////////////////
   // Geometry 
   std::cout << "Adding Geometry file" << std::endl;
@@ -149,13 +141,12 @@ void Fun4All_Year2(const std::string &fname = "DST_TRIGGERED_RAW_beam_new_2023p0
   CaloValid *ca = new CaloValid("CaloValid");
   ca->set_timing_cut_width(200);
   se->registerSubsystem(ca);
-
   
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
   In->AddFile(fname);
   se->registerInputManager(In);
 
-  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", fulloutfile);
+  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfile);
   out->StripNode("CEMCPackets");
   out->StripNode("HCALPackets");
   out->StripNode("ZDCPackets");
@@ -166,9 +157,7 @@ void Fun4All_Year2(const std::string &fname = "DST_TRIGGERED_RAW_beam_new_2023p0
   se->run(nEvents);
   se->End();
 
-  TString qaname = fulloutfile_hist + "_qa.root";
-  std::string qaOutputFileName(qaname.Data());
-  QAHistManagerDef::saveQARootFile(qaOutputFileName);
+  QAHistManagerDef::saveQARootFile(outfile_hist);
 
   CDBInterface::instance()->Print();  // print used DB files
   se->PrintTimer();
