@@ -58,6 +58,9 @@ void Fun4All_Year2(int nEvents=100,
   )
 {
 
+  string fulloutfile = string("./") + outfile;
+  string fulloutfile_hist = string("./") + outfile_hist;
+
   // towerinfov1=kPRDFTowerv1, v2=:kWaveformTowerv2, v3=kPRDFWaveform, v4=kPRDFTowerv4
   CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kWaveformTowerv2;
 
@@ -70,9 +73,8 @@ void Fun4All_Year2(int nEvents=100,
   int runnumber = runseg.first;
   //int segment = runseg.second;
 
-  // conditions DB flags
+  // conditions DB flags and timestamp
   rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
-  // 64 bit timestamp
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   CDBInterface::instance()->Verbosity(1);
 
@@ -152,7 +154,7 @@ void Fun4All_Year2(int nEvents=100,
   In->AddFile(fname);
   se->registerInputManager(In);
 
-  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfile);
+  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", fulloutfile);
   out->StripNode("CEMCPackets");
   out->StripNode("HCALPackets");
   out->StripNode("ZDCPackets");
@@ -163,7 +165,7 @@ void Fun4All_Year2(int nEvents=100,
   se->run(nEvents);
   se->End();
 
-  QAHistManagerDef::saveQARootFile(outfile_hist);
+  QAHistManagerDef::saveQARootFile(fulloutfile_hist);
 
   CDBInterface::instance()->Print();  // print used DB files
   se->PrintTimer();
