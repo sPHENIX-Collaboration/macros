@@ -50,17 +50,11 @@ R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 
-void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commissioning/slurp/calobeam/run_00040700_00040800/DST_TRIGGERED_RAW_beam_new_2023p015-00040797-0001.root", int nEvents = 10)
+void Fun4All_Year2(const std::string &fname = "DST_TRIGGERED_RAW_beam_new_2023p015-00040797-0001.root", int nEvents = 100)
 {
-  bool addZeroSupCaloNodes = 0;
-  // v1 uncomment:
-  // CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv1;
-  // v2 uncomment:
+
+  // towerinfov1=kPRDFTowerv1, v2=:kWaveformTowerv2, v3=kPRDFWaveform, v4=kPRDFTowerv4
   CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kWaveformTowerv2;
-  // v3 uncomment:
-  //CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFWaveform;
-  // v4 uncomment:
-  // CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv4;
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
@@ -72,8 +66,8 @@ void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   int segment = runseg.second;
   char outfile[100];
   char outfile_hist[100];
-  sprintf(outfile, "DST_CALOR-%08d-%04d.root", runnumber, segment);
-  sprintf(outfile_hist, "HIST_CALOR-%08d-%04d.root", runnumber, segment);
+  sprintf(outfile, "DST_CALOR-%08d-%05d.root", runnumber, segment);
+  sprintf(outfile_hist, "HIST_CALOR-%08d-%05d", runnumber, segment);
   string fulloutfile = string("./") + outfile;
   string fulloutfile_hist = string("./") + outfile_hist;
 
@@ -145,15 +139,10 @@ void Fun4All_Year2(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   intrue2->AddFile(geoLocation);
   se->registerInputManager(intrue2);
 
-  Process_Calo_Calib();
 
-  
-  /////////////////
-  // Centrality 
-  //MinimumBiasClassifier *minimumbiasclassifier = new MinimumBiasClassifier();
-  //se->registerSubsystem(minimumbiasclassifier);
-  //CentralityReco *centralityreco = new CentralityReco();
-  //se->registerSubsystem(centralityreco);
+  /////////////////////////////////////////////////////
+  // Set status of towers, Calibrate towers,  Cluster
+  Process_Calo_Calib();
 
   ///////////////////////////////////
   // Validation 
