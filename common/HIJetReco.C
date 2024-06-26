@@ -53,10 +53,10 @@ void HIJetReco()
       TruthJetInput *tji = new TruthJetInput(Jet::PARTICLE);
       tji->add_embedding_flag(0);  // changes depending on signal vs. embedded
       truthjetreco->add_input(tji);
-      truthjetreco->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.2), "AntiKt_Truth_r02");
-      truthjetreco->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.3), "AntiKt_Truth_r03");
-      truthjetreco->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.4), "AntiKt_Truth_r04");
-      truthjetreco->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.5), "AntiKt_Truth_r05");
+      truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.2), "AntiKt_Truth_r02");
+      truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.3), "AntiKt_Truth_r03");
+      truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.4), "AntiKt_Truth_r04");
+      truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.5), "AntiKt_Truth_r05");
       truthjetreco->set_algo_node("ANTIKT");
       truthjetreco->set_input_node("TRUTH");
       truthjetreco->Verbosity(verbosity);
