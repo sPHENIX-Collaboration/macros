@@ -145,7 +145,7 @@ void Fun4All_FieldOnAllTrackers(
   seeder->SetLayerRange(7, 55);
   seeder->SetSearchWindow(2.,0.05); // z-width and phi-width, default in macro at 1.5 and 0.05
   seeder->SetClusAdd_delta_window(3.0,0.06); //  (0.5, 0.005) are default; sdzdr_cutoff, d2/dr2(phi)_cutoff
-  seeder->SetNClustersPerSeedRange(4,60); // default is 6, 6
+  //seeder->SetNClustersPerSeedRange(4,60); // default is 6, 6
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
