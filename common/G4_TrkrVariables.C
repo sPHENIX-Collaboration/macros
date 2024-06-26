@@ -124,7 +124,7 @@ namespace G4TPC
   bool ENABLE_REACHES_READOUT = true;
 
   // module edge distortion corrections
-  bool ENABLE_MODULE_EDGE_CORRECTIONS = true;
+  bool ENABLE_MODULE_EDGE_CORRECTIONS = false;
   std::string module_edge_correction_filename = "";
 
   // static distortion corrections
