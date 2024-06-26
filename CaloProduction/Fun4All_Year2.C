@@ -66,13 +66,8 @@ void Fun4All_Year2(int nEvents=100,
 
   recoConsts *rc = recoConsts::instance();
 
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
-  int runnumber = runseg.first;
-  //int segment = runseg.second;
-
   // conditions DB flags and timestamp
   rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
-  rc->set_uint64Flag("TIMESTAMP", runnumber);
   CDBInterface::instance()->Verbosity(1);
 
   FlagHandler *flag = new FlagHandler();
