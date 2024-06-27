@@ -1,5 +1,5 @@
-#ifndef FUN4ALL_YEAR1_C
-#define FUN4ALL_YEAR1_C
+#ifndef FUN4ALL_YEAR2_C
+#define FUN4ALL_YEAR2_C
 
 #include <QA.C>
 #include<Calo_Calib.C>
@@ -68,6 +68,7 @@ void Fun4All_Year2(int nEvents=100,
 
   // conditions DB flags and timestamp
   rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
   CDBInterface::instance()->Verbosity(1);
 
   FlagHandler *flag = new FlagHandler();
