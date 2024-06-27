@@ -54,7 +54,7 @@ macro (
 		}
 
 		auto* intt_sngl = new SingleInttPoolInput("INTT_" + std::to_string(i));
-		intt_sngl->SetNegativeBco(0); // not sure what this does
+		intt_sngl->SetNegativeBco(0);
 		intt_sngl->SetBcoRange(2);
 		intt_sngl->AddListFile(buff);
 		in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
@@ -81,12 +81,14 @@ macro (
 	inttcalib->SetBcoMapPngFile(bcomap_png_file);
 	se->registerSubsystem(inttcalib);
 
-	std::cout << "\n"
-	          << "hotmap_cdb_file: " << hotmap_cdb_file << "\n"
-	          << "hotmap_png_file: " << hotmap_png_file << "\n"
-	          << "bcomap_cdb_file: " << bcomap_cdb_file << "\n"
-	          << "bcomap_png_file: " << bcomap_png_file << "\n"
-			  << std::endl;
+	if(inttcalib->Verbosity()) {
+		std::cout << "\n"
+		          << "hotmap_cdb_file: " << hotmap_cdb_file << "\n"
+		          << "hotmap_png_file: " << hotmap_png_file << "\n"
+		          << "bcomap_cdb_file: " << bcomap_cdb_file << "\n"
+		          << "bcomap_png_file: " << bcomap_png_file << "\n"
+				  << std::endl;
+	}
 
 	// Run
 	se->run(num_evt);
