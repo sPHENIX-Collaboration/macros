@@ -81,6 +81,10 @@ void Fun4All_FieldOnAllTrackers(
 
   G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
+  //to turn on the default static corrections, enable the two lines below
+  //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
+  //G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS = false;
+
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
