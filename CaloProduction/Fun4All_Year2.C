@@ -2,7 +2,7 @@
 #define FUN4ALL_YEAR2_C
 
 #include <QA.C>
-#include<Calo_Calib.C>
+#include <Calo_Calib.C>
 
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloTowerCalib.h>
@@ -62,9 +62,12 @@ void Fun4All_Year2(int nEvents=100,
   CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kWaveformTowerv2;
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0);
+  se->Verbosity(1);
 
   recoConsts *rc = recoConsts::instance();
+
+  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  int runnumber = runseg.first;
 
   // conditions DB flags and timestamp
   rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
