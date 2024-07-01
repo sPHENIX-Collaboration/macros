@@ -2,13 +2,13 @@
 #define MACRO_JETQA_C
 
 #include <fun4all/Fun4AllServer.h>
-#include </sphenix/u/danderson/install/include/jetqa/ConstituentsinJets.h>
-#include </sphenix/u/danderson/install/include/jetqa/JetKinematicCheck.h>
-#include </sphenix/u/danderson/install/include/jetqa/JetQADefs.h>
-#include </sphenix/u/danderson/install/include/jetqa/JetSeedCount.h>
-#include </sphenix/u/danderson/install/include/jetqa/RhosinEvent.h>
-#include </sphenix/u/danderson/install/include/jetqa/StructureinJets.h>
-#include </sphenix/u/danderson/install/include/jetqa/TrksInJetQA.h>
+#include <jetqa/ConstituentsinJets.h>
+#include <jetqa/JetKinematicCheck.h>
+#include <jetqa/JetQADefs.h>
+#include <jetqa/JetSeedCount.h>
+#include <jetqa/RhosinEvent.h>
+#include <jetqa/StructureinJets.h>
+#include <jetqa/TrksInJetQA.h>
 
 #include <HIJetReco.C>
 #include <QA.C>
