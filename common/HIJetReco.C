@@ -135,4 +135,34 @@ void HIJetReco()
   return;
 
 }
+
+
+// ----------------------------------------------------------------------------
+//! Determine rho from tower input to jet reco (necessary for jet QA)
+// ----------------------------------------------------------------------------
+void DoRhoCalculation()
+{
+
+  // set verbosity
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
+
+  //---------------
+  // Fun4All server
+  //---------------
+  Fun4AllServer* se = Fun4AllServer::instance();
+
+  // run rho calculations w/ default parameters
+  DetermineTowerRho* towRhoCalc = new DetermineTowerRho();
+  towRhoCalc -> add_method(TowerRho::Method::AREA);
+  towRhoCalc -> add_method(TowerRho::Method::MULT);
+  towRhoCalc -> add_tower_input( new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER) );
+  towRhoCalc -> add_tower_input( new TowerJetInput(Jet::HCALIN_TOWERINFO) );
+  towRhoCalc -> add_tower_input( new TowerJetInput(Jet::HCALOUT_TOWERINFO) );
+  se -> registerSubsystem( towRhoCalc );
+
+  // exit back to main macro
+  return;
+
+}
+
 #endif
