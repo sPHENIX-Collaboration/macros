@@ -4,9 +4,11 @@ import subprocess
 
 def get_unique_run_dataset_pairs(cursor):
     query = """
-    SELECT DISTINCT runnumber, dataset
+    SELECT runnumber, dataset
     FROM datasets
-    WHERE filename LIKE 'DST_TRIGGER%' AND runnumber > 42635;
+    WHERE filename LIKE 'DST_CALO%' AND runnumber > 42635
+    GROUP BY runnumber, dataset
+    HAVING SUM(events) > 500000;
     """
     cursor.execute(query)
     run_dataset_pairs = {(row.runnumber, row.dataset) for row in cursor.fetchall()}
@@ -69,7 +71,7 @@ def main():
                 continue  # Skip if the dataset does not match
             print(f"run: {run}  dataset: {result_dataset}  total events in hists = {total_events}")
 
-            if total_events > 1000000:
+            if total_events > 500000:
                 file_paths = get_file_paths(cursor, run, result_dataset)
                 with open('files.txt', 'w') as f:
                     for path in file_paths:
@@ -83,6 +85,7 @@ def main():
                 print("waiting on that run")
 
     conn.close()
+    print("All done")
 
 if __name__ == "__main__":
     main()
