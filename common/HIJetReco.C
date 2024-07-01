@@ -33,6 +33,7 @@ namespace HIJETS
 {
   bool do_flow = false; // should be set to true once the EPD event plane correction is implemented
   bool do_CS = false;
+  bool is_pp = false;  // turn off functionality only relevant for nucleon collisions
   std::string tower_prefix = "TOWERINFO_CALIB";
 }  // namespace HIJETS
 
