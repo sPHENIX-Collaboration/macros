@@ -34,6 +34,7 @@
 #include <G4_Magnet.C>
 #include <GlobalVariables.C>
 #include <HIJetReco.C>
+#include <Jet_QA.C>
 #include <QA.C>
 #include <Trkr_Clustering.C>
 
@@ -68,6 +69,9 @@ void Fun4All_TrackAndCaloJetValid(
   const std::string  qaBase = "HIST_JET_QA",
   std::optional<int> run    = std::nullopt
 ) {
+
+  // turn on pp mode
+  HIJETS::is_pp = true;
 
   // initialize fun4all ------------------------------------------------------
 
@@ -130,88 +134,23 @@ void Fun4All_TrackAndCaloJetValid(
 
   // register & run necessary reconstruction ----------------------------------
 
-  // do vertex reconstruction
+  // do vertex & centrality reconstruction
   Global_Reco(); 
+  if (!HIJETS::is_pp) {
+    Centrality();
+  }
 
-  // initialize and register centrality calculator
-  PHG4CentralityReco* centReco = new PHG4CentralityReco();
-  centReco -> Verbosity(verb);
-  centReco -> GetCalibrationParameters().ReadFromFile(
-    "centrality",
-    "xml",
-    0,
-    0,
-    string(getenv("CALIBRATIONROOT")) + string("/Centrality/")
-  );
-  se -> registerSubsystem( centReco );
-
-  // do jet reconstruction
+  // do jet reconstruction & rho calculation
   HIJetReco();  
-
-  // run rho calculations w/ default parameters
-  DetermineTowerRho* towRhoCalc = new DetermineTowerRho();
-  towRhoCalc -> add_method(TowerRho::Method::AREA);
-  towRhoCalc -> add_method(TowerRho::Method::MULT);
-  towRhoCalc -> add_tower_input( new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER) );
-  towRhoCalc -> add_tower_input( new TowerJetInput(Jet::HCALIN_TOWERINFO) );
-  towRhoCalc -> add_tower_input( new TowerJetInput(Jet::HCALOUT_TOWERINFO) );
-  se         -> registerSubsystem( towRhoCalc );
+  DoRhoCalculation();
 
   // register qa modules ------------------------------------------------------
 
-  // initialize and register mass, eta, and pt qa module 
-  JetKinematicCheck* kinematicQA = new JetKinematicCheck(
-    "AntiKt_Tower_r02",
-    "AntiKt_Tower_r03",
-    "AntiKt_Tower_r04"
-  );
-  kinematicQA -> setPtRange(10., 100.);
-  kinematicQA -> setEtaRange(-1.1, 1.1);
-  se          -> registerSubsystem(kinematicQA);
+  // add generic jet QA
+  CommonJetQA();
 
-  // initialize and register jet seed counter qa module
-  JetSeedCount* jetSeedQA = new JetSeedCount("AntiKt_Tower_r04_Sub1", "", "");
-  jetSeedQA -> setPtRange(5., 100);
-  jetSeedQA -> setEtaRange(-1.1, 1.1);
-  jetSeedQA -> setWriteToOutputFile(false);
-  se        -> registerSubsystem( jetSeedQA );
-
-  // initialize and register constituent checks
-  ConstituentsinJets* jetCstsQA = new ConstituentsinJets("AntiKt_Tower_r04");
-  jetCstsQA -> setPtRange(5., 100.);
-  jetCstsQA -> setEtaRange(-1.1, 1.1);
-  se        -> registerSubsystem( jetCstsQA );
-
-  // initialize and register event-wise rho check
-  RhosinEvent* evtRhoQA = new RhosinEvent("EventWiseRho");
-  evtRhoQA -> add_area_rho_node("TowerRho_AREA");
-  evtRhoQA -> add_mult_rho_node("TowerRho_MULT");
-  se       -> registerSubsystem( evtRhoQA );
-
-  // intialize and register sum track vs. jet pt qa module
-  StructureinJets* jetStructQA = new StructureinJets("AntiKt_Tower_r04_Sub1", "");
-  jetStructQA -> writeToOutputFile(false);
-  se          -> registerSubsystem(jetStructQA);
-
-  // initialize and register track jet qa module
-  TrksInJetQA* trksInJetQA = new TrksInJetQA("TrksInJetQANode_ClustJets");
-  trksInJetQA -> SetHistSuffix("TowerJetSub1");
-  trksInJetQA -> Configure(
-    {
-      .outMode     = TrksInJetQA::OutMode::QA,
-      .verbose     = verb,
-      .doDebug     = false,
-      .doInclusive = false,
-      .doInJet     = true,
-      .doHitQA     = false,
-      .doClustQA   = true,
-      .doTrackQA   = true,
-      .doJetQA     = true,
-      .rJet        = 0.4,
-      .jetInNode   = "AntiKt_Tower_r04_Sub1"
-    }
-  );
-  se -> registerSubsystem(trksInJetQA);
+  // add track jet QA
+  JetsWithTracksQA();
 
   // run modules and exit -----------------------------------------------------
 
