@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import pyodbc
 import subprocess
 
@@ -50,6 +51,14 @@ def main():
     conn = pyodbc.connect("DSN=FileCatalog;UID=phnxrc;READONLY=True")
     cursor = conn.cursor()
 
+    if not os.path.exists('completedruns.txt'):
+        open('completedruns.txt', 'w').close()
+
+    if not os.path.exists('mergedQA'):
+        os.makedirs('mergedQA')
+    if not os.path.exists('hotMaps'):
+        os.makedirs('hotMaps')
+
     unique_run_dataset_pairs = get_unique_run_dataset_pairs(cursor)
 
     with open('completedruns.txt') as f:
@@ -77,7 +86,7 @@ def main():
                     for path in file_paths:
                         f.write(f"{path}\n")
 
-                subprocess.run(["hadd", f"mergedQA/HIST_CALO_{result_dataset}-{run}.root"] + file_paths)
+                subprocess.run(["hadd","-ff", f"mergedQA/HIST_CALO_{result_dataset}-{run}.root"] + file_paths)
                 subprocess.run(["root", "-b", "-q", f"doFindTowersEMCal.C(\"mergedQA/HIST_CALO_{result_dataset}-{run}.root\",\"hotMaps/EMCalHotMap_{result_dataset}-{run}.root\")"])
                 with open('completedruns.txt', 'a') as f:
                     f.write(f"{run},{result_dataset}\n")
