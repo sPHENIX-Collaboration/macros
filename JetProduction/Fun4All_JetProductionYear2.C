@@ -12,7 +12,9 @@
 
 // coresoftware headers
 #include <ffamodules/CDBInterface.h>
+#include <ffamodules/FlagHandler.h>
 #include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
@@ -41,11 +43,11 @@ R__LOAD_LIBRARY(libjetbackground.so)
 R__LOAD_LIBRARY(libqautils.so)
 
 
-// ----------------------------------------------------------------------------
-//! The Year 2 Jet Structure Topical Group production macro
-// ----------------------------------------------------------------------------
+
+// macro body -----------------------------------------------------------------
+
 void Fun4All_JetProductionYear2(
-  const int nEvents = 100,
+  const int nEvents = 0,
   const std::string& infile = "DST_CALO_run2pp_new_2024p001-00042586-0000.root",
   const std::string& outfile = "DST_JET-00042586-0000.root",
   const std::string& outfile_hist = "HIST_JETQA-00042586-0000.root",
@@ -59,6 +61,10 @@ void Fun4All_JetProductionYear2(
   // turn on pp mode
   HIJETS::is_pp = true;
 
+  // qa options
+  JetQA::HasTracks = false;
+  JetQA::UseTrigger = true;
+
   // initialize F4A server
   Fun4AllServer* se = Fun4AllServer::instance();
   se -> Verbosity(1);
@@ -68,7 +74,7 @@ void Fun4All_JetProductionYear2(
   int runnumber = runseg.first;
 
   // set up reconstruction constants, DB tag, timestamp
-  recoconsts* rc = recoConsts::instance();
+  recoConsts* rc = recoConsts::instance();
   rc -> set_StringFlag("CDB_GLOBALTAG", dbtag);
   rc -> set_uint64Flag("TIMESTAMP", runnumber);
 
@@ -81,7 +87,7 @@ void Fun4All_JetProductionYear2(
 
   // read in input
   Fun4AllInputManager* in = new Fun4AllDstInputManager("in");
-  in -> AddFile(fname);
+  in -> AddFile(infile);
   se -> registerInputManager(in);
 
   // do vertex & centrality reconstruction
@@ -98,7 +104,7 @@ void Fun4All_JetProductionYear2(
   if (Enable::QA)
   {
     DoRhoCalculation();
-    CommonJetQA();
+    Jet_QA();
   }
 
   // if needed, save DST output

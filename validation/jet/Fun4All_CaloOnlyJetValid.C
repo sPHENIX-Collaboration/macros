@@ -60,6 +60,10 @@ void Fun4All_CaloOnlyJetValid(
   // turn on pp mode
   HIJETS::is_pp = true;
 
+  // qa options
+  JetQA::HasTracks = false;
+  JetQA::UseTrigger = true;
+
   // initialize fun4all ------------------------------------------------------
 
   // announce start of macro
@@ -119,7 +123,7 @@ void Fun4All_CaloOnlyJetValid(
 
   // register qa modules ------------------------------------------------------
 
-  CommonJetQA();
+  Jet_QA();
 
   // run modules and exit -----------------------------------------------------
 
