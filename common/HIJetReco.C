@@ -10,10 +10,12 @@
 
 #include <jetbackground/CopyAndSubtractJets.h>
 #include <jetbackground/DetermineTowerBackground.h>
+#include <jetbackground/DetermineTowerRho.h>
 #include <jetbackground/FastJetAlgoSub.h>
 #include <jetbackground/RetowerCEMC.h>
 #include <jetbackground/SubtractTowers.h>
 #include <jetbackground/SubtractTowersCS.h>
+#include <jetbackground/TowerRho.h>
 
 #include <fun4all/Fun4AllServer.h>
 
