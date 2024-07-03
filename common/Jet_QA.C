@@ -9,11 +9,16 @@
 #include <jetqa/RhosinEvent.h>
 #include <jetqa/StructureinJets.h>
 #include <jetqa/TrksInJetQA.h>
+#include <map>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <HIJetReco.C>
 #include <QA.C>
 
-R__LOAD_LIBRARY(/sphenix/u/danderson/install/lib/libjetqa.so)
+R__LOAD_LIBRARY(libjetqa.so)
 
 
 
@@ -23,125 +28,423 @@ R__LOAD_LIBRARY(/sphenix/u/danderson/install/lib/libjetqa.so)
 namespace JetQA
 {
 
-  /* TODO will go here */
+  // flags --------------------------------------------------------------------
+
+  //! Set to true if input jets utilize tracks (e.g. via particle flow)
+  bool HasTracks = false;
+
+  //! Set to true to select a particular set of triggers
+  bool UseTrigger = true;
+
+
+
+  // enums --------------------------------------------------------------------
+
+  enum Type
+  {
+    AntiKtTowerSubR02,
+    AntiKtTowerSubR03,
+    AntiKtTowerSubR04,
+    AntiKtTowerSubR05
+  };
+
+
+
+  // constants ----------------------------------------------------------------
+
+  //! Max jet pt in GeV/c
+  double MaxJetPt = 100.;
+
+  //! Min eta acceptance
+  double MinAcceptEta = -1.1;
+
+  //! Max eta acceptance
+  double MaxAcceptEta = 1.1;
+
+
+
+  // maps ---------------------------------------------------------------------
+
+  std::map<uint32_t, std::string> GL1Tag = {
+    {JetQADefs::GL1::Clock, "clock"},
+    {JetQADefs::GL1::ZDCS, "zdcs"},
+    {JetQADefs::GL1::ZDCN, "zdcn"},
+    {JetQADefs::GL1::ZDCNS, "zdcns"},
+    {JetQADefs::GL1::Random, "random"},
+    {JetQADefs::GL1::HCalSingle, "hcalsingle"},
+    {JetQADefs::GL1::MBDS, "mbds"},
+    {JetQADefs::GL1::MBDN, "mbdn"},
+    {JetQADefs::GL1::MBDNS1, "mbdns1"},
+    {JetQADefs::GL1::MBDNS2, "mbdns2"},
+    {JetQADefs::GL1::MBDNSVtx10, "mbdnsvtx10"},
+    {JetQADefs::GL1::MBDNSVtx30, "mbdnsvtx30"},
+    {JetQADefs::GL1::MBDNSVtx60, "mbdnsvtx60"},
+    {JetQADefs::GL1::MBDNSHCalSingle, "mbdnshcalsingle"},
+    {JetQADefs::GL1::MBDNSJet1, "mbdnsjet1"},
+    {JetQADefs::GL1::MBDNSJet2, "mbdnsjet2"},
+    {JetQADefs::GL1::MBDNSJet3, "mbdnsjet3"},
+    {JetQADefs::GL1::MBDNSJet4, "mbdnsjet4"},
+    {JetQADefs::GL1::Jet1, "jet1"},
+    {JetQADefs::GL1::Jet2, "jet2"},
+    {JetQADefs::GL1::Jet3, "jet3"},
+    {JetQADefs::GL1::Jet4, "jet4"},
+    {JetQADefs::GL1::MBDNSPhoton1, "mbdnsphoton1"},
+    {JetQADefs::GL1::MBDNSPhoton2, "mbdnsphoton2"},
+    {JetQADefs::GL1::MBDNSPhoton3, "mbdnsphoton3"},
+    {JetQADefs::GL1::MBDNSPhoton4, "mbdnsphoton4"},
+    {JetQADefs::GL1::Photon1, "photon1"},
+    {JetQADefs::GL1::Photon2, "photon2"},
+    {JetQADefs::GL1::Photon3, "photon3"},
+    {JetQADefs::GL1::Photon4, "photon4"} 
+  };
+
+  std::map<uint32_t, std::string> JetInput = {
+    {Type::AntiKtTowerSubR02, "AntiKt_Tower_r02_Sub1"},
+    {Type::AntiKtTowerSubR03, "AntiKt_Tower_r03_Sub1"},
+    {Type::AntiKtTowerSubR04, "AntiKt_Tower_r04_Sub1"},
+    {Type::AntiKtTowerSubR05, "AntiKt_Tower_r05_Sub1"}
+  };
+
+  std::map<uint32_t, std::string> JetTag = {
+    {Type::AntiKtTowerSubR02, "towersub1_antikt_r02"},
+    {Type::AntiKtTowerSubR03, "towersub1_antikt_r03"},
+    {Type::AntiKtTowerSubR04, "towersub1_antikt_r04"},
+    {Type::AntiKtTowerSubR05, "towersub1_antikt_r05"}
+  };
+
+
+  // methods ------------------------------------------------------------------
+
+  // --------------------------------------------------------------------------
+  //! Get minimum jet pt based on which trigger fired
+  // --------------------------------------------------------------------------
+  // FIXME it might be prudent to allow for thresholds to change vs. run
+  //   number... Before run 46038, the Jet1, 2 thresholds were different
+  inline double GetMinJetPt(const uint32_t trg = JetQADefs::GL1::MBDNSJet1)
+  {
+
+    double ptJetMin;
+    switch (trg)
+    {
+      // Jet4 threshold
+      case JetQADefs::GL1::MBDNSJet4:
+        [[fallthrough]];
+      case JetQADefs::GL1::Jet4:
+        ptJetMin = 11.;
+        break;
+
+      // Jet3 threshold
+      case JetQADefs::GL1::MBDNSJet3:
+        [[fallthrough]];
+      case JetQADefs::GL1::Jet3:
+        ptJetMin = 10.;
+        break;
+
+      // Jet2 threshold
+      case JetQADefs::GL1::MBDNSJet2:
+        [[fallthrough]];
+      case JetQADefs::GL1::Jet2:
+        ptJetMin = 9.;
+        break;
+
+      // Jet1 threshold (default value)
+      case JetQADefs::GL1::MBDNSJet1:
+        [[fallthrough]];
+      case JetQADefs::GL1::Jet1:
+        [[fallthrough]];
+      default:
+        ptJetMin = 6.;
+        break;
+    }
+    return ptJetMin;
+
+  }  // end 'GetMinJetPt(uint32_t)'
+
+
+
+  // --------------------------------------------------------------------------
+  //! Get default jet pt range
+  // --------------------------------------------------------------------------
+  inline std::pair<double, double> GetDefaultJetPtRange(std::optional<uint32_t> trg = std::nullopt)
+  {
+
+    std::pair<double, double> ptJetRange;
+    if (trg.has_value())
+    {
+      ptJetRange = {GetMinJetPt(trg.value()), MaxJetPt};
+    }
+    else
+    {
+      ptJetRange = {GetMinJetPt(), MaxJetPt};
+    }
+    return ptJetRange;
+
+  }  // end 'GetDefaultJetPtRange(std::optional<uint32_t>)'
+
+
+
+  // --------------------------------------------------------------------------
+  //! Get default jet eta range
+  // --------------------------------------------------------------------------
+  inline std::pair<double, double> GetDefaultJetEtaRange(const double res = 0.)
+  {
+
+    const double etaMin = MinAcceptEta + res;
+    const double etaMax = MaxAcceptEta - res;
+    std::pair<double, double> etaJetRange = {etaMin, etaMax};
+    return etaJetRange;
+
+  }  // end 'GetDefaultJetEtaRange(double)'
+
+
+
+  // --------------------------------------------------------------------------
+  //! Get default list of triggers to analyze
+  // --------------------------------------------------------------------------
+  inline std::vector<uint32_t> GetDefaultTriggerList()
+  {
+
+    std::vector<uint32_t> vecDefaultTrigs = {
+      JetQADefs::GL1::MBDNS1,
+      JetQADefs::GL1::MBDNSJet1,
+      JetQADefs::GL1::MBDNSJet2,
+      JetQADefs::GL1::MBDNSJet3,
+      JetQADefs::GL1::MBDNSJet4
+    };
+    return vecDefaultTrigs;
+
+  }  // end 'GetDefaultTriggerList()'
+
+
+
+  // --------------------------------------------------------------------------
+  //! Get list of jets to analyze
+  // --------------------------------------------------------------------------
+  inline std::vector<uint32_t> GetJetsToQA()
+  {
+
+    std::vector<uint32_t> vecJetsToQA = {
+      Type::AntiKtTowerSubR02,
+      Type::AntiKtTowerSubR03,
+      Type::AntiKtTowerSubR04,
+      Type::AntiKtTowerSubR05
+    };
+    return vecJetsToQA;
+
+  }  // end 'GetJetsToQA()'
 
 }  // end JetQA namespace
 
 
+
 // ----------------------------------------------------------------------------
-//! QA for all jets, regardless of constituents
+//! Create QA modules for all jets, regardless of constituents
 // ----------------------------------------------------------------------------
-// TODO factorize so that you can specify
-//   a trigger, and it will create all
-//   the relevant modules
-//
-// TODO clean-up by
-//   (1) moving all tags to vectors
-//   (2) moving default cuts to a struct
-void CommonJetQA()
+void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
 {
 
-  // FIXME select on max of verbosities
-  Enable::QA_VERBOSITY = 10;
+  // set verbosity
+  int verbosity = std::max(Enable::QA_VERBOSITY, Enable::HIJETS_VERBOSITY);
+
+  // make trigger tag
+  std::string trig_tag("");
+  if (trg.has_value())
+  {
+    trig_tag.append("_" + JetQA::GL1Tag[trg.value()]);
+  }
+
+  // grab default pt, eta ranges
+  std::pair<double, double> ptJetRange = JetQA::GetDefaultJetPtRange(trg);
+  std::pair<double, double> etaJetRange = JetQA::GetDefaultJetEtaRange();
+
+  // get list of jet nodes to analyze
+  std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA();
 
   // connect to f4a server
   Fun4AllServer* se = Fun4AllServer::instance();
+
+  // create modules that are independent of/take multiple R values ------------
+
+  // initialize and register event-wise rho check
+  RhosinEvent* evtRhoQA = new RhosinEvent("EventWiseRho" + trig_tag, "");
+  evtRhoQA -> Verbosity(verbosity); 
+  evtRhoQA -> add_area_rho_node("TowerRho_AREA");
+  evtRhoQA -> add_mult_rho_node("TowerRho_MULT");
+  if (trg.has_value())
+  {
+    evtRhoQA -> setTrgToSelect(trg.value());
+  }
+  se -> registerSubsystem(evtRhoQA);
 
   // initialize and register mass, eta, and pt qa module 
   JetKinematicCheck* kinematicQA = new JetKinematicCheck(
-    "JetKinematicCheck",
-    "AntiKt_Tower_r02_Sub1",
-    "AntiKt_Tower_r03_Sub1",
-    "AntiKt_Tower_r04_Sub1",
-    "AntiKt_Tower_r05_Sub1"
+    "JetKinematicCheck" + trig_tag + "_towersub1_antikt",
+    JetQA::JetInput[JetQA::Type::AntiKtTowerSubR02],
+    JetQA::JetInput[JetQA::Type::AntiKtTowerSubR03],
+    JetQA::JetInput[JetQA::Type::AntiKtTowerSubR04],
+    JetQA::JetInput[JetQA::Type::AntiKtTowerSubR05]
   );
-  kinematicQA -> setHistTag("AntiKt_Tower_AllTrig");
-  kinematicQA -> setPtRange(10., 100.);
-  kinematicQA -> setEtaRange(-1.1, 1.1);
-  se          -> registerSubsystem(kinematicQA);
+  kinematicQA -> Verbosity(verbosity);
+  kinematicQA -> setHistTag("");
+  kinematicQA -> setPtRange(ptJetRange.first, ptJetRange.second);
+  kinematicQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
+  if (trg.has_value())
+  {
+    kinematicQA -> setTrgToSelect(trg.value());
+  }
+  se -> registerSubsystem(kinematicQA);
 
-  // initialize and register jet seed counter qa module
-  JetSeedCount* jetSeedQA = new JetSeedCount(
-    "JetSeedCount",
-    "AntiKt_Tower_r04_Sub1",
-    "AntiKt_TowerInfo_HIRecoSeedsRaw_r02",
-    "AntiKt_TowerInfo_HIRecoSeedsSub_r02"
-  );
-  jetSeedQA -> setHistTag("r04_AntiKt_Tower_Sub1_AllTrig");
-  jetSeedQA -> setPtRange(5., 100.);
-  jetSeedQA -> setEtaRange(-1.1, 1.1);
-  jetSeedQA -> setWriteToOutputFile(false);
-  jetSeedQA -> setPPMode(HIJETS::is_pp);
-  se        -> registerSubsystem( jetSeedQA );
+  // create modules that take single R values ---------------------------------
 
-  // initialize and register constituent checks
-  ConstituentsinJets* jetCstsQAR03Jet1 = new ConstituentsinJets(
-    "ConstituentsInJetsR03Jet1",
-    "AntiKt_Tower_r03_Sub1",
-    "TowerInfoBackground_Sub1",
-    "r03_AntiKt_Tower_Jet1"
-  );
-  jetCstsQAR03Jet1 -> setTrgToSelect(JetQADefs::GL1::MBDNSJet1);
-  jetCstsQAR03Jet1 -> setPtRange(5., 100.);
-  jetCstsQAR03Jet1 -> setEtaRange(-1.1, 1.1);
-  se               -> registerSubsystem( jetCstsQAR03Jet1 );
+  for (uint32_t jet : vecJetsToQA)
+  {
 
-  // initialize and register constituent checks
-  ConstituentsinJets* jetCstsQA = new ConstituentsinJets(
-    "ConstituentsInJetsR04Jet4",
-    "AntiKt_Tower_r04_Sub1",
-    "r04_AntiKt_Tower_Jet4"
-  );
-  jetCstsQA -> setTrgToSelect(JetQADefs::GL1::MBDNSJet4);
-  jetCstsQA -> setPtRange(5., 100.);
-  jetCstsQA -> setEtaRange(-1.1, 1.1);
-  se        -> registerSubsystem( jetCstsQA );
+    // initialize and register jet seed counter qa module
+    JetSeedCount* jetSeedQA = new JetSeedCount(
+      "JetSeedCount" + trig_tag + "_" + JetQA::JetTag[jet],
+      JetQA::JetInput[jet],
+      "AntiKt_TowerInfo_HIRecoSeedsRaw_r02",
+      "AntiKt_TowerInfo_HIRecoSeedsSub_r02"
+    );
+    jetSeedQA -> Verbosity(verbosity);
+    jetSeedQA -> setHistTag("");
+    jetSeedQA -> setPtRange(ptJetRange.first, ptJetRange.second);
+    jetSeedQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
+    jetSeedQA -> setWriteToOutputFile(false);
+    jetSeedQA -> setPPMode(HIJETS::is_pp);
+    if (trg.has_value())
+    {
+      jetSeedQA -> setTrgToSelect(trg.value());
+    }
+    se -> registerSubsystem(jetSeedQA);
 
-  // initialize and register event-wise rho check
-  RhosinEvent* evtRhoQA = new RhosinEvent("EventWiseRho", "AllTrig");
-  evtRhoQA -> add_area_rho_node("TowerRho_AREA");
-  evtRhoQA -> add_mult_rho_node("TowerRho_MULT");
-  se       -> registerSubsystem( evtRhoQA );
+    // initialize and register constituent checks
+    ConstituentsinJets* jetCstQA = new ConstituentsinJets(
+      "ConstituentsInJets" + trig_tag + "_" + JetQA::JetTag[jet],
+      JetQA::JetInput[jet],
+      "TowerInfoBackground_Sub1",
+      ""
+    );
+    jetCstQA -> Verbosity(verbosity);
+    jetCstQA -> setPtRange(ptJetRange.first, ptJetRange.second);
+    jetCstQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
+    if (trg.has_value())
+    {
+      jetCstQA -> setTrgToSelect();
+    }
+    se -> registerSubsystem(jetCstQA);
 
-}  // end 'CommonJetQA()'
+  }  // end jet loop
+  return;
+
+}  // end 'CommonJetQA(std::optional<uint32_t>)'
 
 
 
 // ----------------------------------------------------------------------------
-//! QA for jets with tracks
+//! Create QA modules for jets with tracks
 // ----------------------------------------------------------------------------
-void JetsWithTracksQA()
+void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
 {
+
+  // set verbosity
+  int verbosity = std::max(Enable::QA_VERBOSITY, Enable::HIJETS_VERBOSITY);
+
+  // make trigger tag
+  std::string trig_tag("");
+  if (trg.has_value())
+  {
+    trig_tag.append("_" + JetQA::GL1Tag[trg.value()]);
+  }
+
+  // grab default pt, eta ranges
+  std::pair<double, double> ptJetRange = JetQA::GetDefaultJetPtRange(trg);
+  std::pair<double, double> etaJetRange = JetQA::GetDefaultJetEtaRange();
+
+  // get list of jet nodes to analyze
+  std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA();
 
   // connect to f4a server
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  // intialize and register sum track vs. jet pt qa module
-  StructureinJets* jetStructQA = new StructureinJets("AntiKt_Tower_r04_Sub1", "");
-  jetStructQA -> writeToOutputFile(false);
-  se          -> registerSubsystem(jetStructQA);
+  // create modules that take single R values ---------------------------------
 
-  // initialize and register track jet qa module
-  TrksInJetQA* trksInJetQA = new TrksInJetQA("TrksInJetQANode_ClustJets");
-  trksInJetQA -> SetHistSuffix("TowerJetSub1");
-  trksInJetQA -> Configure(
+  for (uint32_t jet : vecJetsToQA)
+  {
+
+    // intialize and register sum track vs. jet pt qa module
+    StructureinJets* jetStructQA = new StructureinJets(
+      "StructureInJets" + trig_tag + "_" + JetQA::JetTag[jet],
+      JetQA::JetInput[jet],
+      ""
+    );
+    jetStructQA -> Verbosity(verbosity);
+    jetStructQA -> writeToOutputFile(false);
+    if (trg.has_value())
     {
-      .outMode     = TrksInJetQA::OutMode::QA,
-      .verbose     = Enable::QA_VERBOSITY,
-      .doDebug     = false,
-      .doInclusive = false,
-      .doInJet     = true,
-      .doHitQA     = false,
-      .doClustQA   = true,
-      .doTrackQA   = true,
-      .doJetQA     = true,
-      .rJet        = 0.4,
-      .jetInNode   = "AntiKt_Tower_r04_Sub1"
+      jetStructQA -> setTrgToSelect(trg.value());
     }
-  );
-  se -> registerSubsystem(trksInJetQA);
+    se -> registerSubsystem(jetStructQA);
 
-}  // end 'JetWithTracksQA()'
+    // initialize and register track jet qa module
+    TrksInJetQA* trksInJetQA = new TrksInJetQA("TrksInJet" + trig_tag + "_" + JetQA::JetTag[jet]);
+    trksInJetQA -> SetHistSuffix("");
+    trksInJetQA -> Configure(
+      {
+        .outMode     = TrksInJetQA::OutMode::QA,
+        .verbose     = Enable::QA_VERBOSITY,
+        .doDebug     = false,
+        .doInclusive = false,
+        .doInJet     = true,
+        .doHitQA     = false,
+        .doClustQA   = true,
+        .doTrackQA   = true,
+        .doJetQA     = true,
+        .rJet        = 0.4,
+        .jetInNode   = JetQA::JetInput[jet]
+      }
+    );
+    if (trg.has_value())
+    {
+      trksInJetQA -> SetTrgToSelect(trg.value());
+    }
+    se -> registerSubsystem(trksInJetQA);
+
+  }  // end jet loop
+  return;
+
+}  // end 'JetWithTracksQA(std::optional<uint32_t>)'
+
+
+
+// ----------------------------------------------------------------------------
+//! Run jet QA
+// ----------------------------------------------------------------------------
+void Jet_QA(std::vector<uint32_t> vecTrigsToUse = JetQA::GetDefaultTriggerList())
+{
+
+  if (!JetQA::UseTrigger)
+  {
+    CommonJetQA();
+    if (JetQA::HasTracks)
+    {
+      JetsWithTracksQA();
+    }
+  }
+  else
+  {
+    for (uint32_t trg : vecTrigsToUse)
+    {
+      CommonJetQA(trg);
+      if (JetQA::HasTracks)
+      {
+        JetsWithTracksQA(trg);
+      }
+    }  // end trigger loop
+  }
+  return;
+
+}  // end 'Jet_QA(std::vector<uint32_t>)'
 
 #endif
 
