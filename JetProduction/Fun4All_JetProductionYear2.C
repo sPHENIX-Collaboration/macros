@@ -51,7 +51,7 @@ void Fun4All_JetProductionYear2(
   const std::string& infile = "DST_CALO_run2pp_new_2024p001-00042586-0000.root",
   const std::string& outfile = "DST_JET-00042586-0000.root",
   const std::string& outfile_hist = "HIST_JETQA-00042586-0000.root",
-  const std::string& dbtag = "00042586-0000.root"
+  const std::string& dbtag = "ProdA_2024"
 ) {
 
   // turn on/off DST output and/or QA
@@ -119,15 +119,15 @@ void Fun4All_JetProductionYear2(
     se -> registerOutputManager(out);
   }
 
+  // run4all
+  se -> run(nEvents);
+  se -> End();
+
   // if needed, save QA output
   if (Enable::QA)
   {
     QAHistManagerDef::saveQARootFile(outfile_hist);
   }
-
-  // run4all
-  se -> run(nEvents);
-  se -> End();
 
   // print used DB files, time elapsed and delete server
   CDBInterface::instance() -> Print();
