@@ -84,10 +84,6 @@ void Fun4All_Year2(int nEvents=100,
   MbdReco *mbdreco = new MbdReco();
   se->registerSubsystem(mbdreco);
 
-  //ZDC Reconstruction--Calib Info
-  ZdcReco *zdcreco = new ZdcReco();
-  se->registerSubsystem(zdcreco);
-
   // Official vertex storage
   GlobalVertexReco *gvertex = new GlobalVertexReco();
   se->registerSubsystem(gvertex);
@@ -125,6 +121,10 @@ void Fun4All_Year2(int nEvents=100,
   caZDC->set_nsamples(16);
   caZDC->set_offlineflag();
   se->registerSubsystem(caZDC);
+
+  //ZDC Reconstruction--Calib Info
+  ZdcReco *zdcreco = new ZdcReco();
+  se->registerSubsystem(zdcreco);
 
   CaloTowerBuilder *caEPD = new CaloTowerBuilder("SEPDBUILDER");
   caEPD->set_detector_type(CaloTowerDefs::SEPD);
