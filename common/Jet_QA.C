@@ -33,8 +33,11 @@ namespace JetQA
   //! Set to true if input jets utilize tracks (e.g. via particle flow)
   bool HasTracks = false;
 
-  //! Set to true to select a particular set of triggers
-  bool UseTrigger = true;
+  //! Set to true to generate histograms for no trigger selection
+  bool DoInclusive = true;
+
+  //! Set to true to generate histograms a specified set of triggers
+  bool DoTriggered = true;
 
 
 
@@ -60,6 +63,9 @@ namespace JetQA
 
   //! Max eta acceptance
   double MaxAcceptEta = 1.1;
+
+  //! Inclusive tag
+  std::string InclusiveTag = "inclusive";
 
 
 
@@ -246,11 +252,16 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
   // set verbosity
   int verbosity = std::max(Enable::QA_VERBOSITY, Enable::HIJETS_VERBOSITY);
 
-  // make trigger tag
+  // if selecting a trigger, add correpsonding tag
+  //   otherwise label as "inclusive"
   std::string trig_tag("");
   if (trg.has_value())
   {
     trig_tag.append("_" + JetQA::GL1Tag[trg.value()]);
+  }
+  else
+  {
+    trig_tag.append("_" + JetQA::InclusiveTag);
   }
 
   // grab default pt, eta ranges
@@ -350,11 +361,16 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
   // set verbosity
   int verbosity = std::max(Enable::QA_VERBOSITY, Enable::HIJETS_VERBOSITY);
 
-  // make trigger tag
+  // if selecting a trigger, add correpsonding tag
+  //   otherwise label as "inclusive"
   std::string trig_tag("");
   if (trg.has_value())
   {
     trig_tag.append("_" + JetQA::GL1Tag[trg.value()]);
+  }
+  else
+  {
+    trig_tag.append("_" + JetQA::InclusiveTag);
   }
 
   // grab default pt, eta ranges
@@ -423,7 +439,8 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
 void Jet_QA(std::vector<uint32_t> vecTrigsToUse = JetQA::GetDefaultTriggerList())
 {
 
-  if (!JetQA::UseTrigger)
+  // run in inclusive mode if needed
+  if (JetQA::DoInclusive)
   {
     CommonJetQA();
     if (JetQA::HasTracks)
@@ -431,7 +448,10 @@ void Jet_QA(std::vector<uint32_t> vecTrigsToUse = JetQA::GetDefaultTriggerList()
       JetsWithTracksQA();
     }
   }
-  else
+
+
+  // run in triggered mode if needed
+  if (JetQA::DoTriggered)
   {
     for (uint32_t trg : vecTrigsToUse)
     {

@@ -73,6 +73,11 @@ void Fun4All_TrackAndCaloJetValid(
   // turn on pp mode
   HIJETS::is_pp = true;
 
+  // qa options
+  JetQA::HasTracks = false;
+  JetQA::DoInclusive = true;
+  JetQA::DoTriggered = true;
+
   // initialize fun4all ------------------------------------------------------
 
   // announce start of macro

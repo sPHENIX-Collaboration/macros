@@ -62,7 +62,8 @@ void Fun4All_CaloOnlyJetValid(
 
   // qa options
   JetQA::HasTracks = false;
-  JetQA::UseTrigger = true;
+  JetQA::DoInclusive = true;
+  JetQA::DoTriggered = true;
 
   // initialize fun4all ------------------------------------------------------
 
