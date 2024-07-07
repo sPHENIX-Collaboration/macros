@@ -36,7 +36,7 @@ namespace JetQA
   //! Set to true to generate histograms for no trigger selection
   bool DoInclusive = true;
 
-  //! Set to true to generate histograms a specified set of triggers
+  //! Set to true to generate histograms for a specified set of triggers
   bool DoTriggered = true;
 
 
@@ -117,6 +117,7 @@ namespace JetQA
     {Type::AntiKtTowerSubR04, "towersub1_antikt_r04"},
     {Type::AntiKtTowerSubR05, "towersub1_antikt_r05"}
   };
+
 
 
   // methods ------------------------------------------------------------------
@@ -448,7 +449,6 @@ void Jet_QA(std::vector<uint32_t> vecTrigsToUse = JetQA::GetDefaultTriggerList()
       JetsWithTracksQA();
     }
   }
-
 
   // run in triggered mode if needed
   if (JetQA::DoTriggered)
