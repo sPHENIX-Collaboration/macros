@@ -10,17 +10,22 @@
 #include <vector>
 
 // coresoftware headers
-#include <g4centrality/PHG4CentralityReco.h>
 #include <ffamodules/CDBInterface.h>
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllUtils.h>
+#include <g4centrality/PHG4CentralityReco.h>
 #include <phool/recoConsts.h>
+#include <jetbackground/DetermineTowerRho.h>
+#include <jetbackground/TowerRho.h>
+#include <jetqa/ConstituentsinJets.h>
+#include <jetqa/JetKinematicCheck.h>
 #include <jetqa/JetSeedCount.h>
 #include <jetqa/StructureinJets.h>
 #include <jetqa/TrksInJetQA.h>
+#include <jetqa/RhosinEvent.h>
 #include <qautils/QAHistManagerDef.h>
 
 // f4a macros
@@ -29,6 +34,7 @@
 #include <G4_Magnet.C>
 #include <GlobalVariables.C>
 #include <HIJetReco.C>
+#include <Jet_QA.C>
 #include <QA.C>
 #include <Trkr_Clustering.C>
 
@@ -36,6 +42,7 @@
 R__LOAD_LIBRARY(libg4centrality.so)
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
+R__LOAD_LIBRARY(libjetbackground.so)
 R__LOAD_LIBRARY(libjetqa.so)
 R__LOAD_LIBRARY(libqautils.so)
 
@@ -63,11 +70,19 @@ void Fun4All_TrackAndCaloJetValid(
   std::optional<int> run    = std::nullopt
 ) {
 
+  // turn on pp mode
+  HIJETS::is_pp = true;
+
+  // qa options
+  JetQA::HasTracks = false;
+  JetQA::DoInclusive = true;
+  JetQA::DoTriggered = true;
+
   // initialize fun4all ------------------------------------------------------
 
   // announce start of macro
   std::cout << "\n -------- OwO -- Starting Jet QA Macro -- OwO -------- \n "
-            << "              [Using Track-and-Calo Jets]               "
+            << "              [Using Track-and-Calo Jets]\n"
             << std::endl;
 
   // grab instances f4a, the cdb, etc.
@@ -124,63 +139,23 @@ void Fun4All_TrackAndCaloJetValid(
 
   // register & run necessary reconstruction ----------------------------------
 
+  // do vertex & centrality reconstruction
   Global_Reco(); 
+  if (!HIJETS::is_pp) {
+    Centrality();
+  }
 
-  // initialize and register centrality calculator
-  PHG4CentralityReco* centReco = new PHG4CentralityReco();
-  centReco -> Verbosity(verb);
-  centReco -> GetCalibrationParameters().ReadFromFile(
-    "centrality",
-    "xml",
-    0,
-    0,
-    string(getenv("CALIBRATIONROOT")) + string("/Centrality/")
-  );
-  se -> registerSubsystem( centReco );
-
+  // do jet reconstruction & rho calculation
   HIJetReco();  
+  DoRhoCalculation();
 
   // register qa modules ------------------------------------------------------
 
-  // initialize and register jet seed counter qa module
-  JetSeedCount* jetSeedQA = new JetSeedCount("AntiKt_Tower_r04_Sub1", "", "seed_test.root");
-  jetSeedQA -> setPtRange(5., 100);
-  jetSeedQA -> setEtaRange(-1.1, 1.1);
-  se        -> registerSubsystem( jetSeedQA );
+  // add generic jet QA
+  CommonJetQA();
 
-  // intialize and register sum track vs. jet pt qa module
-  StructureinJets* jetStructQA = new StructureinJets("AntiKt_Tower_r04_Sub1", "trk_sum_test.root");
-  //se -> registerSubsystem(jetStructQA);  // FIXME uncomment when file-writing issue is resolved 
-
-  // initialize and register track jet qa module
-  TrksInJetQA* trksInJetQA = new TrksInJetQA("TrksInJetQANode_ClustJets");
-  trksInJetQA -> SetHistSuffix("TowerJetSub1");
-  trksInJetQA -> Configure(
-    {
-      .outMode     = TrksInJetQA::OutMode::QA,
-      .verbose     = verb,
-      .doDebug     = false,
-      .doInclusive = false,
-      .doInJet     = true,
-      .doHitQA     = false,
-      .doClustQA   = true,
-      .doTrackQA   = true,
-      .doJetQA     = true,
-      .rJet        = 0.4,
-      .jetInNode   = "AntiKt_Tower_r04_Sub1"
-    }
-  );
-  se -> registerSubsystem(trksInJetQA);
-
-  // initialize and register mass, eta, and pt qa module 
-  JetKinematicCheck* kinematicQA = new JetKinematicCheck(
-    "AntiKt_Tower_r02",
-    "AntiKt_Tower_r03",
-    "AntiKt_Tower_r04"
-  );
-  kinematicQA -> setPtRange(10., 100.);
-  kinematicQA -> setEtaRange(-1.1, 1.1);
-  se          -> registerSubsystem(kinematicQA);
+  // add track jet QA
+  JetsWithTracksQA();
 
   // run modules and exit -----------------------------------------------------
 
