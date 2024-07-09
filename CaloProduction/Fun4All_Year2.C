@@ -41,6 +41,7 @@
 #include <calotrigger/MinimumBiasClassifier.h>
 
 #include <calovalid/CaloValid.h>
+#include <globalqa/GlobalQA.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -52,6 +53,7 @@ R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libzdcinfo.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcalovalid.so)
+R__LOAD_LIBRARY(libglobalQA.so)
 
 void Fun4All_Year2(int nEvents=100,
                    const std::string &fname = "DST_TRIGGERED_RAW_beam_new_2023p015-00040797-0001.root",
@@ -152,6 +154,9 @@ void Fun4All_Year2(int nEvents=100,
   CaloValid *ca = new CaloValid("CaloValid");
   ca->set_timing_cut_width(200);
   se->registerSubsystem(ca);
+
+  GlobalQA *gqa = new GlobalQA("GlobalQA");
+  se->registerSubsystem(gqa);
   
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
   In->AddFile(fname);
