@@ -199,6 +199,7 @@ void Fun4All_Prdf_Combiner(int nEvents = 0,
   */
   ClockDiffCheck *clkchk = new ClockDiffCheck();
   //clkchk->Verbosity(3);
+  clkchk->set_delBadPkts(true);
   se->registerSubsystem(clkchk);
 
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("TriggerOut", "DST_PRDF.root");
