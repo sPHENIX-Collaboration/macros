@@ -3,17 +3,19 @@
 
 #include <GlobalVariables.C>
 
-#include <G4_Bbc.C>
+#include <G4_Mbd.C>
 #include <G4_BlackHole.C>
 #include <G4_CEmc_Spacal.C>
 #include <G4_EPD.C>
 #include <G4_HcalIn_ref.C>
 #include <G4_HcalOut_ref.C>
+#include <G4_TrkrVariables.C>
+/*
 #include <G4_Intt.C>
 #include <G4_Magnet.C>
 #include <G4_Mvtx.C>
 #include <G4_TPC.C>
-
+*/
 #include <g4eval/PHG4DSTReader.h>
 
 #include <fun4all/Fun4AllServer.h>
@@ -71,10 +73,9 @@ void G4DSTreader(const string &outputFile = "G4sPHENIXCells.root")
     {
       ana->AddNode("TPC");
     }
-
-    if (Enable::BBC)
+    if (Enable::MBD)
     {
-      ana->AddNode("BBC");
+      ana->AddNode("MBD");
     }
 
     if (Enable::CEMC)

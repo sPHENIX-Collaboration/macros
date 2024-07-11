@@ -2,11 +2,13 @@
 #define MACRO_G4INPUT_C
 
 #include <GlobalVariables.C>
+#include <G4_TrkrVariables.C>
 
 #include <phpythia6/PHPythia6.h>
 
 #include <phpythia8/PHPythia8.h>
 
+#include <g4main/CosmicSpray.h>
 #include <g4main/HepMCNodeReader.h>
 #include <g4main/PHG4IonGun.h>
 #include <g4main/PHG4ParticleGenerator.h>
@@ -17,14 +19,13 @@
 #include <g4main/ReadEICFiles.h>
 
 #include <fermimotionafterburner/FermimotionAfterburner.h>
+#include <hijingflipafterburner/HIJINGFlipAfterburner.h>
+#include <reactionplaneafterburner/ReactionPlaneAfterburner.h>
 
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phhepmc/Fun4AllHepMCPileupInputManager.h>
 #include <phhepmc/HepMCFlowAfterBurner.h>
 #include <phhepmc/PHHepMCGenHelper.h>
-
-#include <phsartre/PHSartre.h>
-#include <phsartre/PHSartreParticleTrigger.h>
 
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDummyInputManager.h>
@@ -38,8 +39,9 @@ R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
-R__LOAD_LIBRARY(libPHSartre.so)
 R__LOAD_LIBRARY(libFermimotionAfterburner.so)
+R__LOAD_LIBRARY(libHIJINGFlipAfterburner.so)
+R__LOAD_LIBRARY(libReactionPlaneAfterburner.so)
 
 namespace Input
 {
@@ -49,9 +51,6 @@ namespace Input
 
   bool PYTHIA8 = false;
   int PYTHIA8_EmbedId = 0;
-
-  bool SARTRE = false;
-  int SARTRE_EmbedId = 0;
 
   // Single/multiple particle generators
   bool DZERO = false;
@@ -87,22 +86,62 @@ namespace Input
   int VERBOSITY = 0;
   int EmbedId = 1;
 
-  //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
-  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
-  void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen)
+  bool COSMIC = false;
+  double COSMIC_R = 650.;
+
+  //! apply reference sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2022-001 and past RHIC experience
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
+  //! \param[in] collision_type select the beam configuration with Input::BeamConfiguration
+  void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen, const Input::BeamConfiguration & beam_config)
   {
     if (HepMCGen == nullptr)
     {
       std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
       exit(1);
     }
-    HepMCGen->set_beam_direction_theta_phi(1e-3, 0, M_PI - 1e-3, 0);  //2mrad x-ing of sPHENIX per sPH-TRG-2020-001
+    HepMCGen->set_beam_direction_theta_phi(1e-3, 0, M_PI - 1e-3, 0);  //2mrad x-ing of sPHENIX per sPH-TRG-2022-001
 
-    HepMCGen->set_vertex_distribution_width(
-        100e-4,         // approximation from past RICH data
-        100e-4,         // approximation from past RICH data
-        7,              // sPH-TRG-2020-001. Fig 3.2
-        20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+    switch (beam_config)
+    {
+    case AA_COLLISION:
+      // heavy ion mode
+
+      HepMCGen->set_vertex_distribution_width(
+          100e-4,         // approximation from past STAR/Run16 AuAu data
+          100e-4,         // approximation from past STAR/Run16 AuAu data
+          7,              // sPH-TRG-2022-001. Fig B.2
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+    case pA_COLLISION:
+
+      // pA mode
+
+      HepMCGen->set_vertex_distribution_width(
+          100e-4,         // set to be similar to AA
+          100e-4,         // set to be similar to AA
+          8,              // sPH-TRG-2022-001. Fig B.4
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+    case pp_COLLISION:
+
+      // pp mode
+
+      HepMCGen->set_vertex_distribution_width(
+          120e-4,         // approximation from past PHENIX data
+          120e-4,         // approximation from past PHENIX data
+          10,              // sPH-TRG-2022-001. Fig B.3
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+    default:
+      std::cout <<"ApplysPHENIXBeamParameter: invalid beam_config = "<<beam_config<<std::endl;
+
+      exit(1);
+
+    }
+
     HepMCGen->set_vertex_distribution_function(
         PHHepMCGenHelper::Gaus,
         PHHepMCGenHelper::Gaus,
@@ -110,9 +149,16 @@ namespace Input
         PHHepMCGenHelper::Gaus);
   }
 
+  //! apply sPHENIX nominal beam parameter according to the beam collision setting of Input::IS_PP_COLLISION
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
+  void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen)
+  {
+    ApplysPHENIXBeamParameter(HepMCGen, Input::BEAM_CONFIGURATION);
+  }
+
   //! apply EIC beam parameter to any HepMC generator following EIC CDR,
   //! including in-time collision's space time shift, beam crossing angle and angular divergence
-  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
   void ApplyEICBeamParameter(PHHepMCGenHelper *HepMCGen)
   {
     if (HepMCGen == nullptr)
@@ -176,6 +222,8 @@ namespace INPUTHEPMC
   bool FLOW = false;
   int FLOW_VERBOSITY = 0;
   bool FERMIMOTION = false;
+  bool HIJINGFLIP = false;
+  bool REACTIONPLANERAND = false;
 
 }  // namespace INPUTHEPMC
 
@@ -194,6 +242,7 @@ namespace INPUTEMBED
 {
   map<unsigned int, std::string> filename;
   map<unsigned int, std::string> listfile;
+  bool REPEAT = true;
 }  // namespace INPUTEMBED
 
 namespace PYTHIA6
@@ -206,15 +255,10 @@ namespace PYTHIA8
   string config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg";
 }
 
-namespace SARTRE
-{
-  string config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/sartre.cfg";
-}
-
 namespace PILEUP
 {
   string pileupfile = "/sphenix/sim/sim01/sphnxpro/MDC1/sHijing_HepMC/data/sHijing_0_20fm-0000000001-00000.dat";
-  double TpcDriftVelocity = 8.0 / 1000.0;
+  double TpcDriftVelocity = G4TPC::tpc_drift_velocity_sim;
 }  // namespace PILEUP
 
 // collection of pointers to particle generators we can grab in the Fun4All macro
@@ -228,9 +272,8 @@ namespace INPUTGENERATOR
   std::vector<PHG4ParticleGun *> Gun;
   PHPythia6 *Pythia6 = nullptr;
   PHPythia8 *Pythia8 = nullptr;
-  PHSartre *Sartre = nullptr;
-  PHSartreParticleTrigger *SartreTrigger = nullptr;
   ReadEICFiles *EICFileReader = nullptr;
+  CosmicSpray *Cosmic = nullptr;
 }  // namespace INPUTGENERATOR
 
 namespace INPUTMANAGER
@@ -241,6 +284,13 @@ namespace INPUTMANAGER
 
 void InputInit()
 {
+  // for pileup sims embed id is 1, to distinguish particles
+  // which will be embedded (when Input::EMBED = true) into pileup sims
+  // we need to start at embedid = 2
+  if (Input::EMBED)
+  {
+    Input::EmbedId = 2;
+  }
   // first consistency checks - not all input generators play nice
   // with each other
   if (Input::READHITS && Input::EMBED)
@@ -248,7 +298,7 @@ void InputInit()
     cout << "Reading Hits and Embedding into background at the same time is not supported" << endl;
     gSystem->Exit(1);
   }
-  if (Input::READHITS && (Input::PYTHIA6 || Input::PYTHIA8 || Input::SARTRE || Input::SIMPLE || Input::GUN || Input::UPSILON || Input::HEPMC))
+  if (Input::READHITS && (Input::PYTHIA6 || Input::PYTHIA8 || Input::SIMPLE || Input::GUN || Input::UPSILON || Input::HEPMC))
   {
     cout << "Reading Hits and running G4 simultanously is not supported" << endl;
     gSystem->Exit(1);
@@ -284,22 +334,6 @@ void InputInit()
 
     INPUTGENERATOR::Pythia8->set_embedding_id(Input::EmbedId);
     Input::PYTHIA8_EmbedId = Input::EmbedId;
-    Input::EmbedId++;
-  }
-  if (Input::SARTRE)
-  {
-    gSystem->Load("libPHSartre.so");
-    INPUTGENERATOR::Sartre = new PHSartre();
-    INPUTGENERATOR::Sartre->set_config_file(SARTRE::config_file);
-    // particle trigger to enhance forward J/Psi -> ee
-    INPUTGENERATOR::SartreTrigger = new PHSartreParticleTrigger("MySartreTrigger");
-    INPUTGENERATOR::SartreTrigger->AddParticles(-11);
-    //INPUTGENERATOR::SartreTrigger->SetEtaHighLow(4.0,1.4);
-    INPUTGENERATOR::SartreTrigger->SetEtaHighLow(1.0, -1.1);  // central arm
-    INPUTGENERATOR::SartreTrigger->PrintConfig();
-
-    INPUTGENERATOR::Sartre->set_embedding_id(Input::EmbedId);
-    Input::SARTRE_EmbedId = Input::EmbedId;
     Input::EmbedId++;
   }
   // single particle generators
@@ -398,11 +432,6 @@ void InputRegister()
   {
     se->registerSubsystem(INPUTGENERATOR::Pythia8);
   }
-  if (Input::SARTRE)
-  {
-    INPUTGENERATOR::Sartre->register_trigger((PHSartreGenTrigger *) INPUTGENERATOR::SartreTrigger);
-    se->registerSubsystem(INPUTGENERATOR::Sartre);
-  }
   if (Input::DZERO)
   {
     int verbosity = max(Input::DZERO_VERBOSITY, Input::VERBOSITY);
@@ -468,12 +497,28 @@ void InputRegister()
     INPUTGENERATOR::EICFileReader->Verbosity(Input::VERBOSITY);
     se->registerSubsystem(INPUTGENERATOR::EICFileReader);
   }
+  if (Input::COSMIC)
+  {
+    INPUTGENERATOR::Cosmic = new CosmicSpray("COSMIC", Input::COSMIC_R);
+    se->registerSubsystem(INPUTGENERATOR::Cosmic);
+  }
   // here are the various utility modules which read particles and
   // put them onto the G4 particle stack
-  if (Input::HEPMC or Input::PYTHIA8 or Input::PYTHIA6 or Input::READEIC)
+  if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6 || Input::READEIC)
   {
     if (Input::HEPMC)
     {
+      if (INPUTHEPMC::REACTIONPLANERAND)
+      {
+        ReactionPlaneAfterburner *rp = new ReactionPlaneAfterburner();
+        se->registerSubsystem(rp);
+      }
+
+      if (INPUTHEPMC::HIJINGFLIP)
+      {
+	HIJINGFlipAfterburner *flip = new HIJINGFlipAfterburner();
+	se->registerSubsystem(flip); 
+      }
       // these need to be applied before the HepMCNodeReader since they
       // work on the hepmc records
       if (INPUTHEPMC::FLOW)
@@ -516,7 +561,10 @@ void InputManagers()
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
       hitsin->fileopen(iter->second);
       hitsin->Verbosity(Input::VERBOSITY);
-      hitsin->Repeat();
+      if (INPUTEMBED::REPEAT)
+      {
+        hitsin->Repeat();
+      }
       se->registerInputManager(hitsin);
     }
     for (auto iter = INPUTEMBED::listfile.begin(); iter != INPUTEMBED::listfile.end(); ++iter)
@@ -525,7 +573,10 @@ void InputManagers()
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
       hitsin->AddListFile(iter->second);
       hitsin->Verbosity(Input::VERBOSITY);
-      hitsin->Repeat();
+      if (INPUTEMBED::REPEAT)
+      {
+        hitsin->Repeat();
+      }
       se->registerInputManager(hitsin);
     }
   }
@@ -590,7 +641,10 @@ void InputManagers()
     INPUTMANAGER::HepMCPileupInputManager->AddFile(PILEUP::pileupfile);
     INPUTMANAGER::HepMCPileupInputManager->set_collision_rate(Input::PILEUPRATE);
     double time_window = 105.5 / PILEUP::TpcDriftVelocity;
-    INPUTMANAGER::HepMCPileupInputManager->set_time_window(-time_window, time_window);
+    double extended_readout_time = 0.0;
+    if(TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+    INPUTMANAGER::HepMCPileupInputManager->set_time_window(-time_window, time_window + extended_readout_time);
+    cout << "Pileup window is from " << -time_window << " to " <<  time_window + extended_readout_time << endl;
     se->registerInputManager(INPUTMANAGER::HepMCPileupInputManager);
   }
 }

@@ -1,0 +1,13 @@
+{
+  "base_url": "nopayloaddb.apps.rcf.bnl.gov",
+  "api_res":  "/api/cdb_rest/",
+  "write_dir": "/sphenix/user/pinkenbu/cdbtest/",
+  "read_dir_list": ["/cvmfs/sphenix.sdcc.bnl.gov/calibrations/sphnxpro/cdb/", "/sphenix/cvmfscalib/sphnxpro/cdb/","/sphenix/user/pinkenbu/cdbtest/" ],
+  "n_retries": 5,
+  "print_time_stamps": false,
+  "cache_life_time": 10,
+  "cache_max_mb": 1,
+  "use_fake_backend": false,
+  "logger": "terminal",
+  "log_level": "INFO"
+}

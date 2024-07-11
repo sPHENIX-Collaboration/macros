@@ -3,8 +3,8 @@
 
 #include <GlobalVariables.C>
 
-#include <g4jets/FastJetAlgo.h>
-#include <g4jets/JetReco.h>
+#include <jetbase/FastJetAlgo.h>
+#include <jetbase/JetReco.h>
 
 #include <particleflowreco/ParticleFlowJetInput.h>
 #include <particleflowreco/ParticleFlowReco.h>
@@ -12,7 +12,7 @@
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
-R__LOAD_LIBRARY(libg4jets.so)
+R__LOAD_LIBRARY(libjetbase.so)
 R__LOAD_LIBRARY(libparticleflow.so)
 
 namespace Enable
@@ -33,7 +33,6 @@ void ParticleFlow()
   // note: assumes topoCluster input already configured
   ParticleFlowReco *pfr = new ParticleFlowReco();
   pfr->set_energy_match_Nsigma(1.5);
-  pfr->set_emulated_efficiency(1.0);
   pfr->Verbosity(verbosity);
   se->registerSubsystem(pfr);
 

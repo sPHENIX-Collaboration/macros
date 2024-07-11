@@ -3,7 +3,7 @@
 
 #include <GlobalVariables.C>
 
-#include <G4_Bbc.C>
+#include <G4_Mbd.C>
 #include <G4_BlackHole.C>
 #include <G4_CEmc_Albedo.C>
 #include <G4_CEmc_Spacal.C>
@@ -11,15 +11,11 @@
 #include <G4_HcalIn_ref.C>
 #include <G4_HcalOut_ref.C>
 #include <G4_BeamLine.C>
-#include <G4_Intt.C>
 #include <G4_Magnet.C>
-#include <G4_Micromegas.C>
-#include <G4_Mvtx.C>
 #include <G4_PSTOF.C>
 #include <G4_Pipe.C>
 #include <G4_PlugDoor.C>
-#include <G4_TPC.C>
-#include <G4_TrackingService.C>
+#include <G4_TrkrSimulation.C>
 #include <G4_User.C>
 #include <G4_World.C>
 #include <G4_ZDC.C>
@@ -52,12 +48,11 @@ void G4Init()
   // load detector/material macros and execute Init() function
 
   if (Enable::PIPE) PipeInit();
-  if (Enable::TrackingService) TrackingServiceInit();
   if (Enable::MVTX) MvtxInit();
   if (Enable::INTT) InttInit();
   if (Enable::TPC) TPCInit();
   if (Enable::MICROMEGAS) MicromegasInit();
-  if (Enable::BBC) BbcInit();
+  if (Enable::MBD) MbdInit();
   if (Enable::CEMCALBEDO) CEmcAlbedoInit();
   if (Enable::CEMC) CEmcInit();
   if (Enable::HCALIN) HCalInnerInit();
@@ -89,10 +84,13 @@ int G4Setup()
   PHG4Reco *g4Reco = new PHG4Reco();
   g4Reco->set_rapidity_coverage(1.1);  // according to drawings
   WorldInit(g4Reco);
+  //PYTHIA 6
   if (G4P6DECAYER::decayType != EDecayType::kAll)
   {
     g4Reco->set_force_decay(G4P6DECAYER::decayType);
   }
+  //EvtGen 
+  g4Reco->CustomizeEvtGenDecay(EVTGENDECAYER::DecayFile); 
 
   double fieldstrength;
   istringstream stringline(G4MAGNET::magfield);
@@ -100,7 +98,8 @@ int G4Setup()
   if (stringline.fail())
   {  // conversion to double fails -> we have a string
 
-    if (G4MAGNET::magfield.find("sphenix3dbigmapxyz") != string::npos)
+    if (G4MAGNET::magfield.find("sphenix3dbigmapxyz") != string::npos ||
+        G4MAGNET::magfield.find(".root") == string::npos)
     {
       g4Reco->set_field_map(G4MAGNET::magfield, PHFieldConfig::Field3DCartesian);
     }
@@ -112,6 +111,7 @@ int G4Setup()
   else
   {
     g4Reco->set_field(fieldstrength);  // use const soleniodal field
+    G4MAGNET::magfield_tracking = G4MAGNET::magfield; // set tracking fieldmap to value
   }
   g4Reco->set_field_rescale(G4MAGNET::magfield_rescale);
 
@@ -120,12 +120,11 @@ int G4Setup()
   double radius = 0.;
 
   if (Enable::PIPE) radius = Pipe(g4Reco, radius);
-  if (Enable::TrackingService) TrackingService(g4Reco, radius);
   if (Enable::MVTX) radius = Mvtx(g4Reco, radius);
   if (Enable::INTT) radius = Intt(g4Reco, radius);
   if (Enable::TPC) radius = TPC(g4Reco, radius);
   if (Enable::MICROMEGAS) Micromegas(g4Reco);
-  if (Enable::BBC) Bbc(g4Reco);
+  if (Enable::MBD) Mbd(g4Reco);
   if (Enable::CEMCALBEDO) CEmcAlbedo(g4Reco);
   if (Enable::CEMC) radius = CEmc(g4Reco, radius, 8);
   if (Enable::HCALIN) radius = HCalInner(g4Reco, radius, 4);
