@@ -71,6 +71,7 @@ namespace JetQA
 
   // maps ---------------------------------------------------------------------
 
+  //! Map from trigger to histogram tag
   std::map<uint32_t, std::string> GL1Tag = {
     {JetQADefs::GL1::Clock, "clock"},
     {JetQADefs::GL1::ZDCS, "zdcs"},
@@ -104,6 +105,7 @@ namespace JetQA
     {JetQADefs::GL1::Photon4, "photon4"} 
   };
 
+  //! Map from jet type to input node
   std::map<uint32_t, std::string> JetInput = {
     {Type::AntiKtTowerSubR02, "AntiKt_Tower_r02_Sub1"},
     {Type::AntiKtTowerSubR03, "AntiKt_Tower_r03_Sub1"},
@@ -111,11 +113,20 @@ namespace JetQA
     {Type::AntiKtTowerSubR05, "AntiKt_Tower_r05_Sub1"}
   };
 
+  //! Map from jet type to histogram tag
   std::map<uint32_t, std::string> JetTag = {
     {Type::AntiKtTowerSubR02, "towersub1_antikt_r02"},
     {Type::AntiKtTowerSubR03, "towersub1_antikt_r03"},
     {Type::AntiKtTowerSubR04, "towersub1_antikt_r04"},
     {Type::AntiKtTowerSubR05, "towersub1_antikt_r05"}
+  };
+
+  //! Map from jet type to resolution parameter
+  std::map<uint32_t, double> JetRes = {
+    {Type::AntiKtTowerSubR02, 0.2},
+    {Type::AntiKtTowerSubR03, 0.3},
+    {Type::AntiKtTowerSubR04, 0.4},
+    {Type::AntiKtTowerSubR05, 0.5}
   };
 
 
@@ -216,7 +227,11 @@ namespace JetQA
       JetQADefs::GL1::MBDNSJet1,
       JetQADefs::GL1::MBDNSJet2,
       JetQADefs::GL1::MBDNSJet3,
-      JetQADefs::GL1::MBDNSJet4
+      JetQADefs::GL1::MBDNSJet4,
+      JetQADefs::GL1::Jet1,
+      JetQADefs::GL1::Jet2,
+      JetQADefs::GL1::Jet3,
+      JetQADefs::GL1::Jet4
     };
     return vecDefaultTrigs;
 
