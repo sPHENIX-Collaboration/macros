@@ -134,6 +134,31 @@ namespace JetQA
   // methods ------------------------------------------------------------------
 
   // --------------------------------------------------------------------------
+  //! Get trigger tag
+  // --------------------------------------------------------------------------
+  /*! If a trigger index is provided (i.e. a trigger is being selected),
+   *  function returns the correpsonding tag. Otherwise (i.e. NO trigger
+   *  is being selected), returns the inclusive tag.
+   */
+  inline std::string GetTriggerTag(std::optional<uint32_t> trg = std::nullopt)
+  {
+
+    std::string tag("");
+    if (trg.has_value())
+    {
+      tag.append("_" + GL1Tag[trg.value()]);
+    }
+    else
+    {
+      tag.append("_" + InclusiveTag);
+    }
+    return tag;
+
+  }  // end 'GetTriggerTag(std::optional<uint32_t>)'
+
+
+
+  // --------------------------------------------------------------------------
   //! Get minimum jet pt based on which trigger fired
   // --------------------------------------------------------------------------
   // FIXME it might be prudent to allow for thresholds to change vs. run
@@ -268,17 +293,8 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
   // set verbosity
   int verbosity = std::max(Enable::QA_VERBOSITY, Enable::HIJETS_VERBOSITY);
 
-  // if selecting a trigger, add correpsonding tag
-  //   otherwise label as "inclusive"
-  std::string trig_tag("");
-  if (trg.has_value())
-  {
-    trig_tag.append("_" + JetQA::GL1Tag[trg.value()]);
-  }
-  else
-  {
-    trig_tag.append("_" + JetQA::InclusiveTag);
-  }
+  // grab appropriate trigger tag
+  std::string trig_tag = JetQA::GetTriggerTag(trg);
 
   // grab default pt, eta ranges
   std::pair<double, double> ptJetRange = JetQA::GetDefaultJetPtRange(trg);
@@ -377,17 +393,8 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
   // set verbosity
   int verbosity = std::max(Enable::QA_VERBOSITY, Enable::HIJETS_VERBOSITY);
 
-  // if selecting a trigger, add correpsonding tag
-  //   otherwise label as "inclusive"
-  std::string trig_tag("");
-  if (trg.has_value())
-  {
-    trig_tag.append("_" + JetQA::GL1Tag[trg.value()]);
-  }
-  else
-  {
-    trig_tag.append("_" + JetQA::InclusiveTag);
-  }
+  // grab appropriate trigger tag
+  std::string trig_tag = JetQA::GetTriggerTag(trg);
 
   // grab default pt, eta ranges
   std::pair<double, double> ptJetRange = JetQA::GetDefaultJetPtRange(trg);
