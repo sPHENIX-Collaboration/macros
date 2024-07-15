@@ -82,12 +82,19 @@ def main():
 
             if total_events > 500000:
                 file_paths = get_file_paths(cursor, run, result_dataset)
-                with open('files.txt', 'w') as f:
-                    for path in file_paths:
-                        f.write(f"{path}\n")
+                output_file = f"mergedQA/HIST_CALO_{result_dataset}-{run}.root"
+            
+                if not os.path.exists(output_file):
+                    with open('files.txt', 'w') as f:
+                        for path in file_paths:
+                            f.write(f"{path}\n")
+            
+                    subprocess.run(["hadd", "-ff", output_file] + file_paths)
+                else:
+                    print(f"{output_file} already exists, skipping hadd command.")
 
-                subprocess.run(["hadd","-ff", f"mergedQA/HIST_CALO_{result_dataset}-{run}.root"] + file_paths)
-                subprocess.run(["root", "-b", "-q", f"doFindTowersEMCal.C(\"mergedQA/HIST_CALO_{result_dataset}-{run}.root\",\"hotMaps/EMCalHotMap_{result_dataset}-{run}.root\")"])
+                subprocess.run(["root", "-b", "-q", f"doFindTowersEMCal.C(\"{output_file}\",\"hotMaps/EMCalHotMap_{result_dataset}-{run}.root\")"])
+
                 with open('completedruns.txt', 'a') as f:
                     f.write(f"{run},{result_dataset}\n")
             else:
