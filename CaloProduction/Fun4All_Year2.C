@@ -56,7 +56,7 @@ R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libglobalQA.so)
 
 void Fun4All_Year2(int nEvents=100,
-                   const std::string &fname = "DST_TRIGGERED_RAW_beam_new_2023p015-00040797-0001.root",
+                   const std::string &fname = "DST_TRIGGERED_EVENT_run2pp_new_2024p003-00048185-0000.root",
                    const std::string& outfile= "DST_CALO-00000000-000000.root",
                    const std::string& outfile_hist= "HIST_CALOQA-00000000-000000.root",
                    const std::string& dbtag= "ProdA_2024"
@@ -64,7 +64,7 @@ void Fun4All_Year2(int nEvents=100,
 {
 
   // towerinfov1=kPRDFTowerv1, v2=:kWaveformTowerv2, v3=kPRDFWaveform, v4=kPRDFTowerv4
-  CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kWaveformTowerv2;
+  CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv4;
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
@@ -110,6 +110,7 @@ void Fun4All_Year2(int nEvents=100,
   ctbEMCal->set_builder_type(buildertype);
   ctbEMCal->set_offlineflag(true);
   ctbEMCal->set_nsamples(12);
+  ctbEMCal->set_bitFlipRecovery(true);
   se->registerSubsystem(ctbEMCal);
 
   CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
@@ -118,6 +119,7 @@ void Fun4All_Year2(int nEvents=100,
   ctbIHCal->set_builder_type(buildertype);
   ctbIHCal->set_offlineflag();
   ctbIHCal->set_nsamples(12);
+  ctbIHCal->set_bitFlipRecovery(true);
   se->registerSubsystem(ctbIHCal);
 
   CaloTowerBuilder *ctbOHCal = new CaloTowerBuilder("HCALOUTBUILDER");
@@ -126,6 +128,7 @@ void Fun4All_Year2(int nEvents=100,
   ctbOHCal->set_builder_type(buildertype);
   ctbOHCal->set_offlineflag();
   ctbOHCal->set_nsamples(12);
+  ctbOHCal->set_bitFlipRecovery(true);
   se->registerSubsystem(ctbOHCal);
 
   CaloTowerBuilder *caEPD = new CaloTowerBuilder("SEPDBUILDER");
