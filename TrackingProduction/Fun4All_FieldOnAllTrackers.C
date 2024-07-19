@@ -15,6 +15,7 @@
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco.C>
 #include <Trkr_RecoInit.C>
+#include <Trkr_TpcReadoutInit.C>
 
 #include <ffamodules/CDBInterface.h>
 #include <fun4all/Fun4AllDstInputManager.h>
@@ -45,7 +46,7 @@ R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
 void Fun4All_FieldOnAllTrackers(
-    const int nEvents = 0,
+    const int nEvents = 10,
     const std::string tpcfilename = "DST_BEAM_run2pp_new_2023p013-00041989-0000.root",
     const std::string tpcdir = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpcbeam/run_00041900_00042000/",
     const std::string outfilename = "clusters_seeds",
@@ -59,6 +60,13 @@ void Fun4All_FieldOnAllTrackers(
       runseg = Fun4AllUtils::GetRunSegment(tpcfilename);
   int runnumber = runseg.first;
   int segment = runseg.second;
+
+  TpcReadoutInit( runnumber );
+  std::cout<< " run: " << runnumber
+	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
+	   << " pre: " << TRACKING::reco_tpc_time_presample
+	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
+	   << std::endl;
 
   ACTSGEOM::mvtxMisalignment = 100;
   ACTSGEOM::inttMisalignment = 100.;
@@ -79,7 +87,7 @@ void Fun4All_FieldOnAllTrackers(
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
-  G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
+  //  G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
   //to turn on the default static corrections, enable the two lines below
   //G4TPC::ENABLE_STATIC_CORRECTIONS = true;

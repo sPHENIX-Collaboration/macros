@@ -11,6 +11,7 @@
 #include <QA.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco_Cosmics.C>
+#include <Trkr_TpcReadoutInit.C>
 
 #include <ffamodules/CDBInterface.h>
 #include <fun4all/Fun4AllDstInputManager.h>
@@ -53,6 +54,12 @@ void Fun4All_TrkrClusteringSeeding(
   auto pos = filename.find("0002");
   std::string runnumber_str = filename.substr(pos, pos + 8);
   int runnumber = std::stoi(runnumber_str);
+  TpcReadoutInit( runnumber );
+  std::cout<< " run: " << runnumber
+	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
+	   << " pre: " << TRACKING::reco_tpc_time_presample
+	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
+	   << std::endl;
 
   auto se = Fun4AllServer::instance();
   se->Verbosity(1);
@@ -68,7 +75,7 @@ void Fun4All_TrkrClusteringSeeding(
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
-  G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
+  //  G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
   G4MAGNET::magfield = "0.01";
   G4MAGNET::magfield_rescale = 1;
   ACTSGEOM::ActsGeomInit();

@@ -12,6 +12,7 @@
 #include <G4_Mbd.C>
 #include <GlobalVariables.C>
 #include <QA.C>
+#include <Trkr_TpcReadoutInit.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco.C>
 
@@ -73,6 +74,12 @@ void Fun4All_FieldOnAllTrackers_KFP(
       runseg = Fun4AllUtils::GetRunSegment(tpcfilename);
   int runnumber = runseg.first;
   int segment = runseg.second;
+  TpcReadoutInit( runnumber );
+  std::cout<< " run: " << runnumber
+	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
+	   << " pre: " << TRACKING::reco_tpc_time_presample
+	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
+	   << std::endl;
 
   string outDir = "myKShortReco/";
   string outputFileName = "outputFile_" + to_string(runnumber) + "_" + to_string(segment) + ".root";
@@ -103,7 +110,7 @@ void Fun4All_FieldOnAllTrackers_KFP(
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
-  G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
+  //  G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
 
   G4MAGNET::magfield_rescale = 1;
   ACTSGEOM::ActsGeomInit();
