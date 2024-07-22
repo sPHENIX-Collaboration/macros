@@ -11,8 +11,10 @@
 #include <QA.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco_Cosmics.C>
+#include <Trkr_RecoInit.C>
 
 #include <ffamodules/CDBInterface.h>
+
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -33,6 +35,8 @@
 #include <trackingdiagnostics/TrackResiduals.h>
 #include <trackingdiagnostics/TrkrNtuplizer.h>
 
+#include <fun4all/Fun4AllUtils.h>
+
 #include <stdio.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
@@ -43,16 +47,18 @@ R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
-void Fun4All_TrkrClusteringSeeding(
-    const int nEvents = 2,
-    const std::string filename = "cosmics-00025926-0005.root",
+void Fun4All_Cosmics(
+    const int nEvents = 0,
+    const std::string filename = "DST_STREAMING_EVENT_cosmics_new_2024p001-00045673-0000.root",
     const std::string outfilename = "cosmics",
-    const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all_4/")
+    const std::string dir = "/sphenix/lustre01/sphnxpro/physics/slurp/tpccosmics/run_00045600_00045700/")
 {
   std::string inputRawHitFile = dir + filename;
-  auto pos = filename.find("0002");
-  std::string runnumber_str = filename.substr(pos, pos + 8);
-  int runnumber = std::stoi(runnumber_str);
+
+  std::pair<int, int>
+      runseg = Fun4AllUtils::GetRunSegment(inputRawHitFile);
+  int runnumber = runseg.first;
+  int segment = runseg.second;
 
   auto se = Fun4AllServer::instance();
   se->Verbosity(1);
@@ -60,8 +66,8 @@ void Fun4All_TrkrClusteringSeeding(
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
-  rc->set_uint64Flag("TIMESTAMP", 6);
+  rc->set_StringFlag("CDB_GLOBALTAG", "2024p005");
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
@@ -69,9 +75,10 @@ void Fun4All_TrkrClusteringSeeding(
   se->registerInputManager(ingeo);
 
   G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
-  G4MAGNET::magfield = "0.01";
-  G4MAGNET::magfield_rescale = 1;
-  ACTSGEOM::ActsGeomInit();
+// can use for zero field
+  //G4MAGNET::magfield = "0.01";
+  //G4MAGNET::magfield_rescale = 1;
+  TrackingInit();
 
   auto hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->fileopen(inputRawHitFile);
@@ -79,7 +86,12 @@ void Fun4All_TrkrClusteringSeeding(
 
   Mvtx_HitUnpacking();
   Intt_HitUnpacking();
-  Tpc_HitUnpacking();
+
+  auto tpcunpacker = new TpcCombinedRawDataUnpacker;
+  tpcunpacker->Verbosity(0);
+tpcunpacker->doBaselineCorr(true);
+  se->registerSubsystem(tpcunpacker);
+
   Micromegas_HitUnpacking();
   Mvtx_Clustering();
   Intt_Clustering();
@@ -93,23 +105,15 @@ void Fun4All_TrkrClusteringSeeding(
   Micromegas_Clustering();
 
   Tracking_Reco_TrackSeed();
-  convert_seeds();
 
-  TString ntupoutfile = outfilename + filename + "_ntup.root";
-  std::string ntupstring(ntupoutfile.Data());
-
-  auto ntp = new TrkrNtuplizer("TrkrNtuplizer", ntupstring);
-  ntp->do_hit_eval(true);
-  ntp->do_cluster_eval(true);
-  ntp->do_track_eval(true);
-  ntp->do_siseed_eval(true);
-  ntp->do_tpcseed_eval(true);
-  ntp->do_clus_trk_eval(true);
-  ntp->do_vertex_eval(false);
-  ntp->set_trkclus_seed_container("SvtxTrackSeedContainer");
-  ntp->Verbosity(0);
-  ntp->do_info_eval(false);
-  se->registerSubsystem(ntp);
+  TrackSeedTrackMapConverter *converter = new TrackSeedTrackMapConverter();
+  // Default set to full SvtxTrackSeeds. Can be set to
+  // SiliconTrackSeedContainer or TpcTrackSeedContainer
+  converter->setTrackSeedName("SvtxTrackSeedContainer");
+  converter->Verbosity(0);
+  converter->cosmics();
+  converter->setFieldMap(G4MAGNET::magfield_tracking);
+  se->registerSubsystem(converter);
 
   TString residoutfile = outfilename + filename + "_resid.root";
   std::string residstring(residoutfile.Data());
@@ -119,7 +123,8 @@ void Fun4All_TrkrClusteringSeeding(
   resid->alignment(false);
   resid->clusterTree();
   resid->hitTree();
-  resid->zeroField();
+  resid->convertSeeds(true);
+//resid->zeroField();
   se->registerSubsystem(resid);
 
   // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "/sphenix/tg/tg01/hf/jdosbo/tracking_development/onlineoffline/hitsets.root");
