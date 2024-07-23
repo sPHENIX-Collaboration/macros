@@ -102,11 +102,6 @@ namespace G4TPC
   int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
   double tpc_outer_radius = 77. + 2.;
 
-  // drift velocity is set here for all relevant modules
-  double tpc_drift_velocity_sim = 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas, it is very close to our Ar-CF4 mixture
-                                                 //  double tpc_drift_velocity_reco now set in GlobalVariables.C
-                                                 //  double tpc_drift_velocity_reco= 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas
-
   // use simple clusterizer
   bool USE_SIMPLE_CLUSTERIZER = false;
 
@@ -150,6 +145,13 @@ namespace G4TPC
   // space charge calibration output file
   std::string DIRECT_LASER_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";
   std::string DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME = "TpcDirectLaserReconstruction.root";
+
+  std::string TPC_GAS_MIXTURE = "ArCF4Isobutane";
+  // drift velocity is set here for all relevant modules
+  //  double tpc_drift_velocity_reco now set in GlobalVariables.C
+  double tpc_drift_velocity_sim = 0.007550;  // cm/ns   // this is the ArCF4Isobutane version of the gas
+  double tpc_added_smear_long = 0.0;
+  double tpc_added_smear_trans = 0.0;
 
 }  // namespace G4TPC
 

@@ -367,6 +367,28 @@ double TPC(PHG4Reco* g4Reco,
   }
 
   tpc->set_double_param("extended_readout_time", extended_readout_time);
+ 
+   //Note that we default to 75:20:05 Ar:CF4:i-C4H10
+  if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    tpc->set_double_param("drift_velocity", 0.008);
+    tpc->set_double_param("Ar_frac", 0.6);
+    tpc->set_double_param("CF4_frac", 0.4);
+    tpc->set_double_param("N2_frac", 0.0);
+    tpc->set_double_param("isobutane_frac", 0.0);
+  }
+  if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    tpc->set_double_param("drift_velocity", 0.006965);
+    tpc->set_double_param("Ar_frac", 0.65);
+    tpc->set_double_param("CF4_frac", 0.25);
+    tpc->set_double_param("N2_frac", 0.10);
+    tpc->set_double_param("isobutane_frac", 0.0);
+  }
+  if ((G4TPC::TPC_GAS_MIXTURE != "ArCF4Isobutane") || (G4TPC::TPC_GAS_MIXTURE != "ArCF4") || (G4TPC::TPC_GAS_MIXTURE != "ArCF4N2"))
+  {
+    std::cout << "Your gas mixture, " << G4TPC::TPC_GAS_MIXTURE << ", is unknown. Defaulting to ArCF4Isobutane" << std::endl;
+  }
 
   tpc->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(tpc);
@@ -471,6 +493,30 @@ void TPC_Cells()
 
   // override the default drift velocity parameter specification
   edrift->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
+  edrift->set_double_param("added_smear_trans", G4TPC::tpc_added_smear_trans);
+  edrift->set_double_param("added_smear_long", G4TPC::tpc_added_smear_long);
+
+  //Note that we default to 75:20:05 Ar:CF4:i-C4H10
+  if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    edrift->set_double_param("drift_velocity", 0.008);
+    edrift->set_double_param("diffusion_trans", 0.004);
+    edrift->set_double_param("diffusion_long", 0.012);
+    edrift->set_double_param("Ar_frac", 0.6);
+    edrift->set_double_param("CF4_frac", 0.4);
+    edrift->set_double_param("N2_frac", 0.0);
+    edrift->set_double_param("isobutane_frac", 0.0);
+  }
+  if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    edrift->set_double_param("drift_velocity", 0.006965);
+    edrift->set_double_param("diffusion_trans", 0.005487);
+    edrift->set_double_param("diffusion_long", 0.013613);
+    edrift->set_double_param("Ar_frac", 0.65);
+    edrift->set_double_param("CF4_frac", 0.25);
+    edrift->set_double_param("N2_frac", 0.10);
+    edrift->set_double_param("isobutane_frac", 0.0);
+  }
 
   // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
   // They represent effects not due to ideal gas properties and ideal readout plane behavior
