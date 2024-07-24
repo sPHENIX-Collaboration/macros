@@ -23,7 +23,7 @@ R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
 
-void Fun4All_Tpc_Combiner(int nEvents = 10, int RunNumber =41989,
+void Fun4All_Tpc_Combiner(int nEvents = 0,
 		      const string &input_file00 = "tpc00.list",
 		      const string &input_file01 = "tpc01.list",
 		      const string &input_file02 = "tpc02.list",
@@ -75,7 +75,7 @@ void Fun4All_Tpc_Combiner(int nEvents = 10, int RunNumber =41989,
   infile.push_back(input_file21);
   infile.push_back(input_file22);
   infile.push_back(input_file23);
-  /*
+  
   std::ifstream infile_stream;
   infile_stream.open(input_file00, std::ios_base::in);
   std::string filepath;
@@ -83,10 +83,10 @@ void Fun4All_Tpc_Combiner(int nEvents = 10, int RunNumber =41989,
   std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filepath);
   int runnumber = runseg.first;
   int segment = runseg.second;
-  */
-  TpcReadoutInit( RunNumber );
   // std::cout<< " run: " << runnumber << " seg: " << segment << std::endl;
-  std::cout<< " run: " << RunNumber
+  
+  TpcReadoutInit( runnumber );
+  std::cout<< " run: " << runnumber
 	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
 	   << " pre: " << TRACKING::reco_tpc_time_presample
 	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
