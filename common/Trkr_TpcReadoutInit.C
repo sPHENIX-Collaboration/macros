@@ -13,8 +13,12 @@ void TpcReadoutInit(const int RunNumber = 41989)
 {
 
   TRACKING::reco_tpc_is_configured = true;
-  G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
-  if(RunNumber<41624){
+  if(RunNumber<45737){
+    G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
+  }else{ //change to Ar:cf4:N2 at run number 45737
+    G4TPC::tpc_drift_velocity_reco = (7.0 / 1000);
+  }
+  if(RunNumber>=41624){
     TRACKING::reco_tpc_maxtime_sample = 425;
     TRACKING::reco_tpc_time_presample = 40;//120 - 80
   }else{
