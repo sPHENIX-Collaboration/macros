@@ -31,6 +31,7 @@
 #include <trackingqa/MvtxClusterQA.h>
 
 #include <trackingqa/TpcClusterQA.h>
+#include <trackingqa/TpcSeedsQA.h>
 
 #include <trackingdiagnostics/TrackResiduals.h>
 #include <trackingdiagnostics/TrkrNtuplizer.h>
@@ -75,9 +76,14 @@ void Fun4All_Cosmics(
   se->registerInputManager(ingeo);
 
   G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
-// can use for zero field
-  //G4MAGNET::magfield = "0.01";
-  //G4MAGNET::magfield_rescale = 1;
+  // can use for zero field
+  double fieldstrength = std::numeric_limits<double>::quiet_NaN();
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
+  if(ConstField && fieldstrength < 0.1)
+  {
+    G4MAGNET::magfield = "0.01";
+    G4MAGNET::magfield_rescale = 1;
+  }
   TrackingInit();
 
   auto hitsin = new Fun4AllDstInputManager("InputManager");
@@ -125,9 +131,7 @@ void Fun4All_Cosmics(
   resid->hitTree();
   resid->convertSeeds(true);
 
-  double fieldstrength = std::numeric_limits<double>::quiet_NaN();
-  bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
-  
+
   if(ConstField && fieldstrength < 0.1)
   {
     resid->zeroField();
@@ -148,12 +152,13 @@ void Fun4All_Cosmics(
     se->registerSubsystem(new InttClusterQA);
     se->registerSubsystem(new TpcClusterQA);
     se->registerSubsystem(new MicromegasClusterQA);
-
+    se->registerSubsystem(new TpcSeedsQA);
    
   }
- TString qaname = outfilename + filename + "_qa.root";
-    std::string qaOutputFileName(qaname.Data());
-    QAHistManagerDef::saveQARootFile(qaOutputFileName);
+  
+  TString qaname = outfilename + filename + "_qa.root";
+  std::string qaOutputFileName(qaname.Data());
+  QAHistManagerDef::saveQARootFile(qaOutputFileName);
   delete se;
   std::cout << "Finished" << std::endl;
   gSystem->Exit(0);
