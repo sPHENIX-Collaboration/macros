@@ -98,6 +98,7 @@ void Tpc_HitUnpacking()
   Fun4AllServer* se = Fun4AllServer::instance();
 
   auto tpcunpacker = new TpcCombinedRawDataUnpacker;
+  tpcunpacker->set_presampleShift(TRACKING::reco_tpc_time_presample);
   tpcunpacker->Verbosity(verbosity);
   se->registerSubsystem(tpcunpacker);
 }

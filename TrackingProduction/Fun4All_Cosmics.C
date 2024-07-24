@@ -12,6 +12,7 @@
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco_Cosmics.C>
 #include <Trkr_RecoInit.C>
+#include <Trkr_TpcReadoutInit.C>
 
 #include <ffamodules/CDBInterface.h>
 
@@ -52,7 +53,7 @@ void Fun4All_Cosmics(
     const int nEvents = 0,
     const std::string filename = "DST_STREAMING_EVENT_cosmics_new_2024p001-00045673-0000.root",
     const std::string outfilename = "cosmics",
-    const std::string dir = "/sphenix/lustre01/sphnxpro/physics/slurp/tpccosmics/run_00045600_00045700/")
+    const std::string dir = ".")
 {
   std::string inputRawHitFile = dir + filename;
 
@@ -60,6 +61,12 @@ void Fun4All_Cosmics(
       runseg = Fun4AllUtils::GetRunSegment(inputRawHitFile);
   int runnumber = runseg.first;
   int segment = runseg.second;
+  TpcReadoutInit( runnumber );
+  std::cout<< " run: " << runnumber
+	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
+	   << " pre: " << TRACKING::reco_tpc_time_presample
+	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
+	   << std::endl;
 
   auto se = Fun4AllServer::instance();
   se->Verbosity(2);
