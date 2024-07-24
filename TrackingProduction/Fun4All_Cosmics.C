@@ -61,7 +61,7 @@ void Fun4All_Cosmics(
   int segment = runseg.second;
 
   auto se = Fun4AllServer::instance();
-  se->Verbosity(1);
+  se->Verbosity(2);
   auto rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
@@ -89,7 +89,7 @@ void Fun4All_Cosmics(
 
   auto tpcunpacker = new TpcCombinedRawDataUnpacker;
   tpcunpacker->Verbosity(0);
-tpcunpacker->doBaselineCorr(true);
+  tpcunpacker->doBaselineCorr(true);
   se->registerSubsystem(tpcunpacker);
 
   Micromegas_HitUnpacking();
@@ -124,7 +124,15 @@ tpcunpacker->doBaselineCorr(true);
   resid->clusterTree();
   resid->hitTree();
   resid->convertSeeds(true);
-//resid->zeroField();
+
+  double fieldstrength = std::numeric_limits<double>::quiet_NaN();
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
+  
+  if(ConstField && fieldstrength < 0.1)
+  {
+    resid->zeroField();
+  }
+  resid->setSegment(segment);
   se->registerSubsystem(resid);
 
   // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "/sphenix/tg/tg01/hf/jdosbo/tracking_development/onlineoffline/hitsets.root");
@@ -141,11 +149,11 @@ tpcunpacker->doBaselineCorr(true);
     se->registerSubsystem(new TpcClusterQA);
     se->registerSubsystem(new MicromegasClusterQA);
 
-    TString qaname = outfilename + filename + "_qa.root";
+   
+  }
+ TString qaname = outfilename + filename + "_qa.root";
     std::string qaOutputFileName(qaname.Data());
     QAHistManagerDef::saveQARootFile(qaOutputFileName);
-  }
-
   delete se;
   std::cout << "Finished" << std::endl;
   gSystem->Exit(0);
