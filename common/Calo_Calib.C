@@ -37,19 +37,16 @@ void Process_Calo_Calib()
   std::cout << "Calibrating EMCal" << std::endl;
   CaloTowerCalib *calibEMC = new CaloTowerCalib("CEMCCALIB");
   calibEMC->set_detector_type(CaloTowerDefs::CEMC);
-  calibEMC->set_outputNodePrefix("TOWERINFO_CALIB_");
   se->registerSubsystem(calibEMC);
 
   std::cout << "Calibrating OHcal" << std::endl;
   CaloTowerCalib *calibOHCal = new CaloTowerCalib("HCALOUT");
   calibOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
-  calibOHCal->set_outputNodePrefix("TOWERINFO_CALIB_");
   se->registerSubsystem(calibOHCal);
 
   std::cout << "Calibrating IHcal" << std::endl;
   CaloTowerCalib *calibIHCal = new CaloTowerCalib("HCALIN");
   calibIHCal->set_detector_type(CaloTowerDefs::HCALIN);
-  calibIHCal->set_outputNodePrefix("TOWERINFO_CALIB_");
   se->registerSubsystem(calibIHCal);
 
   std::cout << "Calibrating ZDC" << std::endl;
