@@ -27,11 +27,6 @@
 
 #include <phool/recoConsts.h>
 
-#include <track_to_calo/TrackCaloMatch.h>
-#include <track_to_calo/TrackToCalo.h>
-#include <track_to_calo/CaloOnly.h>
-#include <track_to_calo/TrackOnly.h>
-
 #include <trackreco/AzimuthalSeeder.h>
 #include <trackreco/PHActsTrackProjection.h>
 #include <trackingdiagnostics/TrackResiduals.h>
@@ -56,6 +51,13 @@ R__LOAD_LIBRARY(libcalo_reco.so)
 using namespace std;
 
 std::string GetFirstLine(std::string listname);
+
+// example for inputlistfile
+// run46730_0000_trkr.txt
+// > /sphenix/lustre01/sphnxpro/physics/slurp/streaming/physics/tpconlyrun_00046700_00046800/DST_TPC_EVENT_run2pp_new_2024p002-00046730-0000.root
+// run46730_calo.list
+// > /sphenix/lustre01/sphnxpro/physics/slurp/caloy2test/run_00046700_00046800/DST_CALO_run2pp_new_2024p004-00046730-00000.root
+// > /sphenix/lustre01/sphnxpro/physics/slurp/caloy2test/run_00046700_00046800/DST_CALO_run2pp_new_2024p004-00046730-00001.root
 
 void Fun4All_FieldOnAllTrackersCalos(
     const int nEvents = 10, 
@@ -115,8 +117,6 @@ void Fun4All_FieldOnAllTrackersCalos(
 
   std::cout << "Output dst file: " << outputDstFile << std::endl;
 
-  Global_Reco();
-
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
@@ -135,8 +135,8 @@ void Fun4All_FieldOnAllTrackersCalos(
   G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0 * (1+ dz_separation_0 / 2. / 105.); //cm/ns
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
   //to turn on the default static corrections, enable the two lines below
-  G4TPC::ENABLE_STATIC_CORRECTIONS = true;
-  G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS = false;
+  //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
+  //G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS = false;
   //G4MAGNET::magfield = "0.01";
   G4MAGNET::magfield_tracking = G4MAGNET::magfield;
   G4MAGNET::magfield_rescale = 1;
@@ -326,6 +326,8 @@ void Fun4All_FieldOnAllTrackersCalos(
   }
   finder->setOutlierPairCut(0.1);
   se->registerSubsystem(finder);
+
+  Global_Reco();
 
   auto projection = new PHActsTrackProjection("CaloProjection");
   float new_cemc_rad = 100.70;//(1-(-0.077))*93.5 recommended cemc radius
