@@ -146,12 +146,48 @@ namespace G4TPC
   std::string DIRECT_LASER_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";
   std::string DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME = "TpcDirectLaserReconstruction.root";
 
-  std::string TPC_GAS_MIXTURE = "ArCF4Isobutane";
+  std::string TPC_GAS_MIXTURE = "NeCF4";
   // drift velocity is set here for all relevant modules
   //  double tpc_drift_velocity_reco now set in GlobalVariables.C
   double tpc_drift_velocity_sim = 0.007550;  // cm/ns   // this is the ArCF4Isobutane version of the gas
   double tpc_added_smear_long = 0.0;
   double tpc_added_smear_trans = 0.0;
+
+  double NeCF4_drift_velocity = 0.008;
+  double NeCF4_diffusion_long = 0.012;
+  double NeCF4_diffusion_trans = 0.004;
+  double NeCF4_Ne_frac = 0.5;
+  double NeCF4_Ar_frac = 0.0;
+  double NeCF4_CF4_frac = 0.5;
+  double NeCF4_N2_frac = 0.0;
+  double NeCF4_isobutane_frac = 0.0;
+
+  double ArCF4_drift_velocity = 0.008;
+  double ArCF4_diffusion_long = 0.012;
+  double ArCF4_diffusion_trans = 0.004;
+  double ArCF4_Ne_frac = 0.0;
+  double ArCF4_Ar_frac = 0.6;
+  double ArCF4_CF4_frac = 0.4;
+  double ArCF4_N2_frac = 0.0;
+  double ArCF4_isobutane_frac = 0.0;
+
+  double ArCF4N2_drift_velocity = 0.006965;
+  double ArCF4N2_diffusion_long = 0.013613;
+  double ArCF4N2_diffusion_trans = 0.005487;
+  double ArCF4N2_Ne_frac = 0.0;
+  double ArCF4N2_Ar_frac = 0.65;
+  double ArCF4N2_CF4_frac = 0.25;
+  double ArCF4N2_N2_frac = 0.10;
+  double ArCF4N2_isobutane_frac = 0.00;
+
+  double ArCF4Isobutane_drift_velocity = 0.00755;
+  double ArCF4Isobutane_diffusion_long = 0.014596;
+  double ArCF4Isobutane_diffusion_trans = 0.005313;
+  double ArCF4Isobutane_Ne_frac = 0.0;
+  double ArCF4Isobutane_Ar_frac = 0.75;
+  double ArCF4Isobutane_CF4_frac = 0.20;
+  double ArCF4Isobutane_N2_frac = 0.00;
+  double ArCF4Isobutane_isobutane_frac = 0.05;
 
 }  // namespace G4TPC
 
