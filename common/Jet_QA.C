@@ -39,6 +39,9 @@ namespace JetQA
   //! Set to true to generate histograms for a specified set of triggers
   bool DoTriggered = true;
 
+  //! Set to true to restrict jet eta acceptance by resolution parameter
+  bool RestrictEtaByR = true;
+
 
 
   // enums --------------------------------------------------------------------
@@ -329,6 +332,7 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
   );
   kinematicQA -> Verbosity(verbosity);
   kinematicQA -> setHistTag("");
+  kinematicQA -> setRestrictEtaRange(JetQA::RestrictEtaByR);
   kinematicQA -> setPtRange(ptJetRange.first, ptJetRange.second);
   kinematicQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
   if (trg.has_value())
