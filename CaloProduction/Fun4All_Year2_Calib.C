@@ -4,16 +4,6 @@
 #include <QA.C>
 #include <Calo_Calib.C>
 
-#include <caloreco/CaloTowerBuilder.h>
-#include <caloreco/CaloTowerCalib.h>
-#include <caloreco/CaloTowerStatus.h>
-#include <caloreco/CaloWaveformProcessing.h>
-#include <caloreco/DeadHotMapLoader.h>
-#include <caloreco/RawClusterBuilderTemplate.h>
-#include <caloreco/RawClusterDeadHotMask.h>
-#include <caloreco/RawClusterPositionCorrection.h>
-#include <caloreco/TowerInfoDeadHotMask.h>
-
 #include <mbd/MbdReco.h>
 
 #include <zdcinfo/ZdcReco.h>
@@ -55,8 +45,8 @@ R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libglobalQA.so)
 
-void Fun4All_Year2(int nEvents=100,
-                   const std::string &fname = "DST_TRIGGERED_EVENT_run2pp_new_2024p003-00048185-0000.root",
+void Fun4All_Year2_Calib(int nEvents=100,
+                   const std::string &fname = "DST_CALOFITTING-00000000-000000.root",
                    const std::string& outfile= "DST_CALO-00000000-000000.root",
                    const std::string& outfile_hist= "HIST_CALOQA-00000000-000000.root",
                    const std::string& dbtag= "ProdA_2024"
@@ -86,14 +76,6 @@ void Fun4All_Year2(int nEvents=100,
   MbdReco *mbdreco = new MbdReco();
   se->registerSubsystem(mbdreco);
 
-  CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
-  caZDC->set_detector_type(CaloTowerDefs::ZDC);
-  caZDC->set_builder_type(buildertype);
-  caZDC->set_processing_type(CaloWaveformProcessing::FAST);
-  caZDC->set_nsamples(16);
-  caZDC->set_offlineflag();
-  se->registerSubsystem(caZDC);
-
   //ZDC Reconstruction--Calib Info
   ZdcReco *zdcreco = new ZdcReco();
   se->registerSubsystem(zdcreco);
@@ -101,43 +83,6 @@ void Fun4All_Year2(int nEvents=100,
   // Official vertex storage
   GlobalVertexReco *gvertex = new GlobalVertexReco();
   se->registerSubsystem(gvertex);
-
-  /////////////////
-  // build towers
-  CaloTowerBuilder *ctbEMCal = new CaloTowerBuilder("EMCalBUILDER");
-  ctbEMCal->set_detector_type(CaloTowerDefs::CEMC);
-  ctbEMCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  ctbEMCal->set_builder_type(buildertype);
-  ctbEMCal->set_offlineflag(true);
-  ctbEMCal->set_nsamples(12);
-  ctbEMCal->set_bitFlipRecovery(true);
-  se->registerSubsystem(ctbEMCal);
-
-  CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
-  ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
-  ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  ctbIHCal->set_builder_type(buildertype);
-  ctbIHCal->set_offlineflag();
-  ctbIHCal->set_nsamples(12);
-  ctbIHCal->set_bitFlipRecovery(true);
-  se->registerSubsystem(ctbIHCal);
-
-  CaloTowerBuilder *ctbOHCal = new CaloTowerBuilder("HCALOUTBUILDER");
-  ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
-  ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  ctbOHCal->set_builder_type(buildertype);
-  ctbOHCal->set_offlineflag();
-  ctbOHCal->set_nsamples(12);
-  ctbOHCal->set_bitFlipRecovery(true);
-  se->registerSubsystem(ctbOHCal);
-
-  CaloTowerBuilder *caEPD = new CaloTowerBuilder("SEPDBUILDER");
-  caEPD->set_detector_type(CaloTowerDefs::SEPD);
-  caEPD->set_builder_type(buildertype);
-  caEPD->set_processing_type(CaloWaveformProcessing::FAST);
-  caEPD->set_nsamples(12);
-  caEPD->set_offlineflag();
-  se->registerSubsystem(caEPD);
 
   /////////////////////
   // Geometry 
@@ -166,10 +111,11 @@ void Fun4All_Year2(int nEvents=100,
   se->registerInputManager(In);
 
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfile);
-  out->StripNode("CEMCPackets");
-  out->StripNode("HCALPackets");
-  out->StripNode("ZDCPackets");
-  out->StripNode("SEPDPackets");
+  out->StripNode("TOWERS_CEMC");
+  out->StripNode("TOWERS_HCALIN");
+  out->StripNode("TOWERS_HCALOUT");
+  out->StripNode("TOWERS_ZDC");
+  out->StripNode("TOWERS_SEPD");
   out->StripNode("MBDPackets");
   se->registerOutputManager(out);
 

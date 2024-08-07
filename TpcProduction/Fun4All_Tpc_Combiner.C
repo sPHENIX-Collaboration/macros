@@ -1,3 +1,6 @@
+#include <GlobalVariables.C>
+#include <Trkr_TpcReadoutInit.C>
+#include <fun4all/Fun4AllUtils.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
@@ -12,6 +15,9 @@
 #include <phool/recoConsts.h>
 
 #include <ffarawmodules/TpcCheck.h>
+#include <string>
+#include <fstream>
+#include <iostream>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -69,10 +75,26 @@ void Fun4All_Tpc_Combiner(int nEvents = 0,
   infile.push_back(input_file21);
   infile.push_back(input_file22);
   infile.push_back(input_file23);
+  
+  std::ifstream infile_stream;
+  infile_stream.open(input_file00, std::ios_base::in);
+  std::string filepath;
+  getline(infile_stream, filepath);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filepath);
+  int runnumber = runseg.first;
+  int segment = runseg.second;
+  // std::cout<< " run: " << runnumber << " seg: " << segment << std::endl;
+  
+  TpcReadoutInit( runnumber );
+  std::cout<< " run: " << runnumber
+	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
+	   << " pre: " << TRACKING::reco_tpc_time_presample
+	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
+	   << std::endl;
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
-recoConsts *rc = recoConsts::instance();
+  recoConsts *rc = recoConsts::instance();
 //rc->set_IntFlag("RUNNUMBER",20445);
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
 //  in->Verbosity(10);
@@ -83,6 +105,7 @@ recoConsts *rc = recoConsts::instance();
 //    sngl->Verbosity(3);
     sngl->SetBcoRange(130);
     sngl->AddListFile(iter);
+    sngl->SetMaxTpcTimeSamples(TRACKING::reco_tpc_maxtime_sample);
     in->registerStreamingInput(sngl,InputManagerType::TPC);
     i++;
   }
