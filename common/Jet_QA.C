@@ -39,6 +39,9 @@ namespace JetQA
   //! Set to true to generate histograms for a specified set of triggers
   bool DoTriggered = true;
 
+  //! Set to true to restrict minimum jet pt to trigger threshold
+  bool RestrictPtToTrig = false;
+
   //! Set to true to restrict jet eta acceptance by resolution parameter
   bool RestrictEtaByR = true;
 
@@ -57,6 +60,9 @@ namespace JetQA
 
 
   // constants ----------------------------------------------------------------
+
+  //! Min jet pt in GeV/c
+  double MinJetPt = 6.;
 
   //! Max jet pt in GeV/c
   double MaxJetPt = 100.;
@@ -169,38 +175,44 @@ namespace JetQA
   inline double GetMinJetPt(const uint32_t trg = JetQADefs::GL1::MBDNSJet1)
   {
 
-    double ptJetMin;
-    switch (trg)
+    // by defult, set min to global constant
+    double ptJetMin = MinJetPt;
+
+    // if restricting pt to trigger threhsold, pick out relevant threshold
+    if (RestrictPtToTrig)
     {
-      // Jet4 threshold
-      case JetQADefs::GL1::MBDNSJet4:
-        [[fallthrough]];
-      case JetQADefs::GL1::Jet4:
-        ptJetMin = 11.;
-        break;
+      switch (trg)
+      {
+        // Jet4 threshold
+        case JetQADefs::GL1::MBDNSJet4:
+          [[fallthrough]];
+        case JetQADefs::GL1::Jet4:
+          ptJetMin = 11.;
+          break;
 
-      // Jet3 threshold
-      case JetQADefs::GL1::MBDNSJet3:
-        [[fallthrough]];
-      case JetQADefs::GL1::Jet3:
-        ptJetMin = 10.;
-        break;
+        // Jet3 threshold
+        case JetQADefs::GL1::MBDNSJet3:
+          [[fallthrough]];
+        case JetQADefs::GL1::Jet3:
+          ptJetMin = 10.;
+          break;
 
-      // Jet2 threshold
-      case JetQADefs::GL1::MBDNSJet2:
-        [[fallthrough]];
-      case JetQADefs::GL1::Jet2:
-        ptJetMin = 9.;
-        break;
+        // Jet2 threshold
+        case JetQADefs::GL1::MBDNSJet2:
+          [[fallthrough]];
+        case JetQADefs::GL1::Jet2:
+          ptJetMin = 9.;
+          break;
 
-      // Jet1 threshold (default value)
-      case JetQADefs::GL1::MBDNSJet1:
-        [[fallthrough]];
-      case JetQADefs::GL1::Jet1:
-        [[fallthrough]];
-      default:
-        ptJetMin = 6.;
-        break;
+        // Jet1 threshold (default value)
+        case JetQADefs::GL1::MBDNSJet1:
+          [[fallthrough]];
+        case JetQADefs::GL1::Jet1:
+          [[fallthrough]];
+        default:
+          ptJetMin = 6.;
+          break;
+      }
     }
     return ptJetMin;
 
