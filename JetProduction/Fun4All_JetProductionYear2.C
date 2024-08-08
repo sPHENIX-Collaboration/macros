@@ -65,6 +65,8 @@ void Fun4All_JetProductionYear2(
   JetQA::HasTracks = false;
   JetQA::DoInclusive = true;
   JetQA::DoTriggered = true;
+  JetQA::RestrictPtToTrig = false;
+  JetQA::RestrictEtaByR = true;
 
   // initialize F4A server
   Fun4AllServer* se = Fun4AllServer::instance();
