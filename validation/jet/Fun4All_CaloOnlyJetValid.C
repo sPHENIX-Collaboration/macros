@@ -57,6 +57,9 @@ void Fun4All_CaloOnlyJetValid(
   std::optional<int> run    = std::nullopt
 ) {
 
+  // turn on QA
+  Enable::QA = true;
+
   // turn on pp mode
   HIJETS::is_pp = true;
 
@@ -64,6 +67,8 @@ void Fun4All_CaloOnlyJetValid(
   JetQA::HasTracks = false;
   JetQA::DoInclusive = true;
   JetQA::DoTriggered = true;
+  JetQA::RestrictPtToTrig = false;
+  JetQA::RestrictEtaByR = true;
 
   // initialize fun4all ------------------------------------------------------
 

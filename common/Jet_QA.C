@@ -39,6 +39,12 @@ namespace JetQA
   //! Set to true to generate histograms for a specified set of triggers
   bool DoTriggered = true;
 
+  //! Set to true to restrict minimum jet pt to trigger threshold
+  bool RestrictPtToTrig = false;
+
+  //! Set to true to restrict jet eta acceptance by resolution parameter
+  bool RestrictEtaByR = true;
+
 
 
   // enums --------------------------------------------------------------------
@@ -54,6 +60,9 @@ namespace JetQA
 
 
   // constants ----------------------------------------------------------------
+
+  //! Min jet pt in GeV/c
+  double MinJetPt = 6.;
 
   //! Max jet pt in GeV/c
   double MaxJetPt = 100.;
@@ -71,6 +80,7 @@ namespace JetQA
 
   // maps ---------------------------------------------------------------------
 
+  //! Map from trigger to histogram tag
   std::map<uint32_t, std::string> GL1Tag = {
     {JetQADefs::GL1::Clock, "clock"},
     {JetQADefs::GL1::ZDCS, "zdcs"},
@@ -104,6 +114,7 @@ namespace JetQA
     {JetQADefs::GL1::Photon4, "photon4"} 
   };
 
+  //! Map from jet type to input node
   std::map<uint32_t, std::string> JetInput = {
     {Type::AntiKtTowerSubR02, "AntiKt_Tower_r02_Sub1"},
     {Type::AntiKtTowerSubR03, "AntiKt_Tower_r03_Sub1"},
@@ -111,6 +122,7 @@ namespace JetQA
     {Type::AntiKtTowerSubR05, "AntiKt_Tower_r05_Sub1"}
   };
 
+  //! Map from jet type to histogram tag
   std::map<uint32_t, std::string> JetTag = {
     {Type::AntiKtTowerSubR02, "towersub1_antikt_r02"},
     {Type::AntiKtTowerSubR03, "towersub1_antikt_r03"},
@@ -118,9 +130,42 @@ namespace JetQA
     {Type::AntiKtTowerSubR05, "towersub1_antikt_r05"}
   };
 
+  //! Map from jet type to resolution parameter
+  std::map<uint32_t, double> JetRes = {
+    {Type::AntiKtTowerSubR02, 0.2},
+    {Type::AntiKtTowerSubR03, 0.3},
+    {Type::AntiKtTowerSubR04, 0.4},
+    {Type::AntiKtTowerSubR05, 0.5}
+  };
+
 
 
   // methods ------------------------------------------------------------------
+
+  // --------------------------------------------------------------------------
+  //! Get trigger tag
+  // --------------------------------------------------------------------------
+  /*! If a trigger index is provided (i.e. a trigger is being selected),
+   *  function returns the correpsonding tag. Otherwise (i.e. NO trigger
+   *  is being selected), returns the inclusive tag.
+   */
+  inline std::string GetTriggerTag(std::optional<uint32_t> trg = std::nullopt)
+  {
+
+    std::string tag("");
+    if (trg.has_value())
+    {
+      tag.append("_" + GL1Tag[trg.value()]);
+    }
+    else
+    {
+      tag.append("_" + InclusiveTag);
+    }
+    return tag;
+
+  }  // end 'GetTriggerTag(std::optional<uint32_t>)'
+
+
 
   // --------------------------------------------------------------------------
   //! Get minimum jet pt based on which trigger fired
@@ -130,38 +175,44 @@ namespace JetQA
   inline double GetMinJetPt(const uint32_t trg = JetQADefs::GL1::MBDNSJet1)
   {
 
-    double ptJetMin;
-    switch (trg)
+    // by defult, set min to global constant
+    double ptJetMin = MinJetPt;
+
+    // if restricting pt to trigger threhsold, pick out relevant threshold
+    if (RestrictPtToTrig)
     {
-      // Jet4 threshold
-      case JetQADefs::GL1::MBDNSJet4:
-        [[fallthrough]];
-      case JetQADefs::GL1::Jet4:
-        ptJetMin = 11.;
-        break;
+      switch (trg)
+      {
+        // Jet4 threshold
+        case JetQADefs::GL1::MBDNSJet4:
+          [[fallthrough]];
+        case JetQADefs::GL1::Jet4:
+          ptJetMin = 11.;
+          break;
 
-      // Jet3 threshold
-      case JetQADefs::GL1::MBDNSJet3:
-        [[fallthrough]];
-      case JetQADefs::GL1::Jet3:
-        ptJetMin = 10.;
-        break;
+        // Jet3 threshold
+        case JetQADefs::GL1::MBDNSJet3:
+          [[fallthrough]];
+        case JetQADefs::GL1::Jet3:
+          ptJetMin = 10.;
+          break;
 
-      // Jet2 threshold
-      case JetQADefs::GL1::MBDNSJet2:
-        [[fallthrough]];
-      case JetQADefs::GL1::Jet2:
-        ptJetMin = 9.;
-        break;
+        // Jet2 threshold
+        case JetQADefs::GL1::MBDNSJet2:
+          [[fallthrough]];
+        case JetQADefs::GL1::Jet2:
+          ptJetMin = 9.;
+          break;
 
-      // Jet1 threshold (default value)
-      case JetQADefs::GL1::MBDNSJet1:
-        [[fallthrough]];
-      case JetQADefs::GL1::Jet1:
-        [[fallthrough]];
-      default:
-        ptJetMin = 6.;
-        break;
+        // Jet1 threshold (default value)
+        case JetQADefs::GL1::MBDNSJet1:
+          [[fallthrough]];
+        case JetQADefs::GL1::Jet1:
+          [[fallthrough]];
+        default:
+          ptJetMin = 6.;
+          break;
+      }
     }
     return ptJetMin;
 
@@ -172,7 +223,7 @@ namespace JetQA
   // --------------------------------------------------------------------------
   //! Get default jet pt range
   // --------------------------------------------------------------------------
-  inline std::pair<double, double> GetDefaultJetPtRange(std::optional<uint32_t> trg = std::nullopt)
+  inline std::pair<double, double> GetJetPtRange(std::optional<uint32_t> trg = std::nullopt)
   {
 
     std::pair<double, double> ptJetRange;
@@ -186,22 +237,25 @@ namespace JetQA
     }
     return ptJetRange;
 
-  }  // end 'GetDefaultJetPtRange(std::optional<uint32_t>)'
+  }  // end 'GetJetPtRange(std::optional<uint32_t>)'
 
 
 
   // --------------------------------------------------------------------------
   //! Get default jet eta range
   // --------------------------------------------------------------------------
-  inline std::pair<double, double> GetDefaultJetEtaRange(const double res = 0.)
+  inline std::pair<double, double> GetJetEtaRange(const double res = 0.)
   {
 
-    const double etaMin = MinAcceptEta + res;
-    const double etaMax = MaxAcceptEta - res;
+    // determine relevant min/max
+    const double etaMin = RestrictEtaByR ? MinAcceptEta + res : MinAcceptEta;
+    const double etaMax = RestrictEtaByR ? MaxAcceptEta - res : MaxAcceptEta;
+
+    // return range
     std::pair<double, double> etaJetRange = {etaMin, etaMax};
     return etaJetRange;
 
-  }  // end 'GetDefaultJetEtaRange(double)'
+  }  // end 'GetJetEtaRange(double)'
 
 
 
@@ -216,7 +270,11 @@ namespace JetQA
       JetQADefs::GL1::MBDNSJet1,
       JetQADefs::GL1::MBDNSJet2,
       JetQADefs::GL1::MBDNSJet3,
-      JetQADefs::GL1::MBDNSJet4
+      JetQADefs::GL1::MBDNSJet4,
+      JetQADefs::GL1::Jet1,
+      JetQADefs::GL1::Jet2,
+      JetQADefs::GL1::Jet3,
+      JetQADefs::GL1::Jet4
     };
     return vecDefaultTrigs;
 
@@ -253,21 +311,12 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
   // set verbosity
   int verbosity = std::max(Enable::QA_VERBOSITY, Enable::HIJETS_VERBOSITY);
 
-  // if selecting a trigger, add correpsonding tag
-  //   otherwise label as "inclusive"
-  std::string trig_tag("");
-  if (trg.has_value())
-  {
-    trig_tag.append("_" + JetQA::GL1Tag[trg.value()]);
-  }
-  else
-  {
-    trig_tag.append("_" + JetQA::InclusiveTag);
-  }
+  // grab appropriate trigger tag
+  std::string trig_tag = JetQA::GetTriggerTag(trg);
 
   // grab default pt, eta ranges
-  std::pair<double, double> ptJetRange = JetQA::GetDefaultJetPtRange(trg);
-  std::pair<double, double> etaJetRange = JetQA::GetDefaultJetEtaRange();
+  std::pair<double, double> ptJetRange = JetQA::GetJetPtRange(trg);
+  std::pair<double, double> etaJetMaxRange = JetQA::GetJetEtaRange();
 
   // get list of jet nodes to analyze
   std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA();
@@ -298,8 +347,9 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
   );
   kinematicQA -> Verbosity(verbosity);
   kinematicQA -> setHistTag("");
+  kinematicQA -> setRestrictEtaRange(JetQA::RestrictEtaByR);
   kinematicQA -> setPtRange(ptJetRange.first, ptJetRange.second);
-  kinematicQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
+  kinematicQA -> setEtaRange(etaJetMaxRange.first, etaJetMaxRange.second);
   if (trg.has_value())
   {
     kinematicQA -> setTrgToSelect(trg.value());
@@ -310,6 +360,9 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
 
   for (uint32_t jet : vecJetsToQA)
   {
+
+    // get R-dependent eta range
+    std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange(JetQA::JetRes[jet]);
 
     // initialize and register jet seed counter qa module
     JetSeedCount* jetSeedQA = new JetSeedCount(
@@ -362,21 +415,12 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
   // set verbosity
   int verbosity = std::max(Enable::QA_VERBOSITY, Enable::HIJETS_VERBOSITY);
 
-  // if selecting a trigger, add correpsonding tag
-  //   otherwise label as "inclusive"
-  std::string trig_tag("");
-  if (trg.has_value())
-  {
-    trig_tag.append("_" + JetQA::GL1Tag[trg.value()]);
-  }
-  else
-  {
-    trig_tag.append("_" + JetQA::InclusiveTag);
-  }
+  // grab appropriate trigger tag
+  std::string trig_tag = JetQA::GetTriggerTag(trg);
 
   // grab default pt, eta ranges
-  std::pair<double, double> ptJetRange = JetQA::GetDefaultJetPtRange(trg);
-  std::pair<double, double> etaJetRange = JetQA::GetDefaultJetEtaRange();
+  std::pair<double, double> ptJetRange = JetQA::GetJetPtRange(trg);
+  std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange();
 
   // get list of jet nodes to analyze
   std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA();
