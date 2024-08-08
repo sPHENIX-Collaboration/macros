@@ -211,7 +211,7 @@ namespace JetQA
   // --------------------------------------------------------------------------
   //! Get default jet pt range
   // --------------------------------------------------------------------------
-  inline std::pair<double, double> GetDefaultJetPtRange(std::optional<uint32_t> trg = std::nullopt)
+  inline std::pair<double, double> GetJetPtRange(std::optional<uint32_t> trg = std::nullopt)
   {
 
     std::pair<double, double> ptJetRange;
@@ -225,14 +225,14 @@ namespace JetQA
     }
     return ptJetRange;
 
-  }  // end 'GetDefaultJetPtRange(std::optional<uint32_t>)'
+  }  // end 'GetJetPtRange(std::optional<uint32_t>)'
 
 
 
   // --------------------------------------------------------------------------
   //! Get default jet eta range
   // --------------------------------------------------------------------------
-  inline std::pair<double, double> GetDefaultJetEtaRange(const double res = 0.)
+  inline std::pair<double, double> GetJetEtaRange(const double res = 0.)
   {
 
     const double etaMin = MinAcceptEta + res;
@@ -240,7 +240,7 @@ namespace JetQA
     std::pair<double, double> etaJetRange = {etaMin, etaMax};
     return etaJetRange;
 
-  }  // end 'GetDefaultJetEtaRange(double)'
+  }  // end 'GetJetEtaRange(double)'
 
 
 
@@ -300,8 +300,8 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
   std::string trig_tag = JetQA::GetTriggerTag(trg);
 
   // grab default pt, eta ranges
-  std::pair<double, double> ptJetRange = JetQA::GetDefaultJetPtRange(trg);
-  std::pair<double, double> etaJetRange = JetQA::GetDefaultJetEtaRange();
+  std::pair<double, double> ptJetRange = JetQA::GetJetPtRange(trg);
+  std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange();
 
   // get list of jet nodes to analyze
   std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA();
@@ -401,8 +401,8 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
   std::string trig_tag = JetQA::GetTriggerTag(trg);
 
   // grab default pt, eta ranges
-  std::pair<double, double> ptJetRange = JetQA::GetDefaultJetPtRange(trg);
-  std::pair<double, double> etaJetRange = JetQA::GetDefaultJetEtaRange();
+  std::pair<double, double> ptJetRange = JetQA::GetJetPtRange(trg);
+  std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange();
 
   // get list of jet nodes to analyze
   std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA();
