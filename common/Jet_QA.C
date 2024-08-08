@@ -247,8 +247,11 @@ namespace JetQA
   inline std::pair<double, double> GetJetEtaRange(const double res = 0.)
   {
 
-    const double etaMin = MinAcceptEta + res;
-    const double etaMax = MaxAcceptEta - res;
+    // determine relevant min/max
+    const double etaMin = RestrictEtaByR ? MinAcceptEta + res : MinAcceptEta;
+    const double etaMax = RestrictEtaByR ? MaxAcceptEta - res : MaxAcceptEta;
+
+    // return range
     std::pair<double, double> etaJetRange = {etaMin, etaMax};
     return etaJetRange;
 
@@ -313,7 +316,7 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
 
   // grab default pt, eta ranges
   std::pair<double, double> ptJetRange = JetQA::GetJetPtRange(trg);
-  std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange();
+  std::pair<double, double> etaJetMaxRange = JetQA::GetJetEtaRange();
 
   // get list of jet nodes to analyze
   std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA();
@@ -346,7 +349,7 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
   kinematicQA -> setHistTag("");
   kinematicQA -> setRestrictEtaRange(JetQA::RestrictEtaByR);
   kinematicQA -> setPtRange(ptJetRange.first, ptJetRange.second);
-  kinematicQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
+  kinematicQA -> setEtaRange(etaJetMaxRange.first, etaJetMaxRange.second);
   if (trg.has_value())
   {
     kinematicQA -> setTrgToSelect(trg.value());
@@ -357,6 +360,9 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
 
   for (uint32_t jet : vecJetsToQA)
   {
+
+    // get R-dependent eta range
+    std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange(JetQA::JetRes[jet]);
 
     // initialize and register jet seed counter qa module
     JetSeedCount* jetSeedQA = new JetSeedCount(
