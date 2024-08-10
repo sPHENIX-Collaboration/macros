@@ -8,6 +8,7 @@
 #include <fun4allraw/InputManagerType.h>
 #include <fun4allraw/SingleGl1PoolInput.h>
 #include <fun4allraw/SingleInttPoolInput.h>
+#include <fun4allraw/SingleInttEventInput.h>
 #include <fun4allraw/SingleMicromegasPoolInput.h>
 #include <fun4allraw/SingleMvtxPoolInput.h>
 #include <fun4allraw/SingleTpcPoolInput.h>
@@ -28,6 +29,7 @@ R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
 
 bool isGood(const string &infile);
+bool use_inttpool = true; // set to false if you want to use the intt event input mgr
 
 void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
                              const string &input_gl1file = "gl1daq.list",
@@ -155,19 +157,41 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
   i = 0;
 
 
-  for (auto iter : intt_infile)
+  if (use_inttpool)
   {
-    if (isGood(iter))
+    for (auto iter : intt_infile)
     {
-    SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + to_string(i));
+      if (isGood(iter))
+      {
+	cout << "opening file " << iter << endl;
+	SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + to_string(i));
 //    intt_sngl->Verbosity(3);
-    intt_sngl->SetNegativeBco(1);
-    intt_sngl->SetBcoRange(2);
-    intt_sngl->AddListFile(iter);
-    in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
-    i++;
+	intt_sngl->SetNegativeBco(1);
+	intt_sngl->SetBcoRange(2);
+	intt_sngl->AddListFile(iter);
+	in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
+	i++;
+      }
     }
   }
+  else
+  {
+    for (auto iter : intt_infile)
+    {
+      if (isGood(iter))
+      {
+	cout << "opening file " << iter << endl;
+	SingleInttEventInput *intt_sngl = new SingleInttEventInput("INTT_" + to_string(i));
+//    intt_sngl->Verbosity(3);
+	intt_sngl->SetNegativeBco(1);
+	intt_sngl->SetBcoRange(2);
+	intt_sngl->AddListFile(iter);
+	in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
+	i++;
+      }
+    }
+  }
+
   i = 0;
   for (auto iter : mvtx_infile)
   {
