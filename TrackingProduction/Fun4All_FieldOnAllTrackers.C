@@ -27,6 +27,8 @@
 
 #include <phool/recoConsts.h>
 
+#include <tpccalib/PHTpcResiduals.h>
+
 #include <trackingqa/InttClusterQA.h>
 #include <trackingqa/MicromegasClusterQA.h>
 #include <trackingqa/MvtxClusterQA.h>
@@ -67,6 +69,13 @@ void Fun4All_FieldOnAllTrackers(
 	   << " pre: " << TRACKING::reco_tpc_time_presample
 	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
 	   << std::endl;
+
+  // distortion calibration mode
+  /*
+   * set to true to enable residuals in the TPC with
+   * TPC clusters not participating to the ACTS track fit
+   */
+  G4TRACKING::SC_CALIBMODE = false;
 
   ACTSGEOM::mvtxMisalignment = 100;
   ACTSGEOM::inttMisalignment = 100.;
@@ -248,8 +257,29 @@ void Fun4All_FieldOnAllTrackers(
     actsFit->useOutlierFinder(false);
     actsFit->setFieldMap(G4MAGNET::magfield_tracking);
     se->registerSubsystem(actsFit);
+
+    if (G4TRACKING::SC_CALIBMODE)
+    {
+      /*
+      * in calibration mode, calculate residuals between TPC and fitted tracks,
+      * store in dedicated structure for distortion correction
+      */
+      auto residuals = new PHTpcResiduals;
+      const TString tpc_residoutfile = theOutfile + "_PhTpcResiduals.root";
+      residuals->setOutputfile(tpc_residoutfile.Data());
+      residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
+
+      // matches Tony's analysis
+      residuals->setMinPt( 0.2 );
+
+      // reconstructed distortion grid size (phi, r, z)
+      residuals->setGridDimensions(36, 48, 80);
+      se->registerSubsystem(residuals);
+    }
+
   }
-  PHSimpleVertexFinder *finder = new PHSimpleVertexFinder;
+
+  auto finder = new PHSimpleVertexFinder;
   finder->Verbosity(0);
   finder->setDcaCut(0.5);
   finder->setTrackPtCut(-99999.);
@@ -265,6 +295,15 @@ void Fun4All_FieldOnAllTrackers(
   auto resid = new TrackResiduals("TrackResiduals");
   resid->outfileName(residstring);
   resid->alignment(false);
+
+  // adjust track map name
+  if(G4TRACKING::SC_CALIBMODE && !G4TRACKING::convert_seeds_to_svtxtracks)
+  {
+    resid->trackmapName("SvtxSiliconMMTrackMap");
+    if( G4TRACKING::SC_USE_MICROMEGAS )
+    { resid->set_doMicromegasOnly(true); }
+  }
+
   resid->clusterTree();
   resid->hitTree();
   resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
