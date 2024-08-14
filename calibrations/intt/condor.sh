@@ -33,6 +33,7 @@ RUN_NUM="$1"
 
 [[ -d ${DIR}/out ]] || mkdir -p ${DIR}/out
 [[ -d ${DIR}/err ]] || mkdir -p ${DIR}/err
+[[ -d ${DIR}/log ]] || mkdir -p ${DIR}/log
 
 # rm -f ${DIR}/out/*
 # rm -f ${DIR}/err/*
@@ -53,7 +54,7 @@ notification    = Never
 
 output          = ${DIR}/out/out_${ARGS}.txt
 error           = ${DIR}/err/err_${ARGS}.txt
-log             = /tmp/condor
+log             = ${DIR}/log/log_${ARGS}.txt
 
 initialdir      = ${PWD}
 request_memory  = ${MEM}
