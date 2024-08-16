@@ -18,6 +18,7 @@
 #include <Trkr_TpcReadoutInit.C>
 
 #include <ffamodules/CDBInterface.h>
+
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -26,6 +27,8 @@
 #include <fun4all/Fun4AllServer.h>
 
 #include <phool/recoConsts.h>
+
+#include <cdbobjects/CDBTTree.h>
 
 #include <tpccalib/PHTpcResiduals.h>
 
@@ -41,6 +44,8 @@
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
+R__LOAD_LIBRARY(libphool.so)
+R__LOAD_LIBRARY(libcdbobjects.so)
 R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libtpc.so)
@@ -89,14 +94,27 @@ void Fun4All_FieldOnAllTrackers(
 
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
-  rc->set_uint64Flag("TIMESTAMP", 6);
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
-  //  G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
+  CDBInterface *cdb = CDBInterface::instance();
+  std::string tpc_dv_calib_dir = cdb->getUrl("TPC_DRIFT_VELOCITY");
+  if (tpc_dv_calib_dir.empty())
+  {
+    std::cout << "No calibrated TPC drift velocity for Run " << runnumber << ". Use default value " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
+  }
+  else
+  {
+    CDBTTree *cdbttree = new CDBTTree(tpc_dv_calib_dir);
+    cdbttree->LoadCalibrations();
+    G4TPC::tpc_drift_velocity_reco = cdbttree->GetSingleFloatValue("tpc_drift_velocity");
+    std::cout << "Use calibrated TPC drift velocity for Run " << runnumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
+  }
+
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
   //to turn on the default static corrections, enable the two lines below
   //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
