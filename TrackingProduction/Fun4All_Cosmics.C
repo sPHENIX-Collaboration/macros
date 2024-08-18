@@ -25,6 +25,8 @@
 
 #include <phool/recoConsts.h>
 
+#include <cdbobjects/CDBTTree.h>
+
 #include <trackingqa/InttClusterQA.h>
 
 #include <trackingqa/MicromegasClusterQA.h>
@@ -43,6 +45,8 @@
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
+R__LOAD_LIBRARY(libphool.so)
+R__LOAD_LIBRARY(libcdbobjects.so)
 R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libtpc.so)
@@ -83,6 +87,20 @@ void Fun4All_Cosmics(
   se->registerInputManager(ingeo);
 
   G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
+  CDBInterface *cdb = CDBInterface::instance();
+  std::string tpc_dv_calib_dir = cdb->getUrl("TPC_DRIFT_VELOCITY");
+  if (tpc_dv_calib_dir.empty())
+  {
+    std::cout << "No calibrated TPC drift velocity for Run " << runnumber << ". Use default value " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
+  }
+  else
+  {
+    CDBTTree *cdbttree = new CDBTTree(tpc_dv_calib_dir);
+    cdbttree->LoadCalibrations();
+    G4TPC::tpc_drift_velocity_reco = cdbttree->GetSingleFloatValue("tpc_drift_velocity");
+    std::cout << "Use calibrated TPC drift velocity for Run " << runnumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
+  }
+
   // can use for zero field
   double fieldstrength = std::numeric_limits<double>::quiet_NaN();
   bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
