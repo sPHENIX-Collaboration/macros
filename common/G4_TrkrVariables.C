@@ -102,6 +102,8 @@ namespace G4TPC
   int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
   double tpc_outer_radius = 77. + 2.;
 
+  float laser_pedestal_threshold = 0.0;
+
   // use simple clusterizer
   bool USE_SIMPLE_CLUSTERIZER = false;
 
@@ -132,6 +134,8 @@ namespace G4TPC
 
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
+
+  std::string laserClustering_debugName = "LaserCluster_debug.root";
 
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
