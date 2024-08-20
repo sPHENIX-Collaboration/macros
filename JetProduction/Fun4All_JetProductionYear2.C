@@ -48,7 +48,7 @@ R__LOAD_LIBRARY(libqautils.so)
 
 void Fun4All_JetProductionYear2(
   const int nEvents = 0,
-  const std::string& infile = "DST_CALO_run2pp_new_2024p001-00042586-0000.root",
+  const std::string& inlist = "TestListInput.list",
   const std::string& outfile = "DST_JET-00042586-0000.root",
   const std::string& outfile_hist = "HIST_JETQA-00042586-0000.root",
   const std::string& dbtag = "ProdA_2024"
@@ -65,13 +65,20 @@ void Fun4All_JetProductionYear2(
   JetQA::HasTracks = false;
   JetQA::DoInclusive = true;
   JetQA::DoTriggered = true;
+  JetQA::RestrictPtToTrig = false;
+  JetQA::RestrictEtaByR = true;
 
   // initialize F4A server
   Fun4AllServer* se = Fun4AllServer::instance();
   se -> Verbosity(1);
 
+  // grab 1st file from input list
+  ifstream    files(inlist);
+  std::string first("");
+  std::getline(files, first);
+
   // grab run and segment no.s
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(infile);
+  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(first);
   int runnumber = runseg.first;
 
   // set up reconstruction constants, DB tag, timestamp
@@ -88,7 +95,7 @@ void Fun4All_JetProductionYear2(
 
   // read in input
   Fun4AllInputManager* in = new Fun4AllDstInputManager("in");
-  in -> AddFile(infile);
+  in -> AddListFile(inlist);
   se -> registerInputManager(in);
 
   // do vertex & centrality reconstruction
