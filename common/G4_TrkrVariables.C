@@ -125,7 +125,7 @@ namespace G4TPC
   std::string module_edge_correction_filename = "";
 
   // static distortion corrections
-  bool ENABLE_STATIC_CORRECTIONS = false;
+  bool ENABLE_STATIC_CORRECTIONS = true;
   std::string static_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
 
   // average distortion corrections
@@ -133,7 +133,7 @@ namespace G4TPC
   std::string average_correction_filename;
 
   // enable central membrane g4hits generation
-  bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
+  bool ENABLE_CENTRAL_MEMBRANE_HITS = true;
 
   std::string laserClustering_debugName = "LaserCluster_debug.root";
 
