@@ -50,7 +50,6 @@ R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
-R__LOAD_LIBRARY(libtrack_to_calo.so)
 R__LOAD_LIBRARY(libcalo_reco.so)
 
 using namespace std;
