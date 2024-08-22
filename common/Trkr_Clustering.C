@@ -145,8 +145,7 @@ void TPC_LaserClustering()
   //only cluster if turned on
   if( G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS )
   {
-    //int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
-    int verbosity = 5;
+    int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
     ACTSGEOM::ActsGeomInit();
     Fun4AllServer* se = Fun4AllServer::instance();
 
@@ -154,8 +153,6 @@ void TPC_LaserClustering()
     laserClusterizer->Verbosity(verbosity);
     laserClusterizer->set_max_time_samples(TRACKING::reco_tpc_maxtime_sample);
     laserClusterizer->set_pedestal(G4TPC::laser_pedestal_threshold);
-    laserClusterizer->set_debug(true);
-    laserClusterizer->set_debug_name(G4TPC::laserClustering_debugName);
     se->registerSubsystem(laserClusterizer);
   }
 }
