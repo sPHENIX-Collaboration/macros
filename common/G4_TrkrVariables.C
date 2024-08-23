@@ -102,7 +102,7 @@ namespace G4TPC
   int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
   double tpc_outer_radius = 77. + 2.;
 
-  float laser_pedestal_threshold = 0.0;
+  float laser_adc_threshold = 0.0;
 
   // use simple clusterizer
   bool USE_SIMPLE_CLUSTERIZER = false;
