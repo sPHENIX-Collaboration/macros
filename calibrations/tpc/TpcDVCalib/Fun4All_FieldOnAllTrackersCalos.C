@@ -1,10 +1,5 @@
-/*
- * This macro shows a minimum working example of running the tracking
- * hit unpackers with some basic seeding algorithms to try to put together
- * tracks, calorimeter cluster reconstruction, and track projected to claorimeter surface. There are some analysis modules run at the end which package
- * hits, clusters, and clusters on tracks, calo clusters, and towers in calo clusters into trees for analysis.
- * also provide the option to do full tracking detectors or TPC only, and drift velocity correction and EMcal radius correction
- */
+//Track + Calo matching for TPC Drift Velocity Calibration
+//authors: Xudong Yu <xyu3@bnl.gov>
 
 #include <G4_ActsGeom.C>
 #include <G4_Magnet.C>
@@ -28,7 +23,7 @@
 
 #include <phool/recoConsts.h>
 
-#include <cdbobjects/CDBTTree.h>
+#include <tpcdvcalib/TrackToCalo.h>
 
 #include <trackreco/AzimuthalSeeder.h>
 #include <trackreco/PHActsTrackProjection.h>
@@ -40,56 +35,54 @@
 #include <iostream>
 #include <filesystem>
 
+// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
-R__LOAD_LIBRARY(libphool.so)
-R__LOAD_LIBRARY(libcdbobjects.so)
 R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
+R__LOAD_LIBRARY(libTpcDVCalib.so)
 R__LOAD_LIBRARY(libcalo_reco.so)
 
 using namespace std;
 
-std::string GetFirstLine(std::string listname);
+namespace fs = std::filesystem;
 
-// example for inputlistfile
-// run46730_0000_trkr.txt
-// > /sphenix/lustre01/sphnxpro/physics/slurp/streaming/physics/tpconlyrun_00046700_00046800/DST_TPC_EVENT_run2pp_new_2024p002-00046730-0000.root
-// run46730_calo.list
-// > /sphenix/lustre01/sphnxpro/physics/slurp/caloy2test/run_00046700_00046800/DST_CALO_run2pp_new_2024p004-00046730-00000.root
-// > /sphenix/lustre01/sphnxpro/physics/slurp/caloy2test/run_00046700_00046800/DST_CALO_run2pp_new_2024p004-00046730-00001.root
+std::string GetFirstLine(std::string listname);
+bool is_directory_empty(const fs::path& dir_path);
 
 void Fun4All_FieldOnAllTrackersCalos(
-    const int nEvents = 10, 
+    const int nEvents = 10,
     vector<string> myInputLists = {
         "run46730_0000_trkr.txt",
         "run46730_calo.list"}, 
+    std::string outDir = "./",
     bool doTpcOnlyTracking = true,
+    float initial_driftvelocity = 0.00710,
     bool doEMcalRadiusCorr = true,
     const bool convertSeeds = false)
 {
-  gSystem->Load("libg4dst.so");
-
   int verbosity = 0;
 
-  std::cout << "Including " << myInputLists.size() << " files." << std::endl;
+  gSystem->Load("libg4dst.so");
+
   std::string firstfile = GetFirstLine(myInputLists[0]);
   if (*firstfile.c_str() == '\0') return;
   std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(firstfile);
   int runnumber = runseg.first;
   int segment = runseg.second;
 
+  auto rc = recoConsts::instance();
+  rc->set_IntFlag("RUNNUMBER", runnumber);
+
+  Enable::CDB = true;
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_uint64Flag("TIMESTAMP", 6);
+
   Enable::DSTOUT = false;
-  string outputRecoDir = "./inReconstruction/" + to_string(runnumber) + "/";
-  string makeDirectory = "mkdir -p " + outputRecoDir;
-  system(makeDirectory.c_str());
-  string outputDstFileName = "TrackCalo_" + to_string(segment) + "_dst.root";
-  string outputDstFile = outputRecoDir + outputDstFileName;
-  std::cout << "Output dst file: " << outputDstFile << std::endl;
 
   TpcReadoutInit( runnumber );
   std::cout<< " run: " << runnumber
@@ -102,6 +95,8 @@ void Fun4All_FieldOnAllTrackersCalos(
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(verbosity);
 
+  std::cout << "Including " << myInputLists.size() << " files." << std::endl;
+
   //Add all required input files
   for (unsigned int i = 0; i < myInputLists.size(); ++i)
   {
@@ -112,12 +107,17 @@ void Fun4All_FieldOnAllTrackersCalos(
     se->registerInputManager(infile);
   }
 
-  auto rc = recoConsts::instance();
-  rc->set_IntFlag("RUNNUMBER", runnumber);
+  string outputAnaFileName = "TrackCalo_" + to_string(segment) + "_ana.root";
+  string outputDstFileName = "TrackCalo_" + to_string(segment) + "_dst.root";
 
-  Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
-  rc->set_uint64Flag("TIMESTAMP", runnumber);
+  string outputRecoDir = outDir + "/inReconstruction/" + to_string(runnumber) + "/";
+  string makeDirectory = "mkdir -p " + outputRecoDir;
+  system(makeDirectory.c_str());
+  string outputAnaFile = outputRecoDir + outputAnaFileName;
+  string outputDstFile = outputRecoDir + outputDstFileName;
+
+  std::cout << "Reco ANA file: " << outputAnaFile << std::endl;
+  std::cout << "Dst file: " << outputDstFile << std::endl;
 
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
@@ -125,20 +125,8 @@ void Fun4All_FieldOnAllTrackersCalos(
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
-  CDBInterface *cdb = CDBInterface::instance();
-  std::string tpc_dv_calib_dir = cdb->getUrl("TPC_DRIFT_VELOCITY");
-  if (tpc_dv_calib_dir.empty())
-  {
-    std::cout << "No calibrated TPC drift velocity for Run " << runnumber << ". Use default value " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
-  }
-  else
-  {
-    CDBTTree *cdbttree = new CDBTTree(tpc_dv_calib_dir);
-    cdbttree->LoadCalibrations();
-    G4TPC::tpc_drift_velocity_reco = cdbttree->GetSingleFloatValue("tpc_drift_velocity");
-    std::cout << "Use calibrated TPC drift velocity for Run " << runnumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
-  }
-
+  //G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0 * (1+ dz_separation_0 / 2. / 105.); //cm/ns
+  G4TPC::tpc_drift_velocity_reco = initial_driftvelocity; //cm/ns
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
   //to turn on the default static corrections, enable the two lines below
   //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
@@ -149,6 +137,8 @@ void Fun4All_FieldOnAllTrackersCalos(
 
   G4TRACKING::convert_seeds_to_svtxtracks = convertSeeds;
   std::cout << "Converting to seeds : " << G4TRACKING::convert_seeds_to_svtxtracks << std::endl;
+
+  TRACKING::pp_mode = false;
 
   TrackingInit();
   if(doTpcOnlyTracking)
@@ -183,7 +173,7 @@ void Fun4All_FieldOnAllTrackersCalos(
    * Silicon Seeding
    */
   auto silicon_Seeding = new PHActsSiliconSeeding;
-  silicon_Seeding->Verbosity(0);
+  silicon_Seeding->Verbosity(verbosity);
   silicon_Seeding->searchInIntt();
   silicon_Seeding->setinttRPhiSearchWindow(0.4);
   silicon_Seeding->setinttZSearchWindow(1.6);
@@ -191,7 +181,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   se->registerSubsystem(silicon_Seeding);
 
   auto merger = new PHSiliconSeedMerger;
-  merger->Verbosity(0);
+  merger->Verbosity(verbosity);
   se->registerSubsystem(merger);
 
   /*
@@ -247,7 +237,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   // The normal silicon association methods
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
   auto silicon_match = new PHSiliconTpcTrackMatching;
-  silicon_match->Verbosity(0);
+  silicon_match->Verbosity(verbosity);
   silicon_match->set_x_search_window(2.);
   silicon_match->set_y_search_window(2.);
   silicon_match->set_z_search_window(5.);
@@ -259,7 +249,7 @@ void Fun4All_FieldOnAllTrackersCalos(
 
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
   auto mm_match = new PHMicromegasTpcTrackMatching;
-  mm_match->Verbosity(0);
+  mm_match->Verbosity(verbosity);
   mm_match->set_rphi_search_window_lyr1(0.4);
   mm_match->set_rphi_search_window_lyr2(13.0);
   mm_match->set_z_search_window_lyr1(26.0);
@@ -291,18 +281,18 @@ void Fun4All_FieldOnAllTrackersCalos(
       converter->setTrackSeedName("SvtxTrackSeeds");
     }
     converter->setFieldMap(G4MAGNET::magfield_tracking);
-    converter->Verbosity(0);
+    converter->Verbosity(verbosity);
     se->registerSubsystem(converter);
   }
   else
   {
     auto deltazcorr = new PHTpcDeltaZCorrection;
-    deltazcorr->Verbosity(0);
+    deltazcorr->Verbosity(verbosity);
     se->registerSubsystem(deltazcorr);
 
     // perform final track fit with ACTS
     auto actsFit = new PHActsTrkFitter;
-    actsFit->Verbosity(0);
+    actsFit->Verbosity(verbosity);
     actsFit->commissioning(G4TRACKING::use_alignment);
     // in calibration mode, fit only Silicons and Micromegas hits
     if (!doTpcOnlyTracking)
@@ -319,7 +309,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   }
 
   PHSimpleVertexFinder *finder = new PHSimpleVertexFinder;
-  finder->Verbosity(0);
+  finder->Verbosity(verbosity);
   finder->setDcaCut(0.5);
   finder->setTrackPtCut(-99999.);
   finder->setBeamLineCut(1);
@@ -360,20 +350,10 @@ void Fun4All_FieldOnAllTrackersCalos(
   ClusterBuilder1->set_R_shower(0.025);
   se->registerSubsystem(ClusterBuilder1);
 
-  //For particle flow studies
-  RawClusterBuilderTopo* ClusterBuilder2 = new RawClusterBuilderTopo("EMcalRawClusterBuilderTopo2");
-  ClusterBuilder2->Verbosity(verbosity);
-  ClusterBuilder2->set_nodename("TOPOCLUSTER_HCAL");
-  ClusterBuilder2->set_enable_HCal(true);
-  ClusterBuilder2->set_enable_EMCal(false);
-  //ClusterBuilder2->set_noise(0.0025, 0.006, 0.03);
-  ClusterBuilder2->set_noise(0.01, 0.03, 0.03);
-  ClusterBuilder2->set_significance(4.0, 2.0, 1.0);
-  ClusterBuilder2->allow_corner_neighbor(true);
-  ClusterBuilder2->set_do_split(true);
-  ClusterBuilder2->set_minE_local_max(1.0, 2.0, 0.5);
-  ClusterBuilder2->set_R_shower(0.025);
-  se->registerSubsystem(ClusterBuilder2);
+  TrackToCalo *ttc = new TrackToCalo("Tracks_And_Calo", outputAnaFile);
+  ttc->EMcalRadiusUser(true);
+  ttc->setEMcalRadius(new_cemc_rad);
+  se->registerSubsystem(ttc);
 
   if (Enable::DSTOUT)
   {
@@ -396,6 +376,28 @@ void Fun4All_FieldOnAllTrackersCalos(
   se->run(nEvents);
   se->End();
   se->PrintTimer();
+
+  ifstream file_ana(outputAnaFile.c_str(), ios::binary | ios::ate);
+  if (file_ana.good() && (file_ana.tellg() > 100))
+  {
+    string outputRecoDirMove = outDir + "/Reconstructed/" + to_string(runnumber) + "/";
+    string makeDirectoryMove = "mkdir -p " + outputRecoDirMove;
+    system(makeDirectoryMove.c_str());
+    string moveOutput = "mv " + outputAnaFile + " " + outDir + "/Reconstructed/" + to_string(runnumber);
+    std::cout << "moveOutput: " << moveOutput << std::endl;
+    system(moveOutput.c_str());
+  }
+
+  ifstream file_dst(outputDstFile.c_str(), ios::binary | ios::ate);
+  if (file_dst.good() && (file_dst.tellg() > 100))
+  {
+    string outputRecoDirMove = outDir + "/Reconstructed/" + to_string(runnumber) + "/";
+    string makeDirectoryMove = "mkdir -p " + outputRecoDirMove;
+    system(makeDirectoryMove.c_str());
+    string moveOutput = "mv " + outputDstFile + " " + outDir + "/Reconstructed/" + to_string(runnumber);
+    std::cout << "moveOutput: " << moveOutput << std::endl;
+    system(moveOutput.c_str());
+  }
 
   delete se;
   std::cout << "All done" << std::endl;
@@ -420,4 +422,11 @@ std::string GetFirstLine(std::string listname)
       std::cerr << "Unable to open file" << std::endl;
   }
   return firstLine;
+}
+
+bool is_directory_empty(const fs::path& dir_path) {
+    if (fs::exists(dir_path) && fs::is_directory(dir_path)) {
+        return fs::directory_iterator(dir_path) == fs::directory_iterator();
+    }
+    return false;
 }
