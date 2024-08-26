@@ -31,8 +31,8 @@
 
 #include <tpccalib/PHTpcResiduals.h>
 
-#include <trackingqa/TpcSeedsQA.h>
 #include <trackingqa/SiliconSeedsQA.h>
+#include <trackingqa/TpcSeedsQA.h>
 #include <trackingqa/TpcSiliconQA.h>
 
 #include <trackingdiagnostics/TrackResiduals.h>
@@ -64,12 +64,12 @@ void Fun4All_TrackAnalysis(
   int runnumber = runseg.first;
   int segment = runseg.second;
 
-  TpcReadoutInit( runnumber );
-  std::cout<< " run: " << runnumber
-	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
-	   << " pre: " << TRACKING::reco_tpc_time_presample
-	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
-	   << std::endl;
+  TpcReadoutInit(runnumber);
+  std::cout << " run: " << runnumber
+            << " samples: " << TRACKING::reco_tpc_maxtime_sample
+            << " pre: " << TRACKING::reco_tpc_time_presample
+            << " vdrift: " << G4TPC::tpc_drift_velocity_reco
+            << std::endl;
 
   // distortion calibration mode
   /*
@@ -112,9 +112,9 @@ void Fun4All_TrackAnalysis(
   }
 
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
-  //to turn on the default static corrections, enable the two lines below
-  //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
-  //G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS = false;
+  // to turn on the default static corrections, enable the two lines below
+  // G4TPC::ENABLE_STATIC_CORRECTIONS = true;
+  // G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS = false;
 
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
@@ -164,22 +164,21 @@ void Fun4All_TrackAnalysis(
     if (G4TRACKING::SC_CALIBMODE)
     {
       /*
-      * in calibration mode, calculate residuals between TPC and fitted tracks,
-      * store in dedicated structure for distortion correction
-      */
+       * in calibration mode, calculate residuals between TPC and fitted tracks,
+       * store in dedicated structure for distortion correction
+       */
       auto residuals = new PHTpcResiduals;
       const TString tpc_residoutfile = theOutfile + "_PhTpcResiduals.root";
       residuals->setOutputfile(tpc_residoutfile.Data());
       residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
 
       // matches Tony's analysis
-      residuals->setMinPt( 0.2 );
+      residuals->setMinPt(0.2);
 
       // reconstructed distortion grid size (phi, r, z)
       residuals->setGridDimensions(36, 48, 80);
       se->registerSubsystem(residuals);
     }
-
   }
 
   auto finder = new PHSimpleVertexFinder;
@@ -200,11 +199,13 @@ void Fun4All_TrackAnalysis(
   resid->alignment(false);
 
   // adjust track map name
-  if(G4TRACKING::SC_CALIBMODE && !G4TRACKING::convert_seeds_to_svtxtracks)
+  if (G4TRACKING::SC_CALIBMODE && !G4TRACKING::convert_seeds_to_svtxtracks)
   {
     resid->trackmapName("SvtxSiliconMMTrackMap");
-    if( G4TRACKING::SC_USE_MICROMEGAS )
-    { resid->set_doMicromegasOnly(true); }
+    if (G4TRACKING::SC_USE_MICROMEGAS)
+    {
+      resid->set_doMicromegasOnly(true);
+    }
   }
 
   resid->clusterTree();
