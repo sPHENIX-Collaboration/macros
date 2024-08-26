@@ -1,8 +1,8 @@
 /*
- * This macro shows a minimum working example of running the tracking
- * hit unpackers with some basic seeding algorithms to try to put together
- * tracks. There are some analysis modules run at the end which package
- * hits, clusters, and clusters on tracks into trees for analysis.
+ * This macro shows a minimum working example of running track fitting over
+ * the production cluster and track seed DSTs.. There are some analysis 
+ * modules run at the end which package clusters, and clusters on tracks 
+ * into trees for analysis.
  */
 
 #include <fun4all/Fun4AllUtils.h>
@@ -52,7 +52,7 @@ void Fun4All_TrackAnalysis(
     const std::string clusterfilename = "DST_TRKR_CLUSTER_run2pp_new_2024p007-00051520-00000.root",
     const std::string dir = "/sphenix/lustre01/sphnxpro/physics/slurp/tracking/new_2024p007/run_00051500_00051600/",
     const std::string outfilename = "clusters_seeds",
-    const bool convertSeeds = true)
+    const bool convertSeeds = false)
 {
   std::string inputseedRawHitFile = dir + seedfilename;
   std::string inputclusterRawHitFile = dir + clusterfilename;
