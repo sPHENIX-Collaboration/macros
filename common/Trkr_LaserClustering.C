@@ -27,7 +27,7 @@ void TPC_LaserClustering()
       ACTSGEOM::ActsGeomInit();
       Fun4AllServer* se = Fun4AllServer::instance();
       
-      auto laserClusterizer = new LaserClusterizer;
+      LaserClusterizer *laserClusterizer = new LaserClusterizer;
       laserClusterizer->Verbosity(verbosity);
       laserClusterizer->set_max_time_samples(TRACKING::reco_tpc_maxtime_sample);
       laserClusterizer->set_adc_threshold(G4TPC::laser_adc_threshold);
