@@ -31,8 +31,8 @@
 
 #include <tpccalib/PHTpcResiduals.h>
 
-#include <trackingqa/TpcSeedQA.h>
-#include <trackingqa/SiliconSeedQA.h>
+#include <trackingqa/TpcSeedsQA.h>
+#include <trackingqa/SiliconSeedsQA.h>
 #include <trackingqa/TpcSiliconQA.h>
 
 #include <trackingdiagnostics/TrackResiduals.h>
@@ -46,7 +46,7 @@ R__LOAD_LIBRARY(libphool.so)
 R__LOAD_LIBRARY(libcdbobjects.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
-void Fun4All_FieldOnAllTrackers(
+void Fun4All_TrackAnalysis(
     const int nEvents = 10,
     const std::string seedfilename = "DST_TRKR_SEED_run2pp_new_2024p007-00051520-00000.root",
     const std::string clusterfilename = "DST_TRKR_CLUSTER_run2pp_new_2024p007-00051520-00000.root",
@@ -54,7 +54,8 @@ void Fun4All_FieldOnAllTrackers(
     const std::string outfilename = "clusters_seeds",
     const bool convertSeeds = true)
 {
-  std::string inputtpcRawHitFile = dir + seedfilename;
+  std::string inputseedRawHitFile = dir + seedfilename;
+  std::string inputclusterRawHitFile = dir + clusterfilename;
 
   G4TRACKING::convert_seeds_to_svtxtracks = convertSeeds;
   std::cout << "Converting to seeds : " << G4TRACKING::convert_seeds_to_svtxtracks << std::endl;
@@ -118,10 +119,13 @@ void Fun4All_FieldOnAllTrackers(
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
-  auto hitsin = new Fun4AllDstInputManager("InputManager");
-  hitsin->fileopen(inputtpcRawHitFile);
-  // hitsin->AddFile(inputMbd);
-  se->registerInputManager(hitsin);
+  auto hitsinseed = new Fun4AllDstInputManager("SeedInputManager");
+  hitsinseed->fileopen(inputseedRawHitFile);
+  se->registerInputManager(hitsinseed);
+
+  auto hitsinclus = new Fun4AllDstInputManager("ClusterInputManager");
+  hitsinclus->fileopen(inputclusterRawHitFile);
+  se->registerInputManager(hitsinclus);
 
   /*
    * Either converts seeds to tracks with a straight line/helix fit
