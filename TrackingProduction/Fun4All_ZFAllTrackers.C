@@ -55,8 +55,8 @@ R__LOAD_LIBRARY(libtrackingqa.so)
 R__LOAD_LIBRARY(libEventDisplay.so)
 void Fun4All_ZFAllTrackers(
     const int nEvents = 0,
-    const std::string tpcfilename = "DST_BEAM_run2pp_new_2023p013-00041626-0000.root",
-    const std::string tpcdir = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpcbeam/run_00041600_00041700/",
+    const std::string tpcfilename = "DST_STREAMING_EVENT_run2pp_new_2024p002-00052077-00015.root",
+    const std::string tpcdir = "/sphenix/lustre01/sphnxpro/physics/slurp/streaming/physics/new_2024p002/run_00052000_00052100/",
     const std::string outfilename = "clusters_seeds",
     const bool convertSeeds = true)
 {
@@ -119,6 +119,7 @@ void Fun4All_ZFAllTrackers(
   // hitsin->AddFile(inputMbd);
   se->registerInputManager(hitsin);
 
+  TRACKING::tpc_zero_supp = true;
   Mvtx_HitUnpacking();
   Intt_HitUnpacking();
   Tpc_HitUnpacking();
