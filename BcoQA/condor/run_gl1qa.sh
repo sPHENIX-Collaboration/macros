@@ -49,6 +49,6 @@ root.exe -q -b Fun4All_Gl1QA.C\(0,\"$1\"\)
 
 ls -l
 
-cp bcodiff.root $3/$2
+cp gl1daq.root $3/$2
 
 echo "script done"
