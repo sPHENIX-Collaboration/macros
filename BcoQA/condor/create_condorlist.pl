@@ -5,19 +5,24 @@ use File::Basename;
 use File::Path;
 use File::Find;
 
-my $outpathroot = sprintf("/sphenix/user/pinkenbu/tpcqa");
 my $myself = `whoami`;
 chomp $myself;
-if ($#ARGV < 0)
+my $outpathroot = sprintf("/sphenix/user/%s/bcoqa",$myself);
+if (! -d $outpathroot)
 {
-    print "need list file as argument\n";
-#    exit(1);
+    mkpath $outpathroot;
 }
+
+#if ($#ARGV < 0)
+#{
+#    print "need list file as argument\n";
+#    exit(1);
+#}
 my $curdir = `pwd`;
 chomp $curdir;
 opendir my $mydir, '.' or die "cannot open directory $!";
 my @files = grep{ /tpc/ && /\.list/} readdir($mydir);
-    close $mydir;
+close $mydir;
 foreach my $f (sort @files)
 {
     print "tpc list file: $f\n";

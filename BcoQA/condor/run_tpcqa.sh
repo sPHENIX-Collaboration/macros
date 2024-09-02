@@ -2,7 +2,13 @@
 
 export USER="$(id -u -n)"
 export LOGNAME=${USER}
-export HOME=/phenix/u/${USER}
+# check if we run an sphenix account or legacy phenix
+if [[ -d /sphenix/u/${USER} ]]
+then
+  export HOME=/sphenix/u/${USER}
+else
+  export HOME=/phenix/u/${USER}
+fi
 
 hostname
 

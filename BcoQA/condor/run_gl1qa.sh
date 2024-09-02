@@ -2,7 +2,12 @@
 
 export USER="$(id -u -n)"
 export LOGNAME=${USER}
-export HOME=/phenix/u/${USER}
+if [[ -d /sphenix/u/${USER} ]]
+then
+  export HOME=/sphenix/u/${USER}
+else
+  export HOME=/phenix/u/${USER}
+fi
 
 hostname
 
