@@ -18,6 +18,6 @@ fi
 
 sh gl1_makelist.sh $1 $2
 #sh mvtx_makelist.sh $1 $2
-#sh intt_makelist.sh $1 $2
+sh intt_makelist.sh $1 $2
 sh tpc_makelist.sh $1 $2
 #sh tpot_makelist.sh $1 $2
