@@ -11,7 +11,7 @@ R__LOAD_LIBRARY(libffarawmodules.so)
 
 void Fun4All_InttQA(int nEvents = 0,
 		   const std::string &input_list = "prdf.list",
-		   const std::string outfile = "bcodiff.root")
+		   const std::string outfile = "inttbcodiff.root")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
 //  se->Verbosity(1);
