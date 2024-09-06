@@ -91,12 +91,12 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
     //intt_sngl->Verbosity(3);
     intt_sngl->SetNegativeBco(1);
     intt_sngl->SetBcoRange(2);
-    
+
     auto pos = iter.find("intt");
     std::string num = iter.substr(pos+4, 1);
     readoutNumber = "INTT"+num;
     intt_sngl->setHitContainerName("INTTRAWHIT_" + num);
-    
+
     intt_sngl->AddListFile(iter);
     in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
     i++;
@@ -122,7 +122,7 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
 //    mvtx_sngl->Verbosity(5);
     mvtx_sngl->SetBcoRange(100);
     mvtx_sngl->SetNegativeBco(100);
-    
+
     mvtx_sngl->setHitContainerName("MVTXRAWHIT_" + felix);
     mvtx_sngl->setRawEventHeaderName("MVTXRAWEVTHEADER_" + felix);
     mvtx_sngl->AddListFile(iter);
@@ -165,7 +165,7 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
     {
     SingleMicromegasPoolInput *mm_sngl = new SingleMicromegasPoolInput("MICROMEGAS_" + to_string(i));
     //   sngl->Verbosity(3);
-    mm_sngl->SetBcoRange(5);
+    mm_sngl->SetBcoRange(10);
     mm_sngl->SetNegativeBco(2);
     mm_sngl->AddListFile(iter);
     in->registerStreamingInput(mm_sngl, InputManagerType::MICROMEGAS);
@@ -194,7 +194,7 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
 
   char outfile[500];
   sprintf(outfile,"./%s-%s.root",type.c_str(),readoutNumber.c_str());
-  
+
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out",outfile);
   se->registerOutputManager(out);
 

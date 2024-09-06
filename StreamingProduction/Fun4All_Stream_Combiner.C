@@ -229,7 +229,7 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
     {
     SingleMicromegasPoolInput *mm_sngl = new SingleMicromegasPoolInput("MICROMEGAS_" + to_string(i));
     //   sngl->Verbosity(3);
-    mm_sngl->SetBcoRange(5);
+    mm_sngl->SetBcoRange(10);
     mm_sngl->SetNegativeBco(2);
     mm_sngl->AddListFile(iter);
     in->registerStreamingInput(mm_sngl, InputManagerType::MICROMEGAS);
