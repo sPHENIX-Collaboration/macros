@@ -112,6 +112,8 @@ namespace G4TPC
 
   // static distortions
   bool ENABLE_STATIC_DISTORTIONS = false;
+  bool USE_PHI_AS_RAD_STATIC_CORRECTIONS = true;
+
   std::string static_distortion_filename = "TPC_STATIC_DISTORTION";
 
   // time-ordered distortion fluctuations
@@ -131,6 +133,7 @@ namespace G4TPC
   // average distortion corrections
   bool ENABLE_AVERAGE_CORRECTIONS = false;
   std::string average_correction_filename;
+  bool USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = true;
 
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = true;
