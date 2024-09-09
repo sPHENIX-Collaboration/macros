@@ -108,7 +108,7 @@ namespace G4TPC
   bool USE_SIMPLE_CLUSTERIZER = false;
 
   // distortions
-  bool DISTORTIONS_USE_PHI_AS_RADIANS = true;
+  //bool DISTORTIONS_USE_PHI_AS_RADIANS = true;
 
   // apply static distortions in simulations
   bool ENABLE_STATIC_DISTORTIONS = false;
