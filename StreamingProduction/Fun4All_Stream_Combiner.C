@@ -216,7 +216,8 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
     //   tpc_sngl->DryRun();
     tpc_sngl->SetBcoRange(5);
     tpc_sngl->AddListFile(iter);
-    tpc_sngl->SetMaxTpcTimeSamples(TRACKING::reco_tpc_maxtime_sample);
+//    tpc_sngl->SetMaxTpcTimeSamples(TRACKING::reco_tpc_maxtime_sample);
+    tpc_sngl->SetMaxTpcTimeSamples(1024);
     in->registerStreamingInput(tpc_sngl, InputManagerType::TPC);
     i++;
     }
