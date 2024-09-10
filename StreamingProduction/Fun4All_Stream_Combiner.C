@@ -166,8 +166,8 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
 	cout << "opening file " << iter << endl;
 	SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + to_string(i));
 //    intt_sngl->Verbosity(3);
-	intt_sngl->SetNegativeBco(1);
-	intt_sngl->SetBcoRange(2);
+	intt_sngl->SetNegativeBco(120-23);
+	intt_sngl->SetBcoRange(500);
 	intt_sngl->AddListFile(iter);
 	in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
 	i++;
@@ -183,8 +183,8 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
 	cout << "opening file " << iter << endl;
 	SingleInttEventInput *intt_sngl = new SingleInttEventInput("INTT_" + to_string(i));
 //    intt_sngl->Verbosity(3);
-	intt_sngl->SetNegativeBco(1);
-	intt_sngl->SetBcoRange(2);
+	intt_sngl->SetNegativeBco(120-23);
+	intt_sngl->SetBcoRange(500);
 	intt_sngl->AddListFile(iter);
 	in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
 	i++;
@@ -200,7 +200,7 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
     SingleMvtxPoolInput *mvtx_sngl = new SingleMvtxPoolInput("MVTX_" + to_string(i));
 //    mvtx_sngl->Verbosity(5);
     mvtx_sngl->SetBcoRange(100);
-    mvtx_sngl->SetNegativeBco(100);
+    mvtx_sngl->SetNegativeBco(500);
     mvtx_sngl->AddListFile(iter);
     in->registerStreamingInput(mvtx_sngl, InputManagerType::MVTX);
     i++;
@@ -216,7 +216,8 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
     //   tpc_sngl->DryRun();
     tpc_sngl->SetBcoRange(5);
     tpc_sngl->AddListFile(iter);
-    tpc_sngl->SetMaxTpcTimeSamples(TRACKING::reco_tpc_maxtime_sample);
+//    tpc_sngl->SetMaxTpcTimeSamples(TRACKING::reco_tpc_maxtime_sample);
+    tpc_sngl->SetMaxTpcTimeSamples(1024);
     in->registerStreamingInput(tpc_sngl, InputManagerType::TPC);
     i++;
     }
