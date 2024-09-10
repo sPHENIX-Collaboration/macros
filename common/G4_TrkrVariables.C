@@ -107,8 +107,9 @@ namespace G4TPC
   // use simple clusterizer
   bool USE_SIMPLE_CLUSTERIZER = false;
 
-  // distortions
-  //bool DISTORTIONS_USE_PHI_AS_RADIANS = true;
+  // distortions in simulation
+  // set how to interpret the magnitude of phi distortions in simulation
+  bool DISTORTIONS_USE_PHI_AS_RADIANS = true;
 
   // apply static distortions in simulations
   bool ENABLE_STATIC_DISTORTIONS = false;
@@ -119,6 +120,7 @@ namespace G4TPC
   bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
   std::string time_ordered_distortion_filename = "TPC_TIMEORDERED_DISTORTION";
 
+  // allow distortions to remove electrons that 
   bool ENABLE_REACHES_READOUT = true;
 
   // module edge distortion corrections
