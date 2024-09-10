@@ -16,7 +16,7 @@ BCOMAP_CDB_FORMAT="${PWD}/bcomap_cdb/bcomap_run_%08d.root"
 BCOMAP_PNG_FORMAT="${PWD}/bcomap_png/bcomap_run_%08d.png"
 
 RUN_NUM=""         # required
-NUM_EVT="50000"    # default if argument 2 is empty
+NUM_EVT="200000"   # default if argument 2 is empty
 RUN_TYPE="physics" # default if argument 3 is empty
 
 show_help()

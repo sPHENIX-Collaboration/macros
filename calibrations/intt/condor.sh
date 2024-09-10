@@ -53,7 +53,7 @@ notification    = Never
 
 output          = ${DIR}/out/out_${ARGS}.txt
 error           = ${DIR}/err/err_${ARGS}.txt
-log             = /tmp/condor
+log             = /tmp/condor/inttcalib_log_${ARGS}.txt
 
 initialdir      = ${PWD}
 request_memory  = ${MEM}

@@ -345,12 +345,33 @@ double TPC(PHG4Reco* g4Reco,
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::TPC_OVERLAPCHECK;
   bool AbsorberActive = Enable::ABSORBER || Enable::TPC_ABSORBER;
 
+  double drift_vel = G4TPC::tpc_drift_velocity_sim;
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+   drift_vel = G4TPC::NeCF4_drift_velocity;  
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+   drift_vel = G4TPC::ArCF4_drift_velocity;  
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+   drift_vel = G4TPC::ArCF4N2_drift_velocity;  
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+   drift_vel = G4TPC::ArCF4Isobutane_drift_velocity;  
+  }
+  else
+  {
+  }
+
   PHG4TpcSubsystem* tpc = new PHG4TpcSubsystem("TPC");
   tpc->SetActive();
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);  // 1cm steps
 
-  tpc->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
+  tpc->set_double_param("drift_velocity", drift_vel);
   tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
   tpc->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
   tpc->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
@@ -367,6 +388,44 @@ double TPC(PHG4Reco* g4Reco,
   }
 
   tpc->set_double_param("extended_readout_time", extended_readout_time);
+ 
+   //Note that we default to 75:20:05 Ar:CF4:i-C4H10
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    tpc->set_double_param("Ne_frac", G4TPC::NeCF4_Ne_frac);
+    tpc->set_double_param("Ar_frac", G4TPC::NeCF4_Ar_frac);
+    tpc->set_double_param("CF4_frac", G4TPC::NeCF4_CF4_frac);
+    tpc->set_double_param("N2_frac", G4TPC::NeCF4_N2_frac);
+    tpc->set_double_param("isobutane_frac", G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    tpc->set_double_param("Ne_frac", G4TPC::ArCF4_Ne_frac);
+    tpc->set_double_param("Ar_frac", G4TPC::ArCF4_Ar_frac);
+    tpc->set_double_param("CF4_frac", G4TPC::ArCF4_CF4_frac);
+    tpc->set_double_param("N2_frac", G4TPC::ArCF4_N2_frac);
+    tpc->set_double_param("isobutane_frac", G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    tpc->set_double_param("Ne_frac", G4TPC::ArCF4N2_Ne_frac);
+    tpc->set_double_param("Ar_frac", G4TPC::ArCF4N2_Ar_frac);
+    tpc->set_double_param("CF4_frac", G4TPC::ArCF4N2_CF4_frac);
+    tpc->set_double_param("N2_frac", G4TPC::ArCF4N2_N2_frac);
+    tpc->set_double_param("isobutane_frac", G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    tpc->set_double_param("Ne_frac", G4TPC::ArCF4Isobutane_Ne_frac);
+    tpc->set_double_param("Ar_frac", G4TPC::ArCF4Isobutane_Ar_frac);
+    tpc->set_double_param("CF4_frac", G4TPC::ArCF4Isobutane_CF4_frac);
+    tpc->set_double_param("N2_frac", G4TPC::ArCF4Isobutane_N2_frac);
+    tpc->set_double_param("isobutane_frac", G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+    std::cout << "Your gas mixture, " << G4TPC::TPC_GAS_MIXTURE << ", is unknown. Defaulting to ArCF4Isobutane" << std::endl;
+  }
 
   tpc->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(tpc);
@@ -387,6 +446,27 @@ void TPC_Cells()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
   auto se = Fun4AllServer::instance();
+
+  double drift_vel = G4TPC::tpc_drift_velocity_sim;
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+   drift_vel = G4TPC::NeCF4_drift_velocity;  
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+   drift_vel = G4TPC::ArCF4_drift_velocity;  
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+   drift_vel = G4TPC::ArCF4N2_drift_velocity;  
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+   drift_vel = G4TPC::ArCF4Isobutane_drift_velocity;  
+  }
+  else
+  {
+  }
 
   // central membrane G4Hit generation
   if (G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS)
@@ -414,7 +494,7 @@ void TPC_Cells()
     // directLaser->SetFileStepping(13802);
     //___________________________________________________________________
 
-    directLaser->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
+    directLaser->set_double_param("drift_velocity", drift_vel);
     se->registerSubsystem(directLaser);
   }
 
@@ -431,7 +511,7 @@ void TPC_Cells()
 
   padplane->SetReadoutTime(extended_readout_time);
   padplane->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
-  padplane->SetDriftVelocity(G4TPC::tpc_drift_velocity_sim);
+  padplane->SetDriftVelocity(drift_vel);
 
   auto edrift = new PHG4TpcElectronDrift;
   edrift->Detector("TPC");
@@ -464,13 +544,70 @@ void TPC_Cells()
     edrift->setTpcDistortion(distortionMap);
   }
 
-  double tpc_readout_time = 105.5 / G4TPC::tpc_drift_velocity_sim;  // ns
+  double tpc_readout_time = 105.5 / drift_vel;  // ns
   edrift->set_double_param("max_time", tpc_readout_time);
   edrift->set_double_param("extended_readout_time", extended_readout_time);
   std::cout << "PHG4TpcElectronDrift readout window is from 0 to " << tpc_readout_time + extended_readout_time << std::endl;
 
   // override the default drift velocity parameter specification
-  edrift->set_double_param("drift_velocity", G4TPC::tpc_drift_velocity_sim);
+  edrift->set_double_param("drift_velocity", drift_vel);
+  edrift->set_double_param("added_smear_trans", 0.085);
+  edrift->set_double_param("added_smear_long", 0.105);
+  //edrift->set_double_param("added_smear_trans", G4TPC::tpc_added_smear_trans);
+  //edrift->set_double_param("added_smear_long", G4TPC::tpc_added_smear_long);
+
+  //Note that we default to 75:20:05 Ar:CF4:i-C4H10
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    edrift->set_double_param("added_smear_trans", 0.085);
+    edrift->set_double_param("added_smear_long", 0.105);
+    edrift->set_double_param("diffusion_long", G4TPC::NeCF4_diffusion_long);
+    edrift->set_double_param("diffusion_trans", G4TPC::NeCF4_diffusion_trans);
+    edrift->set_double_param("Ne_frac", G4TPC::NeCF4_Ne_frac);
+    edrift->set_double_param("Ar_frac", G4TPC::NeCF4_Ar_frac);
+    edrift->set_double_param("CF4_frac", G4TPC::NeCF4_CF4_frac);
+    edrift->set_double_param("N2_frac", G4TPC::NeCF4_N2_frac);
+    edrift->set_double_param("isobutane_frac", G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    edrift->set_double_param("added_smear_trans", 0.085);
+    edrift->set_double_param("added_smear_long", 0.105);
+    edrift->set_double_param("diffusion_long", G4TPC::ArCF4_diffusion_long);
+    edrift->set_double_param("diffusion_trans", G4TPC::ArCF4_diffusion_trans);
+    edrift->set_double_param("Ne_frac", G4TPC::ArCF4_Ne_frac);
+    edrift->set_double_param("Ar_frac", G4TPC::ArCF4_Ar_frac);
+    edrift->set_double_param("CF4_frac", G4TPC::ArCF4_CF4_frac);
+    edrift->set_double_param("N2_frac", G4TPC::ArCF4_N2_frac);
+    edrift->set_double_param("isobutane_frac", G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    edrift->set_double_param("added_smear_trans", G4TPC::tpc_added_smear_trans);
+    edrift->set_double_param("added_smear_long", G4TPC::tpc_added_smear_long);
+    edrift->set_double_param("diffusion_long", G4TPC::ArCF4N2_diffusion_long);
+    edrift->set_double_param("diffusion_trans", G4TPC::ArCF4N2_diffusion_trans);
+    edrift->set_double_param("Ne_frac", G4TPC::ArCF4N2_Ne_frac);
+    edrift->set_double_param("Ar_frac", G4TPC::ArCF4N2_Ar_frac);
+    edrift->set_double_param("CF4_frac", G4TPC::ArCF4N2_CF4_frac);
+    edrift->set_double_param("N2_frac", G4TPC::ArCF4N2_N2_frac);
+    edrift->set_double_param("isobutane_frac", G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    edrift->set_double_param("added_smear_trans", G4TPC::tpc_added_smear_trans);
+    edrift->set_double_param("added_smear_long", G4TPC::tpc_added_smear_long);
+    edrift->set_double_param("diffusion_long", G4TPC::ArCF4Isobutane_diffusion_long);
+    edrift->set_double_param("diffusion_trans", G4TPC::ArCF4Isobutane_diffusion_trans);
+    edrift->set_double_param("Ne_frac", G4TPC::ArCF4Isobutane_Ne_frac);
+    edrift->set_double_param("Ar_frac", G4TPC::ArCF4Isobutane_Ar_frac);
+    edrift->set_double_param("CF4_frac", G4TPC::ArCF4Isobutane_CF4_frac);
+    edrift->set_double_param("N2_frac", G4TPC::ArCF4Isobutane_N2_frac);
+    edrift->set_double_param("isobutane_frac", G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+  }
 
   // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
   // They represent effects not due to ideal gas properties and ideal readout plane behavior

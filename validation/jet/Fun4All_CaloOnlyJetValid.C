@@ -11,16 +11,21 @@
 
 // coresoftware headers
 #include <ffamodules/CDBInterface.h>
+#include <ffamodules/FlagHandler.h>
 #include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllUtils.h>
 #include <g4centrality/PHG4CentralityReco.h>
-#include <phool/recoConsts.h>
+#include <globalvertex/GlobalVertexReco.h>
 #include <jetbackground/DetermineTowerRho.h>
 #include <jetbackground/TowerRho.h>
+#include <mbd/MbdReco.h>
+#include <phool/recoConsts.h>
 #include <qautils/QAHistManagerDef.h>
+#include <zdcinfo/ZdcReco.h>
 
 // f4a macros
 #include <G4_ActsGeom.C>
@@ -33,11 +38,16 @@
 #include <QA.C>
 
 // load libraries
+R__LOAD_LIBRARY(libcentrality.so)
 R__LOAD_LIBRARY(libg4centrality.so)
+R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libjetbackground.so)
+R__LOAD_LIBRARY(libjetqa.so)
+R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libqautils.so)
+R__LOAD_LIBRARY(libzdcinfo.so)
 
 // types for convenience
 typedef std::vector<std::string> SVec;
@@ -57,6 +67,9 @@ void Fun4All_CaloOnlyJetValid(
   std::optional<int> run    = std::nullopt
 ) {
 
+  // turn on QA
+  Enable::QA = true;
+
   // turn on pp mode
   HIJETS::is_pp = true;
 
@@ -64,6 +77,8 @@ void Fun4All_CaloOnlyJetValid(
   JetQA::HasTracks = false;
   JetQA::DoInclusive = true;
   JetQA::DoTriggered = true;
+  JetQA::RestrictPtToTrig = false;
+  JetQA::RestrictEtaByR = true;
 
   // initialize fun4all ------------------------------------------------------
 

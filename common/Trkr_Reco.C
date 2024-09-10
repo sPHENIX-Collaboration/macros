@@ -86,6 +86,43 @@ void Tracking_Reco_TrackSeed_ZeroField()
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
+
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    seeder->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+    seeder->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+  }
+
   seeder->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(seeder);
 
@@ -105,6 +142,43 @@ void Tracking_Reco_TrackSeed_ZeroField()
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
   cprop->Verbosity(verbosity);
+
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    cprop->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+    cprop->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+  }
+
   cprop->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(cprop);
 
@@ -166,6 +240,43 @@ void Tracking_Reco_TrackSeed()
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
+
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    seeder->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+    seeder->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+  }
+
   seeder->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(seeder);
 
@@ -185,6 +296,43 @@ void Tracking_Reco_TrackSeed()
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
   cprop->Verbosity(verbosity);
+
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    cprop->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+    cprop->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+  }
+
   cprop->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(cprop);
 
@@ -195,6 +343,43 @@ void Tracking_Reco_TrackSeed()
     auto prelim_distcorr = new PrelimDistortionCorrection;
     prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
     prelim_distcorr->Verbosity(verbosity);
+
+    if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+    }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+    }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+    }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+    }
+    else
+    {
+    }
+
     se->registerSubsystem(prelim_distcorr);
   }
 
@@ -430,6 +615,43 @@ void Tracking_Reco_CommissioningTrackSeed()
   seeder->SetMinClustersPerTrack(3);
   seeder->useConstBField(false);
   seeder->useFixedClusterError(true);
+
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    seeder->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+    seeder->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+  }
+
   seeder->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(seeder);
 
@@ -444,6 +666,43 @@ void Tracking_Reco_CommissioningTrackSeed()
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
   cprop->Verbosity(verbosity);
+
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    cprop->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+    cprop->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+  }
+
   cprop->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(cprop);
 
@@ -454,6 +713,43 @@ void Tracking_Reco_CommissioningTrackSeed()
     auto prelim_distcorr = new PrelimDistortionCorrection;
     prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
     prelim_distcorr->Verbosity(verbosity);
+
+    if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+    }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+    }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+    }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+    }
+    else
+    {
+    }
+
     se->registerSubsystem(prelim_distcorr);
   }
 
