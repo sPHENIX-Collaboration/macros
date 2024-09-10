@@ -94,6 +94,7 @@ void Fun4All_FieldOnAllTrackers(
   se->Verbosity(2);
   auto rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
+  rc->set_IntFlag("RUNSEGMENT", segment);
 
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
@@ -346,7 +347,12 @@ void Fun4All_FieldOnAllTrackers(
     se->registerSubsystem(new InttClusterQA);
     se->registerSubsystem(new TpcClusterQA);
     se->registerSubsystem(new MicromegasClusterQA);
-    se->registerSubsystem(new TpcSeedsQA);
+    auto tpcqa = new TpcSeedsQA;
+    tpcqa->setTrackMapName("TpcSvtxTrackMap");
+    tpcqa->setVertexMapName("TpcSvtxVertexMap");
+    tpcqa->setSegment(rc->get_IntFlag("RUNSEGMENT"));
+    se->registerSubsystem(tpcqa);
+    
   }
   se->run(nEvents);
   se->End();
