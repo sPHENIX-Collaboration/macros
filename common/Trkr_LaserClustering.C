@@ -20,7 +20,7 @@ void TPC_LaserClustering()
 {
 
   // central membrane reconstruction
-  if( G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS )
+  if( G4TPC::ENABLE_CENTRAL_MEMBRANE_CLUSTERING )
     {
       
       int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
@@ -31,6 +31,11 @@ void TPC_LaserClustering()
       laserClusterizer->Verbosity(verbosity);
       laserClusterizer->set_max_time_samples(TRACKING::reco_tpc_maxtime_sample);
       laserClusterizer->set_adc_threshold(G4TPC::laser_adc_threshold);
+      if(G4TPC::laser_clusterizer_debug_filename != "")
+      {
+	laserClusterizer->set_debug(true);
+	laserClusterizer->set_debug_name(G4TPC::laser_clusterizer_debug_filename);
+      }
       se->registerSubsystem(laserClusterizer);
 
     }

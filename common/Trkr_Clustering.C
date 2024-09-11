@@ -113,6 +113,8 @@ void Tpc_HitUnpacking(const std::string& ebdc="")
       tpcunpacker->useRawHitNodeName("TPCRAWHIT_" + ebdc);
     }
   tpcunpacker->Verbosity(verbosity);
+  tpcunpacker->doZSEmulation(true);
+  tpcunpacker->set_zs_threshold(20);
   se->registerSubsystem(tpcunpacker);
 }
 

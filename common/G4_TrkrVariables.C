@@ -103,6 +103,7 @@ namespace G4TPC
   double tpc_outer_radius = 77. + 2.;
 
   float laser_adc_threshold = 0.0;
+  std::string laser_clusterizer_debug_filename = "";
 
   // use simple clusterizer
   bool USE_SIMPLE_CLUSTERIZER = false;
@@ -134,6 +135,9 @@ namespace G4TPC
 
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
+
+  //enable diffuse laser clustering
+  bool ENABLE_CENTRAL_MEMBRANE_CLUSTERING = true;
 
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
