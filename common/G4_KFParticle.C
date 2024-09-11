@@ -69,10 +69,10 @@ void KFParticle_Upsilon_Reco()
   kfparticle->Verbosity(verbosity);
   kfparticle->setDecayDescriptor(KFPARTICLE::UpsilonDecayDescriptor);
 
-  kfparticle->saveDST(Enable::KFPARTICLE_APPEND_TO_DST);
-  kfparticle->saveOutput(Enable::KFPARTICLE_SAVE_NTUPLE);
-  kfparticle->doTruthMatching(Enable::KFPARTICLE_TRUTH_MATCH);
-  kfparticle->getDetectorInfo(Enable::KFPARTICLE_DETECTOR_INFO);
+  if (Enable::KFPARTICLE_APPEND_TO_DST) kfparticle->saveDST();
+  if (!Enable::KFPARTICLE_SAVE_NTUPLE) kfparticle->dontSaveOutput();
+  if (Enable::KFPARTICLE_TRUTH_MATCH) kfparticle->doTruthMatching();
+  if (Enable::KFPARTICLE_DETECTOR_INFO) kfparticle->getDetectorInfo();
 
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
   kfparticle->setMinimumTrackIPchi2(0); // Upsilon decays are prompt, tracks are more likely to point to vertex
@@ -84,7 +84,6 @@ void KFParticle_Upsilon_Reco()
   kfparticle->setMinimumMass(KFPARTICLE::UpsilonMassRange.first);
   kfparticle->setMaximumMass(KFPARTICLE::UpsilonMassRange.second);
   kfparticle->setMotherPT(KFParticleBaseCut::minMotherPT);
-  kfparticle->constrainToPrimaryVertex(false);
 
   kfparticle->setContainerName(KFPARTICLE::UpsilonName);
   kfparticle->setOutputName("KFParticleOutput_" + KFPARTICLE::UpsilonName + "_reconstruction.root");
@@ -107,10 +106,10 @@ void KFParticle_D0_Reco()
   kfparticle->Verbosity(verbosity);
   kfparticle->setDecayDescriptor(KFPARTICLE::D0DecayDescriptor);
 
-  kfparticle->saveDST(Enable::KFPARTICLE_APPEND_TO_DST);
-  kfparticle->saveOutput(Enable::KFPARTICLE_SAVE_NTUPLE);
-  kfparticle->doTruthMatching(Enable::KFPARTICLE_TRUTH_MATCH);
-  kfparticle->getDetectorInfo(Enable::KFPARTICLE_DETECTOR_INFO);
+  if (Enable::KFPARTICLE_APPEND_TO_DST) kfparticle->saveDST();
+  if (!Enable::KFPARTICLE_SAVE_NTUPLE) kfparticle->dontSaveOutput();
+  if (Enable::KFPARTICLE_TRUTH_MATCH) kfparticle->doTruthMatching();
+  if (Enable::KFPARTICLE_DETECTOR_INFO) kfparticle->getDetectorInfo();
 
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
   kfparticle->setMinimumTrackIPchi2(KFParticleBaseCut::minTrackIPchi2);
@@ -122,10 +121,10 @@ void KFParticle_D0_Reco()
   kfparticle->setMinimumMass(KFPARTICLE::D0MassRange.first);
   kfparticle->setMaximumMass(KFPARTICLE::D0MassRange.second);
   kfparticle->setMotherPT(KFParticleBaseCut::minMotherPT);
-  kfparticle->constrainToPrimaryVertex(false);
 
   kfparticle->setContainerName(KFPARTICLE::D0Name);
   kfparticle->setOutputName("KFParticleOutput_" + KFPARTICLE::D0Name + "_reconstruction.root");
+  kfparticle->magFieldFile(G4MAGNET::magfield_tracking);
 
   se->registerSubsystem(kfparticle);
 
@@ -145,10 +144,10 @@ void KFParticle_Lambdac_Reco()
   kfparticle->Verbosity(verbosity);
   kfparticle->setDecayDescriptor(KFPARTICLE::LambdacDecayDescriptor);
 
-  kfparticle->saveDST(Enable::KFPARTICLE_APPEND_TO_DST);
-  kfparticle->saveOutput(Enable::KFPARTICLE_SAVE_NTUPLE);
-  kfparticle->doTruthMatching(Enable::KFPARTICLE_TRUTH_MATCH);
-  kfparticle->getDetectorInfo(Enable::KFPARTICLE_DETECTOR_INFO);
+  if (Enable::KFPARTICLE_APPEND_TO_DST) kfparticle->saveDST();
+  if (!Enable::KFPARTICLE_SAVE_NTUPLE) kfparticle->dontSaveOutput();
+  if (Enable::KFPARTICLE_TRUTH_MATCH) kfparticle->doTruthMatching();
+  if (Enable::KFPARTICLE_DETECTOR_INFO) kfparticle->getDetectorInfo();
 
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
   kfparticle->setMinimumTrackIPchi2(KFParticleBaseCut::minTrackIPchi2);
@@ -160,10 +159,10 @@ void KFParticle_Lambdac_Reco()
   kfparticle->setMinimumMass(KFPARTICLE::LambdacMassRange.first);
   kfparticle->setMaximumMass(KFPARTICLE::LambdacMassRange.second);
   kfparticle->setMotherPT(KFParticleBaseCut::minMotherPT);
-  kfparticle->constrainToPrimaryVertex(false);
 
   kfparticle->setContainerName(KFPARTICLE::LambdacName);
   kfparticle->setOutputName("KFParticleOutput_" + KFPARTICLE::LambdacName + "_reconstruction.root");
+  kfparticle->magFieldFile(G4MAGNET::magfield_tracking);
 
   se->registerSubsystem(kfparticle);
 

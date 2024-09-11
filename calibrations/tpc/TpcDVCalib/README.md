@@ -1,6 +1,9 @@
 # TpcDVCalib
 macros for sPHENIX TPC drift velocity calibration module
 
+- ```run_data.sh``` use Fun4All_FieldOnAllTrackersCalos.C, start from hit unpacker
+- ```run_data_trkrana.sh``` use Fun4All_TrackAnalysis.C, start from track fit (more faster)
+
 **Do not forget to change Initialdir, RunNumber, input DST list in Arguments, and the number of jobs you want to submit**
 
 ```

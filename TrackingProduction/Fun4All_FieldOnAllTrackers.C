@@ -36,6 +36,8 @@
 #include <trackingqa/MicromegasClusterQA.h>
 #include <trackingqa/MvtxClusterQA.h>
 #include <trackingqa/TpcClusterQA.h>
+#include <tpcqa/TpcRawHitQA.h>
+#include <trackingqa/TpcSeedsQA.h>
 
 #include <trackingdiagnostics/TrackResiduals.h>
 #include <trackingdiagnostics/TrkrNtuplizer.h>
@@ -52,6 +54,7 @@ R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
+R__LOAD_LIBRARY(libtpcqa.so)
 void Fun4All_FieldOnAllTrackers(
     const int nEvents = 10,
     const std::string tpcfilename = "DST_BEAM_run2pp_new_2023p013-00041989-0000.root",
@@ -116,6 +119,9 @@ void Fun4All_FieldOnAllTrackers(
   }
 
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
+  //Flag for running the tpc hit unpacker with zero suppression on
+  TRACKING::tpc_zero_supp = true;
+
   //to turn on the default static corrections, enable the two lines below
   //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
   //G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS = false;
@@ -335,10 +341,12 @@ void Fun4All_FieldOnAllTrackers(
   // se->registerOutputManager(out);
   if (Enable::QA)
   {
+    se->registerSubsystem(new TpcRawHitQA);
     se->registerSubsystem(new MvtxClusterQA);
     se->registerSubsystem(new InttClusterQA);
     se->registerSubsystem(new TpcClusterQA);
     se->registerSubsystem(new MicromegasClusterQA);
+    se->registerSubsystem(new TpcSeedsQA);
   }
   se->run(nEvents);
   se->End();

@@ -112,6 +112,10 @@ void Tpc_HitUnpacking(const std::string& ebdc="")
     {
       tpcunpacker->useRawHitNodeName("TPCRAWHIT_" + ebdc);
     }
+  if(TRACKING::tpc_zero_supp)
+    {
+      tpcunpacker->ReadZeroSuppressedData();
+    }
   tpcunpacker->Verbosity(verbosity);
   tpcunpacker->doZSEmulation(true);
   tpcunpacker->set_zs_threshold(20);

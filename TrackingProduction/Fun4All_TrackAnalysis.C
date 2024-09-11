@@ -1,23 +1,23 @@
 /*
- * This macro shows a minimum working example of running the tracking
- * hit unpackers with some basic seeding algorithms to try to put together
- * tracks. There are some analysis modules run at the end which package
- * hits, clusters, and clusters on tracks into trees for analysis.
+ * This macro shows a minimum working example of running track fitting over
+ * the production cluster and track seed DSTs.. There are some analysis 
+ * modules run at the end which package clusters, and clusters on tracks 
+ * into trees for analysis.
  */
 
 #include <fun4all/Fun4AllUtils.h>
 #include <G4_ActsGeom.C>
 #include <G4_Global.C>
 #include <G4_Magnet.C>
-#include <G4_Mbd.C>
 #include <GlobalVariables.C>
 #include <QA.C>
-#include <Trkr_RecoInit.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco.C>
+#include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
 
 #include <ffamodules/CDBInterface.h>
+
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -25,20 +25,18 @@
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 
-#include <eventdisplay/TrackerEventDisplay.h>
 #include <phool/recoConsts.h>
-#include <trackingqa/InttClusterQA.h>
 
 #include <cdbobjects/CDBTTree.h>
 
-#include <trackingqa/MicromegasClusterQA.h>
+#include <tpccalib/PHTpcResiduals.h>
 
-#include <trackingqa/MvtxClusterQA.h>
+#include <trackingqa/SiliconSeedsQA.h>
+#include <trackingqa/TpcSeedsQA.h>
+#include <trackingqa/TpcSiliconQA.h>
 
 #include <trackingdiagnostics/TrackResiduals.h>
 #include <trackingdiagnostics/TrkrNtuplizer.h>
-#include <trackingqa/TpcClusterQA.h>
-#include <trackreco/AzimuthalSeeder.h>
 
 #include <stdio.h>
 
@@ -46,38 +44,42 @@ R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libphool.so)
 R__LOAD_LIBRARY(libcdbobjects.so)
-R__LOAD_LIBRARY(libmvtx.so)
-R__LOAD_LIBRARY(libintt.so)
-R__LOAD_LIBRARY(libtpc.so)
-R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
-R__LOAD_LIBRARY(libEventDisplay.so)
-void Fun4All_ZFAllTrackers(
-    const int nEvents = 0,
-    const std::string tpcfilename = "DST_STREAMING_EVENT_run2pp_new_2024p002-00052077-00015.root",
-    const std::string tpcdir = "/sphenix/lustre01/sphnxpro/physics/slurp/streaming/physics/new_2024p002/run_00052000_00052100/",
+void Fun4All_TrackAnalysis(
+    const int nEvents = 10,
+    const std::string seedfilename = "DST_TRKR_SEED_run2pp_new_2024p007-00051520-00000.root",
+    const std::string clusterfilename = "DST_TRKR_CLUSTER_run2pp_new_2024p007-00051520-00000.root",
+    const std::string dir = "/sphenix/lustre01/sphnxpro/physics/slurp/tracking/new_2024p007/run_00051500_00051600/",
     const std::string outfilename = "clusters_seeds",
-    const bool convertSeeds = true)
+    const bool convertSeeds = false)
 {
-  std::string inputtpcRawHitFile = tpcdir + tpcfilename;
+  std::string inputseedRawHitFile = dir + seedfilename;
+  std::string inputclusterRawHitFile = dir + clusterfilename;
 
   G4TRACKING::convert_seeds_to_svtxtracks = convertSeeds;
   std::cout << "Converting to seeds : " << G4TRACKING::convert_seeds_to_svtxtracks << std::endl;
   std::pair<int, int>
-      runseg = Fun4AllUtils::GetRunSegment(tpcfilename);
+      runseg = Fun4AllUtils::GetRunSegment(seedfilename);
   int runnumber = runseg.first;
   int segment = runseg.second;
 
-  TpcReadoutInit( runnumber );
-  std::cout<< " run: " << runnumber
-	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
-	   << " pre: " << TRACKING::reco_tpc_time_presample
-	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
-	   << std::endl;
+  TpcReadoutInit(runnumber);
+  std::cout << " run: " << runnumber
+            << " samples: " << TRACKING::reco_tpc_maxtime_sample
+            << " pre: " << TRACKING::reco_tpc_time_presample
+            << " vdrift: " << G4TPC::tpc_drift_velocity_reco
+            << std::endl;
+
+  // distortion calibration mode
+  /*
+   * set to true to enable residuals in the TPC with
+   * TPC clusters not participating to the ACTS track fit
+   */
+  G4TRACKING::SC_CALIBMODE = false;
 
   ACTSGEOM::mvtxMisalignment = 100;
-  ACTSGEOM::inttMisalignment = 1000.;
+  ACTSGEOM::inttMisalignment = 100.;
   ACTSGEOM::tpotMisalignment = 100.;
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
   std::string theOutfile = outfile.Data();
@@ -109,35 +111,26 @@ void Fun4All_ZFAllTrackers(
     std::cout << "Use calibrated TPC drift velocity for Run " << runnumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
   }
 
-  G4MAGNET::magfield = "0.01";
-  G4MAGNET::magfield_tracking = G4MAGNET::magfield;
+  G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
+  // to turn on the default static corrections, enable the two lines below
+  G4TPC::ENABLE_STATIC_CORRECTIONS = true;
+  // G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS = false;
+
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
-  auto hitsin = new Fun4AllDstInputManager("InputManager");
-  hitsin->fileopen(inputtpcRawHitFile);
-  // hitsin->AddFile(inputMbd);
-  se->registerInputManager(hitsin);
+  auto hitsinseed = new Fun4AllDstInputManager("SeedInputManager");
+  hitsinseed->fileopen(inputseedRawHitFile);
+  se->registerInputManager(hitsinseed);
 
-  TRACKING::tpc_zero_supp = true;
-  Mvtx_HitUnpacking();
-  Intt_HitUnpacking();
-  Tpc_HitUnpacking();
-  Micromegas_HitUnpacking();
+  auto hitsinclus = new Fun4AllDstInputManager("ClusterInputManager");
+  hitsinclus->fileopen(inputclusterRawHitFile);
+  se->registerInputManager(hitsinclus);
 
-  Mvtx_Clustering();
-  Intt_Clustering();
-
-  auto tpcclusterizer = new TpcClusterizer;
-  tpcclusterizer->Verbosity(0);
-  tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
-  tpcclusterizer->set_rawdata_reco();
-  se->registerSubsystem(tpcclusterizer);
-
-  Micromegas_Clustering();
-
-  Tracking_Reco_TrackSeed_ZeroField();
-
+  /*
+   * Either converts seeds to tracks with a straight line/helix fit
+   * or run the full Acts track kalman filter fit
+   */
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
     auto converter = new TrackSeedTrackMapConverter;
@@ -146,7 +139,6 @@ void Fun4All_ZFAllTrackers(
     converter->setTrackSeedName("SvtxTrackSeedContainer");
     converter->setFieldMap(G4MAGNET::magfield_tracking);
     converter->Verbosity(0);
-    converter->constField();
     se->registerSubsystem(converter);
   }
   else
@@ -168,8 +160,28 @@ void Fun4All_ZFAllTrackers(
     actsFit->useOutlierFinder(false);
     actsFit->setFieldMap(G4MAGNET::magfield_tracking);
     se->registerSubsystem(actsFit);
+
+    if (G4TRACKING::SC_CALIBMODE)
+    {
+      /*
+       * in calibration mode, calculate residuals between TPC and fitted tracks,
+       * store in dedicated structure for distortion correction
+       */
+      auto residuals = new PHTpcResiduals;
+      const TString tpc_residoutfile = theOutfile + "_PhTpcResiduals.root";
+      residuals->setOutputfile(tpc_residoutfile.Data());
+      residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
+
+      // matches Tony's analysis
+      residuals->setMinPt(0.2);
+
+      // reconstructed distortion grid size (phi, r, z)
+      residuals->setGridDimensions(36, 48, 80);
+      se->registerSubsystem(residuals);
+    }
   }
-  PHSimpleVertexFinder *finder = new PHSimpleVertexFinder;
+
+  auto finder = new PHSimpleVertexFinder;
   finder->Verbosity(0);
   finder->setDcaCut(0.5);
   finder->setTrackPtCut(-99999.);
@@ -185,20 +197,27 @@ void Fun4All_ZFAllTrackers(
   auto resid = new TrackResiduals("TrackResiduals");
   resid->outfileName(residstring);
   resid->alignment(false);
+
+  // adjust track map name
+  if (G4TRACKING::SC_CALIBMODE && !G4TRACKING::convert_seeds_to_svtxtracks)
+  {
+    resid->trackmapName("SvtxSiliconMMTrackMap");
+    if (G4TRACKING::SC_USE_MICROMEGAS)
+    {
+      resid->set_doMicromegasOnly(true);
+    }
+  }
+
   resid->clusterTree();
-  resid->hitTree();
-  resid->zeroField();
+  resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
   resid->Verbosity(0);
   se->registerSubsystem(resid);
 
-  // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "/sphenix/tg/tg01/hf/jdosbo/tracking_development/Run24/Beam/41626/hitsets.root");
-  // se->registerOutputManager(out);
   if (Enable::QA)
   {
-    se->registerSubsystem(new MvtxClusterQA);
-    se->registerSubsystem(new InttClusterQA);
-    se->registerSubsystem(new TpcClusterQA);
-    se->registerSubsystem(new MicromegasClusterQA);
+    se->registerSubsystem(new SiliconSeedsQA);
+    se->registerSubsystem(new TpcSeedsQA);
+    se->registerSubsystem(new TpcSiliconQA);
   }
   se->run(nEvents);
   se->End();
