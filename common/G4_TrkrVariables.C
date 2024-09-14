@@ -106,17 +106,20 @@ namespace G4TPC
   // use simple clusterizer
   bool USE_SIMPLE_CLUSTERIZER = false;
 
-  // distortions
+  // distortions in simulation
+  // set how to interpret the magnitude of phi distortions in simulation
   bool DISTORTIONS_USE_PHI_AS_RADIANS = true;
 
-  // static distortions
+  // apply static distortions in simulations
   bool ENABLE_STATIC_DISTORTIONS = false;
+
   std::string static_distortion_filename = "TPC_STATIC_DISTORTION";
 
-  // time-ordered distortion fluctuations
+  // apply time-ordered distortion fluctuations in simulation
   bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
   std::string time_ordered_distortion_filename = "TPC_TIMEORDERED_DISTORTION";
 
+  // allow distortions to remove electrons that 
   bool ENABLE_REACHES_READOUT = true;
 
   // module edge distortion corrections
@@ -126,10 +129,12 @@ namespace G4TPC
   // static distortion corrections
   bool ENABLE_STATIC_CORRECTIONS = false;
   std::string static_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
+  bool USE_PHI_AS_RAD_STATIC_CORRECTIONS = true;
 
   // average distortion corrections
   bool ENABLE_AVERAGE_CORRECTIONS = false;
   std::string average_correction_filename;
+  bool USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = true;
 
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
