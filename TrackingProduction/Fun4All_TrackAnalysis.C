@@ -113,7 +113,7 @@ void Fun4All_TrackAnalysis(
 
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
   // to turn on the default static corrections, enable the two lines below
-  G4TPC::ENABLE_STATIC_CORRECTIONS = true;
+  //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
   // G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS = false;
 
   G4MAGNET::magfield_rescale = 1;
