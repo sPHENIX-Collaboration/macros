@@ -10,6 +10,7 @@
 #include <micromegas/MicromegasCombinedDataDecoder.h>
 #include <mvtx/MvtxCombinedRawDataDecoder.h>
 #include <tpc/TpcCombinedRawDataUnpacker.h>
+#include <tpc/LaserEventIdentifier.h>
 
 #include <intt/InttClusterizer.h>
 #include <mvtx/MvtxClusterizer.h>
@@ -118,6 +119,21 @@ void Tpc_HitUnpacking(const std::string& ebdc="")
     }
   tpcunpacker->Verbosity(verbosity);
   se->registerSubsystem(tpcunpacker);
+}
+
+void Tpc_LaserEventIdentifying()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
+  Fun4AllServer* se = Fun4AllServer::instance();
+  
+  auto laserEventIdentifier = new LaserEventIdentifier;
+  if(G4TPC::laser_event_debug_filename != "")
+  {
+    laserEventIdentifier->set_debug(true);
+    laserEventIdentifier->set_debug_name(G4TPC::laser_event_debug_filename);
+  }
+  laserEventIdentifier->set_max_time_samples(TRACKING::reco_tpc_maxtime_sample);
+  se->registerSubsystem(laserEventIdentifier);
 }
 
 void TPC_Clustering()

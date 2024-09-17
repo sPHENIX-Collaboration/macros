@@ -102,8 +102,6 @@ namespace G4TPC
   int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
   double tpc_outer_radius = 77. + 2.;
 
-  float laser_adc_threshold = 0.0;
-  std::string laser_clusterizer_debug_filename = "";
 
   // use simple clusterizer
   bool USE_SIMPLE_CLUSTERIZER = false;
@@ -143,6 +141,10 @@ namespace G4TPC
 
   //enable diffuse laser clustering
   bool ENABLE_CENTRAL_MEMBRANE_CLUSTERING = true;
+
+  float laser_adc_threshold = 0.0;
+  std::string laser_clusterizer_debug_filename = "";
+  std::string laser_event_debug_filename = "";
 
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
