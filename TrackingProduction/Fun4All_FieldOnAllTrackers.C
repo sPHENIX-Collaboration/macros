@@ -13,6 +13,7 @@
 #include <GlobalVariables.C>
 #include <QA.C>
 #include <Trkr_Clustering.C>
+#include <Trkr_LaserClustering.C>
 #include <Trkr_Reco.C>
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
@@ -154,6 +155,8 @@ void Fun4All_FieldOnAllTrackers(
   tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
   tpcclusterizer->set_rawdata_reco();
   se->registerSubsystem(tpcclusterizer);
+
+  Tpc_LaserEventIdentifying();
 
   Micromegas_Clustering();
 
@@ -338,6 +341,7 @@ void Fun4All_FieldOnAllTrackers(
   resid->clusterTree();
   resid->hitTree();
   resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
+  resid->set_rejectLaserEvent(true);
   resid->Verbosity(0);
   se->registerSubsystem(resid);
 
