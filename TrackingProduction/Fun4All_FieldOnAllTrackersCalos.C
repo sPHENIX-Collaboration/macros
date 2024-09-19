@@ -10,6 +10,7 @@
 #include <G4_Magnet.C>
 #include <GlobalVariables.C>
 #include <Trkr_Clustering.C>
+#include <Trkr_LaserClustering.C>
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
 #include <Trkr_Reco.C>
@@ -172,6 +173,8 @@ void Fun4All_FieldOnAllTrackersCalos(
   tpcclusterizer->set_rawdata_reco();
   tpcclusterizer->set_do_sequential(true);
   se->registerSubsystem(tpcclusterizer);
+
+  Tpc_LaserEventIdentifying();
 
   Micromegas_Clustering();
 
@@ -378,17 +381,8 @@ void Fun4All_FieldOnAllTrackersCalos(
   if (Enable::DSTOUT)
   {
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outputDstFile);
-    out->StripNode("TPC");
-    out->StripNode("Sync");
-    out->StripNode("MBD");
-    out->StripNode("ZDC");
-    out->StripNode("SEPD");
-    out->StripNode("HCALIN");
-    out->StripNode("HCALOUT");
-    out->StripNode("alignmentTransformationContainer");
-    out->StripNode("alignmentTransformationContainerTransient");
-    out->StripNode("SiliconTrackSeedContainer");
     out->StripNode("RUN");
+    out->AddNode("TPC");
     out->SaveRunNode(0);
     se->registerOutputManager(out);
   }

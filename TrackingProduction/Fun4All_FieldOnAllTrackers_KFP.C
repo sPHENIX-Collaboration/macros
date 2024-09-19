@@ -14,6 +14,7 @@
 #include <QA.C>
 #include <Trkr_TpcReadoutInit.C>
 #include <Trkr_Clustering.C>
+#include <Trkr_LaserClustering.C>
 #include <Trkr_Reco.C>
 
 #include <ffamodules/CDBInterface.h>
@@ -149,6 +150,8 @@ void Fun4All_FieldOnAllTrackers_KFP(
   tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
   tpcclusterizer->set_rawdata_reco();
   se->registerSubsystem(tpcclusterizer);
+
+  Tpc_LaserEventIdentifying();
 
   Micromegas_Clustering();
 
