@@ -58,8 +58,8 @@ R__LOAD_LIBRARY(libtrackingqa.so)
 R__LOAD_LIBRARY(libtpcqa.so)
 void Fun4All_FieldOnAllTrackers(
     const int nEvents = 10,
-    const std::string tpcfilename = "DST_BEAM_run2pp_new_2023p013-00041989-0000.root",
-    const std::string tpcdir = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpcbeam/run_00041900_00042000/",
+    const std::string tpcfilename = "DST_STREAMING_EVENT_run2pp_new_2024p002-00053217-00000.root",
+    const std::string tpcdir = "/sphenix/lustre01/sphnxpro/physics/slurp/streaming/physics/new_2024p002/run_00053200_00053300/",
     const std::string outfilename = "clusters_seeds",
     const bool convertSeeds = true)
 {
@@ -341,7 +341,7 @@ void Fun4All_FieldOnAllTrackers(
   resid->clusterTree();
   resid->hitTree();
   resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
-  resid->set_rejectLaserEvent(true);
+  
   resid->Verbosity(0);
   se->registerSubsystem(resid);
 
