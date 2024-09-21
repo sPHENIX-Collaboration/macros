@@ -238,8 +238,7 @@ void Fun4All_FieldOnAllTrackers(
   silicon_match->set_z_search_window(5.);
   silicon_match->set_phi_search_window(0.2);
   silicon_match->set_eta_search_window(0.1);
-  silicon_match->set_use_old_matching(true);
-  silicon_match->set_pp_mode(true);
+  silicon_match->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(silicon_match);
 
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
@@ -291,6 +290,10 @@ void Fun4All_FieldOnAllTrackers(
     actsFit->useOutlierFinder(false);
     actsFit->setFieldMap(G4MAGNET::magfield_tracking);
     se->registerSubsystem(actsFit);
+
+    auto cleaner = new PHTrackCleaner();
+    cleaner->Verbosity(0);
+    se->registerSubsystem(cleaner);
 
     if (G4TRACKING::SC_CALIBMODE)
     {
