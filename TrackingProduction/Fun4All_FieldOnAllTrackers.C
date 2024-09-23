@@ -79,6 +79,8 @@ void Fun4All_FieldOnAllTrackers(
 	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
 	   << std::endl;
 
+ TRACKING::pp_mode = false;
+
   // distortion calibration mode
   /*
    * set to true to enable residuals in the TPC with
@@ -167,11 +169,22 @@ void Fun4All_FieldOnAllTrackers(
   /*
    * Silicon Seeding
    */
+
+  /*
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
   silicon_Seeding->searchInIntt();
   silicon_Seeding->setinttRPhiSearchWindow(0.4);
   silicon_Seeding->setinttZSearchWindow(1.6);
+  silicon_Seeding->seedAnalysis(false);
+  se->registerSubsystem(silicon_Seeding);
+  */
+
+  auto silicon_Seeding = new PHActsSiliconSeeding;
+  silicon_Seeding->Verbosity(0);
+  // these get us to about 83% INTT > 1 
+  silicon_Seeding->setinttRPhiSearchWindow(1.0);
+  silicon_Seeding->setinttZSearchWindow(7.0); 
   silicon_Seeding->seedAnalysis(false);
   se->registerSubsystem(silicon_Seeding);
 
