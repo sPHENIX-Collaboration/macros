@@ -22,8 +22,9 @@ namespace Input
   enum BeamConfiguration
   {
     AA_COLLISION = 0,
-    pA_COLLISION,
-    pp_COLLISION
+    pA_COLLISION = 1,
+    pp_COLLISION = 2,
+    pp_ZEROANGLE = 3
   };
 
   BeamConfiguration BEAM_CONFIGURATION = AA_COLLISION;
