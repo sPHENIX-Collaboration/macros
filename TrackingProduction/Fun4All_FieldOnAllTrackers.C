@@ -79,6 +79,8 @@ void Fun4All_FieldOnAllTrackers(
 	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
 	   << std::endl;
 
+ TRACKING::pp_mode = false;
+
   // distortion calibration mode
   /*
    * set to true to enable residuals in the TPC with
@@ -167,11 +169,22 @@ void Fun4All_FieldOnAllTrackers(
   /*
    * Silicon Seeding
    */
+
+  /*
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
   silicon_Seeding->searchInIntt();
   silicon_Seeding->setinttRPhiSearchWindow(0.4);
   silicon_Seeding->setinttZSearchWindow(1.6);
+  silicon_Seeding->seedAnalysis(false);
+  se->registerSubsystem(silicon_Seeding);
+  */
+
+  auto silicon_Seeding = new PHActsSiliconSeeding;
+  silicon_Seeding->Verbosity(0);
+  // these get us to about 83% INTT > 1 
+  silicon_Seeding->setinttRPhiSearchWindow(1.0);
+  silicon_Seeding->setinttZSearchWindow(7.0); 
   silicon_Seeding->seedAnalysis(false);
   se->registerSubsystem(silicon_Seeding);
 
@@ -238,8 +251,7 @@ void Fun4All_FieldOnAllTrackers(
   silicon_match->set_z_search_window(5.);
   silicon_match->set_phi_search_window(0.2);
   silicon_match->set_eta_search_window(0.1);
-  silicon_match->set_use_old_matching(true);
-  silicon_match->set_pp_mode(true);
+  silicon_match->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(silicon_match);
 
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
@@ -291,6 +303,10 @@ void Fun4All_FieldOnAllTrackers(
     actsFit->useOutlierFinder(false);
     actsFit->setFieldMap(G4MAGNET::magfield_tracking);
     se->registerSubsystem(actsFit);
+
+    auto cleaner = new PHTrackCleaner();
+    cleaner->Verbosity(0);
+    se->registerSubsystem(cleaner);
 
     if (G4TRACKING::SC_CALIBMODE)
     {
