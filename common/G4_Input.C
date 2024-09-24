@@ -89,6 +89,7 @@ namespace Input
   bool COSMIC = false;
   double COSMIC_R = 650.;
 
+  double beam_crossing = 1.5; // 1.5 mRad
   //! apply reference sPHENIX nominal beam parameter with 1.5mrad crossing as used in 2024
   //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
   //! \param[in] collision_type select the beam configuration with Input::BeamConfiguration
@@ -99,14 +100,14 @@ namespace Input
       std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
       exit(1);
     }
-
+    double localbcross = Input::beam_crossing/2.*1e-3;
     switch (beam_config)
     {
     case AA_COLLISION:
       // heavy ion mode
 
       // 1.5mRad is split among both beams, means set to 0.75 mRad
-      HepMCGen->set_beam_direction_theta_phi(0.75e-3, 0, M_PI - 0.75e-3, 0);  //1.5mrad x-ing of sPHENIX
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  //1.5mrad x-ing of sPHENIX
       HepMCGen->set_vertex_distribution_width(
 	100e-4,         // approximation from past STAR/Run16 AuAu data
 	100e-4,         // approximation from past STAR/Run16 AuAu data
@@ -119,7 +120,7 @@ namespace Input
       // pA mode
 
       // 1.5mRad is split among both beams, means set to 0.75 mRad
-      HepMCGen->set_beam_direction_theta_phi(0.75e-3, 0, M_PI - 0.75e-3, 0);  //1.5mrad x-ing of sPHENIX
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  //1.5mrad x-ing of sPHENIX
       HepMCGen->set_vertex_distribution_width(
 	100e-4,         // set to be similar to AA
 	100e-4,         // set to be similar to AA
@@ -131,7 +132,7 @@ namespace Input
 
       // pp mode
       // 1.5mRad is split among both beams, means set to 0.75 mRad
-      HepMCGen->set_beam_direction_theta_phi(0.75e-3, 0, M_PI - 0.75e-3, 0);  //1.5mrad x-ing of sPHENIX
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  //1.5mrad x-ing of sPHENIX
       HepMCGen->set_vertex_distribution_width(
 	120e-4,         // approximation from past PHENIX data
 	120e-4,         // approximation from past PHENIX data
