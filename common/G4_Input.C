@@ -89,7 +89,7 @@ namespace Input
   bool COSMIC = false;
   double COSMIC_R = 650.;
 
-  double beam_crossing = 1.5; // 1.5 mRad
+  double beam_crossing = -1.5; // -1.5 mRad
   //! apply reference sPHENIX nominal beam parameter with 1.5mrad crossing as used in 2024
   //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
   //! \param[in] collision_type select the beam configuration with Input::BeamConfiguration
