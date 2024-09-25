@@ -4,7 +4,7 @@ USR="$(id -u -n)"
 PWD=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 # The location of this shell script
 
-EXE="${PWD}/run.sh"
+EXE="${PWD}/shell.sh"
 DIR="${PWD}"
 MEM="4096MB"
 
@@ -31,7 +31,7 @@ RUN_NUM="$1"
 
 [[ -d ${DIR}/job ]] || mkdir -p ${DIR}/job
 
-[[ -d ${DIR}/outtxt ]] || mkdir -p ${DIR}/outtxt
+[[ -d ${DIR}/out ]] || mkdir -p ${DIR}/out
 [[ -d ${DIR}/err ]] || mkdir -p ${DIR}/err
 
 # rm -f ${DIR}/out/*
@@ -51,14 +51,14 @@ arguments       = $*
 
 notification    = Never
 
-output          = ${DIR}/outtxt/out_${ARGS}.txt
+output          = ${DIR}/out/out_${ARGS}.txt
 error           = ${DIR}/err/err_${ARGS}.txt
-log             = /tmp/jaein_${ARGS}.txt
+log             = /tmp/condor/inttcalib_log_${ARGS}.txt
 
 initialdir      = ${PWD}
 request_memory  = ${MEM}
 periodichold    = (NumJobStarts >= 1 && JobStatus == 1)
-concurrency_limits=CONCURRENCY_LIMIT_DEFAULT:100
+
 queue
 EOF
 
