@@ -50,14 +50,14 @@ void macro_Calib(
   std::vector<std::string> missing_list_files = {};
   InttOdbcQuery query;
   query.Query(run_num);
-  if (query.IsStreaming() && run_num>=45235) // run 45235 -> GL1p offically established 
+  if (query.IsStreaming()) // run 45235 -> GL1p offically established 
   {
     SingleGl1PoolInput *gl1_sngl = new SingleGl1PoolInput("GL1");
     snprintf(buff_gl1, sizeof(buff_gl1), gl1_format.c_str(), run_num);
     std::cout << buff_gl1 << std::endl;
     gl1_sngl->AddListFile(buff_gl1);
     in->registerStreamingInput(gl1_sngl, InputManagerType::GL1);
-  }
+  } // If run is not streaming, doing combining without GL1 is also fine for INTT standalone calibration
   for (int i = 0; i < 8; ++i)
   {
     snprintf(buff, sizeof(buff), intt_format.c_str(), run_num, i);
@@ -68,16 +68,8 @@ void macro_Calib(
     }
 
     SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + std::to_string(i));
-    if (query.IsStreaming() && run_num >= 45235) // run 45235 -> GL1p offically established 
-    {
-      intt_sngl->SetNegativeBco(120 - 23);
-      intt_sngl->SetBcoRange(120);
-    }
-    else
-    {
-      intt_sngl->SetNegativeBco(1);
-      intt_sngl->SetBcoRange(2);
-    }
+    intt_sngl->SetNegativeBco(120 - 23);
+    intt_sngl->SetBcoRange(120);
     intt_sngl->AddListFile(buff);
     in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
   }
