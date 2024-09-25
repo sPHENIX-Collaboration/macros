@@ -1,5 +1,5 @@
-#ifndef MACRO_C
-#define MACRO_C
+#ifndef INTT_CALIB_MACRO_C
+#define INTT_CALIB_MACRO_C
 
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -103,4 +103,4 @@ macro (
 	exit(0);
 }
 
-#endif//MACRO_C
+#endif//INTT_CALIB_MACRO_C

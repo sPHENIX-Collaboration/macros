@@ -3,12 +3,19 @@
 MYINSTALL=""
 # MYINSTALL="/sphenix/user/jbertaux/MYINSTALL"
 
-# One-liner to get pwd
-PWD=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+# One-liner to get location of this shell script
+# PWD=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+PWD="."
 
-INTT_FORMAT="" # set based on run number in if statement later on
+INTT_FORMAT="/sphenix/lustre01/sphnxpro/physics/INTT/%s/%s_intt%d-%08d-*"
+
+# Intermediate variable to hold file lists
+# Given unique names to prevent conflicts if multiple jobs are run simultaneously
+# Removed before the shell script exits to avoid unnecessary buildup of files
 INTT_LIST="${PWD}/lst/run_%08d_intt%01d.list"
 
+# Output--can be set relative to the $(pwd) or given absolute paths
+# If any are unset, those outputs are not produced
 HOTMAP_CDB_FORMAT="${PWD}/hotmap_cdb/hotmap_run_%08d.root"
 HOTMAP_PNG_FORMAT="${PWD}/hotmap_png/hotmap_run_%08d.png"
 
@@ -38,11 +45,8 @@ if [[ $# -lt 1 || $1 == "-h" || $1 == "--help" ]]; then
 	exit 0
 fi
 
-RUN_NUM="$1"
-if [[ ${RUN_NUM} -lt 43263 ]]; then
-	INTT_FORMAT="/sphenix/lustre01/sphnxpro/commissioning/INTT/%s/%s_intt%d-%08d-*"
-else
-	INTT_FORMAT="/sphenix/lustre01/sphnxpro/physics/INTT/%s/%s_intt%d-%08d-*"
+if [[ -n "$1" ]]; then
+	RUN_NUM="$1"
 fi
 
 if [[ -n "$2" ]]; then
@@ -59,29 +63,12 @@ if [ -n "${MYINSTALL}" ] && [ -d "${MYINSTALL}" ]; then
 	source /opt/sphenix/core/bin/setup_local.sh ${MYINSTALL}
 fi
 
-# File list creation
-MISSING_FILES=""
-
 for FLX_SVR in $(seq 0 7); do
 	printf -v LIST ${INTT_LIST} ${RUN_NUM} ${FLX_SVR}
 	printf -v FILE ${INTT_FORMAT} ${RUN_TYPE} ${RUN_TYPE} ${FLX_SVR} ${RUN_NUM}
 	mkdir -p $(dirname ${LIST})
 	ls -1 ${FILE} > ${LIST} 2>/dev/null
-	if [ ! -s ${LIST} ]; then
-		MISSING_FILES="${MISSING_FILES}${FILE} "
-		rm ${LIST}
-	fi
 done
-
-# Check list creation (and early return if it failed)
-if [ ! -z "$MISSING_FILES" ]; then
-	echo -e "\nMissing files; the following expansions failed"
-	for FILE in $MISSING_FILES; do
-		echo -e "\t${FILE}"
-	done
-	echo -e "Exiting\n"
-	exit 1
-fi
 
 # Output
 printf -v HOTMAP_CDB_FILE ${HOTMAP_CDB_FORMAT} ${RUN_NUM}
