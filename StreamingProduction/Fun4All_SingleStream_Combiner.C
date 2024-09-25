@@ -167,6 +167,8 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
     //   sngl->Verbosity(3);
     mm_sngl->SetBcoRange(10);
     mm_sngl->SetNegativeBco(2);
+    mm_sngl->SetBcoRange(10);
+    mm_sngl->SetBcoPoolSize(50);
     mm_sngl->AddListFile(iter);
     in->registerStreamingInput(mm_sngl, InputManagerType::MICROMEGAS);
     readoutNumber = "TPOT";
