@@ -182,9 +182,9 @@ void Fun4All_FieldOnAllTrackers(
 
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
-  // these get us to about 83% INTT > 1 
+  // these get us to about 83% INTT > 1
   silicon_Seeding->setinttRPhiSearchWindow(1.0);
-  silicon_Seeding->setinttZSearchWindow(7.0); 
+  silicon_Seeding->setinttZSearchWindow(7.0);
   silicon_Seeding->seedAnalysis(false);
   se->registerSubsystem(silicon_Seeding);
 
@@ -238,6 +238,16 @@ void Fun4All_FieldOnAllTrackers(
   cprop->Verbosity(0);
   cprop->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(cprop);
+
+  if (TRACKING::pp_mode)
+  {
+    // for pp mode, apply preliminary distortion corrections to TPC clusters before crossing is known
+    // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
+    auto prelim_distcorr = new PrelimDistortionCorrection;
+    prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
+    prelim_distcorr->Verbosity(0);
+    se->registerSubsystem(prelim_distcorr);
+  }
 
   /*
    * Track Matching between silicon and TPC
@@ -357,7 +367,7 @@ void Fun4All_FieldOnAllTrackers(
   resid->clusterTree();
   resid->hitTree();
   resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
-  
+
   resid->Verbosity(0);
   se->registerSubsystem(resid);
 
@@ -378,7 +388,7 @@ void Fun4All_FieldOnAllTrackers(
     tpcqa->setVertexMapName("TpcSvtxVertexMap");
     tpcqa->setSegment(rc->get_IntFlag("RUNSEGMENT"));
     se->registerSubsystem(tpcqa);
-    
+
   }
   se->run(nEvents);
   se->End();
