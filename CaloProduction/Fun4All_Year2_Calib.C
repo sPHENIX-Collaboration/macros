@@ -6,6 +6,8 @@
 
 #include <mbd/MbdReco.h>
 
+#include <epd/EpdReco.h>
+
 #include <zdcinfo/ZdcReco.h>
 
 #include <globalvertex/GlobalVertexReco.h>
@@ -40,6 +42,7 @@ R__LOAD_LIBRARY(libcalotrigger.so)
 R__LOAD_LIBRARY(libcentrality.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libmbd.so)
+R__LOAD_LIBRARY(libepd.so)
 R__LOAD_LIBRARY(libzdcinfo.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcalovalid.so)
@@ -75,6 +78,10 @@ void Fun4All_Year2_Calib(int nEvents=100,
   // MBD/BBC Reconstruction
   MbdReco *mbdreco = new MbdReco();
   se->registerSubsystem(mbdreco);
+
+  //sEPD Reconstruction--Calib Info
+  EpdReco *epdreco = new EpdReco();
+  se->registerSubsystem(epdreco);
 
   //ZDC Reconstruction--Calib Info
   ZdcReco *zdcreco = new ZdcReco();

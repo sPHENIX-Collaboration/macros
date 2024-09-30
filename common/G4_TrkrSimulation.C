@@ -99,7 +99,7 @@ void Mvtx_Cells()
   PHG4MvtxHitReco* maps_hits = new PHG4MvtxHitReco("MVTX");
   maps_hits->Verbosity(verbosity);
 
-  double maps_readout_window = 5000.0;  // ns
+  double maps_readout_window = 9900.0;  // ns
   double extended_readout_time = 0.0;
   if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
   // override the default timing window - default is +/- 5000 ns
