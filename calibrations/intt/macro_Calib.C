@@ -77,9 +77,6 @@ void macro_Calib(
 
   InttCalib *inttcalib = new InttCalib();
   inttcalib->Verbosity(0);
-  fs::path currentPath = fs::current_path();
-  std::string RunNumberStr = std::to_string(run_num);
-  std::string EventNumberStr = std::to_string(num_evt);
 
   // Construct file paths
   inttcalib->SetHotMapCdbFile(hotmap_cdb_file);
@@ -89,19 +86,17 @@ void macro_Calib(
   inttcalib->SetBcoMaximumEvent(num_evt); // default = 50k
   inttcalib->SetStreamingMode(query.IsStreaming());
   inttcalib->SetRunNumber(run_num);
-  std::cout << "Run: " << run_num << " is \n"
-            << "\t" << (query.IsStreaming() ? "streaming" : "triggered") << std::endl;
-  // std::string hotmap_cdb_file = (currentPath / "hotmap_cdb" / ("hotmap_cdb_" + RunNumberStr + "_" + EventNumberStr + ".root")).string();
-  // std::string hotmap_save_file = (currentPath / "hotmap_png" / ("hotmap_png_" + RunNumberStr + "_" + EventNumberStr + ".png")).string(); // .root .png .pdf
-  // std::string bcomap_cdb_file = (currentPath / "bcomap_cdb" / ("bcomap_cdb_" + RunNumberStr + "_" + EventNumberStr + ".root")).string();
-  // std::string bcomap_save_file = (currentPath / "bcomap_png" / ("bcomap_png_" + RunNumberStr + "_" + EventNumberStr + ".png")).string(); //.root .png .pdf
 
-  // inttcalib->SetHotMapCdbFile(hotmap_cdb_file);
+  inttcalib->SetHotMapCdbFile(hotmap_cdb_file);
   // inttcalib->SetHotMapPngFile(hotmap_save_file);
-  // inttcalib->SetBcoMapCdbFile(bcomap_cdb_file);
+  inttcalib->SetBcoMapCdbFile(bcomap_cdb_file);
   // inttcalib->SetBcoMapPngFile(bcomap_save_file);
 
   se->registerSubsystem(inttcalib);
+  if(inttcalib->Verbosity())
+  {
+    std::cout << "Run: " << run_num << " is " << (query.IsStreaming() ? "streaming" : "triggered") << std::endl;
+  }
 
   se->run(num_evt);
 
