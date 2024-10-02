@@ -79,7 +79,7 @@ void Fun4All_FieldOnAllTrackers(
 	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
 	   << std::endl;
 
- TRACKING::pp_mode = false;
+ TRACKING::pp_mode = true;
 
   // distortion calibration mode
   /*
