@@ -51,7 +51,7 @@ R__LOAD_LIBRARY(libglobalQA.so)
 R__LOAD_LIBRARY(libcaloTreeGen.so)
 
 void Fun4All_Year2_Calib(int nEvents=100,
-                   const std::string &fname = "/sphenix/lustre01/sphnxpro/physics/slurp/caloy2fitting/ana437_2024p007/run_00047700_00047800/DST_CALOFITTING_run2pp_ana437_2024p007-00047791-00154.root",
+                   const std::string &fname = "DST_CALOFITTING-00000000-000000.root",
                    const std::string& outfile= "DST_CALO-00000000-000000.root",
                    const std::string& outfile_hist= "HIST_CALOQA-00000000-000000.root",
 		   const std::string& outfile_tree= "TREE_CALOQA-00000000-000000.root",
