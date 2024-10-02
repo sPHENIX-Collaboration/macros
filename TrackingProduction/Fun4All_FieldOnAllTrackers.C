@@ -61,7 +61,7 @@ void Fun4All_FieldOnAllTrackers(
     const std::string tpcfilename = "DST_STREAMING_EVENT_run2pp_new_2024p002-00053217-00000.root",
     const std::string tpcdir = "/sphenix/lustre01/sphnxpro/physics/slurp/streaming/physics/new_2024p002/run_00053200_00053300/",
     const std::string outfilename = "clusters_seeds",
-    const bool convertSeeds = true)
+    const bool convertSeeds = false)
 {
   std::string inputtpcRawHitFile = tpcdir + tpcfilename;
 
