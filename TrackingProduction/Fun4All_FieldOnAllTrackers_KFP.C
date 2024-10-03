@@ -205,11 +205,11 @@ void Fun4All_FieldOnAllTrackers_KFP(
 
   //Basic node selection and configuration
   kfparticle->magFieldFile("FIELDMAP_TRACKING");
-  // kfparticle->getAllPVInfo(false);
+  kfparticle->getAllPVInfo(false);
   kfparticle->allowZeroMassTracks(); // true
   kfparticle->useFakePrimaryVertex(); // true
 
-  // kfparticle->constrainToPrimaryVertex(false);
+  kfparticle->constrainToPrimaryVertex(false);
   kfparticle->setMotherIPchi2(FLT_MAX);
   kfparticle->setFlightDistancechi2(-1.);
   kfparticle->setMinDIRA(-1.1);
