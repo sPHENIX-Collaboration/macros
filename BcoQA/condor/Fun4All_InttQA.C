@@ -16,7 +16,9 @@ void Fun4All_InttQA(int nEvents = 0,
   Fun4AllServer *se = Fun4AllServer::instance();
 //  se->Verbosity(1);
 
-  se->registerSubsystem(new InttBcoDump);
+  InttBcoDump *inttdmp = new InttBcoDump;
+  inttdmp->OutFileName(outfile);
+  se->registerSubsystem(inttdmp);
 
   Fun4AllInputManager *in = new Fun4AllPrdfInputManager("PRDFin");
   in->AddListFile(input_list);
@@ -25,8 +27,6 @@ void Fun4All_InttQA(int nEvents = 0,
   se->run(nEvents);
 
   se->End();
-
-  QAHistManagerDef::saveQARootFile(outfile);
 
   delete se;
   std::cout <<"Finished"<<std::endl;
