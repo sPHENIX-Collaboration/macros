@@ -21,11 +21,18 @@ if (! -d $outpathroot)
 my $curdir = `pwd`;
 chomp $curdir;
 opendir my $mydir, '.' or die "cannot open directory $!";
-my @files = grep{ /tpc/ && /\.list/} readdir($mydir);
+my @tpcfiles = grep{ /tpc/ && /\.list/} readdir($mydir);
 close $mydir;
-foreach my $f (sort @files)
+opendir my $mydir, '.' or die "cannot open directory $!";
+my @inttfiles = grep{ /intt/ && /\.list/} readdir($mydir);
+close $mydir;
+foreach my $f (sort @tpcfiles)
 {
     print "tpc list file: $f\n";
+}
+foreach my $f (sort @inttfiles)
+{
+    print "intt list file: $f\n";
 }
 my $gl1file = sprintf("gl1daq.list");
 if (! -f $gl1file)
@@ -65,7 +72,7 @@ if (! -d $outdir)
     mkpath $outdir;
 }
 open(F1,">condor.list");
-foreach my $file (sort @files)
+foreach my $file (sort @tpcfiles)
 {
     chomp $file;
     my $lfn = basename($file);
@@ -76,6 +83,18 @@ foreach my $file (sort @files)
     my $condorerr = sprintf("%s/condor-%s.err",$condorlogpath,$lfn);
     my $condorlog = sprintf("/tmp/%scondor-%s.log",$myself,$lfn);
     print F1 "$curdir/run_tpcqa.sh $file $ntupfile $outdir $condorout $condorerr $condorlog $curdir\n";
+}
+foreach my $file (sort @inttfiles)
+{
+    chomp $file;
+    my $lfn = basename($file);
+    $lfn =~ s/\.list//;
+    print "file is $lfn\n";
+    my $ntupfile = sprintf("%s.root",$lfn);
+    my $condorout = sprintf("%s/condor-%s.out",$condorlogpath,$lfn);
+    my $condorerr = sprintf("%s/condor-%s.err",$condorlogpath,$lfn);
+    my $condorlog = sprintf("/tmp/%scondor-%s.log",$myself,$lfn);
+    print F1 "$curdir/run_inttqa.sh $file $ntupfile $outdir $condorout $condorerr $condorlog $curdir\n";
 }
 # now for the gl1
 my $file=$gl1file;

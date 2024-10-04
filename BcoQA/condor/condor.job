@@ -9,7 +9,7 @@ PeriodicHold 	= (NumJobStarts>=1 && JobStatus == 1)
 #accounting_group = group_sphenix.mdc2
 #accounting_group_user = sphnxpro
 #Requirements = (CPU_Type == "mdc2")
-#request_memory = 5120MB
+#request_memory = 4096MB
 #Priority = $(baseprio)
 job_lease_duration = 3600
 Queue executable, infile, outlfn, outdir, outfile, errfile, condorlogfile, rundir from condor.list

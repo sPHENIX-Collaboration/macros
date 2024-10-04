@@ -22,8 +22,6 @@ anabuild=new
 
 source /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/bin/sphenix_setup.sh -n $anabuild
 
-#source /opt/sphenix/core/bin/setup_local.sh $HOME/workarea/sPHENIX/gitrepov5/installv1
-
 if [[ ! -z "$_CONDOR_SCRATCH_DIR" && -d $_CONDOR_SCRATCH_DIR ]]
 then
     cd $_CONDOR_SCRATCH_DIR
