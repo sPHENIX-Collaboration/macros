@@ -1,8 +1,8 @@
 #ifndef MACRO_G4TRKRSIM_C
 #define MACRO_G4TRKRSIM_C
 
-#include "G4_ActsGeom.C"
-#include "G4_TrkrVariables.C"
+#include <G4_ActsGeom.C>
+#include <G4_TrkrVariables.C>
 #include <GlobalVariables.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
