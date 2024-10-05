@@ -70,7 +70,7 @@ void KFParticle_Upsilon_Reco()
   kfparticle->setDecayDescriptor(KFPARTICLE::UpsilonDecayDescriptor);
 
   if (Enable::KFPARTICLE_APPEND_TO_DST) kfparticle->saveDST();
-  if (!Enable::KFPARTICLE_SAVE_NTUPLE) kfparticle->dontSaveOutput();
+  if (!Enable::KFPARTICLE_SAVE_NTUPLE) kfparticle->saveOutput(false);
   if (Enable::KFPARTICLE_TRUTH_MATCH) kfparticle->doTruthMatching();
   if (Enable::KFPARTICLE_DETECTOR_INFO) kfparticle->getDetectorInfo();
 
@@ -107,7 +107,7 @@ void KFParticle_D0_Reco()
   kfparticle->setDecayDescriptor(KFPARTICLE::D0DecayDescriptor);
 
   if (Enable::KFPARTICLE_APPEND_TO_DST) kfparticle->saveDST();
-  if (!Enable::KFPARTICLE_SAVE_NTUPLE) kfparticle->dontSaveOutput();
+  if (!Enable::KFPARTICLE_SAVE_NTUPLE) kfparticle->saveOutput(false);
   if (Enable::KFPARTICLE_TRUTH_MATCH) kfparticle->doTruthMatching();
   if (Enable::KFPARTICLE_DETECTOR_INFO) kfparticle->getDetectorInfo();
 
@@ -145,7 +145,7 @@ void KFParticle_Lambdac_Reco()
   kfparticle->setDecayDescriptor(KFPARTICLE::LambdacDecayDescriptor);
 
   if (Enable::KFPARTICLE_APPEND_TO_DST) kfparticle->saveDST();
-  if (!Enable::KFPARTICLE_SAVE_NTUPLE) kfparticle->dontSaveOutput();
+  if (!Enable::KFPARTICLE_SAVE_NTUPLE) kfparticle->saveOutput(false);
   if (Enable::KFPARTICLE_TRUTH_MATCH) kfparticle->doTruthMatching();
   if (Enable::KFPARTICLE_DETECTOR_INFO) kfparticle->getDetectorInfo();
 
