@@ -34,6 +34,7 @@
 
 #include <calovalid/CaloValid.h>
 #include <globalqa/GlobalQA.h>
+#include <calotreegen/caloTreeGen.h> 
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -47,11 +48,13 @@ R__LOAD_LIBRARY(libzdcinfo.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libglobalQA.so)
+R__LOAD_LIBRARY(libcaloTreeGen.so)
 
 void Fun4All_Year2_Calib(int nEvents=100,
                    const std::string &fname = "DST_CALOFITTING-00000000-000000.root",
                    const std::string& outfile= "DST_CALO-00000000-000000.root",
                    const std::string& outfile_hist= "HIST_CALOQA-00000000-000000.root",
+		   const std::string& outfile_tree= "TREE_CALOQA-00000000-000000.root",
                    const std::string& dbtag= "ProdA_2024"
   )
 {
@@ -109,6 +112,23 @@ void Fun4All_Year2_Calib(int nEvents=100,
   CaloValid *ca = new CaloValid("CaloValid");
   ca->set_timing_cut_width(200);
   se->registerSubsystem(ca);
+
+  caloTreeGen *caloTree = new caloTreeGen(outfile_tree);
+  //enable subsystems
+  caloTree->doEMCal(1, "TOWERINFO_CALIB_CEMC");
+  caloTree->doClusters(1, "CLUSTERINFO_CEMC");
+  caloTree->doHCals(1, "TOWERINFO_CALIB_HCALOUT", "TOWERINFO_CALIB_HCALIN");
+  caloTree->doZDC(1, "TOWERINFO_CALIB_ZDC");
+  caloTree->doTrig(1, "GL1Packet");
+
+  //set subsystem cuts
+  caloTree->setEMCalThresh(0.7);
+  caloTree->setClusterThresh(0.5);
+  caloTree->doClusterDetails(1);
+  caloTree->setOHCalThresh(0.5);
+  caloTree->setIHCalThresh(0.1);
+  
+  se->registerSubsystem(caloTree);
 
   GlobalQA *gqa = new GlobalQA("GlobalQA");
   se->registerSubsystem(gqa);
