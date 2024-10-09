@@ -88,11 +88,16 @@ void Fun4All_Year2_Calib(int nEvents=100,
 
   //ZDC Reconstruction--Calib Info
   ZdcReco *zdcreco = new ZdcReco();
+  zdcreco->set_zdc1_cut(0.0);
+  zdcreco->set_zdc2_cut(0.0);
   se->registerSubsystem(zdcreco);
 
   // Official vertex storage
   GlobalVertexReco *gvertex = new GlobalVertexReco();
   se->registerSubsystem(gvertex);
+
+  GlobalQA *gqa = new GlobalQA("GlobalQA");
+  se->registerSubsystem(gqa);
 
   /////////////////////
   // Geometry 
@@ -104,7 +109,7 @@ void Fun4All_Year2_Calib(int nEvents=100,
 
 
   /////////////////////////////////////////////////////
-  // Set status of towers, Calibrate towers,  Cluster
+  // Set status of CALO towers, Calibrate towers,  Cluster
   Process_Calo_Calib();
 
   ///////////////////////////////////
@@ -126,12 +131,9 @@ void Fun4All_Year2_Calib(int nEvents=100,
   caloTree->setClusterThresh(0.5);
   caloTree->doClusterDetails(1);
   caloTree->setOHCalThresh(0.5);
-  caloTree->setIHCalThresh(0.1);
-  
+  caloTree->setIHCalThresh(0.1);  
   se->registerSubsystem(caloTree);
 
-  GlobalQA *gqa = new GlobalQA("GlobalQA");
-  se->registerSubsystem(gqa);
   
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
   In->AddFile(fname);
