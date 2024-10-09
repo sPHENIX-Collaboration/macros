@@ -141,6 +141,7 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
 //  in->Verbosity(3);
 
 // create and register input managers
+  int NumInputs = 0;
   int i = 0;
 
   for (auto iter : gl1_infile)
@@ -154,9 +155,9 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
       i++;
     }
   }
+  NumInputs += i;
+
   i = 0;
-
-
   if (use_inttpool)
   {
     for (auto iter : intt_infile)
@@ -191,6 +192,7 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
       }
     }
   }
+  NumInputs += i;
 
   i = 0;
   for (auto iter : mvtx_infile)
@@ -206,6 +208,8 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
     i++;
     }
   }
+  NumInputs += i;
+
   i = 0;
   for (auto iter : tpc_infile)
   {
@@ -222,8 +226,9 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
     i++;
     }
   }
-  i = 0;
+  NumInputs += i;
 
+  i = 0;
   for (auto iter : tpot_infile)
   {
     if (isGood(iter))
@@ -238,7 +243,14 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
     i++;
     }
   }
+  NumInputs += i;
 
+// if there is no input manager this macro will still run - so just quit here
+  if (NumInputs == 0)
+  {
+    std::cout << "no file lists no input manager registered, quitting" << std::endl;
+    gSystem->Exit(1);
+  }
   se->registerInputManager(in);
   // StreamingCheck *scheck = new StreamingCheck();
   // scheck->SetTpcBcoRange(130);
