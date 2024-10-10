@@ -222,7 +222,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
-  seeder->set_pp_mode(TRACKING::pp_mode);
+  seeder->set_pp_mode(true);
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
@@ -241,8 +241,15 @@ void Fun4All_FieldOnAllTrackersCalos(
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
   cprop->Verbosity(verbosity);
-  cprop->set_pp_mode(TRACKING::pp_mode);
+  cprop->set_pp_mode(true);
   se->registerSubsystem(cprop);
+
+  // Always apply preliminary distortion corrections to TPC clusters before silicon matching
+  // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
+  auto prelim_distcorr = new PrelimDistortionCorrection;
+  prelim_distcorr->set_pp_mode(true);
+  prelim_distcorr->Verbosity(0);
+  se->registerSubsystem(prelim_distcorr);
 
   /*
    * Track Matching between silicon and TPC
@@ -257,7 +264,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   silicon_match->set_phi_search_window(0.2);
   silicon_match->set_eta_search_window(0.1);
   silicon_match->set_use_old_matching(true);
-  silicon_match->set_pp_mode(true);
+  silicon_match->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(silicon_match);
 
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
