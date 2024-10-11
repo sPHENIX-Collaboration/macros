@@ -24,7 +24,7 @@ R__LOAD_LIBRARY(libffarawmodules.so)
 bool isGood(const string &infile);
 
 void Fun4All_Intt_Calib_Raw(
-    int num_evt,
+    int num_evt = 400000,
     int run_num,
     const std::string &hotmap_cdb_file = "hotmap.root",
     const std::string &hotmap_png_file = "hotmap.png",

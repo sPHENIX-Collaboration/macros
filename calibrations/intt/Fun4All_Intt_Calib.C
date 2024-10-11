@@ -23,7 +23,7 @@ R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
 
 void Fun4All_Intt_Calib(
-    int num_evt,
+    int num_evt = 400000,
     int run_num,
     const string &input_dst_list = "intt.list",
     const std::string &hotmap_cdb_file = "hotmap.root",
