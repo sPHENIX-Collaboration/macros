@@ -245,7 +245,7 @@ void Fun4All_FieldOnAllTrackers(
   prelim_distcorr->set_pp_mode(true);
   prelim_distcorr->Verbosity(0);
   se->registerSubsystem(prelim_distcorr);
-  
+
   /*
    * Track Matching between silicon and TPC
    */
@@ -264,10 +264,10 @@ void Fun4All_FieldOnAllTrackers(
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
   auto mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(0);
-  mm_match->set_rphi_search_window_lyr1(0.4);
-  mm_match->set_rphi_search_window_lyr2(13.0);
-  mm_match->set_z_search_window_lyr1(26.0);
-  mm_match->set_z_search_window_lyr2(0.4);
+  mm_match->set_rphi_search_window_lyr1(3.);
+  mm_match->set_rphi_search_window_lyr2(15.0);
+  mm_match->set_z_search_window_lyr1(30.0);
+  mm_match->set_z_search_window_lyr2(3.);
 
   mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
   mm_match->set_test_windows_printout(false);  // used for tuning search windows only
