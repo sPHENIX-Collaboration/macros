@@ -83,6 +83,8 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   {
     mvtx->SetSupportActive();
   }
+  std::cout << "PHG4MvtxSubsystem: Apply misalignment? Enable::MVTX_APPLYMISALIGNMENT=" << Enable::MVTX_APPLYMISALIGNMENT << std::endl;
+  mvtx->Apply_Misalignment(Enable::MVTX_APPLYMISALIGNMENT);
   mvtx->OverlapCheck(maps_overlapcheck);
   g4Reco->registerSubsystem(mvtx);
   radius += G4MVTX::radius_offset;
