@@ -4,6 +4,8 @@
 #include <GlobalVariables.C>
 #include <QA.C>
 
+#include <phparameter/PHParameterUtils.h>
+
 #include <g4detectors/PHG4CylinderCellReco.h>
 #include <g4detectors/PHG4CylinderGeom_Spacalv1.h>
 #include <g4detectors/PHG4CylinderSubsystem.h>
@@ -22,6 +24,7 @@
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawClusterPositionCorrection.h>
 #include <caloreco/RawTowerCalibration.h>
+
 #include <simqa_modules/QAG4SimulationCalorimeter.h>
 
 #include <fun4all/Fun4AllServer.h>
@@ -259,7 +262,7 @@ void CEMC_Towers()
   if (!Enable::CEMC_G4Hit) TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
   if (Enable::CDB)
   {
-    TowerDigitizer->GetParameters().ReadFromCDB("EMCTOWERCALIB");
+    PHParameterUtils::FillPHParametersFromCDB(TowerDigitizer->GetParameters(),"EMCTOWERCALIB");
   }
   else
   {
@@ -283,7 +286,7 @@ void CEMC_Towers()
     TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
     if (Enable::CDB)
     {
-      TowerCalibration->GetCalibrationParameters().ReadFromCDB("EMCTOWERCALIB");
+      PHParameterUtils::FillPHParametersFromCDB(TowerCalibration->GetCalibrationParameters(),"EMCTOWERCALIB");
     }
     else
     {
