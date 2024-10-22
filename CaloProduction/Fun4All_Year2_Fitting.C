@@ -32,7 +32,7 @@ void Fun4All_Year2_Fitting(int nEvents = 100,
                    const std::string &dbtag = "ProdA_2024")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0);
+  se->Verbosity(1);
 
   recoConsts *rc = recoConsts::instance();
 
@@ -42,7 +42,7 @@ void Fun4All_Year2_Fitting(int nEvents = 100,
   // conditions DB flags and timestamp
   rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
   rc->set_uint64Flag("TIMESTAMP", runnumber);
-  CDBInterface::instance()->Verbosity(0);
+  CDBInterface::instance()->Verbosity(1);
 
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
