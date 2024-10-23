@@ -22,7 +22,6 @@
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
-
 #include <phool/recoConsts.h>
 
 #include <cdbobjects/CDBTTree.h>
@@ -56,10 +55,11 @@ R__LOAD_LIBRARY(libtrackingqa.so)
 void Fun4All_Cosmics(
     const int nEvents = 0,
     const std::string filename = "DST_STREAMING_EVENT_cosmics_new_2024p001-00045673-0000.root",
-    const std::string outfilename = "cosmics",
-    const std::string dir = ".")
+    const std::string dir = ".",
+    const std::string outfilename = "cosmics")
 {
   std::string inputRawHitFile = dir + filename;
+  TRACKING::tpc_zero_supp = true;
 
   std::pair<int, int>
       runseg = Fun4AllUtils::GetRunSegment(inputRawHitFile);
@@ -73,12 +73,12 @@ void Fun4All_Cosmics(
 	   << std::endl;
 
   auto se = Fun4AllServer::instance();
-  se->Verbosity(2);
+  se->Verbosity(0);
   auto rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "2024p005");
+  rc->set_StringFlag("CDB_GLOBALTAG", "2024p007");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
@@ -102,8 +102,11 @@ void Fun4All_Cosmics(
   }
 
   // can use for zero field
+  //double fieldstrength = 0.01;
+  //G4MAGNET::magfield_tracking = "0.01";
   double fieldstrength = std::numeric_limits<double>::quiet_NaN();
   bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
+
   if(ConstField && fieldstrength < 0.1)
   {
     G4MAGNET::magfield = "0.01";
@@ -117,10 +120,14 @@ void Fun4All_Cosmics(
 
   Mvtx_HitUnpacking();
   Intt_HitUnpacking();
-
+  //Tpc_HitUnpacking();
   auto tpcunpacker = new TpcCombinedRawDataUnpacker;
   tpcunpacker->Verbosity(0);
   tpcunpacker->doBaselineCorr(true);
+  if(TRACKING::tpc_zero_supp)
+    {
+      tpcunpacker->ReadZeroSuppressedData();
+    }
   se->registerSubsystem(tpcunpacker);
 
   Micromegas_HitUnpacking();
@@ -133,6 +140,7 @@ void Fun4All_Cosmics(
   tpcclusterizer->set_rawdata_reco();
   se->registerSubsystem(tpcclusterizer);
 
+  Tpc_LaserEventIdentifying();
   Micromegas_Clustering();
 
   Tracking_Reco_TrackSeed();
@@ -150,6 +158,7 @@ void Fun4All_Cosmics(
   std::string residstring(residoutfile.Data());
 
   auto resid = new TrackResiduals("TrackResiduals");
+  resid->Verbosity(0);
   resid->outfileName(residstring);
   resid->alignment(false);
   resid->clusterTree();
@@ -167,6 +176,7 @@ void Fun4All_Cosmics(
   // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "/sphenix/tg/tg01/hf/jdosbo/tracking_development/onlineoffline/hitsets.root");
   // se->registerOutputManager(out);
 
+
   se->run(nEvents);
   se->End();
   se->PrintTimer();
@@ -183,7 +193,7 @@ void Fun4All_Cosmics(
   
   TString qaname = outfilename + filename + "_qa.root";
   std::string qaOutputFileName(qaname.Data());
-  QAHistManagerDef::saveQARootFile(qaOutputFileName);
+  //QAHistManagerDef::saveQARootFile(qaOutputFileName);
   delete se;
   std::cout << "Finished" << std::endl;
   gSystem->Exit(0);
