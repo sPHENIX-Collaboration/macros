@@ -11,6 +11,8 @@ namespace Enable
   bool MVTX = false;
   bool MVTX_OVERLAPCHECK = false;
 
+  bool MVTX_TRIGGERED = false; // triggered mode or not (default is streaming mode)
+
   bool MVTX_CELL = false;
   bool MVTX_CLUSTER = false;
   bool MVTX_QA = false;
