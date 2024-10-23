@@ -4,11 +4,11 @@
 #include <GlobalVariables.C>
 
 #include <G4_ActsGeom.C>
-#include "G4_TrkrVariables.C"
+#include <G4_TrkrVariables.C>
 
 #include <intt/InttCombinedRawDataDecoder.h>
 #include <micromegas/MicromegasCombinedDataDecoder.h>
-#include "mvtx/MvtxCombinedRawDataDecoder.h"
+#include <mvtx/MvtxCombinedRawDataDecoder.h>
 #include <tpc/TpcCombinedRawDataUnpacker.h>
 #include <tpc/LaserEventIdentifier.h>
 
