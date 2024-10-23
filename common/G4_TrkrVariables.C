@@ -17,6 +17,7 @@ namespace Enable
   bool MVTX_CLUSTER = false;
   bool MVTX_QA = false;
   bool MVTX_SUPPORT = false;
+  bool MVTX_APPLYMISALIGNMENT = false;
 
   int MVTX_VERBOSITY = 0;
 

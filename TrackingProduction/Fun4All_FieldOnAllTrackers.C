@@ -313,6 +313,7 @@ void Fun4All_FieldOnAllTrackers(
 
     auto cleaner = new PHTrackCleaner();
     cleaner->Verbosity(0);
+    cleaner->set_pp_mode(TRACKING::pp_mode);    
     se->registerSubsystem(cleaner);
 
     if (G4TRACKING::SC_CALIBMODE)

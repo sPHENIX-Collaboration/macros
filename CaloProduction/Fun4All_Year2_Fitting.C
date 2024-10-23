@@ -15,14 +15,16 @@
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllUtils.h>
 #include <fun4all/SubsysReco.h>
+#include <calotrigger/TriggerRunInfoReco.h>
 
 #include <phool/recoConsts.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
+R__LOAD_LIBRARY(libcalotrigger.so)
 // this pass containis the reco process that's stable wrt time stamps(raw tower building)
 void Fun4All_Year2_Fitting(int nEvents = 100,
-                   const std::string &fname = "DST_TRIGGERED_EVENT_run2pp_new_2024p003-00048185-0000.root",
+			   const std::string &fname = "DST_TRIGGERED_EVENT_run2pp_new_2024p003-00048185-0000.root",
                    const std::string &outfile = "DST_CALOFITTING-00000000-000000.root",
                    const std::string &dbtag = "ProdA_2024")
 {
@@ -41,6 +43,10 @@ void Fun4All_Year2_Fitting(int nEvents = 100,
 
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
+
+  // Get info from DB and store in DSTs
+  TriggerRunInfoReco *triggerinfo = new TriggerRunInfoReco();
+  se->registerSubsystem(triggerinfo);
 
   Process_Calo_Fitting();
 

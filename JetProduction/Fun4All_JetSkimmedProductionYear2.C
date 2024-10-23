@@ -54,7 +54,7 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
                    const std::string& outfile_low= "DST_CALO-00000000-000000.root",
                    const std::string& outfile_high= "DST_Jet-00000000-000000.root",
                    const std::string& outfile_hist= "HIST_CALOQA-00000000-000000.root",
-		           const std::string& outfile_tree= "TREE_CALOQA-00000000-000000.root",
+		               const std::string& outfile_tree= "TREE_CALOQA-00000000-000000.root",
                    const std::string& dbtag= "ProdA_2024"
   )
 {
@@ -98,11 +98,12 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   Process_Calo_Calib();
 
   ///////////////////////////////////
-  // Validation 
+  // Validation maybe no need to run for the skimmed production?
+  /*
   CaloValid *ca = new CaloValid("CaloValid");
   ca->set_timing_cut_width(200);
   se->registerSubsystem(ca);
-
+  */
 
   // Jet reco related flags
   Enable::QA = true;
@@ -151,29 +152,31 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   Fun4AllDstOutputManager *outlower = new Fun4AllDstOutputManager("DSTOUTLOW", outfile_low);
   outlower->AddNode("Sync");
   outlower->AddNode("EventHeader");
-  outlower->AddNode("TOWERINFO_CALIB_HCALIN");
+  //outlower->AddNode("TOWERINFO_CALIB_HCALIN");
   outlower->AddNode("TOWERS_HCALIN");
-  outlower->AddNode("TOWERINFO_CALIB_HCALOUT");
+  //outlower->AddNode("TOWERINFO_CALIB_HCALOUT");
   outlower->AddNode("TOWERS_HCALOUT");
-  outlower->AddNode("TOWERINFO_CALIB_CEMC");
+  //outlower->AddNode("TOWERINFO_CALIB_CEMC");
   outlower->AddNode("TOWERS_CEMC");
+  outlower->AddNode("TOWERS_SEPD");
+  //outlower->AddNode("TOWERINFO_CALIB_ZDC");
+  outlower->AddNode("TOWERS_ZDC");
 
   se->registerOutputManager(outlower);
 
   Fun4AllDstOutputManager *outhigher = new Fun4AllDstOutputManager("DSTOUTHIGH", outfile_high);
-  outhigher->StripNode("Sync");
-  outhigher->StripNode("EventHeader");
   outhigher->StripNode("TOWERINFO_CALIB_HCALIN");
   outhigher->StripNode("TOWERS_HCALIN");
   outhigher->StripNode("TOWERINFO_CALIB_HCALOUT");
   outhigher->StripNode("TOWERS_HCALOUT");
   outhigher->StripNode("TOWERINFO_CALIB_CEMC");
+  outhigher->StripNode("TOWERINFO_CALIB_CEMC_RETOWER");
   outhigher->StripNode("TOWERS_CEMC");
-  outhigher->StripNode("CEMCPackets");
-  outhigher->StripNode("HCALPackets");
-  outhigher->StripNode("ZDCPackets");
-  outhigher->StripNode("SEPDPackets");
+  outhigher->StripNode("TOWERS_SEPD");
+  outhigher->StripNode("TOWERINFO_CALIB_ZDC");
+  outhigher->StripNode("TOWERS_ZDC");
   outhigher->StripNode("MBDPackets");
+
 
   se->registerOutputManager(outhigher);
 

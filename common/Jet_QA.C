@@ -265,7 +265,8 @@ namespace JetQA
   inline std::vector<uint32_t> GetDefaultTriggerList()
   {
 
-    std::vector<uint32_t> vecDefaultTrigs = {
+    // default jets for pp
+    std::vector<uint32_t> vecDefaultTrigsPP = {
       JetQADefs::GL1::MBDNS1,
       JetQADefs::GL1::MBDNSJet1,
       JetQADefs::GL1::MBDNSJet2,
@@ -276,7 +277,24 @@ namespace JetQA
       JetQADefs::GL1::Jet3,
       JetQADefs::GL1::Jet4
     };
-    return vecDefaultTrigs;
+
+    // default jets for AuAu
+    //   - n.b. the thresholds were changed 10, 60, and
+    //     150 cm respectively during AuAu run
+    std::vector<uint32_t> vecDefaultTrigsAA = {
+      JetQADefs::GL1::MBDNSVtx10,  // actually 10 cm
+      JetQADefs::GL1::MBDNSVtx30,  // actually 60 cm
+      JetQADefs::GL1::MBDNSVtx60   // actually 150 cm 
+    };
+
+    if (HIJETS::is_pp)
+    {
+      return vecDefaultTrigsPP;
+    }
+    else
+    {
+      return vecDefaultTrigsAA;
+    }
 
   }  // end 'GetDefaultTriggerList()'
 
