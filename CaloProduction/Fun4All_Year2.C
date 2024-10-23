@@ -39,6 +39,7 @@
 
 #include <centrality/CentralityReco.h>
 #include <calotrigger/MinimumBiasClassifier.h>
+#include <calotrigger/TriggerRunInfoReco.h>
 
 #include <calovalid/CaloValid.h>
 #include <globalqa/GlobalQA.h>
@@ -82,6 +83,8 @@ void Fun4All_Year2(int nEvents=100,
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
 
+  TriggerRunInfoReco *triggerruninforeco = new TriggerRunInfoReco();
+  se->registerSubsystem(triggerruninforeco);
   // MBD/BBC Reconstruction
   MbdReco *mbdreco = new MbdReco();
   se->registerSubsystem(mbdreco);
