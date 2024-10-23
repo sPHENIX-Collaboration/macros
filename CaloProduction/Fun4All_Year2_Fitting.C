@@ -1,6 +1,7 @@
 #ifndef FUN4ALL_YEAR2_FITTING_C
 #define FUN4ALL_YEAR2_FITTING_C
 
+#include <QA.C>
 #include <Calo_Fitting.C>
 
 #include <ffamodules/CDBInterface.h>
@@ -19,13 +20,18 @@
 
 #include <phool/recoConsts.h>
 
+#include <calovalid/CaloFittingQA.h>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
+R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libcalotrigger.so)
+  
 // this pass containis the reco process that's stable wrt time stamps(raw tower building)
 void Fun4All_Year2_Fitting(int nEvents = 100,
 			   const std::string &fname = "DST_TRIGGERED_EVENT_run2pp_new_2024p003-00048185-0000.root",
                    const std::string &outfile = "DST_CALOFITTING-00000000-000000.root",
+                   const std::string& outfile_hist= "HIST_CALOFITTINGQA-00000000-000000.root",
                    const std::string &dbtag = "ProdA_2024")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -50,6 +56,12 @@ void Fun4All_Year2_Fitting(int nEvents = 100,
 
   Process_Calo_Fitting();
 
+  ///////////////////////////////////
+  // Validation 
+  CaloFittingQA *ca = new CaloFittingQA("CaloFittingQA");
+  ca->set_debug(false);
+  se->registerSubsystem(ca);
+
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
   In->AddFile(fname);
   se->registerInputManager(In);
@@ -63,6 +75,8 @@ void Fun4All_Year2_Fitting(int nEvents = 100,
 
   se->run(nEvents);
   se->End();
+
+  QAHistManagerDef::saveQARootFile(outfile_hist);
 
   CDBInterface::instance()->Print();  // print used DB files
   se->PrintTimer();
