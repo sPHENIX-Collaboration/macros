@@ -152,14 +152,14 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   Fun4AllDstOutputManager *outlower = new Fun4AllDstOutputManager("DSTOUTLOW", outfile_low);
   outlower->AddNode("Sync");
   outlower->AddNode("EventHeader");
-  outlower->AddNode("TOWERINFO_CALIB_HCALIN");
+  //outlower->AddNode("TOWERINFO_CALIB_HCALIN");
   outlower->AddNode("TOWERS_HCALIN");
-  outlower->AddNode("TOWERINFO_CALIB_HCALOUT");
+  //outlower->AddNode("TOWERINFO_CALIB_HCALOUT");
   outlower->AddNode("TOWERS_HCALOUT");
-  outlower->AddNode("TOWERINFO_CALIB_CEMC");
+  //outlower->AddNode("TOWERINFO_CALIB_CEMC");
   outlower->AddNode("TOWERS_CEMC");
   outlower->AddNode("TOWERS_SEPD");
-  outlower->AddNode("TOWERINFO_CALIB_ZDC");
+  //outlower->AddNode("TOWERINFO_CALIB_ZDC");
   outlower->AddNode("TOWERS_ZDC");
 
   se->registerOutputManager(outlower);
@@ -167,13 +167,10 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   Fun4AllDstOutputManager *outhigher = new Fun4AllDstOutputManager("DSTOUTHIGH", outfile_high);
   outhigher->StripNode("TOWERINFO_CALIB_HCALIN");
   outhigher->StripNode("TOWERS_HCALIN");
-  outhigher->StripNode("TOWERINFO_CALIB_HCALIN_SUB1");
   outhigher->StripNode("TOWERINFO_CALIB_HCALOUT");
   outhigher->StripNode("TOWERS_HCALOUT");
-  outhigher->StripNode("TOWERINFO_CALIB_HCALOUT_SUB1");
   outhigher->StripNode("TOWERINFO_CALIB_CEMC");
   outhigher->StripNode("TOWERINFO_CALIB_CEMC_RETOWER");
-  outhigher->StripNode("TOWERINFO_CALIB_CEMC_RETOWER_SUB1");  
   outhigher->StripNode("TOWERS_CEMC");
   outhigher->StripNode("TOWERS_SEPD");
   outhigher->StripNode("TOWERINFO_CALIB_ZDC");
