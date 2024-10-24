@@ -26,6 +26,7 @@
 #include <trackreco/TrackingIterationCounter.h>
 
 #include <tpc/TpcLoadDistortionCorrection.h>
+#include <tpc/LaserEventRejecter.h>
 
 #include <tpccalib/PHTpcResiduals.h>
 #include <tpccalib/TpcSpaceChargeReconstruction.h>
@@ -528,7 +529,7 @@ void Tracking_Reco_TrackFit()
        * in calibration mode, calculate residuals between TPC and fitted tracks,
        * store in dedicated structure for distortion correction
        */
-      auto residuals = new PHTpcResiduals;
+      auto residuals = new PHTpcResiduals();
       residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
       residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
       // reconstructed distortion grid size (phi, r, z)
@@ -861,6 +862,18 @@ void Filter_Conversion_Electrons(std::string ntuple_outfile)
   secvert->setDecayParticleMass(0.000511);  // for electrons
   secvert->setOutfileName(ntuple_outfile);
   se->registerSubsystem(secvert);
+}
+
+void Reject_Laser_Events()
+{
+  if (G4TPC::REJECT_LASER_EVENTS)
+  {
+    auto se = Fun4AllServer::instance();
+    int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+
+    LaserEventRejecter *rejecter = new LaserEventRejecter();
+    se->registerSubsystem(rejecter);
+  }
 }
 
 #endif
