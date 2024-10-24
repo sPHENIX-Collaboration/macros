@@ -34,7 +34,12 @@ R__LOAD_LIBRARY(libcentrality.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libLiteCaloEvalTowSlope.so)
 
-void Fun4All_HCalCosmics(int nEvents = 5e2, const std::string &fname = "dst_triggered_raw_cosmics-00040174.list") 
+void Fun4All_HCalCosmics(int nEvents = 100, 
+                   const std::string &fname = "DST_TRIGGERED_EVENT_run2pp_new_2024p003-00048185-0000.root",
+                   const std::string &outfile = "DST_CALOFITTING-00000000-000000.root",
+                   const std::string& outfile_hist1= "HIST_HCALOUT-00000000-000000.root",
+                   const std::string& outfile_hist2= "HIST_HCALIN-00000000-000000.root",                   
+                   const std::string &dbtag = "ProdA_2024")
 {
   bool useDSTRAW = true;
   // v1 uncomment:
@@ -49,44 +54,16 @@ void Fun4All_HCalCosmics(int nEvents = 5e2, const std::string &fname = "dst_trig
 
   recoConsts *rc = recoConsts::instance();
 
-  ifstream file(fname);
-  std::string first_file;
-  getline(file, first_file);
-  
-
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(first_file);
+  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
   int runnumber = runseg.first;
-  int segment = runseg.second;
-  char outfile[100];
-  char outfile_hist1[100];
-  char outfile_hist2[100];
-  sprintf(outfile, "DST_CALOR-%08d-%04d.root", runnumber, segment);
-  sprintf(outfile_hist1, "HIST_HCALOUT-%08d-%04d.root", runnumber, segment);
-  sprintf(outfile_hist2, "HIST_HCALIN-%08d-%04d.root", runnumber, segment);
-  std::string fulloutfile = std::string("./") + outfile;
-  std::string fulloutfile_hist1 = std::string("./") + outfile_hist1;
-  std::string fulloutfile_hist2 = std::string("./") + outfile_hist2;
 
-  //===============
-  // conditions DB flags
-  //===============
-  // ENABLE::CDB = true;
-  // global tag
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
-  // // 64 bit timestamp
+  // conditions DB flags and timestamp
+  rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   CDBInterface::instance()->Verbosity(1);
 
-  // Sync Headers and Flags
-  SyncReco *sync = new SyncReco();
-  se->registerSubsystem(sync);
-
-  HeadReco *head = new HeadReco();
-  se->registerSubsystem(head);
-
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
-
 
   /////////////////
   // build towers
@@ -94,7 +71,7 @@ void Fun4All_HCalCosmics(int nEvents = 5e2, const std::string &fname = "dst_trig
   ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbIHCal->set_builder_type(buildertype);
-  //ctbIHCal->set_nsamples(31);
+  ctbIHCal->set_nsamples(12);
   if (useDSTRAW) ctbIHCal->set_offlineflag();
   ctbIHCal->set_softwarezerosuppression(true, 200);
   se->registerSubsystem(ctbIHCal);
@@ -103,10 +80,20 @@ void Fun4All_HCalCosmics(int nEvents = 5e2, const std::string &fname = "dst_trig
   ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
   ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbOHCal->set_builder_type(buildertype);
-  //ctbOHCal->set_nsamples(31);
+  ctbOHCal->set_nsamples(12);
   if (useDSTRAW) ctbOHCal->set_offlineflag();
   ctbOHCal->set_softwarezerosuppression(true, 200);
   se->registerSubsystem(ctbOHCal);
+
+  CaloTowerStatus *statusHCalIn = new CaloTowerStatus("HCALINSTATUS");
+  statusHCalIn->set_detector_type(CaloTowerDefs::HCALIN);
+  statusHCalIn->set_time_cut(10);
+  se->registerSubsystem(statusHCalIn);
+
+  CaloTowerStatus *statusHCALOUT = new CaloTowerStatus("HCALOUTSTATUS");
+  statusHCALOUT->set_detector_type(CaloTowerDefs::HCALOUT);
+  statusHCALOUT->set_time_cut(10);
+  se->registerSubsystem(statusHCALOUT);
 
   ////////////////////
   // Calibrate towers
@@ -128,11 +115,11 @@ void Fun4All_HCalCosmics(int nEvents = 5e2, const std::string &fname = "dst_trig
 
   ///////////////////////////////////////////
   // Cosmics histMaker 
-  HCalCosmics *wt2 = new HCalCosmics("HCalCalib_HCALIN",fulloutfile_hist2);
+  HCalCosmics *wt2 = new HCalCosmics("HCalCalib_HCALIN",outfile_hist2);
   wt2->Detector("HCALIN");
   se->registerSubsystem(wt2);
 
-  HCalCosmics *wt3 = new HCalCosmics("HCalCosmics_HCALOUT",fulloutfile_hist1);
+  HCalCosmics *wt3 = new HCalCosmics("HCalCosmics_HCALOUT",outfile_hist1);
   wt3->Detector("HCALOUT");
   se->registerSubsystem(wt3);
 
@@ -149,10 +136,10 @@ void Fun4All_HCalCosmics(int nEvents = 5e2, const std::string &fname = "dst_trig
   Fun4AllInputManager *In;
   if(!useDSTRAW) In = new Fun4AllPrdfInputManager("in");
   if(useDSTRAW)  In = new Fun4AllDstInputManager("in");
-  In->AddListFile(fname);
+  In->AddFile(fname);
   se->registerInputManager(In);
 
-  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", fulloutfile);
+  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfile);
   out->StripNode("CEMCPackets");
   out->StripNode("HCALPackets");
   out->StripNode("ZDCPackets");
