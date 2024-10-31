@@ -20,10 +20,19 @@
 #include <g4main/PHG4Reco.h>
 #include <g4main/PHG4Utils.h>
 
+#include <calowaveformsim/CaloWaveformSim.h>
+
+#include <calobase/TowerInfoDefs.h>
+
 #include <caloreco/RawClusterBuilderGraph.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawClusterPositionCorrection.h>
 #include <caloreco/RawTowerCalibration.h>
+#include <caloreco/CaloTowerBuilder.h>
+#include <caloreco/CaloTowerCalib.h>
+#include <caloreco/CaloWaveformProcessing.h>
+#include <caloreco/CaloTowerStatus.h>
+
 
 #include <simqa_modules/QAG4SimulationCalorimeter.h>
 
@@ -34,6 +43,7 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings);
 
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
+R__LOAD_LIBRARY(libCaloWaveformSim.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libsimqa_modules.so)
@@ -49,6 +59,7 @@ namespace Enable
   bool CEMC_EVAL = false;
   bool CEMC_QA = false;
   bool CEMC_G4Hit = true;
+  bool CEMC_TOWERINFO = false;
   int CEMC_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -241,65 +252,101 @@ void CEMC_Towers()
     TowerBuilder->Verbosity(verbosity);
     se->registerSubsystem(TowerBuilder);
   }
-  double sampling_fraction = 1;
-  //      sampling_fraction = 0.02244; //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.3/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
-  //    sampling_fraction = 2.36081e-02;  //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
-  //    sampling_fraction = 1.90951e-02; // 2017 Tilt porjective SPACAL, 8 GeV photon, eta = 0.3 - 0.4
-  sampling_fraction = 2e-02;                 // 2017 Tilt porjective SPACAL, tower-by-tower calibration
-  const double photoelectron_per_GeV = 500;  // 500 photon per total GeV deposition
+  if (!Enable::CEMC_TOWERINFO)
+  {
+    double sampling_fraction = 1;
+    //      sampling_fraction = 0.02244; //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.3/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
+    //    sampling_fraction = 2.36081e-02;  //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
+    //    sampling_fraction = 1.90951e-02; // 2017 Tilt porjective SPACAL, 8 GeV photon, eta = 0.3 - 0.4
+    sampling_fraction = 2e-02;                 // 2017 Tilt porjective SPACAL, tower-by-tower calibration
+    const double photoelectron_per_GeV = 500;  // 500 photon per total GeV deposition
 
-  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
-  TowerDigitizer->Detector("CEMC");
-  TowerDigitizer->Verbosity(verbosity);
-  TowerDigitizer->set_digi_algorithm(G4CEMC::TowerDigi);
-  TowerDigitizer->set_variable_pedestal(true);  // read ped central and width from calibrations file comment next 2 lines if true
-                                                //   TowerDigitizer->set_pedstal_central_ADC(0);
-                                                //   TowerDigitizer->set_pedstal_width_ADC(8);  // eRD1 test beam setting
-  TowerDigitizer->set_photonelec_ADC(1);                // not simulating ADC discretization error
-  TowerDigitizer->set_photonelec_yield_visible_GeV(photoelectron_per_GeV / sampling_fraction);
-  TowerDigitizer->set_variable_zero_suppression(true);  // read zs values from calibrations file comment next line if true
-                                                        //   TowerDigitizer->set_zero_suppression_ADC(16);  // eRD1 test beam setting
-  if (!Enable::CEMC_G4Hit) TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
-  if (Enable::CDB)
-  {
-    PHParameterUtils::FillPHParametersFromCDB(TowerDigitizer->GetParameters(),"EMCTOWERCALIB");
-  }
-  else
-  {
-    TowerDigitizer->GetParameters().ReadFromFile("CEMC", "xml", 0, 0,
-                                                 string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
-  }
-  se->registerSubsystem(TowerDigitizer);
-
-  RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
-  TowerCalibration->Detector("CEMC");
-  TowerCalibration->set_usetowerinfo_v2(G4CEMC::useTowerInfoV2);
-  TowerCalibration->Verbosity(verbosity);
-  if (!Enable::CEMC_G4Hit) TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
-  if (G4CEMC::TowerDigi == RawTowerDigitizer::kNo_digitization)
-  {
-    // just use sampling fraction set previously
-    TowerCalibration->set_calib_const_GeV_ADC(1.0 / sampling_fraction);
-  }
-  else
-  {
-    TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
+    RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
+    TowerDigitizer->Detector("CEMC");
+    TowerDigitizer->Verbosity(verbosity);
+    TowerDigitizer->set_digi_algorithm(G4CEMC::TowerDigi);
+    TowerDigitizer->set_variable_pedestal(true);  // read ped central and width from calibrations file comment next 2 lines if true
+                                                  //   TowerDigitizer->set_pedstal_central_ADC(0);
+                                                  //   TowerDigitizer->set_pedstal_width_ADC(8);  // eRD1 test beam setting
+    TowerDigitizer->set_photonelec_ADC(1);        // not simulating ADC discretization error
+    TowerDigitizer->set_photonelec_yield_visible_GeV(photoelectron_per_GeV / sampling_fraction);
+    TowerDigitizer->set_variable_zero_suppression(true);                                                          // read zs values from calibrations file comment next line if true
+                                                                                                                  //   TowerDigitizer->set_zero_suppression_ADC(16);  // eRD1 test beam setting
+    if (!Enable::CEMC_G4Hit) TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
     if (Enable::CDB)
     {
-      PHParameterUtils::FillPHParametersFromCDB(TowerCalibration->GetCalibrationParameters(),"EMCTOWERCALIB");
+      PHParameterUtils::FillPHParametersFromCDB(TowerDigitizer->GetParameters(), "EMCTOWERCALIB");
     }
     else
     {
-      TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
-                                                                string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
+      TowerDigitizer->GetParameters().ReadFromFile("CEMC", "xml", 0, 0,
+                                                   string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
     }
-    TowerCalibration->set_variable_GeV_ADC(true);                                                                                                     // read GeV per ADC from calibrations file comment next line if true
-    //    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);                                                             // overall energy scale based on 4-GeV photon simulations
-    TowerCalibration->set_variable_pedestal(true);  // read pedestals from calibrations file comment next line if true
-    //    TowerCalibration->set_pedstal_ADC(0);
-  }
-  se->registerSubsystem(TowerCalibration);
+    se->registerSubsystem(TowerDigitizer);
 
+    RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
+    TowerCalibration->Detector("CEMC");
+    TowerCalibration->set_usetowerinfo_v2(G4CEMC::useTowerInfoV2);
+    TowerCalibration->Verbosity(verbosity);
+    if (!Enable::CEMC_G4Hit) TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    if (G4CEMC::TowerDigi == RawTowerDigitizer::kNo_digitization)
+    {
+      // just use sampling fraction set previously
+      TowerCalibration->set_calib_const_GeV_ADC(1.0 / sampling_fraction);
+    }
+    else
+    {
+      TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
+      if (Enable::CDB)
+      {
+        PHParameterUtils::FillPHParametersFromCDB(TowerCalibration->GetCalibrationParameters(), "EMCTOWERCALIB");
+      }
+      else
+      {
+        TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
+                                                                  string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
+      }
+      TowerCalibration->set_variable_GeV_ADC(true);  // read GeV per ADC from calibrations file comment next line if true
+      //    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);                                                             // overall energy scale based on 4-GeV photon simulations
+      TowerCalibration->set_variable_pedestal(true);  // read pedestals from calibrations file comment next line if true
+      //    TowerCalibration->set_pedstal_ADC(0);
+    }
+    se->registerSubsystem(TowerCalibration);
+  }
+  else
+  {
+    CaloWaveformSim *caloWaveformSim = new CaloWaveformSim();
+    caloWaveformSim->set_detector_type(CaloTowerDefs::CEMC);
+    caloWaveformSim->set_detector("CEMC");
+    caloWaveformSim->set_nsamples(12);
+    caloWaveformSim->set_pedestalsamples(12);
+    caloWaveformSim->set_timewidth(0.2);
+    caloWaveformSim->set_peakpos(6);
+    // caloWaveformSim->Verbosity(2);
+    // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+    caloWaveformSim->set_calibName("cemc_pi0_twrSlope_v1_default");
+    se->registerSubsystem(caloWaveformSim);
+
+    CaloTowerBuilder *ca2 = new CaloTowerBuilder();
+    ca2->set_detector_type(CaloTowerDefs::CEMC);
+    ca2->set_nsamples(12);
+    ca2->set_dataflag(false);
+    ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+    ca2->set_builder_type(CaloTowerDefs::kWaveformTowerv2);
+    // match our current ZS threshold ~14ADC for emcal
+    ca2->set_softwarezerosuppression(true, 14);
+    se->registerSubsystem(ca2);
+
+    CaloTowerStatus *statusEMC = new CaloTowerStatus("CEMCSTATUS");
+    statusEMC->set_detector_type(CaloTowerDefs::CEMC);
+    statusEMC->set_time_cut(1);
+    se->registerSubsystem(statusEMC);
+
+    CaloTowerCalib *calibEMC = new CaloTowerCalib("CEMCCALIB");
+    calibEMC->set_detector_type(CaloTowerDefs::CEMC);
+    calibEMC->set_outputNodePrefix("TOWERINFO_CALIB_");
+    se->registerSubsystem(calibEMC);
+  }
   return;
 }
 
@@ -336,7 +383,7 @@ void CEMC_Clusters()
   }
 
   RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
-  if (!Enable::CEMC_G4Hit) clusterCorrection->set_UseTowerInfo(1);  // just use towerinfo
+  if (!Enable::CEMC_G4Hit || Enable::CEMC_TOWERINFO) clusterCorrection->set_UseTowerInfo(1);  // just use towerinfo
   //    clusterCorrection->set_UseTowerInfo(1); // to use towerinfo objects rather than old RawTower
 
 //  if (Enable::CDB)
@@ -367,6 +414,7 @@ void CEMC_Eval(const std::string &outputfile)
 
   CaloEvaluator *eval = new CaloEvaluator("CEMCEVALUATOR", "CEMC", outputfile);
   eval->Verbosity(verbosity);
+  eval->set_use_towerinfo(Enable::CEMC_TOWERINFO);
   se->registerSubsystem(eval);
 
   return;
@@ -379,6 +427,7 @@ void CEMC_QA()
   Fun4AllServer *se = Fun4AllServer::instance();
   QAG4SimulationCalorimeter *qa = new QAG4SimulationCalorimeter("CEMC");
   qa->Verbosity(verbosity);
+  if(Enable::CEMC_TOWERINFO) qa->set_flags(QAG4SimulationCalorimeter::kProcessTowerinfo);
   se->registerSubsystem(qa);
 
   return;

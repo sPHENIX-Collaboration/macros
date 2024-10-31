@@ -18,9 +18,17 @@
 
 #include <g4main/PHG4Reco.h>
 
+#include <calowaveformsim/CaloWaveformSim.h>
+
+#include <calobase/TowerInfoDefs.h>
+
 #include <caloreco/RawClusterBuilderGraph.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
+#include <caloreco/CaloTowerBuilder.h>
+#include <caloreco/CaloTowerCalib.h>
+#include <caloreco/CaloWaveformProcessing.h>
+#include <caloreco/CaloTowerStatus.h>
 
 #include <simqa_modules/QAG4SimulationCalorimeter.h>
 
@@ -28,6 +36,7 @@
 
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
+R__LOAD_LIBRARY(libCaloWaveformSim.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4ihcal.so)
@@ -46,6 +55,7 @@ namespace Enable
   bool HCALIN_SUPPORT = false;
   bool HCALIN_OLD = false;
   bool HCALIN_G4Hit = true;
+  bool HCALIN_TOWERINFO = false;
   int HCALIN_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -280,45 +290,79 @@ void HCALInner_Towers()
     TowerBuilder->Verbosity(verbosity);
     se->registerSubsystem(TowerBuilder);
   }
-  // From 2016 Test beam sim
-  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalInRawTowerDigitizer");
-  TowerDigitizer->Detector("HCALIN");
-  //  TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
-  TowerDigitizer->set_digi_algorithm(G4HCALIN::TowerDigi);
-  TowerDigitizer->set_pedstal_central_ADC(0);
-  TowerDigitizer->set_pedstal_width_ADC(1);  // From Jin's guess. No EMCal High Gain data yet! TODO: update
-  TowerDigitizer->set_photonelec_ADC(32. / 5.);
-  TowerDigitizer->set_photonelec_yield_visible_GeV(32. / 5 / (0.4e-3));
-  TowerDigitizer->set_zero_suppression_ADC(-0);                 // no-zero suppression
-  TowerDigitizer->Verbosity(verbosity);
-  if (!Enable::HCALIN_G4Hit) TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
-  se->registerSubsystem(TowerDigitizer);
-
-  // Default sampling fraction for SS310
-  double visible_sample_fraction_HCALIN = 0.0631283;                                //, /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV-0000.root_qa.rootQA_Draw_HCALIN_G4Hit.pdf
-
-  if (G4HCALIN::inner_hcal_material_Al) visible_sample_fraction_HCALIN = 0.162166;  // for "G4_Al", Abhisek Sen <sen.abhisek@gmail.com>
-
-  RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalInRawTowerCalibration");
-  TowerCalibration->Detector("HCALIN");
-  TowerCalibration -> set_usetowerinfo_v2(G4HCALIN::useTowerInfoV2);
-  //  TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
-  //  TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
-  TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  if (G4HCALIN::TowerDigi == RawTowerDigitizer::kNo_digitization)
+  if (!Enable::HCALIN_TOWERINFO)
   {
-    // 0.176 extracted from electron sims (edep(scintillator)/edep(total))
-    TowerCalibration->set_calib_const_GeV_ADC(1. / 0.176);
+    // From 2016 Test beam sim
+    RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalInRawTowerDigitizer");
+    TowerDigitizer->Detector("HCALIN");
+    //  TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
+    TowerDigitizer->set_digi_algorithm(G4HCALIN::TowerDigi);
+    TowerDigitizer->set_pedstal_central_ADC(0);
+    TowerDigitizer->set_pedstal_width_ADC(1);  // From Jin's guess. No EMCal High Gain data yet! TODO: update
+    TowerDigitizer->set_photonelec_ADC(32. / 5.);
+    TowerDigitizer->set_photonelec_yield_visible_GeV(32. / 5 / (0.4e-3));
+    TowerDigitizer->set_zero_suppression_ADC(-0);  // no-zero suppression
+    TowerDigitizer->Verbosity(verbosity);
+    if (!Enable::HCALIN_G4Hit) TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    se->registerSubsystem(TowerDigitizer);
+
+    // Default sampling fraction for SS310
+    double visible_sample_fraction_HCALIN = 0.0631283;  //, /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV-0000.root_qa.rootQA_Draw_HCALIN_G4Hit.pdf
+
+    if (G4HCALIN::inner_hcal_material_Al) visible_sample_fraction_HCALIN = 0.162166;  // for "G4_Al", Abhisek Sen <sen.abhisek@gmail.com>
+
+    RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalInRawTowerCalibration");
+    TowerCalibration->Detector("HCALIN");
+    TowerCalibration->set_usetowerinfo_v2(G4HCALIN::useTowerInfoV2);
+    //  TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
+    //  TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
+    TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+    if (G4HCALIN::TowerDigi == RawTowerDigitizer::kNo_digitization)
+    {
+      // 0.176 extracted from electron sims (edep(scintillator)/edep(total))
+      TowerCalibration->set_calib_const_GeV_ADC(1. / 0.176);
+    }
+    else
+    {
+      TowerCalibration->set_calib_const_GeV_ADC(0.4e-3 / visible_sample_fraction_HCALIN);
+    }
+    TowerCalibration->set_pedstal_ADC(0);
+    TowerCalibration->Verbosity(verbosity);
+    if (!Enable::HCALIN_G4Hit) TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    se->registerSubsystem(TowerCalibration);
   }
   else
   {
-    TowerCalibration->set_calib_const_GeV_ADC(0.4e-3 / visible_sample_fraction_HCALIN);
-  }
-  TowerCalibration->set_pedstal_ADC(0);
-  TowerCalibration->Verbosity(verbosity);
-  if (!Enable::HCALIN_G4Hit) TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
-  se->registerSubsystem(TowerCalibration);
+    CaloWaveformSim *caloWaveformSim = new CaloWaveformSim();
+    caloWaveformSim->set_detector_type(CaloTowerDefs::HCALIN);
+    caloWaveformSim->set_detector("HCALIN");
+    caloWaveformSim->set_nsamples(12);
+    caloWaveformSim->set_pedestalsamples(12);
+    caloWaveformSim->set_timewidth(0.2);
+    caloWaveformSim->set_peakpos(6);
+    // caloWaveformSim->Verbosity(2);
+    // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+    se->registerSubsystem(caloWaveformSim);
 
+    CaloTowerBuilder *ca2 = new CaloTowerBuilder();
+    ca2->set_detector_type(CaloTowerDefs::HCALIN);
+    ca2->set_nsamples(12);
+    ca2->set_dataflag(false);
+    ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+    ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
+    ca2->set_softwarezerosuppression(true, 30);
+    se->registerSubsystem(ca2);
+
+    CaloTowerStatus *statusHCALIN = new CaloTowerStatus("HCALINSTATUS");
+    statusHCALIN->set_detector_type(CaloTowerDefs::HCALIN);
+    statusHCALIN->set_time_cut(2);
+    se->registerSubsystem(statusHCALIN);
+
+    CaloTowerCalib *calibIHCal = new CaloTowerCalib("HCALINCALIB");
+    calibIHCal->set_detector_type(CaloTowerDefs::HCALIN);
+    calibIHCal->set_outputNodePrefix("TOWERINFO_CALIB_");
+    se->registerSubsystem(calibIHCal);
+  }
   return;
 }
 
@@ -334,7 +378,7 @@ void HCALInner_Clusters()
     ClusterBuilder->Detector("HCALIN");
     ClusterBuilder->SetCylindricalGeometry();                     // has to be called after Detector()
     ClusterBuilder->Verbosity(verbosity);
-    if (!Enable::HCALIN_G4Hit) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
+    if (!Enable::HCALIN_G4Hit||Enable::HCALIN_TOWERINFO) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
     se->registerSubsystem(ClusterBuilder);
   }
   else if (G4HCALIN::HCalIn_clusterizer == G4HCALIN::kHCalInGraphClusterizer)
@@ -361,6 +405,7 @@ void HCALInner_Eval(const std::string &outputfile, int start_event = 0)
   CaloEvaluator *eval = new CaloEvaluator("HCALINEVALUATOR", "HCALIN", outputfile);
   eval->set_event(start_event);
   eval->Verbosity(verbosity);
+  eval->set_use_towerinfo(Enable::HCALIN_TOWERINFO);
   se->registerSubsystem(eval);
 
   return;
@@ -372,6 +417,7 @@ void HCALInner_QA()
 
   Fun4AllServer *se = Fun4AllServer::instance();
   QAG4SimulationCalorimeter *qa = new QAG4SimulationCalorimeter("HCALIN");
+  if(Enable::HCALIN_TOWERINFO) qa->set_flags(QAG4SimulationCalorimeter::kProcessTowerinfo);
   qa->Verbosity(verbosity);
   se->registerSubsystem(qa);
 
