@@ -16,9 +16,18 @@
 
 #include <g4main/PHG4Reco.h>
 
+#include <calowaveformsim/CaloWaveformSim.h>
+
+#include <calobase/TowerInfoDefs.h>
+
 #include <caloreco/RawClusterBuilderGraph.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
+#include <caloreco/CaloTowerBuilder.h>
+#include <caloreco/CaloTowerCalib.h>
+#include <caloreco/CaloWaveformProcessing.h>
+#include <caloreco/CaloTowerStatus.h>
+
 
 #include <simqa_modules/QAG4SimulationCalorimeter.h>
 
@@ -26,6 +35,7 @@
 
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
+R__LOAD_LIBRARY(libCaloWaveformSim.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4ohcal.so)
@@ -44,6 +54,7 @@ namespace Enable
   bool HCALOUT_OLD = false;
   bool HCALOUT_RING = false;
   bool HCALOUT_G4Hit = true;
+  bool HCALOUT_TOWERINFO = false;
   int HCALOUT_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -280,6 +291,7 @@ void HCALOuter_Towers()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
+  //build the raw tower anyways for the geom nodes
   if (Enable::HCALOUT_G4Hit)
   {
     HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalOutRawTowerBuilder");
@@ -315,6 +327,7 @@ void HCALOuter_Towers()
     TowerBuilder->Verbosity(verbosity);
     se->registerSubsystem(TowerBuilder);
   }
+  if(!Enable::HCALOUT_TOWERINFO){
   // From 2016 Test beam sim
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalOutRawTowerDigitizer");
   TowerDigitizer->Detector("HCALOUT");
@@ -351,6 +364,42 @@ void HCALOuter_Towers()
   TowerCalibration->Verbosity(verbosity);
   if (!Enable::HCALOUT_G4Hit) TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
   se->registerSubsystem(TowerCalibration);
+  }
+  //where I use waveformsim
+  else
+  {
+    CaloWaveformSim *caloWaveformSim = new CaloWaveformSim();
+    caloWaveformSim->set_detector_type(CaloTowerDefs::HCALOUT);
+    caloWaveformSim->set_detector("HCALOUT");
+    caloWaveformSim->set_nsamples(12);
+    caloWaveformSim->set_pedestalsamples(12);
+    caloWaveformSim->set_timewidth(0.2);
+    caloWaveformSim->set_peakpos(6);
+    // caloWaveformSim->Verbosity(2);
+    // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+    se->registerSubsystem(caloWaveformSim);
+
+    CaloTowerBuilder *ca2 = new CaloTowerBuilder();
+    ca2->set_detector_type(CaloTowerDefs::HCALOUT);
+    ca2->set_nsamples(12);
+    ca2->set_dataflag(false);
+    ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+    ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
+    ca2->set_softwarezerosuppression(true, 30);
+    se->registerSubsystem(ca2);
+
+    CaloTowerStatus *statusHCALOUT = new CaloTowerStatus("HCALOUTSTATUS");
+    statusHCALOUT->set_detector_type(CaloTowerDefs::HCALOUT);
+    statusHCALOUT->set_time_cut(2);
+    se->registerSubsystem(statusHCALOUT);
+
+    CaloTowerCalib *calibOHCal = new CaloTowerCalib("HCALOUTCALIB");
+    calibOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
+    calibOHCal->set_outputNodePrefix("TOWERINFO_CALIB_");
+    se->registerSubsystem(calibOHCal);
+    
+
+  }
 
   return;
 }
@@ -367,7 +416,7 @@ void HCALOuter_Clusters()
     ClusterBuilder->Detector("HCALOUT");
     ClusterBuilder->SetCylindricalGeometry();                      // has to be called after Detector()
     ClusterBuilder->Verbosity(verbosity);
-    if (!Enable::HCALOUT_G4Hit) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
+    if (!Enable::HCALOUT_G4Hit || Enable::HCALOUT_TOWERINFO) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
     se->registerSubsystem(ClusterBuilder);
   }
   else if (G4HCALOUT::HCalOut_clusterizer == G4HCALOUT::kHCalOutGraphClusterizer)
@@ -396,6 +445,7 @@ void HCALOuter_Eval(const std::string &outputfile, int start_event = 0)
   CaloEvaluator *eval = new CaloEvaluator("HCALOUTEVALUATOR", "HCALOUT", outputfile);
   eval->set_event(start_event);
   eval->Verbosity(verbosity);
+  eval->set_use_towerinfo(Enable::HCALOUT_TOWERINFO);
   se->registerSubsystem(eval);
 
   return;
@@ -407,6 +457,7 @@ void HCALOuter_QA()
 
   Fun4AllServer *se = Fun4AllServer::instance();
   QAG4SimulationCalorimeter *qa = new QAG4SimulationCalorimeter("HCALOUT");
+  if(Enable::HCALOUT_TOWERINFO) qa->set_flags(QAG4SimulationCalorimeter::kProcessTowerinfo);
   qa->Verbosity(verbosity);
   se->registerSubsystem(qa);
 
