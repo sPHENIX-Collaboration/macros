@@ -18,7 +18,7 @@ namespace Enable
   bool PLUGDOOR_OVERLAPCHECK = false;
   bool PLUGDOOR_BLACKHOLE = false;
 
-  bool BEAMPIPE_ABSORBER = true;
+  bool BEAMPIPE_ABSORBER = false;
   bool BEAMPIPE_ABSORBER_ACTIVE = false;
   bool BEAMPIPE_ABSORBER_OVERLAPCHECK = false;
   bool BEAMPIPE_ABSORBER_BLACKHOLE = false;
