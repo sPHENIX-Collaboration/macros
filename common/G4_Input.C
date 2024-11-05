@@ -105,13 +105,14 @@ namespace Input
     {
     case AA_COLLISION:
       // heavy ion mode
-
-      // 1.5mRad is split among both beams, means set to 0.75 mRad
+      Input::beam_crossing = 1.; // +1 mRad for late 2024 with triggered readout for mvtx
+      localbcross = Input::beam_crossing/2.*1e-3;
+      //  Xing angle is split among both beams, means set to 0.5 mRad
       HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  //1.5mrad x-ing of sPHENIX
       HepMCGen->set_vertex_distribution_width(
 	100e-4,         // approximation from past STAR/Run16 AuAu data
 	100e-4,         // approximation from past STAR/Run16 AuAu data
-	7,              // sPH-TRG-2022-001. Fig B.2
+	13.5,              // measured 2024 with 1mRad beam Xing
 	20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
