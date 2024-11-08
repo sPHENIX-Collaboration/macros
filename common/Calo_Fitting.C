@@ -31,6 +31,8 @@ void Process_Calo_Fitting()
   ctbEMCal->set_offlineflag(true);
   ctbEMCal->set_nsamples(12);
   ctbEMCal->set_bitFlipRecovery(true);
+  //60 ADC SZS
+  ctbEMCal->set_softwarezerosuppression(true, 60);
   se->registerSubsystem(ctbEMCal);
 
   CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
@@ -40,6 +42,8 @@ void Process_Calo_Fitting()
   ctbIHCal->set_offlineflag();
   ctbIHCal->set_nsamples(12);
   ctbIHCal->set_bitFlipRecovery(true);
+  //30 ADC SZS
+  ctbIHCal->set_softwarezerosuppression(true, 30);
   se->registerSubsystem(ctbIHCal);
 
   CaloTowerBuilder *ctbOHCal = new CaloTowerBuilder("HCALOUTBUILDER");
@@ -49,6 +53,8 @@ void Process_Calo_Fitting()
   ctbOHCal->set_offlineflag();
   ctbOHCal->set_nsamples(12);
   ctbOHCal->set_bitFlipRecovery(true);
+  //30 ADC SZS
+  ctbOHCal->set_softwarezerosuppression(true, 30);
   se->registerSubsystem(ctbOHCal);
 
   CaloTowerBuilder *caEPD = new CaloTowerBuilder("SEPDBUILDER");
