@@ -6,6 +6,7 @@
 #include <jetbase/FastJetAlgo.h>
 #include <jetbase/JetReco.h>
 #include <jetbase/TowerJetInput.h>
+#include <jetbase/TrackJetInput.h>
 #include <g4jets/TruthJetInput.h>
 
 #include <jetbackground/CopyAndSubtractJets.h>
@@ -44,7 +45,7 @@ namespace HIJETS
 
 
 // ----------------------------------------------------------------------------
-//! Run jet reconstruction on subtracted towers
+//! Make jets out of subtracted towers
 // ----------------------------------------------------------------------------
 void MakeTowerJets()
 {
@@ -147,6 +148,57 @@ void MakeTowerJets()
 
 
 // ----------------------------------------------------------------------------
+//! Make jets out of tracks
+// ----------------------------------------------------------------------------
+void MakeTrackJets()
+{
+
+  // set verbosity
+  int verbosity = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
+
+  //---------------
+  // Fun4All server
+  //---------------
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  // for simulation
+  if (Enable::HIJETS_MC && Enable::HIJETS_TRUTH)
+  {
+    // configure truth jet input for charged particles
+    TruthJetInput *ctji = new TruthJetInput(Jet::SRC::CHARGED_PARTICLE);
+    ctji->add_embedding_flag(0);  // changes depending on signal vs. embedded
+
+    // book jet reconstruction routines on charged truth particles
+    JetReco *chargedtruthjetreco = new JetReco();
+    chargedtruthjetreco->add_input(ctji);
+    chargedtruthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.2), "AntiKt_ChargedTruth_r02");
+    chargedtruthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.3), "AntiKt_ChargedTruth_r03");
+    chargedtruthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.4), "AntiKt_ChargedTruth_r04");
+    chargedtruthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.5), "AntiKt_ChargedTruth_r05");
+    chargedtruthjetreco->set_algo_node("ANTIKT");
+    chargedtruthjetreco->set_input_node("TRUTH");
+    chargedtruthjetreco->Verbosity(verbosity);
+    se->registerSubsystem(chargedtruthjetreco);
+  }
+
+  // book jet reconstruction routines on tracks
+  JetReco* trackjetreco = new JetReco();
+  trackjetreco->add_input(new TrackJetInput(Jet::SRC::TRACK));
+  trackjetreco->add_algo(new FastJetAlgo(Jet::ALGO::ANTIKT, 0.2), "AntiKt_Track_r02");
+  trackjetreco->add_algo(new FastJetAlgo(Jet::ALGO::ANTIKT, 0.3), "AntiKt_Track_r03");
+  trackjetreco->add_algo(new FastJetAlgo(Jet::ALGO::ANTIKT, 0.4), "AntiKt_Track_r04");
+  trackjetreco->add_algo(new FastJetAlgo(Jet::ALGO::ANTIKT, 0.5), "AntiKt_Track_r05");
+  trackjetreco->set_algo_node("ANTIKT");
+  trackjetreco->set_input_node("TRACK");
+  trackjetreco->Verbosity(verbosity);
+  se->registerSubsystem(trackjetreco);
+
+  // exit back to HIJetReco()
+  return;
+
+}
+
+// ----------------------------------------------------------------------------
 //! Run jet reconstruction
 // ----------------------------------------------------------------------------
 void HIJetReco()
@@ -154,7 +206,8 @@ void HIJetReco()
 
   // run approriate jet reconstruction routines
   if (Enable::HIJETS_TOWER) MakeTowerJets();
-  /* TODO add tracks & pflow here */
+  if (Enable::HIJETS_TRACK) MakeTrackJets();
+  /* TODO add pflow here */
 
 }
 
