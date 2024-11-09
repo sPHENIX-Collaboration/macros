@@ -153,7 +153,7 @@ void HIJetReco()
 {
 
   // run approriate jet reconstruction routines
-  if (ENABLE::HIJETS_TOWER) MakeTowerJets();
+  if (Enable::HIJETS_TOWER) MakeTowerJets();
   /* TODO add tracks & pflow here */
 
 }
