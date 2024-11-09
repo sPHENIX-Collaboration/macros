@@ -29,6 +29,9 @@ namespace Enable
   int HIJETS_VERBOSITY = 0;
   bool HIJETS_MC = true;
   bool HIJETS_TRUTH = false;
+  bool HIJETS_TOWER = true;   // make tower jets
+  bool HIJETS_TRACK = false;  // make track jets
+  bool HIJETS_PFLOW = false;  // make particle flow jets
 }  // namespace Enable
 
 namespace HIJETS
@@ -40,7 +43,10 @@ namespace HIJETS
 }  // namespace HIJETS
 
 
-void HIJetReco()
+// ----------------------------------------------------------------------------
+//! Run jet reconstruction on subtracted towers
+// ----------------------------------------------------------------------------
+void MakeTowerJets()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
 
@@ -136,6 +142,19 @@ void HIJetReco()
   se->registerSubsystem(towerjetreco);
 
   return;
+
+}
+
+
+// ----------------------------------------------------------------------------
+//! Run jet reconstruction
+// ----------------------------------------------------------------------------
+void HIJetReco()
+{
+
+  // run approriate jet reconstruction routines
+  if (ENABLE::HIJETS_TOWER) MakeTowerJets();
+  /* TODO add tracks & pflow here */
 
 }
 
