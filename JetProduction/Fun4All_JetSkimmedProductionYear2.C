@@ -161,6 +161,8 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   outlower->AddNode("TOWERS_SEPD");
   //outlower->AddNode("TOWERINFO_CALIB_ZDC");
   outlower->AddNode("TOWERS_ZDC");
+  outlower->AddNode("MbdOut");
+  outlower->AddNode("MbdPmtContainer");
 
   se->registerOutputManager(outlower);
 
@@ -176,6 +178,9 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   outhigher->StripNode("TOWERINFO_CALIB_ZDC");
   outhigher->StripNode("TOWERS_ZDC");
   outhigher->StripNode("MBDPackets");
+  outhigher->StripNode("MbdOut");
+  outhigher->StripNode("MbdPmtContainer");
+
 
 
   se->registerOutputManager(outhigher);
