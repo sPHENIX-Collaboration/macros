@@ -5,7 +5,7 @@
 
 #include <jetbase/FastJetAlgo.h>
 #include <jetbase/JetReco.h>
-#include <particleflow/ParticleFlowJetInput.h>
+#include <particleflowreco/ParticleFlowJetInput.h>
 #include <jetbase/TowerJetInput.h>
 #include <jetbase/TrackJetInput.h>
 #include <g4jets/TruthJetInput.h>
@@ -81,7 +81,7 @@ void MakeTruthJets()
   }
 
   // if making tower or pflow jets, make truth jets out of all particles
-  if (Enable::HIJETS_TOWER || HIJETS_PFLOW)
+  if (Enable::HIJETS_TOWER || Enable::HIJETS_PFLOW)
   {
     // configure truth jet input for all particles
     TruthJetInput *tji = new TruthJetInput(Jet::PARTICLE);
@@ -239,15 +239,15 @@ void MakePFlowJets()
   //---------------
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  // book jet reconstruction routines on tracks
+  // book jet reconstruction routines on pflow elements
   JetReco* pflowjetreco = new JetReco();
-  pflowjetreco->add_input(new ParticleFlowJetInput(Jet::SRC::PARTICLE));
+  pflowjetreco->add_input(new ParticleFlowJetInput());
   pflowjetreco->add_algo(new FastJetAlgo(Jet::ALGO::ANTIKT, 0.2), "AntiKt_ParticleFlow_r02");
   pflowjetreco->add_algo(new FastJetAlgo(Jet::ALGO::ANTIKT, 0.3), "AntiKt_ParticleFlow_r03");
   pflowjetreco->add_algo(new FastJetAlgo(Jet::ALGO::ANTIKT, 0.4), "AntiKt_ParticleFlow_r04");
   pflowjetreco->add_algo(new FastJetAlgo(Jet::ALGO::ANTIKT, 0.5), "AntiKt_ParticleFlow_r05");
   pflowjetreco->set_algo_node("ANTIKT");
-  pflowjetreco->set_input_node("PARTICLEFLOW");
+  pflowjetreco->set_input_node("ELEMENT");
   pflowjetreco->Verbosity(verbosity);
   se->registerSubsystem(pflowjetreco);
 
@@ -269,7 +269,7 @@ void HIJetReco()
   // run approriate jet reconstruction routines
   if (Enable::HIJETS_TOWER) MakeTowerJets();
   if (Enable::HIJETS_TRACK) MakeTrackJets();
-  if (Enabel::HIJETS_PFLOW) MakePFlowJets();
+  if (Enable::HIJETS_PFLOW) MakePFlowJets();
 
 }
 
