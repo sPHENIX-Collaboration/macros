@@ -45,8 +45,6 @@ void Mvtx_HitUnpacking(const std::string& felix="")
 
   auto mvtxunpacker = new MvtxCombinedRawDataDecoder;
   mvtxunpacker->Verbosity(verbosity);
-  std::cout << "MvtxCombineRawDataDecoder: run triggered mode? " << Enable::MVTX_TRIGGERED << std::endl;
-  mvtxunpacker->runMvtxTriggered(Enable::MVTX_TRIGGERED);
   if(felix.length() > 0)
     {
       mvtxunpacker->useRawHitNodeName("MVTXRAWHIT_" + felix);
