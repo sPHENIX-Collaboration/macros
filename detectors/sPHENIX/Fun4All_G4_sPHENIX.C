@@ -105,7 +105,7 @@ int Fun4All_G4_sPHENIX(
   // Input::SIMPLE_VERBOSITY = 1;
 
   // Enable this is emulating the nominal pp/pA/AA collision vertex distribution
-  // Input::BEAM_CONFIGURATION = Input::AA_COLLISION; // Input::AA_COLLISION (default), Input::pA_COLLISION, Input::pp_COLLISION
+   Input::BEAM_CONFIGURATION = Input::pp_COLLISION; // Input::AA_COLLISION (default), Input::pA_COLLISION, Input::pp_COLLISION
 
   //  Input::PYTHIA6 = true;
 
@@ -239,7 +239,7 @@ int Fun4All_G4_sPHENIX(
 
     //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
     //! Nominal collision geometry is selected by Input::BEAM_CONFIGURATION
-    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia8, Input::BEAM_CONFIGURATION::pp_COLLISION);
+    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia8, Input::BEAM_CONFIGURATION);
   }
 
   //--------------
