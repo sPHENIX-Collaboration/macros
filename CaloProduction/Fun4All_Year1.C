@@ -1,6 +1,8 @@
 #ifndef FUN4ALL_YEAR1_C
 #define FUN4ALL_YEAR1_C
 
+#include <QA.C>
+
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloTowerCalib.h>
 #include <caloreco/CaloTowerStatus.h>
@@ -289,10 +291,8 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   se->registerSubsystem(centralityreco);
   ///////////////////////////////////
   // Validation 
-  CaloValid *ca = new CaloValid("calomodulename",fulloutfile_hist);
+  CaloValid *ca = new CaloValid("CaloValid");
   ca->set_timing_cut_width(200);  //integers for timing width, > 1 : wider cut around max peak time
-  ca->apply_vertex_cut(false);
-  ca->set_vertex_cut(20.);
   se->registerSubsystem(ca);
 
 
@@ -305,6 +305,11 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
 
   se->run(nEvents);
   se->End();
+
+  TString qaname = fulloutfile_hist + "_qa.root";
+  std::string qaOutputFileName(qaname.Data());
+  QAHistManagerDef::saveQARootFile(qaOutputFileName);
+
   CDBInterface::instance()->Print();  // print used DB files
   se->PrintTimer();
   delete se;

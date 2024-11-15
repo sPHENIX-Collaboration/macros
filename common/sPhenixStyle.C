@@ -1,8 +1,11 @@
+#ifndef MACRO_SPHENIXSTYLE_C
+#define MACRO_SPHENIXSTYLE_C
+
 //
 // sPHENIX Style, based on a style file from BaBar, v0.1
 //
 
-#include <sPhenixStyle.h>
+#include "sPhenixStyle.h"
 
 #include <TColor.h>
 #include <TROOT.h>
@@ -113,3 +116,5 @@ TStyle* sPhenixStyle()
 
   return sphenixStyle;
 }
+
+#endif
