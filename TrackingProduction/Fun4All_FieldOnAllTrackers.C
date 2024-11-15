@@ -72,7 +72,6 @@ void Fun4All_FieldOnAllTrackers(
   int runnumber = runseg.first;
   int segment = runseg.second;
 
-  TpcReadoutInit( runnumber );
   std::cout<< " run: " << runnumber
 	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
 	   << " pre: " << TRACKING::reco_tpc_time_presample
@@ -108,20 +107,8 @@ void Fun4All_FieldOnAllTrackers(
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
-  CDBInterface *cdb = CDBInterface::instance();
-  std::string tpc_dv_calib_dir = cdb->getUrl("TPC_DRIFT_VELOCITY");
-  if (tpc_dv_calib_dir.empty())
-  {
-    std::cout << "No calibrated TPC drift velocity for Run " << runnumber << ". Use default value " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
-  }
-  else
-  {
-    CDBTTree *cdbttree = new CDBTTree(tpc_dv_calib_dir);
-    cdbttree->LoadCalibrations();
-    G4TPC::tpc_drift_velocity_reco = cdbttree->GetSingleFloatValue("tpc_drift_velocity");
-    std::cout << "Use calibrated TPC drift velocity for Run " << runnumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
-  }
-
+  TpcReadoutInit( runnumber );
+  
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
   //Flag for running the tpc hit unpacker with zero suppression on
   TRACKING::tpc_zero_supp = true;
@@ -183,8 +170,8 @@ void Fun4All_FieldOnAllTrackers(
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
   // these get us to about 83% INTT > 1
-  silicon_Seeding->setinttRPhiSearchWindow(1.0);
-  silicon_Seeding->setinttZSearchWindow(7.0);
+  silicon_Seeding->setinttRPhiSearchWindow(0.4);
+  silicon_Seeding->setinttZSearchWindow(2.0);
   silicon_Seeding->seedAnalysis(false);
   se->registerSubsystem(silicon_Seeding);
 

@@ -40,14 +40,14 @@ void TpcReadoutInit(const int RunNumber = 41989)
   std::string tpc_dv_calib_dir = CDBInterface::instance()->getUrl("TPC_DRIFT_VELOCITY");
   if (tpc_dv_calib_dir.empty())
   {
-    std::cout << "No calibrated TPC drift velocity for Run " << runnumber << ". Use default value " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
+    std::cout << "No calibrated TPC drift velocity for Run " << RunNumber << ". Use default value " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
   }
   else
   {
     CDBTTree *cdbttree = new CDBTTree(tpc_dv_calib_dir);
     cdbttree->LoadCalibrations();
     G4TPC::tpc_drift_velocity_reco = cdbttree->GetSingleFloatValue("tpc_drift_velocity");
-    std::cout << "Use calibrated TPC drift velocity for Run " << runnumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
+    std::cout << "Use calibrated TPC drift velocity for Run " << RunNumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
   }
 
 }
