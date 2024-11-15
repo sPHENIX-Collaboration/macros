@@ -12,14 +12,14 @@
 #include <g4jets/TruthJetInput.h>
 
 #include <g4eval/JetEvaluator.h>
-#include <qa_modules/QAG4SimulationJet.h>
+#include <simqa_modules/QAG4SimulationJet.h>
 
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libjetbase.so)
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libg4eval.so)
-R__LOAD_LIBRARY(libqa_modules.so)
+R__LOAD_LIBRARY(libsimqa_modules.so)
 
 namespace Enable
 {

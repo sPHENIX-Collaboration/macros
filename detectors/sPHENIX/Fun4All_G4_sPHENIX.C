@@ -378,7 +378,7 @@ int Fun4All_G4_sPHENIX(
   Enable::TRACK_MATCHING_TREE = Enable::TRACK_MATCHING && false;
   Enable::TRACK_MATCHING_TREE_CLUSTERS = Enable::TRACK_MATCHING_TREE && false;
 
-  //Additional tracking tools 
+  //Additional tracking tools
   //Enable::TRACKING_DIAGNOSTICS = Enable::TRACKING_TRACK && true;
   //G4TRACKING::filter_conversion_electrons = true;
   // G4TRACKING::use_alignment = true;
@@ -389,9 +389,10 @@ int Fun4All_G4_sPHENIX(
 
   // set flags to simulate and correct TPC distortions, specify distortion and correction files
   //G4TPC::ENABLE_STATIC_DISTORTIONS = true;
-  //G4TPC::static_distortion_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_event_0_bX180961051_0.distortion_map.hist.root");  
-  //G4TPC::ENABLE_CORRECTIONS = true;
-  //G4TPC::correction_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_smoothed_average.correction_map.hist.root");
+  //G4TPC::static_distortion_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_event_0_bX180961051_0.distortion_map.hist.root");
+  //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
+  //G4TPC::static_correction_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_smoothed_average.correction_map.hist.root");
+  //G4TPC::ENABLE_AVERAGE_CORRECTIONS = false;
 
   //  cemc electronics + thin layer of W-epoxy to get albedo from cemc
   //  into the tracking, cannot run together with CEMC
@@ -585,13 +586,13 @@ int Fun4All_G4_sPHENIX(
     Tracking_Reco();
   }
 
-  
+
 
   if(Enable::TRACKING_DIAGNOSTICS)
     {
       const std::string kshortFile = "./kshort_" + outputFile;
       const std::string residualsFile = "./residuals_" + outputFile;
- 
+
       G4KshortReconstruction(kshortFile);
       seedResiduals(residualsFile);
     }

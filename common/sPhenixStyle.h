@@ -10,8 +10,8 @@
 //
 //   Version 0.1
 
-#ifndef  __SPHENIXSTYLE_H
-#define __SPHENIXSTYLE_H
+#ifndef MACRO_SPHENIXSTYLE_H
+#define MACRO_SPHENIXSTYLE_H
 
 #include <TStyle.h>
 
@@ -48,4 +48,4 @@ void SetsPhenixStyle();
 
 TStyle* sPhenixStyle(); 
 
-#endif // __SPHENIXSTYLE_H
+#endif // MACRO_SPHENIXSTYLE_H

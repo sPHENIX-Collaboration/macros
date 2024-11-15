@@ -103,6 +103,7 @@ void ZDC_Towers()
   RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("ZDCRawTowerDigitizer");
   TowerDigitizer->Detector("ZDC");
   TowerDigitizer->TowerType(0);
+  TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kRawTowerOnly);
   TowerDigitizer->Verbosity(verbosity);
   TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem(TowerDigitizer);
@@ -110,6 +111,7 @@ void ZDC_Towers()
   RawTowerDigitizer *TowerDigitizer1 = new RawTowerDigitizer("ZDCRawTowerDigitizer1");
   TowerDigitizer1->Detector("ZDC");
   TowerDigitizer1->TowerType(1);
+  TowerDigitizer1->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kRawTowerOnly);
   TowerDigitizer1->Verbosity(verbosity);
   TowerDigitizer1->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem(TowerDigitizer1);
@@ -117,6 +119,7 @@ void ZDC_Towers()
   RawTowerCalibration *TowerCalibration = new RawTowerCalibration("ZDCRawTowerCalibration");
   TowerCalibration->Detector("ZDC");
   TowerCalibration->TowerType(0);
+  TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kRawTowerOnly);
   TowerCalibration->Verbosity(verbosity);
   TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
   TowerCalibration->set_calib_const_GeV_ADC(1.0);  // sampling fraction = 0.010
@@ -126,6 +129,7 @@ void ZDC_Towers()
   RawTowerCalibration *TowerCalibration1 = new RawTowerCalibration("ZDCRawTowerCalibration1");
   TowerCalibration1->Detector("ZDC");
   TowerCalibration1->TowerType(1);
+  TowerCalibration1->set_towerinfo(RawTowerCalibration::ProcessTowerType::kRawTowerOnly);
   TowerCalibration1->Verbosity(verbosity);
   TowerCalibration1->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
   TowerCalibration1->set_calib_const_GeV_ADC(1.0);

@@ -11,7 +11,9 @@
 #include <trackreco/PHActsTrkFitter.h>
 #include <trackreco/PHActsVertexPropagator.h>
 #include <trackreco/PHCASeeding.h>
+#include <trackreco/PHGenFitTrkFitter.h>
 #include <trackreco/PHMicromegasTpcTrackMatching.h>
+#include <trackreco/PHSiliconHelicalPropagator.h>
 #include <trackreco/PHSiliconSeedMerger.h>
 #include <trackreco/PHSiliconTpcTrackMatching.h>
 #include <trackreco/PHSimpleKFProp.h>
@@ -19,13 +21,15 @@
 #include <trackreco/PHTpcDeltaZCorrection.h>
 #include <trackreco/PHTrackCleaner.h>
 #include <trackreco/PHTrackSeeding.h>
+#include <trackreco/PrelimDistortionCorrection.h>
 #include <trackreco/SecondaryVertexFinder.h>
 #include <trackreco/TrackingIterationCounter.h>
-#include <trackreco/PrelimDistortionCorrection.h>
 
 #include <tpc/TpcLoadDistortionCorrection.h>
+#include <tpc/LaserEventRejecter.h>
 
 #include <tpccalib/PHTpcResiduals.h>
+#include <tpccalib/TpcSpaceChargeReconstruction.h>
 
 #include <trackermillepedealignment/HelicalFitter.h>
 #include <trackermillepedealignment/MakeMilleFiles.h>
@@ -44,18 +48,161 @@ R__LOAD_LIBRARY(libtrackeralign.so)
 
 void convert_seeds()
 {
-  Fun4AllServer* se = Fun4AllServer::instance();
+  auto se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
-  TrackSeedTrackMapConverter* converter = new TrackSeedTrackMapConverter();
+  auto converter = new TrackSeedTrackMapConverter;
   // Default set to full SvtxTrackSeeds. Can be set to
   // SiliconTrackSeedContainer or TpcTrackSeedContainer
   converter->setTrackSeedName("SvtxTrackSeedContainer");
-  converter->setFieldMap(G4MAGNET::magfield);
+  converter->setFieldMap(G4MAGNET::magfield_tracking);
   converter->Verbosity(verbosity);
   se->registerSubsystem(converter);
 }
+void Tracking_Reco_TrackSeed_ZeroField()
+{
+  // set up verbosity
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
+  // get fun4all server instance
+  auto se = Fun4AllServer::instance();
+
+  auto seeder = new PHCASeeding("PHCASeeding");
+  double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
+  if (ConstField)
+  {
+    seeder->useConstBField(true);
+    seeder->constBField(fieldstrength);
+  }
+  else
+  {
+    seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
+    seeder->useConstBField(false);
+    seeder->magFieldFile(G4MAGNET::magfield_tracking);  // to get charge sign right
+  }
+  seeder->Verbosity(verbosity);
+  seeder->SetLayerRange(7, 55);
+  seeder->SetSearchWindow(1.5, 0.05);  // (z width, phi width)
+  seeder->SetMinHitsPerCluster(0);
+  seeder->SetMinClustersPerTrack(3);
+  seeder->useFixedClusterError(true);
+
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    seeder->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+    seeder->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+  }
+
+  seeder->set_pp_mode(TRACKING::pp_mode);
+  se->registerSubsystem(seeder);
+
+  // expand stubs in the TPC using simple kalman filter
+  auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
+  cprop->set_field_dir(G4MAGNET::magfield_rescale);
+  if (ConstField)
+  {
+    cprop->useConstBField(true);
+    cprop->setConstBField(fieldstrength);
+  }
+  else
+  {
+    cprop->magFieldFile(G4MAGNET::magfield_tracking);
+    cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
+  }
+  cprop->useFixedClusterError(true);
+  cprop->set_max_window(5.);
+  cprop->Verbosity(verbosity);
+
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    cprop->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+    cprop->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+  }
+
+  cprop->set_pp_mode(TRACKING::pp_mode);
+  se->registerSubsystem(cprop);
+
+  PHSiliconHelicalPropagator* hprop = new PHSiliconHelicalPropagator("PHSiliconHelicalPropagator");
+  hprop->dca_xy_cut(0.3);
+  hprop->dca_z_cut(1.);
+  hprop->Verbosity(verbosity);
+  hprop->zeroField();
+  se->registerSubsystem(hprop);
+
+  auto mm_match = new PHMicromegasTpcTrackMatching;
+  mm_match->Verbosity(verbosity);
+
+  // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
+  mm_match->set_rphi_search_window_lyr1(0.4);
+  mm_match->set_rphi_search_window_lyr2(13.0);
+  mm_match->set_z_search_window_lyr1(26.0);
+  mm_match->set_z_search_window_lyr2(0.4);
+
+  mm_match->set_min_tpc_layer(38);            // layer in TPC to start projection fit
+  mm_match->set_test_windows_printout(true);  // used for tuning search windows only
+  se->registerSubsystem(mm_match);
+}
 void Tracking_Reco_TrackSeed()
 {
   // set up verbosity
@@ -75,18 +222,18 @@ void Tracking_Reco_TrackSeed()
   se->registerSubsystem(merger);
 
   auto seeder = new PHCASeeding("PHCASeeding");
-  seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
-
-  if (G4MAGNET::magfield.find("3d") != std::string::npos)
+  double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
+  if (ConstField)
+  {
+    seeder->useConstBField(true);
+    seeder->constBField(fieldstrength);
+  }
+  else
   {
     seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
     seeder->useConstBField(false);
-  }
-  if (G4MAGNET::magfield.find(".root") == std::string::npos)
-  {
-    //! constant field
-    seeder->useConstBField(true);
-    seeder->constBField(std::stod(G4MAGNET::magfield));
+    seeder->magFieldFile(G4MAGNET::magfield_tracking);  // to get charge sign right
   }
   seeder->Verbosity(verbosity);
   seeder->SetLayerRange(7, 55);
@@ -94,36 +241,148 @@ void Tracking_Reco_TrackSeed()
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
+
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    seeder->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+    seeder->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+  }
+
   seeder->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
   auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
   cprop->set_field_dir(G4MAGNET::magfield_rescale);
-  if (G4MAGNET::magfield.find("3d") != std::string::npos)
+  if (ConstField)
   {
-    cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
+    cprop->useConstBField(true);
+    cprop->setConstBField(fieldstrength);
   }
-  if (G4MAGNET::magfield.find(".root") == std::string::npos)
+  else
   {
-    cprop->useConstBField(false);
-    cprop->setConstBField(std::stod(G4MAGNET::magfield));
+    cprop->magFieldFile(G4MAGNET::magfield_tracking);
+    cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
   }
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
   cprop->Verbosity(verbosity);
+
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    cprop->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+    cprop->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+  }
+
   cprop->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(cprop);
 
- if(TRACKING::pp_mode)
+  if (TRACKING::pp_mode)
+  {
+    // for pp mode, apply preliminary distortion corrections to TPC clusters before crossing is known
+    // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
+    auto prelim_distcorr = new PrelimDistortionCorrection;
+    prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
+    prelim_distcorr->Verbosity(verbosity);
+
+    if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
     {
-      // for pp mode, apply preliminary distortion corrections to TPC clusters before crossing is known
-      // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
-      auto prelim_distcorr = new PrelimDistortionCorrection;
-      prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
-      prelim_distcorr->Verbosity(verbosity);
-      se->registerSubsystem(prelim_distcorr);
+      prelim_distcorr->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
     }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+    }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+    }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+    }
+    else
+    {
+    }
+
+    se->registerSubsystem(prelim_distcorr);
+  }
 
   std::cout << "Tracking_Reco_TrackSeed - Using stub matching for Si matching " << std::endl;
   // The normal silicon association methods
@@ -229,33 +488,58 @@ void Tracking_Reco_TrackFit()
   deltazcorr->Verbosity(verbosity);
   se->registerSubsystem(deltazcorr);
 
-  // perform final track fit with ACTS
-  auto actsFit = new PHActsTrkFitter;
-  actsFit->Verbosity(verbosity);
-  actsFit->commissioning(G4TRACKING::use_alignment);
-  // in calibration mode, fit only Silicons and Micromegas hits
-  actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-  actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-  actsFit->set_pp_mode(TRACKING::pp_mode);
-  actsFit->set_use_clustermover(true); // default is true for now
-  actsFit->useActsEvaluator(false);
-  actsFit->useOutlierFinder(false);
-  actsFit->setFieldMap(G4MAGNET::magfield);
-  se->registerSubsystem(actsFit);
-
-  if (G4TRACKING::SC_CALIBMODE)
+  if (G4TRACKING::use_genfit_track_fitter)
   {
-    /*
-     * in calibration mode, calculate residuals between TPC and fitted tracks,
-     * store in dedicated structure for distortion correction
-     */
-    auto residuals = new PHTpcResiduals;
-    residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
-    residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-    residuals->Verbosity(verbosity);
-    se->registerSubsystem(residuals);
+    // perform final track fit with GENFIT
+    auto genfitFit = new PHGenFitTrkFitter;
+    genfitFit->Verbosity(verbosity);
+    genfitFit->set_fit_silicon_mms(G4TRACKING::SC_CALIBMODE);
+    se->registerSubsystem(genfitFit);
+
+    if (G4TRACKING::SC_CALIBMODE)
+    {
+      // Genfit based Tpc space charge Reconstruction
+      auto tpcSpaceChargeReconstruction = new TpcSpaceChargeReconstruction;
+      tpcSpaceChargeReconstruction->set_use_micromegas(G4TRACKING::SC_USE_MICROMEGAS);
+      tpcSpaceChargeReconstruction->set_outputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
+      // reconstructed distortion grid size (phi, r, z)
+      tpcSpaceChargeReconstruction->set_grid_dimensions(36, 48, 80);
+      se->registerSubsystem(tpcSpaceChargeReconstruction);
+    }
   }
   else
+  {
+    // perform final track fit with ACTS
+    auto actsFit = new PHActsTrkFitter;
+    actsFit->Verbosity(verbosity);
+    actsFit->commissioning(G4TRACKING::use_alignment);
+    // in calibration mode, fit only Silicons and Micromegas hits
+    actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
+    actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
+    actsFit->set_pp_mode(TRACKING::pp_mode);
+    actsFit->set_use_clustermover(true);  // default is true for now
+    actsFit->useActsEvaluator(false);
+    actsFit->useOutlierFinder(false);
+    actsFit->setFieldMap(G4MAGNET::magfield_tracking);
+    se->registerSubsystem(actsFit);
+
+    if (G4TRACKING::SC_CALIBMODE)
+    {
+      /*
+       * in calibration mode, calculate residuals between TPC and fitted tracks,
+       * store in dedicated structure for distortion correction
+       */
+      auto residuals = new PHTpcResiduals();
+      residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
+      residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
+      // reconstructed distortion grid size (phi, r, z)
+      residuals->setGridDimensions(36, 48, 80);
+      residuals->Verbosity(verbosity);
+      se->registerSubsystem(residuals);
+    }
+  }
+
+  if (!G4TRACKING::SC_CALIBMODE)
   {
     /*
      * in full tracking mode, run track cleaner, vertex finder,
@@ -269,26 +553,30 @@ void Tracking_Reco_TrackFit()
       /* this breaks in truth_track seeding mode because there is no TpcSeed */
       auto cleaner = new PHTrackCleaner;
       cleaner->Verbosity(verbosity);
-      //cleaner->set_quality_cut(30.0);
+      // cleaner->set_quality_cut(30.0);
       se->registerSubsystem(cleaner);
     }
 
     vertexing();
 
-    // Propagate track positions to the vertex position
-    auto vtxProp = new PHActsVertexPropagator;
-    vtxProp->Verbosity(verbosity);
-    vtxProp->fieldMap(G4MAGNET::magfield);
-    se->registerSubsystem(vtxProp);
-
-    // project tracks to EMCAL
-    auto projection = new PHActsTrackProjection;
-    projection->Verbosity(verbosity);
-    if (G4MAGNET::magfield.find(".root") == std::string::npos)
+    if (!G4TRACKING::use_genfit_track_fitter)
     {
-      projection->setConstFieldVal(std::stod(G4MAGNET::magfield));
+      // Propagate track positions to the vertex position
+      auto vtxProp = new PHActsVertexPropagator;
+      vtxProp->Verbosity(verbosity);
+      vtxProp->fieldMap(G4MAGNET::magfield_tracking);
+      se->registerSubsystem(vtxProp);
+
+      // project tracks to EMCAL
+      auto projection = new PHActsTrackProjection;
+      projection->Verbosity(verbosity);
+      double fieldstrength = std::numeric_limits<double>::quiet_NaN();
+      if (isConstantField(G4MAGNET::magfield_tracking, fieldstrength))
+      {
+        projection->setConstFieldVal(fieldstrength);
+      }
+      se->registerSubsystem(projection);
     }
-    se->registerSubsystem(projection);
   }
 }
 
@@ -303,7 +591,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
   silicon_Seeding->sigmaScattering(50.);
-  silicon_Seeding->setRPhiSearchWindow(2.);
+  silicon_Seeding->setinttRPhiSearchWindow(2.);
   silicon_Seeding->helixcut(0.01);
   se->registerSubsystem(silicon_Seeding);
 
@@ -313,9 +601,12 @@ void Tracking_Reco_CommissioningTrackSeed()
 
   // Assemble TPC clusters into track stubs
   auto seeder = new PHCASeeding("PHCASeeding");
-  seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
-  if (G4MAGNET::magfield.find("3d") != std::string::npos)
+  seeder->set_field_dir(G4MAGNET::magfield_rescale);                // to get charge sign right
+  double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
+  if (!ConstField)
   {
+    seeder->magFieldFile(G4MAGNET::magfield_tracking);
     seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
   }
   seeder->Verbosity(verbosity);
@@ -325,13 +616,50 @@ void Tracking_Reco_CommissioningTrackSeed()
   seeder->SetMinClustersPerTrack(3);
   seeder->useConstBField(false);
   seeder->useFixedClusterError(true);
+
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    seeder->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+    seeder->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    seeder->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+    seeder->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+    seeder->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+    seeder->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+    seeder->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+  }
+
   seeder->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
   auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
   cprop->set_field_dir(G4MAGNET::magfield_rescale);
-  if (G4MAGNET::magfield.find("3d") != std::string::npos)
+  if (!ConstField)
   {
     cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
   }
@@ -339,18 +667,92 @@ void Tracking_Reco_CommissioningTrackSeed()
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
   cprop->Verbosity(verbosity);
+
+  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+  {
+    cprop->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+    cprop->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+  }
+  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+  {
+    cprop->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+    cprop->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+    cprop->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+    cprop->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+    cprop->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+  }
+  else
+  {
+  }
+
   cprop->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(cprop);
 
- if(TRACKING::pp_mode)
+  if (TRACKING::pp_mode)
+  {
+    // for pp mode, apply preliminary distortion corrections to TPC clusters before crossing is known
+    // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
+    auto prelim_distcorr = new PrelimDistortionCorrection;
+    prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
+    prelim_distcorr->Verbosity(verbosity);
+
+    if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
     {
-      // for pp mode, apply preliminary distortion corrections to TPC clusters before crossing is known
-      // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
-      auto prelim_distcorr = new PrelimDistortionCorrection;
-      prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
-      prelim_distcorr->Verbosity(verbosity);
-      se->registerSubsystem(prelim_distcorr);
+      prelim_distcorr->setNeonFraction(G4TPC::NeCF4_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::NeCF4_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
     }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::ArCF4_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::ArCF4_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
+    }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
+    }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+    {
+      prelim_distcorr->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
+      prelim_distcorr->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
+      prelim_distcorr->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
+      prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
+      prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
+    }
+    else
+    {
+    }
+
+    se->registerSubsystem(prelim_distcorr);
+  }
 
   // match silicon track seeds to TPC track seeds
 
@@ -460,6 +862,18 @@ void Filter_Conversion_Electrons(std::string ntuple_outfile)
   secvert->setDecayParticleMass(0.000511);  // for electrons
   secvert->setOutfileName(ntuple_outfile);
   se->registerSubsystem(secvert);
+}
+
+void Reject_Laser_Events()
+{
+  if (G4TPC::REJECT_LASER_EVENTS)
+  {
+    auto se = Fun4AllServer::instance();
+    int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+
+    LaserEventRejecter *rejecter = new LaserEventRejecter();
+    se->registerSubsystem(rejecter);
+  }
 }
 
 #endif
