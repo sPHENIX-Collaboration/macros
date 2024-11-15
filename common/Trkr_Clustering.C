@@ -109,7 +109,6 @@ void Tpc_HitUnpacking(const std::string& ebdc="")
   int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
   std::string name = "TpcCombinedRawDataUnpacker"+ebdc;
-  std::cout << "tpc module name " << name <<std::endl;
   auto tpcunpacker = new TpcCombinedRawDataUnpacker("TpcCombinedRawDataUnpacker"+ebdc);
   tpcunpacker->set_presampleShift(TRACKING::reco_tpc_time_presample);
   if(ebdc.length() > 0)
