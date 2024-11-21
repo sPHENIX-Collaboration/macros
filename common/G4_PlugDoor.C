@@ -30,7 +30,7 @@ namespace G4PLUGDOOR
   // define via four corners in the engineering drawing
   double z_1 = 330.81;
   double z_2 = 360.81;
-  double r_1 = 30;
+  double r_1 = (12./2.)*2.54; // 12 inches diameter
   double r_2 = 263.5;
 
   double length = z_2 - z_1;
