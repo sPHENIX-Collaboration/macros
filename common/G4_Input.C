@@ -4,7 +4,7 @@
 #include <GlobalVariables.C>
 #include <G4_TrkrVariables.C>
 
-#include <phpythia6/PHPythia6.h>
+//#include <phpythia6/PHPythia6.h>
 
 #include <phpythia8/PHPythia8.h>
 
@@ -16,7 +16,7 @@
 #include <g4main/PHG4ParticleGeneratorVectorMeson.h>
 #include <g4main/PHG4ParticleGun.h>
 #include <g4main/PHG4SimpleEventGenerator.h>
-#include <g4main/ReadEICFiles.h>
+//#include <g4main/ReadEICFiles.h>
 
 #include <fermimotionafterburner/FermimotionAfterburner.h>
 #include <hijingflipafterburner/HIJINGFlipAfterburner.h>
@@ -37,7 +37,7 @@
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
-R__LOAD_LIBRARY(libPHPythia6.so)
+//R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
 R__LOAD_LIBRARY(libFermimotionAfterburner.so)
 R__LOAD_LIBRARY(libHIJINGFlipAfterburner.so)
@@ -287,9 +287,9 @@ namespace INPUTGENERATOR
   std::vector<PHG4ParticleGeneratorVectorMeson *> VectorMesonGenerator;
   std::vector<PHG4SimpleEventGenerator *> SimpleEventGenerator;
   std::vector<PHG4ParticleGun *> Gun;
-  PHPythia6 *Pythia6 = nullptr;
+  PHPythia8 *Pythia6 = nullptr;
   PHPythia8 *Pythia8 = nullptr;
-  ReadEICFiles *EICFileReader = nullptr;
+//  ReadEICFiles *EICFileReader = nullptr;
   CosmicSpray *Cosmic = nullptr;
 }  // namespace INPUTGENERATOR
 
@@ -336,12 +336,14 @@ void InputInit()
   Fun4AllServer *se = Fun4AllServer::instance();
   if (Input::PYTHIA6)
   {
-    INPUTGENERATOR::Pythia6 = new PHPythia6();
-    INPUTGENERATOR::Pythia6->set_config_file(PYTHIA6::config_file);
+    cout << "Pythia6 not implemented" << endl;
+    gSystem->Exit(1);
+    // INPUTGENERATOR::Pythia6 = new PHPythia6();
+    // INPUTGENERATOR::Pythia6->set_config_file(PYTHIA6::config_file);
 
-    INPUTGENERATOR::Pythia6->set_embedding_id(Input::EmbedId);
-    Input::PYTHIA6_EmbedId = Input::EmbedId;
-    Input::EmbedId++;
+    // INPUTGENERATOR::Pythia6->set_embedding_id(Input::EmbedId);
+    // Input::PYTHIA6_EmbedId = Input::EmbedId;
+    // Input::EmbedId++;
   }
   if (Input::PYTHIA8)
   {
@@ -441,10 +443,10 @@ void InputInit()
 void InputRegister()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
-  if (Input::PYTHIA6)
-  {
-    se->registerSubsystem(INPUTGENERATOR::Pythia6);
-  }
+  // if (Input::PYTHIA6)
+  // {
+  //   se->registerSubsystem(INPUTGENERATOR::Pythia6);
+  // }
   if (Input::PYTHIA8)
   {
     se->registerSubsystem(INPUTGENERATOR::Pythia8);
@@ -509,10 +511,12 @@ void InputRegister()
   }
   if (Input::READEIC)
   {
-    INPUTGENERATOR::EICFileReader = new ReadEICFiles();
-    INPUTGENERATOR::EICFileReader->OpenInputFile(INPUTREADEIC::filename);
-    INPUTGENERATOR::EICFileReader->Verbosity(Input::VERBOSITY);
-    se->registerSubsystem(INPUTGENERATOR::EICFileReader);
+    cout << "Eic File Reading disabled" << endl;
+    gSystem->Exit(1);
+    // INPUTGENERATOR::EICFileReader = new ReadEICFiles();
+    // INPUTGENERATOR::EICFileReader->OpenInputFile(INPUTREADEIC::filename);
+    // INPUTGENERATOR::EICFileReader->Verbosity(Input::VERBOSITY);
+    // se->registerSubsystem(INPUTGENERATOR::EICFileReader);
   }
   if (Input::COSMIC)
   {
