@@ -139,13 +139,14 @@ void Fun4All_FieldOnAllTrackers(
   Mvtx_Clustering();
   Intt_Clustering();
 
+  Tpc_LaserEventIdentifying();
+
   auto tpcclusterizer = new TpcClusterizer;
   tpcclusterizer->Verbosity(0);
   tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
   tpcclusterizer->set_rawdata_reco();
   se->registerSubsystem(tpcclusterizer);
 
-  Tpc_LaserEventIdentifying();
 
   Micromegas_Clustering();
 
