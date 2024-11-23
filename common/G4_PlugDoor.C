@@ -198,7 +198,6 @@ void PlugDoor(PHG4Reco *g4Reco)
     double z_positions[] = {G4ABSORBER::z_1, G4ABSORBER::z_2, G4ABSORBER::z_3, G4ABSORBER::z_4};
     double r_out_values[] = {G4ABSORBER::r_out_1, G4ABSORBER::r_out_2, G4ABSORBER::r_out_3, G4ABSORBER::r_out_4};
     double radius_in = G4ABSORBER::r_in;
-
     for (int i = 0; i < 4; ++i)
     {
       PHG4CylinderSubsystem *absorber = new PHG4CylinderSubsystem("BEAMPIPE_ABSORBER_PLUS", i);
@@ -228,6 +227,8 @@ void PlugDoor(PHG4Reco *g4Reco)
       g4Reco->registerSubsystem(absorber);
 
     }
+    BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z,    G4ABSORBER::z_4 + G4ABSORBER::l_4);
+    BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z,  -(G4ABSORBER::z_4 + G4ABSORBER::l_4));
 
   }
 
