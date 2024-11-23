@@ -207,6 +207,12 @@ void MakeTrackJets()
   //---------------
   Fun4AllServer *se = Fun4AllServer::instance();
 
+  // emit warning: background sub will be added later
+  std::cerr << "WARNING: Background subtraction for track jets is still in development!\n"
+            << "  If you want to do jet reco without background subtraction, please\n"
+            << "  use NoBkgdSubJetReco()"
+            << std::endl;
+
   // book jet reconstruction routines on tracks
   JetReco* trackjetreco = new JetReco();
   trackjetreco->add_input(new TrackJetInput(Jet::SRC::TRACK));
@@ -238,6 +244,12 @@ void MakePFlowJets()
   // Fun4All server
   //---------------
   Fun4AllServer *se = Fun4AllServer::instance();
+
+  // emit warning: background sub will be added later
+  std::cerr << "WARNING: Background subtraction for particle-flow jets is still in development!\n"
+            << "  If you want to do jet reco without background subtraction, please\n"
+            << "  use NoBkgdSubJetReco.C"
+            << std::endl;
 
   // book jet reconstruction routines on pflow elements
   JetReco* pflowjetreco = new JetReco();
