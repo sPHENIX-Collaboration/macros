@@ -49,7 +49,7 @@ namespace HIJETS
 // ----------------------------------------------------------------------------
 //! Make jets out of appropriate truth particles
 // ----------------------------------------------------------------------------
-void MakeTruthJets()
+void MakeHITruthJets()
 {
 
   // set verbosity
@@ -109,7 +109,7 @@ void MakeTruthJets()
 // ----------------------------------------------------------------------------
 //! Make jets out of subtracted towers
 // ----------------------------------------------------------------------------
-void MakeTowerJets()
+void MakeHITowerJets()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
 
@@ -194,9 +194,9 @@ void MakeTowerJets()
 
 
 // ----------------------------------------------------------------------------
-//! Make jets out of tracks
+//! Make jets out of tracks with background subtraction
 // ----------------------------------------------------------------------------
-void MakeTrackJets()
+void MakeHITrackJets()
 {
 
   // set verbosity
@@ -232,9 +232,9 @@ void MakeTrackJets()
 
 
 // ----------------------------------------------------------------------------
-//! Make jets out of particle-flow elements
+//! Make jets out of particle-flow elements with background subtraction
 // ----------------------------------------------------------------------------
-void MakePFlowJets()
+void MakeHIPFlowJets()
 {
 
   // set verbosity
@@ -270,18 +270,18 @@ void MakePFlowJets()
 
 
 // ----------------------------------------------------------------------------
-//! Run jet reconstruction
+//! Run background-subtracted jet reconstruction
 // ----------------------------------------------------------------------------
 void HIJetReco()
 {
 
   // if simulation, make appropriate truth jets
-  if (Enable::HIJETS_MC && Enable::HIJETS_TRUTH) MakeTruthJets();
+  if (Enable::HIJETS_MC && Enable::HIJETS_TRUTH) MakeHITruthJets();
 
   // run approriate jet reconstruction routines
-  if (Enable::HIJETS_TOWER) MakeTowerJets();
-  if (Enable::HIJETS_TRACK) MakeTrackJets();
-  if (Enable::HIJETS_PFLOW) MakePFlowJets();
+  if (Enable::HIJETS_TOWER) MakeHITowerJets();
+  if (Enable::HIJETS_TRACK) MakeHITrackJets();
+  if (Enable::HIJETS_PFLOW) MakeHIPFlowJets();
 
 }
 
