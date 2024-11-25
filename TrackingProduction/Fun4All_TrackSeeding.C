@@ -115,20 +115,6 @@ void Fun4All_TrackSeeding(
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
-  CDBInterface *cdb = CDBInterface::instance();
-  std::string tpc_dv_calib_dir = cdb->getUrl("TPC_DRIFT_VELOCITY");
-  if (tpc_dv_calib_dir.empty())
-  {
-    std::cout << "No calibrated TPC drift velocity for Run " << runnumber << ". Use default value " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
-  }
-  else
-  {
-    CDBTTree *cdbttree = new CDBTTree(tpc_dv_calib_dir);
-    cdbttree->LoadCalibrations();
-    G4TPC::tpc_drift_velocity_reco = cdbttree->GetSingleFloatValue("tpc_drift_velocity");
-    std::cout << "Use calibrated TPC drift velocity for Run " << runnumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
-  }
-
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
   // to turn on the default static corrections, enable the two lines below
   //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
@@ -165,8 +151,8 @@ void Fun4All_TrackSeeding(
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
   // these get us to about 83% INTT > 1
-  silicon_Seeding->setinttRPhiSearchWindow(1.0);
-  silicon_Seeding->setinttZSearchWindow(7.0);
+  silicon_Seeding->setinttRPhiSearchWindow(0.4);
+  silicon_Seeding->setinttZSearchWindow(2.0);
   silicon_Seeding->seedAnalysis(false);
   se->registerSubsystem(silicon_Seeding);
 
