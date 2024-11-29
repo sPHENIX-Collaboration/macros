@@ -9,8 +9,8 @@
 #include <g4detectors/PHG4BlockSubsystem.h>
 #include <g4detectors/PHG4ConeSubsystem.h>
 #include <g4detectors/PHG4CylinderSubsystem.h>
-#include <g4detectors/PHG4DetectorSubsystem.h>
 #include <g4detectors/PHG4ZDCSubsystem.h>
+#include <g4detectors/PHG4DetectorSubsystem.h>
 
 #include <g4main/PHG4Reco.h>
 
@@ -37,17 +37,17 @@ namespace G4BEAMLINE
 {
   // the beampipes seem to add 2 no_overlaps - needs to be looked at
   // but this z position takes care of our current overlap issues
-  double starting_z = G4PIPE::max_z + 2 * no_overlapp;
-  double enclosure_z_max = 2050. + (800 - starting_z);
+  double starting_z =  G4PIPE::max_z + 2*no_overlapp;
+  double enclosure_z_max = 2050. + (800-starting_z);
   double enclosure_r_max = 30.;  // 30cm radius to cover magnets
   double enclosure_center = 0.5 * (starting_z + enclosure_z_max);
-  double skin_thickness = 0.;  // if center of magnet iron is black hole - thickness of Fe surrounding it
-  int pipe_id_offset = 300;
-  int roman_pot_pipe_id_offset = 400;
+  double skin_thickness = 0.; // if center of magnet iron is black hole - thickness of Fe surrounding it
+  int pipe_id_offset = 100;
+  int roman_pot_pipe_id_offset = 200;
   PHG4CylinderSubsystem *ForwardBeamLineEnclosure(nullptr);
   PHG4CylinderSubsystem *BackwardBeamLineEnclosure(nullptr);
 
-}  // namespace G4BEAMLINE
+}  // namespace BeamLine
 
 void BeamLineInit()
 {
@@ -64,7 +64,7 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
   int verbosity = std::max(Enable::VERBOSITY, Enable::BEAMLINE_VERBOSITY);
 
   G4BEAMLINE::ForwardBeamLineEnclosure = new PHG4CylinderSubsystem("ForwardBeamLineEnclosure");
-  G4BEAMLINE::ForwardBeamLineEnclosure->set_double_param("place_z", G4BEAMLINE::enclosure_center);
+  G4BEAMLINE::ForwardBeamLineEnclosure->set_double_param("place_z", G4BEAMLINE::enclosure_center );
   G4BEAMLINE::ForwardBeamLineEnclosure->set_double_param("radius", 0);
   G4BEAMLINE::ForwardBeamLineEnclosure->set_double_param("thickness", G4BEAMLINE::enclosure_r_max);
   G4BEAMLINE::ForwardBeamLineEnclosure->set_double_param("length", G4BEAMLINE::enclosure_z_max - G4BEAMLINE::starting_z);
@@ -90,7 +90,7 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
 
   // if you insert numbers it only displays those magnets, do not comment out the set declaration
   set<int> magnetlist;
-  // magnetlist.insert(7);
+  //magnetlist.insert(7);
 
   BeamLineMagnetSubsystem *bl = nullptr;
   std::ifstream infile(magFile);
@@ -203,7 +203,7 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
             bl->set_double_param("field_global_rot_y", AngleFlip(angle));  // abs. rotation to world for field manager
             bl->set_double_param("inner_radius", inner_radius_zin);
             bl->set_double_param("outer_radius", outer_magnet_diameter / 2.);
-            bl->set_double_param("skin_thickness", G4BEAMLINE::skin_thickness);
+            bl->set_double_param("skin_thickness",G4BEAMLINE::skin_thickness);
             bl->SetActive(AbsorberActive);
             bl->SetAbsorberActive(AbsorberActive);
             if (Enable::BEAMLINE_BLACKHOLE) bl->BlackHole();  // turn magnets into black holes
@@ -243,7 +243,7 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
   const double qlen[ntube] = {233.8, 233.8, 118.7, 118.7, 217.16, 217.16, 182.5, 182.5, 182.5, 182.5};
   const double qir[ntube] = {6.08, 6.08, 14.60, 14.60, 20.0, 20.0, 6.07, 6.07, 6.07, 6.07};
   const double qor[ntube] = {6.35, 6.35, 15.24, 15.24, 20.96, 20.96, 6.35, 6.35, 6.35, 6.35};
-  const double qrot[ntube] = {0, 0, 0, 0, 0, 0, 1.074, -1.074, -1.074, 1.074};  // degree
+  const double qrot[ntube] = {0, 0, 0, 0, 0, 0, 1.074, -1.074, -1.074, 1.074};  //degree
   const double qxC[ntube] = {0, 0, 0, 0, 0, 0, 12.820, -12.820, 12.820, -12.820};
   const double qyC[ntube] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   const double qzC[ntube] = {863.1, -863.1, 1474.470, -1474.470, 1642.4, -1642.4, 1843.2, 1843.2, -1843.2, -1843.2};
@@ -252,7 +252,7 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
     string name = "beamPipe" + nm[i];
     PHG4CylinderSubsystem *pipe = new PHG4CylinderSubsystem(name, G4BEAMLINE::pipe_id_offset + i);
     if (Enable::BEAMLINE_BLACKHOLE) pipe->BlackHole();
-    pipe->set_color(1, 0, 0, 1.);
+    pipe->set_color(1,0,0,1.);
     pipe->set_double_param("radius", qir[i]);
     pipe->set_double_param("thickness", qor[i] - qir[i]);
     pipe->set_double_param("length", qlen[i]);
@@ -283,7 +283,7 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
     g4Reco->registerSubsystem(pipe);
   }
 
-  // Roman Pot pipe
+  //Roman Pot pipe
   const int nSec = 2;
   const double len[nSec] = {20.87, 20.87};
   const double ir1[nSec] = {7.14, 14.60};
@@ -323,7 +323,7 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
     }
     if (AbsorberActive) pipe->SetActive();
     if (Enable::BEAMLINE_BLACKHOLE) pipe->BlackHole();
-    pipe->set_color(1, 0, 0, 1.);
+    pipe->set_color(1,0,0,1.);
     pipe->SuperDetector("PIPE");
     pipe->OverlapCheck(OverlapCheck);
     g4Reco->registerSubsystem(pipe);
