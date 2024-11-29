@@ -22,66 +22,44 @@ namespace Enable
 namespace G4PIPE
 {
   // STAR Beampipe for sPHENIX - based on STAR DWG 30006
-  double be_pipe_radius = 2.00025;    // 4.0005 cm inner diameter
-  double be_pipe_thickness = 0.0762;  // 0.762 mm
-  double be_pipe_length = 120.015;    // 120 cm or 47.25"
-  double be_pipe_zshift = -41.1639;   // amount Be pipe is shifted south
+  double be_pipe_radius = 2.00025;       // 4.0005 cm inner diameter
+  double be_pipe_thickness = 0.0762;     // 0.762 mm
+  double be_pipe_length = 120.015;       // 120 cm or 47.25"
+  double be_pipe_zshift = -41.1639;      // amount Be pipe is shifted south
 
-  double al_pipe_radius = be_pipe_radius;     // same as Be pipe
-  double al_pipe_thickness = 0.1397;          // 1.397 mm or 0.055"
-  double al_pipe_south_length = 101.486;      // Al extension south (from Dan's drawing, slight diff from STAR drawing)
-  double al_pipe_north_length = 61.51;        // Al extension north (from Dan's drawing, slight diff from STAR drawing)
+  double al_pipe_radius = 2.00025;       // same as Be pipe
+  double al_pipe_thickness = 0.1397;     // 1.397 mm or 0.055"
+  double al_pipe_south_length = 101.486; // Al extension south (from Dan's drawing, slight diff from STAR drawing)
+  double al_pipe_north_length = 61.51;   // Al extension north (from Dan's drawing, slight diff from STAR drawing)
   double al_pipe_north_ext_length = 123.393;  // additional north extension
 
-  double flange_thickness = 6.934 / 2 - (al_pipe_radius + al_pipe_thickness);  // Atlas 2.75" flange, radial thickness
-  double flange_length = 1.2825;                                               // Atlas 2.75" flange
+  double flange_thickness = 6.934/2 - (al_pipe_radius + al_pipe_thickness); // Atlas 2.75" flange, radial thickness
+  double flange_length = 1.2825;                                                // Atlas 2.75" flange
 
   double outer_pipe_precone_length = 22.86;
-  double outer_pipe_precone_radius = al_pipe_radius;  // same as Be pipe
-  double outer_pipe_thickness = al_pipe_thickness;    // 1.397 mm or 0.055"
+  double outer_pipe_precone_radius = 2.00025;       // same as Be pipe
+  double outer_pipe_thickness = 0.1397;             // 1.397 mm or 0.055"
   double outer_pipe_cone_length = 38.1;
   double outer_pipe_ext_radius = 3.81;    // past the cone
-  double outer_pipe_ext_length = 182.88;  // extension beyond first conical part to next flange
-
-  // prebellow length + bellow is 33.5cm
-  double prebellow_flange_thickness = 11.748 / 2 - (outer_pipe_ext_radius + outer_pipe_thickness);
-  double prebellow_flange_length = 3.962 / 2;
-  double prebellow_pipe_length = 10.960;
-
-  // Bellow information, no polycone class implemented in F4A, need to loop :(
-  int nRibs = 24;
-  double bellowLength = 14.764;
-  double bellow_trough = outer_pipe_ext_radius;         // trough is in line with beam pipe
-  double bellow_peak = outer_pipe_ext_radius + 0.9652;  // bellow peak is 0.76/2 inches above beam pipe
-
-  double postbellow_flange_thickness = 11.735 / 2 - (outer_pipe_ext_radius + outer_pipe_thickness);
-  double postbellow_flange_length = 3.810 / 2;
-  double postbellow_pipe_length = 2.54 + postbellow_flange_length + 0.2;
-
-  double final_pipe_precone_radius = outer_pipe_ext_radius;  // same as Be pipe
-  double final_pipe_thickness = 0.1651;
-  double final_pipe_cone_length = 27.94;
-  double final_pipe_radius = 6.35 - final_pipe_thickness;      // past the cone
-  double final_pipe_length = 233.68 - final_pipe_cone_length;  // extension beyond second conical part to the end of the drawing
-
-  // Shifts of beam pipe (2024)
-  double pipe_xshift = (5.161786 + 0.2) * 0.1;  // 5.161786 + 0.2 mm
-  double pipe_yshift = 0.0 * 0.1;               // 0.0 mm
-  double pipe_zshift = 0.751524 * 0.1;          // 0.751524 mm
+//  double outer_pipe_ext_length = 67.087;    // extension beyond conical part
+  double outer_pipe_ext_length = 100.;    // extension beyond conical part through epd
 
   // maximum extent of the central part of beampipe (the forward regions are implemented in G4_Beamline.C)
   double max_z = be_pipe_zshift + be_pipe_length / 2. + al_pipe_north_length + al_pipe_north_ext_length +
-                 outer_pipe_precone_length + outer_pipe_cone_length + outer_pipe_ext_length +
-                 prebellow_pipe_length + bellowLength + postbellow_pipe_length +
-                 final_pipe_cone_length + final_pipe_length + pipe_zshift;
+    outer_pipe_precone_length + outer_pipe_cone_length + outer_pipe_ext_length;
+
+  // Shifts of beam pipe (2024)
+  double pipe_xshift = (5.161786 + 0.2) * 0.1; // 5.161786 + 0.2 mm
+  double pipe_yshift = 0.0 * 0.1; // 0.0 mm
+  double pipe_zshift = 0.751524 * 0.1; // 0.751524 mm
 
 }  // namespace G4PIPE
 
 void PipeInit()
 {
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PIPE::max_z + no_overlapp);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -(G4PIPE::max_z + no_overlapp));
+  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PIPE::max_z + no_overlapp );
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -(G4PIPE::max_z + no_overlapp) );
 }
 
 double Pipe(PHG4Reco* g4Reco, double radius)
@@ -97,8 +75,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
     gSystem->Exit(-1);
   }
 
-  cout << "PHG4Reco::Registering Pipe Subsystems, PIPE_MISALIGNMENT = " << Enable::PIPE_MISALIGNMENT << endl
-       << " pipe is shifted by (x,y,z) = (" << G4PIPE::pipe_xshift << ", " << G4PIPE::pipe_yshift << ", " << G4PIPE::pipe_zshift << ") cm" << endl;
+  cout << "PHG4Reco::Registering Pipe Subsystems, PIPE_MISALIGNMENT = " << Enable::PIPE_MISALIGNMENT << endl << " pipe is shifted by (x,y,z) = (" << G4PIPE::pipe_xshift << ", " << G4PIPE::pipe_yshift << ", " << G4PIPE::pipe_zshift << ") cm" << endl;
 
   int ilayer = 0;
 
@@ -190,22 +167,22 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   g4Reco->registerSubsystem(cyl);
 
   // north flange 1A
-  double flange_place_z = G4PIPE::be_pipe_zshift + 0.5 * G4PIPE::be_pipe_length + G4PIPE::al_pipe_north_length;  // center of flange coupling
+  double flange_place_z = G4PIPE::be_pipe_zshift + 0.5 * G4PIPE::be_pipe_length + G4PIPE::al_pipe_north_length; // center of flange coupling
   // Al half, towards IP
   cyl = new PHG4CylinderSubsystem("N_FLANGE_1A_AL", ilayer++);
   if (Enable::PIPE_MISALIGNMENT)
   {
     cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
     cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z - 0.75 * G4PIPE::flange_length + G4PIPE::pipe_zshift);
+    cyl->set_double_param("place_z", flange_place_z - 0.75*G4PIPE::flange_length + G4PIPE::pipe_zshift);
   }
   else
   {
-    cyl->set_double_param("place_z", flange_place_z - 0.75 * G4PIPE::flange_length);
+    cyl->set_double_param("place_z", flange_place_z - 0.75*G4PIPE::flange_length);
   }
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::flange_length / 2);
+  cyl->set_double_param("length", G4PIPE::flange_length/2);
   cyl->set_string_param("material", "G4_Al");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
@@ -219,15 +196,15 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   {
     cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
     cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z - 0.25 * G4PIPE::flange_length + G4PIPE::pipe_zshift);
+    cyl->set_double_param("place_z", flange_place_z - 0.25*G4PIPE::flange_length + G4PIPE::pipe_zshift);
   }
   else
   {
-    cyl->set_double_param("place_z", flange_place_z - 0.25 * G4PIPE::flange_length);
+    cyl->set_double_param("place_z", flange_place_z - 0.25*G4PIPE::flange_length);
   }
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::flange_length / 2);
+  cyl->set_double_param("length", G4PIPE::flange_length/2);
   cyl->set_string_param("material", "G4_STAINLESS-STEEL");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
@@ -242,15 +219,15 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   {
     cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
     cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z + 0.25 * G4PIPE::flange_length + G4PIPE::pipe_zshift);
+    cyl->set_double_param("place_z", flange_place_z + 0.25*G4PIPE::flange_length + G4PIPE::pipe_zshift);
   }
   else
-  {
-    cyl->set_double_param("place_z", flange_place_z + 0.25 * G4PIPE::flange_length);
+  { 
+    cyl->set_double_param("place_z", flange_place_z + 0.25*G4PIPE::flange_length);
   }
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::flange_length / 2);
+  cyl->set_double_param("length", G4PIPE::flange_length/2);
   cyl->set_string_param("material", "G4_STAINLESS-STEEL");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
@@ -264,22 +241,22 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   {
     cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
     cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z + 0.75 * G4PIPE::flange_length + G4PIPE::pipe_zshift);
+    cyl->set_double_param("place_z", flange_place_z + 0.75*G4PIPE::flange_length + G4PIPE::pipe_zshift);
   }
   else
   {
-    cyl->set_double_param("place_z", flange_place_z + 0.75 * G4PIPE::flange_length);
+    cyl->set_double_param("place_z", flange_place_z + 0.75*G4PIPE::flange_length);
   }
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::flange_length / 2);
+  cyl->set_double_param("length", G4PIPE::flange_length/2);
   cyl->set_string_param("material", "G4_Al");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
   if (AbsorberActive) cyl->SetActive();
   cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(cyl);
-
+ 
   // north flange 2A
   flange_place_z = G4PIPE::be_pipe_zshift + 0.5 * G4PIPE::be_pipe_length + G4PIPE::al_pipe_north_length + G4PIPE::al_pipe_north_ext_length;
   // Al half, towards IP
@@ -288,15 +265,15 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   {
     cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
     cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z - 0.75 * G4PIPE::flange_length + G4PIPE::pipe_zshift);
+    cyl->set_double_param("place_z", flange_place_z - 0.75*G4PIPE::flange_length + G4PIPE::pipe_zshift);
   }
   else
   {
-    cyl->set_double_param("place_z", flange_place_z - 0.75 * G4PIPE::flange_length);
+    cyl->set_double_param("place_z", flange_place_z - 0.75*G4PIPE::flange_length);
   }
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::flange_length / 2);
+  cyl->set_double_param("length", G4PIPE::flange_length/2);
   cyl->set_string_param("material", "G4_Al");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
@@ -310,15 +287,15 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   {
     cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
     cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z - 0.25 * G4PIPE::flange_length + G4PIPE::pipe_zshift);
+    cyl->set_double_param("place_z", flange_place_z - 0.25*G4PIPE::flange_length + G4PIPE::pipe_zshift);
   }
   else
   {
-    cyl->set_double_param("place_z", flange_place_z - 0.25 * G4PIPE::flange_length);
+    cyl->set_double_param("place_z", flange_place_z - 0.25*G4PIPE::flange_length);
   }
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::flange_length / 2);
+  cyl->set_double_param("length", G4PIPE::flange_length/2);
   cyl->set_string_param("material", "G4_STAINLESS-STEEL");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
@@ -333,15 +310,15 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   {
     cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
     cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z + 0.25 * G4PIPE::flange_length + G4PIPE::pipe_zshift);
+    cyl->set_double_param("place_z", flange_place_z + 0.25*G4PIPE::flange_length + G4PIPE::pipe_zshift);
   }
   else
   {
-    cyl->set_double_param("place_z", flange_place_z + 0.25 * G4PIPE::flange_length);
+    cyl->set_double_param("place_z", flange_place_z + 0.25*G4PIPE::flange_length);
   }
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::flange_length / 2);
+  cyl->set_double_param("length", G4PIPE::flange_length/2);
   cyl->set_string_param("material", "G4_STAINLESS-STEEL");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
@@ -355,15 +332,15 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   {
     cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
     cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z + 0.75 * G4PIPE::flange_length + G4PIPE::pipe_zshift);
+    cyl->set_double_param("place_z", flange_place_z + 0.75*G4PIPE::flange_length + G4PIPE::pipe_zshift);
   }
   else
   {
-    cyl->set_double_param("place_z", flange_place_z + 0.75 * G4PIPE::flange_length);
+    cyl->set_double_param("place_z", flange_place_z + 0.75*G4PIPE::flange_length);
   }
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::flange_length / 2);
+  cyl->set_double_param("length", G4PIPE::flange_length/2);
   cyl->set_string_param("material", "G4_Al");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
@@ -423,15 +400,15 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   {
     cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
     cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z + 0.75 * G4PIPE::flange_length + G4PIPE::pipe_zshift);
+    cyl->set_double_param("place_z", flange_place_z + 0.75*G4PIPE::flange_length + G4PIPE::pipe_zshift);
   }
-  else
+  else 
   {
-    cyl->set_double_param("place_z", flange_place_z + 0.75 * G4PIPE::flange_length);
+    cyl->set_double_param("place_z", flange_place_z + 0.75*G4PIPE::flange_length);
   }
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::flange_length / 2);
+  cyl->set_double_param("length", G4PIPE::flange_length/2);
   cyl->set_string_param("material", "G4_Al");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
@@ -445,15 +422,15 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   {
     cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
     cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z + 0.25 * G4PIPE::flange_length + G4PIPE::pipe_zshift);
+    cyl->set_double_param("place_z", flange_place_z + 0.25*G4PIPE::flange_length + G4PIPE::pipe_zshift);
   }
   else
   {
-    cyl->set_double_param("place_z", flange_place_z + 0.25 * G4PIPE::flange_length);
-  }
+    cyl->set_double_param("place_z", flange_place_z + 0.25*G4PIPE::flange_length);
+  } 
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::flange_length / 2);
+  cyl->set_double_param("length", G4PIPE::flange_length/2);
   cyl->set_string_param("material", "G4_STAINLESS-STEEL");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
@@ -468,15 +445,15 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   {
     cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
     cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z - 0.25 * G4PIPE::flange_length + G4PIPE::pipe_zshift);
+    cyl->set_double_param("place_z", flange_place_z - 0.25*G4PIPE::flange_length + G4PIPE::pipe_zshift);
   }
   else
   {
-    cyl->set_double_param("place_z", flange_place_z - 0.25 * G4PIPE::flange_length);
+    cyl->set_double_param("place_z", flange_place_z - 0.25*G4PIPE::flange_length);
   }
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::flange_length / 2);
+  cyl->set_double_param("length", G4PIPE::flange_length/2);
   cyl->set_string_param("material", "G4_STAINLESS-STEEL");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
@@ -490,15 +467,15 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   {
     cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
     cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z - 0.75 * G4PIPE::flange_length + G4PIPE::pipe_zshift);
+    cyl->set_double_param("place_z", flange_place_z - 0.75*G4PIPE::flange_length + G4PIPE::pipe_zshift);
   }
   else
   {
-    cyl->set_double_param("place_z", flange_place_z - 0.75 * G4PIPE::flange_length);
+    cyl->set_double_param("place_z", flange_place_z - 0.75*G4PIPE::flange_length);
   }
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius + G4PIPE::al_pipe_thickness);
   cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::flange_length / 2);
+  cyl->set_double_param("length", G4PIPE::flange_length/2);
   cyl->set_string_param("material", "G4_Al");
   cyl->set_double_param("thickness", G4PIPE::flange_thickness);
   cyl->SuperDetector("PIPE");
@@ -593,7 +570,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   g4Reco->registerSubsystem(cone);
 
   /* north outermost pipe (extension) [vacuum] */
-  north_pipe_place_z += 0.5 * (G4PIPE::outer_pipe_cone_length + G4PIPE::outer_pipe_ext_length);
+  north_pipe_place_z += 0.5 * G4PIPE::outer_pipe_cone_length + 0.5 * G4PIPE::outer_pipe_ext_length;
   cyl = new PHG4CylinderSubsystem("VAC_N_OUTER_PIPE_EXT", ilayer++);
   if (Enable::PIPE_MISALIGNMENT)
   {
@@ -631,51 +608,6 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::outer_pipe_ext_length);
   cyl->set_string_param("material", "G4_Al");
-  cyl->set_double_param("thickness", G4PIPE::outer_pipe_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  /* north outermost pipe (extension) [vacuum] */
-  north_pipe_place_z += 0.5 * (G4PIPE::outer_pipe_ext_length + G4PIPE::prebellow_pipe_length);
-  cyl = new PHG4CylinderSubsystem("VAC_N_OUTER_PIPE_SS", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp);
-  }
-  cyl->set_double_param("radius", 0.);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::prebellow_pipe_length);
-  cyl->set_string_param("material", "G4_Galactic");
-  cyl->set_double_param("thickness", G4PIPE::outer_pipe_ext_radius);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  /* north outermost pipe (extension) */
-  cyl = new PHG4CylinderSubsystem("N_OUTER_PIPE_SS", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::prebellow_pipe_length);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
   cyl->set_double_param("thickness", G4PIPE::outer_pipe_thickness);
   cyl->SuperDetector("PIPE");
   if (AbsorberActive) cyl->SetActive();
@@ -767,7 +699,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   g4Reco->registerSubsystem(cone);
 
   /* south outermost pipe (extension) [vacuum] */
-  south_pipe_place_z -= 0.5 * (G4PIPE::outer_pipe_cone_length + G4PIPE::outer_pipe_ext_length);
+  south_pipe_place_z -= (0.5 * G4PIPE::outer_pipe_cone_length + 0.5 * G4PIPE::outer_pipe_ext_length);
   cyl = new PHG4CylinderSubsystem("VAC_S_OUTER_PIPE_EXT", ilayer++);
   if (Enable::PIPE_MISALIGNMENT)
   {
@@ -811,755 +743,12 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl->OverlapCheck(OverlapCheck);
   g4Reco->registerSubsystem(cyl);
 
-  /* south outermost pipe (extension) [vacuum] */
-  south_pipe_place_z -= 0.5 * (G4PIPE::outer_pipe_ext_length + G4PIPE::prebellow_pipe_length);
-  cyl = new PHG4CylinderSubsystem("VAC_S_OUTER_PIPE_SS", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp);
-  }
-  cyl->set_double_param("radius", 0.);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::prebellow_pipe_length);
-  cyl->set_string_param("material", "G4_Galactic");
-  cyl->set_double_param("thickness", G4PIPE::outer_pipe_ext_radius);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  /* south outermost pipe (extension) */
-  cyl = new PHG4CylinderSubsystem("S_OUTER_PIPE_SS", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::prebellow_pipe_length);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
-  cyl->set_double_param("thickness", G4PIPE::outer_pipe_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // north flange 3A
-  flange_place_z = G4PIPE::be_pipe_zshift + 0.5 * G4PIPE::be_pipe_length + G4PIPE::al_pipe_north_length + G4PIPE::al_pipe_north_ext_length + G4PIPE::outer_pipe_precone_length + G4PIPE::outer_pipe_cone_length + G4PIPE::outer_pipe_ext_length;  // center of flange coupling
-  // Al half, towards IP
-  cyl = new PHG4CylinderSubsystem("N_FLANGE_3A_AL", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z - 0.75 * G4PIPE::prebellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", flange_place_z - 0.75 * G4PIPE::prebellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::prebellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_Al");
-  cyl->set_double_param("thickness", G4PIPE::prebellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // SS half, away from IP
-  cyl = new PHG4CylinderSubsystem("N_FLANGE_3A_SS", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z - 0.25 * G4PIPE::prebellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", flange_place_z - 0.25 * G4PIPE::prebellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::prebellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
-  cyl->set_double_param("thickness", G4PIPE::prebellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // north flange 3B
-  // SS half, towards IP
-  cyl = new PHG4CylinderSubsystem("N_FLANGE_3B_SS", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z + 0.25 * G4PIPE::prebellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", flange_place_z + 0.25 * G4PIPE::prebellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::prebellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
-  cyl->set_double_param("thickness", G4PIPE::prebellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // Al half, away from IP
-  cyl = new PHG4CylinderSubsystem("N_FLANGE_3B_Al", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z + 0.75 * G4PIPE::prebellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", flange_place_z + 0.75 * G4PIPE::prebellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::prebellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_Al");
-  cyl->set_double_param("thickness", G4PIPE::prebellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // south flange 3A
-  flange_place_z = G4PIPE::be_pipe_zshift - 0.5 * G4PIPE::be_pipe_length - G4PIPE::al_pipe_south_length - G4PIPE::outer_pipe_precone_length - G4PIPE::outer_pipe_cone_length - G4PIPE::outer_pipe_ext_length;  // center of flange coupling
-  // Al half, towards IP
-  cyl = new PHG4CylinderSubsystem("S_FLANGE_3A_AL", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z - 0.75 * G4PIPE::prebellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", flange_place_z - 0.75 * G4PIPE::prebellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::prebellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_Al");
-  cyl->set_double_param("thickness", G4PIPE::prebellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // SS half, away from IP
-  cyl = new PHG4CylinderSubsystem("S_FLANGE_3A_SS", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z - 0.25 * G4PIPE::prebellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", flange_place_z - 0.25 * G4PIPE::prebellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::prebellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
-  cyl->set_double_param("thickness", G4PIPE::prebellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // south flange 3B
-  // SS half, towards IP
-  cyl = new PHG4CylinderSubsystem("S_FLANGE_3B_SS", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z + 0.25 * G4PIPE::prebellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", flange_place_z + 0.25 * G4PIPE::prebellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::prebellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
-  cyl->set_double_param("thickness", G4PIPE::prebellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // Al half, away from IP
-  cyl = new PHG4CylinderSubsystem("S_FLANGE_3B_Al", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", flange_place_z + 0.75 * G4PIPE::prebellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", flange_place_z + 0.75 * G4PIPE::prebellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::prebellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_Al");
-  cyl->set_double_param("thickness", G4PIPE::prebellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  /* Make bellow. We have no polycone implementation here so need to use a loop */
-
-  double bellow_half_period = 0.5 * G4PIPE::bellowLength / G4PIPE::nRibs;  // Cone length for bellow is half the separation between each rib
-  std::string sides[2] = {"N", "S"};
-  std::string materials[2] = {"G4_Galactic", "G4_STAINLESS-STEEL"};
-
-  for (auto& side : sides)
-  {
-    for (int i = 0; i < G4PIPE::nRibs; ++i)
-    {
-      for (auto& material : materials)
-      {
-        int sign = side == "N" ? +1 : -1;
-
-        std::string name_rib_peak = side + "_BELLOW_PEAK_" + std::to_string(i);
-        std::string name_rib_trough = side + "_BELLOW_TROUGH_" + std::to_string(i);
-
-        if (material == "G4_Galactic")
-        {
-          name_rib_peak = "VAC_" + name_rib_peak;
-          name_rib_trough = "VAC_" + name_rib_trough;
-        }
-
-        double first_radius_inner = material == "G4_Galactic" ? 0. : G4PIPE::bellow_trough;
-        double second_radius_inner = material == "G4_Galactic" ? 0. : G4PIPE::bellow_peak;
-        double first_radius_outer = material == "G4_Galactic" ? G4PIPE::bellow_trough : G4PIPE::bellow_trough + G4PIPE::outer_pipe_thickness;
-        double second_radius_outer = material == "G4_Galactic" ? G4PIPE::bellow_peak : G4PIPE::bellow_peak + G4PIPE::outer_pipe_thickness;
-
-        double bellow_peak_z_position = side == "N" ? north_pipe_place_z + 0.5 * (G4PIPE::prebellow_pipe_length) + (2 * i + 0.5) * (bellow_half_period)
-                                                    : south_pipe_place_z - 0.5 * (G4PIPE::prebellow_pipe_length) - (2 * i + 0.5) * (bellow_half_period);
-        double bellow_trough_z_position = side == "N" ? bellow_peak_z_position + bellow_half_period : bellow_peak_z_position - 1 * bellow_half_period;
-
-        double firstPlacement = side == "N" ? bellow_peak_z_position : bellow_trough_z_position;
-        double secondPlacement = side == "N" ? bellow_trough_z_position : bellow_peak_z_position;
-
-        cone = new PHG4ConeSubsystem(name_rib_peak, ilayer++);
-        cone->SetR1(first_radius_inner, first_radius_outer);
-        cone->SetR2(second_radius_inner, second_radius_outer);
-        cone->SetZlength(bellow_half_period / 2);
-        if (Enable::PIPE_MISALIGNMENT)
-        {
-          cone->SetPlace(G4PIPE::pipe_xshift, G4PIPE::pipe_yshift, firstPlacement + sign * no_overlapp + G4PIPE::pipe_zshift);
-        }
-        else
-        {
-          cone->SetPlaceZ(firstPlacement + sign * no_overlapp);
-        }
-        cone->SetMaterial(material.c_str());
-        cone->SuperDetector("PIPE");
-        if (AbsorberActive) cone->SetActive();
-        cone->OverlapCheck(OverlapCheck);
-        g4Reco->registerSubsystem(cone);
-
-        cone = new PHG4ConeSubsystem(name_rib_trough, ilayer++);
-        cone->SetR1(second_radius_inner, second_radius_outer);
-        cone->SetR2(first_radius_inner, first_radius_outer);
-        cone->SetZlength(bellow_half_period / 2);
-        if (Enable::PIPE_MISALIGNMENT)
-        {
-          cone->SetPlace(G4PIPE::pipe_xshift, G4PIPE::pipe_yshift, secondPlacement + sign * no_overlapp + G4PIPE::pipe_zshift);
-        }
-        else
-        {
-          cone->SetPlaceZ(secondPlacement + sign * no_overlapp);
-        }
-        cone->SetMaterial(material.c_str());
-        cone->SuperDetector("PIPE");
-        if (AbsorberActive) cone->SetActive();
-        cone->OverlapCheck(OverlapCheck);
-        g4Reco->registerSubsystem(cone);
-      }
-    }
-  }
-
-  /* north postbellow flange connection [vacuum] */
-  north_pipe_place_z += 0.5 * (G4PIPE::prebellow_pipe_length + 2 * G4PIPE::bellowLength + G4PIPE::postbellow_pipe_length);
-  cyl = new PHG4CylinderSubsystem("VAC_N_POSTBELLOW_PIPE", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp);
-  }
-  cyl->set_double_param("radius", 0.);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::postbellow_pipe_length);
-  cyl->set_string_param("material", "G4_Galactic");
-  cyl->set_double_param("thickness", G4PIPE::outer_pipe_ext_radius);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  /* north outermost pipe (extension) */
-  cyl = new PHG4CylinderSubsystem("N_POSTBELLOW_PIPE", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::postbellow_pipe_length);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
-  cyl->set_double_param("thickness", G4PIPE::outer_pipe_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  /* south postbellow flange connection [vacuum] */
-  south_pipe_place_z -= 0.5 * (G4PIPE::prebellow_pipe_length + 2 * G4PIPE::bellowLength + G4PIPE::postbellow_pipe_length);
-  cyl = new PHG4CylinderSubsystem("VAC_S_POSTBELLOW_PIPE", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp);
-  }
-  cyl->set_double_param("radius", 0.);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::postbellow_pipe_length);
-  cyl->set_string_param("material", "G4_Galactic");
-  cyl->set_double_param("thickness", G4PIPE::outer_pipe_ext_radius);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  /* south outermost pipe (extension) */
-  cyl = new PHG4CylinderSubsystem("S_POSTBELLOW_PIPE", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::postbellow_pipe_length);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
-  cyl->set_double_param("thickness", G4PIPE::outer_pipe_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // north flange 4A
-  flange_place_z = G4PIPE::be_pipe_zshift + (0.5 * G4PIPE::be_pipe_length + G4PIPE::al_pipe_north_length + G4PIPE::al_pipe_north_ext_length + G4PIPE::outer_pipe_precone_length + G4PIPE::outer_pipe_cone_length + G4PIPE::outer_pipe_ext_length  // center of flange coupling
-                                             + G4PIPE::prebellow_pipe_length + G4PIPE::bellowLength + 0.5 * G4PIPE::postbellow_flange_length + bellow_half_period);                                                                               // center of flange coupling
-  // Al half, towards IP
-  cyl = new PHG4CylinderSubsystem("N_FLANGE_4A_AL", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", north_pipe_place_z - 0.75 * G4PIPE::postbellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", north_pipe_place_z - 0.75 * G4PIPE::postbellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::postbellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_Al");
-  cyl->set_double_param("thickness", G4PIPE::postbellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // SS half, away from IP
-  cyl = new PHG4CylinderSubsystem("N_FLANGE_4A_SS", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", north_pipe_place_z - 0.25 * G4PIPE::postbellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", north_pipe_place_z - 0.25 * G4PIPE::postbellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::postbellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
-  cyl->set_double_param("thickness", G4PIPE::postbellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // north flange 4B
-  // SS half, towards IP
-  cyl = new PHG4CylinderSubsystem("N_FLANGE_4B_SS", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", north_pipe_place_z + 0.25 * G4PIPE::postbellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", north_pipe_place_z + 0.25 * G4PIPE::postbellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::postbellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
-  cyl->set_double_param("thickness", G4PIPE::postbellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // Al half, away from IP
-  cyl = new PHG4CylinderSubsystem("N_FLANGE_4B_Al", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", north_pipe_place_z + 0.75 * G4PIPE::postbellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", north_pipe_place_z + 0.75 * G4PIPE::postbellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::postbellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_Al");
-  cyl->set_double_param("thickness", G4PIPE::postbellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // south flange 4A
-  flange_place_z = G4PIPE::be_pipe_zshift - (0.5 * G4PIPE::be_pipe_length + G4PIPE::al_pipe_south_length + G4PIPE::outer_pipe_precone_length + G4PIPE::outer_pipe_cone_length + G4PIPE::outer_pipe_ext_length + G4PIPE::prebellow_pipe_length + G4PIPE::bellowLength + 0.5 * G4PIPE::postbellow_flange_length + bellow_half_period);  // center of flange coupling
-
-  // Al half, towards IP
-  cyl = new PHG4CylinderSubsystem("S_FLANGE_4A_AL", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", south_pipe_place_z - 0.75 * G4PIPE::postbellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", south_pipe_place_z - 0.75 * G4PIPE::postbellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::postbellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_Al");
-  cyl->set_double_param("thickness", G4PIPE::postbellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // SS half, away from IP
-  cyl = new PHG4CylinderSubsystem("S_FLANGE_4A_SS", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", south_pipe_place_z - 0.25 * G4PIPE::postbellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", south_pipe_place_z - 0.25 * G4PIPE::postbellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::postbellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
-  cyl->set_double_param("thickness", G4PIPE::postbellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // south flange 4B
-  // SS half, towards IP
-  cyl = new PHG4CylinderSubsystem("S_FLANGE_4B_SS", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", south_pipe_place_z + 0.25 * G4PIPE::postbellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", south_pipe_place_z + 0.25 * G4PIPE::postbellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::postbellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
-  cyl->set_double_param("thickness", G4PIPE::postbellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  // Al half, away from IP
-  cyl = new PHG4CylinderSubsystem("S_FLANGE_4B_Al", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", south_pipe_place_z + 0.75 * G4PIPE::postbellow_flange_length + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", south_pipe_place_z + 0.75 * G4PIPE::postbellow_flange_length);
-  }
-  cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::postbellow_flange_length / 2);
-  cyl->set_string_param("material", "G4_Al");
-  cyl->set_double_param("thickness", G4PIPE::postbellow_flange_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  /* north final pipe (conical part) [vacuum] */
-  north_pipe_place_z += 0.5 * (G4PIPE::postbellow_pipe_length + G4PIPE::final_pipe_cone_length);
-  cone = new PHG4ConeSubsystem("VAC_N_SS_PIPE_CONE", ilayer++);
-  cone->SetR2(0., G4PIPE::final_pipe_radius);
-  cone->SetR1(0., G4PIPE::final_pipe_precone_radius);
-  cone->SetZlength(G4PIPE::final_pipe_cone_length / 2);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cone->SetPlace(G4PIPE::pipe_xshift, G4PIPE::pipe_yshift, north_pipe_place_z + no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cone->SetPlaceZ(north_pipe_place_z + no_overlapp);
-  }
-  cone->SetMaterial("G4_Galactic");
-  cone->SuperDetector("PIPE");
-  if (AbsorberActive) cone->SetActive();
-  cone->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cone);
-
-  /* north final pipe (conical part) */
-  cone = new PHG4ConeSubsystem("N_FINAL_PIPE_CONE", ilayer++);
-  cone->SetR2(G4PIPE::final_pipe_radius, G4PIPE::final_pipe_radius + G4PIPE::final_pipe_thickness);
-  cone->SetR1(G4PIPE::final_pipe_precone_radius, G4PIPE::final_pipe_precone_radius + G4PIPE::final_pipe_thickness);
-  cone->SetZlength(G4PIPE::final_pipe_cone_length / 2);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cone->SetPlace(G4PIPE::pipe_xshift, G4PIPE::pipe_yshift, north_pipe_place_z + no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cone->SetPlaceZ(north_pipe_place_z + no_overlapp);
-  }
-  cone->SetMaterial("G4_STAINLESS-STEEL");
-  cone->SuperDetector("PIPE");
-  if (AbsorberActive) cone->SetActive();
-  cone->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cone);
-
-  /* north final pipe (extension) [vacuum] */
-  north_pipe_place_z += 0.5 * (G4PIPE::final_pipe_cone_length + G4PIPE::final_pipe_length);
-  cyl = new PHG4CylinderSubsystem("VAC_N_FINAL_PIPE_EXT", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp);
-  }
-  cyl->set_double_param("radius", 0.);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::final_pipe_length);
-  cyl->set_string_param("material", "G4_Galactic");
-  cyl->set_double_param("thickness", G4PIPE::final_pipe_radius);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  /* north final pipe (extension) */
-  cyl = new PHG4CylinderSubsystem("N_FINAL_PIPE_EXT", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp);
-  }
-  cyl->set_double_param("radius", G4PIPE::final_pipe_radius);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::final_pipe_length);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
-  cyl->set_double_param("thickness", G4PIPE::final_pipe_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  /* south final pipe (conical part) [vacuum] */
-  south_pipe_place_z -= 0.5 * (G4PIPE::postbellow_pipe_length + G4PIPE::final_pipe_cone_length);
-  cone = new PHG4ConeSubsystem("VAC_S_SS_PIPE_CONE", ilayer++);
-  cone->SetR1(0., G4PIPE::final_pipe_radius);
-  cone->SetR2(0., G4PIPE::final_pipe_precone_radius);
-  cone->SetZlength(G4PIPE::final_pipe_cone_length / 2);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cone->SetPlace(G4PIPE::pipe_xshift, G4PIPE::pipe_yshift, south_pipe_place_z - no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cone->SetPlaceZ(south_pipe_place_z - no_overlapp);
-  }
-  cone->SetMaterial("G4_Galactic");
-  cone->SuperDetector("PIPE");
-  if (AbsorberActive) cone->SetActive();
-  cone->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cone);
-
-  /* south final pipe (conical part) */
-  cone = new PHG4ConeSubsystem("S_FINAL_PIPE_CONE", ilayer++);
-  cone->SetR1(G4PIPE::final_pipe_radius, G4PIPE::final_pipe_radius + G4PIPE::final_pipe_thickness);
-  cone->SetR2(G4PIPE::final_pipe_precone_radius, G4PIPE::final_pipe_precone_radius + G4PIPE::final_pipe_thickness);
-  cone->SetZlength(G4PIPE::final_pipe_cone_length / 2);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cone->SetPlace(G4PIPE::pipe_xshift, G4PIPE::pipe_yshift, south_pipe_place_z - no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cone->SetPlaceZ(south_pipe_place_z - no_overlapp);
-  }
-  cone->SetMaterial("G4_STAINLESS-STEEL");
-  cone->SuperDetector("PIPE");
-  if (AbsorberActive) cone->SetActive();
-  cone->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cone);
-
-  /* south final pipe (extension) [vacuum] */
-  south_pipe_place_z -= 0.5 * (G4PIPE::final_pipe_cone_length + G4PIPE::final_pipe_length);
-  cyl = new PHG4CylinderSubsystem("VAC_S_FINAL_PIPE_EXT", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp);
-  }
-  cyl->set_double_param("radius", 0.);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::final_pipe_length);
-  cyl->set_string_param("material", "G4_Galactic");
-  cyl->set_double_param("thickness", G4PIPE::final_pipe_radius);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  /* south final pipe (extension) */
-  cyl = new PHG4CylinderSubsystem("S_FINAL_PIPE_EXT", ilayer++);
-  if (Enable::PIPE_MISALIGNMENT)
-  {
-    cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
-    cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-    cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp + G4PIPE::pipe_zshift);
-  }
-  else
-  {
-    cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp);
-  }
-  cyl->set_double_param("radius", G4PIPE::final_pipe_radius);
-  cyl->set_int_param("lengthviarapidity", 0);
-  cyl->set_double_param("length", G4PIPE::final_pipe_length);
-  cyl->set_string_param("material", "G4_STAINLESS-STEEL");
-  cyl->set_double_param("thickness", G4PIPE::final_pipe_thickness);
-  cyl->SuperDetector("PIPE");
-  if (AbsorberActive) cyl->SetActive();
-  cyl->OverlapCheck(OverlapCheck);
-  g4Reco->registerSubsystem(cyl);
-
-  radius = G4PIPE::final_pipe_radius + G4PIPE::final_pipe_thickness;
+  radius = G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness;
 
   if (verbosity > 0)
   {
     cout << "=========================== G4_Pipe.C::Pipe() =============================" << endl;
-    cout << " Beryllium Pipe Material Description:" << endl;
+    cout << " PIPE Material Description:" << endl;
     cout << "  inner radius = " << G4PIPE::be_pipe_radius << " cm" << endl;
     cout << "  thickness = " << G4PIPE::be_pipe_thickness << " cm" << endl;
     cout << "  outer radius = " << G4PIPE::be_pipe_radius + G4PIPE::be_pipe_thickness << " cm" << endl;
