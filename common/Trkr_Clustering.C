@@ -117,6 +117,7 @@ void Tpc_HitUnpacking(const std::string& ebdc="")
     {
       tpcunpacker->ReadZeroSuppressedData();
     }
+  tpcunpacker->doBaselineCorr(TRACKING::tpc_baseline_corr);
   tpcunpacker->Verbosity(verbosity);
   se->registerSubsystem(tpcunpacker);
 }
