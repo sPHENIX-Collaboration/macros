@@ -75,6 +75,7 @@ namespace TRACKING
   int reco_tpc_maxtime_sample = 425;
   int reco_tpc_time_presample = 40;//120 - 80
   bool tpc_zero_supp = false;
+  bool tpc_baseline_corr = false;
 
 }  // namespace TRACKING
 

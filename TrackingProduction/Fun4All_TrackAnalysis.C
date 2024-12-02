@@ -64,7 +64,6 @@ void Fun4All_TrackAnalysis(
   int runnumber = runseg.first;
   int segment = runseg.second;
 
-  TpcReadoutInit(runnumber);
   std::cout << " run: " << runnumber
             << " samples: " << TRACKING::reco_tpc_maxtime_sample
             << " pre: " << TRACKING::reco_tpc_time_presample
@@ -97,24 +96,19 @@ void Fun4All_TrackAnalysis(
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
-  CDBInterface *cdb = CDBInterface::instance();
-  std::string tpc_dv_calib_dir = cdb->getUrl("TPC_DRIFT_VELOCITY");
-  if (tpc_dv_calib_dir.empty())
-  {
-    std::cout << "No calibrated TPC drift velocity for Run " << runnumber << ". Use default value " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
-  }
-  else
-  {
-    CDBTTree *cdbttree = new CDBTTree(tpc_dv_calib_dir);
-    cdbttree->LoadCalibrations();
-    G4TPC::tpc_drift_velocity_reco = cdbttree->GetSingleFloatValue("tpc_drift_velocity");
-    std::cout << "Use calibrated TPC drift velocity for Run " << runnumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
-  }
+  TpcReadoutInit( runnumber );
 
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
-  // to turn on the default static corrections, enable the two lines below
+
+  //to turn on the default static corrections, enable the two lines below
   //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
-  // G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS = false;
+  //G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
+
+  //to turn on the average corrections derived from simulation, enable the three lines below
+  //note: these are designed to be used only if static corrections are also applied
+  //G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
+  //G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
+  //G4TPC:average_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/average_minus_static_distortion_inverted_10-new.root";
 
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
@@ -160,6 +154,11 @@ void Fun4All_TrackAnalysis(
     actsFit->useOutlierFinder(false);
     actsFit->setFieldMap(G4MAGNET::magfield_tracking);
     se->registerSubsystem(actsFit);
+
+    auto cleaner = new PHTrackCleaner();
+    cleaner->Verbosity(0);
+    cleaner->set_pp_mode(TRACKING::pp_mode);    
+    se->registerSubsystem(cleaner);
 
     if (G4TRACKING::SC_CALIBMODE)
     {
