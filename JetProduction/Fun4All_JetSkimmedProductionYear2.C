@@ -172,7 +172,6 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   outhigher->StripNode("TOWERINFO_CALIB_HCALOUT");
   outhigher->StripNode("TOWERS_HCALOUT");
   outhigher->StripNode("TOWERINFO_CALIB_CEMC");
-  outhigher->StripNode("TOWERINFO_CALIB_CEMC_RETOWER");
   outhigher->StripNode("TOWERS_CEMC");
   outhigher->StripNode("TOWERS_SEPD");
   outhigher->StripNode("TOWERINFO_CALIB_ZDC");
