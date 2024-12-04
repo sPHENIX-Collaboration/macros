@@ -69,6 +69,13 @@ void Fun4All_ZFAllTrackers(
   int runnumber = runseg.first;
   int segment = runseg.second;
 
+  auto rc = recoConsts::instance();
+  rc->set_IntFlag("RUNNUMBER", runnumber);
+  Enable::CDB = true;
+  rc->set_StringFlag("CDB_GLOBALTAG", "2024p008");
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
+  std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
+
   TpcReadoutInit( runnumber );
   std::cout<< " run: " << runnumber
 	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
@@ -83,13 +90,6 @@ void Fun4All_ZFAllTrackers(
   std::string theOutfile = outfile.Data();
   auto se = Fun4AllServer::instance();
   se->Verbosity(1);
-  auto rc = recoConsts::instance();
-  rc->set_IntFlag("RUNNUMBER", runnumber);
-
-  Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
-  rc->set_uint64Flag("TIMESTAMP", runnumber);
-  std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
   ingeo->AddFile(geofile);
@@ -136,10 +136,37 @@ void Fun4All_ZFAllTrackers(
 
   Micromegas_Clustering();
 
+  // this now does Si and TPC seeding only
   Tracking_Reco_TrackSeed_ZeroField();
+
+  auto silicon_match = new PHSiliconTpcTrackMatching;
+  silicon_match->Verbosity(0);
+  silicon_match->set_x_search_window(0.36);
+  silicon_match->set_y_search_window(0.36);
+  silicon_match->set_z_search_window(2.5); 
+  silicon_match->set_phi_search_window(0.014);
+  silicon_match->set_eta_search_window(0.0091);
+  silicon_match->set_test_windows_printout(false);
+  silicon_match->set_pp_mode(TRACKING::pp_mode);
+  silicon_match->zeroField(true);
+  se->registerSubsystem(silicon_match);
+
+  auto mm_match = new PHMicromegasTpcTrackMatching;
+  mm_match->Verbosity(0);
+
+  // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
+  mm_match->set_rphi_search_window_lyr1(0.4);
+  mm_match->set_rphi_search_window_lyr2(13.0);
+  mm_match->set_z_search_window_lyr1(26.0);
+  mm_match->set_z_search_window_lyr2(0.4);
+
+  mm_match->set_min_tpc_layer(38);            // layer in TPC to start projection fit
+  mm_match->set_test_windows_printout(true);  // used for tuning search windows only
+  se->registerSubsystem(mm_match);
 
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
+
     auto converter = new TrackSeedTrackMapConverter;
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
@@ -169,7 +196,11 @@ void Fun4All_ZFAllTrackers(
     actsFit->setFieldMap(G4MAGNET::magfield_tracking);
     se->registerSubsystem(actsFit);
   }
+
+
+
   PHSimpleVertexFinder *finder = new PHSimpleVertexFinder;
+  finder->zeroField(true);
   finder->Verbosity(0);
   finder->setDcaCut(0.5);
   finder->setTrackPtCut(-99999.);
