@@ -252,11 +252,10 @@ void Fun4All_FullReconstruction(
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
   auto mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(0);
-  mm_match->set_rphi_search_window_lyr1(3.);
-  mm_match->set_rphi_search_window_lyr2(15.0);
-  mm_match->set_z_search_window_lyr1(30.0);
-  mm_match->set_z_search_window_lyr2(3.);
-
+  mm_match->set_rphi_search_window_lyr1(3);
+  mm_match->set_rphi_search_window_lyr2(15);
+  mm_match->set_z_search_window_lyr1(30);
+  mm_match->set_z_search_window_lyr2(3);
   mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
   mm_match->set_test_windows_printout(false);  // used for tuning search windows only
   se->registerSubsystem(mm_match);
