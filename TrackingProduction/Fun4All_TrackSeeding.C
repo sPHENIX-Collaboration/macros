@@ -281,7 +281,7 @@ void Fun4All_TrackSeeding(
 
     auto cleaner = new PHTrackCleaner();
     cleaner->Verbosity(0);
-    cleaner->set_pp_mode(TRACKING::pp_mode);    
+    cleaner->set_pp_mode(TRACKING::pp_mode);
     se->registerSubsystem(cleaner);
 
     if (G4TRACKING::SC_CALIBMODE)
@@ -319,7 +319,7 @@ void Fun4All_TrackSeeding(
      Global_Reco();
 
   //KFParticle setup
-  
+
   KFParticle_sPHENIX *kfparticle = new KFParticle_sPHENIX("myKShortReco");
   kfparticle->Verbosity(1);
   kfparticle->setDecayDescriptor("K_S0 -> pi^+ pi^-");
