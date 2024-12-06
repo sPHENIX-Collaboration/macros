@@ -108,7 +108,7 @@ void Fun4All_FullReconstruction(
   se->registerInputManager(ingeo);
 
   TpcReadoutInit( runnumber );
-  
+
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
   //Flag for running the tpc hit unpacker with zero suppression on
   TRACKING::tpc_zero_supp = true;
@@ -301,7 +301,7 @@ void Fun4All_FullReconstruction(
 
     auto cleaner = new PHTrackCleaner();
     cleaner->Verbosity(0);
-    cleaner->set_pp_mode(TRACKING::pp_mode);    
+    cleaner->set_pp_mode(TRACKING::pp_mode);
     se->registerSubsystem(cleaner);
 
     if (G4TRACKING::SC_CALIBMODE)

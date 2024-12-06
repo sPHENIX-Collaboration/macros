@@ -404,22 +404,12 @@ void Tracking_Reco_TrackSeed()
     // Match TPC track stubs from CA seeder to clusters in the micromegas layers
     auto mm_match = new PHMicromegasTpcTrackMatching;
     mm_match->Verbosity(verbosity);
-    if (G4TRACKING::SC_CALIBMODE)
-    {
-      // configuration is potentially with different search windows
-      mm_match->set_rphi_search_window_lyr1(0.2);
-      mm_match->set_rphi_search_window_lyr2(13.0);
-      mm_match->set_z_search_window_lyr1(26.0);
-      mm_match->set_z_search_window_lyr2(0.2);
-    }
-    else
-    {
-      // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
-      mm_match->set_rphi_search_window_lyr1(0.2);
-      mm_match->set_rphi_search_window_lyr2(13.0);
-      mm_match->set_z_search_window_lyr1(26.0);
-      mm_match->set_z_search_window_lyr2(0.2);
-    }
+
+    mm_match->set_rphi_search_window_lyr1(0.2);
+    mm_match->set_rphi_search_window_lyr2(13.0);
+    mm_match->set_z_search_window_lyr1(26.0);
+    mm_match->set_z_search_window_lyr2(0.2);
+
     mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
     mm_match->set_test_windows_printout(false);  // used for tuning search windows only
     se->registerSubsystem(mm_match);

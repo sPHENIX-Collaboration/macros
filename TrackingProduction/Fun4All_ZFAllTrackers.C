@@ -143,7 +143,7 @@ void Fun4All_ZFAllTrackers(
   silicon_match->Verbosity(0);
   silicon_match->set_x_search_window(0.36);
   silicon_match->set_y_search_window(0.36);
-  silicon_match->set_z_search_window(2.5); 
+  silicon_match->set_z_search_window(2.5);
   silicon_match->set_phi_search_window(0.014);
   silicon_match->set_eta_search_window(0.0091);
   silicon_match->set_test_windows_printout(false);
@@ -154,11 +154,10 @@ void Fun4All_ZFAllTrackers(
   auto mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(0);
 
-  // baseline configuration is (0.2, 13.0, 26, 0.2) and is the default
-  mm_match->set_rphi_search_window_lyr1(0.4);
-  mm_match->set_rphi_search_window_lyr2(13.0);
-  mm_match->set_z_search_window_lyr1(26.0);
-  mm_match->set_z_search_window_lyr2(0.4);
+  mm_match->set_rphi_search_window_lyr1(3.);
+  mm_match->set_rphi_search_window_lyr2(15.0);
+  mm_match->set_z_search_window_lyr1(30.0);
+  mm_match->set_z_search_window_lyr2(3.);
 
   mm_match->set_min_tpc_layer(38);            // layer in TPC to start projection fit
   mm_match->set_test_windows_printout(true);  // used for tuning search windows only
