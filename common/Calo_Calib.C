@@ -65,14 +65,6 @@ void Process_Calo_Calib()
   calibIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   se->registerSubsystem(calibIHCal);
 
-  if (!isSim) 
-  {
-    std::cout << "Calibrating ZDC" << std::endl;
-    CaloTowerCalib *calibZDC = new CaloTowerCalib("ZDC");
-    calibZDC->set_detector_type(CaloTowerDefs::ZDC);
-    se->registerSubsystem(calibZDC);
-  }
-
   ////////////////
   // MC Calibration
   if (isSim) 
