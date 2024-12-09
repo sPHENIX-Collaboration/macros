@@ -7,15 +7,31 @@
 #include <caloreco/RawClusterDeadHotMask.h>
 #include <caloreco/RawClusterPositionCorrection.h>
 
+#include <ffamodules/CDBInterface.h>
+#include <ffamodules/FlagHandler.h>
+#include <phool/recoConsts.h>
+
 R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libffamodules.so)
+R__LOAD_LIBRARY(libfun4allutils.so)
 
 void Process_Calo_Calib()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
+  recoConsts *rc = recoConsts::instance();
+  
+  /////////////////
+  // set MC or data 
+  bool isSim = true;
+  int data_sim_runnumber_thres = 1000;
+  if (rc->get_uint64Flag("TIMESTAMP") > data_sim_runnumber_thres) 
+  {
+    isSim = false;
+  }
+  std::cout << "Calo Calib uses runnumber " << rc->get_uint64Flag("TIMESTAMP") << std::endl;
 
   //////////////////////////////
   // set statuses on raw towers
-
   std::cout << "status setters" << std::endl;
   CaloTowerStatus *statusEMC = new CaloTowerStatus("CEMCSTATUS");
   statusEMC->set_detector_type(CaloTowerDefs::CEMC);
@@ -49,14 +65,27 @@ void Process_Calo_Calib()
   calibIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   se->registerSubsystem(calibIHCal);
 
-  std::cout << "Calibrating ZDC" << std::endl;
-  CaloTowerCalib *calibZDC = new CaloTowerCalib("ZDC");
-  calibZDC->set_detector_type(CaloTowerDefs::ZDC);
-  se->registerSubsystem(calibZDC);
+  ////////////////
+  // MC Calibration
+  if (isSim) 
+  {
+    std::string MC_Calib = CDBInterface::instance()->getUrl("CEMC_MC_RECALIB");
+    if (MC_Calib.empty())
+    {
+      std::cout << "No MC calibration found :( )" << std::endl;
+      gSystem->Exit(0);
+    }
+    CaloTowerCalib *calibEMC_MC = new CaloTowerCalib("CEMCCALIB_MC");
+    calibEMC_MC->set_detector_type(CaloTowerDefs::CEMC);
+    calibEMC_MC->set_inputNodePrefix("TOWERINFO_CALIB_");
+    calibEMC_MC->set_outputNodePrefix("TOWERINFO_CALIB_");
+    calibEMC_MC->set_directURL(MC_Calib);
+    calibEMC_MC->set_doZScrosscalib(false);
+    se->registerSubsystem(calibEMC_MC);
+  }
 
   //////////////////
   // Clusters
-
   std::cout << "Building clusters" << std::endl;
   RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("EmcRawClusterBuilderTemplate");
   ClusterBuilder->Detector("CEMC");
