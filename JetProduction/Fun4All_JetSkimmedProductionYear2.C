@@ -49,9 +49,9 @@ R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libJetDSTSkimmer.so)
 
-void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
-                   const std::string &fname = "DST_CALOFITTING_run2pp_ana437_2024p007-00047289-00000.root",
-                   const std::string& outfile_low= "DST_CALO-00000000-000000.root",
+void Fun4All_JetSkimmedProductionYear2(int nEvents=1000,
+                   const std::string &fname = "/sphenix/lustre01/sphnxpro/production/physics/run2pp/caloy2fitting/ana446_2024p007/run_00052600_00052700/DST_CALOFITTING_run2pp_ana446_2024p007-00052661-00000.root",
+                   const std::string& outfile_low= "DST_JETCALO-00000000-000000.root",
                    const std::string& outfile_high= "DST_Jet-00000000-000000.root",
                    const std::string& outfile_hist= "HIST_CALOQA-00000000-000000.root",
 		               const std::string& outfile_tree= "TREE_CALOQA-00000000-000000.root",
@@ -152,6 +152,7 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   Fun4AllDstOutputManager *outlower = new Fun4AllDstOutputManager("DSTOUTLOW", outfile_low);
   outlower->AddNode("Sync");
   outlower->AddNode("EventHeader");
+  outlower->AddNode("GL1Packet");
   //outlower->AddNode("TOWERINFO_CALIB_HCALIN");
   outlower->AddNode("TOWERS_HCALIN");
   //outlower->AddNode("TOWERINFO_CALIB_HCALOUT");
@@ -163,6 +164,7 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   outlower->AddNode("TOWERS_ZDC");
   outlower->AddNode("MbdOut");
   outlower->AddNode("MbdPmtContainer");
+  outlower->AddNode("MBDPackets");
 
   se->registerOutputManager(outlower);
 
