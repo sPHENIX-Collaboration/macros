@@ -109,6 +109,7 @@ void Tpc_HitUnpacking(const std::string& ebdc="")
   std::string name = "TpcCombinedRawDataUnpacker"+ebdc;
   auto tpcunpacker = new TpcCombinedRawDataUnpacker("TpcCombinedRawDataUnpacker"+ebdc);
   tpcunpacker->set_presampleShift(TRACKING::reco_tpc_time_presample);
+  tpcunpacker->set_t0(TRACKING::reco_t0);
   if(ebdc.length() > 0)
     {
       tpcunpacker->useRawHitNodeName("TPCRAWHIT_" + ebdc);
