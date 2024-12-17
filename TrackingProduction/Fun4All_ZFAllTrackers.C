@@ -1,4 +1,4 @@
-/*
+ /*
  * This macro shows a minimum working example of running the tracking
  * hit unpackers with some basic seeding algorithms to try to put together
  * tracks. There are some analysis modules run at the end which package
@@ -161,6 +161,7 @@ void Fun4All_ZFAllTrackers(
 
   mm_match->set_min_tpc_layer(38);            // layer in TPC to start projection fit
   mm_match->set_test_windows_printout(true);  // used for tuning search windows only
+  mm_match->zeroField(true);
   se->registerSubsystem(mm_match);
 
   if (G4TRACKING::convert_seeds_to_svtxtracks)
