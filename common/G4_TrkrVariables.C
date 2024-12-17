@@ -147,6 +147,8 @@ namespace G4TPC
   float laser_adc_threshold = 0.0;
   std::string laser_clusterizer_debug_filename = "";
   std::string laser_event_debug_filename = "";
+  std::string LaminationOutputName = "";
+  std::string LaminationFitName = "";
 
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
