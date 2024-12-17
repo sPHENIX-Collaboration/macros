@@ -116,8 +116,9 @@ void Tpc_HitUnpacking(const std::string& ebdc="")
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
-
-  auto tpcunpacker = new TpcCombinedRawDataUnpacker;
+  std::string name = "TpcCombinedRawDataUnpacker"+ebdc;
+  auto tpcunpacker = new TpcCombinedRawDataUnpacker("TpcCombinedRawDataUnpacker"+ebdc);
+  tpcunpacker->set_t0(TRACKING::reco_t0);
   tpcunpacker->set_presampleShift(TRACKING::reco_tpc_time_presample);
   if(ebdc.length() > 0)
     {
@@ -127,6 +128,7 @@ void Tpc_HitUnpacking(const std::string& ebdc="")
     {
       tpcunpacker->ReadZeroSuppressedData();
     }
+  tpcunpacker->doBaselineCorr(TRACKING::tpc_baseline_corr);
   tpcunpacker->Verbosity(verbosity);
   se->registerSubsystem(tpcunpacker);
 }
