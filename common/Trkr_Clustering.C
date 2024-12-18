@@ -73,7 +73,6 @@ void Intt_HitUnpacking(const std::string& server="")
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
-  Fun4AllServer* se = Fun4AllServer::instance();
   auto rc = recoConsts::instance();
   int runnumber = rc->get_IntFlag("RUNNUMBER");
   InttOdbcQuery query;
