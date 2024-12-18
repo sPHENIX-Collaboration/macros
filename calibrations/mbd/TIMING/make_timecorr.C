@@ -114,6 +114,7 @@ void gpr_interpolate_timecorr( const int ifeech, TGraphErrors *g )
 */
 
 // use poly fit to interpolate
+// now using spline fit
 void interpolate_timecorr( const int ifeech, TGraphErrors *g, TF1 *f )
 {
   Int_t n = g->GetN();
@@ -149,7 +150,8 @@ void interpolate_timecorr( const int ifeech, TGraphErrors *g, TF1 *f )
   double tdc = 0;
   for (int istep=0; istep<NPOINTS; istep++)
   {
-    _timecorr[ifeech][istep] = f->Eval(tdc) - mintime;
+    //_timecorr[ifeech][istep] = f->Eval(tdc) - mintime;
+    _timecorr[ifeech][istep] = g->Eval(tdc) - mintime;
 
     if ( istep==0 || istep==NPOINTS-1 )
     {
@@ -171,14 +173,17 @@ void make_timecorr(const char *rootfname = "calib_seb18-00029705-0000_mbdtimecal
   TString dir = "results/";
   dir += get_runstr(rootfname);
   dir.ReplaceAll("_mbdtimecalib","");
+  //dir.ReplaceAll("_mbdtrigtimecalib","");
   dir += "/";
   //TString name = "mkdir -p " + dir;
   TString name = "echo " + dir;
   gSystem->Exec( name );
   cout << name << endl;
 
-  TF1 *fpoly = new TF1("fpoly","pol3",0,15000);
-  fpoly->SetParameters(28.,-0.0018,0.,0.);
+  //TF1 *fpoly = new TF1("fpoly","pol3",0,15000);
+  //fpoly->SetParameters(28.,-0.0018,0.,0.);
+  TF1 *fpoly = new TF1("fpoly","pol4",0,15000);
+  fpoly->SetParameters(28.,-0.0018,-1e-7,1.3e-11,-5e-16);
   fpoly->SetLineColor(4);
   TGraphErrors *g_delaytime[MbdDefs::MBD_N_FEECH]; // delay curves, corrected for time
   TFile *tfile = new TFile(rootfname,"READ");
@@ -188,6 +193,7 @@ void make_timecorr(const char *rootfname = "calib_seb18-00029705-0000_mbdtimecal
 
     name = "g_delaytime"; name += ifeech;
     g_delaytime[ifeech] = (TGraphErrors*)tfile->Get(name);
+    cout << name << endl;
 
     // do a prefit since for some reason the first fit fails
     if ( ifeech==0 )
@@ -195,7 +201,10 @@ void make_timecorr(const char *rootfname = "calib_seb18-00029705-0000_mbdtimecal
       g_delaytime[ifeech]->Fit(fpoly,"R");
     }
 
+//if ( ifeech!=118)
+//{
     interpolate_timecorr( ifeech, g_delaytime[ifeech], fpoly );
+//}
 
     //if ( ifeech>4 ) break;
   }
@@ -217,7 +226,8 @@ void make_timecorr(const char *rootfname = "calib_seb18-00029705-0000_mbdtimecal
 
   // write out mbd_timecorr.calib file
   TString tcorr_fname = dir; tcorr_fname += "/mbd_timecorr.calib";
-  cout << tcorr_fname << endl;
+  //TString tcorr_fname = dir; tcorr_fname += "/mbd_trigtimecorr.calib";
+  cout << "tcorr_fname " << tcorr_fname << endl;
   ofstream tcorr_file( tcorr_fname );
   for (int ifeech=0; ifeech<MbdDefs::MBD_N_FEECH; ifeech++)
   {
