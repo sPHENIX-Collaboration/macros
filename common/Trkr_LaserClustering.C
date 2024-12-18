@@ -6,6 +6,7 @@
 #include <G4_TrkrVariables.C>
 
 #include <tpc/LaserClusterizer.h>
+#include <tpccalib/TpcLaminationFitting.h>
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -39,6 +40,28 @@ void TPC_LaserClustering()
       se->registerSubsystem(laserClusterizer);
 
     }
+}
+
+void TPC_LaminationFitting()
+{
+  if( G4TPC::ENABLE_CENTRAL_MEMBRANE_CLUSTERING )
+  {
+
+    int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
+    ACTSGEOM::ActsGeomInit();
+    Fun4AllServer* se = Fun4AllServer::instance();
+    
+    TpcLaminationFitting *laminations = new TpcLaminationFitting;
+    laminations->Verbosity(verbosity);
+    laminations->set_nLayerCut(2);
+    laminations->setOutputfile(G4TPC::LaminationOutputName);
+    if(G4TPC::LaminationFitName != "")
+    {
+      laminations->set_fitFileName(G4TPC::LaminationFitName);
+    }
+    se->registerSubsystem(laminations);
+
+  }
 }
 
 
