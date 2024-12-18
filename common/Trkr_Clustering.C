@@ -7,6 +7,7 @@
 #include <G4_TrkrVariables.C>
 
 #include <intt/InttCombinedRawDataDecoder.h>
+#include <intt/InttOdbcQuery.h>
 #include <micromegas/MicromegasCombinedDataDecoder.h>
 #include <mvtx/MvtxCombinedRawDataDecoder.h>
 #include <tpc/TpcCombinedRawDataUnpacker.h>
@@ -72,10 +73,19 @@ void Intt_HitUnpacking(const std::string& server="")
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
-
+  auto rc = recoConsts::instance();
+  int runnumber = rc->get_IntFlag("RUNNUMBER");
+  InttOdbcQuery query;
+  bool isStreaming = true;
+  if(runnumber != 0)
+  {
+    query.Query(runnumber);
+    isStreaming = query.IsStreaming();
+  }
   auto inttunpacker = new InttCombinedRawDataDecoder("InttCombinedRawDataDecoder"+server);
   inttunpacker->Verbosity(verbosity);
   inttunpacker->LoadHotChannelMapRemote("INTT_HotMap");
+  inttunpacker->set_triggeredMode(!isStreaming); 
    if(server.length() > 0)
     {
       inttunpacker->useRawHitNodeName("INTTRAWHIT_" + server);
