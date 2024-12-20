@@ -413,7 +413,7 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
     jetCstQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
     if (trg.has_value())
     {
-      jetCstQA -> setTrgToSelect();
+      jetCstQA -> setTrgToSelect(trg.value());
     }
     se -> registerSubsystem(jetCstQA);
 
