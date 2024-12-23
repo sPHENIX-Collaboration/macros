@@ -27,12 +27,14 @@
 #include <micromegas/MicromegasClusterizer.h>
 
 #include <fun4all/Fun4AllServer.h>
+#include <phool/recoConsts.h>
 
 R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
+R__LOAD_LIBRARY(libphool.so)
 
 void ClusteringInit()
 {
