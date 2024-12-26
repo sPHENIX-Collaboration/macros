@@ -11,7 +11,6 @@
 #include <vector>
 
 // coresoftware headers
-#include <calotrigger/TriggerRunInfoReco.h>
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
 #include <fun4all/Fun4AllDstInputManager.h>
@@ -40,7 +39,6 @@
 #include <QA.C>
 
 // load libraries
-R__LOAD_LIBRARY(libcalotrigger.so)
 R__LOAD_LIBRARY(libcentrality.so)
 R__LOAD_LIBRARY(libg4centrality.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
@@ -107,10 +105,6 @@ void Fun4All_JetProductionYear2(
   Fun4AllInputManager* in = new Fun4AllDstInputManager("in");
   in -> AddListFile(inlist);
   se -> registerInputManager(in);
-
-  // reconstruct trigger info
-  TriggerRunInfoReco* info = new TriggerRunInfoReco();
-  se -> registerSubsystem(info);
 
   // do vertex & centrality reconstruction
   Global_Reco();
