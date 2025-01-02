@@ -11,6 +11,9 @@
 #include <ffamodules/FlagHandler.h>
 #include <phool/recoConsts.h>
 
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllRunNodeInputManager.h>
+
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libfun4allutils.so)
@@ -29,6 +32,14 @@ void Process_Calo_Calib()
     isSim = false;
   }
   std::cout << "Calo Calib uses runnumber " << rc->get_uint64Flag("TIMESTAMP") << std::endl;
+
+  //////////////////////
+  // Input geometry node
+  std::cout << "Adding Geometry file" << std::endl;
+  Fun4AllInputManager *ingeo = new Fun4AllRunNodeInputManager("DST_GEO");
+  std::string geoLocation = CDBInterface::instance()->getUrl("calo_geo");
+  ingeo->AddFile(geoLocation);
+  se->registerInputManager(ingeo);
 
   //////////////////////////////
   // set statuses on raw towers
