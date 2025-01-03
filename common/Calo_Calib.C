@@ -91,7 +91,7 @@ void Process_Calo_Calib()
     calibEMC_MC->set_inputNodePrefix("TOWERINFO_CALIB_");
     calibEMC_MC->set_outputNodePrefix("TOWERINFO_CALIB_");
     calibEMC_MC->set_directURL(MC_Calib);
-    calibEMC_MC->set_doZScrosscalib(false);
+    calibEMC_MC->set_doCalibOnly(true);
     se->registerSubsystem(calibEMC_MC);
   }
 
