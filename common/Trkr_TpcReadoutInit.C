@@ -1,6 +1,7 @@
 #ifndef MACRO_TPCREADOUTINIT_C
 #define MACRO_TPCREADOUTINIT_C
 
+R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 
@@ -49,6 +50,7 @@ void TpcReadoutInit(const int RunNumber = 41989)
     G4TPC::tpc_drift_velocity_reco = cdbttree->GetSingleFloatValue("tpc_drift_velocity");
     std::cout << "Use calibrated TPC drift velocity for Run " << RunNumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
   }
+  TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
 
 }
 
