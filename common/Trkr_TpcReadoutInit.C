@@ -10,6 +10,11 @@ R__LOAD_LIBRARY(libtpccalib.so)
 #include <G4_TrkrVariables.C>
 #include <fun4all/Fun4AllServer.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wundefined-internal"
+#include <tpc/TpcClusterZCrossingCorrection.h>
+#pragma GCC diagnostic pop
+
 #include <cdbobjects/CDBTTree.h>
 #include <ffamodules/CDBInterface.h>
 void TpcReadoutInit(const int RunNumber = 41989)
