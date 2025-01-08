@@ -11,6 +11,21 @@ R__LOAD_LIBRARY(libtpccalib.so)
 
 #include <cdbobjects/CDBTTree.h>
 #include <ffamodules/CDBInterface.h>
+
+void TpcSampleInit(const int RunNumber = 41989)
+{
+  if(RunNumber>=41624)
+  {
+    TRACKING::reco_tpc_maxtime_sample = 425;
+    TRACKING::reco_tpc_time_presample = 40;//120 - 80
+  }
+  else
+    {
+      TRACKING::reco_tpc_maxtime_sample = 420;
+      TRACKING::reco_tpc_time_presample = 0;// 80
+    }
+}
+
 void TpcReadoutInit(const int RunNumber = 41989)
 {
 
