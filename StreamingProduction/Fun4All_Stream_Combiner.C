@@ -127,11 +127,10 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
   vector<string> tpot_infile;
   tpot_infile.push_back(input_tpotfile);
 
-  TpcReadoutInit( RunNumber );
+  TpcSampleInit( RunNumber );
   std::cout<< " run: " << RunNumber
 	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
 	   << " pre: " << TRACKING::reco_tpc_time_presample
-	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
 	   << std::endl;
 
   Fun4AllServer *se = Fun4AllServer::instance();
