@@ -191,50 +191,6 @@ void Tracking_Reco_TrackSeed_ZeroField()
   cprop->set_pp_mode(true);
   se->registerSubsystem(cprop);
 
-  // Always apply preliminary distortion corrections to TPC clusters before crossing is known
-  // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
-  auto prelim_distcorr = new PrelimDistortionCorrection;
-  prelim_distcorr->set_pp_mode(true);
-  prelim_distcorr->Verbosity(verbosity);
-
-  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
-  {
-    prelim_distcorr->setNeonFraction(G4TPC::NeCF4_Ne_frac);
-    prelim_distcorr->setArgonFraction(G4TPC::NeCF4_Ar_frac);
-    prelim_distcorr->setCF4Fraction(G4TPC::NeCF4_CF4_frac);
-    prelim_distcorr->setNitrogenFraction(G4TPC::NeCF4_N2_frac);
-    prelim_distcorr->setIsobutaneFraction(G4TPC::NeCF4_isobutane_frac);
-  }
-  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
-  {
-    prelim_distcorr->setNeonFraction(G4TPC::ArCF4_Ne_frac);
-    prelim_distcorr->setArgonFraction(G4TPC::ArCF4_Ar_frac);
-    prelim_distcorr->setCF4Fraction(G4TPC::ArCF4_CF4_frac);
-    prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4_N2_frac);
-    prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4_isobutane_frac);
-  }
-  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
-  {
-    prelim_distcorr->setNeonFraction(G4TPC::ArCF4N2_Ne_frac);
-    prelim_distcorr->setArgonFraction(G4TPC::ArCF4N2_Ar_frac);
-    prelim_distcorr->setCF4Fraction(G4TPC::ArCF4N2_CF4_frac);
-    prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4N2_N2_frac);
-    prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4N2_isobutane_frac);
-  }
-  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
-  {
-    prelim_distcorr->setNeonFraction(G4TPC::ArCF4Isobutane_Ne_frac);
-    prelim_distcorr->setArgonFraction(G4TPC::ArCF4Isobutane_Ar_frac);
-    prelim_distcorr->setCF4Fraction(G4TPC::ArCF4Isobutane_CF4_frac);
-    prelim_distcorr->setNitrogenFraction(G4TPC::ArCF4Isobutane_N2_frac);
-    prelim_distcorr->setIsobutaneFraction(G4TPC::ArCF4Isobutane_isobutane_frac);
-  }
-  else
-  {
-  }
-
-  se->registerSubsystem(prelim_distcorr);
-
 }
 void Tracking_Reco_TrackSeed()
 {

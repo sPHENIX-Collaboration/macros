@@ -83,19 +83,6 @@ void Fun4All_ZFAllTrackers(
 	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
 	   << std::endl;
 
-  //to turn on the default module edge corrections, enable the line below
-  //G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
-
-  //to turn on the default static corrections, enable the two lines below
-  //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
-  //G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
-
-  //to turn on the average corrections derived from simulation, enable the three lines below
-  //note: these are designed to be used only if static corrections are also applied
-  //G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  //G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-  //G4TPC::average_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/average_minus_static_distortion_inverted_10-new.root";
-
   ACTSGEOM::mvtxMisalignment = 100;
   ACTSGEOM::inttMisalignment = 1000.;
   ACTSGEOM::tpotMisalignment = 100.;
