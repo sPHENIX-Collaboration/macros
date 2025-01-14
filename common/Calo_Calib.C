@@ -13,6 +13,9 @@
 
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
+#include <fun4all/Fun4AllServer.h>  // for Fun4AllServer
+
+#include <TSystem.h>  // for gSystem
 
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libffamodules.so)
@@ -22,12 +25,12 @@ void Process_Calo_Calib()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
   recoConsts *rc = recoConsts::instance();
-  
+
   /////////////////
-  // set MC or data 
+  // set MC or data
   bool isSim = true;
   int data_sim_runnumber_thres = 1000;
-  if (rc->get_uint64Flag("TIMESTAMP") > data_sim_runnumber_thres) 
+  if (rc->get_uint64Flag("TIMESTAMP") > data_sim_runnumber_thres)
   {
     isSim = false;
   }
@@ -92,7 +95,7 @@ void Process_Calo_Calib()
 
   ////////////////
   // MC Calibration
-  if (isSim) 
+  if (isSim)
   {
     std::string MC_Calib = CDBInterface::instance()->getUrl("CEMC_MC_RECALIB");
     if (MC_Calib.empty())
@@ -121,12 +124,11 @@ void Process_Calo_Calib()
   ClusterBuilder->set_UseTowerInfo(1);  // to use towerinfo objects rather than old RawTower
   se->registerSubsystem(ClusterBuilder);
 
-  // currently NOT included! 
-  //std::cout << "Applying Position Dependent Correction" << std::endl;
-  //RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
-  //clusterCorrection->set_UseTowerInfo(1);  // to use towerinfo objects rather than old RawTower
- // se->registerSubsystem(clusterCorrection);
-
+  // currently NOT included!
+  // std::cout << "Applying Position Dependent Correction" << std::endl;
+  // RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
+  // clusterCorrection->set_UseTowerInfo(1);  // to use towerinfo objects rather than old RawTower
+  // se->registerSubsystem(clusterCorrection);
 }
 
 #endif

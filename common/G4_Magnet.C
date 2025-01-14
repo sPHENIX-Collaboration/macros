@@ -7,6 +7,10 @@
 
 #include <g4main/PHG4Reco.h>
 
+#include <TSystem.h>
+
+#include <cmath>
+
 R__LOAD_LIBRARY(libg4detectors.so)
 
 namespace Enable
@@ -26,7 +30,7 @@ namespace G4MAGNET
 
 void MagnetFieldInit()
 {
-  if (!isfinite(G4MAGNET::magfield_rescale))
+  if (!std::isfinite(G4MAGNET::magfield_rescale))
   {
     G4MAGNET::magfield_rescale = 1.;
   }
@@ -66,8 +70,8 @@ double Magnet(PHG4Reco* g4Reco, double radius)
   double coil_length = 361.5;
   if (radius > magnet_inner_cryostat_wall_radius)
   {
-    cout << "inconsistency: radius: " << radius
-         << " larger than Magnet inner radius: " << magnet_inner_cryostat_wall_radius << endl;
+    std::cout << "inconsistency: radius: " << radius
+              << " larger than Magnet inner radius: " << magnet_inner_cryostat_wall_radius << std::endl;
     gSystem->Exit(-1);
   }
 
@@ -109,12 +113,12 @@ double Magnet(PHG4Reco* g4Reco, double radius)
 
   if (verbosity > 0)
   {
-    cout << "========================= G4_Magnet.C::Magnet() ===========================" << endl;
-    cout << " MAGNET Material Description:" << endl;
-    cout << "  inner radius = " << magnet_inner_cryostat_wall_radius << " cm" << endl;
-    cout << "  outer radius = " << G4MAGNET::magnet_outer_cryostat_wall_radius + G4MAGNET::magnet_outer_cryostat_wall_thickness << " cm" << endl;
-    cout << "  length = " << G4MAGNET::magnet_length << " cm" << endl;
-    cout << "===========================================================================" << endl;
+    std::cout << "========================= G4_Magnet.C::Magnet() ===========================" << std::endl;
+    std::cout << " MAGNET Material Description:" << std::endl;
+    std::cout << "  inner radius = " << magnet_inner_cryostat_wall_radius << " cm" << std::endl;
+    std::cout << "  outer radius = " << G4MAGNET::magnet_outer_cryostat_wall_radius + G4MAGNET::magnet_outer_cryostat_wall_thickness << " cm" << std::endl;
+    std::cout << "  length = " << G4MAGNET::magnet_length << " cm" << std::endl;
+    std::cout << "===========================================================================" << std::endl;
   }
 
   radius += no_overlapp;
