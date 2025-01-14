@@ -6,6 +6,8 @@
 
 #include <phool/recoConsts.h>
 
+#include <TROOT.h>  // for R__LOAD_LIBRARY
+
 R__LOAD_LIBRARY(libsphenixnpc.so)
 R__LOAD_LIBRARY(libphool.so)
 
@@ -79,7 +81,6 @@ int cloneGlobalTag(const std::string &source, const std::string &target)
   return iret;
 }
 
-
 int createPayloadType(const std::string &pt)
 {
   if (!uti) uti = new CDBUtils();
@@ -92,7 +93,7 @@ int insertPayload(const std::string &pl_type, const std::string &file_url, uint6
   if (!uti) uti = new CDBUtils();
   if (uti->isGlobalTagSet())
   {
-    uti->insertPayload(pl_type,file_url,iov_start);
+    uti->insertPayload(pl_type, file_url, iov_start);
   }
   return 0;
 }
@@ -102,7 +103,7 @@ int insertPayload(const std::string &pl_type, const std::string &file_url, uint6
   if (!uti) uti = new CDBUtils();
   if (uti->isGlobalTagSet())
   {
-    uti->insertPayload(pl_type,file_url,iov_start,iov_end);
+    uti->insertPayload(pl_type, file_url, iov_start, iov_end);
   }
   return 0;
 }
@@ -110,7 +111,7 @@ int insertPayload(const std::string &pl_type, const std::string &file_url, uint6
 std::string getCalibration(const std::string &pl_type, uint64_t iov)
 {
   if (!uti) uti = new CDBUtils();
-  return uti->getUrl(pl_type,iov);
+  return uti->getUrl(pl_type, iov);
 }
 
 void clearCache()
@@ -125,16 +126,16 @@ void Verbosity(int verb)
   return uti->Verbosity(verb);
 }
 
-int deletePayloadIOV(const std::string& pl_type, uint64_t iov_start)
+int deletePayloadIOV(const std::string &pl_type, uint64_t iov_start)
 {
   if (!uti) uti = new CDBUtils();
-  return uti->deletePayloadIOV(pl_type,iov_start);
+  return uti->deletePayloadIOV(pl_type, iov_start);
 }
 
-int deletePayloadIOV(const std::string& pl_type, uint64_t iov_start, uint64_t iov_end)
+int deletePayloadIOV(const std::string &pl_type, uint64_t iov_start, uint64_t iov_end)
 {
   if (!uti) uti = new CDBUtils();
-  return uti->deletePayloadIOV(pl_type,iov_start, iov_end);
+  return uti->deletePayloadIOV(pl_type, iov_start, iov_end);
 }
 
 #endif

@@ -1,13 +1,15 @@
 #ifndef MACRO_G4ACTSGEOM_C
 #define MACRO_G4ACTSGEOM_C
 
+#include <TROOT.h>  // for R__LOAD_LIBRARY
+
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 
-#include <GlobalVariables.C>
-
 #include <G4_Magnet.C>
+#include <G4_TrkrVariables.C>  // for Enable::MVTX_APPLYMISALIGNMENT, INTT_USEG4SURVEYGEOM
+#include <GlobalVariables.C>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wundefined-internal"
@@ -15,7 +17,6 @@ R__LOAD_LIBRARY(libtpccalib.so)
 #pragma GCC diagnostic pop
 
 #include <fun4all/Fun4AllServer.h>
-
 
 namespace ACTSGEOM
 {
@@ -52,19 +53,26 @@ namespace ACTSGEOM
     MakeActsGeometry* geom = new MakeActsGeometry();
     geom->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
     geom->Verbosity(verbosity);
-    for(int i = 0; i < 57; i++)
+    for (int i = 0; i < 57; i++)
+    {
+      if (i < 3)
       {
-	if(i<3) {
-	  geom->misalignmentFactor(i, ACTSGEOM::mvtxMisalignment);
-	} else if (i < 7) {
-	  geom->misalignmentFactor(i, ACTSGEOM::inttMisalignment);
-	} else if (i < 55) {
-	  geom->misalignmentFactor(i, ACTSGEOM::tpcMisalignment);
-	} else {
-	  geom->misalignmentFactor(i, ACTSGEOM::tpotMisalignment);
-	}
+        geom->misalignmentFactor(i, ACTSGEOM::mvtxMisalignment);
       }
-    
+      else if (i < 7)
+      {
+        geom->misalignmentFactor(i, ACTSGEOM::inttMisalignment);
+      }
+      else if (i < 55)
+      {
+        geom->misalignmentFactor(i, ACTSGEOM::tpcMisalignment);
+      }
+      else
+      {
+        geom->misalignmentFactor(i, ACTSGEOM::tpotMisalignment);
+      }
+    }
+
     geom->loadMagField(G4TRACKING::init_acts_magfield);
     geom->setMagField(G4MAGNET::magfield_tracking);
     geom->setMagFieldRescale(G4MAGNET::magfield_rescale);
