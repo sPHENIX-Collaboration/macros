@@ -12,6 +12,8 @@
 #include <fun4allraw/SingleMvtxPoolInput.h>
 #include <fun4allraw/SingleTpcPoolInput.h>
 
+#include <intt/InttOdbcQuery.h>
+
 #include <phool/recoConsts.h>
 
 #include <ffarawmodules/InttCheck.h>
@@ -26,7 +28,7 @@ R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
-
+R__LOAD_LIBRARY(libintt.so)
 bool isGood(const string &infile);
 
 void Fun4All_SingleStream_Combiner(int nEvents = 0,
@@ -89,9 +91,14 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
     {
     SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + to_string(i));
     //intt_sngl->Verbosity(3);
-    intt_sngl->SetNegativeBco(1);
-    intt_sngl->SetBcoRange(2);
-
+    InttOdbcQuery query;
+    bool isStreaming = false;
+    if(RunNumber != 0)
+      {
+	query.Query(RunNumber);
+	isStreaming = query.IsStreaming();
+      }
+    intt_sngl->streamingMode(isStreaming);
     auto pos = iter.find("intt");
     std::string num = iter.substr(pos+4, 1);
     readoutNumber = "INTT"+num;
