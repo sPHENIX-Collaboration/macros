@@ -2,8 +2,10 @@
 #define MACRO_QA_C
 
 #include <fun4all/Fun4AllServer.h>
-#include <simqa_modules/QAG4SimulationCalorimeterSum.h>
 #include <qautils/QAHistManagerDef.h>
+#include <simqa_modules/QAG4SimulationCalorimeterSum.h>
+
+#include <TSystem.h>  // for R__LOAD_LIBRARY
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libsimqa_modules.so)

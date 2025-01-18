@@ -3,6 +3,8 @@
 
 #include <GlobalVariables.C>
 
+#include <TSystem.h>
+
 namespace Enable
 {
   bool PRODUCTION = false;
@@ -10,14 +12,14 @@ namespace Enable
 
 namespace PRODUCTION
 {
-  string SaveOutputDir = "./";
+  std::string SaveOutputDir = "./";
 }
 
 void Production_CreateOutputDir()
 {
   PRODUCTION::SaveOutputDir = DstOut::OutputDir;
   DstOut::OutputDir = PRODUCTION::SaveOutputDir + "/ongoing";
-  string mkdircmd = "mkdir -p " + DstOut::OutputDir;
+  std::string mkdircmd = "mkdir -p " + DstOut::OutputDir;
   gSystem->Exec(mkdircmd.c_str());
 }
 
@@ -25,8 +27,8 @@ void Production_MoveOutput()
 {
   if (Enable::DSTOUT)
   {
-    string fulloutfile = DstOut::OutputDir + "/" + DstOut::OutputFile;
-    string mvcmd = "mv " + fulloutfile + " " + PRODUCTION::SaveOutputDir;
+    std::string fulloutfile = DstOut::OutputDir + "/" + DstOut::OutputFile;
+    std::string mvcmd = "mv " + fulloutfile + " " + PRODUCTION::SaveOutputDir;
     gSystem->Exec(mvcmd.c_str());
   }
 }
