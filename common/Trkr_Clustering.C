@@ -88,10 +88,16 @@ void Intt_HitUnpacking(const std::string& server="")
   inttunpacker->Verbosity(verbosity);
   inttunpacker->LoadHotChannelMapRemote("INTT_HotMap");
   inttunpacker->set_triggeredMode(!isStreaming); 
-   if(server.length() > 0)
-    {
-      inttunpacker->useRawHitNodeName("INTTRAWHIT_" + server);
-    }
+  if (TRACKING::pp_mode == false) // note : false -> AuAu
+  {
+    inttunpacker->writeInttEventHeader(true);
+    inttunpacker->set_bcoFilter(true); // default : false
+    inttunpacker->runInttStandalone(true); // default: false
+  }
+  if(server.length() > 0)
+  {
+    inttunpacker->useRawHitNodeName("INTTRAWHIT_" + server);
+  }
   se->registerSubsystem(inttunpacker);
 }
 void Intt_Clustering()
