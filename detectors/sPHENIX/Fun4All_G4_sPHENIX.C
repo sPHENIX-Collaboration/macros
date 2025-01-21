@@ -71,7 +71,7 @@ int Fun4All_G4_sPHENIX(
   // this would be:
   //  rc->set_IntFlag("RANDOMSEED",PHRandomSeed());
   // or set it to a fixed value so you can debug your code
-  //  rc->set_IntFlag("RANDOMSEED", 12345);
+  rc->set_IntFlag("RANDOMSEED", TString(outputFile).Hash());
 
 
   //===============
@@ -100,7 +100,7 @@ int Fun4All_G4_sPHENIX(
   //INPUTEMBED::listfile[0] = embed_input_file;
 
   Input::SIMPLE = true;
-  // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
+  Input::SIMPLE_NUMBER = 2; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
   // Enable this is emulating the nominal pp/pA/AA collision vertex distribution
@@ -123,8 +123,8 @@ int Fun4All_G4_sPHENIX(
   //Input::LAMBDAC = false;
   //Input::LAMBDAC_VERBOSITY = 0;
   // Upsilon generator
-  //Input::UPSILON = true;
-  //Input::UPSILON_NUMBER = 3; // if you need 3 of them
+  Input::UPSILON = true;
+  Input::UPSILON_NUMBER = 1; // if you need 3 of them
   //Input::UPSILON_VERBOSITY = 0;
 
   //  Input::HEPMC = true;
@@ -164,7 +164,9 @@ int Fun4All_G4_sPHENIX(
   // add the settings for other with [1], next with [2]...
   if (Input::SIMPLE)
   {
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 5);
+    // low pT pions
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi-", 10);
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi+", 10);
     if (Input::HEPMC || Input::EMBED)
     {
       INPUTGENERATOR::SimpleEventGenerator[0]->set_reuse_existing_vertex(true);
@@ -180,7 +182,16 @@ int Fun4All_G4_sPHENIX(
     }
     INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1, 1);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
-    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.1, 20.);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(0.1, 2.);
+
+    // high pT pions
+    INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi-", 10);
+    INPUTGENERATOR::SimpleEventGenerator[1]->add_particles("pi+", 10);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_reuse_existing_vertex(true);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_eta_range(-1, 1);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_phi_range(-M_PI, M_PI);
+    INPUTGENERATOR::SimpleEventGenerator[1]->set_pt_range(2, 50.);
   }
   // Upsilons
   // if you run more than one of these Input::UPSILON_NUMBER > 1
@@ -335,8 +346,9 @@ int Fun4All_G4_sPHENIX(
   Enable::MICROMEGAS_QA = Enable::MICROMEGAS_CLUSTER && Enable::QA && true;
 
   Enable::TRACKING_TRACK = (Enable::MICROMEGAS_CLUSTER && Enable::TPC_CLUSTER && Enable::INTT_CLUSTER && Enable::MVTX_CLUSTER) && true;
+
   Enable::GLOBAL_RECO = (Enable::MBDFAKE || Enable::MBDRECO || Enable::TRACKING_TRACK) && true;
-  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && Enable::GLOBAL_RECO && true;
+  Enable::TRACKING_EVAL = Enable::TRACKING_TRACK && Enable::GLOBAL_RECO && false;
   Enable::TRACKING_QA = Enable::TRACKING_TRACK && Enable::QA && true;
 
   // only do track matching if TRACKINGTRACK is also used
@@ -364,7 +376,7 @@ int Fun4All_G4_sPHENIX(
   //  into the tracking, cannot run together with CEMC
   //  Enable::CEMCALBEDO = true;
 
-  Enable::CEMC = true;
+  Enable::CEMC = false;
   Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
@@ -372,7 +384,7 @@ int Fun4All_G4_sPHENIX(
   Enable::CEMC_EVAL = Enable::CEMC_G4Hit && Enable::CEMC_CLUSTER && true;
   Enable::CEMC_QA = Enable::CEMC_CLUSTER && Enable::QA && true;
 
-  Enable::HCALIN = true;
+  Enable::HCALIN = false;
   Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
@@ -380,10 +392,10 @@ int Fun4All_G4_sPHENIX(
   Enable::HCALIN_EVAL = Enable::HCALIN_G4Hit && Enable::HCALIN_CLUSTER && true;
   Enable::HCALIN_QA = Enable::HCALIN_CLUSTER && Enable::QA && true;
 
-  Enable::MAGNET = true;
-  Enable::MAGNET_ABSORBER = true;
+  Enable::MAGNET = false;
+  Enable::MAGNET_ABSORBER = false;
 
-  Enable::HCALOUT = true;
+  Enable::HCALOUT = false;
   Enable::HCALOUT_ABSORBER = true;
   Enable::HCALOUT_CELL = Enable::HCALOUT && true;
   Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
@@ -738,6 +750,10 @@ int Fun4All_G4_sPHENIX(
 
 //  CDBInterface::instance()->Print(); // print used DB files
   se->End();
+    
+  se->PrintTimer();
+  se->PrintMemoryTracker();
+    
   std::cout << "All done" << std::endl;
   delete se;
   if (Enable::PRODUCTION)
