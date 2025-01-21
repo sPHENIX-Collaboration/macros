@@ -6,16 +6,16 @@
 #include <Trkr_TruthTables.C>
 #include <QA.C>
 #include <fun4all/Fun4AllServer.h>
-#include <qa_modules/QAG4SimulationMvtx.h>
-#include <qa_modules/QAG4SimulationIntt.h>
-#include <qa_modules/QAG4SimulationTpc.h>
-#include <qa_modules/QAG4SimulationMicromegas.h>
-#include <qa_modules/QAG4SimulationTracking.h>
-#include <qa_modules/QAG4SimulationUpsilon.h>
-#include <qa_modules/QAG4SimulationVertex.h>
-#include <qa_modules/QAG4SimulationDistortions.h>
+#include <simqa_modules/QAG4SimulationMvtx.h>
+#include <simqa_modules/QAG4SimulationIntt.h>
+#include <simqa_modules/QAG4SimulationTpc.h>
+#include <simqa_modules/QAG4SimulationMicromegas.h>
+#include <simqa_modules/QAG4SimulationTracking.h>
+#include <simqa_modules/QAG4SimulationUpsilon.h>
+#include <simqa_modules/QAG4SimulationVertex.h>
+#include <simqa_modules/QAG4SimulationDistortions.h>
 
-R__LOAD_LIBRARY(libqa_modules.so)
+R__LOAD_LIBRARY(libsimqa_modules.so)
 
 void Mvtx_QA()
 {

@@ -4,7 +4,7 @@
 #include <GlobalVariables.C>
 #include <G4_TrkrVariables.C>
 
-#include <phpythia6/PHPythia6.h>
+//#include <phpythia6/PHPythia6.h>
 
 #include <phpythia8/PHPythia8.h>
 
@@ -16,7 +16,7 @@
 #include <g4main/PHG4ParticleGeneratorVectorMeson.h>
 #include <g4main/PHG4ParticleGun.h>
 #include <g4main/PHG4SimpleEventGenerator.h>
-#include <g4main/ReadEICFiles.h>
+//#include <g4main/ReadEICFiles.h>
 
 #include <fermimotionafterburner/FermimotionAfterburner.h>
 #include <hijingflipafterburner/HIJINGFlipAfterburner.h>
@@ -37,7 +37,7 @@
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
-R__LOAD_LIBRARY(libPHPythia6.so)
+//R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
 R__LOAD_LIBRARY(libFermimotionAfterburner.so)
 R__LOAD_LIBRARY(libHIJINGFlipAfterburner.so)
@@ -89,7 +89,8 @@ namespace Input
   bool COSMIC = false;
   double COSMIC_R = 650.;
 
-  //! apply reference sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2022-001 and past RHIC experience
+  double beam_crossing = -1.5; // -1.5 mRad
+  //! apply reference sPHENIX nominal beam parameter with 1.5mrad crossing as used in 2024
   //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
   //! \param[in] collision_type select the beam configuration with Input::BeamConfiguration
   void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen, const Input::BeamConfiguration & beam_config)
@@ -99,40 +100,56 @@ namespace Input
       std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
       exit(1);
     }
-    HepMCGen->set_beam_direction_theta_phi(1e-3, 0, M_PI - 1e-3, 0);  //2mrad x-ing of sPHENIX per sPH-TRG-2022-001
-
+    double localbcross = Input::beam_crossing/2.*1e-3;
     switch (beam_config)
     {
     case AA_COLLISION:
       // heavy ion mode
-
+      Input::beam_crossing = 1.; // +1 mRad for late 2024 with triggered readout for mvtx
+      localbcross = Input::beam_crossing/2.*1e-3;
+      //  Xing angle is split among both beams, means set to 0.5 mRad
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  //1.5mrad x-ing of sPHENIX
       HepMCGen->set_vertex_distribution_width(
-          100e-4,         // approximation from past STAR/Run16 AuAu data
-          100e-4,         // approximation from past STAR/Run16 AuAu data
-          7,              // sPH-TRG-2022-001. Fig B.2
-          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+	100e-4,         // approximation from past STAR/Run16 AuAu data
+	100e-4,         // approximation from past STAR/Run16 AuAu data
+	13.5,              // measured 2024 with 1mRad beam Xing
+	20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
     case pA_COLLISION:
 
       // pA mode
 
+      // 1.5mRad is split among both beams, means set to 0.75 mRad
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  //1.5mrad x-ing of sPHENIX
       HepMCGen->set_vertex_distribution_width(
-          100e-4,         // set to be similar to AA
-          100e-4,         // set to be similar to AA
-          8,              // sPH-TRG-2022-001. Fig B.4
-          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+	100e-4,         // set to be similar to AA
+	100e-4,         // set to be similar to AA
+	8,              // sPH-TRG-2022-001. Fig B.4
+	20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
     case pp_COLLISION:
 
       // pp mode
+      // 1.5mRad is split among both beams, means set to 0.75 mRad
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  //1.5mrad x-ing of sPHENIX
+      HepMCGen->set_vertex_distribution_width(
+	120e-4,         // approximation from past PHENIX data
+	120e-4,         // approximation from past PHENIX data
+	16,              // measured in 2024 for 1.5mrad Xing angle
+	20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+    case pp_ZEROANGLE:
+
+      // pp mode
 
       HepMCGen->set_vertex_distribution_width(
-          120e-4,         // approximation from past PHENIX data
-          120e-4,         // approximation from past PHENIX data
-          10,              // sPH-TRG-2022-001. Fig B.3
-          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+	120e-4,         // approximation from past PHENIX data
+	120e-4,         // approximation from past PHENIX data
+	65,              // measured in 2024 for 0 Xing angle
+	20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
     default:
@@ -143,10 +160,10 @@ namespace Input
     }
 
     HepMCGen->set_vertex_distribution_function(
-        PHHepMCGenHelper::Gaus,
-        PHHepMCGenHelper::Gaus,
-        PHHepMCGenHelper::Gaus,
-        PHHepMCGenHelper::Gaus);
+      PHHepMCGenHelper::Gaus,
+      PHHepMCGenHelper::Gaus,
+      PHHepMCGenHelper::Gaus,
+      PHHepMCGenHelper::Gaus);
   }
 
   //! apply sPHENIX nominal beam parameter according to the beam collision setting of Input::IS_PP_COLLISION
@@ -270,9 +287,9 @@ namespace INPUTGENERATOR
   std::vector<PHG4ParticleGeneratorVectorMeson *> VectorMesonGenerator;
   std::vector<PHG4SimpleEventGenerator *> SimpleEventGenerator;
   std::vector<PHG4ParticleGun *> Gun;
-  PHPythia6 *Pythia6 = nullptr;
+  PHPythia8 *Pythia6 = nullptr;
   PHPythia8 *Pythia8 = nullptr;
-  ReadEICFiles *EICFileReader = nullptr;
+//  ReadEICFiles *EICFileReader = nullptr;
   CosmicSpray *Cosmic = nullptr;
 }  // namespace INPUTGENERATOR
 
@@ -319,12 +336,14 @@ void InputInit()
   Fun4AllServer *se = Fun4AllServer::instance();
   if (Input::PYTHIA6)
   {
-    INPUTGENERATOR::Pythia6 = new PHPythia6();
-    INPUTGENERATOR::Pythia6->set_config_file(PYTHIA6::config_file);
+    cout << "Pythia6 not implemented" << endl;
+    gSystem->Exit(1);
+    // INPUTGENERATOR::Pythia6 = new PHPythia6();
+    // INPUTGENERATOR::Pythia6->set_config_file(PYTHIA6::config_file);
 
-    INPUTGENERATOR::Pythia6->set_embedding_id(Input::EmbedId);
-    Input::PYTHIA6_EmbedId = Input::EmbedId;
-    Input::EmbedId++;
+    // INPUTGENERATOR::Pythia6->set_embedding_id(Input::EmbedId);
+    // Input::PYTHIA6_EmbedId = Input::EmbedId;
+    // Input::EmbedId++;
   }
   if (Input::PYTHIA8)
   {
@@ -424,10 +443,10 @@ void InputInit()
 void InputRegister()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
-  if (Input::PYTHIA6)
-  {
-    se->registerSubsystem(INPUTGENERATOR::Pythia6);
-  }
+  // if (Input::PYTHIA6)
+  // {
+  //   se->registerSubsystem(INPUTGENERATOR::Pythia6);
+  // }
   if (Input::PYTHIA8)
   {
     se->registerSubsystem(INPUTGENERATOR::Pythia8);
@@ -492,10 +511,12 @@ void InputRegister()
   }
   if (Input::READEIC)
   {
-    INPUTGENERATOR::EICFileReader = new ReadEICFiles();
-    INPUTGENERATOR::EICFileReader->OpenInputFile(INPUTREADEIC::filename);
-    INPUTGENERATOR::EICFileReader->Verbosity(Input::VERBOSITY);
-    se->registerSubsystem(INPUTGENERATOR::EICFileReader);
+    cout << "Eic File Reading disabled" << endl;
+    gSystem->Exit(1);
+    // INPUTGENERATOR::EICFileReader = new ReadEICFiles();
+    // INPUTGENERATOR::EICFileReader->OpenInputFile(INPUTREADEIC::filename);
+    // INPUTGENERATOR::EICFileReader->Verbosity(Input::VERBOSITY);
+    // se->registerSubsystem(INPUTGENERATOR::EICFileReader);
   }
   if (Input::COSMIC)
   {

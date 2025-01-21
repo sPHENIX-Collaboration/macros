@@ -5,6 +5,8 @@
 
 #include <g4centrality/PHG4CentralityReco.h>
 
+#include <phparameter/PHParameterUtils.h>
+
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
@@ -30,7 +32,7 @@ void Centrality()
   cent->Verbosity(verbosity);
   if (Enable::CDB)
   {
-    cent->GetCalibrationParameters().ReadFromCDB("CENTRALITY");
+    PHParameterUtils::FillPHParametersFromCDB(cent->GetCalibrationParameters(),"CENTRALITY");
   }
   else
   {

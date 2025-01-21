@@ -31,7 +31,8 @@ recoConsts *rc = recoConsts::instance();
   {
     SingleMicromegasPoolInput *sngl= new SingleMicromegasPoolInput("MICROMEGAS_" + to_string(i));
     sngl->Verbosity(3);
-    sngl->SetBcoRange(130);
+    sngl->SetBcoRange(10);
+    sngl->SetNegativeBco(2);
     sngl->AddListFile(iter);
     in->registerStreamingInput(sngl,InputManagerType::MICROMEGAS);
     i++;
@@ -40,7 +41,7 @@ recoConsts *rc = recoConsts::instance();
 
    // MicromegasCheck *micromegascheck = new MicromegasCheck();
    // micromegascheck->Verbosity(3);
-   // micromegascheck->SetBcoRange(130);
+   // micromegascheck->SetBcoRange(10);
    // se->registerSubsystem(micromegascheck);
 
    Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out","micromegas.root");

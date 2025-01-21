@@ -5,6 +5,7 @@
  */
 #include <GlobalVariables.C>
 #include <Trkr_Clustering.C>
+#include <Trkr_TpcReadoutInit.C>
 
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -40,12 +41,19 @@ void Fun4All_TrkrHitSet_Unpacker(
   auto se = Fun4AllServer::instance();
   se->Verbosity(1);
   auto rc = recoConsts::instance();
+  std::cout<< " run: " << runnumber
+	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
+	   << " pre: " << TRACKING::reco_tpc_time_presample
+	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
+	   << std::endl;
+
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
-  rc->set_uint64Flag("TIMESTAMP", 6);
-
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
+  
+  TpcReadoutInit( runnumber );
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
   ingeo->AddFile(geofile);
