@@ -57,9 +57,9 @@ R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libglobalQA.so)
 
 void Fun4All_Year2(int nEvents=100,
-                   const std::string &fname = "DST_TRIGGERED_EVENT_run2pp_new_2024p003-00048185-0000.root",
-                   const std::string& outfile= "DST_CALO-00000000-000000.root",
-                   const std::string& outfile_hist= "HIST_CALOQA-00000000-000000.root",
+                   const std::string &fname = "DST_TRIGGERED_EVENT_run2pp_ana451_2024p009-00047748-00000.root",
+                   const std::string& outfile= "DST_CALO_run2pp_ana451_2024p009-00047748-00000.root",
+                   const std::string& outfile_hist= "HIST_CALOQA_run2pp_ana451_2024p009-00047748-00000.root",
                    const std::string& dbtag= "ProdA_2024"
   )
 {
