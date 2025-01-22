@@ -167,6 +167,7 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=1000,
   outlower->AddNode("MbdOut");
   outlower->AddNode("MbdPmtContainer");
   outlower->AddNode("MBDPackets");
+  outlower->AddNode("TriggerRunInfo");
   se->registerOutputManager(outlower);
 
   Fun4AllDstOutputManager *outhigher = new Fun4AllDstOutputManager("DSTOUTHIGH", outfile_high);
