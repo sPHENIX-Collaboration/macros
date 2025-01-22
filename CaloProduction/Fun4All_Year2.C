@@ -1,8 +1,8 @@
 #ifndef FUN4ALL_YEAR2_C
 #define FUN4ALL_YEAR2_C
 
-#include <QA.C>
 #include <Calo_Calib.C>
+#include <QA.C>
 
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloTowerCalib.h>
@@ -37,9 +37,9 @@
 
 #include <phool/recoConsts.h>
 
-#include <centrality/CentralityReco.h>
 #include <calotrigger/MinimumBiasClassifier.h>
 #include <calotrigger/TriggerRunInfoReco.h>
+#include <centrality/CentralityReco.h>
 
 #include <calovalid/CaloValid.h>
 #include <globalqa/GlobalQA.h>
@@ -56,14 +56,12 @@ R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libglobalQA.so)
 
-void Fun4All_Year2(int nEvents=100,
-                   const std::string &fname = "DST_TRIGGERED_EVENT_run2pp_new_2024p003-00048185-0000.root",
-                   const std::string& outfile= "DST_CALO-00000000-000000.root",
-                   const std::string& outfile_hist= "HIST_CALOQA-00000000-000000.root",
-                   const std::string& dbtag= "ProdA_2024"
-  )
+void Fun4All_Year2(int nEvents = 100,
+                   const std::string &fname = "DST_TRIGGERED_EVENT_run2pp_ana451_2024p009-00047748-00000.root",
+                   const std::string &outfile = "DST_CALO_run2pp_ana451_2024p009-00047748-00000.root",
+                   const std::string &outfile_hist = "HIST_CALOQA_run2pp_ana451_2024p009-00047748-00000.root",
+                   const std::string &dbtag = "ProdA_2024")
 {
-
   // towerinfov1=kPRDFTowerv1, v2=:kWaveformTowerv2, v3=kPRDFWaveform, v4=kPRDFTowerv4
   CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv4;
 
@@ -97,7 +95,7 @@ void Fun4All_Year2(int nEvents=100,
   caZDC->set_offlineflag();
   se->registerSubsystem(caZDC);
 
-  //ZDC Reconstruction--Calib Info
+  // ZDC Reconstruction--Calib Info
   ZdcReco *zdcreco = new ZdcReco();
   se->registerSubsystem(zdcreco);
 
@@ -143,27 +141,26 @@ void Fun4All_Year2(int nEvents=100,
   se->registerSubsystem(caEPD);
 
   /////////////////////
-  // Geometry 
+  // Geometry
   std::cout << "Adding Geometry file" << std::endl;
   Fun4AllInputManager *intrue2 = new Fun4AllRunNodeInputManager("DST_GEO");
   std::string geoLocation = CDBInterface::instance()->getUrl("calo_geo");
   intrue2->AddFile(geoLocation);
   se->registerInputManager(intrue2);
 
-
   /////////////////////////////////////////////////////
   // Set status of towers, Calibrate towers,  Cluster
   Process_Calo_Calib();
 
   ///////////////////////////////////
-  // Validation 
+  // Validation
   CaloValid *ca = new CaloValid("CaloValid");
   ca->set_timing_cut_width(200);
   se->registerSubsystem(ca);
 
   GlobalQA *gqa = new GlobalQA("GlobalQA");
   se->registerSubsystem(gqa);
-  
+
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
   In->AddFile(fname);
   se->registerInputManager(In);
