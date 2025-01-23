@@ -108,8 +108,6 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=1000,
   JetQA::RestrictPtToTrig = false;
   JetQA::RestrictEtaByR = true;
 
-  // do vertex & centrality reconstruction
-  Global_Reco();
   if (!HIJETS::is_pp)
   {
     Centrality();
