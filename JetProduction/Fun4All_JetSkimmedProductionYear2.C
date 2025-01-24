@@ -132,7 +132,7 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=1000,
 
   JetDSTSkimmer *jetDSTSkimmer = new JetDSTSkimmer();
   //these are all default values
-  jetDSTSkimmer->SetMinJetPt(10);
+  jetDSTSkimmer->SetMinJetPt(7);
   jetDSTSkimmer->SetMinClusterPt(5);
   jetDSTSkimmer->SetJetNodeName("AntiKt_unsubtracted_r04");
   jetDSTSkimmer->SetClusterNodeName("CLUSTERINFO_CEMC");
