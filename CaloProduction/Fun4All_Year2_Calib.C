@@ -1,8 +1,8 @@
 #ifndef FUN4ALL_YEAR2_C
 #define FUN4ALL_YEAR2_C
 
-#include <QA.C>
 #include <Calo_Calib.C>
+#include <QA.C>
 
 #include <mbd/MbdReco.h>
 
@@ -29,12 +29,12 @@
 
 #include <phool/recoConsts.h>
 
-#include <centrality/CentralityReco.h>
 #include <calotrigger/MinimumBiasClassifier.h>
+#include <centrality/CentralityReco.h>
 
+#include <calotreegen/caloTreeGen.h>
 #include <calovalid/CaloValid.h>
 #include <globalqa/GlobalQA.h>
-#include <calotreegen/caloTreeGen.h> 
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -50,15 +50,13 @@ R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libglobalQA.so)
 R__LOAD_LIBRARY(libcaloTreeGen.so)
 
-void Fun4All_Year2_Calib(int nEvents=100,
-                   const std::string &fname = "DST_CALOFITTING-00000000-000000.root",
-                   const std::string& outfile= "DST_CALO-00000000-000000.root",
-                   const std::string& outfile_hist= "HIST_CALOQA-00000000-000000.root",
-		   const std::string& outfile_tree= "TREE_CALOQA-00000000-000000.root",
-                   const std::string& dbtag= "ProdA_2024"
-  )
+void Fun4All_Year2_Calib(int nEvents = 100,
+                         const std::string &fname = "DST_CALOFITTING_run2pp_ana451_2024p009-00047748-00000.root",
+                         const std::string &outfile = "DST_CALO_run2pp_ana451_2024p009-00047748-00000.root",
+                         const std::string &outfile_hist = "HIST_CALOQA_run2pp_ana451_2024p009-00047748-00000.root",
+                         const std::string &outfile_tree = "TREE_CALOQA_run2pp_ana451_2024p009-00047748-00000.root",
+                         const std::string &dbtag = "ProdA_2024")
 {
-
   // towerinfov1=kPRDFTowerv1, v2=:kWaveformTowerv2, v3=kPRDFWaveform, v4=kPRDFTowerv4
   CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv4;
 
@@ -82,11 +80,11 @@ void Fun4All_Year2_Calib(int nEvents=100,
   MbdReco *mbdreco = new MbdReco();
   se->registerSubsystem(mbdreco);
 
-  //sEPD Reconstruction--Calib Info
+  // sEPD Reconstruction--Calib Info
   EpdReco *epdreco = new EpdReco();
   se->registerSubsystem(epdreco);
 
-  //ZDC Reconstruction--Calib Info
+  // ZDC Reconstruction--Calib Info
   ZdcReco *zdcreco = new ZdcReco();
   zdcreco->set_zdc1_cut(0.0);
   zdcreco->set_zdc2_cut(0.0);
@@ -100,41 +98,39 @@ void Fun4All_Year2_Calib(int nEvents=100,
   se->registerSubsystem(gqa);
 
   /////////////////////
-  // Geometry 
+  // Geometry
   std::cout << "Adding Geometry file" << std::endl;
   Fun4AllInputManager *intrue2 = new Fun4AllRunNodeInputManager("DST_GEO");
   std::string geoLocation = CDBInterface::instance()->getUrl("calo_geo");
   intrue2->AddFile(geoLocation);
   se->registerInputManager(intrue2);
 
-
   /////////////////////////////////////////////////////
   // Set status of CALO towers, Calibrate towers,  Cluster
   Process_Calo_Calib();
 
   ///////////////////////////////////
-  // Validation 
+  // Validation
   CaloValid *ca = new CaloValid("CaloValid");
   ca->set_timing_cut_width(200);
   se->registerSubsystem(ca);
 
-  caloTreeGen *caloTree = new caloTreeGen(outfile_tree);
-  //enable subsystems
-  caloTree->doEMCal(1, "TOWERINFO_CALIB_CEMC");
-  caloTree->doClusters(1, "CLUSTERINFO_CEMC");
-  caloTree->doHCals(1, "TOWERINFO_CALIB_HCALOUT", "TOWERINFO_CALIB_HCALIN");
-  caloTree->doZDC(1, "TOWERINFO_CALIB_ZDC");
-  caloTree->doTrig(1, "GL1Packet");
+  // caloTreeGen *caloTree = new caloTreeGen(outfile_tree);
+  // //enable subsystems
+  // caloTree->doEMCal(1, "TOWERINFO_CALIB_CEMC");
+  // caloTree->doClusters(1, "CLUSTERINFO_CEMC");
+  // caloTree->doHCals(1, "TOWERINFO_CALIB_HCALOUT", "TOWERINFO_CALIB_HCALIN");
+  // caloTree->doZDC(1, "TOWERINFO_CALIB_ZDC");
+  // caloTree->doTrig(1, "GL1Packet");
 
-  //set subsystem cuts
-  caloTree->setEMCalThresh(0.7);
-  caloTree->setClusterThresh(0.5);
-  caloTree->doClusterDetails(1);
-  caloTree->setOHCalThresh(0.5);
-  caloTree->setIHCalThresh(0.1);  
-  se->registerSubsystem(caloTree);
+  // //set subsystem cuts
+  // caloTree->setEMCalThresh(0.7);
+  // caloTree->setClusterThresh(0.5);
+  // caloTree->doClusterDetails(1);
+  // caloTree->setOHCalThresh(0.5);
+  // caloTree->setIHCalThresh(0.1);
+  // se->registerSubsystem(caloTree);
 
-  
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
   In->AddFile(fname);
   se->registerInputManager(In);

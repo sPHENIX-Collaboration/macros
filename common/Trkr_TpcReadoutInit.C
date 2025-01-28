@@ -1,6 +1,7 @@
 #ifndef MACRO_TPCREADOUTINIT_C
 #define MACRO_TPCREADOUTINIT_C
 
+R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 
@@ -9,8 +10,28 @@ R__LOAD_LIBRARY(libtpccalib.so)
 #include <G4_TrkrVariables.C>
 #include <fun4all/Fun4AllServer.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wundefined-internal"
+#include <tpc/TpcClusterZCrossingCorrection.h>
+#pragma GCC diagnostic pop
+
 #include <cdbobjects/CDBTTree.h>
 #include <ffamodules/CDBInterface.h>
+
+void TpcSampleInit(const int RunNumber = 41989)
+{
+  if(RunNumber>=41624)
+  {
+    TRACKING::reco_tpc_maxtime_sample = 425;
+    TRACKING::reco_tpc_time_presample = 40;//120 - 80
+  }
+  else
+    {
+      TRACKING::reco_tpc_maxtime_sample = 420;
+      TRACKING::reco_tpc_time_presample = 0;// 80
+    }
+}
+
 void TpcReadoutInit(const int RunNumber = 41989)
 {
 
@@ -49,6 +70,7 @@ void TpcReadoutInit(const int RunNumber = 41989)
     G4TPC::tpc_drift_velocity_reco = cdbttree->GetSingleFloatValue("tpc_drift_velocity");
     std::cout << "Use calibrated TPC drift velocity for Run " << RunNumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
   }
+  TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
 
 }
 
