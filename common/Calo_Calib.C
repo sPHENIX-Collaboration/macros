@@ -47,6 +47,20 @@ void Process_Calo_Calib()
   CaloTowerStatus *statusEMC = new CaloTowerStatus("CEMCSTATUS");
   statusEMC->set_detector_type(CaloTowerDefs::CEMC);
   statusEMC->set_time_cut(1);
+  // MC Towers Status
+  if(isSim) {
+    // Uses threshold of 50% for towers be considered frequently bad.
+    std::string calibName_hotMap = "CEMC_hotTowers_status";
+    /* Systematic options (to be used as needed). */
+    /* Uses threshold of 40% for towers be considered frequently bad. */
+    // std::string calibName_hotMap = "CEMC_hotTowers_status_40";
+
+    /* Uses threshold of 60% for towers be considered frequently bad. */
+    // std::string calibName_hotMap = "CEMC_hotTowers_status_60";
+
+    std::string calibdir = CDBInterface::instance()->getUrl(calibName_hotMap);
+    statusEMC->set_directURL_hotMap(calibdir);
+  }
   se->registerSubsystem(statusEMC);
 
   CaloTowerStatus *statusHCalIn = new CaloTowerStatus("HCALINSTATUS");
