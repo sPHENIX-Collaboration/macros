@@ -32,13 +32,29 @@ void TPC_LaserClustering()
       laserClusterizer->Verbosity(verbosity);
       laserClusterizer->set_max_time_samples(TRACKING::reco_tpc_maxtime_sample);
       laserClusterizer->set_adc_threshold(G4TPC::laser_adc_threshold);
-      if(G4TPC::laser_clusterizer_debug_filename != "")
-      {
-	laserClusterizer->set_debug(true);
-	laserClusterizer->set_debug_name(G4TPC::laser_clusterizer_debug_filename);
-      }
+      laserClusterizer->set_do_sequential(G4TPC::LaserClusteringSequential);
       se->registerSubsystem(laserClusterizer);
 
+    }
+}
+
+void TPC_LaminationClustering()
+{
+
+  // central membrane reconstruction
+  if( G4TPC::ENABLE_CENTRAL_MEMBRANE_CLUSTERING )
+    {
+      int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
+      ACTSGEOM::ActsGeomInit();
+      Fun4AllServer* se = Fun4AllServer::instance();
+      
+      LaserClusterizer *laminationClusterizer = new LaserClusterizer;
+      laminationClusterizer->Verbosity(verbosity);
+      laminationClusterizer->set_max_time_samples(TRACKING::reco_tpc_maxtime_sample);
+      laminationClusterizer->set_adc_threshold(G4TPC::laser_adc_threshold);
+      laminationClusterizer->set_do_sequential(G4TPC::LaserClusteringSequential);
+      laminationClusterizer->set_lamination(true);
+      se->registerSubsystem(laminationClusterizer);
     }
 }
 
