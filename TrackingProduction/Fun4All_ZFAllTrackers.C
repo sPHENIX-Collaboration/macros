@@ -127,11 +127,11 @@ void Fun4All_ZFAllTrackers(
 
   auto silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
-  silicon_match->set_x_search_window(0.36);
-  silicon_match->set_y_search_window(0.36);
-  silicon_match->set_z_search_window(2.5);
-  silicon_match->set_phi_search_window(0.014);
-  silicon_match->set_eta_search_window(0.0091);
+  silicon_match->set_x_search_window(0.36); // was 0.36
+  silicon_match->set_y_search_window(0.36); // was 0.36
+  silicon_match->set_z_search_window(2.5);  // was 2.5
+  silicon_match->set_phi_search_window(0.014); // was 0.014
+  silicon_match->set_eta_search_window(0.0091); // was 0.0091
   silicon_match->set_test_windows_printout(false);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
   silicon_match->zeroField(true);

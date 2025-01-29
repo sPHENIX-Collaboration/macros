@@ -221,11 +221,11 @@ void Fun4All_TrackSeeding(
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
   auto silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
-  silicon_match->set_x_search_window(2.);
-  silicon_match->set_y_search_window(2.);
-  silicon_match->set_z_search_window(5.);
-  silicon_match->set_phi_search_window(0.2);
-  silicon_match->set_eta_search_window(0.1);
+  silicon_match->set_x_search_window(5.3); // was 2.
+  silicon_match->set_y_search_window(5.16); // was 2.
+  silicon_match->set_z_search_window(13.6); // was 5.
+  silicon_match->set_phi_search_window(-0.25,0.05); // was 0.2
+  silicon_match->set_eta_search_window(0.18); // was 0.1
   silicon_match->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(silicon_match);
 
