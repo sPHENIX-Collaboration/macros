@@ -8,6 +8,8 @@
 #include <tpc/LaserClusterizer.h>
 #include <tpccalib/TpcLaminationFitting.h>
 
+#include <tpccalib/TpcDirectLaserReconstruction.h>
+
 #include <fun4all/Fun4AllServer.h>
 
 
@@ -36,6 +38,20 @@ void TPC_LaserClustering()
       se->registerSubsystem(laserClusterizer);
 
     }
+
+  // direct laser reconstruction
+  if( G4TPC::ENABLE_DIRECT_LASER_HITS )
+    {
+
+    Fun4AllServer* se = Fun4AllServer::instance(); 
+    auto directLaserReconstruction = new TpcDirectLaserReconstruction;
+    directLaserReconstruction->set_outputfile( G4TPC::DIRECT_LASER_ROOTOUTPUT_FILENAME );
+    directLaserReconstruction->set_savehistograms( G4TPC::DIRECT_LASER_SAVEHISTOGRAMS );
+    directLaserReconstruction->set_histogram_outputfile( G4TPC::DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME );
+    se->registerSubsystem(directLaserReconstruction); 
+    
+    }
+
 }
 
 void TPC_LaminationClustering()
