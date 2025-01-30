@@ -99,7 +99,7 @@ int Fun4All_G4_sPHENIX(
   // if you use a filelist
   //INPUTEMBED::listfile[0] = embed_input_file;
 
-  Input::SIMPLE = true;
+  Input::SIMPLE = false;
   // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
@@ -295,7 +295,7 @@ int Fun4All_G4_sPHENIX(
   //======================
 
   // QA, main switch
-  Enable::QA = true;
+  Enable::QA = false;
 
   // Global options (enabled for all enables subsystems - if implemented)
   //  Enable::ABSORBER = true;
@@ -305,10 +305,10 @@ int Fun4All_G4_sPHENIX(
   // Enable::MBD = true;
   // Enable::MBD_SUPPORT = true; // save hist in MBD/BBC support structure
   // Enable::MBDRECO = Enable::MBD && true;
-  Enable::MBDFAKE = true;  // Smeared vtx and t0, use if you don't want real MBD/BBC in simulation
+  Enable::MBDFAKE = false;  // Smeared vtx and t0, use if you don't want real MBD/BBC in simulation
 
-  Enable::PIPE = true;
-  Enable::PIPE_ABSORBER = true;
+  Enable::PIPE = false;
+  Enable::PIPE_ABSORBER = false;
 
   // central tracking
   Enable::MVTX = true;
@@ -364,48 +364,48 @@ int Fun4All_G4_sPHENIX(
   //  into the tracking, cannot run together with CEMC
   //  Enable::CEMCALBEDO = true;
 
-  Enable::CEMC = true;
-  Enable::CEMC_ABSORBER = true;
-  Enable::CEMC_CELL = Enable::CEMC && true;
-  Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
-  Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
-  Enable::CEMC_EVAL = Enable::CEMC_G4Hit && Enable::CEMC_CLUSTER && true;
-  Enable::CEMC_QA = Enable::CEMC_CLUSTER && Enable::QA && true;
+  Enable::CEMC = false;
+  Enable::CEMC_ABSORBER = false;
+  Enable::CEMC_CELL = Enable::CEMC && false;
+  Enable::CEMC_TOWER = Enable::CEMC_CELL && false;
+  Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && false;
+  Enable::CEMC_EVAL = Enable::CEMC_G4Hit && Enable::CEMC_CLUSTER && false;
+  Enable::CEMC_QA = Enable::CEMC_CLUSTER && Enable::QA && false;
 
-  Enable::HCALIN = true;
-  Enable::HCALIN_ABSORBER = true;
-  Enable::HCALIN_CELL = Enable::HCALIN && true;
-  Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
-  Enable::HCALIN_CLUSTER = Enable::HCALIN_TOWER && true;
-  Enable::HCALIN_EVAL = Enable::HCALIN_G4Hit && Enable::HCALIN_CLUSTER && true;
-  Enable::HCALIN_QA = Enable::HCALIN_CLUSTER && Enable::QA && true;
+  Enable::HCALIN = false;
+  Enable::HCALIN_ABSORBER = false;
+  Enable::HCALIN_CELL = Enable::HCALIN && false;
+  Enable::HCALIN_TOWER = Enable::HCALIN_CELL && false;
+  Enable::HCALIN_CLUSTER = Enable::HCALIN_TOWER && false;
+  Enable::HCALIN_EVAL = Enable::HCALIN_G4Hit && Enable::HCALIN_CLUSTER && false;
+  Enable::HCALIN_QA = Enable::HCALIN_CLUSTER && Enable::QA && false;
 
-  Enable::MAGNET = true;
-  Enable::MAGNET_ABSORBER = true;
+  Enable::MAGNET = false;
+  Enable::MAGNET_ABSORBER = false;
 
-  Enable::HCALOUT = true;
-  Enable::HCALOUT_ABSORBER = true;
-  Enable::HCALOUT_CELL = Enable::HCALOUT && true;
-  Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
-  Enable::HCALOUT_CLUSTER = Enable::HCALOUT_TOWER && true;
-  Enable::HCALOUT_EVAL = Enable::HCALOUT_G4Hit && Enable::HCALOUT_CLUSTER && true;
-  Enable::HCALOUT_QA = Enable::HCALOUT_CLUSTER && Enable::QA && true;
+  Enable::HCALOUT = false;
+  Enable::HCALOUT_ABSORBER = false;
+  Enable::HCALOUT_CELL = Enable::HCALOUT && false;
+  Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && false;
+  Enable::HCALOUT_CLUSTER = Enable::HCALOUT_TOWER && false;
+  Enable::HCALOUT_EVAL = Enable::HCALOUT_G4Hit && Enable::HCALOUT_CLUSTER && false;
+  Enable::HCALOUT_QA = Enable::HCALOUT_CLUSTER && Enable::QA && false;
 
-  Enable::EPD = true;
-  Enable::EPD_TILE = Enable::EPD && true;
+  Enable::EPD = false;
+  Enable::EPD_TILE = Enable::EPD && false;
 
-  Enable::BEAMLINE = true;
+  Enable::BEAMLINE = false;
   //  Enable::BEAMLINE_ABSORBER = true;  // makes the beam line magnets sensitive volumes
   //  Enable::BEAMLINE_BLACKHOLE = true; // turns the beamline magnets into black holes
-  Enable::ZDC = true;
+  Enable::ZDC = false;
   //  Enable::ZDC_ABSORBER = true;
   //  Enable::ZDC_SUPPORT = true;
-  Enable::ZDC_TOWER = Enable::ZDC && true;
-  Enable::ZDC_EVAL = Enable::ZDC_TOWER && true;
+  Enable::ZDC_TOWER = Enable::ZDC && false;
+  Enable::ZDC_EVAL = Enable::ZDC_TOWER && false;
 
   //! forward flux return plug door. Out of acceptance and off by default.
   //Enable::PLUGDOOR = true;
-  Enable::PLUGDOOR_ABSORBER = true;
+  Enable::PLUGDOOR_ABSORBER = false;
 
  //Enable::GLOBAL_FASTSIM = true;
 
@@ -416,9 +416,9 @@ int Fun4All_G4_sPHENIX(
 
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && false;
 
-  Enable::JETS = (Enable::GLOBAL_RECO || Enable::GLOBAL_FASTSIM) && true;
-  Enable::JETS_EVAL = Enable::JETS && true;
-  Enable::JETS_QA = Enable::JETS && Enable::QA && true;
+  Enable::JETS = (Enable::GLOBAL_RECO || Enable::GLOBAL_FASTSIM) && false;
+  Enable::JETS_EVAL = Enable::JETS && false;
+  Enable::JETS_QA = Enable::JETS && Enable::QA && false;
 
   // HI Jet Reco for p+Au / Au+Au collisions (default is false for
   // single particle / p+p-only simulations, or for p+Au / Au+Au
@@ -428,12 +428,12 @@ int Fun4All_G4_sPHENIX(
   // 3-D topoCluster reconstruction, potentially in all calorimeter layers
   Enable::TOPOCLUSTER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && false;
   // particle flow jet reconstruction - needs topoClusters!
-  Enable::PARTICLEFLOW = Enable::TOPOCLUSTER && true;
+  Enable::PARTICLEFLOW = Enable::TOPOCLUSTER && false;
   // centrality reconstruction
-  Enable::CENTRALITY = true;
+  Enable::CENTRALITY = false;
 
   // new settings using Enable namespace in GlobalVariables.C
-  Enable::BLACKHOLE = true;
+  Enable::BLACKHOLE = false;
   //Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
   //Enable::BLACKHOLE_FORWARD_SAVEHITS = false; // disable forward/backward hits
   //BlackHoleGeometry::visible = true;

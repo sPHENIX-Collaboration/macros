@@ -482,6 +482,7 @@ void TPC_Cells()
   // direct laser G4Hit generation
   if (G4TPC::ENABLE_DIRECT_LASER_HITS)
   {
+    std::cout<<"______________________YOU ARE REGISTERING THE DIRECT LASER SUBSYSTEM_______________________"<<std::endl;
     auto directLaser = new PHG4TpcDirectLaser;
 
     // setup phi and theta steps
@@ -490,7 +491,7 @@ void TPC_Cells()
     directLaser->SetPhiStepping(144, 0 * deg_to_rad, 360 * deg_to_rad);
     directLaser->SetThetaStepping(36, 0 * deg_to_rad, 90 * deg_to_rad);
     // directLaser->SetArbitraryThetaPhi(50*deg_to_rad, 145*deg_to_rad);
-    directLaser->SetDirectLaserAuto(true);
+    //directLaser->SetDirectLaserAuto(true);
     //__Variable stepping: hitting all of the central membrane____________
     // directLaser->SetDirectLaserPatternfromFile( true );
     // directLaser->SetFileStepping(13802);
@@ -498,6 +499,7 @@ void TPC_Cells()
 
     directLaser->set_double_param("drift_velocity", drift_vel);
     se->registerSubsystem(directLaser);
+    std::cout<<"______________________YOU REGISTERED THE DIRECT LASER SUBSYSTEM_______________________"<<std::endl;
   }
 
   //=========================
@@ -629,7 +631,7 @@ void TPC_Cells()
   digitpc->Verbosity(verbosity);
   cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
        << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << endl;
-  digitpc->set_skip_noise_flag(false);
+  digitpc->set_skip_noise_flag(true);
   se->registerSubsystem(digitpc);
 }
 
