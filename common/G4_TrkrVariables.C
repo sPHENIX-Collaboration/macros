@@ -142,10 +142,10 @@ namespace G4TPC
 
   //enable diffuse laser clustering
   bool ENABLE_CENTRAL_MEMBRANE_CLUSTERING = true;
+  bool LaserClusteringSequential = false;
+  float laser_adc_threshold = 100.0;
 
-  bool REJECT_LASER_EVENTS = true;
-  float laser_adc_threshold = 0.0;
-  std::string laser_clusterizer_debug_filename = "";
+  bool REJECT_LASER_EVENTS = false;
   std::string laser_event_debug_filename = "";
   std::string LaminationOutputName = "";
   std::string LaminationFitName = "";
