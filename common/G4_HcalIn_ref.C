@@ -22,13 +22,13 @@
 
 #include <calobase/TowerInfoDefs.h>
 
+#include <caloreco/CaloTowerBuilder.h>
+#include <caloreco/CaloTowerCalib.h>
+#include <caloreco/CaloTowerStatus.h>
+#include <caloreco/CaloWaveformProcessing.h>
 #include <caloreco/RawClusterBuilderGraph.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
-#include <caloreco/CaloTowerBuilder.h>
-#include <caloreco/CaloTowerCalib.h>
-#include <caloreco/CaloWaveformProcessing.h>
-#include <caloreco/CaloTowerStatus.h>
 
 #include <simqa_modules/QAG4SimulationCalorimeter.h>
 
@@ -93,7 +93,7 @@ namespace G4HCALIN
 
     kHCalInTemplateClusterizer
   };
-  
+
   bool useTowerInfoV2 = true;
   //! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
   enu_HCalIn_clusterizer HCalIn_clusterizer = kHCalInTemplateClusterizer;
@@ -142,7 +142,7 @@ double HCalInner(PHG4Reco *g4Reco,
     {
       if (verbosity > 0)
       {
-        cout << "HCalInner - construct inner HCal absorber with G4_Al" << endl;
+        std::cout << "HCalInner - construct inner HCal absorber with G4_Al" << std::endl;
       }
       hcal->set_string_param("material", "G4_Al");
     }
@@ -150,7 +150,7 @@ double HCalInner(PHG4Reco *g4Reco,
     {
       if (verbosity > 0)
       {
-        cout << "HCalInner - construct inner HCal absorber with SS310" << endl;
+        std::cout << "HCalInner - construct inner HCal absorber with SS310" << std::endl;
       }
       hcal->set_string_param("material", "SS310");
     }
@@ -203,7 +203,7 @@ double HCalInner(PHG4Reco *g4Reco,
   {
     hcal->SetAbsorberActive();
   }
-  if (!isfinite(G4HCALIN::phistart))
+  if (!std::isfinite(G4HCALIN::phistart))
   {
     if (Enable::HCALIN_OLD)
     {
@@ -262,7 +262,7 @@ void HCALInner_Towers()
     HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalInRawTowerBuilder");
     TowerBuilder->Detector("HCALIN");
     TowerBuilder->set_sim_tower_node_prefix("SIM");
-    if (!isfinite(G4HCALIN::phistart))
+    if (!std::isfinite(G4HCALIN::phistart))
     {
       if (Enable::HCALIN_OLD)
       {
@@ -274,7 +274,7 @@ void HCALInner_Towers()
       }
     }
     TowerBuilder->set_double_param("phistart", G4HCALIN::phistart);
-    if (isfinite(G4HCALIN::tower_emin))
+    if (std::isfinite(G4HCALIN::tower_emin))
     {
       TowerBuilder->set_double_param("emin", G4HCALIN::tower_emin);
     }
@@ -376,9 +376,9 @@ void HCALInner_Clusters()
   {
     RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("HcalInRawClusterBuilderTemplate");
     ClusterBuilder->Detector("HCALIN");
-    ClusterBuilder->SetCylindricalGeometry();                     // has to be called after Detector()
+    ClusterBuilder->SetCylindricalGeometry();  // has to be called after Detector()
     ClusterBuilder->Verbosity(verbosity);
-    if (!Enable::HCALIN_G4Hit||Enable::HCALIN_TOWERINFO) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
+    if (!Enable::HCALIN_G4Hit || Enable::HCALIN_TOWERINFO) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
     se->registerSubsystem(ClusterBuilder);
   }
   else if (G4HCALIN::HCalIn_clusterizer == G4HCALIN::kHCalInGraphClusterizer)
@@ -386,12 +386,12 @@ void HCALInner_Clusters()
     RawClusterBuilderGraph *ClusterBuilder = new RawClusterBuilderGraph("HcalInRawClusterBuilderGraph");
     ClusterBuilder->Detector("HCALIN");
     ClusterBuilder->Verbosity(verbosity);
-    //if (!Enable::HCALIN_G4Hit) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
+    // if (!Enable::HCALIN_G4Hit) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
     se->registerSubsystem(ClusterBuilder);
   }
   else
   {
-    cout << "HCalIn_Clusters - unknown clusterizer setting!" << endl;
+    std::cout << "HCalIn_Clusters - unknown clusterizer setting!" << std::endl;
     exit(1);
   }
   return;
@@ -417,7 +417,7 @@ void HCALInner_QA()
 
   Fun4AllServer *se = Fun4AllServer::instance();
   QAG4SimulationCalorimeter *qa = new QAG4SimulationCalorimeter("HCALIN");
-  if(Enable::HCALIN_TOWERINFO) qa->set_flags(QAG4SimulationCalorimeter::kProcessTowerinfo);
+  if (Enable::HCALIN_TOWERINFO) qa->set_flags(QAG4SimulationCalorimeter::kProcessTowerinfo);
   qa->Verbosity(verbosity);
   se->registerSubsystem(qa);
 

@@ -8,6 +8,8 @@
 
 #include <fun4all/Fun4AllServer.h>
 
+#include <TROOT.h>  // for R__LOAD_LIBRARY
+
 R__LOAD_LIBRARY(libg4vertex.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 namespace Enable

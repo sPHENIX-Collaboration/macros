@@ -43,7 +43,7 @@ namespace G4ZDC
 {
   double Gz0 = 1900.;
   double outer_radius = 180.;
-  string calibfile = "ZDC/mapping/towerMap_ZDC.txt";
+  std::string calibfile = "ZDC/mapping/towerMap_ZDC.txt";
   double ZDCPlaceZ = 1843.0;
 
 }  // namespace G4ZDC
@@ -64,8 +64,8 @@ void ZDCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  PHG4ZDCSubsystem *zdc = new PHG4ZDCSubsystem("ZDC",PHG4ZDCDefs::NORTH);
-// place zdc in beam enclosure
+  PHG4ZDCSubsystem *zdc = new PHG4ZDCSubsystem("ZDC", PHG4ZDCDefs::NORTH);
+  // place zdc in beam enclosure
   zdc->set_double_param("place_z", G4ZDC::ZDCPlaceZ - G4BEAMLINE::enclosure_center);
   zdc->OverlapCheck(OverlapCheck);
   zdc->SetActive();
@@ -76,7 +76,7 @@ void ZDCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
   g4Reco->registerSubsystem(zdc);
 
   zdc = new PHG4ZDCSubsystem("ZDC", PHG4ZDCDefs::SOUTH);
-// place zdc in beam enclosure
+  // place zdc in beam enclosure
   zdc->set_double_param("place_z", G4ZDC::ZDCPlaceZ - G4BEAMLINE::enclosure_center);
   zdc->OverlapCheck(OverlapCheck);
   zdc->SetActive();
@@ -92,7 +92,7 @@ void ZDC_Towers()
   int verbosity = std::max(Enable::VERBOSITY, Enable::ZDC_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  string mapping_zdc = string(getenv("CALIBRATIONROOT")) + "/" + G4ZDC::calibfile;
+  std::string mapping_zdc = std::string(getenv("CALIBRATIONROOT")) + "/" + G4ZDC::calibfile;
 
   RawTowerBuilderByHitIndex *tower_ZDC = new RawTowerBuilderByHitIndex("TowerBuilder_ZDC");
   tower_ZDC->Detector("ZDC");
@@ -107,7 +107,7 @@ void ZDC_Towers()
   TowerDigitizer->Verbosity(verbosity);
   TowerDigitizer->set_digi_algorithm(RawTowerDigitizer::kNo_digitization);
   se->registerSubsystem(TowerDigitizer);
-  //SMD
+  // SMD
   RawTowerDigitizer *TowerDigitizer1 = new RawTowerDigitizer("ZDCRawTowerDigitizer1");
   TowerDigitizer1->Detector("ZDC");
   TowerDigitizer1->TowerType(1);
