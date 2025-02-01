@@ -127,11 +127,16 @@ void Fun4All_ZFAllTrackers(
 
   auto silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
-  silicon_match->set_x_search_window(0.36);
-  silicon_match->set_y_search_window(0.36);
-  silicon_match->set_z_search_window(2.5);
-  silicon_match->set_phi_search_window(0.014);
-  silicon_match->set_eta_search_window(0.0091);
+  silicon_match->set_use_legacy_windowing(false);
+  // set search windows matching Silicon to TPC seeds
+  // Selected for tracks with ntpc>34,|z_Si-z_TPC|<30,crossing==0
+  // see https://indico.bnl.gov/event/26202/attachments/59703/102575/2025_01_31_ZeroField.pdf
+  // Will probably be narrowed from improved alignment soon.
+  silicon_match->window_dx.set_QoverpT_maxabs({2.6,0,0});
+  silicon_match->window_dy.set_QoverpT_maxabs({2.3,0,0});
+  silicon_match->window_dz.set_QoverpT_range({-2.9,0,0},{4.2,0,0});
+  silicon_match->window_deta.set_QoverpT_maxabs({0.06,0,0});
+  silicon_match->window_dphi.set_QoverpT_maxabs({0.11,0,0});
   silicon_match->set_test_windows_printout(false);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
   silicon_match->zeroField(true);
