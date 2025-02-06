@@ -244,16 +244,17 @@ void CEMC_Towers()
   int verbosity = std::max(Enable::VERBOSITY, Enable::CEMC_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  if (Enable::CEMC_G4Hit)
-  {
-    RawTowerBuilder *TowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
-    TowerBuilder->Detector("CEMC");
-    TowerBuilder->set_sim_tower_node_prefix("SIM");
-    TowerBuilder->Verbosity(verbosity);
-    se->registerSubsystem(TowerBuilder);
-  }
+
   if (!Enable::CEMC_TOWERINFO)
   {
+    if (Enable::CEMC_G4Hit)
+    {
+      RawTowerBuilder *TowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
+      TowerBuilder->Detector("CEMC");
+      TowerBuilder->set_sim_tower_node_prefix("SIM");
+      TowerBuilder->Verbosity(verbosity);
+      se->registerSubsystem(TowerBuilder);
+    }
     double sampling_fraction = 1;
     //      sampling_fraction = 0.02244; //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.3/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
     //    sampling_fraction = 2.36081e-02;  //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
@@ -322,6 +323,15 @@ void CEMC_Towers()
     caloWaveformSim->set_pedestalsamples(12);
     caloWaveformSim->set_timewidth(0.2);
     caloWaveformSim->set_peakpos(6);
+    // pedestal scale down for different beam configurations according to Blair
+    if(Input::BEAM_CONFIGURATION == Input::pp_ZEROANGLE)
+    {
+      caloWaveformSim->set_pedestal_scale(0.69);
+    }
+    if(Input::BEAM_CONFIGURATION == Input::pp_COLLISION)
+    {
+      caloWaveformSim->set_pedestal_scale(0.77);
+    }
     // caloWaveformSim->Verbosity(2);
     // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
     caloWaveformSim->set_calibName("cemc_pi0_twrSlope_v1_default");
@@ -333,8 +343,8 @@ void CEMC_Towers()
     ca2->set_dataflag(false);
     ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
     ca2->set_builder_type(CaloTowerDefs::kWaveformTowerv2);
-    // match our current ZS threshold ~14ADC for emcal
-    ca2->set_softwarezerosuppression(true, 14);
+    // match our current ZS threshold ~60ADC for emcal
+    ca2->set_softwarezerosuppression(true, 60);
     se->registerSubsystem(ca2);
 
     CaloTowerStatus *statusEMC = new CaloTowerStatus("CEMCSTATUS");

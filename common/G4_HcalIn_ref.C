@@ -257,41 +257,42 @@ void HCALInner_Towers()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
-  if (Enable::HCALIN_G4Hit)
-  {
-    HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalInRawTowerBuilder");
-    TowerBuilder->Detector("HCALIN");
-    TowerBuilder->set_sim_tower_node_prefix("SIM");
-    if (!std::isfinite(G4HCALIN::phistart))
-    {
-      if (Enable::HCALIN_OLD)
-      {
-        G4HCALIN::phistart = 0.0328877688;  // offet in phi (from zero) extracted from geantinos
-      }
-      else
-      {
-        G4HCALIN::phistart = 0.0445549893;  // offet in phi (from zero) extracted from geantinos
-      }
-    }
-    TowerBuilder->set_double_param("phistart", G4HCALIN::phistart);
-    if (std::isfinite(G4HCALIN::tower_emin))
-    {
-      TowerBuilder->set_double_param("emin", G4HCALIN::tower_emin);
-    }
-    if (G4HCALIN::tower_energy_source >= 0)
-    {
-      TowerBuilder->set_int_param("tower_energy_source", G4HCALIN::tower_energy_source);
-    }
-    // this sets specific decalibration factors
-    // for a given cell
-    // TowerBuilder->set_cell_decal_factor(1,10,0.1);
-    // for a whole tower
-    // TowerBuilder->set_tower_decal_factor(0,10,0.2);
-    TowerBuilder->Verbosity(verbosity);
-    se->registerSubsystem(TowerBuilder);
-  }
+  
   if (!Enable::HCALIN_TOWERINFO)
   {
+    if (Enable::HCALIN_G4Hit)
+    {
+      HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalInRawTowerBuilder");
+      TowerBuilder->Detector("HCALIN");
+      TowerBuilder->set_sim_tower_node_prefix("SIM");
+      if (!std::isfinite(G4HCALIN::phistart))
+      {
+        if (Enable::HCALIN_OLD)
+        {
+          G4HCALIN::phistart = 0.0328877688;  // offet in phi (from zero) extracted from geantinos
+        }
+        else
+        {
+          G4HCALIN::phistart = 0.0445549893;  // offet in phi (from zero) extracted from geantinos
+        }
+      }
+      TowerBuilder->set_double_param("phistart", G4HCALIN::phistart);
+      if (std::isfinite(G4HCALIN::tower_emin))
+      {
+        TowerBuilder->set_double_param("emin", G4HCALIN::tower_emin);
+      }
+      if (G4HCALIN::tower_energy_source >= 0)
+      {
+        TowerBuilder->set_int_param("tower_energy_source", G4HCALIN::tower_energy_source);
+      }
+      // this sets specific decalibration factors
+      // for a given cell
+      // TowerBuilder->set_cell_decal_factor(1,10,0.1);
+      // for a whole tower
+      // TowerBuilder->set_tower_decal_factor(0,10,0.2);
+      TowerBuilder->Verbosity(verbosity);
+      se->registerSubsystem(TowerBuilder);
+    }
     // From 2016 Test beam sim
     RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalInRawTowerDigitizer");
     TowerDigitizer->Detector("HCALIN");
