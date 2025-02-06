@@ -290,44 +290,45 @@ void HCALOuter_Towers()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
-  // build the raw tower anyways for the geom nodes
-  if (Enable::HCALOUT_G4Hit)
-  {
-    HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalOutRawTowerBuilder");
-    TowerBuilder->Detector("HCALOUT");
-    TowerBuilder->set_sim_tower_node_prefix("SIM");
-    if (!isfinite(G4HCALOUT::phistart))
-    {
-      if (Enable::HCALOUT_OLD)
-      {
-        G4HCALOUT::phistart = 0.026598397;  // offet in phi (from zero) extracted from geantinos
-      }
-      else
-      {
-        G4HCALOUT::phistart = 0.0240615415;  // offet in phi (from zero) extracted from geantinos
-      }
-    }
-    TowerBuilder->set_double_param("phistart", G4HCALOUT::phistart);
-    if (isfinite(G4HCALOUT::tower_emin))
-    {
-      TowerBuilder->set_double_param("emin", G4HCALOUT::tower_emin);
-    }
-    if (G4HCALOUT::tower_energy_source >= 0)
-    {
-      TowerBuilder->set_int_param("tower_energy_source", G4HCALOUT::tower_energy_source);
-    }
-    // this sets specific decalibration factors
-    // for a given cell
-    // TowerBuilder->set_cell_decal_factor(1,10,0.1);
-    // for a whole tower
-    // TowerBuilder->set_tower_decal_factor(0,10,0.2);
-    // TowerBuilder->set_cell_decal_factor(1,10,0.1);
-    // TowerBuilder->set_tower_decal_factor(0,10,0.2);
-    TowerBuilder->Verbosity(verbosity);
-    se->registerSubsystem(TowerBuilder);
-  }
+  
   if (!Enable::HCALOUT_TOWERINFO)
   {
+    // build the raw tower anyways for the geom nodes
+  if (Enable::HCALOUT_G4Hit)
+    {
+      HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalOutRawTowerBuilder");
+      TowerBuilder->Detector("HCALOUT");
+      TowerBuilder->set_sim_tower_node_prefix("SIM");
+      if (!isfinite(G4HCALOUT::phistart))
+      {
+        if (Enable::HCALOUT_OLD)
+        {
+          G4HCALOUT::phistart = 0.026598397;  // offet in phi (from zero) extracted from geantinos
+        }
+        else
+        {
+          G4HCALOUT::phistart = 0.0240615415;  // offet in phi (from zero) extracted from geantinos
+        }
+      }
+      TowerBuilder->set_double_param("phistart", G4HCALOUT::phistart);
+      if (isfinite(G4HCALOUT::tower_emin))
+      {
+        TowerBuilder->set_double_param("emin", G4HCALOUT::tower_emin);
+      }
+      if (G4HCALOUT::tower_energy_source >= 0)
+      {
+        TowerBuilder->set_int_param("tower_energy_source", G4HCALOUT::tower_energy_source);
+      }
+      // this sets specific decalibration factors
+      // for a given cell
+      // TowerBuilder->set_cell_decal_factor(1,10,0.1);
+      // for a whole tower
+      // TowerBuilder->set_tower_decal_factor(0,10,0.2);
+      // TowerBuilder->set_cell_decal_factor(1,10,0.1);
+      // TowerBuilder->set_tower_decal_factor(0,10,0.2);
+      TowerBuilder->Verbosity(verbosity);
+      se->registerSubsystem(TowerBuilder);
+    }
     // From 2016 Test beam sim
     RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalOutRawTowerDigitizer");
     TowerDigitizer->Detector("HCALOUT");
