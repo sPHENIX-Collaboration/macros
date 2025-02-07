@@ -150,6 +150,7 @@ void Fun4All_TrackSeeding(
 
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
+  silicon_Seeding->setStrobeRange(-5,5);
   // these get us to about 83% INTT > 1
   silicon_Seeding->setinttRPhiSearchWindow(0.4);
   silicon_Seeding->setinttZSearchWindow(2.0);
