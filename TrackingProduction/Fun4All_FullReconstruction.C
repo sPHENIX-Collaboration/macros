@@ -136,7 +136,10 @@ void Fun4All_FullReconstruction(
   Tpc_HitUnpacking();
   Micromegas_HitUnpacking();
 
-  Mvtx_Clustering();
+  MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
+  mvtxclusterizer->Verbosity(verbosity);
+  se->registerSubsystem(mvtxclusterizer);
+  
   Intt_Clustering();
 
   Tpc_LaserEventIdentifying();
@@ -170,6 +173,7 @@ void Fun4All_FullReconstruction(
 
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
+  silicon_Seeding0->setStrobeRange(-5,5);
   // these get us to about 83% INTT > 1
   silicon_Seeding->setinttRPhiSearchWindow(0.4);
   silicon_Seeding->setinttZSearchWindow(2.0);
