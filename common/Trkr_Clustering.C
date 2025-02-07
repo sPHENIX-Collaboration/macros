@@ -15,6 +15,7 @@
 
 #include <intt/InttClusterizer.h>
 #include <mvtx/MvtxClusterizer.h>
+#include <mvtx/MvtxHitPruner.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wundefined-internal"
@@ -58,6 +59,11 @@ void Mvtx_Clustering()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
+
+  // prune the extra MVTX hits due to multiple strobes per hit
+  MvtxHitPruner* mvtxhitpruner = new MvtxHitPruner();
+  mvtxhitpruner->Verbosity(verbosity);
+  se->registerSubsystem(mvtxhitpruner);
 
   // For the Mvtx layers
   //================
