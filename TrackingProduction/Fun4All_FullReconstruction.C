@@ -137,6 +137,7 @@ void Fun4All_FullReconstruction(
   Micromegas_HitUnpacking();
 
   MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
+  int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
   mvtxclusterizer->Verbosity(verbosity);
   se->registerSubsystem(mvtxclusterizer);
   
@@ -173,7 +174,7 @@ void Fun4All_FullReconstruction(
 
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
-  silicon_Seeding0->setStrobeRange(-5,5);
+  silicon_Seeding->setStrobeRange(-5,5);
   // these get us to about 83% INTT > 1
   silicon_Seeding->setinttRPhiSearchWindow(0.4);
   silicon_Seeding->setinttZSearchWindow(2.0);
