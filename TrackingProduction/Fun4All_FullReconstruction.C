@@ -140,7 +140,7 @@ void Fun4All_FullReconstruction(
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
   mvtxclusterizer->Verbosity(verbosity);
   se->registerSubsystem(mvtxclusterizer);
-  
+
   Intt_Clustering();
 
   Tpc_LaserEventIdentifying();
@@ -253,6 +253,7 @@ void Fun4All_FullReconstruction(
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
   auto mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(0);
+  mm_match->set_pp_mode(TRACKING::pp_mode);
   mm_match->set_rphi_search_window_lyr1(3.);
   mm_match->set_rphi_search_window_lyr2(15.0);
   mm_match->set_z_search_window_lyr1(30.0);
