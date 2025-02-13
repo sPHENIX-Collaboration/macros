@@ -155,8 +155,6 @@ void TPC_Clustering()
   tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
   
   se->registerSubsystem(tpcclusterizer);
-  tpcclusterizer->set_fixed_window(0);
-  tpcclusterizer->set_do_split(true);
   auto tpcclustercleaner = new TpcClusterCleaner;
   tpcclustercleaner->Verbosity(verbosity);
   se->registerSubsystem(tpcclustercleaner);
