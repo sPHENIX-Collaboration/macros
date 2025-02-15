@@ -76,6 +76,10 @@ void Fun4All_TrackSeeding(
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
   TpcReadoutInit(runnumber);
+ // these lines show how to override the drift velocity and time offset values set in TpcReadoutInit
+  // G4TPC::tpc_drift_velocity_reco = 0.0073844; // cm/ns
+  // TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
+  // G4TPC::tpc_tzero_reco = -5*50;  // ns
   std::cout << " run: " << runnumber
             << " samples: " << TRACKING::reco_tpc_maxtime_sample
             << " pre: " << TRACKING::reco_tpc_time_presample

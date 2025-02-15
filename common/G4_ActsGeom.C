@@ -52,6 +52,7 @@ namespace ACTSGEOM
     // Geometry must be built before any Acts modules
     MakeActsGeometry* geom = new MakeActsGeometry();
     geom->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
+    geom->set_tpc_tzero(G4TPC::tpc_tzero_reco);
     geom->Verbosity(verbosity);
     for (int i = 0; i < 57; i++)
     {
