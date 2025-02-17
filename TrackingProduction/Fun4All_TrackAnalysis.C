@@ -97,6 +97,10 @@ void Fun4All_TrackAnalysis(
   se->registerInputManager(ingeo);
 
   TpcReadoutInit( runnumber );
+  // these lines show how to override the drift velocity and time offset values set in TpcReadoutInit
+  // G4TPC::tpc_drift_velocity_reco = 0.0073844; // cm/ns
+  // TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
+  // G4TPC::tpc_tzero_reco = -5*50;  // ns
 
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
 
