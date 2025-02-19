@@ -656,6 +656,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   cprop->useConstBField(false);
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
+  cprop->set_max_seeds(5000);
   cprop->Verbosity(verbosity);
 
   if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
