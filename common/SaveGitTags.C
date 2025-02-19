@@ -7,7 +7,15 @@
 
 R__LOAD_LIBRARY(libphool.so)
 
+void SaveGitTags();
 void SetGitTagsFromFile(const std::string &filename);
+
+void SaveGitTags(const std::string &commitid)
+{
+  recoConsts *rc = recoConsts::instance();
+  rc->set_StringFlag("MDC2_GITTAG", commitid);
+  SaveGitTags();
+}
 
 // build the filename from rebuild.info under $OFFLINE_MAIN
 void SaveGitTags()
