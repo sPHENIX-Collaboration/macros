@@ -154,6 +154,20 @@ namespace Input
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
+
+    case ppg02:
+      Input::beam_crossing = 1.;  // +1 mRad for late 2024 with triggered readout for mvtx
+      localbcross = Input::beam_crossing / 2. * 1e-3;
+      //  Xing angle is split among both beams, means set to 0.5 mRad
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  // 1.5mrad x-ing of sPHENIX
+      HepMCGen->set_vertex_distribution_mean(-0.022,0.223, -4.03, 0.);
+      HepMCGen->set_vertex_distribution_width(
+          120e-4,         // approximation from past PHENIX data
+          120e-4,         // approximation from past PHENIX data
+          9.358,             // measured by intt
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+      break;
+      
     default:
       std::cout << "ApplysPHENIXBeamParameter: invalid beam_config = " << beam_config << std::endl;
 
@@ -242,6 +256,7 @@ namespace INPUTHEPMC
   bool FERMIMOTION = false;
   bool HIJINGFLIP = false;
   bool REACTIONPLANERAND = false;
+  float HEPMC_STRANGENESS_FRACTION = -1.;
 
 }  // namespace INPUTHEPMC
 
@@ -557,6 +572,10 @@ void InputRegister()
     }
     // copy HepMC records into G4
     HepMCNodeReader *hr = new HepMCNodeReader();
+    if (INPUTHEPMC::HEPMC_STRANGENESS_FRACTION >= 0)
+    {
+      hr->AddStrangeness(INPUTHEPMC::HEPMC_STRANGENESS_FRACTION);
+    }
     se->registerSubsystem(hr);
   }
 }
