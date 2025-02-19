@@ -46,6 +46,7 @@
 #include <trackingqa/TpcClusterQA.h>
 #include <trackingqa/TpcSeedsQA.h>
 #include <trackingqa/SiliconSeedsQA.h>
+#include <trackingqa/TpcSiliconQA.h>
 
 #include <trackingqa/MicromegasClusterQA.h>
 
@@ -97,30 +98,30 @@ void Fun4All_PRDFReconstruction(
     const string &input_mvtxfile03 = "mvtx3.list",
     const string &input_mvtxfile04 = "mvtx4.list",
     const string &input_mvtxfile05 = "mvtx5.list",
-    const string &input_tpcfile00 = "tpc00.list",
-    const string &input_tpcfile01 = "tpc01.list",
-    const string &input_tpcfile02 = "tpc02.list",
-    const string &input_tpcfile03 = "tpc03.list",
-    const string &input_tpcfile04 = "tpc04.list",
-    const string &input_tpcfile05 = "tpc05.list",
-    const string &input_tpcfile06 = "tpc06.list",
-    const string &input_tpcfile07 = "tpc07.list",
-    const string &input_tpcfile08 = "tpc08.list",
-    const string &input_tpcfile09 = "tpc09.list",
-    const string &input_tpcfile10 = "tpc10.list",
-    const string &input_tpcfile11 = "tpc11.list",
-    const string &input_tpcfile12 = "tpc12.list",
-    const string &input_tpcfile13 = "tpc13.list",
-    const string &input_tpcfile14 = "tpc14.list",
-    const string &input_tpcfile15 = "tpc15.list",
-    const string &input_tpcfile16 = "tpc16.list",
-    const string &input_tpcfile17 = "tpc17.list",
-    const string &input_tpcfile18 = "tpc18.list",
-    const string &input_tpcfile19 = "tpc19.list",
-    const string &input_tpcfile20 = "tpc20.list",
-    const string &input_tpcfile21 = "tpc21.list",
-    const string &input_tpcfile22 = "tpc22.list",
-    const string &input_tpcfile23 = "tpc23.list",
+    const string &input_tpcfile00 = "ebdc00.list",
+    const string &input_tpcfile01 = "ebdc01.list",
+    const string &input_tpcfile02 = "ebdc02.list",
+    const string &input_tpcfile03 = "ebdc03.list",
+    const string &input_tpcfile04 = "ebdc04.list",
+    const string &input_tpcfile05 = "ebdc05.list",
+    const string &input_tpcfile06 = "ebdc06.list",
+    const string &input_tpcfile07 = "ebdc07.list",
+    const string &input_tpcfile08 = "ebdc08.list",
+    const string &input_tpcfile09 = "ebdc09.list",
+    const string &input_tpcfile10 = "ebdc10.list",
+    const string &input_tpcfile11 = "ebdc11.list",
+    const string &input_tpcfile12 = "ebdc12.list",
+    const string &input_tpcfile13 = "ebdc13.list",
+    const string &input_tpcfile14 = "ebdc14.list",
+    const string &input_tpcfile15 = "ebdc15.list",
+    const string &input_tpcfile16 = "ebdc16.list",
+    const string &input_tpcfile17 = "ebdc17.list",
+    const string &input_tpcfile18 = "ebdc18.list",
+    const string &input_tpcfile19 = "ebdc19.list",
+    const string &input_tpcfile20 = "ebdc20.list",
+    const string &input_tpcfile21 = "ebdc21.list",
+    const string &input_tpcfile22 = "ebdc22.list",
+    const string &input_tpcfile23 = "ebdc23.list",
     const string &input_tpotfile = "tpot.list"
 )
 {
@@ -188,6 +189,7 @@ void Fun4All_PRDFReconstruction(
   rc->set_uint64Flag("TIMESTAMP", runnumber);
 
   //! flags to set
+  Enable::QA = true;
   TRACKING::tpc_zero_supp = true;
   TRACKING::pp_mode = true;
   G4TRACKING::convert_seeds_to_svtxtracks = false;
@@ -520,11 +522,6 @@ void Fun4All_PRDFReconstruction(
   // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "/sphenix/tg/tg01/hf/jdosbo/tracking_development/onlineoffline/hitsets.root");
   // se->registerOutputManager(out);
 
-
-  se->run(nEvents);
-  se->End();
-  se->PrintTimer();
-
   if (Enable::QA)
   {
     se->registerSubsystem(new MvtxRawHitQA);
@@ -536,12 +533,20 @@ void Fun4All_PRDFReconstruction(
     se->registerSubsystem(new MicromegasClusterQA);
     se->registerSubsystem(new SiliconSeedsQA);
     se->registerSubsystem(new TpcSeedsQA);
+    se->registerSubsystem(new TpcSiliconQA);
    
   }
-  
-  TString qaname = outfilename + runnumber +"_qa.root";
-  std::string qaOutputFileName(qaname.Data());
-  QAHistManagerDef::saveQARootFile(qaOutputFileName);
+
+  se->run(nEvents);
+  se->End();
+  se->PrintTimer();
+
+  if(Enable::QA)
+    {
+      TString qaname = outfilename + runnumber +"_qa.root";
+      std::string qaOutputFileName(qaname.Data());
+      QAHistManagerDef::saveQARootFile(qaOutputFileName);
+    }
   delete se;
   std::cout << "Finished" << std::endl;
   gSystem->Exit(0);
