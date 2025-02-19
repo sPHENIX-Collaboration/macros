@@ -176,6 +176,7 @@ double Intt(PHG4Reco* g4Reco, double radius,
   {
     sitrack->set_int_param(PHG4InttDefs::SUPPORTPARAMS, "supportactive", 1);
   }
+  
   g4Reco->registerSubsystem(sitrack);
 
   // Set the laddertype and ladder spacing configuration
@@ -372,7 +373,6 @@ double TPC(PHG4Reco* g4Reco,
   tpc->SetActive();
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);  // 1cm steps
-
   tpc->set_double_param("drift_velocity", drift_vel);
   tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
   tpc->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
@@ -430,6 +430,8 @@ double TPC(PHG4Reco* g4Reco,
   }
 
   tpc->OverlapCheck(OverlapCheck);
+
+  tpc->UpdateParametersWithMacro();
   g4Reco->registerSubsystem(tpc);
 
   if (Enable::TPC_ENDCAP)
@@ -497,6 +499,8 @@ void TPC_Cells()
     //___________________________________________________________________
 
     directLaser->set_double_param("drift_velocity", drift_vel);
+    
+    directLaser->UpdateParametersWithMacro();
     se->registerSubsystem(directLaser);
   }
 
@@ -514,6 +518,7 @@ void TPC_Cells()
   padplane->SetReadoutTime(extended_readout_time);
   padplane->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
   padplane->SetDriftVelocity(drift_vel);
+  padplane->UpdateParametersWithMacro();
 
   auto edrift = new PHG4TpcElectronDrift;
   edrift->Detector("TPC");
@@ -614,7 +619,8 @@ void TPC_Cells()
   // fudge factors to get drphi 150 microns (in mid and outer Tpc) and dz 500 microns cluster resolution
   // They represent effects not due to ideal gas properties and ideal readout plane behavior
   // defaults are 0.085 and 0.105, they can be changed here to get a different resolution
-
+  
+  edrift->UpdateParametersWithMacro();
   edrift->registerPadPlane(padplane);
   se->registerSubsystem(edrift);
 
