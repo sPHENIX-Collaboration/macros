@@ -547,6 +547,7 @@ void Fun4All_PRDFReconstruction(
       std::string qaOutputFileName(qaname.Data());
       QAHistManagerDef::saveQARootFile(qaOutputFileName);
     }
+  CDBInterface::instance()->Print();
   delete se;
   std::cout << "Finished" << std::endl;
   gSystem->Exit(0);

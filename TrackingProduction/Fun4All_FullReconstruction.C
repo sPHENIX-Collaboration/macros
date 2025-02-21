@@ -381,7 +381,7 @@ void Fun4All_FullReconstruction(
   se->run(nEvents);
   se->End();
   se->PrintTimer();
-
+  CDBInterface::instance()->Print();
   if (Enable::QA)
   {
     TString qaname = theOutfile + "_qa.root";
