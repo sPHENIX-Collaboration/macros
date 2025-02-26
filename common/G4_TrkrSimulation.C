@@ -11,7 +11,6 @@
 #include <g4mvtx/PHG4MvtxHitReco.h>
 #include <g4mvtx/PHG4MvtxSubsystem.h>
 
-#include <g4intt/PHG4InttDeadMapLoader.h>
 #include <g4intt/PHG4InttDefs.h>
 #include <g4intt/PHG4InttDigitizer.h>
 #include <g4intt/PHG4InttHitReco.h>
@@ -210,35 +209,6 @@ void Intt_Cells()
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  if (G4INTT::InttDeadMapOption != G4INTT::kInttNoDeadMap)
-  {
-    // Load pre-defined deadmaps
-    PHG4InttDeadMapLoader* deadMapINTT = new PHG4InttDeadMapLoader("INTT");
-
-    for (int i = 0; i < G4INTT::n_intt_layer; i++)
-    {
-      string DeadMapConfigName = Form("intt_layer%d/", i);
-
-      if (G4INTT::InttDeadMapOption == G4INTT::kInttDeadMap)
-      {
-        string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap/");
-        // string DeadMapPath = "/sphenix/u/wxie/sphnx_software/INTT" + string("/DeadMap/");
-
-        DeadMapPath += DeadMapConfigName;
-
-        deadMapINTT->deadMapPath(G4MVTX::n_maps_layer + i, DeadMapPath);
-      }
-      else
-      {
-        cout << "G4_Intt.C - fatal error - invalid InttDeadMapOption = " << G4INTT::InttDeadMapOption << endl;
-        exit(1);
-      }
-    }
-
-    deadMapINTT->Verbosity(verbosity);
-    // deadMapINTT -> Verbosity(1);
-    se->registerSubsystem(deadMapINTT);
-  }
   // new storage containers
   PHG4InttHitReco* reco = new PHG4InttHitReco();
   reco->setHotStripMaskFile("INTT_HotMap");
@@ -288,7 +258,8 @@ void Intt_Cells()
   // new containers
   PHG4InttDigitizer* digiintt = new PHG4InttDigitizer();
   digiintt->Verbosity(verbosity);
-  // digiintt->Verbosity(3);
+  /// Only necessary to call the following method if using a non-default calibration
+  digiintt->SetWhichBadMap("INTT_Hotmap");
   for (int i = 0; i < G4INTT::n_intt_layer; i++)
   {
     digiintt->set_adc_scale(G4MVTX::n_maps_layer + i, userrange);
