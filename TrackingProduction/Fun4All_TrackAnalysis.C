@@ -138,6 +138,14 @@ void Fun4All_TrackAnalysis(
   silicon_match->Verbosity(0);
   silicon_match->set_use_legacy_windowing(false);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
+  if(G4TPC::ENABLE_AVERAGE_CORRECTIONS)
+    {
+      // reset phi matching window to be centered on zero
+      // it defaults to being centered on -0.1 radians for the case of static corrections only
+      std::array<double,3> arrlo = {-0.15,0,0};
+      std::array<double,3> arrhi = {0.15,0,0};
+      silicon_match->window_dphi.set_QoverpT_range(arrlo, arrhi);
+    }
   se->registerSubsystem(silicon_match);
 
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
