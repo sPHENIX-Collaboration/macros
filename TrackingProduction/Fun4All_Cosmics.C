@@ -54,17 +54,41 @@ R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
 void Fun4All_Cosmics(
     const int nEvents = 0,
-    const std::string filename = "DST_STREAMING_EVENT_cosmics_new_2024p001-00045673-0000.root",
+    const std::string filelist = "filelist.list",
     const std::string dir = ".",
     const std::string outfilename = "cosmics")
 {
-  std::string inputRawHitFile = dir + filename;
+  
   TRACKING::tpc_zero_supp = true;
+  auto se = Fun4AllServer::instance();
+  se->Verbosity(0);
+  auto rc = recoConsts::instance();
+  
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  std::ifstream ifs(filelist);
+  std::string filepath;
+  int runnumber = std::numeric_limits<int>::quiet_NaN();
+  int segment = std::numeric_limits<int>::quiet_NaN();
+  int i = 0;
+  while(std::getline(ifs,filepath))
+    {
+      std::cout << "Adding DST with filepath: " << filepath << std::endl; 
+     if(i==0)
+	{
+	   std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filepath);
+	   runnumber = runseg.first;
+	   segment = runseg.second;
+	   rc->set_IntFlag("RUNNUMBER", runnumber);
+	   rc->set_uint64Flag("TIMESTAMP", runnumber);
+        
+	}
+      std::string inputname = "InputManager" + std::to_string(i);
+      auto hitsin = new Fun4AllDstInputManager(inputname);
+      hitsin->fileopen(filepath);
+      se->registerInputManager(hitsin);
+      i++;
+    }
 
-  std::pair<int, int>
-      runseg = Fun4AllUtils::GetRunSegment(inputRawHitFile);
-  int runnumber = runseg.first;
-  int segment = runseg.second;
   TpcReadoutInit( runnumber );
   std::cout<< " run: " << runnumber
 	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
@@ -72,13 +96,8 @@ void Fun4All_Cosmics(
 	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
 	   << std::endl;
 
-  auto se = Fun4AllServer::instance();
-  se->Verbosity(0);
-  auto rc = recoConsts::instance();
-  rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "2024p007");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
@@ -86,20 +105,6 @@ void Fun4All_Cosmics(
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
-  G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
-  CDBInterface *cdb = CDBInterface::instance();
-  std::string tpc_dv_calib_dir = cdb->getUrl("TPC_DRIFT_VELOCITY");
-  if (tpc_dv_calib_dir.empty())
-  {
-    std::cout << "No calibrated TPC drift velocity for Run " << runnumber << ". Use default value " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
-  }
-  else
-  {
-    CDBTTree *cdbttree = new CDBTTree(tpc_dv_calib_dir);
-    cdbttree->LoadCalibrations();
-    G4TPC::tpc_drift_velocity_reco = cdbttree->GetSingleFloatValue("tpc_drift_velocity");
-    std::cout << "Use calibrated TPC drift velocity for Run " << runnumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
-  }
 
   // can use for zero field
   //double fieldstrength = 0.01;
@@ -114,23 +119,30 @@ void Fun4All_Cosmics(
   }
   TrackingInit();
 
-  auto hitsin = new Fun4AllDstInputManager("InputManager");
-  hitsin->fileopen(inputRawHitFile);
-  se->registerInputManager(hitsin);
-
-  Mvtx_HitUnpacking();
-  Intt_HitUnpacking();
-  //Tpc_HitUnpacking();
-  auto tpcunpacker = new TpcCombinedRawDataUnpacker;
-  tpcunpacker->Verbosity(0);
-  tpcunpacker->doBaselineCorr(true);
-  if(TRACKING::tpc_zero_supp)
+  
+  for(int felix=0; felix < 6; felix++)
     {
-      tpcunpacker->ReadZeroSuppressedData();
+      Mvtx_HitUnpacking(std::to_string(felix));
     }
-  se->registerSubsystem(tpcunpacker);
+  for(int server = 0; server < 8; server++)
+    {
+      Intt_HitUnpacking(std::to_string(server));
+    }
+  ostringstream ebdcname;
+  for(int ebdc = 0; ebdc < 24; ebdc++)
+    {
+      ebdcname.str("");
+      if(ebdc < 10)
+	{
+	  ebdcname<<"0";
+	}
+      ebdcname<<ebdc;
+      Tpc_HitUnpacking(ebdcname.str());
+    }
 
   Micromegas_HitUnpacking();
+
+  
   Mvtx_Clustering();
   Intt_Clustering();
 
@@ -154,7 +166,7 @@ void Fun4All_Cosmics(
   converter->setFieldMap(G4MAGNET::magfield_tracking);
   se->registerSubsystem(converter);
 
-  TString residoutfile = outfilename + filename + "_resid.root";
+  TString residoutfile = outfilename + runnumber +"-"+segment+  "_resid.root";
   std::string residstring(residoutfile.Data());
 
   auto resid = new TrackResiduals("TrackResiduals");
@@ -162,7 +174,7 @@ void Fun4All_Cosmics(
   resid->outfileName(residstring);
   resid->alignment(false);
   resid->clusterTree();
-  resid->hitTree();
+  //resid->hitTree();
   resid->convertSeeds(true);
 
 
@@ -191,7 +203,7 @@ void Fun4All_Cosmics(
    
   }
   
-  TString qaname = outfilename + filename + "_qa.root";
+  TString qaname = outfilename + runnumber+"-"+segment + "_qa.root";
   std::string qaOutputFileName(qaname.Data());
   //QAHistManagerDef::saveQARootFile(qaOutputFileName);
   delete se;
