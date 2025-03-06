@@ -43,6 +43,7 @@ void TrackingInit()
     {
       tpcLoadDistortionCorrection->set_interpolate_2D_to_zero(TpcLoadDistortionCorrection::DistortionType_Average, G4TPC::average_correction_interpolate);
       tpcLoadDistortionCorrection->set_correction_filename(TpcLoadDistortionCorrection::DistortionType_Average, G4TPC::average_correction_filename);
+      tpcLoadDistortionCorrection->set_interpolate_2D_to_zero(TpcLoadDistortionCorrection::DistortionType_Average, true);
     }
     se->registerSubsystem(tpcLoadDistortionCorrection);
   }

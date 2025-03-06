@@ -120,10 +120,18 @@ void Fun4All_TrackSeeding(
   se->registerInputManager(ingeo);
 
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
-  // to turn on the default static corrections, enable the two lines below
-  //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
-  // G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS = false;
 
+  // to turn on the default static corrections, enable the two lines below
+  G4TPC::ENABLE_STATIC_CORRECTIONS = true;
+  G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
+
+  //to turn on the average corrections, enable the three lines below
+  //note: these are designed to be used only if static corrections are also applied
+  //G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
+  // G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
+  // to use a custom file instead of the database file:
+   //G4TPC::average_correction_filename = std::string("/sphenix/tg/tg01/jets/bkimelman/BenProduction/Feb21_2025/Laminations_run2pp_ana464_2024p011_v001-00053744.root");
+   
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
@@ -141,16 +149,6 @@ void Fun4All_TrackSeeding(
   /*
    * Silicon Seeding
    */
-
-  /*
-  auto silicon_Seeding = new PHActsSiliconSeeding;
-  silicon_Seeding->Verbosity(0);
-  silicon_Seeding->searchInIntt();
-  silicon_Seeding->setinttRPhiSearchWindow(0.4);
-  silicon_Seeding->setinttZSearchWindow(1.6);
-  silicon_Seeding->seedAnalysis(false);
-  se->registerSubsystem(silicon_Seeding);
-  */
 
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
@@ -228,7 +226,15 @@ void Fun4All_TrackSeeding(
   silicon_match->Verbosity(0);
   silicon_match->set_use_legacy_windowing(false);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
-  se->registerSubsystem(silicon_match);
+  if(G4TPC::ENABLE_AVERAGE_CORRECTIONS)
+    {
+      // reset phi matching window to be centered on zero
+      // it defaults to being centered on -0.1 radians for the case of static corrections only
+      std::array<double,3> arrlo = {-0.15,0,0};
+      std::array<double,3> arrhi = {0.15,0,0};
+      silicon_match->window_dphi.set_QoverpT_range(arrlo, arrhi);
+    }
+    se->registerSubsystem(silicon_match);
 
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
   auto mm_match = new PHMicromegasTpcTrackMatching;
@@ -397,7 +403,7 @@ void Fun4All_TrackSeeding(
   se->run(nEvents);
   se->End();
   se->PrintTimer();
-
+  CDBInterface::instance()->Print();
   if (Enable::QA)
   {
     TString qaname = theOutfile + "_qa.root";

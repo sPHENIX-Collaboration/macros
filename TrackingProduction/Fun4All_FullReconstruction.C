@@ -58,19 +58,40 @@ R__LOAD_LIBRARY(libtrackingqa.so)
 R__LOAD_LIBRARY(libtpcqa.so)
 void Fun4All_FullReconstruction(
     const int nEvents = 10,
-    const std::string tpcfilename = "DST_STREAMING_EVENT_run2pp_new_2024p002-00053217-00000.root",
-    const std::string tpcdir = "/sphenix/lustre01/sphnxpro/physics/slurp/streaming/physics/new_2024p002/run_00053200_00053300/",
+    const std::string filelist = "filelist.list",
     const std::string outfilename = "clusters_seeds",
     const bool convertSeeds = false)
 {
-  std::string inputtpcRawHitFile = tpcdir + tpcfilename;
-
   G4TRACKING::convert_seeds_to_svtxtracks = convertSeeds;
   std::cout << "Converting to seeds : " << G4TRACKING::convert_seeds_to_svtxtracks << std::endl;
-  std::pair<int, int>
-      runseg = Fun4AllUtils::GetRunSegment(tpcfilename);
-  int runnumber = runseg.first;
-  int segment = runseg.second;
+
+  auto se = Fun4AllServer::instance();
+  se->Verbosity(2);
+  auto rc = recoConsts::instance();
+  
+  std::ifstream ifs(filelist);
+  std::string filepath;
+  int runnumber = std::numeric_limits<int>::quiet_NaN();
+  int segment = std::numeric_limits<int>::quiet_NaN();
+  int i = 0;
+  while(std::getline(ifs,filepath))
+    {
+      std::cout << "Adding DST with filepath: " << filepath << std::endl; 
+     if(i==0)
+	{
+	   std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filepath);
+	   runnumber = runseg.first;
+	   segment = runseg.second;
+	   rc->set_IntFlag("RUNNUMBER", runnumber);
+	   rc->set_uint64Flag("TIMESTAMP", runnumber);
+        
+	}
+      std::string inputname = "InputManager" + std::to_string(i);
+      auto hitsin = new Fun4AllDstInputManager(inputname);
+      hitsin->fileopen(filepath);
+      se->registerInputManager(hitsin);
+      i++;
+    }
 
   std::cout<< " run: " << runnumber
 	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
@@ -92,12 +113,8 @@ void Fun4All_FullReconstruction(
   ACTSGEOM::tpotMisalignment = 100.;
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
   std::string theOutfile = outfile.Data();
-  auto se = Fun4AllServer::instance();
-  se->Verbosity(2);
-  auto rc = recoConsts::instance();
-  rc->set_IntFlag("RUNNUMBER", runnumber);
-  rc->set_IntFlag("RUNSEGMENT", segment);
 
+ 
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
@@ -114,8 +131,8 @@ void Fun4All_FullReconstruction(
   TRACKING::tpc_zero_supp = true;
 
   //to turn on the default static corrections, enable the two lines below
-  //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
-  //G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
+  G4TPC::ENABLE_STATIC_CORRECTIONS = true;
+  G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
 
   //to turn on the average corrections derived from simulation, enable the three lines below
   //note: these are designed to be used only if static corrections are also applied
@@ -126,14 +143,27 @@ void Fun4All_FullReconstruction(
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
-  auto hitsin = new Fun4AllDstInputManager("InputManager");
-  hitsin->fileopen(inputtpcRawHitFile);
-  // hitsin->AddFile(inputMbd);
-  se->registerInputManager(hitsin);
 
-  Mvtx_HitUnpacking();
-  Intt_HitUnpacking();
-  Tpc_HitUnpacking();
+  for(int felix=0; felix < 6; felix++)
+    {
+      Mvtx_HitUnpacking(std::to_string(felix));
+    }
+  for(int server = 0; server < 8; server++)
+    {
+      Intt_HitUnpacking(std::to_string(server));
+    }
+  ostringstream ebdcname;
+  for(int ebdc = 0; ebdc < 24; ebdc++)
+    {
+      ebdcname.str("");
+      if(ebdc < 10)
+	{
+	  ebdcname<<"0";
+	}
+      ebdcname<<ebdc;
+      Tpc_HitUnpacking(ebdcname.str());
+    }
+
   Micromegas_HitUnpacking();
 
   MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
@@ -381,7 +411,7 @@ void Fun4All_FullReconstruction(
   se->run(nEvents);
   se->End();
   se->PrintTimer();
-
+  CDBInterface::instance()->Print();
   if (Enable::QA)
   {
     TString qaname = theOutfile + "_qa.root";
