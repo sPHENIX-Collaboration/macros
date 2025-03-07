@@ -1,8 +1,6 @@
 #ifndef MACRO_G4TRKRVARIABLES_C
 #define MACRO_G4TRKRVARIABLES_C
 
-#include <GlobalVariables.C>
-
 #include <g4intt/PHG4InttDefs.h>
 #include <g4mvtx/PHG4MvtxDefs.h>
 
@@ -66,7 +64,7 @@ namespace G4MVTX
 
 namespace G4MVTXAlignment
 {
-  std::string alignment_path = string(getenv("CALIBRATIONROOT")) + "/Tracking/MVTX/alignment";
+  std::string alignment_path = std::string(getenv("CALIBRATIONROOT")) + "/Tracking/MVTX/alignment";
   double z_offset[] = {0.0, 0.0, 200.0};
 }  // namespace G4MVTXAlignment
 
@@ -96,13 +94,12 @@ namespace G4TPC
 {
   int n_tpc_layer_inner = 16;
 
-  int tpc_layer_rphi_count_inner = 1128; // 94 * 12
+  int tpc_layer_rphi_count_inner = 1128;  // 94 * 12
 
   int n_tpc_layer_mid = 16;
   int n_tpc_layer_outer = 16;
   int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
   double tpc_outer_radius = 77. + 2.;
-
 
   // use simple clusterizer
   bool USE_SIMPLE_CLUSTERIZER = false;
@@ -120,7 +117,7 @@ namespace G4TPC
   bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
   std::string time_ordered_distortion_filename = "TPC_TIMEORDERED_DISTORTION";
 
-  // allow distortions to remove electrons that 
+  // allow distortions to remove electrons that
   bool ENABLE_REACHES_READOUT = true;
 
   // module edge distortion corrections
@@ -140,13 +137,15 @@ namespace G4TPC
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
 
-  //enable diffuse laser clustering
+  // enable diffuse laser clustering
   bool ENABLE_CENTRAL_MEMBRANE_CLUSTERING = true;
+  bool LaserClusteringSequential = false;
+  float laser_adc_threshold = 100.0;
 
-  bool REJECT_LASER_EVENTS = true;
-  float laser_adc_threshold = 0.0;
-  std::string laser_clusterizer_debug_filename = "";
+  bool REJECT_LASER_EVENTS = false;
   std::string laser_event_debug_filename = "";
+  std::string LaminationOutputName = "";
+  std::string LaminationFitName = "";
 
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;

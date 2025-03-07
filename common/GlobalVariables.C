@@ -1,9 +1,11 @@
 #ifndef MACRO_GLOBALVARIABLES_C
 #define MACRO_GLOBALVARIABLES_C
 
-#include <G4_TrkrVariables.C>
 #include <g4decayer/EDecayType.hh>
+#include <limits>
 #include <set>
+#include <sstream>
+#include <string>
 
 double no_overlapp = 0.0001;
 
@@ -24,7 +26,8 @@ namespace Input
     AA_COLLISION = 0,
     pA_COLLISION = 1,
     pp_COLLISION = 2,
-    pp_ZEROANGLE = 3
+    pp_ZEROANGLE = 3,
+    ppg02 = 4
   };
 
   BeamConfiguration BEAM_CONFIGURATION = AA_COLLISION;
@@ -73,8 +76,10 @@ namespace TRACKING
   double pp_extended_readout_time = 7000.0;  // ns
   bool reco_tpc_is_configured = false;
   int reco_tpc_maxtime_sample = 425;
-  int reco_tpc_time_presample = 40;//120 - 80
+  int reco_tpc_time_presample = 40;  // 120 - 80
+  int reco_t0 = 0;
   bool tpc_zero_supp = false;
+  bool tpc_baseline_corr = true;
 
 }  // namespace TRACKING
 
@@ -83,7 +88,7 @@ namespace G4MAGNET
   // initialize to garbage values - the override is done in the respective
   // MagnetInit() functions. If used standalone (without the G4_Magnet include)
   // like in the tracking - those need to be set in the Fun4All macro
-  double magfield_rescale = NAN;
+  double magfield_rescale = std::numeric_limits<double>::quiet_NaN();
   std::string magfield;
   std::string magfield_OHCAL_steel;
   std::string magfield_tracking;
@@ -103,6 +108,7 @@ namespace G4MICROMEGAS
 namespace G4TPC
 {
   double tpc_drift_velocity_reco = 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas, it is very close to our Ar-CF4 mixture
+  double tpc_tzero_reco = 0.0;  // ns  
 }
 
 namespace G4TRACKING
@@ -128,7 +134,7 @@ bool isRootFile(const std::string &fname)
 {
   std::string tmp = fname;
   size_t i = fname.rfind('.', fname.length());
-  if (i != string::npos)
+  if (i != std::string::npos)
   {
     if (fname.substr(i + 1, fname.length() - i) == "root")
     {
@@ -140,7 +146,7 @@ bool isRootFile(const std::string &fname)
 
 bool isConstantField(const std::string &name, double &fieldstrength)
 {
-  istringstream stringline(G4MAGNET::magfield_tracking);
+  std::istringstream stringline(G4MAGNET::magfield_tracking);
   stringline >> fieldstrength;
   if (stringline.fail())
   {  // conversion to double fails -> we have a string (means fieldmap)

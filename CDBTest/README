@@ -1,8 +1,10 @@
 Setup:
 
-modify mycdb.json, replace  /sphenix/user/pinkenbu/cdbtest/ by an area you can write to (make sure it exists). Leave the other fields in the read_dir_list unchanged - in case your tests need other existing calibrations. The master copy of this is $NOPAYLOADCLIENT_CONF in case there are updates I forgot to merge with mycdb.json
+Please do not use the writing/reading to the cdb (the mycdb.jsan stuff), it's not needed right now - your job ends when you have created the file and read it back)
 
-set NOPAYLOADCLIENT_CONF to this file (if you stay in this dir you don't need the full path):
+The calibration files will be written and read to the local directory (./)
+
+set NOPAYLOADCLIENT_CONF to mycdb.json (you need to stay in this dir so the reading/writing work so you don't need the full path):
 
 setenv NOPAYLOADCLIENT_CONF mycdb.json
 or when using bash
