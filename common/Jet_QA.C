@@ -86,7 +86,6 @@ namespace JetQA
     {JetQADefs::GL1::ZDCS, "zdcs"},
     {JetQADefs::GL1::ZDCN, "zdcn"},
     {JetQADefs::GL1::ZDCNS, "zdcns"},
-    {JetQADefs::GL1::Random, "random"},
     {JetQADefs::GL1::HCalSingle, "hcalsingle"},
     {JetQADefs::GL1::MBDS, "mbds"},
     {JetQADefs::GL1::MBDN, "mbdn"},
