@@ -153,7 +153,7 @@ void Fun4All_TrackSeeding(
   silicon_Seeding->setStrobeRange(-5,5);
   // these get us to about 83% INTT > 1
   silicon_Seeding->setinttRPhiSearchWindow(0.2);
-  silicon_Seeding->setinttZSearchWindow(1.0)
+  silicon_Seeding->setinttZSearchWindow(1.0);
   silicon_Seeding->seedAnalysis(false);
   se->registerSubsystem(silicon_Seeding);
 
