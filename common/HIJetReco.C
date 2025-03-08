@@ -179,9 +179,19 @@ void DoRhoCalculation()
   DetermineTowerRho* towRhoCalc = new DetermineTowerRho();
   towRhoCalc -> add_method(TowerRho::Method::AREA);
   towRhoCalc -> add_method(TowerRho::Method::MULT);
-  towRhoCalc -> add_tower_input( new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER) );
-  towRhoCalc -> add_tower_input( new TowerJetInput(Jet::HCALIN_TOWERINFO) );
-  towRhoCalc -> add_tower_input( new TowerJetInput(Jet::HCALOUT_TOWERINFO) );
+  TowerJetInput * rho_incemc = new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER,HIJETS::tower_prefix);
+  TowerJetInput * rho_inihcal = new TowerJetInput(Jet::HCALIN_TOWERINFO,HIJETS::tower_prefix);
+  TowerJetInput * rho_inohcal = new TowerJetInput(Jet::HCALOUT_TOWERINFO,HIJETS::tower_prefix);
+  if (HIJETS::do_vertex_type)
+  {
+    rho_incemc->set_GlobalVertexType(HIJETS::vertex_type);
+    rho_inihcal->set_GlobalVertexType(HIJETS::vertex_type);
+    rho_inohcal->set_GlobalVertexType(HIJETS::vertex_type);
+  }
+
+  towRhoCalc -> add_tower_input( rho_incemc );
+  towRhoCalc -> add_tower_input( rho_inihcal );
+  towRhoCalc -> add_tower_input( rho_inohcal );
   se -> registerSubsystem( towRhoCalc );
 
   // exit back to main macro
