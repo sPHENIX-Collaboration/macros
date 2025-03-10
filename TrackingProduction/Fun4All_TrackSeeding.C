@@ -106,7 +106,6 @@ void Fun4All_TrackSeeding(
   G4TRACKING::SC_CALIBMODE = false;
   TRACKING::pp_mode = true;
 
-  ACTSGEOM::tpotMisalignment = 100.;
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
   std::string theOutfile = outfile.Data();
   auto se = Fun4AllServer::instance();
@@ -187,6 +186,7 @@ void Fun4All_TrackSeeding(
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
   seeder->set_pp_mode(true);
+  seeder->reject_zsize1_clusters(true);
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
@@ -206,6 +206,7 @@ void Fun4All_TrackSeeding(
   cprop->set_max_window(5.);
   cprop->Verbosity(0);
   cprop->set_pp_mode(true);
+  cprop->set_max_seeds(5000);
   se->registerSubsystem(cprop);
 
   // Always apply preliminary distortion corrections to TPC clusters before silicon matching

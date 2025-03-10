@@ -74,9 +74,6 @@ void Fun4All_TrackAnalysis(
    */
   G4TRACKING::SC_CALIBMODE = false;
 
-  ACTSGEOM::mvtxMisalignment = 100;
-  ACTSGEOM::inttMisalignment = 100.;
-  ACTSGEOM::tpotMisalignment = 100.;
   TRACKING::pp_mode = true;
   
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
@@ -106,16 +103,16 @@ void Fun4All_TrackAnalysis(
 
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
 
-  //to turn on the default static corrections, enable the two lines below
+  // to turn on the default static corrections, enable the two lines below
   G4TPC::ENABLE_STATIC_CORRECTIONS = true;
   G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
 
-  //to turn on the average corrections derived from simulation, enable the three lines below
+  //to turn on the average corrections, enable the three lines below
   //note: these are designed to be used only if static corrections are also applied
-  //G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  //G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-  //G4TPC::average_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/average_minus_static_distortion_inverted_10-new.root";
-
+  G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
+  G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
+   // to use a custom file instead of the database file:
+  G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
@@ -221,15 +218,27 @@ void Fun4All_TrackAnalysis(
     }
   }
 
+  
   auto finder = new PHSimpleVertexFinder;
   finder->Verbosity(0);
-  finder->setDcaCut(0.5);
-  finder->setTrackPtCut(-99999.);
+  
+  //new cuts
+  finder->setDcaCut(0.02);
+  finder->setTrackPtCut(0.1);
   finder->setBeamLineCut(1);
-  finder->setTrackQualityCut(1000000000);
+  finder->setTrackQualityCut(100);
   finder->setNmvtxRequired(3);
-  finder->setOutlierPairCut(0.1);
+  finder->setOutlierPairCut(0.05);
+  
   se->registerSubsystem(finder);
+
+  // Propagate track positions to the vertex position
+  auto vtxProp = new PHActsVertexPropagator;
+  vtxProp->Verbosity(0);
+  vtxProp->fieldMap(G4MAGNET::magfield_tracking);
+  se->registerSubsystem(vtxProp);
+
+
 
   TString residoutfile = theOutfile + "_resid.root";
   std::string residstring(residoutfile.Data());
