@@ -315,12 +315,12 @@ void Fun4All_TrackSeeding(
   finder->Verbosity(0);
   
   //new cuts
-  finder->setDcaCut(0.02);
+  finder->setDcaCut(0.05);
   finder->setTrackPtCut(0.1);
   finder->setBeamLineCut(1);
-  finder->setTrackQualityCut(100);
+  finder->setTrackQualityCut(300);
   finder->setNmvtxRequired(3);
-  finder->setOutlierPairCut(0.05);
+  finder->setOutlierPairCut(0.10);
   
   se->registerSubsystem(finder);
 
