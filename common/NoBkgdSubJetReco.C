@@ -231,7 +231,7 @@ void NoBkgdSubJetReco()
 {
 
   // if simulation, make appropriate truth jets
-  if (Enable::NSJETS_MC && Enable::NSJETS_TRUTH) MakeHITruthJets();
+  if (Enable::NSJETS_MC && Enable::NSJETS_TRUTH) MakeNSTruthJets();
 
   // run approriate jet reconstruction routines
   if (Enable::NSJETS_TOWER) MakeNSTowerJets();
