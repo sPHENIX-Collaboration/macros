@@ -10,6 +10,8 @@
 #include <jetbase/TrackJetInput.h>
 #include <g4jets/TruthJetInput.h>
 
+#include <globalvertex/GlobalVertex.h>
+
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libparticleflow.so)
@@ -22,13 +24,13 @@ R__LOAD_LIBRARY(libg4jets.so)
 // ----------------------------------------------------------------------------
 namespace Enable
 {
-  int  NSJETS_VERBOSITY = 0;      //! verbosity
-  bool NSJETS           = false;  //! do no-subtraction jet reco
-  bool NSJETS_MC        = false;  //! is simulation
-  bool NSJETS_TRUTH     = false;  //! make truth jets
-  bool NSJETS_TOWER     = false;  //! make tower jets
-  bool NSJETS_TRACK     = true;   //! make track jets
-  bool NSJETS_PFLOW     = false;  //! make particle flow jets
+  int  NSJETS_VERBOSITY = 0;      ///! verbosity
+  bool NSJETS           = false;  ///! do no-subtraction jet reco
+  bool NSJETS_MC        = false;  ///! is simulation
+  bool NSJETS_TRUTH     = false;  ///! make truth jets
+  bool NSJETS_TOWER     = false;  ///! make tower jets
+  bool NSJETS_TRACK     = true;   ///! make track jets
+  bool NSJETS_PFLOW     = false;  ///! make particle flow jets
 }  // end namespace Enable
 
 
@@ -37,7 +39,18 @@ namespace Enable
 // ----------------------------------------------------------------------------
 namespace NSJETS
 {
-  bool is_pp = false;  //! turn on/off AA-only operations
+  ///! turn on/off AA-only operations
+  bool is_pp = false;
+
+  ///! if true, sets vertex type to type specified
+  ///! by vertex_type
+  bool do_vertex_type = true;
+
+  ///! specifies type of vertex to use
+  GlobalVertex::VTXTYPE vertex_type = GlobalVertex::MBD;
+
+  ///! sets prefix of nodes to use as tower jet
+  ///! input
   std::string tower_prefix = "TOWERINFO_CALIB";
 }  // end namespace NSJETS
 
@@ -116,11 +129,22 @@ void MakeNSTowerJets()
   rcemc->set_towerNodePrefix(NSJETS::tower_prefix);
   se->registerSubsystem(rcemc);
 
+  // create tower jet input and set vertex type
+  TowerJetInput* emTwrInput = new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER, NSJETS::tower_prefix);
+  TowerJetInput* ihTwrInput = new TowerJetInput(Jet::HCALIN_TOWERINFO, NSJETS::tower_prefix);
+  TowerJetInput* ohTwrInput = new TowerJetInput(Jet::HCALOUT_TOWERINFO, NSJETS::tower_prefix);
+  if (NSJETS::do_vertex_type)
+  {
+    emTwrInput->set_GlobalVertexType(NSJETS::vertex_type);
+    ihTwrInput->set_GlobalVertexType(NSJETS::vertex_type);
+    ohTwrInput->set_GlobalVertexType(NSJETS::vertex_type);
+  }
+
   // book jet reconstruction on towers  
   JetReco* twrRecoJets = new JetReco();
-  twrRecoJets->add_input(new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER,NSJETS::tower_prefix));
-  twrRecoJets->add_input(new TowerJetInput(Jet::HCALIN_TOWERINFO,NSJETS::tower_prefix));
-  twrRecoJets->add_input(new TowerJetInput(Jet::HCALOUT_TOWERINFO,NSJETS::tower_prefix));
+  twrRecoJets->add_input(emTwrInput);
+  twrRecoJets->add_input(ihTwrInput);
+  twrRecoJets->add_input(ohTwrInput);
   twrRecoJets->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.2, verbosity), "AntiKt_Tower_r02");
   twrRecoJets->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.3, verbosity), "AntiKt_Tower_r03");
   twrRecoJets->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.4, verbosity), "AntiKt_Tower_r04");
