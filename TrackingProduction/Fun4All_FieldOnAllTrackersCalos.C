@@ -65,10 +65,10 @@ std::string GetFirstLine(std::string listname);
 // > /sphenix/lustre01/sphnxpro/physics/slurp/caloy2test/run_00046700_00046800/DST_CALO_run2pp_new_2024p004-00046730-00001.root
 
 void Fun4All_FieldOnAllTrackersCalos(
-    const int nEvents = 10, 
+    const int nEvents = 10,
     vector<string> myInputLists = {
         "run46730_0000_trkr.txt",
-        "run46730_calo.list"}, 
+        "run46730_calo.list"},
     bool doTpcOnlyTracking = true,
     bool doEMcalRadiusCorr = true,
     const bool convertSeeds = false)
@@ -143,7 +143,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
   //to turn on the default static corrections, enable the two lines below
   //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
-  //G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS = false;
+  //G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
   //G4MAGNET::magfield = "0.01";
   G4MAGNET::magfield_tracking = G4MAGNET::magfield;
   G4MAGNET::magfield_rescale = 1;
@@ -258,11 +258,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
   auto silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
-  silicon_match->set_x_search_window(2.);
-  silicon_match->set_y_search_window(2.);
-  silicon_match->set_z_search_window(5.);
-  silicon_match->set_phi_search_window(0.2);
-  silicon_match->set_eta_search_window(0.1);
+  silicon_match->set_use_legacy_windowing(false);
   silicon_match->set_use_old_matching(true);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(silicon_match);
@@ -270,10 +266,11 @@ void Fun4All_FieldOnAllTrackersCalos(
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
   auto mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(0);
-  mm_match->set_rphi_search_window_lyr1(0.4);
-  mm_match->set_rphi_search_window_lyr2(13.0);
-  mm_match->set_z_search_window_lyr1(26.0);
-  mm_match->set_z_search_window_lyr2(0.4);
+  mm_match->set_pp_mode(TRACKING::pp_mode);
+  mm_match->set_rphi_search_window_lyr1(3.);
+  mm_match->set_rphi_search_window_lyr2(15.0);
+  mm_match->set_z_search_window_lyr1(30.0);
+  mm_match->set_z_search_window_lyr2(3.);
 
   mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
   mm_match->set_test_windows_printout(false);  // used for tuning search windows only

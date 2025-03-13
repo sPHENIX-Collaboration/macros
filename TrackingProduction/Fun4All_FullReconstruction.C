@@ -56,23 +56,43 @@ R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
 R__LOAD_LIBRARY(libtpcqa.so)
-void Fun4All_FieldOnAllTrackers(
+void Fun4All_FullReconstruction(
     const int nEvents = 10,
-    const std::string tpcfilename = "DST_STREAMING_EVENT_run2pp_new_2024p002-00053217-00000.root",
-    const std::string tpcdir = "/sphenix/lustre01/sphnxpro/physics/slurp/streaming/physics/new_2024p002/run_00053200_00053300/",
+    const std::string filelist = "filelist.list",
     const std::string outfilename = "clusters_seeds",
     const bool convertSeeds = false)
 {
-  std::string inputtpcRawHitFile = tpcdir + tpcfilename;
-
   G4TRACKING::convert_seeds_to_svtxtracks = convertSeeds;
   std::cout << "Converting to seeds : " << G4TRACKING::convert_seeds_to_svtxtracks << std::endl;
-  std::pair<int, int>
-      runseg = Fun4AllUtils::GetRunSegment(tpcfilename);
-  int runnumber = runseg.first;
-  int segment = runseg.second;
 
-  TpcReadoutInit( runnumber );
+  auto se = Fun4AllServer::instance();
+  se->Verbosity(2);
+  auto rc = recoConsts::instance();
+  
+  std::ifstream ifs(filelist);
+  std::string filepath;
+  int runnumber = std::numeric_limits<int>::quiet_NaN();
+  int segment = std::numeric_limits<int>::quiet_NaN();
+  int i = 0;
+  while(std::getline(ifs,filepath))
+    {
+      std::cout << "Adding DST with filepath: " << filepath << std::endl; 
+     if(i==0)
+	{
+	   std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filepath);
+	   runnumber = runseg.first;
+	   segment = runseg.second;
+	   rc->set_IntFlag("RUNNUMBER", runnumber);
+	   rc->set_uint64Flag("TIMESTAMP", runnumber);
+        
+	}
+      std::string inputname = "InputManager" + std::to_string(i);
+      auto hitsin = new Fun4AllDstInputManager(inputname);
+      hitsin->fileopen(filepath);
+      se->registerInputManager(hitsin);
+      i++;
+    }
+
   std::cout<< " run: " << runnumber
 	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
 	   << " pre: " << TRACKING::reco_tpc_time_presample
@@ -93,12 +113,8 @@ void Fun4All_FieldOnAllTrackers(
   ACTSGEOM::tpotMisalignment = 100.;
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
   std::string theOutfile = outfile.Data();
-  auto se = Fun4AllServer::instance();
-  se->Verbosity(2);
-  auto rc = recoConsts::instance();
-  rc->set_IntFlag("RUNNUMBER", runnumber);
-  rc->set_IntFlag("RUNSEGMENT", segment);
 
+ 
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
@@ -108,49 +124,56 @@ void Fun4All_FieldOnAllTrackers(
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
-  CDBInterface *cdb = CDBInterface::instance();
-  std::string tpc_dv_calib_dir = cdb->getUrl("TPC_DRIFT_VELOCITY");
-  if (tpc_dv_calib_dir.empty())
-  {
-    std::cout << "No calibrated TPC drift velocity for Run " << runnumber << ". Use default value " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
-  }
-  else
-  {
-    CDBTTree *cdbttree = new CDBTTree(tpc_dv_calib_dir);
-    cdbttree->LoadCalibrations();
-    G4TPC::tpc_drift_velocity_reco = cdbttree->GetSingleFloatValue("tpc_drift_velocity");
-    std::cout << "Use calibrated TPC drift velocity for Run " << runnumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
-  }
+  TpcReadoutInit( runnumber );
 
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
   //Flag for running the tpc hit unpacker with zero suppression on
   TRACKING::tpc_zero_supp = true;
 
   //to turn on the default static corrections, enable the two lines below
-  //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
-  //G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
+  G4TPC::ENABLE_STATIC_CORRECTIONS = true;
+  G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
 
   //to turn on the average corrections derived from simulation, enable the three lines below
   //note: these are designed to be used only if static corrections are also applied
   //G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
   //G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-  //G4TPC:average_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/average_minus_static_distortion_inverted_10-new.root";
+  //G4TPC::average_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/average_minus_static_distortion_inverted_10-new.root";
 
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
-  auto hitsin = new Fun4AllDstInputManager("InputManager");
-  hitsin->fileopen(inputtpcRawHitFile);
-  // hitsin->AddFile(inputMbd);
-  se->registerInputManager(hitsin);
 
-  Mvtx_HitUnpacking();
-  Intt_HitUnpacking();
-  Tpc_HitUnpacking();
+  for(int felix=0; felix < 6; felix++)
+    {
+      Mvtx_HitUnpacking(std::to_string(felix));
+    }
+  for(int server = 0; server < 8; server++)
+    {
+      Intt_HitUnpacking(std::to_string(server));
+    }
+  ostringstream ebdcname;
+  for(int ebdc = 0; ebdc < 24; ebdc++)
+    {
+      ebdcname.str("");
+      if(ebdc < 10)
+	{
+	  ebdcname<<"0";
+	}
+      ebdcname<<ebdc;
+      Tpc_HitUnpacking(ebdcname.str());
+    }
+
   Micromegas_HitUnpacking();
 
-  Mvtx_Clustering();
+  MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
+  int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
+  mvtxclusterizer->Verbosity(verbosity);
+  se->registerSubsystem(mvtxclusterizer);
+
   Intt_Clustering();
+
+  Tpc_LaserEventIdentifying();
 
   auto tpcclusterizer = new TpcClusterizer;
   tpcclusterizer->Verbosity(0);
@@ -158,7 +181,6 @@ void Fun4All_FieldOnAllTrackers(
   tpcclusterizer->set_rawdata_reco();
   se->registerSubsystem(tpcclusterizer);
 
-  Tpc_LaserEventIdentifying();
 
   Micromegas_Clustering();
 
@@ -182,9 +204,10 @@ void Fun4All_FieldOnAllTrackers(
 
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
+  silicon_Seeding->setStrobeRange(-5,5);
   // these get us to about 83% INTT > 1
-  silicon_Seeding->setinttRPhiSearchWindow(1.0);
-  silicon_Seeding->setinttZSearchWindow(7.0);
+  silicon_Seeding->setinttRPhiSearchWindow(0.4);
+  silicon_Seeding->setinttZSearchWindow(2.0);
   silicon_Seeding->seedAnalysis(false);
   se->registerSubsystem(silicon_Seeding);
 
@@ -253,17 +276,14 @@ void Fun4All_FieldOnAllTrackers(
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
   auto silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
-  silicon_match->set_x_search_window(2.);
-  silicon_match->set_y_search_window(2.);
-  silicon_match->set_z_search_window(5.);
-  silicon_match->set_phi_search_window(0.2);
-  silicon_match->set_eta_search_window(0.1);
+  silicon_match->set_use_legacy_windowing(false);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(silicon_match);
 
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
   auto mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(0);
+  mm_match->set_pp_mode(TRACKING::pp_mode);
   mm_match->set_rphi_search_window_lyr1(3.);
   mm_match->set_rphi_search_window_lyr2(15.0);
   mm_match->set_z_search_window_lyr1(30.0);
@@ -313,7 +333,7 @@ void Fun4All_FieldOnAllTrackers(
 
     auto cleaner = new PHTrackCleaner();
     cleaner->Verbosity(0);
-    cleaner->set_pp_mode(TRACKING::pp_mode);    
+    cleaner->set_pp_mode(TRACKING::pp_mode);
     se->registerSubsystem(cleaner);
 
     if (G4TRACKING::SC_CALIBMODE)
@@ -391,7 +411,7 @@ void Fun4All_FieldOnAllTrackers(
   se->run(nEvents);
   se->End();
   se->PrintTimer();
-
+  CDBInterface::instance()->Print();
   if (Enable::QA)
   {
     TString qaname = theOutfile + "_qa.root";
