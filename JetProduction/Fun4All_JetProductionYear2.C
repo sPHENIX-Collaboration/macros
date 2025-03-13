@@ -66,7 +66,7 @@ void Fun4All_JetProductionYear2(
   Enable::DSTOUT = false;
   Enable::QA = true;
 
-  // turn on pp mode
+  // turn on/off pp mode
   HIJETS::is_pp = true;
 
   // qa options
@@ -113,7 +113,7 @@ void Fun4All_JetProductionYear2(
     Centrality();
   }
 
-  // do jet reconstruction & rho calculation
+  // do jet reconstruction
   HIJetReco();  
 
   // register modules necessary for QA
