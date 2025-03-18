@@ -1,6 +1,5 @@
-#ifndef FUN4ALL_JETPRODUCTIONYEAR2_C
-#define FUN4ALL_JETPRODUCTIONYEAR2_C
-
+#ifndef FUN4ALL_JETPRODUCTIONYEAR3_C
+#define FUN4ALL_JETPRODUCTIONYEAR3_C
 
 // c++ utilities
 #include <fstream>
@@ -54,12 +53,12 @@ R__LOAD_LIBRARY(libzdcinfo.so)
 
 // macro body -----------------------------------------------------------------
 
-void Fun4All_JetProductionYear2(
+void Fun4All_JetProductionYear3(
   const int nEvents = 0,
   const std::string& inlist = "TestListInput.list",
   const std::string& outfile = "DST_JET-00042586-0000.root",
   const std::string& outfile_hist = "HIST_JETQA-00042586-0000.root",
-  const std::string& dbtag = "ProdA_2024"
+  const std::string& dbtag = "ProdA_2024"  // FIXME will be ProdA_2025 presumably?
 ) {
 
   // turn on/off DST output and/or QA
@@ -67,7 +66,7 @@ void Fun4All_JetProductionYear2(
   Enable::QA = true;
 
   // turn on/off pp mode
-  HIJETS::is_pp = true;
+  HIJETS::is_pp = false;
 
   // qa options
   JetQA::HasTracks = false;
