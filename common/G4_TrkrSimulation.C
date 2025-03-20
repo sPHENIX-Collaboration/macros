@@ -40,6 +40,9 @@
 
 #include <ffamodules/CDBInterface.h>
 
+#include <cdbobjects/CDBTTree.h>
+#include <ffamodules/CDBInterface.h>
+
 #include <cmath>
 #include <vector>
 
@@ -85,6 +88,12 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   }
   std::cout << "PHG4MvtxSubsystem: Apply misalignment? Enable::MVTX_APPLYMISALIGNMENT=" << Enable::MVTX_APPLYMISALIGNMENT << std::endl;
   mvtx->Apply_Misalignment(Enable::MVTX_APPLYMISALIGNMENT);
+  if(Enable::MVTX_APPLYMISALIGNMENT)
+    {
+      std::string file = CDBInterface::instance()->getUrl("MVTX_ALIGNMENT");
+      std::cout << "applying with file " << file << std::endl;
+      mvtx->MisalignmentFile(file);	
+    }
   mvtx->OverlapCheck(maps_overlapcheck);
   g4Reco->registerSubsystem(mvtx);
   radius += G4MVTX::radius_offset;
@@ -372,7 +381,6 @@ double TPC(PHG4Reco* g4Reco,
   tpc->SetActive();
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);  // 1cm steps
-
   tpc->set_double_param("drift_velocity", drift_vel);
   tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
   tpc->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
@@ -430,6 +438,7 @@ double TPC(PHG4Reco* g4Reco,
   }
 
   tpc->OverlapCheck(OverlapCheck);
+  
   g4Reco->registerSubsystem(tpc);
 
   if (Enable::TPC_ENDCAP)
