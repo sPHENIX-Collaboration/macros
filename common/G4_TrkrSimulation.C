@@ -301,7 +301,7 @@ void Intt_Cells()
 void TPCInit()
 {
   std::cout << "G4_TrkrSimulation::TpcInit" << std::endl;
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4TPC::tpc_outer_radius);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 82.); // radius of the tpc hanger + .3 cm
 
   if (Enable::TPC_ENDCAP)
   {
@@ -313,7 +313,6 @@ void TPCInit()
     BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 211. / 2.);
     BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -211. / 2.);
   }
-
   // the mvtx is not called if disabled but the default number of layers is set to 3,
   // so we need to set it to zero
   if (!Enable::MVTX)
