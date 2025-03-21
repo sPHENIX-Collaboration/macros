@@ -118,7 +118,34 @@ namespace HIJETS
     addResoToAlgos(0.4);
     addResoToAlgos(0.5);
     return algos;
-  }  // end 'GetFJOptions()'
+  }  // end 'GetFJAlgorithms()'
+
+  // --------------------------------------------------------------------------
+  //! Helper method to generate releveant FastJet subtracted algorithms
+  // --------------------------------------------------------------------------
+  std::vector<FastJetAlgoSub*> GetFJSubAlgorithms()
+  {
+    // algorithms to run
+    std::vector<FastJetAlgoSub*> algos;
+
+    // grab current options
+    FastJetOptions opts = fj_opts;
+
+    // lambda to update opts' reso. parameter
+    // and add to vector of algorithms
+    auto addResoToAlgos = [&opts, &algos](const float reso) {
+      opts.jet_R = reso;
+      algos.push_back( new FastJetAlgoSub(opts) );
+      return;
+    };
+
+    // create and add all algorithms
+    addResoToAlgos(0.2);
+    addResoToAlgos(0.3);
+    addResoToAlgos(0.4);
+    addResoToAlgos(0.5);
+    return algos;
+  }  // end 'GetFJSubAlgorithms()'
 }  // namespace HIJETS
 
 
@@ -193,7 +220,7 @@ void MakeHITowerJets()
   int verbosity = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
 
   // generate fastjet algorithms
-  auto algos = HIJETS::GetFJAlgorithms();
+  auto sub_algos = HIJETS::GetFJSubAlgorithms();
 
   //---------------
   // Fun4All server
@@ -221,7 +248,7 @@ void MakeHITowerJets()
   towerjetreco->add_input(incemc);
   towerjetreco->add_input(inihcal);
   towerjetreco->add_input(inohcal);
-  towerjetreco->add_algo(new FastJetAlgoSub(HIJETS::fj_opts.algo, 0.2), HIJETS::algo_prefix + "_TowerInfo_HIRecoSeedsRaw_r02");
+  towerjetreco->add_algo(sub_algos[HIJETS::Res::R02], HIJETS::algo_prefix + "_TowerInfo_HIRecoSeedsRaw_r02");
   towerjetreco->set_algo_node(HIJETS::jet_node);
   towerjetreco->set_input_node("TOWER");
   towerjetreco->Verbosity(verbosity);
@@ -276,10 +303,10 @@ void MakeHITowerJets()
   towerjetreco->add_input(incemc);
   towerjetreco->add_input(inihcal);
   towerjetreco->add_input(inohcal);
-  towerjetreco->add_algo(algos[HIJETS::Res::R02], HIJETS::algo_prefix + "_Tower_r02_Sub1");
-  towerjetreco->add_algo(algos[HIJETS::Res::R03], HIJETS::algo_prefix + "_Tower_r03_Sub1");
-  towerjetreco->add_algo(algos[HIJETS::Res::R04], HIJETS::algo_prefix + "_Tower_r04_Sub1");
-  towerjetreco->add_algo(algos[HIJETS::Res::R05], HIJETS::algo_prefix + "_Tower_r05_Sub1");
+  towerjetreco->add_algo(sub_algos[HIJETS::Res::R02], HIJETS::algo_prefix + "_Tower_r02_Sub1");
+  towerjetreco->add_algo(sub_algos[HIJETS::Res::R03], HIJETS::algo_prefix + "_Tower_r03_Sub1");
+  towerjetreco->add_algo(sub_algos[HIJETS::Res::R04], HIJETS::algo_prefix + "_Tower_r04_Sub1");
+  towerjetreco->add_algo(sub_algos[HIJETS::Res::R05], HIJETS::algo_prefix + "_Tower_r05_Sub1");
   towerjetreco->set_algo_node(HIJETS::jet_node);
   towerjetreco->set_input_node("TOWER");
   towerjetreco->Verbosity(verbosity);
