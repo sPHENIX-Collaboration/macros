@@ -139,6 +139,7 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
+  rc->set_IntFlag("RUNNUMBER", RunNumber);
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
 //  in->Verbosity(3);
 
