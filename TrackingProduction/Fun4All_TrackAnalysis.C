@@ -48,8 +48,8 @@ R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
 void Fun4All_TrackAnalysis(
     const int nEvents = 10,
-    const std::string seedfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana468_2024p012_v002/DST_TRKR_SEED/run_00053700_00053800/dst/DST_TRKR_SEED_run2pp_ana468_2024p012_v002-00053743-00000.root",
-    const std::string clusterfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana466_2024p012_v001/DST_TRKR_CLUSTER/run_00053700_00053800/dst/DST_TRKR_CLUSTER_run2pp_ana466_2024p012_v001-00053743-00000.root",
+    const std::string seedfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana473_2024p016_v001/DST_TRKR_SEED/run_00053800_00053900/dst/DST_TRKR_SEED_run2pp_ana473_2024p016_v001-00053877-00000.root",
+    const std::string clusterfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana466_2024p012_v001/DST_TRKR_CLUSTER/run_00053800_00053900/dst/DST_TRKR_CLUSTER_run2pp_ana466_2024p012_v001-00053877-00000.root",
     const std::string outfilename = "clusters_seeds",
     const bool convertSeeds = false)
 {
@@ -73,7 +73,8 @@ void Fun4All_TrackAnalysis(
    * TPC clusters not participating to the ACTS track fit
    */
   G4TRACKING::SC_CALIBMODE = false;
-
+  Enable::MVTX_APPLYMISALIGNMENT = true;
+  ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
   TRACKING::pp_mode = true;
   
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
