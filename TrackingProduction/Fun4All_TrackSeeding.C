@@ -105,7 +105,10 @@ void Fun4All_TrackSeeding(
    */
   G4TRACKING::SC_CALIBMODE = false;
   TRACKING::pp_mode = true;
-
+  
+  Enable::MVTX_APPLYMISALIGNMENT = true;
+  ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
+  
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
   std::string theOutfile = outfile.Data();
   auto se = Fun4AllServer::instance();
