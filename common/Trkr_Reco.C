@@ -95,6 +95,7 @@ void Tracking_Reco_TrackSeed_ZeroField()
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
+  seeder->reject_zsize1_clusters(true);
 
   if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
   {
@@ -230,7 +231,7 @@ void Tracking_Reco_TrackSeed()
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
-
+  seeder->reject_zsize1_clusters(true);
   if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
   {
     seeder->setNeonFraction(G4TPC::NeCF4_Ne_frac);
@@ -595,7 +596,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   seeder->SetMinClustersPerTrack(3);
   seeder->useConstBField(false);
   seeder->useFixedClusterError(true);
-
+  seeder->reject_zsize1_clusters(true);
   if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
   {
     seeder->setNeonFraction(G4TPC::NeCF4_Ne_frac);
@@ -645,6 +646,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   cprop->useConstBField(false);
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
+  cprop->set_max_seeds(5000);
   cprop->Verbosity(verbosity);
 
   if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
