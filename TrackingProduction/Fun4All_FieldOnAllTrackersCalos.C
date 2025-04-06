@@ -74,9 +74,7 @@ void Fun4All_FieldOnAllTrackersCalos(
     const bool convertSeeds = false)
 {
   gSystem->Load("libg4dst.so");
-
-  int verbosity = 0;
-
+    
   std::cout << "Including " << myInputLists.size() << " files." << std::endl;
   std::string firstfile = GetFirstLine(myInputLists[0]);
   if (*firstfile.c_str() == '\0') return;
@@ -84,6 +82,15 @@ void Fun4All_FieldOnAllTrackersCalos(
   int runnumber = runseg.first;
   int segment = runseg.second;
 
+  auto rc = recoConsts::instance();
+  rc->set_IntFlag("RUNNUMBER", runnumber);
+
+  Enable::CDB = true;
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
+
+  int verbosity = 0;
+  
   Enable::DSTOUT = false;
   string outputRecoDir = "./inReconstruction/" + to_string(runnumber) + "/";
   string makeDirectory = "mkdir -p " + outputRecoDir;
@@ -113,13 +120,7 @@ void Fun4All_FieldOnAllTrackersCalos(
     se->registerInputManager(infile);
   }
 
-  auto rc = recoConsts::instance();
-  rc->set_IntFlag("RUNNUMBER", runnumber);
-
-  Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
-  rc->set_uint64Flag("TIMESTAMP", runnumber);
-
+  
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
