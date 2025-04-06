@@ -224,6 +224,7 @@ void MakeNSTrackJets()
   // set verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::NSJETS_VERBOSITY);
 
+  auto algos = NSJETS::GetFJAlgorithms();
   //---------------
   // Fun4All server
   //---------------
@@ -256,6 +257,7 @@ void MakeNSPFlowJets()
   // set verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::NSJETS_VERBOSITY);
 
+  auto algos = NSJETS::GetFJAlgorithms();
   //---------------
   // Fun4All server
   //---------------
