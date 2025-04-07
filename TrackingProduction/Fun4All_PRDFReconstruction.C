@@ -194,6 +194,8 @@ void Fun4All_PRDFReconstruction(
   TRACKING::pp_mode = true;
   G4TRACKING::convert_seeds_to_svtxtracks = false;
 
+  Enable::MVTX_APPLYMISALIGNMENT = true;
+  ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
   TpcReadoutInit( runnumber );
   std::cout<< " run: " << runnumber
 	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
@@ -201,7 +203,7 @@ void Fun4All_PRDFReconstruction(
 	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
 	   << std::endl;
 
- 
+  CDBInterface::instance()->Verbosity(1);
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
   std::cout << "CDB tracking geometry file "<<geofile << std::endl;
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");

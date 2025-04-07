@@ -48,8 +48,8 @@ R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
 void Fun4All_TrackAnalysis(
     const int nEvents = 10,
-    const std::string seedfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana468_2024p012_v002/DST_TRKR_SEED/run_00053700_00053800/dst/DST_TRKR_SEED_run2pp_ana468_2024p012_v002-00053743-00000.root",
-    const std::string clusterfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana466_2024p012_v001/DST_TRKR_CLUSTER/run_00053700_00053800/dst/DST_TRKR_CLUSTER_run2pp_ana466_2024p012_v001-00053743-00000.root",
+    const std::string seedfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana473_2024p016_v001/DST_TRKR_SEED/run_00053800_00053900/dst/DST_TRKR_SEED_run2pp_ana473_2024p016_v001-00053877-00000.root",
+    const std::string clusterfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana466_2024p012_v001/DST_TRKR_CLUSTER/run_00053800_00053900/dst/DST_TRKR_CLUSTER_run2pp_ana466_2024p012_v001-00053877-00000.root",
     const std::string outfilename = "clusters_seeds",
     const bool convertSeeds = false)
 {
@@ -73,10 +73,8 @@ void Fun4All_TrackAnalysis(
    * TPC clusters not participating to the ACTS track fit
    */
   G4TRACKING::SC_CALIBMODE = false;
-
-  ACTSGEOM::mvtxMisalignment = 100;
-  ACTSGEOM::inttMisalignment = 100.;
-  ACTSGEOM::tpotMisalignment = 100.;
+  Enable::MVTX_APPLYMISALIGNMENT = true;
+  ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
   TRACKING::pp_mode = true;
   
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
@@ -106,16 +104,16 @@ void Fun4All_TrackAnalysis(
 
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
 
-  //to turn on the default static corrections, enable the two lines below
+  // to turn on the default static corrections, enable the two lines below
   G4TPC::ENABLE_STATIC_CORRECTIONS = true;
   G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
 
-  //to turn on the average corrections derived from simulation, enable the three lines below
+  //to turn on the average corrections, enable the three lines below
   //note: these are designed to be used only if static corrections are also applied
-  //G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  //G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-  //G4TPC::average_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/average_minus_static_distortion_inverted_10-new.root";
-
+  G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
+  G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
+   // to use a custom file instead of the database file:
+  G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
@@ -221,15 +219,27 @@ void Fun4All_TrackAnalysis(
     }
   }
 
+  
   auto finder = new PHSimpleVertexFinder;
   finder->Verbosity(0);
-  finder->setDcaCut(0.5);
-  finder->setTrackPtCut(-99999.);
+  
+  //new cuts
+  finder->setDcaCut(0.05);
+  finder->setTrackPtCut(0.1);
   finder->setBeamLineCut(1);
-  finder->setTrackQualityCut(1000000000);
+  finder->setTrackQualityCut(300);
   finder->setNmvtxRequired(3);
-  finder->setOutlierPairCut(0.1);
+  finder->setOutlierPairCut(0.10);
+  
   se->registerSubsystem(finder);
+
+  // Propagate track positions to the vertex position
+  auto vtxProp = new PHActsVertexPropagator;
+  vtxProp->Verbosity(0);
+  vtxProp->fieldMap(G4MAGNET::magfield_tracking);
+  se->registerSubsystem(vtxProp);
+
+
 
   TString residoutfile = theOutfile + "_resid.root";
   std::string residstring(residoutfile.Data());

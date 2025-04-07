@@ -51,8 +51,8 @@ R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
 void Fun4All_TrackSeeding(
     const int nEvents = 5,
-    const std::string clusterfilename = "DST_TRKR_CLUSTER_run2pp_ana441_2024p007-00052911-00000.root",
-    const std::string dir = "/sphenix/lustre01/sphnxpro/physics/slurp/tracking/ana441_2024p007/run_00052900_00053000/",
+    const std::string clusterfilename = "DST_TRKR_CLUSTER_run2pp_ana466_2024p012_v001-00053877-00000.root",
+    const std::string dir = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana466_2024p012_v001/DST_TRKR_CLUSTER/run_00053800_00053900/dst/",
     const std::string outfilename = "clusters_seeds",
     const bool convertSeeds = false,
     const bool doKFParticle = false)
@@ -105,10 +105,10 @@ void Fun4All_TrackSeeding(
    */
   G4TRACKING::SC_CALIBMODE = false;
   TRACKING::pp_mode = true;
-
-  ACTSGEOM::mvtxMisalignment = 100;
-  ACTSGEOM::inttMisalignment = 100.;
-  ACTSGEOM::tpotMisalignment = 100.;
+  
+  Enable::MVTX_APPLYMISALIGNMENT = true;
+  ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
+  
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
   std::string theOutfile = outfile.Data();
   auto se = Fun4AllServer::instance();
@@ -127,10 +127,10 @@ void Fun4All_TrackSeeding(
 
   //to turn on the average corrections, enable the three lines below
   //note: these are designed to be used only if static corrections are also applied
-  //G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  // G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-  // to use a custom file instead of the database file:
-   //G4TPC::average_correction_filename = std::string("/sphenix/tg/tg01/jets/bkimelman/BenProduction/Feb21_2025/Laminations_run2pp_ana464_2024p011_v001-00053744.root");
+  G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
+  G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
+   // to use a custom file instead of the database file:
+  G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
    
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
@@ -154,8 +154,8 @@ void Fun4All_TrackSeeding(
   silicon_Seeding->Verbosity(0);
   silicon_Seeding->setStrobeRange(-5,5);
   // these get us to about 83% INTT > 1
-  silicon_Seeding->setinttRPhiSearchWindow(0.4);
-  silicon_Seeding->setinttZSearchWindow(2.0);
+  silicon_Seeding->setinttRPhiSearchWindow(0.2);
+  silicon_Seeding->setinttZSearchWindow(1.0);
   silicon_Seeding->seedAnalysis(false);
   se->registerSubsystem(silicon_Seeding);
 
@@ -189,6 +189,7 @@ void Fun4All_TrackSeeding(
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
   seeder->set_pp_mode(true);
+  seeder->reject_zsize1_clusters(true);
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
@@ -208,6 +209,7 @@ void Fun4All_TrackSeeding(
   cprop->set_max_window(5.);
   cprop->Verbosity(0);
   cprop->set_pp_mode(true);
+  cprop->set_max_seeds(5000);
   se->registerSubsystem(cprop);
 
   // Always apply preliminary distortion corrections to TPC clusters before silicon matching
@@ -314,14 +316,23 @@ void Fun4All_TrackSeeding(
 
   auto finder = new PHSimpleVertexFinder;
   finder->Verbosity(0);
-  finder->setDcaCut(0.5);
-  finder->setTrackPtCut(-99999.);
+  
+  //new cuts
+  finder->setDcaCut(0.05);
+  finder->setTrackPtCut(0.1);
   finder->setBeamLineCut(1);
-  finder->setTrackQualityCut(1000000000);
+  finder->setTrackQualityCut(300);
   finder->setNmvtxRequired(3);
-  finder->setOutlierPairCut(0.1);
+  finder->setOutlierPairCut(0.10);
+  
   se->registerSubsystem(finder);
 
+  // Propagate track positions to the vertex position
+  auto vtxProp = new PHActsVertexPropagator;
+  vtxProp->Verbosity(0);
+  vtxProp->fieldMap(G4MAGNET::magfield_tracking);
+  se->registerSubsystem(vtxProp);
+  
   //run KFParticle
   if(doKFParticle){
      Global_Reco();
