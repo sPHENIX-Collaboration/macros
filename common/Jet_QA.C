@@ -583,25 +583,17 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   // connect to f4a server
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  // configure the CaloStatusMapper module
-  CaloStatusMapper::Config caloMapCfg;
-  caloMapCfg.debug = false;
-  caloMapCfg.moduleName = "CaloStatusMapper" + trig_tag;
-  caloMapCfg.histTag = "";
-
-  // enable trigger selection if a trigger is provided
-  if (trg.has_value())
-  {
-    caloMapCfg.doTrgSelect = true;
-    caloMapCfg.trgToSelect = trg.value();
-  }
-  else
-  {
-    caloMapCfg.doTrgSelect = false;
-  }
-
   // instantiate & register the CaloStatusMapper QA module using the configuration
-  CaloStatusMapper* caloStatusQA = new CaloStatusMapper(caloMapCfg);
+  //   - FIXME might want to move to top level...
+  CaloStatusMapper* caloStatusQA = new CaloStatusMapper("CaloStatusMapper" + trig_tag);
+  caloStatusQA -> SetConfig(
+    {
+      .debug       = false,
+      .histTag     = "",
+      .doTrgSelect = trg.has_value(),
+      .trgToSelect = trg.has_value() ? trg.value() : JetQADefs::GL1::Clock
+    }
+  );
   se -> registerSubsystem(caloStatusQA);
 
   // initialize and register photon jet kinematic QA
