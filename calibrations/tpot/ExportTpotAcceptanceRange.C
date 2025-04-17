@@ -4,7 +4,6 @@
  * to the full TPC acceptance
  */
 
-
 #include <ffamodules/CDBInterface.h>
 
 #include <fun4all/Fun4AllRunNodeInputManager.h>
@@ -86,6 +85,7 @@ void ExportTpotAcceptanceRange()
 
   // acts geometry initialization
   auto geom = new MakeActsGeometry;
+  geom->set_mvtx_applymisalign(true);
   geom->InitRun( topNode );
 
   // get relevant nodes
