@@ -86,6 +86,7 @@ void ExportTpotAcceptanceRange()
 
   // acts geometry initialization
   auto geom = new MakeActsGeometry;
+  geom->set_mvtx_applymisalign(true);
   geom->InitRun( topNode );
 
   // get relevant nodes
