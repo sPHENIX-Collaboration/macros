@@ -3,21 +3,22 @@
 
 #include <GlobalVariables.C>
 
+#include <fun4all/Fun4AllServer.h>
+#include <g4jets/TruthJetInput.h>
+#include <globalvertex/GlobalVertex.h>
+#include <globalvertex/GlobalVertex.h>
+#include <jetbackground/RetowerCEMC.h>
 #include <jetbase/FastJetAlgo.h>
 #include <jetbase/FastJetOptions.h>
 #include <jetbase/JetReco.h>
-#include <particleflowreco/ParticleFlowJetInput.h>
 #include <jetbase/TowerJetInput.h>
 #include <jetbase/TrackJetInput.h>
-#include <g4jets/TruthJetInput.h>
+#include <particleflowreco/ParticleFlowJetInput.h>
 
-#include <globalvertex/GlobalVertex.h>
-
-#include <fun4all/Fun4AllServer.h>
-
-R__LOAD_LIBRARY(libparticleflow.so)
-R__LOAD_LIBRARY(libjetbase.so)
 R__LOAD_LIBRARY(libg4jets.so)
+R__LOAD_LIBRARY(libjetbackground.so)
+R__LOAD_LIBRARY(libjetbase.so)
+R__LOAD_LIBRARY(libparticleflow.so)
 
 
 // ----------------------------------------------------------------------------
@@ -58,7 +59,7 @@ namespace NSJETS
   ///! Base fastjet options to use. Note that the
   ///! resolution parameter will be overwritten
   ///! to R = 0.2, 0.3, 0.4, and 0.5
-  FastJetOptions fj_opts({Jet::ANTIKT, JET_R, 0.4, VERBOSITY, static_cast<float>(Enable::HIJETS_VERBOSITY)});
+  FastJetOptions fj_opts({Jet::ANTIKT, JET_R, 0.4, VERBOSITY, static_cast<float>(Enable::NSJETS_VERBOSITY)});
 
   ///! sets jet node name
   std::string jet_node = "ANTIKT";
