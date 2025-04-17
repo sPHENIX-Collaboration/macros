@@ -1,4 +1,5 @@
 #include <tpccalib/TpcSpaceChargeMatrixInversion.h>
+#include <tpccalib/TpcSpaceChargeReconstructionHelper.h>
 
 #include <cstdio>
 #include <sstream>
@@ -63,6 +64,12 @@ void DistortionCorrectionMatrixInversion()
 
   auto filenames = list_files( inputFile.Data() );
   std::cout << "SpaceChargeMatrixInversion - loaded " << filenames.size() << " files" << std::endl;
+
+  // update TPOT phi range, needed for the interpolation
+  // TODO: calculate on the fly
+  TpcSpaceChargeReconstructionHelper::set_phi_range_central({-1.73246,-1.43608});
+  TpcSpaceChargeReconstructionHelper::set_phi_range_east({-2.26272,-1.96089});
+  TpcSpaceChargeReconstructionHelper::set_phi_range_west({-1.21241,-0.909953});
 
   // perform matrix inversion
   TpcSpaceChargeMatrixInversion spaceChargeMatrixInversion;
