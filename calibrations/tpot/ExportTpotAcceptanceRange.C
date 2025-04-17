@@ -4,7 +4,6 @@
  * to the full TPC acceptance
  */
 
-
 #include <ffamodules/CDBInterface.h>
 
 #include <fun4all/Fun4AllRunNodeInputManager.h>
