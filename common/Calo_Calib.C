@@ -122,6 +122,7 @@ void Process_Calo_Calib()
   emc_prof += "/EmcProfile/CEMCprof_Thresh30MeV.root";
   ClusterBuilder->LoadProfile(emc_prof);
   ClusterBuilder->set_UseTowerInfo(1);  // to use towerinfo objects rather than old RawTower
+  ClusterBuilder->set_UseAltZVertex(1); // Use MBD Vertex for vertex-based corrections
   se->registerSubsystem(ClusterBuilder);
 
   // currently NOT included!
