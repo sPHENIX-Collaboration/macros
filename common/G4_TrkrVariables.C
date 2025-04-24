@@ -133,7 +133,8 @@ namespace G4TPC
   bool ENABLE_AVERAGE_CORRECTIONS = false;
   std::string average_correction_filename;
   bool USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-
+  bool average_correction_interpolate = true;
+  
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
 
