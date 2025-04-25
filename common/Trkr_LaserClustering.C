@@ -86,6 +86,7 @@ void TPC_LaminationFitting()
     TpcLaminationFitting *laminations = new TpcLaminationFitting;
     laminations->Verbosity(verbosity);
     laminations->set_nLayerCut(2);
+    laminations->set_ppMode(TRACKING::pp_mode);
     laminations->setOutputfile(G4TPC::LaminationOutputName);
     if(G4TPC::LaminationFitName != "")
     {
