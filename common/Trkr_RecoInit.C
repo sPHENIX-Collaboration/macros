@@ -19,7 +19,6 @@ void TrackingInit()
 {
   ACTSGEOM::ActsGeomInit();
   G4TPC::module_edge_correction_filename = CDBInterface::instance()->getUrl("TPC_Module_Edge");
-  G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
 
   // space charge correction
   if (G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS || G4TPC::ENABLE_STATIC_CORRECTIONS || G4TPC::ENABLE_AVERAGE_CORRECTIONS)
