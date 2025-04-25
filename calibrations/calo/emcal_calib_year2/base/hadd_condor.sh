@@ -2,7 +2,7 @@
 
 
 export TargetDir="$PWD"/hadd_condor
-
+export basedir="$PWD"
 
 
 
@@ -26,6 +26,10 @@ while read dir; do
 
     cp -v "$PWD"/../../CondorHADD.sh CondorRunJob$li.sh
     sed -i "s/RUN/$dir/g" CondorRunJob$li.sh
+
+    escaped_basedir=$(echo "$basedir" | sed 's/\//\\\//g')
+    sed -i "s/BASEDIR/${escaped_basedir}/g" CondorRunJob$li.sh
+
 
     chmod +x CondorRunJob$li.sh
     
