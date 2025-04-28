@@ -26,6 +26,15 @@ R__LOAD_LIBRARY(libjetqa.so)
 
 
 // ----------------------------------------------------------------------------
+//! General options for jet QA
+// ----------------------------------------------------------------------------
+namespace Enable
+{
+  int JETQA_VERBOSITY = 0;  ///< verbosity of jet qa
+}
+
+
+// ----------------------------------------------------------------------------
 //! Namespace to collect various enums, default arguments, etc.
 // ----------------------------------------------------------------------------
 namespace JetQA
@@ -362,9 +371,13 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
 {
 
   // set verbosity
-  //   - FIXME CAN NOT APPEAL TO HIJETS OR NSJETS IN MACRO 
-  //int verbosity = std::max({Enable::QA_VERBOSITY, Enable::HIJETS_VERBOSITY, Enable::NSJETS_VERBOSITY});
-  int verbosity = Enable::QA_VERBOSITY;
+  int verbosity = std::max(Enable::JETQA_VERBOSITY, Enable::QA_VERBOSITY);
+  if (verbosity > 1)
+  {
+    std::cout << ">>> Entering CommonJetQA() with trg="
+              << (trg.has_value() ? std::to_string(trg.value()) : "none")
+              << std::endl;
+  }
 
   // grab appropriate trigger tag
   std::string trig_tag = JetQA::GetTriggerTag(trg);
@@ -486,9 +499,13 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
 {
 
   // set verbosity
-  //   - FIXME CAN NOT APPEAL TO HIJETS OR NSJETS IN MACRO 
-  //int verbosity = std::max({Enable::QA_VERBOSITY, Enable::HIJETS_VERBOSITY,Enable::NSJETS_VERBOSITY});
-  int verbosity = Enable::QA_VERBOSITY;
+  int verbosity = std::max(Enable::JETQA_VERBOSITY, Enable::QA_VERBOSITY);
+  if (verbosity > 1)
+  {
+    std::cout << ">>> Entering JetsWithTracksQA() with trg="
+              << (trg.has_value() ? std::to_string(trg.value()) : "none")
+              << std::endl;
+  }
 
   // grab appropriate trigger tag
   std::string trig_tag = JetQA::GetTriggerTag(trg);
@@ -559,16 +576,14 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
 void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
 {
 
-/* FIXME SHOULD HIDE BEHIND VERBOSITY LEVEL
-  std::cout << ">>> Entering JetsWithCaloQA() with trg=" 
-            << (trg.has_value() ? std::to_string(trg.value()) : "none") 
-            << std::endl;
-*/
-
   // set verbosity
-  //   - FIXME CAN NOT APPEAL TO HIJETS OR NSJETS IN MACRO 
-  //int verbosity = std::max({Enable::QA_VERBOSITY, Enable::HIJETS_VERBOSITY,Enable::NSJETS_VERBOSITY});
-  int verbosity = Enable::QA_VERBOSITY;
+  int verbosity = std::max(Enable::JETQA_VERBOSITY, Enable::QA_VERBOSITY);
+  if (verbosity > 1)
+  {
+    std::cout << ">>> Entering JetsWithCaloQA() with trg="
+              << (trg.has_value() ? std::to_string(trg.value()) : "none")
+              << std::endl;
+  }
 
   // grab appropriate trigger tag
   std::string trig_tag = JetQA::GetTriggerTag(trg);
