@@ -60,10 +60,10 @@ void Mvtx_Clustering()
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  // prune the extra MVTX hits due to multiple strobes per hit
-  MvtxHitPruner* mvtxhitpruner = new MvtxHitPruner();
-  mvtxhitpruner->Verbosity(verbosity);
-  se->registerSubsystem(mvtxhitpruner);
+//   // prune the extra MVTX hits due to multiple strobes per hit
+//   auto mvtxhitpruner = new MvtxHitPruner;
+//   mvtxhitpruner->Verbosity(verbosity);
+//   se->registerSubsystem(mvtxhitpruner);
 
   // For the Mvtx layers
   //================
@@ -189,6 +189,8 @@ void Micromegas_Clustering()
 {
   auto se = Fun4AllServer::instance();
   auto mm_clus = new MicromegasClusterizer;
+  const auto calibrationFile = CDBInterface::instance()->getUrl("TPOT_Pedestal");
+  mm_clus->set_calibration_file(calibrationFile);
   se->registerSubsystem(mm_clus);
 }
 
