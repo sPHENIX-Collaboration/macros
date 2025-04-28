@@ -42,22 +42,22 @@ namespace JetQA
 
   // flags --------------------------------------------------------------------
 
-  //! Set to true if input jets utilize tracks (e.g. via particle flow)
+  ///! Set to true if input jets utilize tracks (e.g. via particle flow)
   bool HasTracks = false;
 
-  //! Set to true if input jets utilize calorimeters(e.g. via particle flow)
+  ///! Set to true if input jets utilize calorimeters(e.g. via particle flow)
   bool HasCalos = false;
 
-  //! Set to true to generate histograms for no trigger selection
+  ///! Set to true to generate histograms for no trigger selection
   bool DoInclusive = true;
 
-  //! Set to true to generate histograms for a specified set of triggers
+  ///! Set to true to generate histograms for a specified set of triggers
   bool DoTriggered = true;
 
-  //! Set to true to restrict minimum jet pt to trigger threshold
+  ///! Set to true to restrict minimum jet pt to trigger threshold
   bool RestrictPtToTrig = false;
 
-  //! Set to true to restrict jet eta acceptance by resolution parameter
+  ///! Set to true to restrict jet eta acceptance by resolution parameter
   bool RestrictEtaByR = true;
 
 
