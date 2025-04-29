@@ -1,7 +1,7 @@
 /*
- * This macro shows a working example of running TrackSeeding over the cluster DST
- * This has track residuals as default output but has KFParticle set up with a togglable flag
- * with the default set up for K Short reconstruction
+ * This macro shows a working example of running KFParticle over a Track DST
+ * This has certain KFParticle features like Particle ID and trigger Info off
+ * Because those features require other DSTs like the cluster or hit dst
  */
 
  #include <fun4all/Fun4AllUtils.h>
