@@ -258,7 +258,6 @@ void Intt_Cells()
   // new containers
   PHG4InttDigitizer* digiintt = new PHG4InttDigitizer();
   digiintt->Verbosity(verbosity);
-  /// Only necessary to call the following method if using a non-default calibration
   digiintt->LoadBadChannelMap("INTT_Hotmap");
   for (int i = 0; i < G4INTT::n_intt_layer; i++)
   {
