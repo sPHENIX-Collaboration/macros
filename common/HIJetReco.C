@@ -14,7 +14,6 @@
 #include <jetbackground/SubtractTowers.h>
 #include <jetbackground/SubtractTowersCS.h>
 #include <jetbackground/TowerRho.h>
-#include <jetbase/FastJetAlgo.h>
 #include <jetbase/FastJetOptions.h>
 #include <jetbase/JetReco.h>
 #include <jetbase/TowerJetInput.h>
@@ -93,10 +92,10 @@ namespace HIJETS
   // --------------------------------------------------------------------------
   //! Helper method to generate releveant FastJet algorithms
   // --------------------------------------------------------------------------
-  std::vector<FastJetAlgo*> GetFJAlgorithms()
+  std::vector<FastJetAlgoSub*> GetFJAlgorithms()
   {
     // algorithms to run
-    std::vector<FastJetAlgo*> algos;
+    std::vector<FastJetAlgoSub*> algos;
 
     // grab current options
     FastJetOptions opts = fj_opts;
@@ -105,7 +104,7 @@ namespace HIJETS
     // and add to vector of algorithms
     auto addResoToAlgos = [&opts, &algos](const float reso) {
       opts.jet_R = reso;
-      algos.push_back( new FastJetAlgo(opts) );
+      algos.push_back( new FastJetAlgoSub(opts) );
       return;
     };
 
