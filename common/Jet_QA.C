@@ -22,6 +22,7 @@
 #include <NoBkgdSubJetReco.C>
 #include <QA.C>
 
+
 R__LOAD_LIBRARY(libjetqa.so)
 
 
@@ -39,6 +40,10 @@ R__LOAD_LIBRARY(libjetqa.so)
 
 	//! Set to true if input jets utilize calorimeters(e.g. via particle flow)
 	bool HasCalos = false;
+
+	//! Set to true if jets have background subtracted
+        //! (e.g. HIJetReco.C output)
+	bool UseBkgdSub = false;
 
 	//! Set to true to generate histograms for no trigger selection
 	bool DoInclusive = true;
@@ -70,6 +75,12 @@ R__LOAD_LIBRARY(libjetqa.so)
 		AntiKtTrackR03,
 		AntiKtTrackR04,
 		AntiKtTrackR05
+	};
+
+	enum class Source : uint32_t
+	{
+		Calos = 0,
+		Tracks = 1	
 	};
 
 
@@ -342,26 +353,51 @@ R__LOAD_LIBRARY(libjetqa.so)
 	// --------------------------------------------------------------------------
 	//! Get list of jets to analyze
 	// --------------------------------------------------------------------------
-	inline std::vector<uint32_t> GetJetsToQA()
+	inline std::vector<uint32_t> GetJetsToQA(Source source)
 	{
+	     std::vector<uint32_t> vecJetsToQA;
+	     
+	     switch(source)
+	     {
+	      case Source::Calos:
 
-		std::vector<uint32_t> vecJetsToQA = {
-			Type::AntiKtTowerSubR02,
-			Type::AntiKtTowerSubR03,
-			Type::AntiKtTowerSubR04,
-			Type::AntiKtTowerSubR05,
-			Type::AntiKtTowerR02,
-                        Type::AntiKtTowerR03,
-                        Type::AntiKtTowerR04,
-                        Type::AntiKtTowerR05,
-			Type::AntiKtTrackR02,
-                        Type::AntiKtTrackR03,
-                        Type::AntiKtTrackR04,
-                        Type::AntiKtTrackR05
-				
-		};
-		return vecJetsToQA;
+		if (UseBkgdSub)
+		{	   
+                  vecJetsToQA.insert(vecJetsToQA.end(),  
+		  {
+		    Type::AntiKtTowerSubR02,
+		    Type::AntiKtTowerSubR03,
+		    Type::AntiKtTowerSubR04,
+		    Type::AntiKtTowerSubR05
+		  });
+		}
 
+		else
+                {
+                  vecJetsToQA.insert(vecJetsToQA.end(),
+                  {
+                    Type::AntiKtTowerR02,
+                    Type::AntiKtTowerR03,
+                    Type::AntiKtTowerR04,
+                    Type::AntiKtTowerR05
+                  });
+                }  	     
+  	     	break;
+
+		case Source::Tracks:
+
+	        vecJetsToQA.insert(vecJetsToQA.end(),
+                {
+                  Type::AntiKtTrackR02,
+                  Type::AntiKtTrackR03,
+                  Type::AntiKtTrackR04,
+                  Type::AntiKtTrackR05
+                });	
+		break;
+
+             }
+
+	     return vecJetsToQA;	     
 	}  // end 'GetJetsToQA()'
 
 }  // end JetQA namespace
@@ -385,7 +421,7 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
 	std::pair<double, double> etaJetMaxRange = JetQA::GetJetEtaRange();
 
 	// get list of jet nodes to analyze
-	std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA();
+	//std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA();
 
 	// connect to f4a server
 	Fun4AllServer* se = Fun4AllServer::instance();
@@ -393,90 +429,92 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
 	// create modules that are independent of/take multiple R values ------------
 
 	// initialize and register mass, eta, and pt qa module
-	// this part is for subtracted background towers 
-	JetKinematicCheck* kinematicQA = new JetKinematicCheck(
-			"JetKinematicCheck" + trig_tag + "_towersub1_antikt",
-			JetQA::JetInput[JetQA::Type::AntiKtTowerSubR02],
-			JetQA::JetInput[JetQA::Type::AntiKtTowerSubR03],
-			JetQA::JetInput[JetQA::Type::AntiKtTowerSubR04],
-			JetQA::JetInput[JetQA::Type::AntiKtTowerSubR05]
-			);
-	kinematicQA -> Verbosity(verbosity);
-	kinematicQA -> setHistTag("");
-	kinematicQA -> setRestrictEtaRange(JetQA::RestrictEtaByR);
-	kinematicQA -> setPtRange(ptJetRange.first, ptJetRange.second);
-	kinematicQA -> setEtaRange(etaJetMaxRange.first, etaJetMaxRange.second);
-	if (trg.has_value())
+	if (JetQA::HasCalos)
 	{
-		kinematicQA -> setTrgToSelect(trg.value());
+	  auto vecCalos = JetQA::GetJetsToQA(JetQA::Source::Calos);
+	  if (!vecCalos.empty())
+	  {	  
+	    JetKinematicCheck* kinematicQA = new JetKinematicCheck(
+	     "JetKinematicCheck" + trig_tag + (JetQA::UseBkgdSub ? "_towersub1_antikt" : "_tower_antikt"),
+	     JetQA::JetInput[vecCalos[0]],
+	     JetQA::JetInput[vecCalos[1]],
+	     JetQA::JetInput[vecCalos[2]],
+	     JetQA::JetInput[vecCalos[3]]);
+	  
+	    kinematicQA -> Verbosity(verbosity);
+	    kinematicQA -> setHistTag("");
+	    kinematicQA -> setRestrictEtaRange(JetQA::RestrictEtaByR);
+	    kinematicQA -> setPtRange(ptJetRange.first, ptJetRange.second);
+	    kinematicQA -> setEtaRange(etaJetMaxRange.first, etaJetMaxRange.second);
+	    if (trg.has_value())
+	    {
+	       kinematicQA -> setTrgToSelect(trg.value());
+	    }
+	    se -> registerSubsystem(kinematicQA);
+	  }
 	}
-	se -> registerSubsystem(kinematicQA);
-	//this part is for no subtracted background towers
-	JetKinematicCheck* kinematicQA_NoSub = new JetKinematicCheck(
-                        "JetKinematicCheck" + trig_tag + "_tower_antikt",
-                        JetQA::JetInput[JetQA::Type::AntiKtTowerR02],
-                        JetQA::JetInput[JetQA::Type::AntiKtTowerR03],
-                        JetQA::JetInput[JetQA::Type::AntiKtTowerR04],
-                        JetQA::JetInput[JetQA::Type::AntiKtTowerR05]
-                        );
-        kinematicQA_NoSub -> Verbosity(verbosity);
-        kinematicQA_NoSub -> setHistTag("");
-        kinematicQA_NoSub -> setRestrictEtaRange(JetQA::RestrictEtaByR);
-        kinematicQA_NoSub -> setPtRange(ptJetRange.first, ptJetRange.second);
-        kinematicQA_NoSub -> setEtaRange(etaJetMaxRange.first, etaJetMaxRange.second);
-        if (trg.has_value())
-        {
-                kinematicQA_NoSub -> setTrgToSelect(trg.value());
-        }
-        se -> registerSubsystem(kinematicQA_NoSub);
+        if (JetQA::HasTracks)
+	{
+	  auto vecTrk = JetQA::GetJetsToQA(JetQA::Source::Tracks);
 
-	//this part is for no subtracted background towers
-	
-        JetKinematicCheck* kinematicQA_Tracks = new JetKinematicCheck(
-                        "JetKinematicCheck" + trig_tag + "_track_antikt",
-                        JetQA::JetInput[JetQA::Type::AntiKtTrackR02],
-                        JetQA::JetInput[JetQA::Type::AntiKtTrackR03],
-                        JetQA::JetInput[JetQA::Type::AntiKtTrackR04],
-                        JetQA::JetInput[JetQA::Type::AntiKtTrackR05]
-                        );
-        kinematicQA_Tracks -> Verbosity(verbosity);
-        kinematicQA_Tracks -> setHistTag("");
-        kinematicQA_Tracks -> setRestrictEtaRange(JetQA::RestrictEtaByR);
-        kinematicQA_Tracks -> setPtRange(ptJetRange.first, ptJetRange.second);
-        kinematicQA_Tracks -> setEtaRange(etaJetMaxRange.first, etaJetMaxRange.second);
-        if (trg.has_value())
-        {
-                kinematicQA_Tracks -> setTrgToSelect(trg.value());
-        }
-        se -> registerSubsystem(kinematicQA_Tracks);	
+	  if (!vecTrk.empty())
+	  {
+
+            JetKinematicCheck* kinematicQA_Tracks = new JetKinematicCheck(
+             "JetKinematicCheck" + trig_tag + "_track_antikt",
+             JetQA::JetInput[vecTrk[0]],
+             JetQA::JetInput[vecTrk[1]],
+             JetQA::JetInput[vecTrk[2]],
+             JetQA::JetInput[vecTrk[3]]);
+
+            kinematicQA_Tracks -> Verbosity(verbosity);
+            kinematicQA_Tracks -> setHistTag("");
+            kinematicQA_Tracks -> setRestrictEtaRange(JetQA::RestrictEtaByR);
+            kinematicQA_Tracks -> setPtRange(ptJetRange.first, ptJetRange.second);
+            kinematicQA_Tracks -> setEtaRange(etaJetMaxRange.first, etaJetMaxRange.second);
+            if (trg.has_value())
+            {
+              kinematicQA_Tracks -> setTrgToSelect(trg.value());
+            }
+            se -> registerSubsystem(kinematicQA_Tracks);
+  	  }	  
+	}
 	
 	// create modules that take single R values ---------------------------------
+
+	std::vector<uint32_t> vecJetsToQA;
+   	if (JetQA::HasCalos)
+   	{		
+	  auto vecCalJets = JetQA::GetJetsToQA(JetQA::Source::Calos);
+
+	  vecJetsToQA.insert(vecJetsToQA.end(), vecCalJets.begin(), vecCalJets.end());	  
+	}
+
+     	if (JetQA::HasTracks)
+        {
+          auto vecTrkJets = JetQA::GetJetsToQA(JetQA::Source::Tracks);
+
+          vecJetsToQA.insert(vecJetsToQA.end(), vecTrkJets.begin(), vecTrkJets.end());
+        }
+        
 
 	for (uint32_t jet : vecJetsToQA)
 	{
 
-		// get R-dependent eta range
-		std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange(JetQA::JetRes[jet]);
-
-		// initialize and register jet seed counter qa module
-		JetSeedCount* jetSeedQA = new JetSeedCount(
-				"JetSeedCount" + trig_tag + "_" + JetQA::JetTag[jet],
-				JetQA::JetInput[jet],
-				"AntiKt_TowerInfo_HIRecoSeedsRaw_r02",
-				"AntiKt_TowerInfo_HIRecoSeedsSub_r02"
-				);
-		jetSeedQA -> Verbosity(verbosity);
-		jetSeedQA -> setHistTag("");
-		jetSeedQA -> setPtRange(ptJetRange.first, ptJetRange.second);
-		jetSeedQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
-		jetSeedQA -> setWriteToOutputFile(false);
-		jetSeedQA -> setPPMode(HIJETS::is_pp);
-		if (trg.has_value())
-		{
-			jetSeedQA -> setTrgToSelect(trg.value());
-		}
-		se -> registerSubsystem(jetSeedQA);
-
+	    // get R-dependent eta range
+	    std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange(JetQA::JetRes[jet]);
+	    //intialize and register dijetQA	    
+	    DijetQA *dijetQA = new DijetQA(  
+             "DijetQA" + trig_tag + "_"+ JetQA::JetTag[jet],
+	     JetQA::JetInput[jet]);
+	     dijetQA -> setPtLeadRange(ptJetRange.first, ptJetRange.second);  
+             dijetQA -> setEtaRange(etaJetRange.first, etaJetRange.second);  
+            if (trg.has_value())
+            {
+              dijetQA -> setTrgToSelect(trg.value());
+            }
+            se->registerSubsystem(dijetQA);
+            
 	}  // end jet loop
 	return;
 
@@ -501,7 +539,7 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
 	std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange();
 
 	// get list of jet nodes to analyze
-	std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA();
+	std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA(JetQA::Source::Tracks);
 
 	// connect to f4a server
 	Fun4AllServer* se = Fun4AllServer::instance();
@@ -511,43 +549,40 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
 	for (uint32_t jet : vecJetsToQA)
 	{
 
-		// intialize and register sum track vs. jet pt qa module
-		StructureinJets* jetStructQA = new StructureinJets(
-				"StructureInJets" + trig_tag + "_" + JetQA::JetTag[jet],
-				JetQA::JetInput[jet],
-				""
-				);
-		jetStructQA -> Verbosity(verbosity);
-		jetStructQA -> writeToOutputFile(false);
-		if (trg.has_value())
-		{
-			jetStructQA -> setTrgToSelect(trg.value());
-		}
-		se -> registerSubsystem(jetStructQA);
+	    // intialize and register sum track vs. jet pt qa module
+	    StructureinJets* jetStructQA = new StructureinJets(
+	     "StructureInJets" + trig_tag + "_" + JetQA::JetTag[jet],
+	     JetQA::JetInput[jet],"");
+	     jetStructQA -> Verbosity(verbosity);
+	     jetStructQA -> writeToOutputFile(false);
+	    if (trg.has_value())
+	    {
+	     jetStructQA -> setTrgToSelect(trg.value());
+	    }
+	    se -> registerSubsystem(jetStructQA);
 
-		// initialize and register track jet qa module
-		TrksInJetQA* trksInJetQA = new TrksInJetQA("TrksInJet" + trig_tag + "_" + JetQA::JetTag[jet]);
-		trksInJetQA -> SetHistSuffix("");
-		trksInJetQA -> Configure(
-				{
-				.outMode     = TrksInJetQA::OutMode::QA,
-				.verbose     = Enable::QA_VERBOSITY,
-				.doDebug     = false,
-				.doInclusive = false,
-				.doInJet     = true,
-				.doHitQA     = false,
-				.doClustQA   = true,
-				.doTrackQA   = true,
-				.doJetQA     = true,
-				.rJet        = 0.4,
-				.jetInNode   = JetQA::JetInput[jet]
-				}
-				);
-		if (trg.has_value())
-		{
-			trksInJetQA -> SetTrgToSelect(trg.value());
-		}
-		se -> registerSubsystem(trksInJetQA);
+	    // initialize and register track jet qa module
+	    TrksInJetQA* trksInJetQA = new TrksInJetQA("TrksInJet" + trig_tag + "_" + JetQA::JetTag[jet]);
+	    trksInJetQA -> SetHistSuffix("");
+	    trksInJetQA -> Configure(
+	    {
+	      .outMode     = TrksInJetQA::OutMode::QA,
+	      .verbose     = Enable::QA_VERBOSITY,
+	      .doDebug     = false,
+	      .doInclusive = false,
+	      .doInJet     = true,
+	      .doHitQA     = false,
+	      .doClustQA   = true,
+	      .doTrackQA   = true,
+	      .doJetQA     = true,
+	      .rJet        = 0.4,
+	      .jetInNode   = JetQA::JetInput[jet]
+	    });
+	    if (trg.has_value())
+	    {
+	      trksInJetQA -> SetTrgToSelect(trg.value());
+	    }
+	    se -> registerSubsystem(trksInJetQA);
 
 	}  // end jet loop
 	return;
@@ -576,7 +611,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
 	std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange();
 
 	// get list of jet nodes to analyze
-	std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA();
+	std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA(JetQA::Source::Calos);
 
 	// connect to f4a server
 	Fun4AllServer* se = Fun4AllServer::instance();
@@ -592,10 +627,11 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
 	// Enable trigger selection if a trigger is provided
 	if (trg.has_value())
 	{
-		caloMapCfg.doTrgSelect = true;
-		caloMapCfg.trgToSelect = trg.value();
-	}else{
-	 caloMapCfg.doTrgSelect = false;
+	   caloMapCfg.doTrgSelect = true;
+	   caloMapCfg.trgToSelect = trg.value();
+
+	} else {
+	   caloMapCfg.doTrgSelect = false;
 	}
 
 
@@ -604,18 +640,18 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
 
 	// Register the calorimeter QA module with the Fun4All server
 	se->registerSubsystem(caloQA);
-
+	
 	// initialize and register photon jet kinematic QA
 	
 	std::string moduleName = "PhotonJetsKinematics" + trig_tag;
-	  std::string inputNode = "CLUSTERINFO_CEMC";
-	  std::string histTag = "";
-	  PhotonJetsKinematics *photonJets = new PhotonJetsKinematics(moduleName, inputNode, histTag);
-	  if (trg.has_value())
-		  {
-			    photonJets->SetTrgToSelect(trg.value());
-			  }
-	  se->registerSubsystem(photonJets);
+	std::string inputNode = "CLUSTERINFO_CEMC";
+	std::string histTag = "";
+	PhotonJetsKinematics *photonJets = new PhotonJetsKinematics(moduleName, inputNode, histTag);
+	if (trg.has_value())
+        {
+	  photonJets->SetTrgToSelect(trg.value());
+	}
+	se->registerSubsystem(photonJets);
 
 	// initialize and register event-wise rho check
 	
@@ -631,23 +667,42 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
 	for (uint32_t jet : vecJetsToQA)
 	{
 
-		// get R-dependent eta range
-		std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange(JetQA::JetRes[jet]);
-		// initialize and register constituent checks
-		ConstituentsinJets* jetCstQA = new ConstituentsinJets(
-				"ConstituentsInJets" + trig_tag + "_" + JetQA::JetTag[jet],
-				JetQA::JetInput[jet],
-				"TowerInfoBackground_Sub1",
-				""
-				);
-		jetCstQA -> Verbosity(verbosity);
-		jetCstQA -> setPtRange(ptJetRange.first, ptJetRange.second);
-		jetCstQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
-		if (trg.has_value())
-		{
-			jetCstQA -> setTrgToSelect(trg.value());
-		}
-		se -> registerSubsystem(jetCstQA); 
+	   // get R-dependent eta range
+	   std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange(JetQA::JetRes[jet]);
+           // initialize and register jet seed counter qa module
+           JetSeedCount* jetSeedQA = new JetSeedCount(
+            "JetSeedCount" + trig_tag + "_" + JetQA::JetTag[jet],
+            JetQA::JetInput[jet],
+            "AntiKt_TowerInfo_HIRecoSeedsRaw_r02",
+            "AntiKt_TowerInfo_HIRecoSeedsSub_r02");
+
+           jetSeedQA -> Verbosity(verbosity);
+           jetSeedQA -> setHistTag("");
+           jetSeedQA -> setPtRange(ptJetRange.first, ptJetRange.second);
+           jetSeedQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
+           jetSeedQA -> setWriteToOutputFile(false);
+           jetSeedQA -> setPPMode(HIJETS::is_pp);
+           if (trg.has_value())
+           {
+             jetSeedQA -> setTrgToSelect(trg.value());
+           }
+           se -> registerSubsystem(jetSeedQA);
+
+           // initialize and register constituent checks
+	   ConstituentsinJets* jetCstQA = new ConstituentsinJets(
+	    "ConstituentsInJets" + trig_tag + "_" + JetQA::JetTag[jet],
+	    JetQA::JetInput[jet],
+	    "TowerInfoBackground_Sub1",
+	    "");
+
+	   jetCstQA -> Verbosity(verbosity);
+	   jetCstQA -> setPtRange(ptJetRange.first, ptJetRange.second);
+           jetCstQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
+	   if (trg.has_value())
+	   {
+	     jetCstQA -> setTrgToSelect(trg.value());
+	   }
+           se -> registerSubsystem(jetCstQA); 
 	}
 	
 	return;
@@ -663,33 +718,34 @@ void Jet_QA(std::vector<uint32_t> vecTrigsToUse = JetQA::GetDefaultTriggerList()
 	// run in inclusive mode if needed
 	if (JetQA::DoInclusive)
 	{
-		CommonJetQA();
-		if (JetQA::HasTracks)
-		{
-			JetsWithTracksQA();
-		}
-		if (JetQA::HasCalos){
-			JetsWithCaloQA();
+	  CommonJetQA();
+	  if (JetQA::HasTracks)
+	  {
+	    JetsWithTracksQA();
+	  }
+	  if (JetQA::HasCalos){
+	    JetsWithCaloQA();
 
-		}
+          }
 
 	}
 
 	// run in triggered mode if needed
 	if (JetQA::DoTriggered)
 	{
-		for (uint32_t trg : vecTrigsToUse)
-		{
-			CommonJetQA(trg);
-			if (JetQA::HasTracks)
-			{
-				JetsWithTracksQA(trg);
-			}
+	  for (uint32_t trg : vecTrigsToUse)
+	  {
+	     CommonJetQA(trg);
+	     if (JetQA::HasTracks)
+	     {
+	       JetsWithTracksQA(trg);
+	     }
 
-			if (JetQA::HasCalos){
-				JetsWithCaloQA(trg);
-			}
-		}  // end trigger loop
+	     if (JetQA::HasCalos)
+	     {
+	       JetsWithCaloQA(trg);
+	     }
+	   }  // end trigger loop
 	}
 	return;
 
