@@ -503,31 +503,12 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
 
 	    // get R-dependent eta range
 	    std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange(JetQA::JetRes[jet]);
-
-	    // initialize and register jet seed counter qa module
-	    JetSeedCount* jetSeedQA = new JetSeedCount(
-	     "JetSeedCount" + trig_tag + "_" + JetQA::JetTag[jet],
-	     JetQA::JetInput[jet],
-	     GetRawSeedJets(),
-	     GetSubSeedJets());
-	    jetSeedQA -> Verbosity(verbosity);
-	    jetSeedQA -> setHistTag("");
-	    jetSeedQA -> setPtRange(ptJetRange.first, ptJetRange.second);
-	    jetSeedQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
-	    jetSeedQA -> setWriteToOutputFile(false);
-	    jetSeedQA -> setPPMode(HIJETS::is_pp);
-	    if (trg.has_value())
-	    {
-	      jetSeedQA -> setTrgToSelect(trg.value());
-	    }
-	    se -> registerSubsystem(jetSeedQA);
-
 	    //intialize and register dijetQA	    
 	    DijetQA *dijetQA = new DijetQA(  
-            "DijetQA" + trig_tag + "_"+ JetQA::JetTag[jet],
-	    JetQA::JetInput[jet]);
-	    dijetQA -> setPtLeadRange(ptJetRange.first, ptJetRange.second);  
-            dijetQA -> setEtaRange(etaJetRange.first, etaJetRange.second);  
+             "DijetQA" + trig_tag + "_"+ JetQA::JetTag[jet],
+	     JetQA::JetInput[jet]);
+	     dijetQA -> setPtLeadRange(ptJetRange.first, ptJetRange.second);  
+             dijetQA -> setEtaRange(etaJetRange.first, etaJetRange.second);  
             if (trg.has_value())
             {
               dijetQA -> setTrgToSelect(trg.value());
@@ -570,10 +551,10 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
 
 	    // intialize and register sum track vs. jet pt qa module
 	    StructureinJets* jetStructQA = new StructureinJets(
-	    "StructureInJets" + trig_tag + "_" + JetQA::JetTag[jet],
-	    JetQA::JetInput[jet],"");
-	    jetStructQA -> Verbosity(verbosity);
-	    jetStructQA -> writeToOutputFile(false);
+	     "StructureInJets" + trig_tag + "_" + JetQA::JetTag[jet],
+	     JetQA::JetInput[jet],"");
+	     jetStructQA -> Verbosity(verbosity);
+	     jetStructQA -> writeToOutputFile(false);
 	    if (trg.has_value())
 	    {
 	     jetStructQA -> setTrgToSelect(trg.value());
@@ -688,12 +669,32 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
 
 	   // get R-dependent eta range
 	   std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange(JetQA::JetRes[jet]);
+           // initialize and register jet seed counter qa module
+           JetSeedCount* jetSeedQA = new JetSeedCount(
+            "JetSeedCount" + trig_tag + "_" + JetQA::JetTag[jet],
+            JetQA::JetInput[jet],
+            "AntiKt_TowerInfo_HIRecoSeedsRaw_r02",
+            "AntiKt_TowerInfo_HIRecoSeedsSub_r02");
+
+           jetSeedQA -> Verbosity(verbosity);
+           jetSeedQA -> setHistTag("");
+           jetSeedQA -> setPtRange(ptJetRange.first, ptJetRange.second);
+           jetSeedQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
+           jetSeedQA -> setWriteToOutputFile(false);
+           jetSeedQA -> setPPMode(HIJETS::is_pp);
+           if (trg.has_value())
+           {
+             jetSeedQA -> setTrgToSelect(trg.value());
+           }
+           se -> registerSubsystem(jetSeedQA);
+
            // initialize and register constituent checks
 	   ConstituentsinJets* jetCstQA = new ConstituentsinJets(
-	   "ConstituentsInJets" + trig_tag + "_" + JetQA::JetTag[jet],
-	   JetQA::JetInput[jet],
-	   "TowerInfoBackground_Sub1",
-	   "");
+	    "ConstituentsInJets" + trig_tag + "_" + JetQA::JetTag[jet],
+	    JetQA::JetInput[jet],
+	    "TowerInfoBackground_Sub1",
+	    "");
+
 	   jetCstQA -> Verbosity(verbosity);
 	   jetCstQA -> setPtRange(ptJetRange.first, ptJetRange.second);
            jetCstQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
