@@ -57,7 +57,7 @@ R__LOAD_LIBRARY(libglobalvertex.so)
 void createLocalEMCalCalibFile(const string fname, int runNumber);
 
 
-void Fun4All_EMCal(int nevents = 1e1, const std::string &fname = "inputdata.txt",int iter = 2, const std::string &calib_fname="base/local_calib_copy.root")
+void Fun4All_EMCal(int nevents = 1e2, const std::string &fname = "inputdata.txt",int iter = 2, const std::string &calib_fname="base/local_calib_copy.root")
 {
 
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -141,6 +141,7 @@ void Fun4All_EMCal(int nevents = 1e1, const std::string &fname = "inputdata.txt"
   ClusterBuilder->LoadProfile(emc_prof);
   ClusterBuilder->set_UseTowerInfo(1);  // to use towerinfo objects rather than old RawTower
   ClusterBuilder->setOutputClusterNodeName("CLUSTERINFO_CEMC");
+  ClusterBuilder->set_UseAltZVertex(1); 
   se->registerSubsystem(ClusterBuilder);
 
 /*

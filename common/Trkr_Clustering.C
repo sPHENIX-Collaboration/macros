@@ -86,7 +86,8 @@ void Intt_HitUnpacking(const std::string& server="")
   }
   auto inttunpacker = new InttCombinedRawDataDecoder("InttCombinedRawDataDecoder"+server);
   inttunpacker->Verbosity(verbosity);
-  inttunpacker->LoadHotChannelMapRemote("INTT_HotMap");
+  /// Only necessary to call the following method if using a non-default calibration
+  inttunpacker->LoadBadChannelMap("INTT_HotMap");
   inttunpacker->set_triggeredMode(!isStreaming);
    if(server.length() > 0)
     {

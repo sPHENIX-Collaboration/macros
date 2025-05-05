@@ -7,15 +7,15 @@ export Cur_dir=$(pwd)
 echo "running area:" ${Cur_dir}
 echo "-------------------------running----------------------------"
 cd ${Cur_dir}
+
+
+
 ls
+root '' > notes.log
 
+root -b "Fun4All_HCal.C(0,\"inputdata.txt\")"
 
-
-root -b "Fun4All_EMCal.C(1e3,\"inputdata.txt\",iteration,\"local_calib_copy.root\")"
+rm inputdata.txt
+echo "DONE" >> DONE.txt
 
 echo "JOB COMPLETE!"
-
-# if things are running well add the following lines for speed
-#rm Fun4All_EMCal.C
-#rm ff.sub
-#rm inputdata.txt

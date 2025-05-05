@@ -2,7 +2,7 @@
 
 
 export TargetDir="$PWD"/hadd_condor
-export basedir="$PWD"
+
 
 
 
@@ -24,19 +24,15 @@ while read dir; do
     
     pushd ${WorkDir}
 
-    cp -v "$PWD"/../../CondorHADD.sh CondorRunJob$li.sh
-    sed -i "s/RUN/$dir/g" CondorRunJob$li.sh
+    cp -v "$PWD"/../../CondorHADD.sh CondorHaddJob$li.sh
+    sed -i "s/RUN/$dir/g" CondorHaddJob$li.sh
 
-    escaped_basedir=$(echo "$basedir" | sed 's/\//\\\//g')
-    sed -i "s/BASEDIR/${escaped_basedir}/g" CondorRunJob$li.sh
-
-
-    chmod +x CondorRunJob$li.sh
+    chmod +x CondorHaddJob$li.sh
     
     cat >>ff.sub<< EOF
 +JobFlavour                   = "workday"
-transfer_input_files          = ${WorkDir}/CondorRunJob$li.sh
-Executable                    = CondorRunJob$li.sh
+transfer_input_files          = ${WorkDir}/CondorHaddJob$li.sh
+Executable                    = CondorHaddJob$li.sh
 Universe                      = vanilla
 Notification                  = Never
 GetEnv                        = True
