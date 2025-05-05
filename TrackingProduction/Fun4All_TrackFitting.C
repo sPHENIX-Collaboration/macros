@@ -88,7 +88,7 @@ void Fun4All_TrackFitting(
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "2024p017");
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
