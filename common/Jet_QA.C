@@ -633,20 +633,6 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   // get list of jet nodes to analyze
   std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA(JetQA::Source::Calos);
 
-  // instantiate & register the CaloStatusMapper QA module using the configuration
-  //   - FIXME might want to move to top level...
-  CaloStatusMapper* caloStatusQA = new CaloStatusMapper("CaloStatusMapper" + trig_tag);
-  caloStatusQA -> SetConfig(
-    {
-      .debug       = false,
-      .histTag     = "",
-      .doTrgSelect = trg.has_value(),
-      .trgToSelect = trg.has_value() ? trg.value() : JetQADefs::GL1::Clock
-    }
-  );
-  se -> Verbosity(verbosity);
-  se -> registerSubsystem(caloStatusQA);
-
   // initialize and register photon jet kinematic QA
   PhotonJetsKinematics* photonJetsQA = new PhotonJetsKinematics(
     "PhotonJetsKinematics" + trig_tag,
@@ -706,7 +692,10 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
       "ConstituentsInJets" + trig_tag + "_" + JetQA::JetTag[jet],
       JetQA::JetInput[jet],
       "TowerInfoBackground_Sub1",
-      "");
+      "",
+      "TOWERINFO_CALIB_CEMC_RETOWER",
+      "TOWERINFO_CALIB_HCALIN",
+      "TOWERINFO_CALIB_HCALOUT");
     jetCstQA -> Verbosity(verbosity);
     jetCstQA -> setPtRange(ptJetRange.first, ptJetRange.second);
     jetCstQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
@@ -727,6 +716,29 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
 // ----------------------------------------------------------------------------
 void Jet_QA(std::vector<uint32_t> vecTrigsToUse = JetQA::GetDefaultTriggerList())
 {
+
+  // if running with calos, instantiate & register the
+  // CaloStatusMapper QA module
+  if (JetQA::HasCalos)
+  {
+    // set verbosity
+    int verbosity = std::max(Enable::JETQA_VERBOSITY, Enable::QA_VERBOSITY);
+
+    // connect to f4a server
+    Fun4AllServer* se = Fun4AllServer::instance();
+
+    // register module
+    CaloStatusMapper* caloStatusQA = new CaloStatusMapper("CaloStatusMapper");
+    caloStatusQA -> SetConfig(
+      {
+        .debug       = false,
+        .histTag     = "",
+        .doTrgSelect = false // n.b. differential in trigger not useful here
+      }
+    );
+    se -> Verbosity(verbosity);
+    se -> registerSubsystem(caloStatusQA);
+  }
 
   // run in inclusive mode if needed
   if (JetQA::DoInclusive)
