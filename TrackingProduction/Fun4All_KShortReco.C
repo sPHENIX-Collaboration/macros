@@ -178,6 +178,11 @@
    //Vertex parameters
    kfparticle->setMaximumVertexchi2nDOF(20);
    kfparticle->setMaximumDaughterDCA(0.5); //5 mm
+
+   //Set Tracker State Requirements
+   kfparticle->setMinMVTXhits(0);
+   kfparticle->setMinINTThits(0);
+   kfparticle->setMinTPChits(20);
  
    //Parent parameters
    kfparticle->setMotherPT(0);
