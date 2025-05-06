@@ -21,8 +21,7 @@
 #include <fun4all/Fun4AllUtils.h>
 #include <g4centrality/PHG4CentralityReco.h>
 #include <globalvertex/GlobalVertexReco.h>
-#include <jetbackground/DetermineTowerRho.h>
-#include <jetbackground/TowerRho.h>
+#include <jetbackground/BeamBackgroundFilterAndQA.h>
 #include <mbd/MbdReco.h>
 #include <phool/recoConsts.h>
 #include <qautils/QAHistManagerDef.h>
@@ -127,6 +126,19 @@ void Fun4All_JetProductionYear2(
   {
     Centrality();
   }
+
+  // filter out beam-background events (use default parameters for
+  // streak-sideband filter)
+  BeamBackgroundFilterAndQA* filter = new BeamBackgroundFilterAndQA("BeamBackgroundFilterAndQA");
+  filter -> Verbosity(std::max(Enable::QA_VERBOSITY, Enable::JETQA_VERBOSITY));
+  filter -> SetConfig(
+    {
+      .debug = false,
+      .doQA  = Enable::QA,
+      .doEvtAbort = false
+    }
+  );
+  se -> registerSubsystem(filter);
 
   // do jet reconstruction
   NoBkgdSubJetReco();

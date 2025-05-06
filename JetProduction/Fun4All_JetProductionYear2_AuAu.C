@@ -20,8 +20,7 @@
 #include <fun4all/Fun4AllUtils.h>
 #include <g4centrality/PHG4CentralityReco.h>
 #include <globalvertex/GlobalVertexReco.h>
-#include <jetbackground/DetermineTowerRho.h>
-#include <jetbackground/TowerRho.h>
+#include <jetbackground/BeamBackgroundFilterAndQA.h>
 #include <mbd/MbdReco.h>
 #include <phool/recoConsts.h>
 #include <qautils/QAHistManagerDef.h>
@@ -64,16 +63,24 @@ void Fun4All_JetProductionYear2_AuAu(
   // turn on/off DST output and/or QA
   Enable::DSTOUT = false;
   Enable::QA = true;
+  Enable::HIJETS_VERBOSITY = 0;
+  Enable::JETQA_VERBOSITY = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
 
-  // turn on/off pp mode
+  // jet reco options
+  Enable::HIJETS = true;
+  Enable::HIJETS_TOWER = true;
+  Enable::HIJETS_TRACK = false;
+  Enable::HIJETS_PFLOW = false;
   HIJETS::is_pp = false;
 
   // qa options
-  JetQA::HasTracks = false;
   JetQA::DoInclusive = true;
   JetQA::DoTriggered = true;
+  JetQA::DoPP = HIJETS::is_pp;
   JetQA::RestrictPtToTrig = false;
   JetQA::RestrictEtaByR = true;
+  JetQA::HasTracks = Enable::HIJETS_TRACK || Enable::HIJETS_PFLOW;
+  JetQA::HasCalos = Enable::HIJETS_TOWER || Enable::HIJETS_PFLOW;
 
   // initialize F4A server
   Fun4AllServer* se = Fun4AllServer::instance();
@@ -111,6 +118,19 @@ void Fun4All_JetProductionYear2_AuAu(
   {
     Centrality();
   }
+
+  // filter out beam-background events (use default parameters for
+  // streak-sideband filter)
+  BeamBackgroundFilterAndQA* filter = new BeamBackgroundFilterAndQA("BeamBackgroundFilterAndQA");
+  filter -> Verbosity(std::max(Enable::QA_VERBOSITY, Enable::JETQA_VERBOSITY));
+  filter -> SetConfig(
+    {
+      .debug = false,
+      .doQA  = Enable::QA,
+      .doEvtAbort = false
+    }
+  );
+  se -> registerSubsystem(filter);
 
   // do jet reconstruction
   HIJetReco();  
