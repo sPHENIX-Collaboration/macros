@@ -34,7 +34,8 @@
 #include <G4_Global.C>
 #include <G4_Magnet.C>
 #include <GlobalVariables.C>
-#include <HIJetReco.C>
+#include <HIJetReco.C>  // n.b. needed for rho calculation
+#include <NoBkgdSubJetReco.C>
 #include <Jet_QA.C>
 #include <QA.C>
 
@@ -56,25 +57,39 @@ R__LOAD_LIBRARY(libzdcinfo.so)
 
 void Fun4All_JetProductionYear2(
   const int nEvents = 0,
-  const std::string& inlist = "TestListInput.list",
-  const std::string& outfile = "DST_JET-00042586-0000.root",
-  const std::string& outfile_hist = "HIST_JETQA-00042586-0000.root",
+  const std::string& inlist = "./input/dst_calo_run2pp-00047289.list",
+  const std::string& outfile = "DST_JET-00047289-0000.root",
+  const std::string& outfile_hist = "HIST_JETQA-000427289-0000.calotest.root",
   const std::string& dbtag = "ProdA_2024"
 ) {
 
   // turn on/off DST output and/or QA
   Enable::DSTOUT = false;
   Enable::QA = true;
+  Enable::NSJETS_VERBOSITY = 0;
+  Enable::JETQA_VERBOSITY = std::max(Enable::VERBOSITY, Enable::NSJETS_VERBOSITY);
 
-  // turn on/off pp mode
-  HIJETS::is_pp = true;
+  // jet reco options
+  Enable::NSJETS = true;
+  Enable::NSJETS_TOWER = true;
+  Enable::NSJETS_TRACK = false;
+  Enable::NSJETS_PFLOW = false;
+  NSJETS::is_pp = true;
+
+  // make sure HIJetReco inputs are the same
+  // for rho calculation
+  Enable::HIJETS_TOWER = Enable::NSJETS_TOWER;
+  Enable::HIJETS_TRACK = Enable::NSJETS_TRACK;
+  Enable::HIJETS_PFLOW = Enable::NSJETS_PFLOW;
 
   // qa options
-  JetQA::HasTracks = false;
   JetQA::DoInclusive = true;
   JetQA::DoTriggered = true;
+  JetQA::DoPP = NSJETS::is_pp;
   JetQA::RestrictPtToTrig = false;
   JetQA::RestrictEtaByR = true;
+  JetQA::HasTracks = Enable::NSJETS_TRACK || Enable::NSJETS_PFLOW;
+  JetQA::HasCalos = Enable::NSJETS_TOWER || Enable::NSJETS_PFLOW;
 
   // initialize F4A server
   Fun4AllServer* se = Fun4AllServer::instance();
@@ -114,7 +129,7 @@ void Fun4All_JetProductionYear2(
   }
 
   // do jet reconstruction
-  HIJetReco();  
+  NoBkgdSubJetReco();
 
   // register modules necessary for QA
   if (Enable::QA)

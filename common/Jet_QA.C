@@ -1,8 +1,6 @@
 #ifndef MACRO_JETQA_C
 #define MACRO_JETQA_C
 
-#include <HIJetReco.C>
-#include <NoBkgdSubJetReco.C>
 #include <QA.C>
 
 #include <fun4all/Fun4AllServer.h>
@@ -57,6 +55,9 @@ namespace JetQA
 
   ///! Set to true to generate histograms for a specified set of triggers
   bool DoTriggered = true;
+
+  ///! Set to true to use pp-specific options (otherwise assumes AuAU)
+  bool DoPP = false;
 
   ///! Set to true to restrict minimum jet pt to trigger threshold
   bool RestrictPtToTrig = false;
@@ -329,7 +330,7 @@ namespace JetQA
       JetQADefs::GL1::MBDNSVtx60   // actually 150 cm
     };
 
-    if (HIJETS::is_pp)
+    if (JetQA::DoPP)
     {
       return vecDefaultTrigsPP;
     }
@@ -504,6 +505,7 @@ void CommonJetQA(std::optional<uint32_t> trg = std::nullopt)
     DijetQA* dijetQA = new DijetQA(
       "DijetQA" + trig_tag + "_"+ JetQA::JetTag[jet],
        JetQA::JetInput[jet]);
+    dijetQA -> Verbosity(verbosity);
     dijetQA -> setPtLeadRange(ptJetRange.first, ptJetRange.second);
     dijetQA -> setPtSubRange(1.0, ptJetRange.second);
     dijetQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
@@ -565,7 +567,7 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
     jetStructQA -> setTrkQualityCut(6.0);
     jetStructQA -> setTrkNSilCut(4);
     jetStructQA -> setTrkNTPCCut(25);
-    jetStructQA -> setJetRadius(JetRes[jet]);
+    jetStructQA -> setJetRadius(JetQA::JetRes[jet]);
     jetStructQA -> setJetPtRange(ptJetRange.first, ptJetRange.second);
     jetStructQA -> setJetEtaRange(etaJetRange.first, etaJetRange.second);
     if (trg.has_value())
@@ -580,7 +582,7 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
     trksInJetQA -> Configure(
     {
       .outMode     = TrksInJetQA::OutMode::QA,
-      .verbose     = Enable::QA_VERBOSITY,
+      .verbose     = verbosity,
       .doDebug     = false,
       .doInclusive = false,
       .doInJet     = true,
@@ -588,7 +590,7 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
       .doClustQA   = true,
       .doTrackQA   = true,
       .doJetQA     = true,
-      .rJet        = JetRes[jet],
+      .rJet        = JetQA::JetRes[jet],
       .jetInNode   = JetQA::JetInput[jet]
     });
     if (trg.has_value())
@@ -642,6 +644,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
       .trgToSelect = trg.has_value() ? trg.value() : JetQADefs::GL1::Clock
     }
   );
+  se -> Verbosity(verbosity);
   se -> registerSubsystem(caloStatusQA);
 
   // initialize and register photon jet kinematic QA
@@ -654,6 +657,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   {
     photonJetsQA -> SetTrgToSelect(trg.value());
   }
+  photonJetsQA -> Verbosity(verbosity);
   se -> registerSubsystem(photonJetsQA);
 
   // initialize and register event-wise rho check
@@ -677,7 +681,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
     std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange(JetQA::JetRes[jet]);
 
     // initialize and register jet seed counter qa module
-    if (UseBkgdSub)
+    if (JetQA::UseBkgdSub)
     {
       JetSeedCount* jetSeedQA = new JetSeedCount(
         "JetSeedCount" + trig_tag + "_" + JetQA::JetTag[jet],
@@ -689,7 +693,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
       jetSeedQA -> setPtRange(ptJetRange.first, ptJetRange.second);
       jetSeedQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
       jetSeedQA -> setWriteToOutputFile(false);
-      jetSeedQA -> setPPMode(HIJETS::is_pp);
+      jetSeedQA -> setPPMode(JetQA::DoPP);
       if (trg.has_value())
       {
         jetSeedQA -> setTrgToSelect(trg.value());
