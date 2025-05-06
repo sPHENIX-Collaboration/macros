@@ -4,16 +4,16 @@
 #include <QA.C>
 
 #include <fun4all/Fun4AllServer.h>
+#include <jetqa/CaloStatusMapper.h>
 #include <jetqa/ConstituentsinJets.h>
+#include <jetqa/DijetQA.h>
 #include <jetqa/JetKinematicCheck.h>
 #include <jetqa/JetQADefs.h>
 #include <jetqa/JetSeedCount.h>
+#include <jetqa/PhotonJetsKinematics.h>
 #include <jetqa/RhosinEvent.h>
 #include <jetqa/StructureinJets.h>
 #include <jetqa/TrksInJetQA.h>
-#include <jetqa/CaloStatusMapper.h>
-#include <jetqa/DijetQA.h>
-#include <jetqa/PhotonJetsKinematics.h>
 #include <map>
 #include <optional>
 #include <string>
@@ -667,7 +667,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
     std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange(JetQA::JetRes[jet]);
 
     // initialize and register jet seed counter qa module
-    if (JetQA::UseBkgdSub)
+    if (!JetQA::DoPP)
     {
       JetSeedCount* jetSeedQA = new JetSeedCount(
         "JetSeedCount" + trig_tag + "_" + JetQA::JetTag[jet],
@@ -699,6 +699,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
     jetCstQA -> Verbosity(verbosity);
     jetCstQA -> setPtRange(ptJetRange.first, ptJetRange.second);
     jetCstQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
+    jetCstQA -> setPPMode(JetQA::DoPP);
     if (trg.has_value())
     {
       jetCstQA -> setTrgToSelect(trg.value());
