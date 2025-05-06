@@ -7,6 +7,7 @@
 #include <g4jets/TruthJetInput.h>
 #include <globalvertex/GlobalVertex.h>
 #include <jetbackground/CopyAndSubtractJets.h>
+#include <jetbackground/DetermineEventRho.h>
 #include <jetbackground/DetermineTowerBackground.h>
 #include <jetbackground/DetermineTowerRho.h>
 #include <jetbackground/FastJetAlgoSub.h>
@@ -426,24 +427,36 @@ void DoRhoCalculation()
   //---------------
   Fun4AllServer* se = Fun4AllServer::instance();
 
-  // run rho calculations w/ default parameters
-  DetermineTowerRho* towRhoCalc = new DetermineTowerRho();
-  towRhoCalc -> add_method(TowerRho::Method::AREA);
-  towRhoCalc -> add_method(TowerRho::Method::MULT);
-  TowerJetInput * rho_incemc = new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER,HIJETS::tower_prefix);
-  TowerJetInput * rho_inihcal = new TowerJetInput(Jet::HCALIN_TOWERINFO,HIJETS::tower_prefix);
-  TowerJetInput * rho_inohcal = new TowerJetInput(Jet::HCALOUT_TOWERINFO,HIJETS::tower_prefix);
-  if (HIJETS::do_vertex_type)
+  // run rho calculations w/ towers
+  if (Enable::HIJETS_TOWER)
   {
-    rho_incemc->set_GlobalVertexType(HIJETS::vertex_type);
-    rho_inihcal->set_GlobalVertexType(HIJETS::vertex_type);
-    rho_inohcal->set_GlobalVertexType(HIJETS::vertex_type);
+    DetermineTowerRho* towRhoCalc = new DetermineTowerRho();
+    towRhoCalc -> add_method(TowerRho::Method::AREA);
+    towRhoCalc -> add_method(TowerRho::Method::MULT);
+    TowerJetInput * rho_incemc = new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER,HIJETS::tower_prefix);
+    TowerJetInput * rho_inihcal = new TowerJetInput(Jet::HCALIN_TOWERINFO,HIJETS::tower_prefix);
+    TowerJetInput * rho_inohcal = new TowerJetInput(Jet::HCALOUT_TOWERINFO,HIJETS::tower_prefix);
+    if (HIJETS::do_vertex_type)
+    {
+      rho_incemc->set_GlobalVertexType(HIJETS::vertex_type);
+      rho_inihcal->set_GlobalVertexType(HIJETS::vertex_type);
+      rho_inohcal->set_GlobalVertexType(HIJETS::vertex_type);
+    }
+    towRhoCalc -> add_tower_input( rho_incemc );
+    towRhoCalc -> add_tower_input( rho_inihcal );
+    towRhoCalc -> add_tower_input( rho_inohcal );
+    se -> registerSubsystem( towRhoCalc );
   }
 
-  towRhoCalc -> add_tower_input( rho_incemc );
-  towRhoCalc -> add_tower_input( rho_inihcal );
-  towRhoCalc -> add_tower_input( rho_inohcal );
-  se -> registerSubsystem( towRhoCalc );
+  // run rho calculations w/ tracks
+  if (Enable::HIJETS_TRACK)
+  {
+    DetermineEventRho* trkRhoCalc = new DetermineEventRho();
+    trkRhoCalc -> add_method(EventRho::Method::AREA, "EventRho_AREA");
+    trkRhoCalc -> add_method(EventRho::Method::MULT, "EventRho_MULT");
+    trkRhoCalc -> add_input( new TrackJetInput(Jet::TRACK, "TRACKS") );
+    se -> registerSubsystem( trkRhoCalc );
+  }
 
   // exit back to main macro
   return;
