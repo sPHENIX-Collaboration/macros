@@ -70,13 +70,16 @@ R__LOAD_LIBRARY(libzdcinfo.so)
  */
 void Fun4All_JetProductionYear2_AuAu(
   const int nEvents = 0,
+  const bool useTwrs = true,
+  const bool useTrks = false,
+  const bool useFlow = false,
   const std::vector<std::string>& inlists = {
-    "./input/dsts_calo_run2pp-00053741.goldenTrkCaloRun_allSeg.list",
-    "./input/dsts_clust_run2pp-00053741.goldenTrkCaloRun_allSeg.list",
-    "./input/dsts_track_run2pp-00053741.goldenTrkCaloRun_allSeg.list"
+    "./input/dsts_calo_run2pp-00053877.goldenTrkCaloRun_allSeg.list",
+    "./input/dsts_clust_run2pp-00053877.goldenTrkCaloRun_allSeg.list",
+    "./input/dsts_track_run2pp-00053877.goldenTrkCaloRun_allSeg.list"
   },
-  const std::string& outfile = "DST_JET-00053741-0000.root",
-  const std::string& outfile_hist = "HIST_JETQA-00053741-0000.year2aa_tracktest.root",
+  const std::string& outfile = "DST_JET-00053877-0000.root",
+  const std::string& outfile_hist = "HIST_JETQA-00053877-0000.year2aa_tracktest.root",
   const std::string& dbtag = "ProdA_2024"
 ) {
 
@@ -90,9 +93,9 @@ void Fun4All_JetProductionYear2_AuAu(
 
   // jet reco options
   Enable::HIJETS         = true;
-  Enable::HIJETS_TOWER   = true;
-  Enable::HIJETS_TRACK   = false;
-  Enable::HIJETS_PFLOW   = false;
+  Enable::HIJETS_TOWER   = useTwrs;
+  Enable::HIJETS_TRACK   = useTrks;
+  Enable::HIJETS_PFLOW   = useFlow;
   HIJETS::is_pp          = false;
   HIJETS::do_vertex_type = true;
   HIJETS::vertex_type    = Enable::HIJETS_TRACK ? GlobalVertex::SVTX : GlobalVertex::MBD;

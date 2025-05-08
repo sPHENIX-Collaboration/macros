@@ -72,13 +72,16 @@ R__LOAD_LIBRARY(libzdcinfo.so)
  */
 void Fun4All_JetProductionYear2(
   const int nEvents = 0,
+  const bool useTwrs = true,
+  const bool useTrks = false,
+  const bool useFlow = false,
   const std::vector<std::string>& inlists = {
-    "./input/dsts_calo_run2pp-00053741.goldenTrkCaloRun_allSeg.list",
-    "./input/dsts_clust_run2pp-00053741.goldenTrkCaloRun_allSeg.list",
-    "./input/dsts_track_run2pp-00053741.goldenTrkCaloRun_allSeg.list"
+    "./input/dsts_calo_run2pp-00053877.goldenTrkCaloRun_allSeg.list",
+    "./input/dsts_clust_run2pp-00053877.goldenTrkCaloRun_allSeg.list",
+    "./input/dsts_track_run2pp-00053877.goldenTrkCaloRun_allSeg.list"
   },
-  const std::string& outfile = "DST_JET-00053741-0000.root",
-  const std::string& outfile_hist = "HIST_JETQA-00053741-0000.year2_tracktest.root",
+  const std::string& outfile = "DST_JET-00053877-0000.root",
+  const std::string& outfile_hist = "HIST_JETQA-00053877-0000.year2_trackandcalotest.root",
   const std::string& dbtag = "ProdA_2024"
 ) {
 
@@ -92,9 +95,9 @@ void Fun4All_JetProductionYear2(
 
   // jet reco options
   Enable::NSJETS         = true;
-  Enable::NSJETS_TOWER   = true;
-  Enable::NSJETS_TRACK   = false;
-  Enable::NSJETS_PFLOW   = false;
+  Enable::NSJETS_TOWER   = useTwrs;
+  Enable::NSJETS_TRACK   = useTrks;
+  Enable::NSJETS_PFLOW   = useFlow;
   NSJETS::is_pp          = true;
   NSJETS::do_vertex_type = true;
   NSJETS::vertex_type    = Enable::NSJETS_TRACK ? GlobalVertex::SVTX : GlobalVertex::MBD;
