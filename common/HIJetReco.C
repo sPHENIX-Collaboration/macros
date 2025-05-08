@@ -404,7 +404,7 @@ void DoRhoCalculation()
     DetermineEventRho* trkRhoCalc = new DetermineEventRho();
     trkRhoCalc -> add_method(EventRho::Method::AREA, "EventRho_AREA");
     trkRhoCalc -> add_method(EventRho::Method::MULT, "EventRho_MULT");
-    trkRhoCalc -> add_input( new TrackJetInput(Jet::TRACK, "TRACKS") );
+    trkRhoCalc -> add_input( new TrackJetInput(Jet::SRC::TRACK) );
     se -> registerSubsystem( trkRhoCalc );
   }
 
