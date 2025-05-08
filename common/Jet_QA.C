@@ -550,6 +550,17 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
   // connect to f4a server
   Fun4AllServer* se = Fun4AllServer::instance();
 
+  // initialize and register event-wise rho check
+  RhosinEvent* evtRhoQA = new RhosinEvent("EventWiseTrackRho" + trig_tag, "");
+  evtRhoQA -> Verbosity(verbosity);
+  evtRhoQA -> add_area_rho_node("EventRho_AREA");
+  evtRhoQA -> add_mult_rho_node("EventRho_MULT");
+  if (trg.has_value())
+  {
+    evtRhoQA -> setTrgToSelect(trg.value());
+  }
+  se -> registerSubsystem(evtRhoQA);
+
   // create modules that take single R values ---------------------------------
 
   // loop over resolution parameters
@@ -560,11 +571,12 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
     StructureinJets* jetStructQA = new StructureinJets(
       "StructureInJets" + trig_tag + "_" + JetQA::JetTag[jet],
       JetQA::JetInput[jet],
+      "SvtxTrackMap",
       "");
     jetStructQA -> Verbosity(verbosity);
     jetStructQA -> writeToOutputFile(false);
     jetStructQA -> setTrkPtCut(0.1);
-    jetStructQA -> setTrkQualityCut(6.0);
+    jetStructQA -> setTrkQualityCut(100.0);  // set to be big for now, should refine later
     jetStructQA -> setTrkNSilCut(4);
     jetStructQA -> setTrkNTPCCut(25);
     jetStructQA -> setJetRadius(JetQA::JetRes[jet]);
@@ -581,17 +593,18 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
     trksInJetQA -> SetHistSuffix("");
     trksInJetQA -> Configure(
     {
-      .outMode     = TrksInJetQA::OutMode::QA,
-      .verbose     = verbosity,
-      .doDebug     = false,
-      .doInclusive = false,
-      .doInJet     = true,
-      .doHitQA     = false,
-      .doClustQA   = true,
-      .doTrackQA   = true,
-      .doJetQA     = true,
-      .rJet        = JetQA::JetRes[jet],
-      .jetInNode   = JetQA::JetInput[jet]
+      .outMode      = TrksInJetQA::OutMode::QA,
+      .verbose      = verbosity,
+      .doDebug      = false,
+      .doInclusive  = false,  // n.b. inclusive case covered by track QA
+      .doInJet      = true,
+      .doHitQA      = false,
+      .doClustQA    = true,
+      .doTrackQA    = true,
+      .doJetQA      = true,
+      .doSubsysHist = false,
+      .rJet         = JetQA::JetRes[jet],
+      .jetInNode    = JetQA::JetInput[jet]
     });
     if (trg.has_value())
     {
@@ -647,7 +660,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   se -> registerSubsystem(photonJetsQA);
 
   // initialize and register event-wise rho check
-  RhosinEvent* evtRhoQA = new RhosinEvent("EventWiseRho" + trig_tag, "");
+  RhosinEvent* evtRhoQA = new RhosinEvent("EventWiseCaloRho" + trig_tag, "");
   evtRhoQA -> Verbosity(verbosity);
   evtRhoQA -> add_area_rho_node("TowerRho_AREA");
   evtRhoQA -> add_mult_rho_node("TowerRho_MULT");
