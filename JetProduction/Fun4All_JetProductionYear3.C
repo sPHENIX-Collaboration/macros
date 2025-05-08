@@ -223,7 +223,7 @@ void Fun4All_JetProductionYear3(
   }
 
   // print used DB files, time elapsed and delete server
-  CDBInterface::instance() -> Print();
+  cdb -> Print();
   se -> PrintTimer();
   delete se;
 
