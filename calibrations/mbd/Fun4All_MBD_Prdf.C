@@ -2,6 +2,7 @@
 #define __FUN4ALL_MBD_PRDF_H__
 
 #include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllUtils.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4allraw/Fun4AllPrdfInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
@@ -17,8 +18,6 @@
 #include <globalvertex/GlobalVertexReco.h>
 #include <mbd/MbdReco.h>
 
-#include "get_runstr.h"
-
 #if defined(__CLING__)
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -28,24 +27,20 @@ R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 #endif
 
-void Fun4All_MBD_Prdf(const char *input_file = "beam/beam_seb18-000020868-0000.prdf", const int nEvents = 0, const string& cdbtag = "")
+void Fun4All_MBD_Prdf(const std::string input_file = "beam/beam_seb18-000020868-0000.prdf", const int nEvents = 0, const int nskip = 0, const string& cdbtag = "")
 {
-  TString runseq = input_file;
-  int idx = runseq.Last('/');
-  runseq.Remove(0,idx+1);
-  idx = runseq.First('-');
-  runseq.Remove(0,idx+1);
-  runseq.ReplaceAll(".prdf","");
+  
+  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  int run_number = runseg.first;
+  int seg = runseg.second;
+  cout << "RUN\t" << run_number << "\t" << seg << endl;
 
-  int run_number = get_runnumber(input_file);
-  cout << "RUN\t" << run_number << endl;
   recoConsts *rc = recoConsts::instance();
-  //rc->set_uint64Flag("TIMESTAMP", run_number);
+  rc->set_uint64Flag("TIMESTAMP", run_number);
 
   if ( cdbtag.size() != 0 )
   {
     rc->set_StringFlag("CDB_GLOBALTAG",cdbtag); 
-    //rc->set_StringFlag("CDB_GLOBALTAG","chiu"); 
     //rc->set_StringFlag("CDB_GLOBALTAG","ProdA_2023"); 
     //rc->set_StringFlag("CDB_GLOBALTAG","ProdA_2024"); 
 
@@ -88,13 +83,14 @@ void Fun4All_MBD_Prdf(const char *input_file = "beam/beam_seb18-000020868-0000.p
   //in->Verbosity(1);
   se->registerInputManager(in);
 
-  TString outfile = "DST_MBD-";
-  outfile += runseq;
-  outfile += ".root";
+  std::filesystem::path filePath(input_file);
+  TString outfile = filePath.filename().string();
+  outfile.ReplaceAll(".prdf",".root");
   cout << outfile << endl;
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfile.Data());
   se->registerOutputManager(out);
 
+  se->skip(nskip);
   se->run(nEvents);
 
   se->End();
