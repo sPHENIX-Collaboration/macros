@@ -35,6 +35,9 @@
 #include <HIJetReco.C>
 #include <Jet_QA.C>
 #include <QA.C>
+#include <Trkr_Reco.C>
+#include <Trkr_RecoInit.C>
+#include <Trkr_TpcReadoutInit.C>
 
 // load libraries
 R__LOAD_LIBRARY(libcentrality.so)
@@ -58,16 +61,26 @@ R__LOAD_LIBRARY(libzdcinfo.so)
  *  future.
  *
  *  Necessary inputs:
- *    - For calo jets: DST_CALO
- *    - For track jets: DST_TRKR_TRACKS, DST_TRKR_CLUSTER
+ *    - For calo jets:
+ *      - DST_CALO
+ *    - For track jets:
+ *      - DST_CALO (for beam background filter)
+ *      - DST_TRKR_TRACKS
+ *      - DST_TRKR_CLUSTER (for tracks-in-jets QA)
  */
 void Fun4All_JetProductionYear2_AuAu(
   const int nEvents = 0,
-  const std::string& inlist = "./input/dst_calo_run2pp-00047289.list",
-  const std::string& outfile = "DST_JET-00047289-0000.root",
-  const std::string& outfile_hist = "HIST_JETQA-000427289-0000.year2aa_calotest.root",
+  const std::vector<std::string>& inlists = {
+    "./input/dsts_calo_run2pp-00053741.goldenTrkCaloRun_allSeg.list",
+    "./input/dsts_clust_run2pp-00053741.goldenTrkCaloRun_allSeg.list",
+    "./input/dsts_track_run2pp-00053741.goldenTrkCaloRun_allSeg.list"
+  },
+  const std::string& outfile = "DST_JET-00053741-0000.root",
+  const std::string& outfile_hist = "HIST_JETQA-00053741-0000.year2aa_tracktest.root",
   const std::string& dbtag = "ProdA_2024"
 ) {
+
+  // set options --------------------------------------------------------------
 
   // turn on/off DST output and/or QA
   Enable::DSTOUT           = false;
@@ -76,15 +89,17 @@ void Fun4All_JetProductionYear2_AuAu(
   Enable::JETQA_VERBOSITY  = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
 
   // jet reco options
-  Enable::HIJETS       = true;
-  Enable::HIJETS_TOWER = true;
-  Enable::HIJETS_TRACK = false;
-  Enable::HIJETS_PFLOW = false;
-  HIJETS::is_pp        = false;
+  Enable::HIJETS         = true;
+  Enable::HIJETS_TOWER   = true;
+  Enable::HIJETS_TRACK   = false;
+  Enable::HIJETS_PFLOW   = false;
+  HIJETS::is_pp          = false;
+  HIJETS::do_vertex_type = true;
+  HIJETS::vertex_type    = Enable::HIJETS_TRACK ? GlobalVertex::SVTX : GlobalVertex::MBD;
 
   // qa options
   JetQA::DoInclusive      = true;
-  JetQA::DoTriggered      = false;
+  JetQA::DoTriggered      = true;
   JetQA::DoPP             = HIJETS::is_pp;
   JetQA::UseBkgdSub       = true;
   JetQA::RestrictPtToTrig = false;
@@ -92,12 +107,20 @@ void Fun4All_JetProductionYear2_AuAu(
   JetQA::HasTracks        = Enable::HIJETS_TRACK || Enable::HIJETS_PFLOW;
   JetQA::HasCalos         = Enable::HIJETS_TOWER || Enable::HIJETS_PFLOW;
 
+  // tracking options
+  G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
+  Enable::MVTX_APPLYMISALIGNMENT        = true;
+  ACTSGEOM::mvtx_applymisalignment      = Enable::MVTX_APPLYMISALIGNMENT;
+  TRACKING::pp_mode                     = HIJETS::is_pp;
+
+  // initialize interfaces, register inputs -----------------------------------
+
   // initialize F4A server
   Fun4AllServer* se = Fun4AllServer::instance();
   se -> Verbosity(1);
 
-  // grab 1st file from input list
-  ifstream    files(inlist);
+  // grab 1st file from input lists
+  ifstream    files(inlists.front());
   std::string first("");
   std::getline(files, first);
 
@@ -111,16 +134,35 @@ void Fun4All_JetProductionYear2_AuAu(
   rc -> set_uint64Flag("TIMESTAMP", runnumber);
 
   // connect to conditions database
-  CDBInterface::instance()->Verbosity(1);
+  CDBInterface* cdb = CDBInterface::instance();
+  cdb -> Verbosity(1);
 
   // set up flag handler
   FlagHandler* flag = new FlagHandler();
   se -> registerSubsystem(flag);
 
   // read in input
-  Fun4AllInputManager* in = new Fun4AllDstInputManager("in");
-  in -> AddListFile(inlist);
-  se -> registerInputManager(in);
+  for (std::size_t iin = 0; iin < inlists.size(); ++iin)
+  {
+    Fun4AllInputManager* indst = new Fun4AllDstInputManager("indst" + std::to_string(iin));
+    indst -> AddListFile(inlists[iin]);
+    se -> registerInputManager(indst);
+  }
+
+  // set up tracking
+  if (JetQA::HasTracks)
+  {
+    // register tracking geometry
+    Fun4AllRunNodeInputManager* ingeom = new Fun4AllRunNodeInputManager("ingeom");
+    ingeom -> AddFile(cdb -> getUrl("Tracking_Geometry"));
+    se -> registerInputManager(ingeom);
+
+    // initialize tracking
+    TpcReadoutInit(runnumber);
+    TrackingInit();
+  }
+
+  // register reconstruction modules ------------------------------------------
 
   // do vertex & centrality reconstruction
   Global_Reco();
@@ -164,6 +206,8 @@ void Fun4All_JetProductionYear2_AuAu(
     out -> StripNode("MBDPackets");
     se -> registerOutputManager(out);
   }
+
+  // run & exit ---------------------------------------------------------------
 
   // run4all
   se -> run(nEvents);
