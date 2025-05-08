@@ -50,37 +50,47 @@ R__LOAD_LIBRARY(libzdcinfo.so)
 
 
 
-// macro body -----------------------------------------------------------------
-
+// ============================================================================
+//! Jet production macro for year 2 (AuAu)
+// ============================================================================
+/*! Jet production macro for AuAu-running in year 2. Currently used for
+ *  producing for QA. Can be adapted for production of JET DSTs in the
+ *  future.
+ *
+ *  Necessary inputs:
+ *    - For calo jets: DST_CALO
+ *    - For track jets: DST_TRKR_TRACKS, DST_TRKR_CLUSTER
+ */
 void Fun4All_JetProductionYear2_AuAu(
   const int nEvents = 0,
-  const std::string& inlist = "TestListInput.list",
-  const std::string& outfile = "DST_JET-00042586-0000.root",
-  const std::string& outfile_hist = "HIST_JETQA-00042586-0000.root",
+  const std::string& inlist = "./input/dst_calo_run2pp-00047289.list",
+  const std::string& outfile = "DST_JET-00047289-0000.root",
+  const std::string& outfile_hist = "HIST_JETQA-000427289-0000.year2aa_calotest.root",
   const std::string& dbtag = "ProdA_2024"
 ) {
 
   // turn on/off DST output and/or QA
-  Enable::DSTOUT = false;
-  Enable::QA = true;
+  Enable::DSTOUT           = false;
+  Enable::QA               = true;
   Enable::HIJETS_VERBOSITY = 0;
-  Enable::JETQA_VERBOSITY = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
+  Enable::JETQA_VERBOSITY  = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
 
   // jet reco options
-  Enable::HIJETS = true;
+  Enable::HIJETS       = true;
   Enable::HIJETS_TOWER = true;
   Enable::HIJETS_TRACK = false;
   Enable::HIJETS_PFLOW = false;
-  HIJETS::is_pp = false;
+  HIJETS::is_pp        = false;
 
   // qa options
-  JetQA::DoInclusive = true;
-  JetQA::DoTriggered = true;
-  JetQA::DoPP = HIJETS::is_pp;
+  JetQA::DoInclusive      = true;
+  JetQA::DoTriggered      = false;
+  JetQA::DoPP             = HIJETS::is_pp;
+  JetQA::UseBkgdSub       = true;
   JetQA::RestrictPtToTrig = false;
-  JetQA::RestrictEtaByR = true;
-  JetQA::HasTracks = Enable::HIJETS_TRACK || Enable::HIJETS_PFLOW;
-  JetQA::HasCalos = Enable::HIJETS_TOWER || Enable::HIJETS_PFLOW;
+  JetQA::RestrictEtaByR   = true;
+  JetQA::HasTracks        = Enable::HIJETS_TRACK || Enable::HIJETS_PFLOW;
+  JetQA::HasCalos         = Enable::HIJETS_TOWER || Enable::HIJETS_PFLOW;
 
   // initialize F4A server
   Fun4AllServer* se = Fun4AllServer::instance();
@@ -125,9 +135,10 @@ void Fun4All_JetProductionYear2_AuAu(
   filter -> Verbosity(std::max(Enable::QA_VERBOSITY, Enable::JETQA_VERBOSITY));
   filter -> SetConfig(
     {
-      .debug = false,
-      .doQA  = Enable::QA,
-      .doEvtAbort = false
+      .debug          = false,
+      .doQA           = Enable::QA,
+      .doEvtAbort     = false,
+      .filtersToApply = {"StreakSideband"}
     }
   );
   se -> registerSubsystem(filter);

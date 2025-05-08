@@ -52,8 +52,17 @@ R__LOAD_LIBRARY(libzdcinfo.so)
 
 
 
-// macro body -----------------------------------------------------------------
-
+// ============================================================================
+//! Jet production macro for year 2 (pp)
+// ============================================================================
+/*! Jet production macro for pp-running in year 2. Currently used for
+ *  producing for QA. Can be adapted for production of JET DSTs in the
+ *  future.
+ *
+ *  Necessary inputs:
+ *    - For calo jets: DST_CALO
+ *    - For track jets: DST_TRKR_TRACKS, DST_TRKR_CLUSTER
+ */
 void Fun4All_JetProductionYear2(
   const int nEvents = 0,
   const std::string& inlist = "./input/dst_calo_run2pp-00047289.list",
@@ -63,17 +72,17 @@ void Fun4All_JetProductionYear2(
 ) {
 
   // turn on/off DST output and/or QA
-  Enable::DSTOUT = false;
-  Enable::QA = true;
-  Enable::NSJETS_VERBOSITY = 0;
-  Enable::JETQA_VERBOSITY = std::max(Enable::VERBOSITY, Enable::NSJETS_VERBOSITY);
+  Enable::DSTOUT           = false;
+  Enable::QA               = true;
+  Enable::NSJETS_VERBOSITY = 1;
+  Enable::JETQA_VERBOSITY  = std::max(Enable::VERBOSITY, Enable::NSJETS_VERBOSITY);
 
   // jet reco options
-  Enable::NSJETS = true;
+  Enable::NSJETS       = true;
   Enable::NSJETS_TOWER = true;
   Enable::NSJETS_TRACK = false;
   Enable::NSJETS_PFLOW = false;
-  NSJETS::is_pp = true;
+  NSJETS::is_pp        = true;
 
   // make sure HIJetReco inputs are the same
   // for rho calculation
@@ -82,13 +91,14 @@ void Fun4All_JetProductionYear2(
   Enable::HIJETS_PFLOW = Enable::NSJETS_PFLOW;
 
   // qa options
-  JetQA::DoInclusive = true;
-  JetQA::DoTriggered = true;
-  JetQA::DoPP = NSJETS::is_pp;
+  JetQA::DoInclusive      = true;
+  JetQA::DoTriggered      = false;
+  JetQA::DoPP             = NSJETS::is_pp;
+  JetQA::UseBkgdSub       = false;
   JetQA::RestrictPtToTrig = false;
-  JetQA::RestrictEtaByR = true;
-  JetQA::HasTracks = Enable::NSJETS_TRACK || Enable::NSJETS_PFLOW;
-  JetQA::HasCalos = Enable::NSJETS_TOWER || Enable::NSJETS_PFLOW;
+  JetQA::RestrictEtaByR   = true;
+  JetQA::HasTracks        = Enable::NSJETS_TRACK || Enable::NSJETS_PFLOW;
+  JetQA::HasCalos         = Enable::NSJETS_TOWER || Enable::NSJETS_PFLOW;
 
   // initialize F4A server
   Fun4AllServer* se = Fun4AllServer::instance();
@@ -133,9 +143,10 @@ void Fun4All_JetProductionYear2(
   filter -> Verbosity(std::max(Enable::QA_VERBOSITY, Enable::JETQA_VERBOSITY));
   filter -> SetConfig(
     {
-      .debug = false,
-      .doQA  = Enable::QA,
-      .doEvtAbort = false
+      .debug          = false,
+      .doQA           = Enable::QA,
+      .doEvtAbort     = false
+      .filtersToApply = {"StreakSideband"}
     }
   );
   se -> registerSubsystem(filter);
