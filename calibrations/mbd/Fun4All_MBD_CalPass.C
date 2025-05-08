@@ -29,7 +29,7 @@ R__LOAD_LIBRARY(libglobalvertex.so)
 #endif
 
 void Fun4All_MBD_CalPass(const char *inputfname = "/sphenix/user/pinkenbu/testprdf/beam-00002609-0000.prdf",
-    const int calpass = 0, int nEvents = 0, const int nskip = 0, const int usecdb = 0)
+    const int calpass = 0, int nEvents = 0, const int nskip = 0, const std::string& cdbtag = "")
 {
   TString input_file = inputfname;
   string first_line = input_file.Data();
@@ -47,10 +47,10 @@ void Fun4All_MBD_CalPass(const char *inputfname = "/sphenix/user/pinkenbu/testpr
   cout << "run number = " << runnumber << endl;
 
   recoConsts *rc = recoConsts::instance();
-  if ( usecdb!=0 )
+  if ( cdbtag.length() !=0 )
   {
-    cout << "Using cdb " << "ProdA_2024" << endl;
-    rc->set_StringFlag("CDB_GLOBALTAG","ProdA_2024"); 
+    cout << "Using cdb " << cdbtag << endl;
+    rc->set_StringFlag("CDB_GLOBALTAG",cdbtag.c_str()); 
   }
   else
   {
@@ -126,6 +126,11 @@ void Fun4All_MBD_CalPass(const char *inputfname = "/sphenix/user/pinkenbu/testpr
     out->StripNode("ZDCPackets");
     out->StripNode("SEPDPackets");
     out->StripNode("MBDPackets");
+    out->StripNode("TOWERS_ZDC");
+    out->StripNode("TOWERS_SEPD");
+    out->StripNode("TOWERS_CEMC");
+    out->StripNode("TOWERS_HCALIN");
+    out->StripNode("TOWERS_HCALOUT");
     se->registerOutputManager(out);
   }
 
