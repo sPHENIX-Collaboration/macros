@@ -79,29 +79,18 @@ namespace NSJETS
   // --------------------------------------------------------------------------
   //! Helper method to generate releveant FastJet algorithms
   // --------------------------------------------------------------------------
-  std::vector<FastJetAlgoSub*> GetFJAlgorithms()
+  FastJetAlgoSub* GetFJAlgo(const float reso)
   {
-    // algorithms to run
-    std::vector<FastJetAlgoSub*> algos;
 
-    // grab current options
+    // grab current options & update
+    // reso parameter
     FastJetOptions opts = fj_opts;
+    opts.jet_R = reso;
 
-    // lambda to update opts' reso. parameter
-    // and add to vector of algorithms
-    auto addResoToAlgos = [&opts, &algos](const float reso) {
-      opts.jet_R = reso;
-      algos.push_back( new FastJetAlgoSub(opts) );
-      return;
-    };
+    // create new algorithm
+    return new FastJetAlgoSub(opts);
 
-    // create and add all algorithms
-    addResoToAlgos(0.2);
-    addResoToAlgos(0.3);
-    addResoToAlgos(0.4);
-    addResoToAlgos(0.5);
-    return algos;
-  }  // end 'GetFJOptions()'
+  }  // end 'GetFJAlgo()'
 }  // end namespace NSJETS
 
 
@@ -114,9 +103,6 @@ void MakeNSTruthJets()
   // set verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::NSJETS_VERBOSITY);
 
-  // generate fastjet algorithms
-  auto algos = NSJETS::GetFJAlgorithms();
-
   //---------------
   // Fun4All server
   //---------------
@@ -128,10 +114,10 @@ void MakeNSTruthJets()
     // book jet reconstruction on charged FS particles
     JetReco* chrgTruthJets = new JetReco();
     chrgTruthJets->add_input(new TruthJetInput(Jet::SRC::CHARGED_PARTICLE));
-    chrgTruthJets->add_algo(algos[NSJETS::Res::R02], NSJETS::algo_prefix + "_ChargedTruth_r02");
-    chrgTruthJets->add_algo(algos[NSJETS::Res::R03], NSJETS::algo_prefix + "_ChargedTruth_r03");
-    chrgTruthJets->add_algo(algos[NSJETS::Res::R04], NSJETS::algo_prefix + "_ChargedTruth_r04");
-    chrgTruthJets->add_algo(algos[NSJETS::Res::R05], NSJETS::algo_prefix + "_ChargedTruth_r05");
+    chrgTruthJets->add_algo(NSJETS::GetFJAlgo(0.2), NSJETS::algo_prefix + "_ChargedTruth_r02");
+    chrgTruthJets->add_algo(NSJETS::GetFJAlgo(0.3), NSJETS::algo_prefix + "_ChargedTruth_r03");
+    chrgTruthJets->add_algo(NSJETS::GetFJAlgo(0.4), NSJETS::algo_prefix + "_ChargedTruth_r04");
+    chrgTruthJets->add_algo(NSJETS::GetFJAlgo(0.5), NSJETS::algo_prefix + "_ChargedTruth_r05");
     chrgTruthJets->set_algo_node(NSJETS::jet_node);
     chrgTruthJets->set_input_node("TRUTH");
     chrgTruthJets->Verbosity(verbosity);
@@ -144,10 +130,10 @@ void MakeNSTruthJets()
     // book jet reconstruction on all particles
     JetReco* fullTruthJets = new JetReco();
     fullTruthJets->add_input(new TruthJetInput(Jet::PARTICLE));
-    fullTruthJets->add_algo(algos[NSJETS::Res::R02], NSJETS::algo_prefix + "_Truth_r02");
-    fullTruthJets->add_algo(algos[NSJETS::Res::R03], NSJETS::algo_prefix + "_Truth_r03");
-    fullTruthJets->add_algo(algos[NSJETS::Res::R04], NSJETS::algo_prefix + "_Truth_r04");
-    fullTruthJets->add_algo(algos[NSJETS::Res::R05], NSJETS::algo_prefix + "_Truth_r05");
+    fullTruthJets->add_algo(NSJETS::GetFJAlgo(0.2), NSJETS::algo_prefix + "_Truth_r02");
+    fullTruthJets->add_algo(NSJETS::GetFJAlgo(0.3), NSJETS::algo_prefix + "_Truth_r03");
+    fullTruthJets->add_algo(NSJETS::GetFJAlgo(0.4), NSJETS::algo_prefix + "_Truth_r04");
+    fullTruthJets->add_algo(NSJETS::GetFJAlgo(0.5), NSJETS::algo_prefix + "_Truth_r05");
     fullTruthJets->set_algo_node(NSJETS::jet_node);
     fullTruthJets->set_input_node("TRUTH");
     fullTruthJets->Verbosity(verbosity);
@@ -168,9 +154,6 @@ void MakeNSTowerJets()
 
   // set verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::NSJETS_VERBOSITY);
-
-  // generate fastjet algorithms
-  auto algos = NSJETS::GetFJAlgorithms();
 
   //---------------
   // Fun4All server
@@ -201,10 +184,10 @@ void MakeNSTowerJets()
   twrRecoJets->add_input(emTwrInput);
   twrRecoJets->add_input(ihTwrInput);
   twrRecoJets->add_input(ohTwrInput);
-  twrRecoJets->add_algo(algos[NSJETS::Res::R02], NSJETS::algo_prefix + "_Tower_r02");
-  twrRecoJets->add_algo(algos[NSJETS::Res::R03], NSJETS::algo_prefix + "_Tower_r03");
-  twrRecoJets->add_algo(algos[NSJETS::Res::R04], NSJETS::algo_prefix + "_Tower_r04");
-  twrRecoJets->add_algo(algos[NSJETS::Res::R05], NSJETS::algo_prefix + "_Tower_r05");
+  twrRecoJets->add_algo(NSJETS::GetFJAlgo(0.2), NSJETS::algo_prefix + "_Tower_r02");
+  twrRecoJets->add_algo(NSJETS::GetFJAlgo(0.3), NSJETS::algo_prefix + "_Tower_r03");
+  twrRecoJets->add_algo(NSJETS::GetFJAlgo(0.4), NSJETS::algo_prefix + "_Tower_r04");
+  twrRecoJets->add_algo(NSJETS::GetFJAlgo(0.5), NSJETS::algo_prefix + "_Tower_r05");
   twrRecoJets->set_algo_node(NSJETS::jet_node);
   twrRecoJets->set_input_node("TOWER");
   twrRecoJets->Verbosity(verbosity);
@@ -225,7 +208,6 @@ void MakeNSTrackJets()
   // set verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::NSJETS_VERBOSITY);
 
-  auto algos = NSJETS::GetFJAlgorithms();
   //---------------
   // Fun4All server
   //---------------
@@ -234,10 +216,10 @@ void MakeNSTrackJets()
   // book jet reconstruction routines on tracks
   JetReco* trkRecoJets = new JetReco();
   trkRecoJets->add_input(new TrackJetInput(Jet::SRC::TRACK));
-  trkRecoJets->add_algo(algos[NSJETS::Res::R02], NSJETS::algo_prefix + "_Track_r02");
-  trkRecoJets->add_algo(algos[NSJETS::Res::R03], NSJETS::algo_prefix + "_Track_r03");
-  trkRecoJets->add_algo(algos[NSJETS::Res::R04], NSJETS::algo_prefix + "_Track_r04");
-  trkRecoJets->add_algo(algos[NSJETS::Res::R05], NSJETS::algo_prefix + "_Track_r05");
+  trkRecoJets->add_algo(NSJETS::GetFJAlgo(0.2), NSJETS::algo_prefix + "_Track_r02");
+  trkRecoJets->add_algo(NSJETS::GetFJAlgo(0.3), NSJETS::algo_prefix + "_Track_r03");
+  trkRecoJets->add_algo(NSJETS::GetFJAlgo(0.4), NSJETS::algo_prefix + "_Track_r04");
+  trkRecoJets->add_algo(NSJETS::GetFJAlgo(0.5), NSJETS::algo_prefix + "_Track_r05");
   trkRecoJets->set_algo_node(NSJETS::jet_node);
   trkRecoJets->set_input_node("TRACK");
   trkRecoJets->Verbosity(verbosity);
@@ -258,7 +240,6 @@ void MakeNSPFlowJets()
   // set verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::NSJETS_VERBOSITY);
 
-  auto algos = NSJETS::GetFJAlgorithms();
   //---------------
   // Fun4All server
   //---------------
@@ -267,10 +248,10 @@ void MakeNSPFlowJets()
   // book jet reconstruction routines on pflow elements
   JetReco* pfRecoJets = new JetReco();
   pfRecoJets->add_input(new ParticleFlowJetInput());
-  pfRecoJets->add_algo(algos[NSJETS::Res::R02], NSJETS::algo_prefix + "_ParticleFlow_r02");
-  pfRecoJets->add_algo(algos[NSJETS::Res::R03], NSJETS::algo_prefix + "_ParticleFlow_r03");
-  pfRecoJets->add_algo(algos[NSJETS::Res::R04], NSJETS::algo_prefix + "_ParticleFlow_r04");
-  pfRecoJets->add_algo(algos[NSJETS::Res::R05], NSJETS::algo_prefix + "_ParticleFlow_r05");
+  pfRecoJets->add_algo(NSJETS::GetFJAlgo(0.2), NSJETS::algo_prefix + "_ParticleFlow_r02");
+  pfRecoJets->add_algo(NSJETS::GetFJAlgo(0.3), NSJETS::algo_prefix + "_ParticleFlow_r03");
+  pfRecoJets->add_algo(NSJETS::GetFJAlgo(0.4), NSJETS::algo_prefix + "_ParticleFlow_r04");
+  pfRecoJets->add_algo(NSJETS::GetFJAlgo(0.5), NSJETS::algo_prefix + "_ParticleFlow_r05");
   pfRecoJets->set_algo_node(NSJETS::jet_node);
   pfRecoJets->set_input_node("ELEMENT");
   pfRecoJets->Verbosity(verbosity);
