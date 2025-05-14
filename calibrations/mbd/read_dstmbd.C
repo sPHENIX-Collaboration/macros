@@ -2,24 +2,23 @@
 // macro to read in MBD data after the waveforms are processed
 // at this stage, we only have charge and time from each channel, not the full waveform
 //
+#include <fstream>
 #include <mbd/MbdDefs.h>
-
-const int NUM_ARMS = 2;
+#include <TChain.h>
 
 // Set up variables to read from TTree
-Int_t   f_evt;
-UShort_t f_clk;
-UShort_t f_femclk;
+Int_t   f_evt{0};
+UShort_t f_clk{0};
+UShort_t f_femclk{0};
 Float_t f_tt[MbdDefs::MBD_N_PMT];  // time from t-channels
 Float_t f_tq[MbdDefs::MBD_N_PMT];  // time from q-channels
 Float_t f_q[MbdDefs::MBD_N_PMT];   // charge
 
-//Float_t f_bn[NUM_ARMS];   // num hit PMTs
-Short_t f_bn[NUM_ARMS];   // num hit PMTs
-Float_t f_bq[NUM_ARMS];   // chargesum
-Float_t f_bt[NUM_ARMS];   // mean time in arm
-Float_t f_bz;             // z-vertex
-Float_t f_bt0;            // t-zero
+Short_t f_bn[MbdDefs::MBD_N_ARMS]; // num hit PMTs
+Float_t f_bq[MbdDefs::MBD_N_ARMS]; // chargesum
+Float_t f_bt[MbdDefs::MBD_N_ARMS]; // mean time in arm
+Float_t f_bz;                      // z-vertex
+Float_t f_bt0;                     // t-zero
 
 TFile *tfile {nullptr};
 TTree *tree {nullptr};
@@ -30,23 +29,10 @@ void read_dstmbd(const char *tfname = "beam_mbd-00009184-0000_mbd.root")
 
   // Set up TTree
   int is_dst = 0; // whether reading from DST or private root files
-  TString name;
   tfile = new TFile(tfname,"READ");
-  tree = (TTree*)tfile->Get("t");
-  if ( tree==nullptr )
-  {
-    tree = (TTree*)tfile->Get("T");
-    is_dst = 1;
-  }
+  tree = (TTree*)tfile->Get("T");
 
-  if ( is_dst==1 )
-  {
-    tree->SetBranchAddress("EvtSequence",&f_evt);
-  }
-  else
-  {
-    tree->SetBranchAddress("evt",&f_evt);
-  }
+  tree->SetBranchAddress("EvtSequence",&f_evt);
   tree->SetBranchAddress("clk", &f_clk);
   tree->SetBranchAddress("femclk", &f_femclk);
   tree->SetBranchAddress("bns",&f_bn[0]);
@@ -57,30 +43,17 @@ void read_dstmbd(const char *tfname = "beam_mbd-00009184-0000_mbd.root")
   tree->SetBranchAddress("btn",&f_bt[1]);
   tree->SetBranchAddress("bz",&f_bz);
   tree->SetBranchAddress("bt0",&f_bt0);
-  if ( is_dst )
-  {
-    tree->SetBranchAddress("MbdPmtHits.bq",f_q);
-    tree->SetBranchAddress("MbdPmtHits.btt",f_tt);
-    tree->SetBranchAddress("MbdPmtHits.btq",f_tq);
-  }
-  else
-  {
-    for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT; ipmt++)
-    {
-      name = "tt"; name += ipmt;
-      tree->SetBranchAddress(name,&f_tt[ipmt]);
-      name = "tq"; name += ipmt;
-      tree->SetBranchAddress(name,&f_tq[ipmt]);
-      name = "q"; name += ipmt;
-      tree->SetBranchAddress(name,&f_q[ipmt]);
-    }
-  }
-
+  tree->SetBranchAddress("MbdPmtHits.bq",f_q);
+  tree->SetBranchAddress("MbdPmtHits.btt",f_tt);
+  tree->SetBranchAddress("MbdPmtHits.btq",f_tq);
 
   // Event loop, each ientry is one triggered event
   int nentries = tree->GetEntries();
-  for (int ientry=0; ientry<nentries; ientry++)
+  cout << "checking output of dst file " << tfname << endl;
+  cout << "nentries = " << nentries << endl;
+  for (int ientry=0; ientry<10; ientry++)
   {
+    //cout << "ientry " << ientry << endl;
     tree->GetEntry(ientry);
     //tree->GetEntry(ientry+100);
 
