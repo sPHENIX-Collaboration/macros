@@ -1,5 +1,5 @@
 //
-// Do a recalibration from the saved histograms
+// Do a recalibration of the mip from the saved histograms
 //
 #include <TSpectrum.h>
 #include "get_runstr.h"
@@ -37,13 +37,38 @@ Double_t powerlaw(Double_t *x, Double_t *par)
 // [0] = ampl, peak 1
 // [1] = mean
 // [2] = sigma
-// [2] = ampl, peak 2
+// [3] = ampl, peak 2
 Double_t gaus2(Double_t *x, Double_t *par)
 {
   Double_t xx =x[0];
   Double_t f = par[0]*TMath::Gaus(xx,par[1],par[2]) + par[3]*TMath::Gaus(xx,2.0*par[1],sqrt(2)*par[2]); 
   return f;
 }
+
+Double_t woodssaxon(Double_t *x, Double_t *par)
+{
+  Double_t xx =x[0];
+  Double_t e = par[0]/(1.0+exp((xx-par[1])/par[2]));
+  return e;
+}
+
+// Two gaussians + expo
+// [0] = ampl, peak 1
+// [1] = mean
+// [2] = sigma
+// [3] = ampl, peak 2
+// [4] = ampl, woods-saxon
+// [5] = a, woods-saxon 
+// [6] = slope, expo
+Double_t gaus2ws(Double_t *x, Double_t *par)
+{
+  Double_t xx =x[0];
+  Double_t f = par[0]*TMath::Gaus(xx,par[1],par[2]) + par[3]*TMath::Gaus(xx,2.0*par[1],sqrt(2)*par[2]); 
+  //Double_t e = par[4]*TMath::Exp(-par[5]*xx);
+  Double_t e = par[4]/(1.0+exp((xx-par[5])/par[6]));
+  return f + e;
+}
+
 
 Double_t landau2(Double_t *x, Double_t *par)
 {
@@ -108,11 +133,72 @@ Double_t langaufun(Double_t *x, Double_t *par)
 
 
 // find the threshold
+// may also want to consider getting threshold from turn-on curves
 void FindThreshold(TH1 *h, double& threshold)
 {
+  threshold = 0.;
   double absolute_min = 10.;
+  double absolute_max = 70.;    // max adc where the threshold could be
+  int absminbin = h->FindBin( absolute_min );
+  int absmaxbin = h->FindBin( absolute_max );
+  double absmaxval = h->GetBinContent( h->GetMaximumBin() );
+  int maxbin = 0;
+  double maxval = 0.;
+  double prev_val = 0.;
+  int maxjumpbin = 0;
+  double maxratio = 0.;
+
+  for (int ibin=absminbin; ibin<=absmaxbin; ibin++)
+  {
+    double val = h->GetBinContent(ibin);
+    if ( val > maxval )
+    {
+      maxval = val;
+      maxbin = ibin;
+    }
+
+    if ( val>0. && prev_val>0. )
+    {
+      double ratio = val/prev_val;
+      if ( val>(absmaxval*0.25) )
+      {
+        //cout << ibin << "\t" << ratio << endl;
+        if ( ratio>maxratio )
+        {
+          maxratio = ratio;
+          maxjumpbin = ibin;
+        }
+      }
+    }
+
+    prev_val = val;
+  }
+
+  if ( maxbin==absmaxbin )
+  {
+    // no exponential before mip peak, use max jump to find threshold
+    // (Note: should raise gain for this channel)
+    threshold = h->GetBinLowEdge( maxjumpbin );
+  }
+  else
+  {
+    // use max bin in threshold range
+    threshold = h->GetBinLowEdge( maxbin );
+  }
+  //cout << threshold << endl;
+}
+
+/*
+void FindThreshold(TH1 *h, double& threshold)
+{
+  threshold = 0.;
+  double absolute_min = 10.;
+  double absolute_max = 70.;    // max where the threshold could be
   int bin = h->FindBin( absolute_min );
-  int maxbin = h->FindBin( qmax );
+  int maxbin = h->FindBin( absolute_max );
+  int maxval = h->GetBinContent( h->GetMaximumBin() );
+  int maxjumpbin = 0;
+  double maxratio = 0.;
   //cout << bin << "\t" << maxbin << endl;
 
   // now look for peak after first min
@@ -131,11 +217,20 @@ void FindThreshold(TH1 *h, double& threshold)
     else if ( val>0. && prev_val>0. )
     {
       double ratio = val/prev_val;
-      //cout << ibin << "\t" << ratio << endl;
-      if ( ratio<1.05 )
+      if ( val>maxval*0.25 )
       {
-        threshold = h->GetBinCenter( ibin );
-        break;
+        //cout << ibin << "\t" << ratio << endl;
+        if ( ratio<1.0 )
+        {
+          threshold = h->GetBinLowEdge( ibin );
+          break;
+        }
+
+        if ( ratio>maxratio )
+        {
+          maxratio = ratio;
+          maxjumpbin = ibin;
+        }
       }
     }
 
@@ -143,7 +238,13 @@ void FindThreshold(TH1 *h, double& threshold)
     ibin++;
   }
 
+  // never found the threshold, so we use where the jump is the biggest
+  if ( threshold == 0. )
+  {
+    threshold = h->GetBinLowEdge( maxjumpbin );
+  }
 }
+*/
 
 // xmin and xmax are the min and max range of the peak
 void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax)
@@ -212,8 +313,9 @@ void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax)
 // type0: auau200
 // type1: pp200
 // type
-void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 3, const int nevt = 0, const int type = 0)
+void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 3, const int type = 0)
 {
+  cout << "recal_mbd_mip(), type " << type << endl;
   cout << "tfname " << tfname << endl;
 
   const int NUM_PMT = 128;
@@ -221,13 +323,14 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
   const int NUM_ARMS = 2;
 
   // Create new TFile
+  int runnumber = get_runnumber(tfname);
   TString dir = "results/";
-  dir += get_runnumber(tfname);
+  dir += runnumber;
   dir += "/";
   TString name = "mkdir -p "; name += dir;
   gSystem->Exec( name );
 
-  name = dir; name += "calmbdq_pass3.root";
+  name = dir; name += "calmbdpass2.3_q-"; name += runnumber; name += ".root";
 
   // Read in TFile with h_q
   TFile *oldfile = new TFile(name,"READ");
@@ -245,7 +348,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
     if ( type == MBDRUNS::PP200 )
     {
       //h_q[ipmt]->Rebin(4);  // b-off
-      h_q[ipmt]->Rebin(2);
+      //h_q[ipmt]->Rebin(2);
     }
 
     name = "h_tq"; name += ipmt;
@@ -291,10 +394,12 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
 
   if ( type==MBDRUNS::PP200 )
   {
+    cout << "setting up for pp200" << endl;
     //qmin = 200;
     //qmax = 10000;       // Run24pp boff
     //qmin = 100;
-    qmin = 50;
+    //qmin = 50;
+    qmin = 10;
     qmax = 2000;       // Run24pp bon
   }
 
@@ -310,10 +415,16 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
   TH1 *h_mip[NUM_PMT];  // mip signal histogram
   TH1 *h_bkgmip[NUM_PMT];  // bkg + fit histogram
 
+  //TF1 *fws = new TF1("fws",woodssaxon,0,1000,3);
+  //fws->SetParameters(-85.27,559.8,99.77);
+
+  // Set up output pdf to save plots
+  TString pdfname = dir; pdfname += "calmbdpass2."; pdfname += pass; pdfname += "_mip-"; pdfname += runnumber; pdfname += ".pdf";
+  cout << pdfname << endl;
+  ac[cvindex]->Print( pdfname + "[" );
 
   for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
   {
-
     if (pass>0)
     {
       h_bkg[ipmt] = (TH1*)h_q[ipmt]->Clone();
@@ -333,6 +444,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       if (type==MBDRUNS::PP200)
       {
         h_bkg[ipmt] = s.Background( h_q[ipmt] );
+        //h_bkg[ipmt]->Add( fws );
 
         h_mip[ipmt] = (TH1*)h_q[ipmt]->Clone();
         name = h_q[ipmt]->GetName(); name.ReplaceAll("q","mip");
@@ -402,6 +514,8 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       */
       // Two gaussian fit
       mipfit[ipmt] = new TF1(name,gaus2,qmin,qmax,4);
+      //mipfit[ipmt] = new TF1(name,gaus2expo,qmin,qmax,7);
+      //mipfit[ipmt] = new TF1(name,"gaus",qmin,qmax,4);
 
       //mipfit[ipmt] = new TF1(name,langaufun,qmin,qmax,4);
 
@@ -432,6 +546,9 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       mipfit[ipmt]->SetParameter( 1, seedmean );
       mipfit[ipmt]->SetParameter( 2, seedsigma );
       mipfit[ipmt]->SetParameter( 3, mipfit[ipmt]->GetParameter(0)*0.1 );
+      //mipfit[ipmt]->SetParameter( 4, mipfit[ipmt]->GetParameter(0)*0.01 );
+      //mipfit[ipmt]->SetParameter( 5, 200.);
+      //mipfit[ipmt]->SetParameter( 6, 20.);
       //mipfit[ipmt]->SetParameter( 4, mipfit[ipmt]->GetParameter(1) );
 
       h_mip[ipmt]->Fit( mipfit[ipmt], "RM" );
@@ -506,12 +623,15 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
          cin >> junk;
          */
 
-      name = dir + "h_qfit"; name += ipmt; name += ".png";
-      cout << name << endl;
-      ac[cvindex]->Print( name );
+      //name = dir + "h_qfit"; name += ipmt; name += ".png";
+      title = "h_qfit"; title += ipmt;
+      //cout << pdfname << " " << title << endl;
+      ac[cvindex]->Print( pdfname, title );
     }
 
   }
+
+  ac[cvindex]->Print( pdfname + "]" );
   ++cvindex;
 
   if ( pass==3 )

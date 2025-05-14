@@ -10,7 +10,7 @@ void plot_relwidth_onerun(const int irun = 0);
 
 TFile *savefile;
 
-const int MAX_RUNS = 1000;
+const int MAX_RUNS = 2500;
 int nruns = 0;
 
 MbdCalib *bcal[MAX_RUNS];
@@ -28,7 +28,7 @@ TGraphErrors *gainvals[128];
 TGraphErrors *g_relwidth[128];  // relative width
 TH1 *h_relwidth{nullptr};
 
-const int update_qfit = 0;    // whether to write update gain files
+const int update_qfit = 1;    // whether to write update gain files
 const int write_plots = 1;    // whether to save plots to png
   
 
@@ -36,6 +36,7 @@ const int write_plots = 1;    // whether to save plots to png
 // where the calibrations are stored
 void read_calibgains(const char *flist)
 {
+  cout << "read_calibgains()" << endl;
   ifstream inflist(flist);
 
   ifstream cal_mip_file;
@@ -95,9 +96,11 @@ void read_calibgains(const char *flist)
       */
 
       // check for bad fit
-      if ( integ < 0. || bqmean[temp_pmt][nruns]<0. )
+      //if ( integ < 100. || bqmean[temp_pmt][nruns]<0. || chi2ndf>4.0 )
+      if ( integ < 100. || bqmean[temp_pmt][nruns]<0. || chi2ndf>10.0 )
       {
-        cout << "BAD " << calfile << "\t" << ipmt << "\t" << integ << "\t" << best_peak << endl;
+        cout << "BAD " << calfile << "\t" << ipmt << "\t" << best_peak
+          << "\t" << integ << "\t" << bqmean[temp_pmt][nruns] << "\t" << chi2ndf << endl;
         bqmean[temp_pmt][nruns] = NAN;
       }
 
@@ -138,7 +141,42 @@ void plot_relwidth_onerun(const int irun = 0)
   h_relwidth->Draw();
 }
 
-void plot_calibgains(const char *flist = "runseq.list")
+
+// Find any values that deviate greatly from prior run, and set to nan
+// Note that 1st run must be good
+//void CheckForLargeDeviation( const double max_deviation = 0.05 ) // 5% deviation
+void CheckForLargeDeviation( const double max_deviation = 0.10 ) // 10% deviation
+{
+  for (int ipmt=0; ipmt<128; ipmt++)
+  {
+    for (int irun=1; irun<nruns; irun++)
+    {
+      if ( isnan(bqmean[ipmt][irun]) ) continue;  // skip ones already bad
+
+      // search for prev good val
+      double prevgoodmean = NAN;
+      for (int prevrun=irun-1; prevrun>=0; prevrun--)
+      {
+        if ( !isnan( bqmean[ipmt][prevrun] ) )
+        {
+          prevgoodmean = bqmean[ipmt][prevrun];
+          break;
+        }
+      }
+
+      double deviation = fabs((bqmean[ipmt][irun] - prevgoodmean)/prevgoodmean);
+      if ( deviation > max_deviation )
+      {
+        cout << "BADDEV " << listofruns[irun] << "\t" << ipmt << "\t" << bqmean[ipmt][irun]
+          << "\t" << prevgoodmean << "\t" << deviation << endl;
+        bqmean[ipmt][irun] = NAN;
+      }
+    }
+  }
+
+}
+
+void plot_calibgains(const char *flist = "runs.list")
 {
   // Read in all the calibrations from flist
   read_calibgains(flist);
@@ -148,6 +186,9 @@ void plot_calibgains(const char *flist = "runseq.list")
     savefile = new TFile("results/calibgains.root","RECREATE");
   }
 
+  // sanity check that gains aren't bad
+  CheckForLargeDeviation();
+
   TString name;
   TString title;
   for (int ipmt=0; ipmt<128; ipmt++)
@@ -155,9 +196,10 @@ void plot_calibgains(const char *flist = "runseq.list")
     // do corrections
     for (int irun=0; irun<nruns; irun++)
     {
+
       if ( isnan(bqmean[ipmt][irun]) )
       {
-        //if ( ipmt==51 && irun== )
+        cout << "FOUND BAD " << listofruns[irun] << " " << ipmt << " " << bqmean[ipmt][irun] << endl;
         // search for next good val
         double nextgood = NAN;
         for (int nextrun=irun+1; nextrun<nruns; nextrun++)
@@ -197,6 +239,8 @@ void plot_calibgains(const char *flist = "runseq.list")
         {
           cout << "ERROR, no good run to interpolate from" << endl;
         }
+
+        cout << "NEW VALUE FOR BAD " << irun << " " << ipmt << " " << bqmean[ipmt][irun] << endl;
       }
 
       if ( isnan(bqmeanerr[ipmt][irun]) )

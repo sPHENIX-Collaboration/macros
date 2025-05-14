@@ -28,18 +28,30 @@ R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 #endif
 
-void Fun4All_MBD_CalPass(const char *inputfname = "/sphenix/user/pinkenbu/testprdf/beam-00002609-0000.prdf",
+void Fun4All_MBD_CalPass(const char *input = "/sphenix/user/pinkenbu/testprdf/beam-00002609-0000.prdf",
     const int calpass = 0, int nEvents = 0, const int nskip = 0, const std::string& cdbtag = "")
 {
-  TString input_file = inputfname;
-  string first_line = input_file.Data();
-  if ( input_file.EndsWith(".list") )
+  // process the input
+  // it could be a single prdf, dst, or listfile
+  // or it could be a comma separated string of prdf, dst, or listfiles
+
+  std::stringstream ss(input);
+  std::vector<std::string> all_inputfnames;
+  while ( ss.good() )
   {
-    ifstream listfile(inputfname);
+    std::string temp;
+    getline( ss, temp, ',' );
+    all_inputfnames.push_back( temp );
+  }
+
+  // Get dst or prdf filename to extract runnumber
+  std::string first_line = all_inputfnames[0];
+  if ( first_line.ends_with(".list") )
+  {
+    ifstream listfile(all_inputfnames[0]);
     getline(listfile, first_line);
     listfile.close();
   }
-
 
   pair<int, int> runseg = Fun4AllUtils::GetRunSegment(first_line);
   int runnumber = runseg.first;
@@ -54,7 +66,6 @@ void Fun4All_MBD_CalPass(const char *inputfname = "/sphenix/user/pinkenbu/testpr
   }
   else
   {
-    //int run_number = get_runnumber(input_file);
     cout << "RUN\t" << runnumber << endl;
     rc->set_uint64Flag("TIMESTAMP", runnumber);
 
@@ -75,7 +86,7 @@ void Fun4All_MBD_CalPass(const char *inputfname = "/sphenix/user/pinkenbu/testpr
   //se->Verbosity(1);
 
   // Sync Headers and Flags
-  SyncReco *sync = new SyncReco();
+  SyncReco *sync = new SyncReco();new Fun4AllPrdfInputManager("PRDFin");
   se->registerSubsystem(sync);
 
   HeadReco *head = new HeadReco();
@@ -93,26 +104,39 @@ void Fun4All_MBD_CalPass(const char *inputfname = "/sphenix/user/pinkenbu/testpr
   //GlobalVertexReco *gvertex = new GlobalVertexReco();
   //se->registerSubsystem(gvertex);
 
-  Fun4AllInputManager *in{nullptr};
-  if ( input_file.EndsWith(".prdf") )
-  {
-    cout << "prdf " << input_file << endl;
-    in = new Fun4AllPrdfInputManager("PRDFin");
-    in->fileopen(inputfname);
-  }
-  else if ( input_file.EndsWith(".root") )
-  {
-    in = new Fun4AllDstInputManager("DST");
-    in->AddFile(inputfname);
-  }
-  else if ( input_file.EndsWith(".list") )
-  {
-    in = new Fun4AllDstInputManager("DST");
-    in->AddListFile(inputfname);
-  }
+  vector<Fun4AllInputManager *> in;
 
-  se->registerInputManager(in);
-  //in->Verbosity(1);
+  if ( all_inputfnames[0].ends_with(".prdf") )
+  {
+    for ( const auto& inputfname : all_inputfnames )
+    {
+      Fun4AllPrdfInputManager *inputman = new Fun4AllPrdfInputManager("PRDFin");
+      inputman->fileopen( inputfname );
+      in.push_back( inputman );
+      se->registerInputManager( inputman );
+    }
+  }
+  else if ( all_inputfnames[0].ends_with(".root") )
+  {
+    for ( const auto& inputfname : all_inputfnames )
+    {
+      Fun4AllDstInputManager *inputman = new Fun4AllDstInputManager("DST");
+      inputman->AddFile( inputfname );
+      in.push_back( inputman );
+      se->registerInputManager( inputman );
+    }
+  }
+  else if ( all_inputfnames[0].ends_with(".list") )
+  {
+    for ( const auto& inputfname : all_inputfnames )
+    {
+      cout << "adding " << inputfname << endl;
+      Fun4AllDstInputManager *inputman = new Fun4AllDstInputManager("DST");
+      inputman->AddListFile( inputfname );
+      in.push_back( inputman );
+      se->registerInputManager( inputman );
+    }
+  }
 
   if ( calpass == 2 )
   {
