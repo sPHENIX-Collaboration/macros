@@ -112,7 +112,7 @@ void makeDefaultCalib(string infile,string outfile,string infield,int icalo){
   for(int ie=1; ie<h->GetXaxis()->GetNbins()+1; ie++){
     for(int ip=1; ip<h->GetYaxis()->GetNbins()+1; ip++){
       float val = h->GetBinContent(ie,ip);
-      if (val != 0) h->SetBinContent(ie,ip,avg);
+      if (val == 0) h->SetBinContent(ie,ip,avg);
     }
   }
 
