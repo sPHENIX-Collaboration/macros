@@ -140,7 +140,11 @@ export USER="$(id -u -n)"
 export LOGNAME=${USER}
 export HOME=/sphenix/u/${USER}
 
-source /opt/sphenix/core/bin/sphenix_setup.sh -n ${build}
+if [[ $build != "none" ]]   # use none to keep existing env
+then
+  echo source /opt/sphenix/core/bin/sphenix_setup.sh -n ${build}
+  source /opt/sphenix/core/bin/sphenix_setup.sh -n ${build}
+fi
 
 export ODBCINI=./odbc.ini
  
@@ -206,18 +210,18 @@ ls -la *.root
 fname=$(ls -tr DST_UNCALMBD*.root | tail -1)
 
 echo "###############################################################################################################"
-echo "Running pass2.1 calibration"
-#./cups.py -r ${runnumber} -s ${segment} -d ${outbase} message "Running PASS 2.1 calibration"
+echo "Running pass2.0 calibration"
+#./cups.py -r ${runnumber} -s ${segment} -d ${outbase} message "Running PASS 2.0 calibration"
 pass=0
 echo root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents}\)
 root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents}\)
 
 echo "###############################################################################################################"
-echo "Running pass2.2 calibration"
-./cups.py -r ${runnumber} -s ${segment} -d ${outbase} message "Running PASS 2.2 calibration"
+echo "Running pass2.3 calibration"
+#./cups.py -r ${runnumber} -s ${segment} -d ${outbase} message "Running PASS 2.2 calibration"
 pass=3
 echo root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents},${runtype}\)
-root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents},${runtype}\)
+root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents},${runtype},\"${dbtag}\"\)
 
 # Flag as done
 #./cups.py -r ${runno} -s ${segment} -d ${outbase} message "Done"

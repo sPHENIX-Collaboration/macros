@@ -11,26 +11,30 @@
 #include <TPad.h>
 #include <TSystem.h>
 
+#include <ffamodules/CDBInterface.h>
+#include <phool/recoConsts.h>
+
 #include "get_runstr.h"
 #include <mbd/MbdCalib.h>
 #include <mbd/MbdDefs.h>
 #include "read_dstmbd.C"
 #include "recal_mbd_mip.C"
 
-
 #if defined(__CLING__)
+R__LOAD_LIBRARY(libffamodules.so)
+R__LOAD_LIBRARY(libphool.so)
 R__LOAD_LIBRARY(libmbd.so)
 #endif
 
 // This macro executes the sub-passes for the pass2 calibrations
 //pass 2.0: do tt_t0 and tq_t0 offset calibration
-//pass 2.1: do the slew correction
-//pass 2.2: do the next iteration of the slew correction
+//pass 2.1: do the slew correction calibration
+//pass 2.2: do the next iteration of the slew correction calibration
 //pass 2.3: do the mip fits for charge calibration 
 
 //runtype 0: au+au 200 GeV
 //runtype 1: p+p 200 GeV
-void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int subpass = 0, const int nevt = 0, const int runtype = 0)
+void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int subpass = 0, const int nevt = 0, const int runtype = 0, const std::string_view dbtag = "")
 {
   cout << "cal_mbd(), tfname " << tfname << endl;
   cout << "cal_mbd(), runtype " << runtype << endl;
@@ -78,20 +82,33 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   // Load whatever calibrations are available at each subpass
   if ( subpass>0 )
   {
-    calfile = dir + "/mbd_tq_t0.calib";
+    calfile = dir + "/pass0_mbd_tq_t0.calib";
     mcal->Download_TQT0( calfile.Data() );
     cout << "Loaded " << calfile << endl;
 
-    calfile = dir + "/mbd_tt_t0.calib";
+    calfile = dir + "/pass0_mbd_tt_t0.calib";
     mcal->Download_TTT0( calfile.Data() );
     cout << "Loaded " << calfile << endl;
 
   }
   if ( subpass>1 )
   {
-    calfile = dir + "/mbd_slewcorr.calib";
-    mcal->Download_SlewCorr( calfile.Data() );
-    cout << "Loaded " << calfile << endl;
+    if ( dbtag.empty() )
+    {
+      calfile = dir + "/mbd_slewcorr.calib";
+      mcal->Download_SlewCorr( calfile.Data() );
+      cout << "Loaded " << calfile << endl;
+    }
+    else
+    {
+      recoConsts *rc = recoConsts::instance();
+      rc->set_StringFlag("CDB_GLOBALTAG","ProdA_2024"); 
+      rc->set_uint64Flag("TIMESTAMP",runnumber);
+      CDBInterface *cdb = CDBInterface::instance();
+      std::string slew_url = cdb->getUrl("MBD_SLEWCORR");
+      mcal->Download_SlewCorr(slew_url);
+      cout << "Loaded " << slew_url << endl;
+    }
   }
   if ( subpass>3 )
   {
@@ -194,7 +211,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       }
 
       //if ( subpass==0 )  // temp, for final t0
-      if ( subpass>1 ) // apply slewcorr if subpass > 1
+      if ( subpass>1 && subpass<3 ) // apply slewcorr if subpass > 1
       {
         int feech = (ipmt / 8) * 16 + ipmt % 8;
         if ( !isnan(mcal->get_tt0(ipmt)) && mcal->get_tt0(ipmt)>-100. && f_q[ipmt]>0. && f_q[ipmt]<16000. )
@@ -496,27 +513,27 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   }
 
   //== Draw the charge histograms
-  ac[cvindex] = new TCanvas("cal_q","q",425*1.5,550*1.5);
-
-  pdfname = dir; pdfname += "calmbdpass2."; pdfname += subpass; pdfname += "_adc-"; pdfname += runnumber; pdfname += ".pdf";
-  ac[cvindex]->Print( pdfname + "[" );
-
   if ( subpass==0 )
   {
+    ac[cvindex] = new TCanvas("cal_q","q",425*1.5,550*1.5);
+
+    pdfname = dir; pdfname += "calmbdpass2."; pdfname += subpass; pdfname += "_adc-"; pdfname += runnumber; pdfname += ".pdf";
+    ac[cvindex]->Print( pdfname + "[" );
+
     gPad->SetLogy(1);
-  }
 
-  for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT && subpass==0; ipmt++)
-  {
-    h_q[ipmt]->Draw();
+    for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT && subpass==0; ipmt++)
+    {
+      h_q[ipmt]->Draw();
 
-    //name = dir + "h_adc"; name += ipmt; name += ".png";
-    title = "h_adc"; title += ipmt;
-    //cout << pdfname << " " << title << endl;
-    ac[cvindex]->Print( pdfname, title );
+      //name = dir + "h_adc"; name += ipmt; name += ".png";
+      title = "h_adc"; title += ipmt;
+      //cout << pdfname << " " << title << endl;
+      ac[cvindex]->Print( pdfname, title );
+    }
+    ac[cvindex]->Print( pdfname + "]" );
+    ++cvindex;
   }
-  ac[cvindex]->Print( pdfname + "]" );
-  ++cvindex;
 
   savefile->Write();
   //savefile->Close();

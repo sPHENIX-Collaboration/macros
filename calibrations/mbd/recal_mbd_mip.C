@@ -2,8 +2,9 @@
 // Do a recalibration of the mip from the saved histograms
 //
 #include <TSpectrum.h>
-#include "get_runstr.h"
 #include <mbd/MbdCalib.h>
+
+#include "get_runstr.h"
 
 
 #if defined(__CLING__)
@@ -188,68 +189,56 @@ void FindThreshold(TH1 *h, double& threshold)
   //cout << threshold << endl;
 }
 
+
+// xmin and xmax are the min and max range of the peak
+// This version uses TSpectrum to find the peaks
 /*
-void FindThreshold(TH1 *h, double& threshold)
+void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax, double threshold)
 {
-  threshold = 0.;
-  double absolute_min = 10.;
-  double absolute_max = 70.;    // max where the threshold could be
-  int bin = h->FindBin( absolute_min );
-  int maxbin = h->FindBin( absolute_max );
-  int maxval = h->GetBinContent( h->GetMaximumBin() );
-  int maxjumpbin = 0;
-  double maxratio = 0.;
-  //cout << bin << "\t" << maxbin << endl;
-
-  // now look for peak after first min
-  double prev_val = 0.;
-  int ibin = bin;
-  while ( ibin<=maxbin )
+  int verbose = 1;    // Peak finder
+  if ( verbose )
   {
-    double val = h->GetBinContent( ibin );
-    //cout << val << endl;
-    if ( val<=0. )
-    {
-      prev_val = val;
-      ibin++;
-      continue;
-    }
-    else if ( val>0. && prev_val>0. )
-    {
-      double ratio = val/prev_val;
-      if ( val>maxval*0.25 )
-      {
-        //cout << ibin << "\t" << ratio << endl;
-        if ( ratio<1.0 )
-        {
-          threshold = h->GetBinLowEdge( ibin );
-          break;
-        }
-
-        if ( ratio>maxratio )
-        {
-          maxratio = ratio;
-          maxjumpbin = ibin;
-        }
-      }
-    }
-
-    prev_val = val;
-    ibin++;
+    static TCanvas *ac = new TCanvas("cpeak","peakfinder",800,600);
+    ac->cd();
+    h->GetXaxis()->SetRangeUser( qmin, qmax );
+    h->Draw();
   }
 
-  // never found the threshold, so we use where the jump is the biggest
-  if ( threshold == 0. )
+  const Int_t maxPeaks = 1;
+  TSpectrum spectrum(maxPeaks);
+
+  // sigma: minimum expected width of a peak in bins (e.g., sigma=2 means width ≈ 4 bins)
+  Double_t sigma = 5;
+
+  // Threshold = minimum relative height (0.1 = 10% of max)
+  Int_t nPeaks = spectrum.Search(h, sigma, "", 0.1);
+
+  std::cout << "Found " << nPeaks << " peaks:\n";
+
+  // Get peak positions
+  Double_t* peaksX = spectrum.GetPositionX();
+  for (Int_t i = 0; i < nPeaks; ++i) {
+    Double_t x = peaksX[i];
+    Double_t y = h->GetBinContent(h->FindBin(x));
+    std::cout << "  Peak at x = " << x << ", height = " << y << "\n";
+  }
+
+  if ( verbose )
   {
-    threshold = h->GetBinLowEdge( maxjumpbin );
+    gPad->Modified();
+    gPad->Update();
+    std::string junk;
+    std::cout << "? ";
+    std::cin >> junk;
   }
 }
 */
 
-// xmin and xmax are the min and max range of the peak
-void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax)
+void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax, double threshold)
 {
-  int bin = h->FindBin( qmin );
+  int verbose = 1;
+
+  int bin = h->FindBin( threshold );
   int maxbin = h->FindBin( qmax );
   double ymin = 1e12; // the minimum y val
   int nabove = 0;     // num points above the min
@@ -267,6 +256,12 @@ void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax)
     else
     {
       nabove++;
+    }
+
+    if ( verbose )
+    {
+      double x = h->GetBinCenter( ibin );
+      std::cout << "bin x y nabove " << ibin << "\t" << x << "\t" << val << "\t" << nabove << std::endl;
     }
 
     // if we see this many above the min, the signal is rising
@@ -312,14 +307,14 @@ void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax)
 
 // type0: auau200
 // type1: pp200
-// type
-void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 3, const int type = 0)
+// method0:  TSpectrum bkg + 2 gaus fit
+void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 3, const int type = 0, const int method = 0)
 {
-  cout << "recal_mbd_mip(), type " << type << endl;
+  cout << "recal_mbd_mip(), type method " << type << " " << method << endl;
   cout << "tfname " << tfname << endl;
 
   const int NUM_PMT = 128;
-  //const int NUM_PMT = 12;
+  //const int NUM_PMT = 2;
   const int NUM_ARMS = 2;
 
   // Create new TFile
@@ -345,7 +340,11 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
     title = "q"; title += ipmt;
     //h_q[ipmt] = new TH1F(name,title,15100/4,-100,15000);
     h_q[ipmt] = (TH1*)oldfile->Get(name);
-    if ( type == MBDRUNS::PP200 )
+    if ( type == MBDRUNS::AUAU200 )
+    {
+      //h_q[ipmt]->Rebin(2);
+    }
+    else if ( type == MBDRUNS::PP200 )
     {
       //h_q[ipmt]->Rebin(4);  // b-off
       //h_q[ipmt]->Rebin(2);
@@ -441,7 +440,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       double sigma = 20;
       double seedmean = 0;
       TSpectrum s{};
-      if (type==MBDRUNS::PP200)
+      if ( method==0 )
       {
         h_bkg[ipmt] = s.Background( h_q[ipmt] );
         //h_bkg[ipmt]->Add( fws );
@@ -468,10 +467,9 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
         */
 
       }
-      else if (type==MBDRUNS::AUAU200)
+      else if ( method==1 )
       {
-
-        FindPeakRange( h_bkg[ipmt], minrej, peak, maxrej );
+        FindPeakRange( h_bkg[ipmt], minrej, peak, maxrej, threshold );
         cout << "peak range\t" << minrej << "\t" << peak << "\t" << maxrej << endl;
         sigma = peak-minrej;
         seedmean = peak;
