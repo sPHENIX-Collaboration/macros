@@ -60,11 +60,6 @@ void Mvtx_Clustering()
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
   auto se = Fun4AllServer::instance();
 
-//   // prune the extra MVTX hits due to multiple strobes per hit
-//   auto mvtxhitpruner = new MvtxHitPruner;
-//   mvtxhitpruner->Verbosity(verbosity);
-//   se->registerSubsystem(mvtxhitpruner);
-
   // For the Mvtx layers
   //================
   auto mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
