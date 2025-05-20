@@ -58,7 +58,7 @@ void Mvtx_HitUnpacking(const std::string& felix="")
 void Mvtx_Clustering()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
-  Fun4AllServer* se = Fun4AllServer::instance();
+  auto se = Fun4AllServer::instance();
 
 //   // prune the extra MVTX hits due to multiple strobes per hit
 //   auto mvtxhitpruner = new MvtxHitPruner;
@@ -67,7 +67,7 @@ void Mvtx_Clustering()
 
   // For the Mvtx layers
   //================
-  MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
+  auto mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
   mvtxclusterizer->Verbosity(verbosity);
   se->registerSubsystem(mvtxclusterizer);
 }
