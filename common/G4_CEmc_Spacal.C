@@ -334,7 +334,6 @@ void CEMC_Towers()
     }
     // caloWaveformSim->Verbosity(2);
     // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
-    caloWaveformSim->set_calibName("cemc_pi0_twrSlope_v1_default");
     se->registerSubsystem(caloWaveformSim);
 
     CaloTowerBuilder *ca2 = new CaloTowerBuilder();
