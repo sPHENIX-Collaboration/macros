@@ -341,7 +341,7 @@ void CEMC_Towers()
     ca2->set_nsamples(12);
     ca2->set_dataflag(false);
     ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-    ca2->set_builder_type(CaloTowerDefs::kWaveformTowerv2);
+    ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
     // match our current ZS threshold ~60ADC for emcal
     ca2->set_softwarezerosuppression(true, 60);
     se->registerSubsystem(ca2);
