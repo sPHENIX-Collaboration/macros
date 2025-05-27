@@ -229,14 +229,36 @@ void Fun4All_TrackSeeding(
   silicon_match->set_use_legacy_windowing(false);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
   if(G4TPC::ENABLE_AVERAGE_CORRECTIONS)
+  {
+    // for general tracking
+    // Eta/Phi window is determined by 3 sigma window
+    // X/Y/Z window is determined by 4 sigma window
+    silicon_match->window_deta.set_posQoverpT_maxabs({-0.014,0.0331,0.48});
+    silicon_match->window_deta.set_negQoverpT_maxabs({-0.006,0.0235,0.52});
+    silicon_match->set_deltaeta_min(0.03);
+    silicon_match->window_dphi.set_QoverpT_range({-0.15,0,0}, {0.15,0,0});
+    silicon_match->window_dx.set_QoverpT_maxabs({3.0,0,0});
+    silicon_match->window_dy.set_QoverpT_maxabs({3.0,0,0});
+    silicon_match->window_dz.set_posQoverpT_maxabs({1.138,0.3919,0.84});
+    silicon_match->window_dz.set_negQoverpT_maxabs({0.719,0.6485,0.65});
+    silicon_match->set_crossing_deltaz_max(30);
+    silicon_match->set_crossing_deltaz_min(2);
+
+    // for distortion correction using SI-TPOT fit and track pT>0.5
+    if (G4TRACKING::SC_CALIBMODE)
     {
-      // reset phi matching window to be centered on zero
-      // it defaults to being centered on -0.1 radians for the case of static corrections only
-      std::array<double,3> arrlo = {-0.15,0,0};
-      std::array<double,3> arrhi = {0.15,0,0};
-      silicon_match->window_dphi.set_QoverpT_range(arrlo, arrhi);
+      silicon_match->window_deta.set_posQoverpT_maxabs({0.016,0.0060,1.13});
+      silicon_match->window_deta.set_negQoverpT_maxabs({0.022,0.0022,1.44});
+      silicon_match->set_deltaeta_min(0.03);
+      silicon_match->window_dphi.set_QoverpT_range({-0.15,0,0}, {0.09,0,0});
+      silicon_match->window_dx.set_QoverpT_maxabs({2.0,0,0});
+      silicon_match->window_dy.set_QoverpT_maxabs({1.5,0,0});
+      silicon_match->window_dz.set_posQoverpT_maxabs({1.213,0.0211,2.09});
+      silicon_match->window_dz.set_negQoverpT_maxabs({1.307,0.0001,4.52});
+      silicon_match->set_crossing_deltaz_min(1.2);
     }
-    se->registerSubsystem(silicon_match);
+  }
+  se->registerSubsystem(silicon_match);
 
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
   auto mm_match = new PHMicromegasTpcTrackMatching;
