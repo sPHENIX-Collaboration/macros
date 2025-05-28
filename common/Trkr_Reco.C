@@ -204,6 +204,10 @@ void Tracking_Reco_TrackSeed()
 
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
+
+  // modify strobe range
+  silicon_Seeding->setStrobeRange(0,2);
+
   se->registerSubsystem(silicon_Seeding);
 
   auto merger = new PHSiliconSeedMerger;
