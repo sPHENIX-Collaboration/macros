@@ -40,7 +40,7 @@ then
   BATCH=-b
 fi
 
-subpass=1  # do slew calibrations, don't apply them
+subpass=1  # generate slew curves (slew calibrations may or may not be applied)
 echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\)
 root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\) 
 
