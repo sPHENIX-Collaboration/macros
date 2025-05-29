@@ -24,7 +24,8 @@ echo PATH=$PATH
 echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 
 # process up to 100K uncalibrated events for t0 calibration
-tcalib_events=100000
+#tcalib_events=100000
+tcalib_events=0
 if [[ $nevt -ne 0 ]] && [[ $nevt -lt 100000 ]]
 then
   tcalib_events=${nevt}

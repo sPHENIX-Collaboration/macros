@@ -46,7 +46,7 @@ R__LOAD_LIBRARY(libphool.so)
 R__LOAD_LIBRARY(libcdbobjects.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
-void Fun4All_TrackAnalysis(
+void Fun4All_TrackFitting(
     const int nEvents = 10,
     const std::string seedfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana473_2024p016_v001/DST_TRKR_SEED/run_00053800_00053900/dst/DST_TRKR_SEED_run2pp_ana473_2024p016_v001-00053877-00000.root",
     const std::string clusterfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana466_2024p012_v001/DST_TRKR_CLUSTER/run_00053800_00053900/dst/DST_TRKR_CLUSTER_run2pp_ana466_2024p012_v001-00053877-00000.root",

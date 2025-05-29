@@ -182,7 +182,7 @@ void Fun4All_EMCal(int nevents = 1e2, const std::string &fname = "inputdata.txt"
 
 void createLocalEMCalCalibFile(const string fname, int runNumber)
 {
-  string default_time_independent_calib = "cemc_pi0_twrSlope_v1_default";
+  string default_time_independent_calib = "CEMC_calib_ADC_to_ETower_default";
   //string m_calibName = "cemc_pi0_twrSlope_v1";
   string m_calibName = "getdefault";
 
