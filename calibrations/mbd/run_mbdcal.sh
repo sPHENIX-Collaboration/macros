@@ -215,6 +215,10 @@ echo "Running pass2.0 calibration"
 pass=0
 echo root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents}\)
 root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents}\)
+cp -p results/${runno}/pass0_mbd_tt_t0.calib results/${runno}/mbd_tt_t0.calib
+cp -p results/${runno}/pass0_mbd_tq_t0.calib results/${runno}/mbd_tq_t0.calib
+mv results/${runno}/pass0_mbd_tt_t0.root results/${runno}/mbd_tt_t0-${runno}.root
+mv results/${runno}/pass0_mbd_tq_t0.root results/${runno}/mbd_tq_t0-${runno}.root
 
 echo "###############################################################################################################"
 echo "Running pass2.3 calibration"
@@ -222,6 +226,13 @@ echo "Running pass2.3 calibration"
 pass=3
 echo root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents},${runtype}\)
 root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents},${runtype},\"${dbtag}\"\)
+mv results/${runno}/mbd_qfit.root results/${runno}/mbd_qfit-${runno}.root
+
+echo "###############################################################################################################"
+echo "Running pass2.4 calibration"
+echo root.exe -q calib_t0mean.C\(\"results/${runno}/calmbdpass2.3_q_${runno}.root\"\)
+root.exe -q calib_t0mean.C\(\"results/${runno}/calmbdpass2.3_q-${runno}.root\"\)
+mv results/${runno}/mbd_t0corr.root results/${runno}/mbd_t0corr-${runno}.root
 
 # Flag as done
 #./cups.py -r ${runno} -s ${segment} -d ${outbase} message "Done"

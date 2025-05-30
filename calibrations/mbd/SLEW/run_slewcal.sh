@@ -11,7 +11,7 @@ then
   exit -1
 fi
 
-fname=$1    # DigSig ROOT filename
+fname=$1    # DST_UNCALMBD filename
 
 nevt=0
 if [[ $# -gt 1 ]]
@@ -40,21 +40,20 @@ then
   BATCH=-b
 fi
 
-subpass=1  # do slew calibrations, don't apply them
+subpass=1  # generate slew curves (slew calibrations may or may not be applied)
 echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\)
 root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\) 
 
 # after this, run recal_mbd_slew.C to generate the slewcorr calib file,
 run=${mbd_uncalrootf##*/}
-run=${run##*-}
+run=${run#*-}
 run=${run%.root}
-run=$(echo ${run} | sed 's/^00*//')
+run=${run%-*}
+run=$((10#${run}))
 
 slewrootf=results/${run}/calmbdpass2.${subpass}_slew-${run}.root
-echo root.exe -b -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 
-root.exe -b -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 
-
-exit
+echo root.exe ${BATCH} -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 
+root.exe ${BATCH} -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 
 
 # cp the slewcorr file so that it is used in the subpass 2
 echo cp -p results/${run}/pass${subpass}_mbd_slewcorr.calib results/${run}/mbd_slewcorr.calib
@@ -65,16 +64,16 @@ echo Updating mbd_slewcorr.calib using pass${subpass}_mbd_slewcorr.calib
 echo root.exe -b -q addt0.C\(\"results/${run}/mbd_tt_t0.calib\",\"results/${run}/pass${subpass}_mbd_tt_t0.calib\"\)
 root.exe -b -q addt0.C\(\"results/${run}/mbd_tt_t0.calib\",\"results/${run}/pass${subpass}_mbd_tt_t0.calib\"\)
 rm -f results/${run}/mbd_tt_t0.calib results/${run}/mbd_tq_t0.calib
-cp -p add_mbd_tt_t0.calib results/${run}/mbd_tt_t0.calib
-cp -p add_mbd_tq_t0.calib results/${run}/mbd_tq_t0.calib
+cp -p results/${run}/add_mbd_tt_t0.calib results/${run}/mbd_tt_t0.calib
+cp -p results/${run}/add_mbd_tq_t0.calib results/${run}/mbd_tq_t0.calib
 
 subpass=2  # do slew calibrations, applying any that exist
 echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\)
 root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\) 
 
 slewrootf=results/${run}/calmbdpass2.${subpass}_slew-${run}.root
-echo root.exe -b -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 
-root.exe -b -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 
+echo root.exe ${BATCH} -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 
+root.exe ${BATCH} -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 
 
 # then run addslew.C to get combined slewcorr.calib. need to add in original, since that was applied in dst_uncalmbd
 # then run addt0 to get combined t0 calibs

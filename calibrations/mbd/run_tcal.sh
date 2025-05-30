@@ -26,7 +26,7 @@ echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 # process up to 100K uncalibrated events for t0 calibration
 #tcalib_events=100000
 tcalib_events=0
-if [[ $nevt -ne 0 ]] && [[ $nevt -lt 100000 ]]
+if [[ $nevt -ne 0 ]] && [[ $nevt -le 100000 ]]
 then
   tcalib_events=${nevt}
 fi
@@ -38,6 +38,14 @@ then
 fi
 
 pass=0
-echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${pass},${tcalib_events}\)
-root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${pass},${tcalib_events}\)  # time calibrations
+runtype=0 # 0=auau,1=pp
+#dbtag="ProdA_2024"
+dbtag=""
+if [[ -n "$PASS0DIR" ]]
+then
+  dbtag=""
+fi
+
+echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${pass},${tcalib_events},${runtype},\"${dbtag}\"\)
+root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${pass},${tcalib_events},${runtype},\"${dbtag}\"\)
 

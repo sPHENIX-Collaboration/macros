@@ -10,6 +10,7 @@
 Int_t   f_evt{0};
 UShort_t f_clk{0};
 UShort_t f_femclk{0};
+Short_t  f_npmt;
 Float_t f_tt[MbdDefs::MBD_N_PMT];  // time from t-channels
 Float_t f_tq[MbdDefs::MBD_N_PMT];  // time from q-channels
 Float_t f_q[MbdDefs::MBD_N_PMT];   // charge
@@ -32,7 +33,8 @@ void read_dstmbd(const char *tfname = "beam_mbd-00009184-0000_mbd.root")
   tfile = new TFile(tfname,"READ");
   tree = (TTree*)tfile->Get("T");
 
-  tree->SetBranchAddress("EvtSequence",&f_evt);
+  //tree->SetBranchAddress("EvtSequence",&f_evt);
+  tree->SetBranchAddress("evtseq",&f_evt);
   tree->SetBranchAddress("clk", &f_clk);
   tree->SetBranchAddress("femclk", &f_femclk);
   tree->SetBranchAddress("bns",&f_bn[0]);
@@ -43,6 +45,7 @@ void read_dstmbd(const char *tfname = "beam_mbd-00009184-0000_mbd.root")
   tree->SetBranchAddress("btn",&f_bt[1]);
   tree->SetBranchAddress("bz",&f_bz);
   tree->SetBranchAddress("bt0",&f_bt0);
+  tree->SetBranchAddress("npmt",&f_npmt);
   tree->SetBranchAddress("MbdPmtHits.bq",f_q);
   tree->SetBranchAddress("MbdPmtHits.btt",f_tt);
   tree->SetBranchAddress("MbdPmtHits.btq",f_tq);

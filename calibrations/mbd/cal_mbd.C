@@ -15,6 +15,7 @@
 #include <phool/recoConsts.h>
 
 #include "get_runstr.h"
+#include "make_cdbtree.C"
 #include <mbd/MbdCalib.h>
 #include <mbd/MbdDefs.h>
 #include "read_dstmbd.C"
@@ -54,8 +55,19 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   //Float_t tq_t0_offsets[MbdDefs::MBD_N_PMT] = {};
 
   MbdCalib *mcal = new MbdCalib();
+  mcal->Verbosity(1);
+
+  // Load local mbd_sampmax and ped if they exist
   TString calfile = dir + "/mbd_sampmax.calib";
-  mcal->Download_SampMax( calfile.Data() );
+  if ( gSystem->AccessPathName(calfile)==0 )
+  {
+    mcal->Download_SampMax( calfile.Data() );
+  }
+  calfile = dir + "/mbd_ped.calib";
+  if ( gSystem->AccessPathName(calfile)==0 )
+  {
+    mcal->Download_Ped( calfile.Data() );
+  }
 
   TString savefname = dir;
   if ( subpass==0 )
@@ -80,7 +92,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   cout << "saving to " << savefname << endl;
 
   // Load whatever calibrations are available at each subpass
-  if ( subpass>0 )
+  if ( subpass==3 )
   {
     calfile = dir + "/pass0_mbd_tq_t0.calib";
     mcal->Download_TQT0( calfile.Data() );
@@ -89,7 +101,6 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
     calfile = dir + "/pass0_mbd_tt_t0.calib";
     mcal->Download_TTT0( calfile.Data() );
     cout << "Loaded " << calfile << endl;
-
   }
   if ( subpass>1 )
   {
@@ -131,29 +142,34 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
     name = "h_q"; name += ipmt;
     title = "q"; title += ipmt;
     h_q[ipmt] = new TH1F(name,title,3000,-100,15000-100);
+    h_q[ipmt]->SetXTitle("ADC");
 
     name = "h_tt"; name += ipmt;
     title = "tt"; title += ipmt;
     //h_tt[ipmt] = new TH1F(name,title,7000,-150,31*17.76);
     h_tt[ipmt] = new TH1F(name,title,7000,-30.,30.);
+    h_tt[ipmt]->SetXTitle("ns");
 
     name = "h_tq"; name += ipmt;
     title = "tq"; title += ipmt;
     h_tq[ipmt] = new TH1F(name,title,7000,-150,31*17.76);
+    h_tq[ipmt]->SetXTitle("ns");
 
     if ( subpass>0 )
     {
       name = "h2_slew"; name += ipmt;
       title = "slew curve, ch "; title += ipmt;
       h2_slew[ipmt] = new TH2F(name,title,4000,-0.5,16000-0.5,1100,-5,6);
+      h2_slew[ipmt]->SetXTitle("ADC");
+      h2_slew[ipmt]->SetYTitle("#Delta T (ns)");
     }
   }
   TH2 *h2_tq = new TH2F("h2_tq","ch vs tq",900,-150,150,MbdDefs::MBD_N_PMT,-0.5,MbdDefs::MBD_N_PMT-0.5);
-  h2_tq->SetXTitle("pmt ch");
-  h2_tq->SetYTitle("tq [ns]");
+  h2_tq->SetXTitle("tq [ns]");
+  h2_tq->SetYTitle("pmt ch");
   TH2 *h2_tt = new TH2F("h2_tt","ch vs tt",900,-150,150,MbdDefs::MBD_N_PMT,-0.5,MbdDefs::MBD_N_PMT-0.5);
-  h2_tt->SetXTitle("pmt ch");
-  h2_tt->SetYTitle("tt [ns]");
+  h2_tt->SetXTitle("tt [ns]");
+  h2_tt->SetYTitle("pmt ch");
 
   // Event loop, each ientry is one triggered event
   int nentries = tree->GetEntries();
@@ -166,6 +182,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   double nhit[2]{0.,0.};
   float  ttcorr[128] = {0.};
 
+  std::cout << "Processing " << nentries << std::endl;
   for (int ientry=0; ientry<nentries; ientry++)
   {
     tree->GetEntry(ientry);
@@ -173,8 +190,14 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
     if (ientry<4)
     {
       // print charge from channels 0 and 127
-      cout << f_evt << "\t" << f_tt[0] << "\t" << f_tq[0] << "\t" << f_q[0] << endl;
-      cout << "\t" << f_tt[127] << "\t" << f_tq[127] << "\t" << f_q[127] << endl;
+      cout << f_evt << "\tch0\t" << f_tt[0] << "\t" << f_tq[0] << "\t" << f_q[0] << endl;
+      cout << "ch127\t" << f_tt[127] << "\t" << f_tq[127] << "\t" << f_q[127] << endl;
+    }
+
+    // make npmt cut
+    if ( f_npmt==0 )
+    {
+      continue;
     }
 
     // Make vertex cut
@@ -334,9 +357,9 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   gPad->SetLogy(1);
 
   ofstream cal_tt_t0_file;
-  name = dir; name += "pass"; name += subpass; name += "_mbd_tt_t0.calib";
-  cal_tt_t0_file.open( name );
-  cout << "Creating " << name << endl;
+  TString cal_fname = dir; cal_fname += "pass"; cal_fname += subpass; cal_fname += "_mbd_tt_t0.calib";
+  cal_tt_t0_file.open( cal_fname );
+  cout << "Creating " << cal_fname << endl;
 
   TF1 *gaussian = new TF1("gaussian","gaus",-25,25);
   gaussian->SetLineColor(2);
@@ -405,10 +428,11 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       //name = dir + "h_ttcorr"; name += ipmt; name += ".png";
       title = "h_ttcorr"; title += ipmt;
     }
-    cout << title << endl;
+    //cout << title << endl;
     ac[cvindex]->Print( pdfname, title );
   }
   cal_tt_t0_file.close();
+  make_cdbtree( cal_fname );
   ++cvindex;
 
   // Now calculate tq_t0
@@ -416,8 +440,8 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   gPad->SetLogy(1);
 
   ofstream cal_tq_t0_file;
-  name = dir; name += "pass"; name += subpass; name += "_mbd_tq_t0.calib";
-  cal_tq_t0_file.open( name );
+  cal_fname = dir; cal_fname += "pass"; cal_fname += subpass; cal_fname += "_mbd_tq_t0.calib";
+  cal_tq_t0_file.open( cal_fname );
 
   for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT; ipmt++)
   {
@@ -480,11 +504,12 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       //name = dir + "h_tqcorr"; name += ipmt; name += ".png";
       title = "h_tqcorr"; title += ipmt;
     }
-    cout << name << endl;
+    //cout << name << endl;
     ac[cvindex]->Print( pdfname, title );
   }
 
   cal_tq_t0_file.close();
+  make_cdbtree( cal_fname );
 
   ac[0]->Print( pdfname + "]" );
   ++cvindex;
@@ -499,6 +524,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
     for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT; ipmt++)
     {
       h2_slew[ipmt]->Draw("colz");
+      gPad->SetLogz(1);
 
       //name = dir + "h2_slew"; name += ipmt; name += "_pass"; name += subpass; name += ".png";
       name = dir + "h2_slew"; name += ipmt; name += "_pass"; name += subpass;
