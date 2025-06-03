@@ -48,9 +48,11 @@ namespace Enable
 // ----------------------------------------------------------------------------
 namespace HIJETS
 {
-  ///! should be set to true once the EPD event
-  ///! plane correction is implemented
-  bool do_flow = false;
+  // do_flow = 0 --noflow
+  // do_flow = 1 --psi2 derived from calo
+  // do_flow = 2 --psi2 derived from HIJING
+  // do_flow = 3 --psi2 derived from sEPD
+  int do_flow = 0;
 
   ///! do constituent subtraction
   bool do_CS = false;
