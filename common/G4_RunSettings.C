@@ -10,14 +10,17 @@ void RunSettings(int runnumber, const std::string type = "")
   switch (runnumber)
   {
   case 21:  // zero beam xing angle, mvtx rotated
+  case 28:  // zero beam xing angle, mvtx rotated
     Input::BEAM_CONFIGURATION = Input::pp_ZEROANGLE;
     Enable::MVTX_APPLYMISALIGNMENT = true;
     break;
   case 22:  // 1.5mRad xing angle, mvtx rotated
+  case 29:  // 1.5mRad xing angle, mvtx rotated
     Input::BEAM_CONFIGURATION = Input::pp_COLLISION;
     Enable::MVTX_APPLYMISALIGNMENT = true;
     break;
   case 23:  // AuAu 1mRad xing angle, mvtx rotated
+  case 30:  // AuAu 1mRad xing angle, mvtx rotated
     Input::BEAM_CONFIGURATION = Input::AA_COLLISION;
     Enable::MVTX_APPLYMISALIGNMENT = true;
     break;
