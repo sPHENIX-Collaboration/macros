@@ -32,7 +32,7 @@ void Fun4All_New_Year2_Fitting(int nEvents = 100,
 			   const std::string inlist = "files.list",
                            const std::string &outfile = "DST_CALOFITTING_run2auau_ana487_2024p018_v001",
                            const std::string &outfile_hist = "HIST_CALOFITTINGQA_run2auau_ana487_2024p018_v001",
-                           const std::string &dbtag = "2024p018")
+                           const std::string &dbtag = "ProdA_2024")
 {
   gSystem->Load("libg4dst.so");
 
