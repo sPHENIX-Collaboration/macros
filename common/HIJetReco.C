@@ -20,12 +20,15 @@
 #include <jetbase/TowerJetInput.h>
 #include <jetbase/TrackJetInput.h>
 #include <particleflowreco/ParticleFlowJetInput.h>
+#include <eventplaneinfo/Eventplaneinfo.h>
+#include <eventplaneinfo/EventPlaneReco.h>
 
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libjetbackground.so)
 R__LOAD_LIBRARY(libjetbase.so)
 R__LOAD_LIBRARY(libparticleflow.so)
+R__LOAD_LIBRARY(libeventplaneinfo.so)
 
 
 // ----------------------------------------------------------------------------
@@ -181,6 +184,13 @@ void MakeHITowerJets()
   // Fun4All server
   //---------------
   Fun4AllServer *se = Fun4AllServer::instance();
+    
+  if(HIJETS::do_flow == 3)
+  {
+      EventPlaneReco *epreco = new EventPlaneReco();
+      epreco->set_sepd_epreco(true);
+      se->registerSubsystem(epreco);
+  }
 
   RetowerCEMC *rcemc = new RetowerCEMC(); 
   rcemc->Verbosity(verbosity); 
