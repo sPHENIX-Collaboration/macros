@@ -122,14 +122,17 @@ void end_kfparticle(std::string full_file_name, std::string final_path)
 
 void Fun4All_raw_hit_KFP(
     const int nEvents = 100,
-    const int runnumber = 53871,
-    const int segment = 0,
     const std::string filelist = "filelists/filelist_run_00053871_seg_00000.list",
     const std::string outfilename = "clusters_seeds",
     const bool convertSeeds = false,
-    const int nSkip = 1)
+    const int nSkip = 1,
+    const bool doKFParticle = true;)
 {
 
+
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filepath);
+  int runnumber = runseg.first;
+  int segment = runseg.second;
   std::stringstream nice_runnumber;
   nice_runnumber << std::setw(8) << std::setfill('0') << to_string(runnumber);
 
@@ -151,10 +154,10 @@ void Fun4All_raw_hit_KFP(
   output_dir = "/sphenix/tg/tg01/hf/cdean/AuAuTest/"; //Top dir of where the output nTuples will be written
   trailer = "_" + nice_runnumber.str() + "_" + nice_segment.str() + "_" + nice_skip.str() + ".root";
 
-  
+  if(doKFParticle){
   create_hf_directories(pipi_reconstruction_name, pipi_output_dir, pipi_output_reco_file);
   create_hf_directories(ppi_reconstruction_name, ppi_output_dir, ppi_output_reco_file);
-  
+  }
 
 
   G4TRACKING::convert_seeds_to_svtxtracks = convertSeeds;
@@ -174,11 +177,7 @@ void Fun4All_raw_hit_KFP(
    * set to true to enable residuals in the TPC with
    * TPC clusters not participating to the ACTS track fit
    */
-  G4TRACKING::SC_CALIBMODE = false;
 
-  ACTSGEOM::mvtxMisalignment = 100;
-  ACTSGEOM::inttMisalignment = 100.;
-  ACTSGEOM::tpotMisalignment = 100.;
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
   std::string theOutfile = outfile.Data();
   auto se = Fun4AllServer::instance();
@@ -236,7 +235,7 @@ void Fun4All_raw_hit_KFP(
       std::cout << "Adding DST with filepath: " << filepath << std::endl; 
      if(i==0)
 	  {
-	   std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filepath);
+	   
 	   int runNumber = runseg.first;
 	   rc->set_IntFlag("RUNNUMBER", runNumber);
 	   rc->set_uint64Flag("TIMESTAMP", runNumber);
@@ -325,19 +324,6 @@ void Fun4All_raw_hit_KFP(
    * Begin Track Seeding
    */
 
-  /*
-   * Silicon Seeding
-   */
-
-  /*
-  auto silicon_Seeding = new PHActsSiliconSeeding;
-  silicon_Seeding->Verbosity(0);
-  silicon_Seeding->searchInIntt();
-  silicon_Seeding->setinttRPhiSearchWindow(0.4);
-  silicon_Seeding->setinttZSearchWindow(1.6);
-  silicon_Seeding->seedAnalysis(false);
-  se->registerSubsystem(silicon_Seeding);
-  */
 
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
@@ -578,6 +564,7 @@ void Fun4All_raw_hit_KFP(
 
   }
 
+  if(doKFParticle){
   //KFParticle dependancy
      Global_Reco();
 
@@ -687,6 +674,8 @@ void Fun4All_raw_hit_KFP(
 
   se->registerSubsystem(kfparticleLambda);
 
+  }
+
   
 
 
@@ -696,10 +685,10 @@ void Fun4All_raw_hit_KFP(
   se->End();
   se->PrintTimer();
 
-
+  if(doKFParticle){
   end_kfparticle(pipi_output_reco_file, pipi_output_dir);
   end_kfparticle(ppi_output_reco_file, ppi_output_dir);
-
+  }
   if (Enable::QA)
   {
     TString qaname = theOutfile + "_qa.root";
