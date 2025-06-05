@@ -12,12 +12,20 @@
 
 #include <globalvertex/GlobalVertexReco.h>
 
+#include <calotrigger/MinimumBiasClassifier.h>
+
+#include <calotreegen/caloTreeGen.h>
+
+#include <calovalid/CaloValid.h>
+
+#include <centrality/CentralityReco.h>
+
+#include <globalqa/GlobalQA.h>
+
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
 #include <ffamodules/HeadReco.h>
 #include <ffamodules/SyncReco.h>
-
-#include <fun4allraw/Fun4AllPrdfInputManager.h>
 
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -29,15 +37,8 @@
 
 #include <phool/recoConsts.h>
 
-#include <calotrigger/MinimumBiasClassifier.h>
-#include <centrality/CentralityReco.h>
-
-#include <calotreegen/caloTreeGen.h>
-#include <calovalid/CaloValid.h>
-#include <globalqa/GlobalQA.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
-R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libcalotrigger.so)
 R__LOAD_LIBRARY(libcentrality.so)
@@ -51,10 +52,10 @@ R__LOAD_LIBRARY(libglobalQA.so)
 R__LOAD_LIBRARY(libcaloTreeGen.so)
 
 void Fun4All_Year2_Calib(int nEvents = 100,
-                         const std::string &fname = "DST_CALOFITTING_run2pp_ana451_2024p009-00047748-00000.root",
-                         const std::string &outfile = "DST_CALO_run2pp_ana451_2024p009-00047748-00000.root",
-                         const std::string &outfile_hist = "HIST_CALOQA_run2pp_ana451_2024p009-00047748-00000.root",
-                         const std::string &outfile_tree = "TREE_CALOQA_run2pp_ana451_2024p009-00047748-00000.root",
+                         const std::string &fname = "DST_CALOFITTING_run2pp_ana487_2024p018_v004-00047289-00000.root",
+                         const std::string &outfile = "DST_CALO_run2pp_ana487_2024p018_v004-00047289-00000.root",
+                         const std::string &outfile_hist = "HIST_CALOQA_run2pp_ana487_2024p018_v004-00047289-00000.root",
+                         const std::string &outfile_tree = "TREE_CALOQA_run2pp_ana487_2024p018_v004-00047289-00000.root",
                          const std::string &dbtag = "ProdA_2024")
 {
   // towerinfov1=kPRDFTowerv1, v2=:kWaveformTowerv2, v3=kPRDFWaveform, v4=kPRDFTowerv4
