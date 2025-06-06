@@ -29,7 +29,11 @@ namespace Enable
 
 namespace G4HIJETS
 {
-  bool do_flow = false;
+  // do_flow = 0 --noflow
+  // do_flow = 1 --psi2 derived from calo
+  // do_flow = 2 --psi2 derived from HIJING
+  // do_flow = 3 --psi2 derived from sEPD
+  int do_flow = 0;
   bool do_CS = false;
 }  // namespace G4HIJETS
 

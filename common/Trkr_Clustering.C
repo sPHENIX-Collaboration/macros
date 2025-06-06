@@ -15,7 +15,7 @@
 
 #include <intt/InttClusterizer.h>
 #include <mvtx/MvtxClusterizer.h>
-#include <mvtx/MvtxHitPruner.h>
+#include <mvtx/MvtxClusterPruner.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wundefined-internal"
@@ -55,22 +55,23 @@ void Mvtx_HitUnpacking(const std::string& felix="")
     }
   se->registerSubsystem(mvtxunpacker);
 }
+
 void Mvtx_Clustering()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
-  Fun4AllServer* se = Fun4AllServer::instance();
+  auto se = Fun4AllServer::instance();
 
-  // prune the extra MVTX hits due to multiple strobes per hit
-  MvtxHitPruner* mvtxhitpruner = new MvtxHitPruner();
-  mvtxhitpruner->Verbosity(verbosity);
-  se->registerSubsystem(mvtxhitpruner);
-
-  // For the Mvtx layers
-  //================
-  MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
+  // clusterizer
+  auto mvtxclusterizer = new MvtxClusterizer;
   mvtxclusterizer->Verbosity(verbosity);
   se->registerSubsystem(mvtxclusterizer);
+
+  // cluster pruner
+  auto mvtxClusterPruner = new MvtxClusterPruner;
+  mvtxClusterPruner->set_use_strict_matching(true);
+  se->registerSubsystem(mvtxClusterPruner);
 }
+
 void Intt_HitUnpacking(const std::string& server="")
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
@@ -86,7 +87,8 @@ void Intt_HitUnpacking(const std::string& server="")
   }
   auto inttunpacker = new InttCombinedRawDataDecoder("InttCombinedRawDataDecoder"+server);
   inttunpacker->Verbosity(verbosity);
-  inttunpacker->LoadHotChannelMapRemote("INTT_HotMap");
+  /// Only necessary to call the following method if using a non-default calibration
+  inttunpacker->LoadBadChannelMap("INTT_HotMap");
   inttunpacker->set_triggeredMode(!isStreaming);
    if(server.length() > 0)
     {
@@ -189,6 +191,8 @@ void Micromegas_Clustering()
 {
   auto se = Fun4AllServer::instance();
   auto mm_clus = new MicromegasClusterizer;
+  const auto calibrationFile = CDBInterface::instance()->getUrl("TPOT_Pedestal");
+  mm_clus->set_calibration_file(calibrationFile);
   se->registerSubsystem(mm_clus);
 }
 

@@ -38,7 +38,8 @@ then
 fi
 
 pass=3
-runtype=1 # pp200
+#runtype=1 # pp200
+runtype=0 # auau200
 echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${pass},${qcalib_events},${runtype}\)
 root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${pass},${qcalib_events},${runtype}\)  # time calibrations
 

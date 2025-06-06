@@ -60,6 +60,7 @@ void Tracking_Reco_TrackSeed()
   auto se = Fun4AllServer::instance();
 
   PHCosmicSeeder *seeder = new PHCosmicSeeder;
+  seeder->adcCut(175.);
   seeder->Verbosity(verbosity);
   se->registerSubsystem(seeder);
 

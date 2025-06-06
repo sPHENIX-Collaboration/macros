@@ -55,13 +55,19 @@ R__LOAD_LIBRARY(libtrackingqa.so)
 void Fun4All_Cosmics(
     const int nEvents = 0,
     const std::string filelist = "filelist.list",
-    const std::string dir = ".",
+    const std::string dir = "./",
     const std::string outfilename = "cosmics")
 {
   
   TRACKING::tpc_zero_supp = true;
+  TRACKING::tpc_baseline_corr = true;
+  Enable::MVTX_APPLYMISALIGNMENT = true;
+  ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
+  Enable::QA = false;
+  
   auto se = Fun4AllServer::instance();
-  se->Verbosity(0);
+  se->Verbosity(1);
+  se->VerbosityDownscale(1000);
   auto rc = recoConsts::instance();
   
   rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
@@ -70,6 +76,7 @@ void Fun4All_Cosmics(
   int runnumber = std::numeric_limits<int>::quiet_NaN();
   int segment = std::numeric_limits<int>::quiet_NaN();
   int i = 0;
+  int nTpcFiles = 0;
   while(std::getline(ifs,filepath))
     {
       std::cout << "Adding DST with filepath: " << filepath << std::endl; 
@@ -83,6 +90,14 @@ void Fun4All_Cosmics(
         
 	}
       std::string inputname = "InputManager" + std::to_string(i);
+     
+      if(filepath.find("ebdc") != std::string::npos)
+	{
+	  if(filepath.find("39") == std::string::npos)
+	    {
+	      nTpcFiles++;
+	    }
+	}
       auto hitsin = new Fun4AllDstInputManager(inputname);
       hitsin->fileopen(filepath);
       se->registerInputManager(hitsin);
@@ -111,7 +126,7 @@ void Fun4All_Cosmics(
   //G4MAGNET::magfield_tracking = "0.01";
   double fieldstrength = std::numeric_limits<double>::quiet_NaN();
   bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
-
+  std::cout << "const field " << ConstField << std::endl;
   if(ConstField && fieldstrength < 0.1)
   {
     G4MAGNET::magfield = "0.01";
@@ -129,15 +144,37 @@ void Fun4All_Cosmics(
       Intt_HitUnpacking(std::to_string(server));
     }
   ostringstream ebdcname;
-  for(int ebdc = 0; ebdc < 24; ebdc++)
+ for(int ebdc = 0; ebdc < 24; ebdc++)
     {
-      ebdcname.str("");
-      if(ebdc < 10)
+      if(nTpcFiles ==24)
 	{
-	  ebdcname<<"0";
+	  ebdcname.str("");
+	  if(ebdc < 10)
+	    {
+	      ebdcname<<"0";
+	    }
+	  ebdcname<<ebdc;
+	  Tpc_HitUnpacking(ebdcname.str());
 	}
-      ebdcname<<ebdc;
-      Tpc_HitUnpacking(ebdcname.str());
+      
+      else if(nTpcFiles == 48)
+	{
+	  for(int endpoint = 0; endpoint <2; endpoint++)
+	    {
+	      ebdcname.str("");
+	      if(ebdc < 10)
+		{
+		  ebdcname<<"0";
+		}
+	      ebdcname<<ebdc <<"_"<<endpoint;
+	      Tpc_HitUnpacking(ebdcname.str());
+	    }
+	}
+      else
+	{
+	  std::cout << "Wrong number of tpc files input " << nTpcFiles << "! Exiting now." << std::endl;
+	  gSystem->Exit(1);
+	}
     }
 
   Micromegas_HitUnpacking();
@@ -146,13 +183,15 @@ void Fun4All_Cosmics(
   Mvtx_Clustering();
   Intt_Clustering();
 
+  Tpc_LaserEventIdentifying();
+  
   auto tpcclusterizer = new TpcClusterizer;
   tpcclusterizer->Verbosity(0);
+  tpcclusterizer->set_reject_event(true);
   tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
   tpcclusterizer->set_rawdata_reco();
   se->registerSubsystem(tpcclusterizer);
 
-  Tpc_LaserEventIdentifying();
   Micromegas_Clustering();
 
   Tracking_Reco_TrackSeed();
@@ -165,8 +204,8 @@ void Fun4All_Cosmics(
   converter->cosmics();
   converter->setFieldMap(G4MAGNET::magfield_tracking);
   se->registerSubsystem(converter);
-
-  TString residoutfile = outfilename + runnumber +"-"+segment+  "_resid.root";
+ 
+  TString residoutfile = dir + outfilename;
   std::string residstring(residoutfile.Data());
 
   auto resid = new TrackResiduals("TrackResiduals");
@@ -180,6 +219,7 @@ void Fun4All_Cosmics(
 
   if(ConstField && fieldstrength < 0.1)
   {
+    std::cout << "zero field"<<std::endl;
     resid->zeroField();
   }
   resid->setSegment(segment);
@@ -187,11 +227,6 @@ void Fun4All_Cosmics(
 
   // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "/sphenix/tg/tg01/hf/jdosbo/tracking_development/onlineoffline/hitsets.root");
   // se->registerOutputManager(out);
-
-
-  se->run(nEvents);
-  se->End();
-  se->PrintTimer();
 
   if (Enable::QA)
   {
@@ -202,10 +237,17 @@ void Fun4All_Cosmics(
     se->registerSubsystem(new TpcSeedsQA);
    
   }
-  
-  TString qaname = outfilename + runnumber+"-"+segment + "_qa.root";
+
+  se->run(nEvents);
+  se->End();
+  se->PrintTimer();
+
+  if(Enable::QA)
+    {
+  TString qaname = dir+outfilename +"_qa.root";
   std::string qaOutputFileName(qaname.Data());
-  //QAHistManagerDef::saveQARootFile(qaOutputFileName);
+  QAHistManagerDef::saveQARootFile(qaOutputFileName);
+    }
   delete se;
   std::cout << "Finished" << std::endl;
   gSystem->Exit(0);
