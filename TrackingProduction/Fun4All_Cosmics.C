@@ -76,6 +76,7 @@ void Fun4All_Cosmics(
   int runnumber = std::numeric_limits<int>::quiet_NaN();
   int segment = std::numeric_limits<int>::quiet_NaN();
   int i = 0;
+  int nTpcFiles = 0;
   while(std::getline(ifs,filepath))
     {
       std::cout << "Adding DST with filepath: " << filepath << std::endl; 
@@ -89,6 +90,14 @@ void Fun4All_Cosmics(
         
 	}
       std::string inputname = "InputManager" + std::to_string(i);
+     
+      if(filepath.find("ebdc") != std::string::npos)
+	{
+	  if(filepath.find("39") == std::string::npos)
+	    {
+	      nTpcFiles++;
+	    }
+	}
       auto hitsin = new Fun4AllDstInputManager(inputname);
       hitsin->fileopen(filepath);
       se->registerInputManager(hitsin);
@@ -135,15 +144,37 @@ void Fun4All_Cosmics(
       Intt_HitUnpacking(std::to_string(server));
     }
   ostringstream ebdcname;
-  for(int ebdc = 0; ebdc < 24; ebdc++)
+ for(int ebdc = 0; ebdc < 24; ebdc++)
     {
-      ebdcname.str("");
-      if(ebdc < 10)
+      if(nTpcFiles ==24)
 	{
-	  ebdcname<<"0";
+	  ebdcname.str("");
+	  if(ebdc < 10)
+	    {
+	      ebdcname<<"0";
+	    }
+	  ebdcname<<ebdc;
+	  Tpc_HitUnpacking(ebdcname.str());
 	}
-      ebdcname<<ebdc;
-      Tpc_HitUnpacking(ebdcname.str());
+      
+      else if(nTpcFiles == 48)
+	{
+	  for(int endpoint = 0; endpoint <2; endpoint++)
+	    {
+	      ebdcname.str("");
+	      if(ebdc < 10)
+		{
+		  ebdcname<<"0";
+		}
+	      ebdcname<<ebdc <<"_"<<endpoint;
+	      Tpc_HitUnpacking(ebdcname.str());
+	    }
+	}
+      else
+	{
+	  std::cout << "Wrong number of tpc files input " << nTpcFiles << "! Exiting now." << std::endl;
+	  gSystem->Exit(1);
+	}
     }
 
   Micromegas_HitUnpacking();
