@@ -538,10 +538,7 @@ void Fun4All_PRDFReconstruction(
   resid->Verbosity(0);
   resid->outfileName(residstring);
   resid->alignment(false);
-  resid->clusterTree();
-  resid->failedTree();
   //resid->hitTree();
-  resid->noEventTree();
   resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
 
 
