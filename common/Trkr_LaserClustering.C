@@ -88,9 +88,9 @@ void TPC_LaminationFitting()
     laminations->set_nLayerCut(2);
     laminations->set_ppMode(TRACKING::pp_mode);
     laminations->setOutputfile(G4TPC::LaminationOutputName);
-    if(G4TPC::LaminationFitName != "")
+    if(G4TPC::LaminationQAName != "")
     {
-      laminations->set_fitFileName(G4TPC::LaminationFitName);
+      laminations->set_QAFileName(G4TPC::LaminationQAName);
     }
     se->registerSubsystem(laminations);
 
