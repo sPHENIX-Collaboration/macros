@@ -146,7 +146,7 @@ namespace G4TPC
   bool REJECT_LASER_EVENTS = false;
   std::string laser_event_debug_filename = "";
   std::string LaminationOutputName = "";
-  std::string LaminationFitName = "";
+  std::string LaminationQAName = "";
 
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
