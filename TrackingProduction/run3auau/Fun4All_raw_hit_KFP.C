@@ -121,18 +121,61 @@ void end_kfparticle(std::string full_file_name, std::string final_path)
 }
 
 void Fun4All_raw_hit_KFP(
-    const int nEvents = 100,
-    const std::string filelist = "filelists/filelist_run_00053871_seg_00000.list",
+    const int nEvents = 10,
+    const std::string filelist = "filelist.list",
     const std::string outfilename = "clusters_seeds",
     const bool convertSeeds = false,
-    const int nSkip = 1,
-    const bool doKFParticle = true;)
+    const int nSkip = 0,
+    const bool doKFParticle = false)
 {
+  auto se = Fun4AllServer::instance();
+  se->Verbosity(2);
+  auto rc = recoConsts::instance();
+
+   //input manager for QM production raw hit DST file
+  std::ifstream ifs(filelist);
+  std::string filepath;
+
+  int i = 0;
+  int nTpcFiles = 0;
+  int runnumber = std::numeric_limits<int>::quiet_NaN();
+  int segment = std::numeric_limits<int>::quiet_NaN();
+  while(std::getline(ifs,filepath))
+    {
+      std::cout << "Adding DST with filepath: " << filepath << std::endl; 
+     if(i==0)
+	  {
+	    std::pair<int, int>
+	      runseg = Fun4AllUtils::GetRunSegment(filepath);
+	    runnumber = runseg.first;
+	    segment = runseg.second;
+	    rc->set_IntFlag("RUNNUMBER", runnumber);
+	    rc->set_uint64Flag("TIMESTAMP", runnumber);
+        
+	  }
+     if(filepath.find("ebdc") != std::string::npos)
+       {
+	 if(filepath.find("39") == std::string::npos)
+	   {
+	     nTpcFiles++;
+	   }
+       }
+      std::string inputname = "InputManager" + std::to_string(i);
+      auto hitsin = new Fun4AllDstInputManager(inputname);
+      hitsin->fileopen(filepath);
+      se->registerInputManager(hitsin);
+      i++;
+    }
+  
+  rc->set_IntFlag("RUNNUMBER", runnumber);
+  rc->set_IntFlag("RUNSEGMENT", segment);
+
+  Enable::CDB = true;
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
 
 
-  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filepath);
-  int runnumber = runseg.first;
-  int segment = runseg.second;
+
   std::stringstream nice_runnumber;
   nice_runnumber << std::setw(8) << std::setfill('0') << to_string(runnumber);
 
@@ -151,7 +194,7 @@ void Fun4All_raw_hit_KFP(
   nice_skip << std::setw(5) << std::setfill('0') << to_string(nSkip);
 
 
-  output_dir = "/sphenix/tg/tg01/hf/cdean/AuAuTest/"; //Top dir of where the output nTuples will be written
+  output_dir = "./"; //Top dir of where the output nTuples will be written
   trailer = "_" + nice_runnumber.str() + "_" + nice_segment.str() + "_" + nice_skip.str() + ".root";
 
   if(doKFParticle){
@@ -180,15 +223,6 @@ void Fun4All_raw_hit_KFP(
 
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
   std::string theOutfile = outfile.Data();
-  auto se = Fun4AllServer::instance();
-  se->Verbosity(2);
-  auto rc = recoConsts::instance();
-  rc->set_IntFlag("RUNNUMBER", runnumber);
-  rc->set_IntFlag("RUNSEGMENT", segment);
-
-  Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
-  rc->set_uint64Flag("TIMESTAMP", runnumber);
 
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
@@ -221,39 +255,6 @@ void Fun4All_raw_hit_KFP(
 
 
   G4MAGNET::magfield_rescale = 1;
-
-
-  //input manager for QM production raw hit DST file
-  std::ifstream ifs(filelist);
-  std::string filepath;
-
-  int i = 0;
-  int nTpcFiles = 0;
-
-  while(std::getline(ifs,filepath))
-    {
-      std::cout << "Adding DST with filepath: " << filepath << std::endl; 
-     if(i==0)
-	  {
-	   
-	   int runNumber = runseg.first;
-	   rc->set_IntFlag("RUNNUMBER", runNumber);
-	   rc->set_uint64Flag("TIMESTAMP", runNumber);
-        
-	  }
-    if(filepath.find("ebdc") != std::string::npos)
-	  {
-	  if(filepath.find("39") == std::string::npos)
-	    {
-	      nTpcFiles++;
-	    }
-	  }
-      std::string inputname = "InputManager" + std::to_string(i);
-      auto hitsin = new Fun4AllDstInputManager(inputname);
-      hitsin->fileopen(filepath);
-      se->registerInputManager(hitsin);
-      i++;
-    }
   
   
   TrackingInit();
@@ -280,7 +281,7 @@ void Fun4All_raw_hit_KFP(
 	  Tpc_HitUnpacking(ebdcname.str());
 	}
       
-      else if(nTpcFiles == 48)
+      else if(nTpcFiles >30)
 	{
 	  for(int endpoint = 0; endpoint <2; endpoint++)
 	    {
