@@ -1,5 +1,13 @@
 #!/usr/bin/bash
 
+# Take input file as argument, default to runList.txt
+input_file=${1:-runList.txt}
+echo "About to submit merge jobs for runs in: $input_file"
+read -p "Continue? [y/N]: " confirm
+if [[ $confirm != [yY] ]]; then
+  echo "Aborting."
+  exit 1
+fi
 
 export TargetDir="$PWD"/hadd_condor
 
@@ -49,5 +57,5 @@ EOF
     popd
   
     i=$((i+1))
-done < runList.txt # redirect the input of the
+done < "$input_file" #input file of runnumbers
 

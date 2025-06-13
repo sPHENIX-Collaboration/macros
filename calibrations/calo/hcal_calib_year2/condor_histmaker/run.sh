@@ -1,4 +1,12 @@
 #!/bin/bash
+input_file=${1:-runList.txt}
+echo "About to submit jobs for runs in: $input_file"
+read -p "Continue? [y/N]: " confirm
+if [[ $confirm != [yY] ]]; then
+  echo "Aborting."
+  exit 1
+fi
+mkdir -p dstLists  #Ensure directory exists
 
 export TargetDir="$PWD"/condorout
 
@@ -102,7 +110,7 @@ EOF
   condor_submit ff.sub
   popd
 
-done < runList.txt # redirect the input of the
+done < "$input_file"  # redirect the input of the
 
 
 # Set the directory where the files are located
