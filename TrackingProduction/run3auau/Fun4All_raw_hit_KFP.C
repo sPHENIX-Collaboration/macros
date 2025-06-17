@@ -34,12 +34,16 @@
 
 #include <tpccalib/PHTpcResiduals.h>
 
+#include <mvtxrawhitqa/MvtxRawHitQA.h>
+#include <inttrawhitqa/InttRawHitQA.h>
 #include <trackingqa/InttClusterQA.h>
 #include <trackingqa/MicromegasClusterQA.h>
 #include <trackingqa/MvtxClusterQA.h>
 #include <trackingqa/TpcClusterQA.h>
 #include <tpcqa/TpcRawHitQA.h>
+#include <trackingqa/SiliconSeedsQA.h>
 #include <trackingqa/TpcSeedsQA.h>
+#include <trackingqa/TpcSiliconQA.h>
 
 #include <trackingdiagnostics/TrackResiduals.h>
 #include <trackingdiagnostics/TrkrNtuplizer.h>
@@ -170,6 +174,7 @@ void Fun4All_raw_hit_KFP(
   rc->set_IntFlag("RUNNUMBER", runnumber);
   rc->set_IntFlag("RUNSEGMENT", segment);
 
+  Enable::QA = false;
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
@@ -552,17 +557,70 @@ void Fun4All_raw_hit_KFP(
   */
   if (Enable::QA)
   {
+    se->registerSubsystem(new MvtxRawHitQA);
+    se->registerSubsystem(new InttRawHitQA);
     se->registerSubsystem(new TpcRawHitQA);
     se->registerSubsystem(new MvtxClusterQA);
     se->registerSubsystem(new InttClusterQA);
     se->registerSubsystem(new TpcClusterQA);
     se->registerSubsystem(new MicromegasClusterQA);
+
+    auto converter = new TrackSeedTrackMapConverter("SiliconSeedConverter");
+    // Default set to full SvtxTrackSeeds. Can be set to
+    // SiliconTrackSeedContainer or TpcTrackSeedContainer
+    converter->setTrackSeedName("SiliconTrackSeedContainer");
+    converter->setTrackMapName("SiliconSvtxTrackMap");
+    converter->setFieldMap(G4MAGNET::magfield_tracking);
+    converter->Verbosity(0);
+    se->registerSubsystem(converter);
+    
+    auto finder = new PHSimpleVertexFinder("SiliconVertexFinder");
+    finder->Verbosity(0);
+    finder->setDcaCut(0.1);
+    finder->setTrackPtCut(0.2);
+    finder->setBeamLineCut(1);
+    finder->setTrackQualityCut(500);
+    finder->setNmvtxRequired(3);
+    finder->setOutlierPairCut(0.1);
+    finder->setTrackMapName("SiliconSvtxTrackMap");
+    finder->setVertexMapName("SiliconSvtxVertexMap");
+    se->registerSubsystem(finder);
+    
+    auto siliconqa = new SiliconSeedsQA;
+    siliconqa->setTrackMapName("SiliconSvtxTrackMap");
+    siliconqa->setVertexMapName("SiliconSvtxVertexMap");
+    se->registerSubsystem(siliconqa);
+    
+    auto convertertpc = new TrackSeedTrackMapConverter("TpcSeedConverter");
+    // Default set to full SvtxTrackSeeds. Can be set to
+    // SiliconTrackSeedContainer or TpcTrackSeedContainer
+    convertertpc->setTrackSeedName("TpcTrackSeedContainer");
+    convertertpc->setTrackMapName("TpcSvtxTrackMap");
+    convertertpc->setFieldMap(G4MAGNET::magfield_tracking);
+    convertertpc->Verbosity(0);
+    se->registerSubsystem(convertertpc);
+    
+    auto findertpc = new PHSimpleVertexFinder("TpcSimpleVertexFinder");
+    findertpc->Verbosity(0);
+    findertpc->setDcaCut(0.5);
+    findertpc->setTrackPtCut(0.2);
+    findertpc->setBeamLineCut(1);
+    findertpc->setTrackQualityCut(1000000000);
+    //findertpc->setNmvtxRequired(3);
+    findertpc->setRequireMVTX(false);
+    findertpc->setOutlierPairCut(0.1);
+    findertpc->setTrackMapName("TpcSvtxTrackMap");
+    findertpc->setVertexMapName("TpcSvtxVertexMap");
+    se->registerSubsystem(findertpc);
+    
     auto tpcqa = new TpcSeedsQA;
     tpcqa->setTrackMapName("TpcSvtxTrackMap");
     tpcqa->setVertexMapName("TpcSvtxVertexMap");
     tpcqa->setSegment(rc->get_IntFlag("RUNSEGMENT"));
     se->registerSubsystem(tpcqa);
 
+    se->registerSubsystem(new TpcSiliconQA);
+    
   }
 
   if(doKFParticle){
@@ -696,7 +754,7 @@ void Fun4All_raw_hit_KFP(
     std::string qaOutputFileName(qaname.Data());
     QAHistManagerDef::saveQARootFile(qaOutputFileName);
   }
-
+  CDBInterface::instance()->Print();
   delete se;
   std::cout << "Finished" << std::endl;
   gSystem->Exit(0);
