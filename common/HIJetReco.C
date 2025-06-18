@@ -92,7 +92,7 @@ namespace HIJETS
   ///! 1 = pythia/herwig particles only (use for pythia/herwig jets in HIJING+Pythia samples)
   ///! 2 = pythia particles from the HIJING+Pythia samples (use for pythia jets in HIJING+Pythia samples)
   ///! negative values are typically background particles (HIJING particles)
-  int embedding_flag = 0;
+  int embedding_flag = 1;
 
 
   ///! enumerates reconstructed resolution
