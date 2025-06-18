@@ -86,6 +86,15 @@ namespace HIJETS
   ///! sets prefix of nodes to store jets
   std::string algo_prefix = "AntiKt";
 
+  ///! sets the embedding g4 flag used to determine which particles are classified as 'truth' in MakeHITruthJets
+  ///! if you don't know what this is, you probably don't need to change it
+  ///! 0 = all particles (use for all g4particles !not useful for HIJING+Pythia samples)
+  ///! 1 = pythia/herwig particles only (use for pythia/herwig jets in HIJING+Pythia samples)
+  ///! 2 = pythia particles from the HIJING+Pythia samples (use for pythia jets in HIJING+Pythia samples)
+  ///! negative values are typically background particles (HIJING particles)
+  int embedding_flag = 1;
+
+
   ///! enumerates reconstructed resolution
   ///! parameters
   enum Res {
@@ -132,7 +141,7 @@ void MakeHITruthJets()
   {
     // configure truth jet input for charged particles
     TruthJetInput *ctji = new TruthJetInput(Jet::SRC::CHARGED_PARTICLE);
-    ctji->add_embedding_flag(0);  // changes depending on signal vs. embedded
+    ctji->add_embedding_flag(HIJETS::embedding_flag);  // changes depending on signal vs. embedded
 
     // book jet reconstruction on chargedparticles
     JetReco *chargedtruthjetreco = new JetReco();
@@ -152,7 +161,7 @@ void MakeHITruthJets()
   {
     // configure truth jet input for all particles
     TruthJetInput *tji = new TruthJetInput(Jet::PARTICLE);
-    tji->add_embedding_flag(0);  // changes depending on signal vs. embedded
+    tji->add_embedding_flag(HIJETS::embedding_flag);  // changes depending on signal vs. embedded
 
     // book jet reconstruction on all particles
     JetReco *truthjetreco = new JetReco();
