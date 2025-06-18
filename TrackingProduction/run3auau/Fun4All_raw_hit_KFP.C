@@ -518,20 +518,29 @@ void Fun4All_raw_hit_KFP(
   auto finder = new PHSimpleVertexFinder;
   finder->Verbosity(0);
   finder->setDcaCut(0.5);
-  finder->setTrackPtCut(-99999.);
+  finder->setTrackPtCut(0.3);
   finder->setBeamLineCut(1);
-  finder->setTrackQualityCut(1000000000);
+  finder->setTrackQualityCut(1000);
   finder->setNmvtxRequired(3);
   finder->setOutlierPairCut(0.1);
   se->registerSubsystem(finder);
 
-//   TString residoutfile = theOutfile + "_resid.root";
-//   std::string residstring(residoutfile.Data());
+  if (!G4TRACKING::convert_seeds_to_svtxtracks)
+  {
+    // Propagate track positions to the vertex position
+    auto vtxProp = new PHActsVertexPropagator;
+    vtxProp->Verbosity(0);
+    vtxProp->fieldMap(G4MAGNET::magfield_tracking);
+    se->registerSubsystem(vtxProp);
+  }
+  
+   TString residoutfile = theOutfile + "_resid.root";
+   std::string residstring(residoutfile.Data());
 
-//   auto resid = new TrackResiduals("TrackResiduals");
-//   resid->outfileName(residstring);
-//   resid->alignment(false);
-
+   auto resid = new TrackResiduals("TrackResiduals");
+   resid->outfileName(residstring);
+   resid->alignment(false);
+   resid->vertexTree();
 //   // adjust track map name
 //   if(G4TRACKING::SC_CALIBMODE && !G4TRACKING::convert_seeds_to_svtxtracks)
 //   {
@@ -542,18 +551,33 @@ void Fun4All_raw_hit_KFP(
 
 //   resid->clusterTree();
 //   resid->hitTree();
-//   resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
+   resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
 
 //   resid->Verbosity(0);
-//   se->registerSubsystem(resid);
+   //se->registerSubsystem(resid);
 
+   
+   
   //auto ntuplizer = new TrkrNtuplizer("TrkrNtuplizer");
   //se->registerSubsystem(ntuplizer);
+   
   /*
-  TString outputFile = "/sphenix/user/aopatton/TrackSeedOutput/output/RawHitFileLists_nSkip_"+std::to_string(nSkip)+ "-" + std::to_string(runnumber) + "-" + std::to_string(segment) + ".root";
-  std::string theOutputFile = outputFile.Data();
-  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", theOutputFile.c_str());
-  se->registerOutputManager(out);
+    // To write an output DST
+    TString dstfile = theOutfile;
+   std::string theDSTFile = dstfile.Data();
+   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", theDSTFile.c_str());
+   out->AddNode("Sync");
+   out->AddNode("EventHeader");
+   out->AddNode("TRKR_CLUSTER");
+   out->AddNode("SiliconTrackSeedContainer");
+   out->AddNode("TpcTrackSeedContainer");
+   out->AddNode("SvtxTrackSeedContainer");
+   out->AddNode("SvtxTrackMap");
+   out->AddNode("SvtxVertexMap");
+   out->AddNode("MbdVertexMap");
+   out->AddNode("GL1RAWHIT");
+   se->registerOutputManager(out);
+
   */
   if (Enable::QA)
   {
