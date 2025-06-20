@@ -17,7 +17,7 @@
 #include <Trkr_Reco.C>
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
-
+#include <mbd/MbdReco.h>
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
 
@@ -533,6 +533,10 @@ void Fun4All_raw_hit_KFP(
     vtxProp->fieldMap(G4MAGNET::magfield_tracking);
     se->registerSubsystem(vtxProp);
   }
+
+  MbdReco *mbdreco = new MbdReco();
+  mbdreco->Verbosity(0);
+  //se->registerSubsystem(mbdreco);
   
    TString residoutfile = theOutfile + "_resid.root";
    std::string residstring(residoutfile.Data());
@@ -554,7 +558,7 @@ void Fun4All_raw_hit_KFP(
    resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
 
 //   resid->Verbosity(0);
-   //se->registerSubsystem(resid);
+   se->registerSubsystem(resid);
 
    
    
