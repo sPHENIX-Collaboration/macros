@@ -159,7 +159,7 @@ void Fun4All_raw_hit_KFP(
 	  }
      if(filepath.find("ebdc") != std::string::npos)
        {
-	 if(filepath.find("39") == std::string::npos)
+	 if(filepath.find("ebdc39") == std::string::npos)
 	   {
 	     nTpcFiles++;
 	   }
@@ -405,7 +405,6 @@ void Fun4All_raw_hit_KFP(
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
   auto silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
-  silicon_match->set_use_legacy_windowing(false);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
   if(G4TPC::ENABLE_AVERAGE_CORRECTIONS)
   {

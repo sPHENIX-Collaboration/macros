@@ -93,7 +93,7 @@ void Fun4All_Cosmics(
      
       if(filepath.find("ebdc") != std::string::npos)
 	{
-	  if(filepath.find("39") == std::string::npos)
+	  if(filepath.find("ebdc39") == std::string::npos)
 	    {
 	      nTpcFiles++;
 	    }

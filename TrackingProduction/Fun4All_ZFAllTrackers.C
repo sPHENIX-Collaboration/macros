@@ -132,7 +132,6 @@ void Fun4All_ZFAllTrackers(
 
   auto silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
-  silicon_match->set_use_legacy_windowing(false);
   // set search windows matching Silicon to TPC seeds
   // Selected for tracks with ntpc>34,|z_Si-z_TPC|<30,crossing==0
   // see https://indico.bnl.gov/event/26202/attachments/59703/102575/2025_01_31_ZeroField.pdf
