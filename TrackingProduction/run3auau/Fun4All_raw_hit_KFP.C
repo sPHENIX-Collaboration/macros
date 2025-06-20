@@ -159,7 +159,7 @@ void Fun4All_raw_hit_KFP(
 	  }
      if(filepath.find("ebdc") != std::string::npos)
        {
-	 if(filepath.find("39") == std::string::npos)
+	 if(filepath.find("ebdc39") == std::string::npos)
 	   {
 	     nTpcFiles++;
 	   }
