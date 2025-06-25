@@ -325,6 +325,11 @@ def main():
     do_condor_submit = args.do_condor_submit
     verbose    = args.verbose
 
+    # Append timestamp if the automated condor submission is enabled.
+    # This will ensure the output directory is unique for each call of the cron job.
+    if do_condor_submit:
+        output += '-' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
     log_file = os.path.join(output, f'log-{CURRENT_DATE}.txt')
 
     bin_filter_datasets = os.path.realpath(args.bin_filter_datasets)
