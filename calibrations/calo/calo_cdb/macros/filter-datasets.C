@@ -69,8 +69,9 @@ void myAnalysis::analyze(const string& input, const string &outputDir) {
   for(const auto &run_dataset : m_runInfo) {
     string run = run_dataset.first;
     string dataset = run_dataset.second;
+    ++m_ctr["ctr_run"];
     cout << "Run: " << run << ", Dataset: " << dataset << ", Processing: "
-         << ++m_ctr["ctr_run"] << ", " << m_ctr["ctr_run"] * 100. / static_cast<Double_t>(m_runInfo.size()) << " %" << endl;
+         << m_ctr["ctr_run"] << ", " << m_ctr["ctr_run"] * 100. / static_cast<Double_t>(m_runInfo.size()) << " %" << endl;
 
     Bool_t keep = false;
 
