@@ -105,9 +105,6 @@ namespace JetQA
   ///! Max eta acceptance
   double MaxAcceptEta = 1.1;
 
-  ///! Inclusive tag
-  std::string InclusiveTag = "inclusive";
-
   // maps ---------------------------------------------------------------------
 
   ///! Map from trigger to histogram tag
@@ -140,7 +137,8 @@ namespace JetQA
     {JetQADefs::GL1::Photon1, "photon1"},
     {JetQADefs::GL1::Photon2, "photon2"},
     {JetQADefs::GL1::Photon3, "photon3"},
-    {JetQADefs::GL1::Photon4, "photon4"} 
+    {JetQADefs::GL1::Photon4, "photon4"},
+    {JetQADefs::GL1::Inclusive, "inclusive"}
   };
 
   ///! Map from jet type to input node
@@ -210,7 +208,7 @@ namespace JetQA
     }
     else
     {
-      tag.append("_" + InclusiveTag);
+      tag.append("_" + GL1Tag[JetQADefs::GL1::Inclusive]);
     }
     return tag;
 
@@ -657,6 +655,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
     photonJetsQA -> SetTrgToSelect(trg.value());
   }
   photonJetsQA -> Verbosity(verbosity);
+  photonJetsQA -> SetDoOptHist(false);
   se -> registerSubsystem(photonJetsQA);
 
   // initialize and register event-wise rho check
@@ -746,6 +745,8 @@ void Jet_QA(std::vector<uint32_t> vecTrigsToUse = JetQA::GetDefaultTriggerList()
     caloStatusQA -> SetConfig(
       {
         .debug       = false,
+        .doNorm      = false,
+        .doOptHist   = false,
         .histTag     = "",
         .doTrgSelect = false // n.b. differential in trigger not useful here
       }
