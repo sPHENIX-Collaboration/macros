@@ -529,6 +529,12 @@ void Fun4All_PRDFReconstruction(
   finder->setNmvtxRequired(3);
   finder->setOutlierPairCut(0.1);
   se->registerSubsystem(finder);
+
+  // Propagate track positions to the vertex position
+  auto vtxProp = new PHActsVertexPropagator;
+  vtxProp->Verbosity(0);
+  vtxProp->fieldMap(G4MAGNET::magfield_tracking);
+  se->registerSubsystem(vtxProp);
   
   TString residoutfile = outfilename + "_resid.root";
   std::string residstring(residoutfile.Data());
