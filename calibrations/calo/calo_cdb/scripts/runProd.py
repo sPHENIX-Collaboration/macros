@@ -22,18 +22,18 @@ parser.add_argument('-i'
 
 parser.add_argument('-f'
                     , '--bin-filter-datasets', type=str
-                    , default='/direct/sphenix+u/anarde/Documents/sPHENIX/analysis-CaloCDB/CaloCDB/bin/filter-datasets'
-                    , help='Filter Datasets Bin. Default: /direct/sphenix+u/anarde/Documents/sPHENIX/analysis-CaloCDB/CaloCDB/bin/filter-datasets')
+                    , default='bin/filter-datasets'
+                    , help='Filter Datasets Bin. Default: bin/filter-datasets')
 
 parser.add_argument('-f2'
                     , '--bin-genStatus', type=str
-                    , default='/direct/sphenix+u/anarde/Documents/sPHENIX/analysis-CaloCDB/CaloCDB/bin/genStatus'
-                    , help='Gen Status Bin. Default: /direct/sphenix+u/anarde/Documents/sPHENIX/analysis-CaloCDB/CaloCDB/bin/genStatus')
+                    , default='bin/genStatus'
+                    , help='Gen Status Bin. Default: bin/genStatus')
 
 parser.add_argument('-e'
-                    , '--executable', type=str
-                    , default='/direct/sphenix+u/anarde/Documents/sPHENIX/analysis-CaloCDB/CaloCDB/scripts/genStatus.sh'
-                    , help='Condor Script. Default: /direct/sphenix+u/anarde/Documents/sPHENIX/analysis-CaloCDB/CaloCDB/scripts/genStatus.sh')
+                    , '--condor-script', type=str
+                    , default='scripts/genStatus.sh'
+                    , help='Condor Script. Default: scripts/genStatus.sh')
 
 parser.add_argument('-n'
                     , '--min-events', type=int
@@ -47,8 +47,8 @@ parser.add_argument('-o'
 
 parser.add_argument('-m'
                     , '--memory', type=float
-                    , default=0.2
-                    , help='Memory (units of GB) to request per condor submission. Default: 0.2 GB.')
+                    , default=0.5
+                    , help='Memory (units of GB) to request per condor submission. Default: 0.5 GB.')
 
 parser.add_argument('-l'
                     , '--condor-log-dir', type=str
@@ -247,12 +247,25 @@ def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
 
     reduced_process_df = reduced_df.merge(processed_df)
 
+    # Ensure that the file paths from the database actually exist
+    logger.info(f'Current files: {len(reduced_process_df)}')
+    logger.info('Checking file status')
+
+    mask_exists = reduced_process_df['full_file_path'].apply(os.path.exists)
+
+    df_filtered = reduced_process_df[mask_exists]
+
+    logger.info(f'Clean files: {len(df_filtered)}')
+    logger.info(f'Missing files: {len(reduced_process_df[~mask_exists])}, {len(reduced_process_df[~mask_exists])*100//len(reduced_process_df)} %')
+
+    reduced_process_df[~mask_exists].to_csv(f'{output}/{run_type}-missing.csv', columns=['full_file_path'], index=False, header=True)
+
     if verbose:
         logger.info("Final Reduced DataFrame that needs CDB Maps:")
-        logger.info(reduced_process_df.head().to_string())
-        logger.info(f'Runs: {len(processed_df)}')
+        logger.info(df_filtered.head().to_string())
+        logger.info(f'Runs: {df_filtered["runnumber"].nunique()}')
 
-    return reduced_process_df
+    return df_filtered
 
 def generate_run_list(reduced_process_df, output):
     """
@@ -273,7 +286,8 @@ def generate_run_list(reduced_process_df, output):
 
         group_df['full_file_path'].to_csv(filepath, index=False, header=False)
 
-def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, executable, do_condor_submit):
+
+def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit):
     """
     Generate condor submission directory to generate the CDB files for the runs.
     """
@@ -285,7 +299,7 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
     os.makedirs(condor_log_dir, exist_ok=True)
 
     shutil.copy(bin_genStatus, output)
-    shutil.copy(executable, output)
+    shutil.copy(condor_script, output)
 
     command = f'readlink -f {output}/datasets/* > jobs.list'
     subprocess.run(['bash','-c',command], cwd=output, check=False)
@@ -295,11 +309,11 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
     os.makedirs(f'{output}/output',exist_ok=True)
 
     with open(f'{output}/genStatus.sub', mode="w", encoding="utf-8") as file:
-        file.write(f'executable     = {os.path.basename(executable)}\n')
         file.write(f'arguments      = {output}/{os.path.basename(bin_genStatus)} $(input_run) {output}/output\n')
+        file.write(f'executable     = {os.path.basename(condor_script)}\n')
         file.write(f'log            = {condor_log_file}\n')
-        file.write('output          = stdout/job-$(Process).out\n')
-        file.write('error           = error/job-$(Process).err\n')
+        file.write('output          = stdout/job-$(ClusterId)-$(Process).out\n')
+        file.write('error           = error/job-$(ClusterId)-$(Process).err\n')
         file.write(f'request_memory = {condor_memory}GB\n')
 
     command = f'rm -rf {condor_log_dir} && mkdir {condor_log_dir} && cd {output} && condor_submit genStatus.sub -queue "input_run from jobs.list"'
@@ -334,7 +348,7 @@ def main():
 
     bin_filter_datasets = os.path.realpath(args.bin_filter_datasets)
     bin_genStatus       = os.path.realpath(args.bin_genStatus)
-    executable          = os.path.realpath(args.executable)
+    condor_script         = os.path.realpath(args.condor_script)
 
     os.makedirs(output, exist_ok=True)
 
@@ -353,9 +367,15 @@ def main():
     logger.info(f'Condor Memory: {condor_memory}')
     logger.info(f'Do Condor Submission: {do_condor_submit}')
     logger.info(f'Filter Datasets Bin: {bin_filter_datasets}')
+    logger.info(f'genStatus Bin: {bin_genStatus}')
+    logger.info(f'Condor Script: {condor_script}')
     logger.info(f'Log File: {log_file}')
     logger.info(f'Condor Log File: {condor_log_file}')
     logger.info(f'Verbose: {verbose}')
+
+    if not (os.path.exists(bin_filter_datasets) and os.path.exists(bin_genStatus) and os.path.exists(condor_script)):
+        logger.info(f'One of {bin_filter_datasets} or {bin_genStatus} or {condor_script} does NOT exist!')
+        sys.exit()
 
     if verbose:
         logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO) # Set to logging.DEBUG for even more detail
@@ -372,7 +392,7 @@ def main():
     generate_run_list(reduced_process_df, output)
 
     # generate condor jobs / submit them
-    generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, executable, do_condor_submit)
+    generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit)
 
 logger = logging.getLogger(__name__)
 
