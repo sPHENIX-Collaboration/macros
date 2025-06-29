@@ -185,7 +185,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   std::cout << "Processing " << nentries << std::endl;
   for (int ientry=0; ientry<nentries; ientry++)
   {
-    tree->GetEntry(ientry);
+    dstmbd_GetEntry(ientry);
 
     if (ientry<4)
     {
@@ -195,13 +195,16 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
     }
 
     // make npmt cut
+    /*
     if ( f_npmt==0 )
     {
+      cout << "f_npmt == 0" << endl;
       continue;
     }
+    */
 
     // Make vertex cut
-    if ( fabs(f_bz)>60. )
+    if ( subpass!=0 && fabs(f_bz)>60. )
     {
       continue;
     }
