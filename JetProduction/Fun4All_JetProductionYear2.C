@@ -1,16 +1,20 @@
 #ifndef FUN4ALL_JETPRODUCTIONYEAR2_C
 #define FUN4ALL_JETPRODUCTIONYEAR2_C
 
+#include <GlobalVariables.C>
 
-// c++ utilities
-#include <fstream>
-#include <iostream>
-#include <optional>
-#include <string>
-#include <utility>
-#include <vector>
+#include <G4_ActsGeom.C>
+#include <G4_Centrality.C>
+#include <G4_Global.C>
+#include <G4_Magnet.C>
+#include <HIJetReco.C>  // n.b. needed for rho calculation
+#include <NoBkgdSubJetReco.C>
+#include <Jet_QA.C>
+#include <QA.C>
+#include <Trkr_Reco.C>
+#include <Trkr_RecoInit.C>
+#include <Trkr_TpcReadoutInit.C>
 
-// coresoftware headers
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
 #include <fun4all/Fun4AllDstInputManager.h>
@@ -27,19 +31,12 @@
 #include <qautils/QAHistManagerDef.h>
 #include <zdcinfo/ZdcReco.h>
 
-// f4a macros
-#include <G4_ActsGeom.C>
-#include <G4_Centrality.C>
-#include <G4_Global.C>
-#include <G4_Magnet.C>
-#include <GlobalVariables.C>
-#include <HIJetReco.C>  // n.b. needed for rho calculation
-#include <NoBkgdSubJetReco.C>
-#include <Jet_QA.C>
-#include <QA.C>
-#include <Trkr_Reco.C>
-#include <Trkr_RecoInit.C>
-#include <Trkr_TpcReadoutInit.C>
+#include <fstream>
+#include <iostream>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 // load libraries
 R__LOAD_LIBRARY(libcentrality.so)

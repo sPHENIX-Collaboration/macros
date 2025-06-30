@@ -1,15 +1,19 @@
 #ifndef FUN4ALL_JETPRODUCTIONYEAR3_C
 #define FUN4ALL_JETPRODUCTIONYEAR3_C
 
-// c++ utilities
-#include <fstream>
-#include <iostream>
-#include <optional>
-#include <string>
-#include <utility>
-#include <vector>
+#include <GlobalVariables.C>
 
-// coresoftware headers
+#include <G4_ActsGeom.C>
+#include <G4_Centrality.C>
+#include <G4_Global.C>
+#include <G4_Magnet.C>
+#include <HIJetReco.C>
+#include <Jet_QA.C>
+#include <QA.C>
+#include <Trkr_Reco.C>
+#include <Trkr_RecoInit.C>
+#include <Trkr_TpcReadoutInit.C>
+
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
 #include <fun4all/Fun4AllDstInputManager.h>
@@ -26,18 +30,12 @@
 #include <qautils/QAHistManagerDef.h>
 #include <zdcinfo/ZdcReco.h>
 
-// f4a macros
-#include <G4_ActsGeom.C>
-#include <G4_Centrality.C>
-#include <G4_Global.C>
-#include <G4_Magnet.C>
-#include <GlobalVariables.C>
-#include <HIJetReco.C>
-#include <Jet_QA.C>
-#include <QA.C>
-#include <Trkr_Reco.C>
-#include <Trkr_RecoInit.C>
-#include <Trkr_TpcReadoutInit.C>
+#include <fstream>
+#include <iostream>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 // load libraries
 R__LOAD_LIBRARY(libcentrality.so)
