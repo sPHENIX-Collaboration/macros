@@ -118,7 +118,7 @@ void ConvertTpotAlignment()
 
   rc->set_IntFlag("RUNNUMBER", runnumber);
   rc->set_IntFlag("RUNSEGMENT", 0);
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
 
   // load geometry file
@@ -130,6 +130,7 @@ void ConvertTpotAlignment()
 
   // acts geometry initialization
   auto geom = new MakeActsGeometry;
+  geom->set_mvtx_applymisalign(true);
   geom->InitRun( topNode );
 
   // get relevant nodes
@@ -138,6 +139,29 @@ void ConvertTpotAlignment()
 
   // ACTS geometry
   auto m_tGeometry = findNode::getClass<ActsGeometry>(topNode, "ActsGeometry");
+
+  // write down the center of all tiles
+  const auto [begin,end] = m_micromegas_geomcontainer->get_begin_end();
+  for( auto iter = begin; iter != end; ++iter )
+  {
+
+    auto layergeom = dynamic_cast<CylinderGeomMicromegas*>(iter->second);
+
+    // get layer
+    const unsigned int layer = layergeom->get_layer();
+
+    // get tiles
+    const unsigned int tile_count = layergeom->get_tiles_count();
+
+    // loop over tiles
+    for( unsigned int tileid = 0; tileid < tile_count; ++tileid )
+    {
+      // get tile center and print
+      const auto center = layergeom->get_world_from_local_coords( tileid, m_tGeometry, {0,0} );
+      std::cout << "ConvertTpotAlignment - layer: " << layer << " tile: " << tileid << " center: {" << center.x() << "," << center.y() << "," << center.z() << "}" << std::endl;
+    }
+  }
+
 
   // loop over TPOT alignment parameters
   for( auto&& p:translation_parameters )
