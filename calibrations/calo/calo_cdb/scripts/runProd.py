@@ -3,14 +3,18 @@
 This module generates a list of run / datasets given a run type and event threshold.
 """
 import argparse
-import os
-import logging
-import sys
-import subprocess
 import datetime
+import glob
+import logging
+import os
 import shutil
+import subprocess
+import sys
+
 import pandas as pd
 from sqlalchemy import create_engine
+
+logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser()
 
@@ -63,14 +67,12 @@ parser.add_argument('-v'
                     , '--verbose', action='store_true'
                     , help='Verbose.')
 
-args = parser.parse_args()
-
 def get_file_paths(engine, runtype='run3auau', threshold=500000):
     """
     Generate file paths from given minimum events and run type.
     """
 
-    query = f"""
+    query = """
     SELECT
         a.dataset, a.runnumber, f.full_file_path, f.time
     FROM
@@ -86,15 +88,15 @@ def get_file_paths(engine, runtype='run3auau', threshold=500000):
                 FROM
                     datasets
                 WHERE
-                    dsttype = 'HIST_CALOQA_{runtype}') h
+                    dsttype = %(hist_dsttype)s) h
             ON
                 d.dataset = h.dataset AND d.runnumber = h.runnumber AND d.segment = h.segment
             WHERE
-                d.dsttype LIKE 'DST_CALO_{runtype}'
+                d.dsttype = %(calo_dsttype)s
             GROUP BY
                 d.dataset, d.runnumber
             HAVING
-                SUM(d.events) > {threshold}) k
+                SUM(d.events) > %(threshold)s) k
     ON
         k.dataset = a.dataset AND k.runnumber = a.runnumber
     JOIN
@@ -104,7 +106,13 @@ def get_file_paths(engine, runtype='run3auau', threshold=500000):
     WHERE
         a.filename LIKE %(filename_pattern)s;
     """
-    parameters = {'filename_pattern': f'HIST_CALOQA_{runtype}%'}
+
+    parameters = {
+        'hist_dsttype': f'HIST_CALOQA_{runtype}',
+        'calo_dsttype': f'DST_CALO_{runtype}',
+        'threshold': threshold,
+        'filename_pattern': f'HIST_CALOQA_{runtype}%'
+    }
 
     return pd.read_sql_query(query, engine, params=parameters)
 
@@ -228,13 +236,13 @@ def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
         logger.info(reduced_df.sort_values(by='time').reset_index(drop=True).head().to_string())
 
     # Save CSV of unique run and dataset pairs
-    reduced_df[['runnumber', 'dataset']].drop_duplicates().sort_values(by='runnumber').to_csv(f'{output}/{run_type}.csv', index=False, header=True)
+    reduced_df[['runnumber', 'dataset']].drop_duplicates().sort_values(by='runnumber').to_csv(os.path.join(output, f'{run_type}.csv'), index=False, header=True)
 
     ## DEBUG
-    command = f'{bin_filter_datasets} {output}/{run_type}.csv {output}'
+    command = f'{bin_filter_datasets} {os.path.join(output, f"{run_type}.csv")} {output}'
     run_command_and_log(command)
 
-    processed_df = pd.read_csv(f'{output}/{run_type}-process.csv')
+    processed_df = pd.read_csv(os.path.join(output, f'{run_type}-process.csv'))
 
     # Check if any new runs need new cdb maps
     if len(processed_df) == 0:
@@ -258,7 +266,7 @@ def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
     logger.info(f'Clean files: {len(df_filtered)}')
     logger.info(f'Missing files: {len(reduced_process_df[~mask_exists])}, {len(reduced_process_df[~mask_exists])*100//len(reduced_process_df)} %')
 
-    reduced_process_df[~mask_exists].to_csv(f'{output}/{run_type}-missing.csv', columns=['full_file_path'], index=False, header=True)
+    reduced_process_df[~mask_exists].to_csv(os.path.join(output, f'{run_type}-missing.csv'), columns=['full_file_path'], index=False, header=True)
 
     if verbose:
         logger.info("Final Reduced DataFrame that needs CDB Maps:")
@@ -271,7 +279,7 @@ def generate_run_list(reduced_process_df, output):
     """
     Generate lists of CaloValid histogram for each run.
     """
-    dataset_dir = f'{output}/datasets'
+    dataset_dir = os.path.join(output, 'datasets')
     os.makedirs(dataset_dir, exist_ok=True)
 
     # 7. Group by 'runnumber' and 'dataset'
@@ -301,15 +309,18 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
     shutil.copy(bin_genStatus, output)
     shutil.copy(condor_script, output)
 
-    command = f'readlink -f {output}/datasets/* > jobs.list'
-    subprocess.run(['bash','-c',command], cwd=output, check=False)
+    dataset_dir = os.path.join(output, 'datasets')
+    list_files = glob.glob(os.path.join(dataset_dir, '*.list'))
+    with open(os.path.join(output, 'jobs.list'), 'w', encoding="utf-8") as f:
+        for file_path in list_files:
+            f.write(os.path.realpath(file_path) + '\n')
 
-    os.makedirs(f'{output}/stdout',exist_ok=True)
-    os.makedirs(f'{output}/error',exist_ok=True)
-    os.makedirs(f'{output}/output',exist_ok=True)
+    os.makedirs(os.path.join(output,'stdout'),exist_ok=True)
+    os.makedirs(os.path.join(output,'error'),exist_ok=True)
+    os.makedirs(os.path.join(output,'output'),exist_ok=True)
 
-    with open(f'{output}/genStatus.sub', mode="w", encoding="utf-8") as file:
-        file.write(f'arguments      = {output}/{os.path.basename(bin_genStatus)} $(input_run) {output}/output\n')
+    with open(os.path.join(output,'genStatus.sub'), mode="w", encoding="utf-8") as file:
+        file.write(f'arguments      = {os.path.join(output, os.path.basename(bin_genStatus))} $(input_run) {os.path.join(output, "output")}\n')
         file.write(f'executable     = {os.path.basename(condor_script)}\n')
         file.write(f'log            = {condor_log_file}\n')
         file.write('output          = stdout/job-$(ClusterId)-$(Process).out\n')
@@ -327,7 +338,7 @@ def main():
     """
     Main Function
     """
-
+    args = parser.parse_args()
     run_type   = args.run_type
     min_events = args.min_events
     CURRENT_DATE = str(datetime.date.today())
@@ -393,8 +404,6 @@ def main():
 
     # generate condor jobs / submit them
     generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit)
-
-logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     main()
