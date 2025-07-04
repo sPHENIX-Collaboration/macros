@@ -199,41 +199,45 @@ def run_command_and_log(command, current_dir = '.', description="Executing comma
         logger.critical(f"An unexpected error occurred while running '{command}': {e}")
         return False
 
-def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
+def process_df(df, run_type, bin_filter_datasets, output, threshold, verbose=False):
     """
     Filter df and get a reduced df that contains the necessary runs with missing / outdated bad tower maps
     """
     if verbose:
         logger.info("Original")
         logger.info(df.head().to_string())
+        logger.info(f'size: {len(df)}')
         logger.info("\n" + "="*70 + "\n")
 
-    # 2. Calculate the minimum time for each dataset
-    min_times_per_dataset = df.groupby('dataset')['time'].min().sort_values(ascending=False)
+    # 2. Calculate the minimum time for each tag
+    min_times_per_tag = df.groupby('tag')['time'].min().sort_values(ascending=False)
 
     if verbose:
-        logger.info("Minimum time for each dataset:")
-        logger.info(min_times_per_dataset.head().to_string())
+        logger.info("Minimum time for each tag:")
+        logger.info(min_times_per_tag.head().to_string())
+        logger.info(f'size: {len(min_times_per_tag)}')
         logger.info("\n" + "="*70 + "\n")
 
-    # 3. Add this minimum time back to the original DataFrame as 'dataset_min_time'
-    df_processed = df.merge(min_times_per_dataset.rename('dataset_min_time'),
-                            left_on='dataset',
+    # 3. Add this minimum time back to the original DataFrame as 'tag_min_time'
+    df_processed = df.merge(min_times_per_tag.rename('tag_min_time'),
+                            left_on='tag',
                             right_index=True)
 
     if verbose:
-        logger.info("DataFrame with 'dataset_min_time' column:")
-        logger.info(df_processed[['dataset', 'runnumber', 'time', 'full_file_path', 'dataset_min_time']].head().to_string())
+        logger.info("DataFrame with 'tag_min_time' column:")
+        logger.info(df_processed.head().to_string())
+        logger.info(f'size: {len(df_processed)}')
         logger.info("\n" + "="*70 + "\n")
 
-    # 4. For each 'runnumber', find the 'dataset_min_time' of the HIGHEST PRIORITY dataset containing it.
-    #    "Highest priority" means the dataset with the LATEST (maximum) 'dataset_min_time'.
-    highest_priority_time_for_runnumber = df_processed.groupby('runnumber')['dataset_min_time'].max()
-    highest_priority_time_for_runnumber.name = 'highest_priority_dataset_min_time_for_runnumber'
+    # 4. For each 'runnumber', find the 'tag_min_time' of the HIGHEST PRIORITY tag containing it.
+    #    "Highest priority" means the tag with the LATEST (maximum) 'tag_min_time'.
+    highest_priority_time_for_runnumber = df_processed.groupby('runnumber')['tag_min_time'].max()
+    highest_priority_time_for_runnumber.name = 'highest_priority_tag_min_time_for_runnumber'
 
     if verbose:
-        logger.info("Highest Priority 'dataset_min_time' for each 'runnumber':")
+        logger.info("Highest Priority 'tag_min_time' for each 'runnumber':")
         logger.info(highest_priority_time_for_runnumber.head().to_string())
+        logger.info(f'size: {len(highest_priority_time_for_runnumber)}')
         logger.info("\n" + "="*70 + "\n")
 
     # 5. Merge this information back to the DataFrame
@@ -242,23 +246,24 @@ def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
                                     right_index=True)
 
     if verbose:
-        logger.info("DataFrame with 'highest_priority_dataset_min_time_for_runnumber' column:")
-        logger.info(df_processed[['dataset', 'runnumber', 'time', 'full_file_path', 'dataset_min_time', 'highest_priority_dataset_min_time_for_runnumber']].head().to_string())
+        logger.info("DataFrame with 'highest_priority_tag_min_time_for_runnumber' column:")
+        logger.info(df_processed[['tag', 'runnumber', 'time', 'full_file_path', 'tag_min_time', 'highest_priority_tag_min_time_for_runnumber']].head().to_string())
+        logger.info(f'size: {len(df_processed)}')
         logger.info("\n" + "="*70 + "\n")
 
-    # 6. Filter the DataFrame: Keep only rows where the row's 'dataset_min_time'
-    #    matches the 'highest_priority_dataset_min_time_for_runnumber'.
-    #    This ensures we keep ALL rows for a runnumber from its highest-priority dataset.
+    # 6. Filter the DataFrame: Keep only rows where the row's 'tag_min_time'
+    #    matches the 'highest_priority_tag_min_time_for_runnumber'.
+    #    This ensures we keep ALL rows for a runnumber from its highest-priority tag.
     reduced_df = df_processed[
-        df_processed['dataset_min_time'] == df_processed['highest_priority_dataset_min_time_for_runnumber']
+        df_processed['tag_min_time'] == df_processed['highest_priority_tag_min_time_for_runnumber']
     ]
 
     if verbose:
         logger.info("Final Reduced DataFrame (sorted by time for readability):")
         logger.info(reduced_df.sort_values(by='time').reset_index(drop=True).head().to_string())
 
-    # Save CSV of unique run and dataset pairs
-    reduced_df[['runnumber', 'dataset']].drop_duplicates().sort_values(by='runnumber').to_csv(os.path.join(output, f'{run_type}.csv'), index=False, header=True)
+    # Save CSV of unique run and tag pairs
+    reduced_df[['runnumber', 'tag']].drop_duplicates().sort_values(by='runnumber').to_csv(os.path.join(output, f'{run_type}.csv'), index=False, header=True)
 
     ## DEBUG
     command = f'{bin_filter_datasets} {os.path.join(output, f"{run_type}.csv")} {output}'
@@ -290,12 +295,17 @@ def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
 
     reduced_process_df[~mask_exists].to_csv(os.path.join(output, f'{run_type}-missing.csv'), columns=['full_file_path'], index=False, header=True)
 
+    df_filtered['group_total_events'] = df_filtered.groupby(['tag', 'runnumber'])['events'].transform('sum')
+    df_final = df_filtered[df_filtered['group_total_events'] > threshold].copy()
+    df_drop = df_filtered[df_filtered['group_total_events'] < threshold].copy()
+
     if verbose:
         logger.info("Final Reduced DataFrame that needs CDB Maps:")
-        logger.info(df_filtered.head().to_string())
-        logger.info(f'Runs: {df_filtered["runnumber"].nunique()}')
+        logger.info(df_final.head().to_string())
+        logger.info(f'Runs: {df_final["runnumber"].nunique()}')
+        logger.info(f'Runs Dropped: {df_drop["runnumber"].nunique()}')
 
-    return df_filtered
+    return df_final
 
 def generate_run_list(reduced_process_df, output):
     """
@@ -306,13 +316,13 @@ def generate_run_list(reduced_process_df, output):
 
     # 7. Group by 'runnumber' and 'dataset'
     # Iterating over this grouped object is efficient.
-    grouped = reduced_process_df.groupby(['runnumber', 'dataset'])
+    grouped = reduced_process_df.groupby(['runnumber', 'tag'])
 
     # 8. Loop through each unique group
-    for (run, dataset), group_df in grouped:
-        logger.info(f'Processing: {run},{dataset}')
+    for (run, tag), group_df in grouped:
+        logger.info(f'Processing: {run},{tag}')
 
-        filepath = os.path.join(dataset_dir, f'{run}_{dataset}.list')
+        filepath = os.path.join(dataset_dir, f'{run}_{tag}.list')
 
         group_df['full_file_path'].to_csv(filepath, index=False, header=False)
 
@@ -419,7 +429,7 @@ def main():
     df = get_file_paths(engine, run_type, min_events)
 
     # filter and process the initial dataframe
-    reduced_process_df = process_df(df, run_type, bin_filter_datasets, output, verbose)
+    reduced_process_df = process_df(df, run_type, bin_filter_datasets, output, min_events, verbose)
 
     # generate the lists of CaloValid histograms for each identified run
     generate_run_list(reduced_process_df, output)
