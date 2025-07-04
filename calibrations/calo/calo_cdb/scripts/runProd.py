@@ -390,7 +390,11 @@ def main():
     log_file = os.path.join(output, f'log-{CURRENT_DATE}.txt')
 
     condor_script       = os.path.realpath(args.condor_script)
-    OFFLINE_MAIN_BIN    = os.path.join(os.environ.get('OFFLINE_MAIN'), 'bin')
+    offline_main = os.environ.get('OFFLINE_MAIN')
+    if not offline_main:
+        logger.critical("OFFLINE_MAIN environment variable not set, exiting.")
+        sys.exit(1)
+    OFFLINE_MAIN_BIN    = os.path.join(offline_main, 'bin')
     bin_filter_datasets = os.path.realpath(args.bin_filter_datasets) if args.bin_filter_datasets else os.path.join(OFFLINE_MAIN_BIN, 'CaloCDB-FilterDatasets')
     bin_genStatus       = os.path.realpath(args.bin_genStatus) if args.bin_genStatus else os.path.join(OFFLINE_MAIN_BIN, 'CaloCDB-GenStatus')
 
