@@ -12,7 +12,7 @@ import subprocess
 import sys
 
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 logger = logging.getLogger(__name__)
 
@@ -72,49 +72,71 @@ def get_file_paths(engine, runtype='run3auau', threshold=500000):
     Generate file paths from given minimum events and run type.
     """
 
+    # Identify run range from the run type
+    run_ranges = {'run2pp': (47286, 53880), 'run2auau': (54128, 54974), 'run3auau': (66457, 20000000)}
+    params = {'run_start': run_ranges[runtype][0], 'run_end': run_ranges[runtype][1], 'threshold': threshold}
+
+    create_temp_table_query = """
+    CREATE TEMPORARY TABLE t1 AS
+    SELECT
+        d.tag, d.runnumber, d.segment, d.events
+    FROM
+        datasets d
+    JOIN (
+        SELECT
+            tag, runnumber, segment
+        FROM
+            datasets
+        WHERE
+            dsttype like 'HIST_CALOQA%' and runnumber >= :run_start and runnumber <= :run_end) h
+    ON
+        d.tag = h.tag AND d.runnumber = h.runnumber AND d.segment = h.segment
+    WHERE
+        d.dsttype like 'DST_CALOFITTING%';
+    """
+
     query = """
     SELECT
-        a.dataset, a.runnumber, f.full_file_path, f.time
+        a.tag, a.runnumber, f.full_file_path, t1.events, f.time
     FROM
         datasets a
     JOIN (
-            SELECT
-                d.dataset, d.runnumber
-            FROM
-                datasets d
-            JOIN (
-                SELECT
-                    dataset, runnumber, segment
-                FROM
-                    datasets
-                WHERE
-                    dsttype = %(hist_dsttype)s) h
-            ON
-                d.dataset = h.dataset AND d.runnumber = h.runnumber AND d.segment = h.segment
-            WHERE
-                d.dsttype = %(calo_dsttype)s
-            GROUP BY
-                d.dataset, d.runnumber
-            HAVING
-                SUM(d.events) > %(threshold)s) k
+        SELECT
+            tag, runnumber
+        FROM t1
+        GROUP BY
+            tag, runnumber
+        HAVING
+            SUM(events) > :threshold) k
     ON
-        k.dataset = a.dataset AND k.runnumber = a.runnumber
+        k.tag = a.tag AND k.runnumber = a.runnumber
+    JOIN t1
+    ON
+        t1.tag = a.tag AND t1.runnumber = a.runnumber AND t1.segment = a.segment
     JOIN
         files f
     ON
         f.lfn = a.filename
     WHERE
-        a.filename LIKE %(filename_pattern)s;
+        a.filename LIKE 'HIST_CALOQA%';
     """
 
-    parameters = {
-        'hist_dsttype': f'HIST_CALOQA_{runtype}',
-        'calo_dsttype': f'DST_CALO_{runtype}',
-        'threshold': threshold,
-        'filename_pattern': f'HIST_CALOQA_{runtype}%'
-    }
+    df = pd.DataFrame()
 
-    return pd.read_sql_query(query, engine, params=parameters)
+    try:
+        with engine.connect() as connection:
+            # Create the temporary table
+            connection.execute(text(create_temp_table_query), params)
+
+            # Use the temporary table
+            df = pd.read_sql_query(text(query), connection, params=params)
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        print("Ensure database is running, tables exist, and query syntax is correct.")
+        sys.exit()
+
+    return df
 
 def setup_logging(log_file, log_level):
     """Configures the logging system to output to a file and console."""
