@@ -9,10 +9,10 @@ This package automates the generation of the CDB maps for the calorimeters. Spec
 
 ** Steps
 
-1) The ~FileCatalog~ is queried for all runnumber, dataset, file paths, and time given a run type and minimum event threshold. By default the run type is set to ~run3auau~ and minimum event threshold is 500k events.
-2) The result is reduced as follows: Only the dataset corresponding to the latest time among duplicate instaces of run numbers is kept. For example, if there are two instances (run, dataset, time) of (A,B,C) and (A,D,E) where E > C then (A,B,C) is dropped and only (A,D,E) is kept.
-3) Using the ~filter-datasets~ binary, the CDB (Calibrations Database) is pinged given the run number and specific calibration name. If no result is returned by the CDB or if the dataset in the calibration name does not match the latest dataset, then the pair of run number and dataset is kept to produce the calibration files. Otherwise the pair is removed since the latest calibration already exists in the CDB. A list of all such runs is written to ~{runtype}-process.csv~.
-4) Using the ~{runtype}-process.csv~ file, a unique file is created for each run number which consists of all of the ~HIST_CALOQA_{runtype}~ for that run number.
+1) The ~FileCatalog~ is queried for all runnumber, tag, file paths, and time given a run type and minimum event threshold. By default the run type is set to ~run3auau~ and minimum event threshold is 500k events.
+2) The result is reduced as follows: Only the tag corresponding to the latest time among duplicate instaces of run numbers is kept. For example, if there are two instances (run, tag, time) of (A,B,C) and (A,D,E) where E > C then (A,B,C) is dropped and only (A,D,E) is kept.
+3) Using the ~filter-datasets~ binary, the CDB (Calibrations Database) is pinged given the run number and specific calibration name. If no result is returned by the CDB or if the tag in the calibration name does not match the latest tag, then the pair of run number and tag is kept to produce the calibration files. Otherwise the pair is removed since the latest calibration already exists in the CDB. A list of all such runs is written to ~{runtype}-process.csv~.
+4) Using the ~{runtype}-process.csv~ file, a unique file is created for each run number which consists of all of the ~HIST_CALOQA~ for that run number.
 5) A condor submission directory is created that processes one job per run number and uses the ~genStatus~ binary to combine all of the relevant histograms from the dataset file and write out the CDB files for the specified calibrations.
 
 * Prerequisites
@@ -30,13 +30,14 @@ Some key flags:
 - ~--output~: By default is set to ~test~. This directory is where all relevant log files and condor files are stored.
 - ~--condor-log-dir~: By default is set to ~/tmp/<USER>/dump~. This directory is where the condor log files are stored. As long as the location is under ~/tmp~ it should be fine.
 - ~--do-condor-submit~: By default this is disabled. Enabling this option submits the condor jobs as needed. Useful for embedding the script in a cron job. Note: Jobs are only submitted if there exists a run with outdated or missing calibrations.
+- By default the ~--bin-filter-datasets~ and ~--bin-genStatus~ are set empty as they are determined on on-the-fly through the ~$OFFLINE_MAIN/bin~ path where the binaries for the key routines are stored.
 
 Example:
 #+begin_src bash
-runProd.py --run-type run3auau --min-events 500000 --output test --verbose 
+runProd.py --run-type run3auau --min-events 500000 --output run3auau --verbose
 #+end_src
 
 Example Cron Job (Once a day at midnight):
 #+begin_src
-0 0 * * * runProd.py --run-type run3auau --min-events 500000 --output test --verbose --do-condor-submit
+0 0 * * * runProd.py --run-type run3auau --min-events 500000 --output run3auau --verbose --do-condor-submit
 #+end_src
