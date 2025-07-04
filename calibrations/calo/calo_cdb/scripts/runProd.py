@@ -26,13 +26,13 @@ parser.add_argument('-i'
 
 parser.add_argument('-f'
                     , '--bin-filter-datasets', type=str
-                    , default='bin/filter-datasets'
-                    , help='Filter Datasets Bin. Default: bin/filter-datasets')
+                    , default=''
+                    , help='Filter Datasets Bin. Default: Official')
 
 parser.add_argument('-f2'
                     , '--bin-genStatus', type=str
-                    , default='bin/genStatus'
-                    , help='Gen Status Bin. Default: bin/genStatus')
+                    , default=''
+                    , help='Gen Status Bin. Default: Official')
 
 parser.add_argument('-e'
                     , '--condor-script', type=str
@@ -389,9 +389,10 @@ def main():
 
     log_file = os.path.join(output, f'log-{CURRENT_DATE}.txt')
 
-    bin_filter_datasets = os.path.realpath(args.bin_filter_datasets)
-    bin_genStatus       = os.path.realpath(args.bin_genStatus)
-    condor_script         = os.path.realpath(args.condor_script)
+    condor_script       = os.path.realpath(args.condor_script)
+    OFFLINE_MAIN_BIN    = os.path.join(os.environ.get('OFFLINE_MAIN'), 'bin')
+    bin_filter_datasets = os.path.realpath(args.bin_filter_datasets) if args.bin_filter_datasets else os.path.join(OFFLINE_MAIN_BIN, 'CaloCDB-FilterDatasets')
+    bin_genStatus       = os.path.realpath(args.bin_genStatus) if args.bin_genStatus else os.path.join(OFFLINE_MAIN_BIN, 'CaloCDB-GenStatus')
 
     os.makedirs(output, exist_ok=True)
 
