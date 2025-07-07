@@ -1,5 +1,5 @@
-#ifndef FUN4ALL_JETSKIMMEDPRODUCTIONYEAR2_C
-#define FUN4ALL_JETSKIMMEDPRODUCTIONYEAR2_C
+#ifndef FUN4ALL_JETSKIMMEDPRODUCTIONYEAR3_C
+#define FUN4ALL_JETSKIMMEDPRODUCTIONYEAR3_C
 
 #include <QA.C>
 #include <Calo_Calib.C>
@@ -59,7 +59,7 @@ void Fun4All_JetSkimmedProductionYear3(int nEvents=1000,
 {
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(1);
+  se->Verbosity(0);
 
   recoConsts *rc = recoConsts::instance();
 
@@ -86,14 +86,6 @@ void Fun4All_JetSkimmedProductionYear3(int nEvents=1000,
   // Set status of CALO towers, Calibrate towers,  Cluster
   Process_Calo_Calib();
 
-  ///////////////////////////////////
-  // Validation maybe no need to run for the skimmed production?
-  /*
-  CaloValid *ca = new CaloValid("CaloValid");
-  ca->set_timing_cut_width(200);
-  se->registerSubsystem(ca);
-  */
-
   // Jet reco related flags
   Enable::QA = true;
 
@@ -117,20 +109,6 @@ void Fun4All_JetSkimmedProductionYear3(int nEvents=1000,
 
   // do jet reconstruction & rho calculation
   HIJetReco();
-
-  // do unsubtracted jet reconstruction
-  /*std::string jetreco_input_prefix = "TOWERINFO_CALIB";
-  JetReco *_jetRecoUnsub = new JetReco();
-  _jetRecoUnsub->add_input(new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER, jetreco_input_prefix));
-  _jetRecoUnsub->add_input(new TowerJetInput(Jet::HCALIN_TOWERINFO, jetreco_input_prefix));
-  _jetRecoUnsub->add_input(new TowerJetInput(Jet::HCALOUT_TOWERINFO, jetreco_input_prefix));
-  _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.2), "AntiKt_unsubtracted_r02");
-  _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.3), "AntiKt_unsubtracted_r03");
-  _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.4), "AntiKt_unsubtracted_r04");
-  _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.5), "AntiKt_unsubtracted_r05");
-  _jetRecoUnsub->set_algo_node("ANTIKT");
-  _jetRecoUnsub->set_input_node("TOWER");
-  se->registerSubsystem(_jetRecoUnsub);*/
 
   JetDSTSkimmer *jetDSTSkimmer = new JetDSTSkimmer();
   //these are all default values
