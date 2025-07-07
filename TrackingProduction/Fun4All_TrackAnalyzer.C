@@ -48,9 +48,9 @@ R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
 void Fun4All_TrackAnalyzer(
     const int nEvents = 10,
-    const std::string trackfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana475_2024p017_v001/DST_TRKR_TRACKS/run_00053800_00053900/dst/DST_TRKR_TRACKS_run2pp_ana475_2024p017_v001-00053877-00000.root",
-    const std::string seedfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana473_2024p016_v001/DST_TRKR_SEED/run_00053800_00053900/dst/DST_TRKR_SEED_run2pp_ana473_2024p016_v001-00053877-00000.root",
-    const std::string clusterfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana466_2024p012_v001/DST_TRKR_CLUSTER/run_00053800_00053900/dst/DST_TRKR_CLUSTER_run2pp_ana466_2024p012_v001-00053877-00000.root",
+    const std::string trackfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana494_2024p021_v001/DST_TRKR_TRACKS/run_00053800_00053900/dst/DST_TRKR_TRACKS_run2pp_ana494_2024p021_v001-00053877-00000.root",
+    const std::string seedfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana494_2024p021_v001/DST_TRKR_SEED/run_00053800_00053900/dst/DST_TRKR_SEED_run2pp_ana494_2024p021_v001-00053877-00000.root",
+    const std::string clusterfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana494_2024p021_v001/DST_TRKR_CLUSTER/run_00053800_00053900/dst/DST_TRKR_CLUSTER_run2pp_ana494_2024p021_v001-00053877-00000.root",
     const std::string outfilename = "clusters_seeds")
 {
 
@@ -86,7 +86,7 @@ void Fun4All_TrackAnalyzer(
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
