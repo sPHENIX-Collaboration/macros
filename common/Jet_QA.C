@@ -105,6 +105,9 @@ namespace JetQA
   ///! Max eta acceptance
   double MaxAcceptEta = 1.1;
 
+  ///! Inclusive tag
+  std::string InclusiveTag = "inclusive";
+
   // maps ---------------------------------------------------------------------
 
   ///! Map from trigger to histogram tag
@@ -137,8 +140,7 @@ namespace JetQA
     {JetQADefs::GL1::Photon1, "photon1"},
     {JetQADefs::GL1::Photon2, "photon2"},
     {JetQADefs::GL1::Photon3, "photon3"},
-    {JetQADefs::GL1::Photon4, "photon4"},
-    {JetQADefs::GL1::Inclusive, "inclusive"}
+    {JetQADefs::GL1::Photon4, "photon4"}
   };
 
   ///! Map from jet type to input node
@@ -208,7 +210,7 @@ namespace JetQA
     }
     else
     {
-      tag.append("_" + GL1Tag[JetQADefs::GL1::Inclusive]);
+      tag.append("_" + InclusiveTag);
     }
     return tag;
 
@@ -655,7 +657,6 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
     photonJetsQA -> SetTrgToSelect(trg.value());
   }
   photonJetsQA -> Verbosity(verbosity);
-  photonJetsQA -> SetDoOptHist(false);
   se -> registerSubsystem(photonJetsQA);
 
   // initialize and register event-wise rho check
@@ -669,6 +670,27 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   }
   se -> registerSubsystem(evtRhoQA);
 
+  // initialize and register jet seed counter qa module
+  if (!JetQA::DoPP)
+  {
+    JetSeedCount* jetSeedQA = new JetSeedCount(
+      "JetSeedCount" + trig_tag + "_towersub1_antikt_r02",
+      "AntiKt_Tower_r04",  // n.b. unused in module
+      "AntiKt_TowerInfo_HIRecoSeedsRaw_r02",
+      "AntiKt_TowerInfo_HIRecoSeedsSub_r02");
+    jetSeedQA -> Verbosity(verbosity);
+    jetSeedQA -> setHistTag("");
+    jetSeedQA -> setPtRange(ptJetRange.first, ptJetRange.second);
+    jetSeedQA -> setEtaRange(JetQA::MinAcceptEta, JetQA::MaxAcceptEta);
+    jetSeedQA -> setWriteToOutputFile(false);
+    jetSeedQA -> setPPMode(JetQA::DoPP);
+    if (trg.has_value())
+    {
+      jetSeedQA -> setTrgToSelect(trg.value());
+    }
+    se -> registerSubsystem(jetSeedQA);
+  }
+
   // create modules that take single R values ---------------------------------
 
   // loop over resolution parameters
@@ -677,27 +699,6 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
 
     // get R-dependent eta range
     std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange(JetQA::JetRes[jet]);
-
-    // initialize and register jet seed counter qa module
-    if (!JetQA::DoPP)
-    {
-      JetSeedCount* jetSeedQA = new JetSeedCount(
-        "JetSeedCount" + trig_tag + "_" + JetQA::JetTag[jet],
-        JetQA::JetInput[jet],
-        "AntiKt_TowerInfo_HIRecoSeedsRaw_r02",
-        "AntiKt_TowerInfo_HIRecoSeedsSub_r02");
-      jetSeedQA -> Verbosity(verbosity);
-      jetSeedQA -> setHistTag("");
-      jetSeedQA -> setPtRange(ptJetRange.first, ptJetRange.second);
-      jetSeedQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
-      jetSeedQA -> setWriteToOutputFile(false);
-      jetSeedQA -> setPPMode(JetQA::DoPP);
-      if (trg.has_value())
-      {
-        jetSeedQA -> setTrgToSelect(trg.value());
-      }
-      se -> registerSubsystem(jetSeedQA);
-    }
 
     // initialize and register constituent checks
     ConstituentsinJets* jetCstQA = new ConstituentsinJets(
@@ -745,8 +746,6 @@ void Jet_QA(std::vector<uint32_t> vecTrigsToUse = JetQA::GetDefaultTriggerList()
     caloStatusQA -> SetConfig(
       {
         .debug       = false,
-        .doNorm      = false,
-        .doOptHist   = false,
         .histTag     = "",
         .doTrgSelect = false // n.b. differential in trigger not useful here
       }
