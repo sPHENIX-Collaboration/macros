@@ -652,6 +652,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
     "CLUSTERINFO_CEMC",
     ""
   );
+  photonJetsQA -> SetDoOptHist(false);
   if (trg.has_value())
   {
     photonJetsQA -> SetTrgToSelect(trg.value());
@@ -747,7 +748,9 @@ void Jet_QA(std::vector<uint32_t> vecTrigsToUse = JetQA::GetDefaultTriggerList()
       {
         .debug       = false,
         .histTag     = "",
-        .doTrgSelect = false // n.b. differential in trigger not useful here
+        .doNorm      = false, // do NOT try to normalize histograms
+        .doOptHist   = false, // turn off extra histograms
+        .doTrgSelect = false  // n.b. differential in trigger not useful here
       }
     );
     se -> Verbosity(verbosity);
