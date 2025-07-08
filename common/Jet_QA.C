@@ -601,6 +601,7 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
       .doTrackQA    = true,
       .doJetQA      = true,
       .doSubsysHist = false,
+      .doOptHist    = false,  // turn off optional histograms
       .rJet         = JetQA::JetRes[jet],
       .jetInNode    = JetQA::JetInput[jet]
     });
