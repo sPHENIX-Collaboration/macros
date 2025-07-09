@@ -149,7 +149,8 @@ namespace JetQA
     {JetQADefs::GL1::MBDNS2Photon6Vtx150, "mbdns2photon6vtx150"},
     {JetQADefs::GL1::MBDNS2Photon8Vtx150, "mbdns2photon8vtx150"},
     {JetQADefs::GL1::MBDNS2Photon10Vtx150, "mbdns2photon10vtx150"},
-    {JetQADefs::GL1::MBDNS2Photon12Vtx150, "mbdns2photon12vtx150"}
+    {JetQADefs::GL1::MBDNS2Photon12Vtx150, "mbdns2photon12vtx150"},
+    {JetQADefs::GL1::Inclusive, "inclusive"}
   };
 
   ///! Map from jet type to input node
