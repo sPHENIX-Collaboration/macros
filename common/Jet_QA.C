@@ -137,8 +137,19 @@ namespace JetQA
     {JetQADefs::GL1::Photon1, "photon1"},
     {JetQADefs::GL1::Photon2, "photon2"},
     {JetQADefs::GL1::Photon3, "photon3"},
-    {JetQADefs::GL1::Photon4, "photon4"},
-    {JetQADefs::GL1::Inclusive, "inclusive"}
+    {JetQADefs::GL1::Photon4, "photon4"}, 
+    {JetQADefs::GL1::MBDNS2Vtx10, "mbdns2vtx10"},
+    {JetQADefs::GL1::MBDNS2Vtx30, "mbdns2vtx30"},
+    {JetQADefs::GL1::MBDNS2Vtx60, "mbdns2vtx60"},
+    {JetQADefs::GL1::MBDNS2Vtx150, "mbdns2vtx150"},
+    {JetQADefs::GL1::MBDNS2Photon6Vtx10, "mbdns2photon6vtx10"},
+    {JetQADefs::GL1::MBDNS2Photon8Vtx10, "mbdns2photon8vtx10"},
+    {JetQADefs::GL1::MBDNS2Photon10Vtx10, "mbdns2photon10vtx10"},
+    {JetQADefs::GL1::MBDNS2Photon12Vtx10, "mbdns2photon12vtx10"},
+    {JetQADefs::GL1::MBDNS2Photon6Vtx150, "mbdns2photon6vtx150"},
+    {JetQADefs::GL1::MBDNS2Photon8Vtx150, "mbdns2photon8vtx150"},
+    {JetQADefs::GL1::MBDNS2Photon10Vtx150, "mbdns2photon10vtx150"},
+    {JetQADefs::GL1::MBDNS2Photon12Vtx150, "mbdns2photon12vtx150"}
   };
 
   ///! Map from jet type to input node
@@ -319,13 +330,10 @@ namespace JetQA
       JetQADefs::GL1::Jet4
     };
 
-    // default jets for AuAu
-    //   - n.b. the thresholds were changed 10, 60, and
-    //     150 cm respectively during AuAu run
+    // default triggers for 2025 AuAu
     std::vector<uint32_t> vecDefaultTrigsAA = {
-      JetQADefs::GL1::MBDNSVtx10,  // actually 10 cm
-      JetQADefs::GL1::MBDNSVtx30,  // actually 60 cm
-      JetQADefs::GL1::MBDNSVtx60   // actually 150 cm
+      JetQADefs::GL1::MBDNS2Vtx10,
+      JetQADefs::GL1::MBDNS2Vtx150
     };
 
     if (JetQA::DoPP)
