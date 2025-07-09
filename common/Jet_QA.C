@@ -755,9 +755,9 @@ void Jet_QA(std::vector<uint32_t> vecTrigsToUse = JetQA::GetDefaultTriggerList()
     caloStatusQA -> SetConfig(
       {
         .debug       = false,
-        .histTag     = "",
         .doNorm      = false, // do NOT try to normalize histograms
         .doOptHist   = false, // turn off extra histograms
+        .histTag     = "",
         .doTrgSelect = false  // n.b. differential in trigger not useful here
       }
     );
