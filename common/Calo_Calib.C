@@ -63,6 +63,7 @@ void Process_Calo_Calib()
 
     std::string calibdir = CDBInterface::instance()->getUrl(calibName_hotMap);
     statusEMC->set_directURL_hotMap(calibdir);
+    statusEMC->set_isSim(true);
   }
   se->registerSubsystem(statusEMC);
 
