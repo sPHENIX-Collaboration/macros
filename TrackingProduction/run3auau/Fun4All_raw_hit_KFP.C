@@ -141,9 +141,10 @@ void Fun4All_raw_hit_KFP(
   std::string filepath;
 
   int i = 0;
-  int nTpcFiles = 0;
   int runnumber = std::numeric_limits<int>::quiet_NaN();
   int segment = std::numeric_limits<int>::quiet_NaN();
+  bool process_endpoints = false;
+  
   while(std::getline(ifs,filepath))
     {
       std::cout << "Adding DST with filepath: " << filepath << std::endl; 
@@ -159,10 +160,11 @@ void Fun4All_raw_hit_KFP(
 	  }
      if(filepath.find("ebdc") != std::string::npos)
        {
-	 if(filepath.find("ebdc39") == std::string::npos)
-	   {
-	     nTpcFiles++;
-	   }
+	 if(filepath.find("_0_") != std::string::npos or
+	     filepath.find("_1_") != std::string::npos)
+	    {
+	      process_endpoints = true;
+	    }
        }
       std::string inputname = "InputManager" + std::to_string(i);
       auto hitsin = new Fun4AllDstInputManager(inputname);
@@ -176,7 +178,7 @@ void Fun4All_raw_hit_KFP(
 
   Enable::QA = false;
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
 
 
@@ -275,7 +277,7 @@ void Fun4All_raw_hit_KFP(
   ostringstream ebdcname;
   for(int ebdc = 0; ebdc < 24; ebdc++)
     {
-      if(nTpcFiles ==24)
+      if(!process_endpoints)
 	{
 	  ebdcname.str("");
 	  if(ebdc < 10)
@@ -286,7 +288,7 @@ void Fun4All_raw_hit_KFP(
 	  Tpc_HitUnpacking(ebdcname.str());
 	}
       
-      else if(nTpcFiles >30)
+      else if(process_endpoints)
 	{
 	  for(int endpoint = 0; endpoint <2; endpoint++)
 	    {
@@ -298,11 +300,6 @@ void Fun4All_raw_hit_KFP(
 	      ebdcname<<ebdc <<"_"<<endpoint;
 	      Tpc_HitUnpacking(ebdcname.str());
 	    }
-	}
-      else
-	{
-	  std::cout << "Wrong number of tpc files input! Exiting now." << std::endl;
-	  gSystem->Exit(1);
 	}
     }
 
