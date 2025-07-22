@@ -258,6 +258,8 @@ void Fun4All_raw_hit_KFP(
   //note: these are designed to be used only if static corrections are also applied
   //G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
   //G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
+  //G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
+  //std::cout << "avg corr filename " << G4TPC::average_correction_filename << std::endl;
   //G4TPC::average_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/average_minus_static_distortion_inverted_10-new.root";
 
 
@@ -514,11 +516,13 @@ void Fun4All_raw_hit_KFP(
   auto finder = new PHSimpleVertexFinder;
   finder->Verbosity(0);
   finder->setDcaCut(0.5);
-  finder->setTrackPtCut(0.3);
+  finder->setTrackPtCut(0.5);
   finder->setBeamLineCut(1);
-  finder->setTrackQualityCut(1000000);
-  finder->setNmvtxRequired(3);
+  finder->setTrackQualityCut(100000000000);
+  //finder->setNmvtxRequired(0);
+  finder->setRequireMVTX(false);
   finder->setOutlierPairCut(0.1);
+  finder->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(finder);
 
   if (!G4TRACKING::convert_seeds_to_svtxtracks)
@@ -531,7 +535,7 @@ void Fun4All_raw_hit_KFP(
   }
 
   MbdReco *mbdreco = new MbdReco();
-  mbdreco->Verbosity(0);
+  mbdreco->Verbosity(10);
   //se->registerSubsystem(mbdreco);
   
    TString residoutfile = theOutfile + "_resid.root";
