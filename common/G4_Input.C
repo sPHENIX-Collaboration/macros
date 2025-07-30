@@ -4,8 +4,6 @@
 #include <G4_TrkrVariables.C>
 #include <GlobalVariables.C>
 
-// #include <phpythia6/PHPythia6.h>
-
 #include <phpythia8/PHPythia8.h>
 
 #include <g4main/CosmicSpray.h>
@@ -87,6 +85,7 @@ namespace Input
   bool READHITS = false;
   int VERBOSITY = 0;
   int EmbedId = 1;
+  int VertexEmbedId = 0;
 
   bool COSMIC = false;
   double COSMIC_R = 650.;
@@ -370,6 +369,11 @@ void InputInit()
     INPUTGENERATOR::Pythia8->set_embedding_id(Input::EmbedId);
     Input::PYTHIA8_EmbedId = Input::EmbedId;
     Input::EmbedId++;
+    if (Input::EMBED)
+    {
+      INPUTGENERATOR::Pythia8->set_reuse_vertex(Input::VertexEmbedId);
+    }
+
   }
   // single particle generators
   if (Input::DZERO)
