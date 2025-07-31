@@ -37,7 +37,6 @@
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
-// R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
 R__LOAD_LIBRARY(libFermimotionAfterburner.so)
 R__LOAD_LIBRARY(libHIJINGFlipAfterburner.so)
@@ -250,6 +249,7 @@ namespace INPUTHEPMC
 {
   std::string filename;
   std::string listfile;
+  int EmbedId = 0;
   bool FLOW = false;
   int FLOW_VERBOSITY = 0;
   bool FERMIMOTION = false;
@@ -453,6 +453,7 @@ void InputInit()
   if (Input::HEPMC)
   {
     INPUTMANAGER::HepMCInputManager = new Fun4AllHepMCInputManager("HEPMCin");
+    INPUTMANAGER::HepMCInputManager->set_embedding_id(INPUTHEPMC::EmbedId);
   }
   if (Input::PILEUPRATE > 0)
   {
