@@ -602,8 +602,12 @@ void TPC_Cells()
   digitpc->SetTpcMinLayer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
   double ENC = 670.0;  // standard
   digitpc->SetENC(ENC);
+  double pedestal = 40540; // 40540 electrons = 60 ADU
+  digitpc->SetPedestal(pedestal);
+  double ZS_threshold = 13440; // 13440 electrons = 20 ADU
+  digitpc->SetZSThreshold(ZS_threshold);
   double ADC_threshold = 4.0 * ENC;
-  digitpc->SetADCThreshold(ADC_threshold);  // 4 * ENC seems OK
+  digitpc->SetADCThreshold(ADC_threshold);
   digitpc->Verbosity(verbosity);
   cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
        << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << endl;
