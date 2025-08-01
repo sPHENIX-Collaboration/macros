@@ -1,0 +1,43 @@
+#+title: README
+
+* Overview
+
+This package automates the generation of the CDB maps for the calorimeters. Specifically, the following maps are considered:
+- BadTowerMap: CEMC
+- meanTime: CEMC, HCALIN and HCALOUT
+- fracBadChi2: CEMC, HCALIN and HCALOUT
+
+** Steps
+
+1) The ~FileCatalog~ is queried for all runnumber, tag, file paths, and time given a run type and minimum event threshold. By default the run type is set to ~run3auau~ and minimum event threshold is 500k events.
+2) The result is reduced as follows: Only the tag corresponding to the latest time among duplicate instaces of run numbers is kept. For example, if there are two instances (run, tag, time) of (A,B,C) and (A,D,E) where E > C then (A,B,C) is dropped and only (A,D,E) is kept.
+3) Using the ~filter-datasets~ binary, the CDB (Calibrations Database) is pinged given the run number and specific calibration name. If no result is returned by the CDB or if the tag in the calibration name does not match the latest tag, then the pair of run number and tag is kept to produce the calibration files. Otherwise the pair is removed since the latest calibration already exists in the CDB. A list of all such runs is written to ~{runtype}-process.csv~.
+4) Using the ~{runtype}-process.csv~ file, a unique file is created for each run number which consists of all of the ~HIST_CALOQA~ for that run number.
+5) A condor submission directory is created that processes one job per run number and uses the ~genStatus~ binary to combine all of the relevant histograms from the dataset file and write out the CDB files for the specified calibrations.
+
+* Prerequisites
+- Python 3.13.0
+- Additional Python Packages:
+  - SQLAlchemy 2.0.41
+  - pandas     2.2.3
+
+* runProd.py Script Details
+
+To get a quick list of all options allowed, run the script using the ~-h~ flag as follows: ~runProd.py -h~.
+Some key flags:
+- ~--run-type~: By default is set to ~run3auau~ but can also work with ~run2auau~ or ~run2pp~.
+- ~--min-events~: By default is set to ~500k~. Only runs with at least this many events are considered.
+- ~--output~: By default is set to ~test~. This directory is where all relevant log files and condor files are stored.
+- ~--condor-log-dir~: By default is set to ~/tmp/<USER>/dump~. This directory is where the condor log files are stored. As long as the location is under ~/tmp~ it should be fine.
+- ~--do-condor-submit~: By default this is disabled. Enabling this option submits the condor jobs as needed. Useful for embedding the script in a cron job. Note: Jobs are only submitted if there exists a run with outdated or missing calibrations.
+- By default the ~--bin-filter-datasets~ and ~--bin-genStatus~ are set empty as they are determined on on-the-fly through the ~$OFFLINE_MAIN/bin~ path where the binaries for the key routines are stored.
+
+Example:
+#+begin_src bash
+runProd.py --run-type run3auau --min-events 500000 --output run3auau --verbose
+#+end_src
+
+Example Cron Job (Once a day at midnight):
+#+begin_src
+0 0 * * * runProd.py --run-type run3auau --min-events 500000 --output run3auau --verbose --do-condor-submit
+#+end_src

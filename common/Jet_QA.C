@@ -105,9 +105,6 @@ namespace JetQA
   ///! Max eta acceptance
   double MaxAcceptEta = 1.1;
 
-  ///! Inclusive tag
-  std::string InclusiveTag = "inclusive";
-
   // maps ---------------------------------------------------------------------
 
   ///! Map from trigger to histogram tag
@@ -140,7 +137,20 @@ namespace JetQA
     {JetQADefs::GL1::Photon1, "photon1"},
     {JetQADefs::GL1::Photon2, "photon2"},
     {JetQADefs::GL1::Photon3, "photon3"},
-    {JetQADefs::GL1::Photon4, "photon4"} 
+    {JetQADefs::GL1::Photon4, "photon4"}, 
+    {JetQADefs::GL1::MBDNS2Vtx10, "mbdns2vtx10"},
+    {JetQADefs::GL1::MBDNS2Vtx30, "mbdns2vtx30"},
+    {JetQADefs::GL1::MBDNS2Vtx60, "mbdns2vtx60"},
+    {JetQADefs::GL1::MBDNS2Vtx150, "mbdns2vtx150"},
+    {JetQADefs::GL1::MBDNS2Photon6Vtx10, "mbdns2photon6vtx10"},
+    {JetQADefs::GL1::MBDNS2Photon8Vtx10, "mbdns2photon8vtx10"},
+    {JetQADefs::GL1::MBDNS2Photon10Vtx10, "mbdns2photon10vtx10"},
+    {JetQADefs::GL1::MBDNS2Photon12Vtx10, "mbdns2photon12vtx10"},
+    {JetQADefs::GL1::MBDNS2Photon6Vtx150, "mbdns2photon6vtx150"},
+    {JetQADefs::GL1::MBDNS2Photon8Vtx150, "mbdns2photon8vtx150"},
+    {JetQADefs::GL1::MBDNS2Photon10Vtx150, "mbdns2photon10vtx150"},
+    {JetQADefs::GL1::MBDNS2Photon12Vtx150, "mbdns2photon12vtx150"},
+    {JetQADefs::GL1::Inclusive, "inclusive"}
   };
 
   ///! Map from jet type to input node
@@ -210,7 +220,7 @@ namespace JetQA
     }
     else
     {
-      tag.append("_" + InclusiveTag);
+      tag.append("_" + GL1Tag[JetQADefs::GL1::Inclusive]);
     }
     return tag;
 
@@ -321,13 +331,10 @@ namespace JetQA
       JetQADefs::GL1::Jet4
     };
 
-    // default jets for AuAu
-    //   - n.b. the thresholds were changed 10, 60, and
-    //     150 cm respectively during AuAu run
+    // default triggers for 2025 AuAu
     std::vector<uint32_t> vecDefaultTrigsAA = {
-      JetQADefs::GL1::MBDNSVtx10,  // actually 10 cm
-      JetQADefs::GL1::MBDNSVtx30,  // actually 60 cm
-      JetQADefs::GL1::MBDNSVtx60   // actually 150 cm
+      JetQADefs::GL1::MBDNS2Vtx10,
+      JetQADefs::GL1::MBDNS2Vtx150
     };
 
     if (JetQA::DoPP)
@@ -603,6 +610,7 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
       .doTrackQA    = true,
       .doJetQA      = true,
       .doSubsysHist = false,
+      .doOptHist    = false,  // turn off optional histograms
       .rJet         = JetQA::JetRes[jet],
       .jetInNode    = JetQA::JetInput[jet]
     });
@@ -652,6 +660,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
     "CLUSTERINFO_CEMC",
     ""
   );
+  photonJetsQA -> SetDoOptHist(false);
   if (trg.has_value())
   {
     photonJetsQA -> SetTrgToSelect(trg.value());
@@ -670,6 +679,27 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   }
   se -> registerSubsystem(evtRhoQA);
 
+  // initialize and register jet seed counter qa module
+  if (!JetQA::DoPP)
+  {
+    JetSeedCount* jetSeedQA = new JetSeedCount(
+      "JetSeedCount" + trig_tag + "_towersub1_antikt_r02",
+      "AntiKt_Tower_r04",  // n.b. unused in module
+      "AntiKt_TowerInfo_HIRecoSeedsRaw_r02",
+      "AntiKt_TowerInfo_HIRecoSeedsSub_r02");
+    jetSeedQA -> Verbosity(verbosity);
+    jetSeedQA -> setHistTag("");
+    jetSeedQA -> setPtRange(ptJetRange.first, ptJetRange.second);
+    jetSeedQA -> setEtaRange(JetQA::MinAcceptEta, JetQA::MaxAcceptEta);
+    jetSeedQA -> setWriteToOutputFile(false);
+    jetSeedQA -> setPPMode(JetQA::DoPP);
+    if (trg.has_value())
+    {
+      jetSeedQA -> setTrgToSelect(trg.value());
+    }
+    se -> registerSubsystem(jetSeedQA);
+  }
+
   // create modules that take single R values ---------------------------------
 
   // loop over resolution parameters
@@ -678,27 +708,6 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
 
     // get R-dependent eta range
     std::pair<double, double> etaJetRange = JetQA::GetJetEtaRange(JetQA::JetRes[jet]);
-
-    // initialize and register jet seed counter qa module
-    if (!JetQA::DoPP)
-    {
-      JetSeedCount* jetSeedQA = new JetSeedCount(
-        "JetSeedCount" + trig_tag + "_" + JetQA::JetTag[jet],
-        JetQA::JetInput[jet],
-        "AntiKt_TowerInfo_HIRecoSeedsRaw_r02",
-        "AntiKt_TowerInfo_HIRecoSeedsSub_r02");
-      jetSeedQA -> Verbosity(verbosity);
-      jetSeedQA -> setHistTag("");
-      jetSeedQA -> setPtRange(ptJetRange.first, ptJetRange.second);
-      jetSeedQA -> setEtaRange(etaJetRange.first, etaJetRange.second);
-      jetSeedQA -> setWriteToOutputFile(false);
-      jetSeedQA -> setPPMode(JetQA::DoPP);
-      if (trg.has_value())
-      {
-        jetSeedQA -> setTrgToSelect(trg.value());
-      }
-      se -> registerSubsystem(jetSeedQA);
-    }
 
     // initialize and register constituent checks
     ConstituentsinJets* jetCstQA = new ConstituentsinJets(
@@ -746,8 +755,10 @@ void Jet_QA(std::vector<uint32_t> vecTrigsToUse = JetQA::GetDefaultTriggerList()
     caloStatusQA -> SetConfig(
       {
         .debug       = false,
+        .doNorm      = false, // do NOT try to normalize histograms
+        .doOptHist   = false, // turn off extra histograms
         .histTag     = "",
-        .doTrgSelect = false // n.b. differential in trigger not useful here
+        .doTrgSelect = false  // n.b. differential in trigger not useful here
       }
     );
     se -> Verbosity(verbosity);

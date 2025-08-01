@@ -15,11 +15,15 @@
 #include <jetbackground/SubtractTowers.h>
 #include <jetbackground/SubtractTowersCS.h>
 
+#include <eventplaneinfo/Eventplaneinfo.h>
+#include <eventplaneinfo/EventPlaneReco.h>
+
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libjetbase.so)
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libjetbackground.so)
+R__LOAD_LIBRARY(libeventplaneinfo.so)
 
 namespace Enable
 {
@@ -60,6 +64,14 @@ void HIJetReco()
   truthjetreco->set_input_node("TRUTH");
   truthjetreco->Verbosity(verbosity);
   se->registerSubsystem(truthjetreco);
+
+  if(G4HIJETS::do_flow == 3)
+  {
+      EventPlaneReco *epreco = new EventPlaneReco();
+      epreco->set_sepd_epreco(true);
+      epreco->set_isSim(true);
+      se->registerSubsystem(epreco);
+  }
 
 
 

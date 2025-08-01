@@ -198,6 +198,12 @@ void Fun4All_FieldOnAllTrackers_KFP(
   finder->setOutlierPairCut(0.1);
   se->registerSubsystem(finder);
 
+  // Propagate track positions to the vertex position
+  auto vtxProp = new PHActsVertexPropagator;
+  vtxProp->Verbosity(0);
+  vtxProp->fieldMap(G4MAGNET::magfield_tracking);
+  se->registerSubsystem(vtxProp);
+  
   //KFParticle setup
   KFParticle_sPHENIX *kfparticle = new KFParticle_sPHENIX("myKShortReco");
   kfparticle->Verbosity(1);

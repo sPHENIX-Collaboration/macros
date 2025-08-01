@@ -72,7 +72,7 @@ void load_tpot_geometry( int runnumber )
 
   rc->set_IntFlag("RUNNUMBER", runnumber);
   rc->set_IntFlag("RUNSEGMENT", 0);
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
 
   // load geometry file

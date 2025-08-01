@@ -4,8 +4,6 @@
 #include <G4_TrkrVariables.C>
 #include <GlobalVariables.C>
 
-// #include <phpythia6/PHPythia6.h>
-
 #include <phpythia8/PHPythia8.h>
 
 #include <g4main/CosmicSpray.h>
@@ -39,7 +37,6 @@
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
-// R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
 R__LOAD_LIBRARY(libFermimotionAfterburner.so)
 R__LOAD_LIBRARY(libHIJINGFlipAfterburner.so)
@@ -87,6 +84,7 @@ namespace Input
   bool READHITS = false;
   int VERBOSITY = 0;
   int EmbedId = 1;
+  int VertexEmbedId = 0;
 
   bool COSMIC = false;
   double COSMIC_R = 650.;
@@ -251,6 +249,7 @@ namespace INPUTHEPMC
 {
   std::string filename;
   std::string listfile;
+  int EmbedId = 0;
   bool FLOW = false;
   int FLOW_VERBOSITY = 0;
   bool FERMIMOTION = false;
@@ -370,6 +369,11 @@ void InputInit()
     INPUTGENERATOR::Pythia8->set_embedding_id(Input::EmbedId);
     Input::PYTHIA8_EmbedId = Input::EmbedId;
     Input::EmbedId++;
+    if (Input::EMBED)
+    {
+      INPUTGENERATOR::Pythia8->set_reuse_vertex(Input::VertexEmbedId);
+    }
+
   }
   // single particle generators
   if (Input::DZERO)
@@ -449,6 +453,7 @@ void InputInit()
   if (Input::HEPMC)
   {
     INPUTMANAGER::HepMCInputManager = new Fun4AllHepMCInputManager("HEPMCin");
+    INPUTMANAGER::HepMCInputManager->set_embedding_id(INPUTHEPMC::EmbedId);
   }
   if (Input::PILEUPRATE > 0)
   {
