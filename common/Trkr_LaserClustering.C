@@ -35,6 +35,7 @@ void TPC_LaserClustering()
       laserClusterizer->set_max_time_samples(TRACKING::reco_tpc_maxtime_sample);
       laserClusterizer->set_adc_threshold(G4TPC::laser_adc_threshold);
       laserClusterizer->set_do_sequential(G4TPC::LaserClusteringSequential);
+      laserClusterizer->set_do_fitting(G4TPC::laserClusterFitting);
       se->registerSubsystem(laserClusterizer);
 
     }
@@ -69,6 +70,7 @@ void TPC_LaminationClustering()
       laminationClusterizer->set_max_time_samples(TRACKING::reco_tpc_maxtime_sample);
       laminationClusterizer->set_adc_threshold(G4TPC::laser_adc_threshold);
       laminationClusterizer->set_do_sequential(G4TPC::LaserClusteringSequential);
+      laminationClusterizer->set_do_fitting(G4TPC::laserClusterFitting);
       laminationClusterizer->set_lamination(true);
       se->registerSubsystem(laminationClusterizer);
     }
