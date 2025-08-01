@@ -141,7 +141,8 @@ void Tpc_LaserEventIdentifying()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
   Fun4AllServer* se = Fun4AllServer::instance();
-
+  auto rc = recoConsts::instance();
+  int runnumber = rc->get_IntFlag("RUNNUMBER");
   auto laserEventIdentifier = new LaserEventIdentifier;
   if(G4TPC::laser_event_debug_filename != "")
   {
@@ -149,6 +150,7 @@ void Tpc_LaserEventIdentifying()
     laserEventIdentifier->set_debug_name(G4TPC::laser_event_debug_filename);
   }
   laserEventIdentifier->set_max_time_samples(TRACKING::reco_tpc_maxtime_sample);
+  laserEventIdentifier->set_runnumber(runnumber);
   se->registerSubsystem(laserEventIdentifier);
 }
 
