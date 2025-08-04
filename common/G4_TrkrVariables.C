@@ -141,7 +141,7 @@ namespace G4TPC
   // enable diffuse laser clustering
   bool ENABLE_CENTRAL_MEMBRANE_CLUSTERING = true;
   bool LaserClusteringSequential = false;
-  bool laserClusterFitting = true;
+  bool laserClusterFitting = false;
   float laser_adc_threshold = 100.0;
 
   bool REJECT_LASER_EVENTS = false;
