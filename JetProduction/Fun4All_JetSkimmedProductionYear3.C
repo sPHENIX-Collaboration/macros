@@ -36,6 +36,7 @@
 #include <calovalid/CaloValid.h>
 
 #include <jetdstskimmer/JetDSTSkimmer.h>
+#include <jetbackground/BeamBackgroundFilterAndQA.h>
 
 
 R__LOAD_LIBRARY(libfun4all.so)
@@ -50,10 +51,10 @@ R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libJetDSTSkimmer.so)
 
 void Fun4All_JetSkimmedProductionYear3(int nEvents=1000,
-                        const std::string &fname = "DST_CALOFITTING_run3auau_new_newcdbtag_v005-00067520-00000.root",
-                        const std::string& outfile_low= "DST_JETCALO-00000000-000000.root",
-                        const std::string& outfile_high= "DST_Jet-00000000-000000.root",
-                        const std::string& outfile_hist= "HIST_JETQA-00000000-000000.root",
+                        const std::string &fname = "DST_CALOFITTING_run3auau_new_newcdbtag_v007-00068490-00000.root",
+                        const std::string& outfile_low= "DST_JETCALO-00068490-000000.root",
+                        const std::string& outfile_high= "DST_Jet-00068490-000000.root",
+                        const std::string& outfile_hist= "HIST_JETQA-00068490-000000.root",
                         const std::string& dbtag= "ProdA_2024"
   )
 {
@@ -106,6 +107,20 @@ void Fun4All_JetSkimmedProductionYear3(int nEvents=1000,
   {
     Centrality();
   }
+
+  // filter out beam-background events (use default parameters for
+  // streak-sideband filter)
+  BeamBackgroundFilterAndQA* filter = new BeamBackgroundFilterAndQA("BeamBackgroundFilterAndQA");
+  filter->Verbosity(std::max(Enable::QA_VERBOSITY, Enable::JETQA_VERBOSITY));
+  filter->SetConfig(
+    {
+      .debug          = false,
+      .doQA           = Enable::QA,
+      .doEvtAbort     = false,
+      .filtersToApply = {"StreakSideband"}
+    }
+  );
+  se->registerSubsystem(filter);
 
   // do jet reconstruction & rho calculation
   HIJetReco();
