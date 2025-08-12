@@ -545,6 +545,7 @@ void Fun4All_raw_hit_KFP(
    resid->outfileName(residstring);
    resid->alignment(false);
    resid->vertexTree();
+   resid->eventTree();
 //   // adjust track map name
 //   if(G4TRACKING::SC_CALIBMODE && !G4TRACKING::convert_seeds_to_svtxtracks)
 //   {
