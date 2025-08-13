@@ -60,7 +60,8 @@ int Fun4All_G4_sPHENIX(
 
   //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
   PHRandomSeed::Verbosity(1);
-
+  CDBInterface::instance()->Verbosity(1);
+  
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
@@ -736,7 +737,7 @@ int Fun4All_G4_sPHENIX(
   // Exit
   //-----
 
-//  CDBInterface::instance()->Print(); // print used DB files
+  CDBInterface::instance()->Print(); // print used DB files
   se->End();
   std::cout << "All done" << std::endl;
   delete se;
