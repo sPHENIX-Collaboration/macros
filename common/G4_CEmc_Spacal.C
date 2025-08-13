@@ -349,7 +349,6 @@ void CEMC_Towers()
     CaloTowerStatus *statusEMC = new CaloTowerStatus("CEMCSTATUS");
     statusEMC->set_detector_type(CaloTowerDefs::CEMC);
     statusEMC->set_time_cut(1);
-    statusEMC->set_isSim(true);
     se->registerSubsystem(statusEMC);
 
     CaloTowerCalib *calibEMC = new CaloTowerCalib("CEMCCALIB");
