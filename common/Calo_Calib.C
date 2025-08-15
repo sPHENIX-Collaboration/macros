@@ -94,6 +94,11 @@ void Process_Calo_Calib()
   calibIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   se->registerSubsystem(calibIHCal);
 
+  std::cout << "Calibrating sEPD" << std::endl;
+  CaloTowerCalib *calibSEPD = new CaloTowerCalib("SEPD");
+  calibSEPD->set_detector_type(CaloTowerDefs::SEPD);
+  se->registerSubsystem(calibSEPD);
+
   ////////////////
   // MC Calibration
   if (isSim)
