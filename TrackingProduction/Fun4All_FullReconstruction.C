@@ -125,7 +125,8 @@ void Fun4All_FullReconstruction(
   se->registerInputManager(ingeo);
 
   TpcReadoutInit( runnumber );
-
+  
+  G4TPC::REJECT_LASER_EVENTS=true;
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
   //Flag for running the tpc hit unpacker with zero suppression on
   TRACKING::tpc_zero_supp = true;
@@ -167,24 +168,17 @@ void Fun4All_FullReconstruction(
 
   Micromegas_HitUnpacking();
 
-  MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
-  int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
-  mvtxclusterizer->Verbosity(verbosity);
-  se->registerSubsystem(mvtxclusterizer);
+  Mvtx_Clustering();
 
   Intt_Clustering();
 
   Tpc_LaserEventIdentifying();
 
-  auto tpcclusterizer = new TpcClusterizer;
-  tpcclusterizer->Verbosity(0);
-  tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
-  tpcclusterizer->set_rawdata_reco();
-  se->registerSubsystem(tpcclusterizer);
-
+  TPC_Clustering_run2pp();
 
   Micromegas_Clustering();
 
+  Reject_Laser_Events();
   /*
    * Begin Track Seeding
    */

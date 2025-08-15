@@ -153,7 +153,19 @@ void Tpc_LaserEventIdentifying()
   laserEventIdentifier->set_runnumber(runnumber);
   se->registerSubsystem(laserEventIdentifier);
 }
+void TPC_Clustering_run2pp()
+{
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
+  ACTSGEOM::ActsGeomInit();
+  Fun4AllServer* se = Fun4AllServer::instance();
 
+  auto tpcclusterizer = new TpcClusterizer;
+  tpcclusterizer->Verbosity(0);
+  tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
+  tpcclusterizer->set_rawdata_reco();
+  tpcclusterizer->set_reject_event(G4TPC::REJECT_LASER_EVENTS);
+  se->registerSubsystem(tpcclusterizer);
+}
 void TPC_Clustering()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);

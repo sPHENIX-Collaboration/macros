@@ -101,7 +101,7 @@ void Fun4All_TrackFitting(
   // G4TPC::tpc_drift_velocity_reco = 0.0073844; // cm/ns
   // TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
   // G4TPC::tpc_tzero_reco = -5*50;  // ns
-
+  G4TPC::REJECT_LASER_EVENTS=true;
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
 
   // to turn on the default static corrections, enable the two lines below
@@ -125,61 +125,10 @@ void Fun4All_TrackFitting(
   hitsinclus->fileopen(clusterfilename);
   se->registerInputManager(hitsinclus);
 
-
+  Reject_Laser_Events();
   
-  /*
-   * Track Matching between silicon and TPC
-   */
-  // The normal silicon association methods
-  // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
-  auto silicon_match = new PHSiliconTpcTrackMatching;
-  silicon_match->Verbosity(0);
-  silicon_match->set_pp_mode(TRACKING::pp_mode);
-  if(G4TPC::ENABLE_AVERAGE_CORRECTIONS)
-  {
-    // for general tracking
-    // Eta/Phi window is determined by 3 sigma window
-    // X/Y/Z window is determined by 4 sigma window
-    silicon_match->window_deta.set_posQoverpT_maxabs({-0.014,0.0331,0.48});
-    silicon_match->window_deta.set_negQoverpT_maxabs({-0.006,0.0235,0.52});
-    silicon_match->set_deltaeta_min(0.03);
-    silicon_match->window_dphi.set_QoverpT_range({-0.15,0,0}, {0.15,0,0});
-    silicon_match->window_dx.set_QoverpT_maxabs({3.0,0,0});
-    silicon_match->window_dy.set_QoverpT_maxabs({3.0,0,0});
-    silicon_match->window_dz.set_posQoverpT_maxabs({1.138,0.3919,0.84});
-    silicon_match->window_dz.set_negQoverpT_maxabs({0.719,0.6485,0.65});
-    silicon_match->set_crossing_deltaz_max(30);
-    silicon_match->set_crossing_deltaz_min(2);
-
-    // for distortion correction using SI-TPOT fit and track pT>0.5
-    if (G4TRACKING::SC_CALIBMODE)
-    {
-      silicon_match->window_deta.set_posQoverpT_maxabs({0.016,0.0060,1.13});
-      silicon_match->window_deta.set_negQoverpT_maxabs({0.022,0.0022,1.44});
-      silicon_match->set_deltaeta_min(0.03);
-      silicon_match->window_dphi.set_QoverpT_range({-0.15,0,0}, {0.09,0,0});
-      silicon_match->window_dx.set_QoverpT_maxabs({2.0,0,0});
-      silicon_match->window_dy.set_QoverpT_maxabs({1.5,0,0});
-      silicon_match->window_dz.set_posQoverpT_maxabs({1.213,0.0211,2.09});
-      silicon_match->window_dz.set_negQoverpT_maxabs({1.307,0.0001,4.52});
-      silicon_match->set_crossing_deltaz_min(1.2);
-    }
-  }
-  se->registerSubsystem(silicon_match);
-
-  // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-  auto mm_match = new PHMicromegasTpcTrackMatching;
-  mm_match->Verbosity(0);
-  mm_match->set_pp_mode(TRACKING::pp_mode);
-  mm_match->set_rphi_search_window_lyr1(3.);
-  mm_match->set_rphi_search_window_lyr2(15.0);
-  mm_match->set_z_search_window_lyr1(30.0);
-  mm_match->set_z_search_window_lyr2(3.);
-
-  mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
-  mm_match->set_test_windows_printout(false);  // used for tuning search windows only
-  se->registerSubsystem(mm_match);
-
+  Tracking_Reco_TrackMatching_run2pp();
+  
   
   /*
    * Either converts seeds to tracks with a straight line/helix fit
@@ -197,70 +146,11 @@ void Fun4All_TrackFitting(
   }
   else
   {
-    auto deltazcorr = new PHTpcDeltaZCorrection;
-    deltazcorr->Verbosity(0);
-    se->registerSubsystem(deltazcorr);
-
-    // perform final track fit with ACTS
-    auto actsFit = new PHActsTrkFitter;
-    actsFit->Verbosity(0);
-    actsFit->commissioning(G4TRACKING::use_alignment);
-    // in calibration mode, fit only Silicons and Micromegas hits
-    actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-    actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-    actsFit->set_pp_mode(TRACKING::pp_mode);
-    actsFit->set_use_clustermover(true);  // default is true for now
-    actsFit->useActsEvaluator(false);
-    actsFit->useOutlierFinder(false);
-    actsFit->setFieldMap(G4MAGNET::magfield_tracking);
-    se->registerSubsystem(actsFit);
-
-    auto cleaner = new PHTrackCleaner();
-    cleaner->Verbosity(0);
-    cleaner->set_pp_mode(TRACKING::pp_mode);    
-    se->registerSubsystem(cleaner);
-
-    if (G4TRACKING::SC_CALIBMODE)
-    {
-      /*
-       * in calibration mode, calculate residuals between TPC and fitted tracks,
-       * store in dedicated structure for distortion correction
-       */
-      auto residuals = new PHTpcResiduals;
-      const TString tpc_residoutfile = theOutfile + "_PhTpcResiduals.root";
-      residuals->setOutputfile(tpc_residoutfile.Data());
-      residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-
-      // matches Tony's analysis
-      residuals->setMinPt(0.2);
-
-      // reconstructed distortion grid size (phi, r, z)
-      residuals->setGridDimensions(36, 48, 80);
-      se->registerSubsystem(residuals);
-    }
+    Tracking_Reco_TrackFit_run2pp(theOutfile);
   }
 
-  
-  auto finder = new PHSimpleVertexFinder;
-  finder->Verbosity(0);
-  
-  //new cuts
-  finder->setDcaCut(0.05);
-  finder->setTrackPtCut(0.1);
-  finder->setBeamLineCut(1);
-  finder->setTrackQualityCut(300);
-  finder->setNmvtxRequired(3);
-  finder->setOutlierPairCut(0.10);
-  
-  se->registerSubsystem(finder);
-
-  // Propagate track positions to the vertex position
-  auto vtxProp = new PHActsVertexPropagator;
-  vtxProp->Verbosity(0);
-  vtxProp->fieldMap(G4MAGNET::magfield_tracking);
-  se->registerSubsystem(vtxProp);
-
-
+  //vertexing and propagation to vertex
+  Tracking_Reco_Vertex_run2pp();
 
   TString residoutfile = theOutfile + "_resid.root";
   std::string residstring(residoutfile.Data());
