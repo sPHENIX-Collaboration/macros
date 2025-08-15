@@ -119,6 +119,7 @@ void Fun4All_TrackSeeding(
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
+  G4TPC::REJECT_LASER_EVENTS=true;
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
 
   // to turn on the default static corrections, enable the two lines below

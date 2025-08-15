@@ -101,7 +101,7 @@ void Fun4All_TrackFitting(
   // G4TPC::tpc_drift_velocity_reco = 0.0073844; // cm/ns
   // TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
   // G4TPC::tpc_tzero_reco = -5*50;  // ns
-
+  G4TPC::REJECT_LASER_EVENTS=true;
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
 
   // to turn on the default static corrections, enable the two lines below
@@ -125,7 +125,8 @@ void Fun4All_TrackFitting(
   hitsinclus->fileopen(clusterfilename);
   se->registerInputManager(hitsinclus);
 
-
+  Reject_Laser_Events();
+  
   Tracking_Reco_TrackMatching_run2pp();
   
   
