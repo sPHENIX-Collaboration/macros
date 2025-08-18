@@ -241,7 +241,7 @@ void Fun4All_raw_hit_KFP(
   se->registerInputManager(ingeo);
 
   TpcReadoutInit( runnumber );
-
+  G4TPC::REJECT_LASER_EVENTS=true;
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
   //Flag for running the tpc hit unpacker with zero suppression on
   TRACKING::tpc_zero_supp = true;
@@ -305,9 +305,7 @@ void Fun4All_raw_hit_KFP(
 
   Micromegas_HitUnpacking();
 
-  MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
-  mvtxclusterizer->Verbosity(0);
-  se->registerSubsystem(mvtxclusterizer);
+  Mvtx_Clustering();
 
   Intt_Clustering();
 
@@ -323,6 +321,7 @@ void Fun4All_raw_hit_KFP(
 
   Micromegas_Clustering();
 
+  Reject_Laser_Events();
   /*
    * Begin Track Seeding
    */
