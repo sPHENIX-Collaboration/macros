@@ -47,7 +47,7 @@
 #include <trackingqa/TpcSeedsQA.h>
 #include <trackingqa/SiliconSeedsQA.h>
 #include <trackingqa/TpcSiliconQA.h>
-
+#include <trackingqa/TrackFittingQA.h>
 #include <trackingqa/MicromegasClusterQA.h>
 
 #include <trackingqa/MvtxClusterQA.h>
@@ -98,30 +98,30 @@ void Fun4All_PRDFReconstruction(
     const string &input_mvtxfile03 = "mvtx3.list",
     const string &input_mvtxfile04 = "mvtx4.list",
     const string &input_mvtxfile05 = "mvtx5.list",
-    const string &input_tpcfile00 = "ebdc00.list",
-    const string &input_tpcfile01 = "ebdc01.list",
-    const string &input_tpcfile02 = "ebdc02.list",
-    const string &input_tpcfile03 = "ebdc03.list",
-    const string &input_tpcfile04 = "ebdc04.list",
-    const string &input_tpcfile05 = "ebdc05.list",
-    const string &input_tpcfile06 = "ebdc06.list",
-    const string &input_tpcfile07 = "ebdc07.list",
-    const string &input_tpcfile08 = "ebdc08.list",
-    const string &input_tpcfile09 = "ebdc09.list",
-    const string &input_tpcfile10 = "ebdc10.list",
-    const string &input_tpcfile11 = "ebdc11.list",
-    const string &input_tpcfile12 = "ebdc12.list",
-    const string &input_tpcfile13 = "ebdc13.list",
-    const string &input_tpcfile14 = "ebdc14.list",
-    const string &input_tpcfile15 = "ebdc15.list",
-    const string &input_tpcfile16 = "ebdc16.list",
-    const string &input_tpcfile17 = "ebdc17.list",
-    const string &input_tpcfile18 = "ebdc18.list",
-    const string &input_tpcfile19 = "ebdc19.list",
-    const string &input_tpcfile20 = "ebdc20.list",
-    const string &input_tpcfile21 = "ebdc21.list",
-    const string &input_tpcfile22 = "ebdc22.list",
-    const string &input_tpcfile23 = "ebdc23.list",
+    const string &input_tpcfile00 = "tpc00_0.list",
+    const string &input_tpcfile01 = "tpc01_0.list",
+    const string &input_tpcfile02 = "tpc02_0.list",
+    const string &input_tpcfile03 = "tpc03_0.list",
+    const string &input_tpcfile04 = "tpc04_0.list",
+    const string &input_tpcfile05 = "tpc05_0.list",
+    const string &input_tpcfile06 = "tpc06_0.list",
+    const string &input_tpcfile07 = "tpc07_0.list",
+    const string &input_tpcfile08 = "tpc08_0.list",
+    const string &input_tpcfile09 = "tpc09_0.list",
+    const string &input_tpcfile10 = "tpc10_0.list",
+    const string &input_tpcfile11 = "tpc11_0.list",
+    const string &input_tpcfile12 = "tpc12_0.list",
+    const string &input_tpcfile13 = "tpc13_0.list",
+    const string &input_tpcfile14 = "tpc14_0.list",
+    const string &input_tpcfile15 = "tpc15_0.list",
+    const string &input_tpcfile16 = "tpc16_0.list",
+    const string &input_tpcfile17 = "tpc17_0.list",
+    const string &input_tpcfile18 = "tpc18_0.list",
+    const string &input_tpcfile19 = "tpc19_0.list",
+    const string &input_tpcfile20 = "tpc20_0.list",
+    const string &input_tpcfile21 = "tpc21_0.list",
+    const string &input_tpcfile22 = "tpc22_0.list",
+    const string &input_tpcfile23 = "tpc23_0.list",
     const string &input_tpotfile = "tpot.list"
 )
 {
@@ -193,7 +193,8 @@ void Fun4All_PRDFReconstruction(
   TRACKING::tpc_zero_supp = true;
   TRACKING::pp_mode = true;
   G4TRACKING::convert_seeds_to_svtxtracks = false;
-
+  G4TPC::REJECT_LASER_EVENTS=true;
+  
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
   TpcReadoutInit( runnumber );
@@ -338,203 +339,25 @@ void Fun4All_PRDFReconstruction(
   Tpc_HitUnpacking();
   Micromegas_HitUnpacking();
 
-  MvtxClusterizer* mvtxclusterizer = new MvtxClusterizer("MvtxClusterizer");
-  mvtxclusterizer->Verbosity(0);
-  se->registerSubsystem(mvtxclusterizer);
+  Mvtx_Clustering();
 
   Intt_Clustering();
   
   Tpc_LaserEventIdentifying();
 
-  auto tpcclusterizer = new TpcClusterizer;
-  tpcclusterizer->Verbosity(0);
-  tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
-  tpcclusterizer->set_rawdata_reco();
-  tpcclusterizer->set_reject_event(G4TPC::REJECT_LASER_EVENTS);
-  se->registerSubsystem(tpcclusterizer);
-
+  TPC_Clustering_run2pp();
   Micromegas_Clustering();
 
+  Reject_Laser_Events();
+
   
-  auto silicon_Seeding = new PHActsSiliconSeeding;
-  silicon_Seeding->Verbosity(0);
-  // these get us to about 83% INTT > 1
-  silicon_Seeding->setinttRPhiSearchWindow(0.4);
-  silicon_Seeding->setinttZSearchWindow(2.0);
-  silicon_Seeding->setStrobeRange(-5,5);
-  silicon_Seeding->seedAnalysis(false);
-  se->registerSubsystem(silicon_Seeding);
+  Tracking_Reco_TrackSeed_run2pp();
+  Tracking_Reco_TrackMatching_run2pp();
 
-  auto merger = new PHSiliconSeedMerger;
-  merger->Verbosity(0);
-  se->registerSubsystem(merger);
-
-  /*
-   * Tpc Seeding
-   */
-  auto seeder = new PHCASeeding("PHCASeeding");
- if (ConstField)
-  {
-    seeder->useConstBField(true);
-    seeder->constBField(fieldstrength);
-  }
-  else
-  {
-    seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
-    seeder->useConstBField(false);
-    seeder->magFieldFile(G4MAGNET::magfield_tracking);  // to get charge sign right
-  }
-  seeder->Verbosity(0);
-  seeder->SetLayerRange(7, 55);
-  seeder->SetSearchWindow(2.,0.05); // z-width and phi-width, default in macro at 1.5 and 0.05
-  seeder->SetClusAdd_delta_window(3.0,0.06); //  (0.5, 0.005) are default; sdzdr_cutoff, d2/dr2(phi)_cutoff
-  //seeder->SetNClustersPerSeedRange(4,60); // default is 6, 6
-  seeder->SetMinHitsPerCluster(0);
-  seeder->SetMinClustersPerTrack(3);
-  seeder->useFixedClusterError(true);
-  seeder->set_pp_mode(true);
-  se->registerSubsystem(seeder);
-
-  // expand stubs in the TPC using simple kalman filter
-  auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
-  cprop->set_field_dir(G4MAGNET::magfield_rescale);
-  if (ConstField)
-  {
-    cprop->useConstBField(true);
-    cprop->setConstBField(fieldstrength);
-  }
-  else
-  {
-    cprop->magFieldFile(G4MAGNET::magfield_tracking);
-    cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
-  }
-  cprop->useFixedClusterError(true);
-  cprop->set_max_window(5.);
-  cprop->Verbosity(0);
-  cprop->set_pp_mode(true);
-  se->registerSubsystem(cprop);
-
-  // Always apply preliminary distortion corrections to TPC clusters before silicon matching
-  // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
-  auto prelim_distcorr = new PrelimDistortionCorrection;
-  prelim_distcorr->set_pp_mode(true);
-  prelim_distcorr->Verbosity(0);
-  se->registerSubsystem(prelim_distcorr);
-
-  /*
-   * Track Matching between silicon and TPC
-   */
-  // The normal silicon association methods
-  // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
-  auto silicon_match = new PHSiliconTpcTrackMatching;
-  silicon_match->Verbosity(0);
-  silicon_match->set_pp_mode(TRACKING::pp_mode);
-  if(G4TPC::ENABLE_AVERAGE_CORRECTIONS)
-  {
-    // for general tracking
-    // Eta/Phi window is determined by 3 sigma window
-    // X/Y/Z window is determined by 4 sigma window
-    silicon_match->window_deta.set_posQoverpT_maxabs({-0.014,0.0331,0.48});
-    silicon_match->window_deta.set_negQoverpT_maxabs({-0.006,0.0235,0.52});
-    silicon_match->set_deltaeta_min(0.03);
-    silicon_match->window_dphi.set_QoverpT_range({-0.15,0,0}, {0.15,0,0});
-    silicon_match->window_dx.set_QoverpT_maxabs({3.0,0,0});
-    silicon_match->window_dy.set_QoverpT_maxabs({3.0,0,0});
-    silicon_match->window_dz.set_posQoverpT_maxabs({1.138,0.3919,0.84});
-    silicon_match->window_dz.set_negQoverpT_maxabs({0.719,0.6485,0.65});
-    silicon_match->set_crossing_deltaz_max(30);
-    silicon_match->set_crossing_deltaz_min(2);
-
-    // for distortion correction using SI-TPOT fit and track pT>0.5
-    if (G4TRACKING::SC_CALIBMODE)
-    {
-      silicon_match->window_deta.set_posQoverpT_maxabs({0.016,0.0060,1.13});
-      silicon_match->window_deta.set_negQoverpT_maxabs({0.022,0.0022,1.44});
-      silicon_match->set_deltaeta_min(0.03);
-      silicon_match->window_dphi.set_QoverpT_range({-0.15,0,0}, {0.09,0,0});
-      silicon_match->window_dx.set_QoverpT_maxabs({2.0,0,0});
-      silicon_match->window_dy.set_QoverpT_maxabs({1.5,0,0});
-      silicon_match->window_dz.set_posQoverpT_maxabs({1.213,0.0211,2.09});
-      silicon_match->window_dz.set_negQoverpT_maxabs({1.307,0.0001,4.52});
-      silicon_match->set_crossing_deltaz_min(1.2);
-    }
-  }
-  se->registerSubsystem(silicon_match);
-
-  // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-  auto mm_match = new PHMicromegasTpcTrackMatching;
-  mm_match->Verbosity(0);
-  mm_match->set_rphi_search_window_lyr1(3.);
-  mm_match->set_rphi_search_window_lyr2(15.0);
-  mm_match->set_z_search_window_lyr1(30.0);
-  mm_match->set_z_search_window_lyr2(3.);
-
-  mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
-  mm_match->set_test_windows_printout(false);  // used for tuning search windows only
-  se->registerSubsystem(mm_match);
-
-  /*
-   * End Track Seeding
-   */
-
-
-  /*
-   * Either converts seeds to tracks with a straight line/helix fit
-   * or run the full Acts track kalman filter fit
-   */
-  if (G4TRACKING::convert_seeds_to_svtxtracks)
-  {
-    auto converter = new TrackSeedTrackMapConverter;
-    // Default set to full SvtxTrackSeeds. Can be set to
-    // SiliconTrackSeedContainer or TpcTrackSeedContainer
-    converter->setTrackSeedName("SvtxTrackSeedContainer");
-    converter->setFieldMap(G4MAGNET::magfield_tracking);
-    converter->Verbosity(0);
-    se->registerSubsystem(converter);
-  }
-  else
-  {
-    auto deltazcorr = new PHTpcDeltaZCorrection;
-    deltazcorr->Verbosity(0);
-    se->registerSubsystem(deltazcorr);
-
-    // perform final track fit with ACTS
-    auto actsFit = new PHActsTrkFitter;
-    actsFit->Verbosity(0);
-    actsFit->commissioning(G4TRACKING::use_alignment);
-    // in calibration mode, fit only Silicons and Micromegas hits
-    actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-    actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-    actsFit->set_pp_mode(TRACKING::pp_mode);
-    actsFit->set_use_clustermover(true);  // default is true for now
-    actsFit->useActsEvaluator(false);
-    actsFit->useOutlierFinder(false);
-    actsFit->setFieldMap(G4MAGNET::magfield_tracking);
-    se->registerSubsystem(actsFit);
-
-    auto cleaner = new PHTrackCleaner();
-    cleaner->Verbosity(0);
-    cleaner->set_pp_mode(TRACKING::pp_mode);
-    //se->registerSubsystem(cleaner);
-  }
-
- 
-
-  auto finder = new PHSimpleVertexFinder;
-  finder->Verbosity(0);
-  finder->setDcaCut(0.5);
-  finder->setTrackPtCut(-99999.);
-  finder->setBeamLineCut(1);
-  finder->setTrackQualityCut(1000000000);
-  finder->setNmvtxRequired(3);
-  finder->setOutlierPairCut(0.1);
-  se->registerSubsystem(finder);
-
-  // Propagate track positions to the vertex position
-  auto vtxProp = new PHActsVertexPropagator;
-  vtxProp->Verbosity(0);
-  vtxProp->fieldMap(G4MAGNET::magfield_tracking);
-  se->registerSubsystem(vtxProp);
+  
+  Tracking_Reco_TrackFit_run2pp();
+  //vertexing and propagation to vertex
+  Tracking_Reco_Vertex_run2pp();
   
   TString residoutfile = outfilename + "_resid.root";
   std::string residstring(residoutfile.Data());
@@ -568,6 +391,7 @@ void Fun4All_PRDFReconstruction(
     se->registerSubsystem(new SiliconSeedsQA);
     se->registerSubsystem(new TpcSeedsQA);
     se->registerSubsystem(new TpcSiliconQA);
+    se->registerSubsystem(new TrackFittingQA);
    
   }
 
