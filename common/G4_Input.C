@@ -252,6 +252,7 @@ namespace INPUTHEPMC
   int EmbedId = 0;
   bool FLOW = false;
   int FLOW_VERBOSITY = 0;
+  bool FLOW_FLUCTUATIONS = false;
   bool FERMIMOTION = false;
   bool HIJINGFLIP = false;
   bool REACTIONPLANERAND = false;
@@ -567,6 +568,7 @@ void InputRegister()
       {
         HepMCFlowAfterBurner *burn = new HepMCFlowAfterBurner();
         burn->Verbosity(INPUTHEPMC::FLOW_VERBOSITY);
+        burn->enableFluctuations(INPUTHEPMC::FLOW_FLUCTUATIONS);
         se->registerSubsystem(burn);
       }
       if (INPUTHEPMC::FERMIMOTION)
