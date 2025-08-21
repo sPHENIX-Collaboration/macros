@@ -253,6 +253,7 @@ namespace INPUTHEPMC
   bool FLOW = false;
   int FLOW_VERBOSITY = 0;
   bool FLOW_FLUCTUATIONS = false;
+  float FLOW_SCALING = 1.0;  // scaling factor for flow
   bool FERMIMOTION = false;
   bool HIJINGFLIP = false;
   bool REACTIONPLANERAND = false;
@@ -569,6 +570,7 @@ void InputRegister()
         HepMCFlowAfterBurner *burn = new HepMCFlowAfterBurner();
         burn->Verbosity(INPUTHEPMC::FLOW_VERBOSITY);
         burn->enableFluctuations(INPUTHEPMC::FLOW_FLUCTUATIONS);
+        burn->scaleFlow(INPUTHEPMC::FLOW_SCALING);
         se->registerSubsystem(burn);
       }
       if (INPUTHEPMC::FERMIMOTION)
