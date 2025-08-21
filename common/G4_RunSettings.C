@@ -42,6 +42,27 @@ void RunSettings(int runnumber, const std::string type = "")
     INPUTHEPMC::HEPMC_STRANGENESS_FRACTION = 40.;
     std::cout << "use ppg02 settings" << std::endl;
     break;
+  case 31:  // run 31 ppg08, AuAu 1mRad xing angle, mvtx rotated, flow flucuations enabled
+    Input::BEAM_CONFIGURATION = Input::AA_COLLISION;
+    Enable::MVTX_APPLYMISALIGNMENT = true;
+    INPUTHEPMC::FLOW_FLUCTUATIONS = true;
+    INPUTHEPMC::FLOW_SCALING = 1.0;
+    std::cout << "use ppg08 run31 settings" << std::endl;
+    break;
+  case 32:  // run 31 ppg08, AuAu 1mRad xing angle, mvtx rotated, flow flucuations disenabled, scale 2
+    Input::BEAM_CONFIGURATION = Input::AA_COLLISION;
+    Enable::MVTX_APPLYMISALIGNMENT = true;
+    INPUTHEPMC::FLOW_FLUCTUATIONS = false;
+    INPUTHEPMC::FLOW_SCALING = 2.0;
+    std::cout << "use ppg08 run32 settings" << std::endl;
+    break;
+  case 33:  // run 31 ppg08, AuAu 1mRad xing angle, mvtx rotated, flow flucuations disenabled, scale 0.5,
+    Input::BEAM_CONFIGURATION = Input::AA_COLLISION;
+    Enable::MVTX_APPLYMISALIGNMENT = true;
+    INPUTHEPMC::FLOW_FLUCTUATIONS = false;
+    INPUTHEPMC::FLOW_SCALING = 0.5;
+    std::cout << "use ppg08 run33 settings" << std::endl;
+    break;
   default:
     cout << "runnnumber " << runnumber << " not implemented" << endl;
     gSystem->Exit(1);
