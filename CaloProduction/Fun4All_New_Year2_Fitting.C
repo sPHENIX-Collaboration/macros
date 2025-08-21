@@ -23,9 +23,12 @@
 
 #include <phool/recoConsts.h>
 
+#include <calopacketskimmer/CaloPacketSkimmer.h>
+
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libcalotrigger.so)
+R__LOAD_LIBRARY(libCaloPacketSkimmer.so);
 
 // this pass containis the reco process that's stable wrt time stamps(raw tower building)
 void Fun4All_New_Year2_Fitting(int nEvents = 100,
@@ -52,6 +55,9 @@ void Fun4All_New_Year2_Fitting(int nEvents = 100,
   // Get info from DB and store in DSTs
   TriggerRunInfoReco *triggerinfo = new TriggerRunInfoReco();
   se->registerSubsystem(triggerinfo);
+
+  CaloPacketSkimmer *calopacket = new CaloPacketSkimmer();
+  se->registerSubsystem(calopacket);
 
   Process_Calo_Fitting();
 
