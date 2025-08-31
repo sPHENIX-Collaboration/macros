@@ -207,6 +207,7 @@ def process_df(df, run_type, bin_filter_datasets, output, threshold, verbose=Fal
         logger.info("Original")
         logger.info(df.head().to_string())
         logger.info(f'size: {len(df)}')
+        logger.info(f'Runs: {df['runnumber'].nunique()}')
         logger.info("\n" + "="*70 + "\n")
 
     # 2. Calculate the minimum time for each tag
@@ -249,6 +250,7 @@ def process_df(df, run_type, bin_filter_datasets, output, threshold, verbose=Fal
         logger.info("DataFrame with 'highest_priority_tag_min_time_for_runnumber' column:")
         logger.info(df_processed[['tag', 'runnumber', 'time', 'full_file_path', 'tag_min_time', 'highest_priority_tag_min_time_for_runnumber']].head().to_string())
         logger.info(f'size: {len(df_processed)}')
+        logger.info(f'Runs: {df_processed['runnumber'].nunique()}')
         logger.info("\n" + "="*70 + "\n")
 
     # 6. Filter the DataFrame: Keep only rows where the row's 'tag_min_time'
@@ -261,6 +263,7 @@ def process_df(df, run_type, bin_filter_datasets, output, threshold, verbose=Fal
     if verbose:
         logger.info("Final Reduced DataFrame (sorted by time for readability):")
         logger.info(reduced_df.sort_values(by='time').reset_index(drop=True).head().to_string())
+        logger.info(f'Runs: {reduced_df['runnumber'].nunique()}')
 
     # Save CSV of unique run and tag pairs
     reduced_df[['runnumber', 'tag']].drop_duplicates().sort_values(by='runnumber').to_csv(os.path.join(output, f'{run_type}.csv'), index=False, header=True)
