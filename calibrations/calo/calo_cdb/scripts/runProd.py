@@ -12,6 +12,7 @@ import sys
 import textwrap
 
 from pathlib import Path
+from multiprocessing import Pool, cpu_count
 import pandas as pd
 from sqlalchemy import create_engine, text
 
@@ -200,6 +201,10 @@ def run_command_and_log(command, current_dir = '.', description="Executing comma
         logger.critical(f"An unexpected error occurred while running '{command}': {e}")
         return False
 
+def check_path_exists(path):
+    """A simple helper function for the multiprocessing pool."""
+    return os.path.exists(path)
+
 def process_df(df, run_type, bin_filter_datasets, output, threshold, verbose=False):
     """
     Filter df and get a reduced df that contains the necessary runs with missing / outdated bad tower maps
@@ -290,7 +295,20 @@ def process_df(df, run_type, bin_filter_datasets, output, threshold, verbose=Fal
     logger.info(f'Current files: {len(reduced_process_df)}')
     logger.info('Checking file status')
 
-    mask_exists = reduced_process_df['full_file_path'].apply(os.path.exists)
+    # Get the list of file paths to check
+    file_paths = reduced_process_df['full_file_path'].tolist()
+
+    # Determine the number of processes to use (usually the number of CPU cores)
+    num_processes = cpu_count()
+    logger.info(f'Using {num_processes} cores for parallel file checking.')
+
+    # Create a pool of worker processes
+    with Pool(processes=num_processes) as pool:
+        # pool.map applies the check_path_exists function to each item in file_paths and returns the results as a list of booleans (True/False)
+        mask_exists_list = pool.map(check_path_exists, file_paths)
+
+    # The list of booleans can now be directly used as the mask
+    mask_exists = pd.Series(mask_exists_list, index=reduced_process_df.index)
 
     df_filtered = reduced_process_df[mask_exists].copy()
 
@@ -329,7 +347,6 @@ def generate_run_list(reduced_process_df, output):
         filepath = dataset_dir / f'{run}_{tag}.list'
 
         group_df['full_file_path'].to_csv(filepath, index=False, header=False)
-
 
 def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit):
     """
