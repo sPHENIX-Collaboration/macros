@@ -92,7 +92,7 @@ def get_file_paths(engine, runtype='run3auau', threshold=500000):
     ON
         d.tag = h.tag AND d.runnumber = h.runnumber AND d.segment = h.segment
     WHERE
-        d.dsttype like 'DST_CALOFITTING%';
+        d.dsttype like 'DST_CALO%';
     """
 
     query = """
