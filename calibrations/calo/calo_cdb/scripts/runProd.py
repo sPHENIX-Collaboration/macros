@@ -288,7 +288,7 @@ def process_df(df, run_type, bin_filter_datasets, output, threshold, verbose=Fal
 
     mask_exists = reduced_process_df['full_file_path'].apply(os.path.exists)
 
-    df_filtered = reduced_process_df[mask_exists]
+    df_filtered = reduced_process_df[mask_exists].copy()
 
     logger.info(f'Clean files: {len(df_filtered)}')
     logger.info(f'Missing files: {len(reduced_process_df[~mask_exists])}, {len(reduced_process_df[~mask_exists])*100//len(reduced_process_df)} %')
