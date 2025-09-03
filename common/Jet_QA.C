@@ -14,6 +14,7 @@
 #include <jetqa/RhosinEvent.h>
 #include <jetqa/StructureinJets.h>
 #include <jetqa/TrksInJetQA.h>
+#include <jetqa/UEvsEtaCentrality.h>
 #include <map>
 #include <optional>
 #include <string>
@@ -700,6 +701,25 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
     se -> registerSubsystem(jetSeedQA);
   }
 
+  // register underlying event module
+  UEvsEtaCentrality* UEvsEtaCentralityQA = new UEvsEtaCentrality("UEvsEtaCent" + trig_tag);
+  UEvsEtaCentralityQA -> SetConfig(
+    {
+      .debug       = false,
+      .histTag     = "",
+    }
+  );
+  if (trg.has_value())
+  {
+    UEvsEtaCentralityQA -> SetConfig(
+      {
+        .doTrgSelect = true,
+        .trgToSelect = trg.value(),
+      }
+    );
+  }
+  se -> registerSubsystem(UEvsEtaCentralityQA);
+
   // create modules that take single R values ---------------------------------
 
   // loop over resolution parameters
@@ -761,8 +781,10 @@ void Jet_QA(std::vector<uint32_t> vecTrigsToUse = JetQA::GetDefaultTriggerList()
         .doTrgSelect = false  // n.b. differential in trigger not useful here
       }
     );
+
     se -> Verbosity(verbosity);
     se -> registerSubsystem(caloStatusQA);
+  
   }
 
   // run in inclusive mode if needed
