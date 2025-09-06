@@ -50,11 +50,11 @@ R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libJetDSTSkimmer.so)
 
 void Fun4All_JetSkimmedProductionYear3(int nEvents=1000,
-				       const std::string &fname = "/sphenix/lustre01/sphnxpro/production2/run3auau/physics/calofitting/new_newcdbtag_v001/run_00072700_00072800/DST_CALOFITTING_run3auau_new_newcdbtag_v001-00072723-00001.root",
+				       const std::string &fname = "DST_CALOFITTING_run3auau_new_newcdbtag_v001-00072723-00001.root",
                         const std::string& outfile_low= "DST_JETCALO-00000000-000000.root",
                         const std::string& outfile_high= "DST_Jet-00000000-000000.root",
                         const std::string& outfile_hist= "HIST_JETQA-00000000-000000.root",
-                        const std::string& dbtag= "ProdA_2024"
+                        const std::string& dbtag= "newcdbtag"
   )
 {
 
