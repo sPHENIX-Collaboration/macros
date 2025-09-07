@@ -53,6 +53,9 @@ namespace ACTSGEOM
     MakeActsGeometry* geom = new MakeActsGeometry();
     geom->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
     geom->set_tpc_tzero(G4TPC::tpc_tzero_reco);
+    geom->set_max_driftlength(G4TPC::maxDriftLength);
+    geom->set_CM_halfwidth(G4TPC::CM_halfwidth);
+    std::cout << "G4_ActsGeom: Setting  maxDriftLength = " << G4TPC::maxDriftLength << std::endl;
     geom->Verbosity(verbosity);
     for (int i = 0; i < 57; i++)
     {

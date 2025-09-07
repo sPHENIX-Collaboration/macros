@@ -205,6 +205,10 @@ namespace G4TPC
   double ArCF4Isobutane_N2_frac = 0.00;
   double ArCF4Isobutane_isobutane_frac = 0.05;
 
+  //  double maxDriftLength = 105.5;  // old value, for testing
+  double maxDriftLength = 102.325;  // new value, CM face to top of GEM stack
+
+  double CM_halfwidth = 0.28;  // cm
 }  // namespace G4TPC
 
 namespace G4TRACKING

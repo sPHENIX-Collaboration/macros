@@ -39,7 +39,7 @@ void TpcReadoutInit(const int RunNumber = 41989)
   if(RunNumber<45737)
   {
     // all Ar/CF4 runs
-    G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0; // cm/ns
+    G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / G4TPC::maxDriftLength; // cm/ns
   } else if(RunNumber<49515) {
     // Ar/CF4/N2 runs
     G4TPC::tpc_drift_velocity_reco = 0.007; // cm/ns
