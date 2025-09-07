@@ -29,13 +29,12 @@
 #include <fun4all/SubsysReco.h>
 
 #include <phool/recoConsts.h>
-
+#include <jetbackground/BeamBackgroundFilterAndQA.h>
 #include <centrality/CentralityReco.h>
 #include <calotrigger/MinimumBiasClassifier.h>
 
 #include <calovalid/CaloValid.h>
 
-#include <jetbackground/BeamBackgroundFilterAndQA.h>
 #include <jetdstskimmer/JetDSTSkimmer.h>
 
 
@@ -51,16 +50,16 @@ R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libJetDSTSkimmer.so)
 
 void Fun4All_JetSkimmedProductionYear3(int nEvents=1000,
-                        const std::string &fname = "DST_CALOFITTING_run3auau_new_newcdbtag_v007-00068490-00000.root",
+				       const std::string &fname = "DST_CALOFITTING_run3auau_new_newcdbtag_v001-00072723-00001.root",
                         const std::string& outfile_low= "DST_JETCALO-00000000-000000.root",
                         const std::string& outfile_high= "DST_Jet-00000000-000000.root",
                         const std::string& outfile_hist= "HIST_JETQA-00000000-000000.root",
-                        const std::string& dbtag= "ProdA_2024"
+                        const std::string& dbtag= "newcdbtag"
   )
 {
 
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(0);
+  se->Verbosity(1);
 
   recoConsts *rc = recoConsts::instance();
 
@@ -70,7 +69,7 @@ void Fun4All_JetSkimmedProductionYear3(int nEvents=1000,
   // conditions DB flags and timestamp
   rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
   rc->set_uint64Flag("TIMESTAMP", runnumber);
-  CDBInterface::instance()->Verbosity(1);
+  CDBInterface::instance()->Verbosity(3);
 
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
@@ -108,22 +107,8 @@ void Fun4All_JetSkimmedProductionYear3(int nEvents=1000,
     Centrality();
   }
 
-  // filter out beam-background events (use default parameters for
-  // streak-sideband filter)
-  BeamBackgroundFilterAndQA* filter = new BeamBackgroundFilterAndQA("BeamBackgroundFilterAndQA");
-  filter->Verbosity(std::max(Enable::QA_VERBOSITY, Enable::JETQA_VERBOSITY));
-  filter->SetConfig(
-    {
-      .debug          = false,
-      .doQA           = Enable::QA,
-      .doEvtAbort     = false,
-      .filtersToApply = {"StreakSideband"}
-    }
-  );
-  se->registerSubsystem(filter);
-
   // do jet reconstruction & rho calculation
-  HIJetReco();
+   HIJetReco();
 
   JetDSTSkimmer *jetDSTSkimmer = new JetDSTSkimmer();
   //these are all default values
@@ -133,13 +118,29 @@ void Fun4All_JetSkimmedProductionYear3(int nEvents=1000,
   jetDSTSkimmer->SetClusterNodeName("CLUSTERINFO_CEMC");
   se->registerSubsystem(jetDSTSkimmer);
 
+  // filter out beam-background events (use default parameters for                                                                                                                
+  // streak-sideband filter)
+  
+  BeamBackgroundFilterAndQA* filter = new BeamBackgroundFilterAndQA("BeamBackgroundFilterAndQA");
+  filter -> Verbosity(std::max(Enable::QA_VERBOSITY, Enable::JETQA_VERBOSITY));
+  filter -> SetConfig(
+    {
+      .debug          = false,
+      .doQA           = Enable::QA,
+      .doEvtAbort     = false,
+      .filtersToApply = {"StreakSideband"}
+    }
+  );
+  se -> registerSubsystem(filter);
+  
   // register modules necessary for QA
   if (Enable::QA)
   {
     DoRhoCalculation();
     Jet_QA();
   }
-
+  
+  
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
   In->AddFile(fname);
   se->registerInputManager(In);
@@ -153,7 +154,7 @@ void Fun4All_JetSkimmedProductionYear3(int nEvents=1000,
   //outlower->AddNode("TOWERINFO_CALIB_HCALOUT");
   outlower->AddNode("TOWERS_HCALOUT");
   //outlower->AddNode("TOWERINFO_CALIB_CEMC");
-  outlower->AddNode("TOWERS_CEMC");
+  //  outlower->AddNode("TOWERS_CEMC");
   outlower->AddNode("TOWERS_SEPD");
   //outlower->AddNode("TOWERINFO_CALIB_ZDC");
   outlower->AddNode("TOWERS_ZDC");
@@ -161,22 +162,22 @@ void Fun4All_JetSkimmedProductionYear3(int nEvents=1000,
   outlower->AddNode("MbdPmtContainer");
   outlower->AddNode("MBDPackets");
   outlower->AddNode("TriggerRunInfo");
-  se->registerOutputManager(outlower);
+  //se->registerOutputManager(outlower);
 
   Fun4AllDstOutputManager *outhigher = new Fun4AllDstOutputManager("DSTOUTHIGH", outfile_high);
   outhigher->StripNode("TOWERINFO_CALIB_HCALIN");
   outhigher->StripNode("TOWERS_HCALIN");
   outhigher->StripNode("TOWERINFO_CALIB_HCALOUT");
   outhigher->StripNode("TOWERS_HCALOUT");
-  outhigher->StripNode("TOWERINFO_CALIB_CEMC");
-  outhigher->StripNode("TOWERS_CEMC");
+  //outhigher->StripNode("TOWERINFO_CALIB_CEMC");
+  //  outhigher->StripNode("TOWERS_CEMC");
   outhigher->StripNode("TOWERS_SEPD");
   outhigher->StripNode("TOWERINFO_CALIB_ZDC");
   outhigher->StripNode("TOWERS_ZDC");
   outhigher->StripNode("MBDPackets");
   outhigher->StripNode("MbdOut");
   outhigher->StripNode("MbdPmtContainer");
-  se->registerOutputManager(outhigher);
+  //se->registerOutputManager(outhigher);
 
   se->run(nEvents);
   se->End();

@@ -10,7 +10,7 @@
 #include <jetqa/JetKinematicCheck.h>
 #include <jetqa/JetQADefs.h>
 #include <jetqa/JetSeedCount.h>
-#include <jetqa/PhotonJetsKinematics.h>
+#include <jetqa/EMClusterKinematics.h>
 #include <jetqa/RhosinEvent.h>
 #include <jetqa/StructureinJets.h>
 #include <jetqa/TrksInJetQA.h>
@@ -654,19 +654,19 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   // get list of jet nodes to analyze
   std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA(JetQA::Source::Calos);
 
-  // initialize and register photon jet kinematic QA
-  PhotonJetsKinematics* photonJetsQA = new PhotonJetsKinematics(
-    "PhotonJetsKinematics" + trig_tag,
+  // initialize and register emcluster jet kinematic QA
+  EMClusterKinematics* emclusterJetsQA = new EMClusterKinematics(
+    "EMClusterKinematics" + trig_tag,
     "CLUSTERINFO_CEMC",
     ""
   );
-  photonJetsQA -> SetDoOptHist(false);
+  emclusterJetsQA -> SetDoOptHist(false);
   if (trg.has_value())
   {
-    photonJetsQA -> SetTrgToSelect(trg.value());
+    emclusterJetsQA -> SetTrgToSelect(trg.value());
   }
-  photonJetsQA -> Verbosity(verbosity);
-  se -> registerSubsystem(photonJetsQA);
+  emclusterJetsQA -> Verbosity(verbosity);
+  se -> registerSubsystem(emclusterJetsQA);
 
   // initialize and register event-wise rho check
   RhosinEvent* evtRhoQA = new RhosinEvent("EventWiseCaloRho" + trig_tag, "");
