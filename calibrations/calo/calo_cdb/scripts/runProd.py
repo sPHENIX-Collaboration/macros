@@ -41,11 +41,6 @@ parser.add_argument('-e'
                     , default='scripts/genStatus.sh'
                     , help='Condor Script. Default: scripts/genStatus.sh')
 
-parser.add_argument('-n'
-                    , '--min-events', type=int
-                    , default=500000
-                    , help='Minimum Events (for Run). Default: 500k')
-
 parser.add_argument('-o'
                     , '--output', type=str
                     , default='test'
@@ -69,68 +64,31 @@ parser.add_argument('-v'
                     , '--verbose', action='store_true'
                     , help='Verbose.')
 
-def get_file_paths(engine, runtype='run3auau', threshold=500000):
+def get_file_paths(engine, runtype='run3auau'):
     """
     Generate file paths from given minimum events and run type.
     """
 
     # Identify run range from the run type
     run_ranges = {'run2pp': (47286, 53880), 'run2auau': (54128, 54974), 'run3auau': (66457, 20000000)}
-    params = {'run_start': run_ranges[runtype][0], 'run_end': run_ranges[runtype][1], 'threshold': threshold}
-
-    create_temp_table_query = """
-    CREATE TEMPORARY TABLE t1 AS
-    SELECT
-        d.tag, d.runnumber, d.segment, d.events
-    FROM
-        datasets d
-    JOIN (
-        SELECT
-            tag, runnumber, segment
-        FROM
-            datasets
-        WHERE
-            dsttype like 'HIST_CALOQA%' and runnumber >= :run_start and runnumber <= :run_end) h
-    ON
-        d.tag = h.tag AND d.runnumber = h.runnumber AND d.segment = h.segment
-    WHERE
-        d.dsttype like 'DST_CALO%';
-    """
+    params = {'run_start': run_ranges[runtype][0], 'run_end': run_ranges[runtype][1]}
 
     query = """
     SELECT
-        a.tag, a.runnumber, f.full_file_path, t1.events, f.time
+        d.tag, d.runnumber, f.full_file_path, f.time
     FROM
-        datasets a
-    JOIN (
-        SELECT
-            tag, runnumber
-        FROM t1
-        GROUP BY
-            tag, runnumber
-        HAVING
-            SUM(events) > :threshold) k
-    ON
-        k.tag = a.tag AND k.runnumber = a.runnumber
-    JOIN t1
-    ON
-        t1.tag = a.tag AND t1.runnumber = a.runnumber AND t1.segment = a.segment
+        datasets d
     JOIN
         files f
     ON
-        f.lfn = a.filename
+        f.lfn = d.filename
     WHERE
-        a.filename LIKE 'HIST_CALOQA%';
+        d.dsttype LIKE 'HIST_CALOQA%' AND d.runnumber >= :run_start AND d.runnumber <= :run_end;
     """
-
     df = pd.DataFrame()
 
     try:
         with engine.connect() as connection:
-            # Create the temporary table
-            connection.execute(text(create_temp_table_query), params)
-
-            # Use the temporary table
             df = pd.read_sql_query(text(query), connection, params=params)
 
     except Exception as e:
@@ -205,7 +163,7 @@ def check_path_exists(path):
     """A simple helper function for the multiprocessing pool."""
     return os.path.exists(path)
 
-def process_df(df, run_type, bin_filter_datasets, output, threshold, verbose=False):
+def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
     """
     Filter df and get a reduced df that contains the necessary runs with missing / outdated bad tower maps
     """
@@ -317,17 +275,12 @@ def process_df(df, run_type, bin_filter_datasets, output, threshold, verbose=Fal
 
     reduced_process_df[~mask_exists].to_csv(output / f'{run_type}-missing.csv', columns=['full_file_path'], index=False, header=True)
 
-    df_filtered['group_total_events'] = df_filtered.groupby(['tag', 'runnumber'])['events'].transform('sum')
-    df_final = df_filtered[df_filtered['group_total_events'] > threshold].copy()
-    df_drop = df_filtered[df_filtered['group_total_events'] < threshold].copy()
-
     if verbose:
         logger.info("Final Reduced DataFrame that needs CDB Maps:")
-        logger.info(df_final.head().to_string())
-        logger.info(f'Runs: {df_final["runnumber"].nunique()}')
-        logger.info(f'Runs Dropped: {df_drop["runnumber"].nunique()}')
+        logger.info(df_filtered.head().to_string())
+        logger.info(f'Runs: {df_filtered["runnumber"].nunique()}')
 
-    return df_final
+    return df_filtered
 
 def generate_run_list(reduced_process_df, output):
     """
@@ -400,7 +353,6 @@ def main():
     """
     args = parser.parse_args()
     run_type   = args.run_type
-    min_events = args.min_events
     CURRENT_DATE = str(datetime.date.today())
     output = Path(args.output).resolve()
     condor_memory = args.memory
@@ -438,7 +390,6 @@ def main():
     logger.info('#'*40)
     logger.info(f'LOGGING: {str(datetime.datetime.now())}')
     logger.info(f'Run Type: {run_type}')
-    logger.info(f'Min Events: {min_events}')
     logger.info(f'Output Directory: {output}')
     logger.info(f'Condor Memory: {condor_memory}')
     logger.info(f'Do Condor Submission: {do_condor_submit}')
@@ -459,10 +410,10 @@ def main():
     engine = create_engine(DATABASE_URL)
 
     # 1. Get the dataframe from the database
-    df = get_file_paths(engine, run_type, min_events)
+    df = get_file_paths(engine, run_type)
 
     # filter and process the initial dataframe
-    reduced_process_df = process_df(df, run_type, bin_filter_datasets, output, min_events, verbose)
+    reduced_process_df = process_df(df, run_type, bin_filter_datasets, output, verbose)
 
     # generate the lists of CaloValid histograms for each identified run
     generate_run_list(reduced_process_df, output)
