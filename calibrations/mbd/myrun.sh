@@ -18,7 +18,7 @@ runno=${runno%.prdf}
 runno=$((10#${runno}))  # convert to decimal number
 echo processing run $runno
 
-nevents=0
+nevents=3000000
 if [[ $# -ge 2 ]]
 then
   nevents=$2
@@ -26,7 +26,7 @@ fi
 echo Processing $nevents events
 
 build=none          # use current environment
-#dbtag=ProdA_2024
+#dbtag=newcdbtag
 dbtag=""
 pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0
 outbase=DST_MBD_CALIBRATION_run3auau

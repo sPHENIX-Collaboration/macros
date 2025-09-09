@@ -113,7 +113,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
     else
     {
       recoConsts *rc = recoConsts::instance();
-      rc->set_StringFlag("CDB_GLOBALTAG","ProdA_2024"); 
+      rc->set_StringFlag("CDB_GLOBALTAG","newcdbtag"); 
       rc->set_uint64Flag("TIMESTAMP",runnumber);
       CDBInterface *cdb = CDBInterface::instance();
       std::string slew_url = cdb->getUrl("MBD_SLEWCORR");
