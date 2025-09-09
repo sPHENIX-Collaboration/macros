@@ -74,17 +74,54 @@ def get_file_paths(engine, runtype='run3auau'):
     params = {'run_start': run_ranges[runtype][0], 'run_end': run_ranges[runtype][1]}
 
     query = """
+    -- Use a Common Table Expression (CTE) to find the winning tag for each runnumber
+    WITH WinningTags AS (
+        SELECT
+            runnumber,
+            tag
+        FROM (
+            -- This inner query ranks the tags within each runnumber group
+            SELECT
+                d.runnumber,
+                d.tag,
+                -- The tag with the latest max timestamp gets rank '1'
+                ROW_NUMBER() OVER (PARTITION BY d.runnumber ORDER BY MAX(f.time) DESC) as rn
+            FROM
+                datasets d
+            JOIN
+                files f
+            ON
+                d.filename = f.lfn
+            WHERE
+                d.dsttype LIKE 'HIST_CALOQA%'
+                AND d.dsttype NOT LIKE 'HIST_CALOQASKIMMED%'
+                AND d.tag IS NOT NULL AND d.tag != ''
+                AND d.runnumber >= :run_start AND d.runnumber <= :run_end
+            GROUP BY
+                d.runnumber, d.tag
+        ) AS RankedTags
+        WHERE
+            rn = 1
+    )
+    -- Now, join the original table with the list of winning tags
     SELECT
-        d.tag, d.runnumber, f.full_file_path, f.time
+        d.tag, d.runnumber, f.full_file_path
     FROM
         datasets d
     JOIN
         files f
     ON
-        f.lfn = d.filename
+        d.filename = f.lfn
+    JOIN
+        WinningTags wt
+    ON
+        d.runnumber = wt.runnumber AND d.tag = wt.tag
     WHERE
-        d.dsttype LIKE 'HIST_CALOQA%' AND d.runnumber >= :run_start AND d.runnumber <= :run_end;
+        d.dsttype LIKE 'HIST_CALOQA%'
+        AND d.dsttype NOT LIKE 'HIST_CALOQASKIMMED%'
+        AND d.segment != 9999;
     """
+
     df = pd.DataFrame()
 
     try:
@@ -174,63 +211,8 @@ def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
         logger.info(f'Runs: {df['runnumber'].nunique()}')
         logger.info("\n" + "="*70 + "\n")
 
-    # 2. Calculate the minimum time for each tag
-    min_times_per_tag = df.groupby('tag')['time'].min().sort_values(ascending=False)
-
-    if verbose:
-        logger.info("Minimum time for each tag:")
-        logger.info(min_times_per_tag.head().to_string())
-        logger.info(f'size: {len(min_times_per_tag)}')
-        logger.info("\n" + "="*70 + "\n")
-
-    # 3. Add this minimum time back to the original DataFrame as 'tag_min_time'
-    df_processed = df.merge(min_times_per_tag.rename('tag_min_time'),
-                            left_on='tag',
-                            right_index=True)
-
-    if verbose:
-        logger.info("DataFrame with 'tag_min_time' column:")
-        logger.info(df_processed.head().to_string())
-        logger.info(f'size: {len(df_processed)}')
-        logger.info("\n" + "="*70 + "\n")
-
-    # 4. For each 'runnumber', find the 'tag_min_time' of the HIGHEST PRIORITY tag containing it.
-    #    "Highest priority" means the tag with the LATEST (maximum) 'tag_min_time'.
-    highest_priority_time_for_runnumber = df_processed.groupby('runnumber')['tag_min_time'].max()
-    highest_priority_time_for_runnumber.name = 'highest_priority_tag_min_time_for_runnumber'
-
-    if verbose:
-        logger.info("Highest Priority 'tag_min_time' for each 'runnumber':")
-        logger.info(highest_priority_time_for_runnumber.head().to_string())
-        logger.info(f'size: {len(highest_priority_time_for_runnumber)}')
-        logger.info("\n" + "="*70 + "\n")
-
-    # 5. Merge this information back to the DataFrame
-    df_processed = df_processed.merge(highest_priority_time_for_runnumber,
-                                    left_on='runnumber',
-                                    right_index=True)
-
-    if verbose:
-        logger.info("DataFrame with 'highest_priority_tag_min_time_for_runnumber' column:")
-        logger.info(df_processed[['tag', 'runnumber', 'time', 'full_file_path', 'tag_min_time', 'highest_priority_tag_min_time_for_runnumber']].head().to_string())
-        logger.info(f'size: {len(df_processed)}')
-        logger.info(f'Runs: {df_processed['runnumber'].nunique()}')
-        logger.info("\n" + "="*70 + "\n")
-
-    # 6. Filter the DataFrame: Keep only rows where the row's 'tag_min_time'
-    #    matches the 'highest_priority_tag_min_time_for_runnumber'.
-    #    This ensures we keep ALL rows for a runnumber from its highest-priority tag.
-    reduced_df = df_processed[
-        df_processed['tag_min_time'] == df_processed['highest_priority_tag_min_time_for_runnumber']
-    ]
-
-    if verbose:
-        logger.info("Final Reduced DataFrame (sorted by time for readability):")
-        logger.info(reduced_df.sort_values(by='time').reset_index(drop=True).head().to_string())
-        logger.info(f'Runs: {reduced_df['runnumber'].nunique()}')
-
     # Save CSV of unique run and tag pairs
-    reduced_df[['runnumber', 'tag']].drop_duplicates().sort_values(by='runnumber').to_csv(output / f'{run_type}.csv', index=False, header=True)
+    df[['runnumber', 'tag']].drop_duplicates().sort_values(by='runnumber').to_csv(output / f'{run_type}.csv', index=False, header=True)
 
     ## DEBUG
     command = f'{bin_filter_datasets} {output / f"{run_type}.csv"} {output}'
@@ -247,7 +229,7 @@ def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
         logger.critical(f'ERROR: Too many Runs: {len(processed_df)}. Quitting.')
         sys.exit()
 
-    reduced_process_df = reduced_df.merge(processed_df)
+    reduced_process_df = df.merge(processed_df)
 
     # Ensure that the file paths from the database actually exist
     logger.info(f'Current files: {len(reduced_process_df)}')
