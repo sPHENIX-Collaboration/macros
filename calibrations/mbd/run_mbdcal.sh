@@ -102,6 +102,7 @@ if [[ -z "$runno" ]]; then
 fi
 
 
+
 # Get input files, concatentate into comma-separated string
 inputs=$1
 shift
@@ -142,7 +143,7 @@ export USER="$(id -u -n)"
 export LOGNAME=${USER}
 export HOME=/sphenix/u/${USER}
 
-if [[ $build != "none" ]]   # use none to keep existing env
+if [[ "$build" != "none" ]]   # use none to keep existing env
 then
   echo source /opt/sphenix/core/bin/sphenix_setup.sh -n ${build}
   source /opt/sphenix/core/bin/sphenix_setup.sh -n ${build}
@@ -210,6 +211,8 @@ ls -la *.root
 # Pass 2 calibrations (t0 offsets)
 # Pass 2 calibrations mip fits
 fname=$(ls -tr DST_UNCALMBD*.root | tail -1)
+echo XXX
+ls -ltr
 
 echo "###############################################################################################################"
 echo "Running pass2.0 calibration"
@@ -264,6 +267,10 @@ done
 
 }  > ${logbase}.out 2>${logbase}.err 
 
+mkdir -p $logdir
 [[ "${logdir%/}" != "." ]] && cp -p ${logbase}.out  ${logdir}
 [[ "${logdir%/}" != "." ]] && cp -p ${logbase}.err  ${logdir}
 
+echo LOGBASE LOGDIR
+echo $logbase
+echo $logdir
