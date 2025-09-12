@@ -11,8 +11,10 @@ outdir="/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST"
 logdir="/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST/log"
 logbase="DST_MBD_CALIBRATION_run3auau"
 build="new"
-dbtag="ProdA_2024"
-pass0dir=""      # only set if using local private pass0 calibs, otherwise use CDB
+#dbtag="newcdbtag"
+#pass0dir=""      # only set if using local private pass0 calibs, otherwise use CDB
+dbtag=""
+pass0dir="/sphenix/user/chiu/sphenix_bbc/CDB/PASS0"      # only set if using local private pass0 calibs, otherwise use CDB
 nevents=0        # by default process all events
 
 #echo $@ 
@@ -100,6 +102,7 @@ if [[ -z "$runno" ]]; then
 fi
 
 
+
 # Get input files, concatentate into comma-separated string
 inputs=$1
 shift
@@ -140,7 +143,7 @@ export USER="$(id -u -n)"
 export LOGNAME=${USER}
 export HOME=/sphenix/u/${USER}
 
-if [[ $build != "none" ]]   # use none to keep existing env
+if [[ "$build" != "none" ]]   # use none to keep existing env
 then
   echo source /opt/sphenix/core/bin/sphenix_setup.sh -n ${build}
   source /opt/sphenix/core/bin/sphenix_setup.sh -n ${build}
@@ -171,7 +174,7 @@ mkdir -p ${caldir}
 if [[ ! -z ${pass0dir} ]]
 then
 #  ./cups.py -r ${runno} -s ${segment} -d ${outbase} message "Stage in pass0 from ${pass0dir}"
-  for calib in mbd_shape.calib mbd_sherr.calib mbd_timecorr.calib mbd_slewcorr.calib mbd_tt_t0.calib mbd_tq_t0.calib
+  for calib in mbd_shape.calib mbd_sherr.calib mbd_timecorr.calib mbd_slewcorr.calib mbd_tt_t0.calib mbd_tq_t0.calib mbd_pileup.calib
   do
     echo Stagein ${pass0dir}/${calib} to ${caldir}
     cp -p ${pass0dir}/${calib} ${caldir}/
@@ -208,6 +211,8 @@ ls -la *.root
 # Pass 2 calibrations (t0 offsets)
 # Pass 2 calibrations mip fits
 fname=$(ls -tr DST_UNCALMBD*.root | tail -1)
+echo XXX
+ls -ltr
 
 echo "###############################################################################################################"
 echo "Running pass2.0 calibration"
@@ -215,14 +220,14 @@ echo "Running pass2.0 calibration"
 pass=0
 echo root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents}\)
 root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents}\)
-cp -p results/${runno}/pass0_mbd_tt_t0.calib results/${runno}/mbd_tt_t0.calib
-cp -p results/${runno}/pass0_mbd_tq_t0.calib results/${runno}/mbd_tq_t0.calib
+#cp -p results/${runno}/pass0_mbd_tt_t0.calib results/${runno}/mbd_tt_t0.calib
+#cp -p results/${runno}/pass0_mbd_tq_t0.calib results/${runno}/mbd_tq_t0.calib
 mv results/${runno}/pass0_mbd_tt_t0.root results/${runno}/mbd_tt_t0-${runno}.root
 mv results/${runno}/pass0_mbd_tq_t0.root results/${runno}/mbd_tq_t0-${runno}.root
 
 echo "###############################################################################################################"
 echo "Running pass2.3 calibration"
-#./cups.py -r ${runnumber} -s ${segment} -d ${outbase} message "Running PASS 2.2 calibration"
+#./cups.py -r ${runnumber} -s ${segment} -d ${outbase} message "Running PASS 2.3 calibration"
 pass=3
 echo root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents},${runtype}\)
 root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents},${runtype},\"${dbtag}\"\)
@@ -240,7 +245,7 @@ mv results/${runno}/mbd_t0corr.root results/${runno}/mbd_t0corr-${runno}.root
 
 # Copy out files
 mkdir -p ${outdir}/${runno}
-cp -p ${fname} ${outdir}/${runno}/
+#cp -p ${fname} ${outdir}/${runno}/   # dst_uncal root file
 for r in ${caldir}/*
 do
     # skip linked files
@@ -262,6 +267,10 @@ done
 
 }  > ${logbase}.out 2>${logbase}.err 
 
+mkdir -p $logdir
 [[ "${logdir%/}" != "." ]] && cp -p ${logbase}.out  ${logdir}
 [[ "${logdir%/}" != "." ]] && cp -p ${logbase}.err  ${logdir}
 
+echo LOGBASE LOGDIR
+echo $logbase
+echo $logdir

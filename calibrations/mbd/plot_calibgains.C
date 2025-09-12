@@ -2,6 +2,8 @@
 #include "mbd/MbdCalib.h"
 //#include "get_runstr.h"
 
+#include <TCanvas.h>
+
 R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libmbd_io.so)
 
@@ -27,6 +29,8 @@ Double_t runindex[MAX_RUNS];
 TGraphErrors *gainvals[128];
 TGraphErrors *g_relwidth[128];  // relative width
 TH1 *h_relwidth{nullptr};
+
+TCanvas *ac{nullptr};
 
 const int update_qfit = 1;    // whether to write update gain files
 const int write_plots = 1;    // whether to save plots to png
@@ -189,6 +193,13 @@ void plot_calibgains(const char *flist = "runs.list")
   // sanity check that gains aren't bad
   CheckForLargeDeviation();
 
+  TString pdfname = "gainvals.pdf";
+  if ( write_plots )
+  {
+    ac = new TCanvas("c_gainvals","gainvals",1100,850);
+    gPad->Print( pdfname + "[");
+  }
+
   TString name;
   TString title;
   for (int ipmt=0; ipmt<128; ipmt++)
@@ -296,10 +307,14 @@ void plot_calibgains(const char *flist = "runs.list")
 
     if ( write_plots )
     {
-      name += ".png";
-      gPad->Print( name );
+      gPad->Print( pdfname, name );
       gainvals[ipmt]->Write();
     }
+  }
+
+  if ( write_plots )
+  {
+    gPad->Print( pdfname + "]");
   }
 
   // Get mean gain for each channel, and write out the values

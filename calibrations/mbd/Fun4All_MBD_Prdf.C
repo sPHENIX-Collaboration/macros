@@ -41,8 +41,7 @@ void Fun4All_MBD_Prdf(const std::string input_file = "beam/beam_seb18-000020868-
   if ( cdbtag.size() != 0 )
   {
     rc->set_StringFlag("CDB_GLOBALTAG",cdbtag); 
-    //rc->set_StringFlag("CDB_GLOBALTAG","ProdA_2023"); 
-    //rc->set_StringFlag("CDB_GLOBALTAG","ProdA_2024"); 
+    //rc->set_StringFlag("CDB_GLOBALTAG","newcdbtag"); 
 
     cout << "Using CDB_GLOBALTAG " << cdbtag << endl;
   }
