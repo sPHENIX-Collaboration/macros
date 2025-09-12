@@ -42,7 +42,7 @@ namespace ACTSGEOM
     {
       G4MICROMEGAS::n_micromegas_layer = 0;
     }
-
+    ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
     MagnetFieldInit();
 
     // Build the Acts geometry

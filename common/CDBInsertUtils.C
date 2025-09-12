@@ -1,9 +1,10 @@
 #include <CDBUtils.C>
 
 std::map<std::string, std::string> md5map;
+std::string md5sumfile;
 
 void loadmd5map(const std::string &fname);
-bool md5check(const std::string &cdbfname, const std::string &fname);
+int md5check(const std::string &cdbfname, const std::string &fname);
 int insertpl(const std::string &fname, const std::string &ptype, int runnumber);
 int checkpl(const std::string &fname, const std::string &ptype, int runnumber);
 int insertplrunrange(const std::string &fname, const std::string &ptype, int runnumber, int endrun);
@@ -21,17 +22,25 @@ int checkpl(const std::string &fname, const std::string &ptype, int runnumber)
   }
   else
   {
-    if (md5check(cdbres,fname))
+    int iret = md5check(cdbres,fname);
+    switch(iret)
     {
+    case 0:
 //      cout << fname << " checks out" << std::endl;
-    }
-    else
-    {
+      break;
+    case 1:
       cout << fname << " will be overwritten with new md5sum" << std::endl;
       insertpl(fname,ptype,runnumber);
+      break;
+    case -1:
+      cout << "could not find " << fname << " in " << md5sumfile << std::endl;
+      break;
+    default:
+      cout << "strange return from md5check(" << cdbres << ", "
+	   << fname << std::endl;
+      break;
     }
-      
-    }
+  }
   return 0;
 }
 
@@ -45,17 +54,25 @@ int checkplrunrange(const std::string &fname, const std::string &ptype, int runn
   }
   else
   {
-    if (md5check(cdbres,fname))
+    int iret = md5check(cdbres,fname);
+    switch(iret)
     {
+    case 0:
 //      cout << fname << " checks out" << std::endl;
-    }
-    else
-    {
+      break;
+    case 1:
       cout << fname << " will be overwritten with new md5sum" << std::endl;
       insertplrunrange(fname,ptype,runnumber,endrun);
+      break;
+    case -1:
+      cout << "could not find " << fname << " in " << md5sumfile << std::endl;
+      break;
+    default:
+      cout << "strange return from md5check(" << cdbres << ", "
+	   << fname << std::endl;
+      break;
     }
-      
-    }
+  }
   return 0;
 }
 
@@ -69,17 +86,25 @@ int checkplinfinity(const std::string &fname, const std::string &ptype, int runn
   }
   else
   {
-    if (md5check(cdbres,fname))
+    int iret = md5check(cdbres,fname);
+    switch(iret)
     {
+    case 0:
 //      cout << fname << " checks out" << std::endl;
-    }
-    else
-    {
+      break;
+    case 1:
       cout << fname << " will be overwritten with new md5sum" << std::endl;
       insertplinfinity(fname,ptype,runnumber);
+      break;
+    case -1:
+      cout << "could not find " << fname << " in " << md5sumfile << std::endl;
+      break;
+    default:
+      cout << "strange return from md5check(" << cdbres << ", "
+	   << fname << std::endl;
+      break;
     }
-      
-    }
+  }
   return 0;
 }
 
@@ -109,6 +134,7 @@ int insertplinfinity(const std::string &fname, const std::string &ptype, int run
 
 void loadmd5map(const std::string &fname)
 {
+  md5sumfile = fname;
   ifstream infile(fname);
   if (infile.is_open())
   {
@@ -135,7 +161,7 @@ void loadmd5map(const std::string &fname)
   }
 }
 
-bool md5check(const std::string &cdbfname, const std::string &fname)
+int md5check(const std::string &cdbfname, const std::string &fname)
 {
   std::filesystem::path fullfile(cdbfname);
   std::string lfn = fullfile.stem();
@@ -151,8 +177,12 @@ bool md5check(const std::string &cdbfname, const std::string &fname)
     if (iter->second == lfn)
     {
 //      std::cout << "all good" << std::endl;
-      return true;
+      return 0;
+    }
+    else
+    {
+      return 1;
     }
   }
-  return false;
+  return -1;
 }

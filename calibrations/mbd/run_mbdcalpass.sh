@@ -45,7 +45,7 @@ run=$((10#$run))  # convert string to decimal
 if [ -z "${PASS0DIR}" ]
 then
   # set cdb tag by run
-  cdbtag="ProdA_2024"
+  cdbtag="newcdbtag"
   #export PASS0DIR=/sphenix/user/chiu/sphenix_bbc/CDB/2024_PASS0_AUAU/
   #echo "Setting PASS0DIR to ${PASS0DIR}"
 else
