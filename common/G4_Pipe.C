@@ -60,6 +60,7 @@ void PipeInit()
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PIPE::max_z + no_overlapp );
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -(G4PIPE::max_z + no_overlapp) );
+  Enable::PIPE_MISALIGNMENT = Enable::MVTX_APPLYMISALIGNMENT;
 }
 
 double Pipe(PHG4Reco* g4Reco, double radius)
