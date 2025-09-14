@@ -2,6 +2,7 @@
 #define MACRO_G4PIPE_C
 
 #include <GlobalVariables.C>
+#include <G4_TrkrVariables.C>
 
 #include <g4detectors/PHG4ConeSubsystem.h>
 #include <g4detectors/PHG4CylinderSubsystem.h>
