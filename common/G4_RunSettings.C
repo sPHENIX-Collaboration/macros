@@ -56,11 +56,12 @@ void RunSettings(int runnumber, const std::string type = "")
     INPUTHEPMC::FLOW_SCALING = 2.0;
     std::cout << "use ppg08 run32 settings" << std::endl;
     break;
-  case 33:  // run 33 ppg08, AuAu 1mRad xing angle, mvtx rotated, flow fluctuations disabled, scale 0.5
+  case 33:  // run 33 ppg08, AuAu 1mRad xing angle, mvtx rotated, flow afterburner disabled
     Input::BEAM_CONFIGURATION = Input::AA_COLLISION;
     Enable::MVTX_APPLYMISALIGNMENT = true;
     INPUTHEPMC::FLOW_FLUCTUATIONS = false;
-    INPUTHEPMC::FLOW_SCALING = 0.5;
+    INPUTHEPMC::FLOW = false;
+    INPUTHEPMC::FLOW_SCALING = 0.0;
     std::cout << "use ppg08 run33 settings" << std::endl;
     break;
   default:
