@@ -351,6 +351,8 @@ double TPC(PHG4Reco* g4Reco,
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);  // 1cm steps
   tpc->set_double_param("drift_velocity", drift_vel);
+  tpc->set_double_param("tpc_length", G4TPC::maxDriftLength*2 + G4TPC::CM_halfwidth*2);
+  tpc->set_double_param("maxdriftlength", G4TPC::maxDriftLength);
   tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
   tpc->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
   tpc->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
@@ -475,6 +477,8 @@ void TPC_Cells()
     //___________________________________________________________________
 
     directLaser->set_double_param("drift_velocity", drift_vel);
+    directLaser->set_double_param("tpc_half_length", G4TPC::maxDriftLength + G4TPC::CM_halfwidth);
+    directLaser->set_double_param("CM_halfwidth", G4TPC::CM_halfwidth);
     se->registerSubsystem(directLaser);
   }
 
@@ -524,13 +528,14 @@ void TPC_Cells()
     edrift->setTpcDistortion(distortionMap);
   }
 
-  double tpc_readout_time = 105.5 / drift_vel;  // ns
+  double tpc_readout_time = G4TPC::maxDriftLength / drift_vel;  // ns
   edrift->set_double_param("max_time", tpc_readout_time);
   edrift->set_double_param("extended_readout_time", extended_readout_time);
   std::cout << "PHG4TpcElectronDrift readout window is from 0 to " << tpc_readout_time + extended_readout_time << std::endl;
 
   // override the default drift velocity parameter specification
   edrift->set_double_param("drift_velocity", drift_vel);
+  edrift->set_double_param("maxdriftlength", G4TPC::maxDriftLength);  
   edrift->set_double_param("added_smear_trans", 0.085);
   edrift->set_double_param("added_smear_long", 0.105);
   //edrift->set_double_param("added_smear_trans", G4TPC::tpc_added_smear_trans);
