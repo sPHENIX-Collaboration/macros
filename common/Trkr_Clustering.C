@@ -182,10 +182,12 @@ void TPC_Clustering()
   auto tpcclusterizer = new TpcClusterizer;
   tpcclusterizer->Verbosity(verbosity);
   tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
+  tpcclusterizer->set_min_err_squared(0.);
   se->registerSubsystem(tpcclusterizer);
 
   auto tpcclustercleaner = new TpcClusterCleaner;
   tpcclustercleaner->Verbosity(verbosity);
+  tpcclustercleaner->set_rphi_error_low_cut(0.0);
   se->registerSubsystem(tpcclustercleaner);
 }
 

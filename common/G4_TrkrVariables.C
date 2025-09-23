@@ -162,7 +162,7 @@ namespace G4TPC
   std::string DIRECT_LASER_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";
   std::string DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME = "TpcDirectLaserReconstruction.root";
 
-  std::string TPC_GAS_MIXTURE = "NeCF4";
+  std::string TPC_GAS_MIXTURE = "ArCF4Isobutane";
   // drift velocity is set here for all relevant modules
   //  double tpc_drift_velocity_reco now set in GlobalVariables.C
   double tpc_drift_velocity_sim = 0.007550;  // cm/ns   // this is the ArCF4Isobutane version of the gas
