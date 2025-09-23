@@ -95,7 +95,7 @@ void Process_Calo_Calib()
 
   ////////////////
   // MC Calibration
-  if (isSim)
+  if (isSim && rc->get_uint64Flag("TIMESTAMP")<28) //in run28 and beyond we moved the MC calibration into the waveformsim module for data embedding
   {
     std::string MC_Calib = CDBInterface::instance()->getUrl("CEMC_MC_RECALIB");
     if (MC_Calib.empty())

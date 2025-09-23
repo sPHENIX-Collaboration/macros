@@ -397,6 +397,11 @@ def main():
     # filter and process the initial dataframe
     reduced_process_df = process_df(df, run_type, bin_filter_datasets, output, verbose)
 
+    # if there are no new runs to process then exit
+    if reduced_process_df.empty:
+        logger.info('No new runs to process. Quitting...')
+        sys.exit()
+
     # generate the lists of CaloValid histograms for each identified run
     generate_run_list(reduced_process_df, output)
 
