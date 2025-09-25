@@ -179,12 +179,12 @@ void Fun4All_PRDFReconstruction(
   tpot_infile.push_back(input_tpotfile);
 
  auto se = Fun4AllServer::instance();
-  se->Verbosity(2);
+  se->Verbosity(1);
   auto rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   
   rc->set_uint64Flag("TIMESTAMP", runnumber);
 

@@ -4,13 +4,15 @@ This module generates a list of run / datasets given a run type and event thresh
 """
 import argparse
 import datetime
-import glob
 import logging
 import os
 import shutil
 import subprocess
 import sys
+import textwrap
 
+from pathlib import Path
+from multiprocessing import Pool, cpu_count
 import pandas as pd
 from sqlalchemy import create_engine, text
 
@@ -39,11 +41,6 @@ parser.add_argument('-e'
                     , default='scripts/genStatus.sh'
                     , help='Condor Script. Default: scripts/genStatus.sh')
 
-parser.add_argument('-n'
-                    , '--min-events', type=int
-                    , default=500000
-                    , help='Minimum Events (for Run). Default: 500k')
-
 parser.add_argument('-o'
                     , '--output', type=str
                     , default='test'
@@ -67,68 +64,68 @@ parser.add_argument('-v'
                     , '--verbose', action='store_true'
                     , help='Verbose.')
 
-def get_file_paths(engine, runtype='run3auau', threshold=500000):
+def get_file_paths(engine, runtype='run3auau'):
     """
     Generate file paths from given minimum events and run type.
     """
 
     # Identify run range from the run type
     run_ranges = {'run2pp': (47286, 53880), 'run2auau': (54128, 54974), 'run3auau': (66457, 20000000)}
-    params = {'run_start': run_ranges[runtype][0], 'run_end': run_ranges[runtype][1], 'threshold': threshold}
-
-    create_temp_table_query = """
-    CREATE TEMPORARY TABLE t1 AS
-    SELECT
-        d.tag, d.runnumber, d.segment, d.events
-    FROM
-        datasets d
-    JOIN (
-        SELECT
-            tag, runnumber, segment
-        FROM
-            datasets
-        WHERE
-            dsttype like 'HIST_CALOQA%' and runnumber >= :run_start and runnumber <= :run_end) h
-    ON
-        d.tag = h.tag AND d.runnumber = h.runnumber AND d.segment = h.segment
-    WHERE
-        d.dsttype like 'DST_CALOFITTING%';
-    """
+    params = {'run_start': run_ranges[runtype][0], 'run_end': run_ranges[runtype][1]}
 
     query = """
-    SELECT
-        a.tag, a.runnumber, f.full_file_path, t1.events, f.time
-    FROM
-        datasets a
-    JOIN (
+    -- Use a Common Table Expression (CTE) to find the winning tag for each runnumber
+    WITH WinningTags AS (
         SELECT
-            tag, runnumber
-        FROM t1
-        GROUP BY
-            tag, runnumber
-        HAVING
-            SUM(events) > :threshold) k
-    ON
-        k.tag = a.tag AND k.runnumber = a.runnumber
-    JOIN t1
-    ON
-        t1.tag = a.tag AND t1.runnumber = a.runnumber AND t1.segment = a.segment
+            runnumber,
+            tag
+        FROM (
+            -- This inner query ranks the tags within each runnumber group
+            SELECT
+                d.runnumber,
+                d.tag,
+                -- The tag with the latest max timestamp gets rank '1'
+                ROW_NUMBER() OVER (PARTITION BY d.runnumber ORDER BY MAX(f.time) DESC) as rn
+            FROM
+                datasets d
+            JOIN
+                files f
+            ON
+                d.filename = f.lfn
+            WHERE
+                d.dsttype LIKE 'HIST_CALOQA%'
+                AND d.dsttype NOT LIKE 'HIST_CALOQASKIMMED%'
+                AND d.tag IS NOT NULL AND d.tag != ''
+                AND d.runnumber >= :run_start AND d.runnumber <= :run_end
+            GROUP BY
+                d.runnumber, d.tag
+        ) AS RankedTags
+        WHERE
+            rn = 1
+    )
+    -- Now, join the original table with the list of winning tags
+    SELECT
+        d.tag, d.runnumber, f.full_file_path
+    FROM
+        datasets d
     JOIN
         files f
     ON
-        f.lfn = a.filename
+        d.filename = f.lfn
+    JOIN
+        WinningTags wt
+    ON
+        d.runnumber = wt.runnumber AND d.tag = wt.tag
     WHERE
-        a.filename LIKE 'HIST_CALOQA%';
+        d.dsttype LIKE 'HIST_CALOQA%'
+        AND d.dsttype NOT LIKE 'HIST_CALOQASKIMMED%'
+        AND d.segment != 9999;
     """
 
     df = pd.DataFrame()
 
     try:
         with engine.connect() as connection:
-            # Create the temporary table
-            connection.execute(text(create_temp_table_query), params)
-
-            # Use the temporary table
             df = pd.read_sql_query(text(query), connection, params=params)
 
     except Exception as e:
@@ -199,7 +196,11 @@ def run_command_and_log(command, current_dir = '.', description="Executing comma
         logger.critical(f"An unexpected error occurred while running '{command}': {e}")
         return False
 
-def process_df(df, run_type, bin_filter_datasets, output, threshold, verbose=False):
+def check_path_exists(path):
+    """A simple helper function for the multiprocessing pool."""
+    return os.path.exists(path)
+
+def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
     """
     Filter df and get a reduced df that contains the necessary runs with missing / outdated bad tower maps
     """
@@ -207,69 +208,17 @@ def process_df(df, run_type, bin_filter_datasets, output, threshold, verbose=Fal
         logger.info("Original")
         logger.info(df.head().to_string())
         logger.info(f'size: {len(df)}')
+        logger.info(f'Runs: {df['runnumber'].nunique()}')
         logger.info("\n" + "="*70 + "\n")
-
-    # 2. Calculate the minimum time for each tag
-    min_times_per_tag = df.groupby('tag')['time'].min().sort_values(ascending=False)
-
-    if verbose:
-        logger.info("Minimum time for each tag:")
-        logger.info(min_times_per_tag.head().to_string())
-        logger.info(f'size: {len(min_times_per_tag)}')
-        logger.info("\n" + "="*70 + "\n")
-
-    # 3. Add this minimum time back to the original DataFrame as 'tag_min_time'
-    df_processed = df.merge(min_times_per_tag.rename('tag_min_time'),
-                            left_on='tag',
-                            right_index=True)
-
-    if verbose:
-        logger.info("DataFrame with 'tag_min_time' column:")
-        logger.info(df_processed.head().to_string())
-        logger.info(f'size: {len(df_processed)}')
-        logger.info("\n" + "="*70 + "\n")
-
-    # 4. For each 'runnumber', find the 'tag_min_time' of the HIGHEST PRIORITY tag containing it.
-    #    "Highest priority" means the tag with the LATEST (maximum) 'tag_min_time'.
-    highest_priority_time_for_runnumber = df_processed.groupby('runnumber')['tag_min_time'].max()
-    highest_priority_time_for_runnumber.name = 'highest_priority_tag_min_time_for_runnumber'
-
-    if verbose:
-        logger.info("Highest Priority 'tag_min_time' for each 'runnumber':")
-        logger.info(highest_priority_time_for_runnumber.head().to_string())
-        logger.info(f'size: {len(highest_priority_time_for_runnumber)}')
-        logger.info("\n" + "="*70 + "\n")
-
-    # 5. Merge this information back to the DataFrame
-    df_processed = df_processed.merge(highest_priority_time_for_runnumber,
-                                    left_on='runnumber',
-                                    right_index=True)
-
-    if verbose:
-        logger.info("DataFrame with 'highest_priority_tag_min_time_for_runnumber' column:")
-        logger.info(df_processed[['tag', 'runnumber', 'time', 'full_file_path', 'tag_min_time', 'highest_priority_tag_min_time_for_runnumber']].head().to_string())
-        logger.info(f'size: {len(df_processed)}')
-        logger.info("\n" + "="*70 + "\n")
-
-    # 6. Filter the DataFrame: Keep only rows where the row's 'tag_min_time'
-    #    matches the 'highest_priority_tag_min_time_for_runnumber'.
-    #    This ensures we keep ALL rows for a runnumber from its highest-priority tag.
-    reduced_df = df_processed[
-        df_processed['tag_min_time'] == df_processed['highest_priority_tag_min_time_for_runnumber']
-    ]
-
-    if verbose:
-        logger.info("Final Reduced DataFrame (sorted by time for readability):")
-        logger.info(reduced_df.sort_values(by='time').reset_index(drop=True).head().to_string())
 
     # Save CSV of unique run and tag pairs
-    reduced_df[['runnumber', 'tag']].drop_duplicates().sort_values(by='runnumber').to_csv(os.path.join(output, f'{run_type}.csv'), index=False, header=True)
+    df[['runnumber', 'tag']].drop_duplicates().sort_values(by='runnumber').to_csv(output / f'{run_type}.csv', index=False, header=True)
 
     ## DEBUG
-    command = f'{bin_filter_datasets} {os.path.join(output, f"{run_type}.csv")} {output}'
+    command = f'{bin_filter_datasets} {output / f"{run_type}.csv"} {output}'
     run_command_and_log(command)
 
-    processed_df = pd.read_csv(os.path.join(output, f'{run_type}-process.csv'))
+    processed_df = pd.read_csv(output / f'{run_type}-process.csv')
 
     # Check if any new runs need new cdb maps
     if len(processed_df) == 0:
@@ -280,39 +229,47 @@ def process_df(df, run_type, bin_filter_datasets, output, threshold, verbose=Fal
         logger.critical(f'ERROR: Too many Runs: {len(processed_df)}. Quitting.')
         sys.exit()
 
-    reduced_process_df = reduced_df.merge(processed_df)
+    reduced_process_df = df.merge(processed_df)
 
     # Ensure that the file paths from the database actually exist
     logger.info(f'Current files: {len(reduced_process_df)}')
     logger.info('Checking file status')
 
-    mask_exists = reduced_process_df['full_file_path'].apply(os.path.exists)
+    # Get the list of file paths to check
+    file_paths = reduced_process_df['full_file_path'].tolist()
 
-    df_filtered = reduced_process_df[mask_exists]
+    # Determine the number of processes to use (usually the number of CPU cores)
+    num_processes = cpu_count()
+    logger.info(f'Using {num_processes} cores for parallel file checking.')
+
+    # Create a pool of worker processes
+    with Pool(processes=num_processes) as pool:
+        # pool.map applies the check_path_exists function to each item in file_paths and returns the results as a list of booleans (True/False)
+        mask_exists_list = pool.map(check_path_exists, file_paths)
+
+    # The list of booleans can now be directly used as the mask
+    mask_exists = pd.Series(mask_exists_list, index=reduced_process_df.index)
+
+    df_filtered = reduced_process_df[mask_exists].copy()
 
     logger.info(f'Clean files: {len(df_filtered)}')
     logger.info(f'Missing files: {len(reduced_process_df[~mask_exists])}, {len(reduced_process_df[~mask_exists])*100//len(reduced_process_df)} %')
 
-    reduced_process_df[~mask_exists].to_csv(os.path.join(output, f'{run_type}-missing.csv'), columns=['full_file_path'], index=False, header=True)
-
-    df_filtered['group_total_events'] = df_filtered.groupby(['tag', 'runnumber'])['events'].transform('sum')
-    df_final = df_filtered[df_filtered['group_total_events'] > threshold].copy()
-    df_drop = df_filtered[df_filtered['group_total_events'] < threshold].copy()
+    reduced_process_df[~mask_exists].to_csv(output / f'{run_type}-missing.csv', columns=['full_file_path'], index=False, header=True)
 
     if verbose:
         logger.info("Final Reduced DataFrame that needs CDB Maps:")
-        logger.info(df_final.head().to_string())
-        logger.info(f'Runs: {df_final["runnumber"].nunique()}')
-        logger.info(f'Runs Dropped: {df_drop["runnumber"].nunique()}')
+        logger.info(df_filtered.head().to_string())
+        logger.info(f'Runs: {df_filtered["runnumber"].nunique()}')
 
-    return df_final
+    return df_filtered
 
 def generate_run_list(reduced_process_df, output):
     """
     Generate lists of CaloValid histogram for each run.
     """
-    dataset_dir = os.path.join(output, 'datasets')
-    os.makedirs(dataset_dir, exist_ok=True)
+    dataset_dir = output / 'datasets'
+    dataset_dir.mkdir(parents=True, exist_ok=True)
 
     # 7. Group by 'runnumber' and 'dataset'
     # Iterating over this grouped object is efficient.
@@ -322,10 +279,9 @@ def generate_run_list(reduced_process_df, output):
     for (run, tag), group_df in grouped:
         logger.info(f'Processing: {run},{tag}')
 
-        filepath = os.path.join(dataset_dir, f'{run}_{tag}.list')
+        filepath = dataset_dir / f'{run}_{tag}.list'
 
         group_df['full_file_path'].to_csv(filepath, index=False, header=False)
-
 
 def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit):
     """
@@ -336,28 +292,35 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
         shutil.rmtree(condor_log_dir)
         logger.info(f"Directory '{condor_log_dir}' and its contents removed.")
 
-    os.makedirs(condor_log_dir, exist_ok=True)
+    condor_log_dir.mkdir(parents=True, exist_ok=True)
 
     shutil.copy(bin_genStatus, output)
     shutil.copy(condor_script, output)
 
-    dataset_dir = os.path.join(output, 'datasets')
-    list_files = glob.glob(os.path.join(dataset_dir, '*.list'))
-    with open(os.path.join(output, 'jobs.list'), 'w', encoding="utf-8") as f:
+    dataset_dir = output / 'datasets'
+    list_files = list(dataset_dir.glob('*.list'))
+    with open(output / 'jobs.list', 'w', encoding="utf-8") as f:
         for file_path in list_files:
-            f.write(os.path.realpath(file_path) + '\n')
+            f.write(str(file_path.resolve()) + '\n')
 
-    os.makedirs(os.path.join(output,'stdout'),exist_ok=True)
-    os.makedirs(os.path.join(output,'error'),exist_ok=True)
-    os.makedirs(os.path.join(output,'output'),exist_ok=True)
+    # list of subdirectories to create
+    subdirectories = ['stdout', 'error', 'output']
 
-    with open(os.path.join(output,'genStatus.sub'), mode="w", encoding="utf-8") as file:
-        file.write(f'arguments      = {os.path.join(output, os.path.basename(bin_genStatus))} $(input_run) {os.path.join(output, "output")}\n')
-        file.write(f'executable     = {os.path.basename(condor_script)}\n')
-        file.write(f'log            = {condor_log_file}\n')
-        file.write('output          = stdout/job-$(ClusterId)-$(Process).out\n')
-        file.write('error           = error/job-$(ClusterId)-$(Process).err\n')
-        file.write(f'request_memory = {condor_memory}GB\n')
+    # Loop through the list and create each one
+    for subdir in subdirectories:
+        (output / subdir).mkdir(parents=True, exist_ok=True)
+
+    submit_file_content = textwrap.dedent(f"""\
+        arguments      = {output / os.path.basename(bin_genStatus)} $(input_run) {output / "output"}
+        executable     = {os.path.basename(condor_script)}
+        log            = {condor_log_file}
+        output         = stdout/job-$(ClusterId)-$(Process).out
+        error          = error/job-$(ClusterId)-$(Process).err
+        request_memory = {condor_memory}GB
+    """)
+
+    with open(output / 'genStatus.sub', mode="w", encoding="utf-8") as file:
+        file.write(submit_file_content)
 
     command = f'rm -rf {condor_log_dir} && mkdir {condor_log_dir} && cd {output} && condor_submit genStatus.sub -queue "input_run from jobs.list"'
 
@@ -372,13 +335,12 @@ def main():
     """
     args = parser.parse_args()
     run_type   = args.run_type
-    min_events = args.min_events
     CURRENT_DATE = str(datetime.date.today())
-    output = os.path.realpath(args.output)
+    output = Path(args.output).resolve()
     condor_memory = args.memory
     USER = os.environ.get('USER')
-    condor_log_dir = os.path.realpath(args.condor_log_dir) if args.condor_log_dir else f'/tmp/{USER}/dump'
-    condor_log_file = os.path.join(condor_log_dir, 'job-$(ClusterId)-$(Process).log')
+    condor_log_dir = Path(args.condor_log_dir).resolve() if args.condor_log_dir else Path(f'/tmp/{USER}/dump')
+    condor_log_file = condor_log_dir / 'job-$(ClusterId)-$(Process).log'
     do_condor_submit = args.do_condor_submit
     verbose    = args.verbose
 
@@ -387,18 +349,18 @@ def main():
     if do_condor_submit:
         output += '-' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
-    log_file = os.path.join(output, f'log-{CURRENT_DATE}.txt')
+    log_file = output / f'log-{CURRENT_DATE}.txt'
 
-    condor_script       = os.path.realpath(args.condor_script)
-    offline_main = os.environ.get('OFFLINE_MAIN')
+    condor_script = Path(args.condor_script).resolve()
+    offline_main = Path(os.environ.get('OFFLINE_MAIN'))
     if not offline_main:
         logger.critical("OFFLINE_MAIN environment variable not set, exiting.")
         sys.exit(1)
-    OFFLINE_MAIN_BIN    = os.path.join(offline_main, 'bin')
-    bin_filter_datasets = os.path.realpath(args.bin_filter_datasets) if args.bin_filter_datasets else os.path.join(OFFLINE_MAIN_BIN, 'CaloCDB-FilterDatasets')
-    bin_genStatus       = os.path.realpath(args.bin_genStatus) if args.bin_genStatus else os.path.join(OFFLINE_MAIN_BIN, 'CaloCDB-GenStatus')
+    OFFLINE_MAIN_BIN    = offline_main / 'bin'
+    bin_filter_datasets = Path(args.bin_filter_datasets).resolve() if args.bin_filter_datasets else OFFLINE_MAIN_BIN / 'CaloCDB-FilterDatasets'
+    bin_genStatus       = Path(args.bin_genStatus).resolve() if args.bin_genStatus else OFFLINE_MAIN_BIN / 'CaloCDB-GenStatus'
 
-    os.makedirs(output, exist_ok=True)
+    output.mkdir(parents=True, exist_ok=True)
 
     setup_logging(log_file, logging.DEBUG)
 
@@ -410,7 +372,6 @@ def main():
     logger.info('#'*40)
     logger.info(f'LOGGING: {str(datetime.datetime.now())}')
     logger.info(f'Run Type: {run_type}')
-    logger.info(f'Min Events: {min_events}')
     logger.info(f'Output Directory: {output}')
     logger.info(f'Condor Memory: {condor_memory}')
     logger.info(f'Do Condor Submission: {do_condor_submit}')
@@ -431,10 +392,15 @@ def main():
     engine = create_engine(DATABASE_URL)
 
     # 1. Get the dataframe from the database
-    df = get_file_paths(engine, run_type, min_events)
+    df = get_file_paths(engine, run_type)
 
     # filter and process the initial dataframe
-    reduced_process_df = process_df(df, run_type, bin_filter_datasets, output, min_events, verbose)
+    reduced_process_df = process_df(df, run_type, bin_filter_datasets, output, verbose)
+
+    # if there are no new runs to process then exit
+    if reduced_process_df.empty:
+        logger.info('No new runs to process. Quitting...')
+        sys.exit()
 
     # generate the lists of CaloValid histograms for each identified run
     generate_run_list(reduced_process_df, output)
