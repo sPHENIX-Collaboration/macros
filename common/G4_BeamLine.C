@@ -60,7 +60,10 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
 {
   bool overlapCheck = Enable::OVERLAPCHECK || Enable::BEAMLINE_OVERLAPCHECK;
   bool AbsorberActive = Enable::ABSORBER || Enable::BEAMLINE_ABSORBER;
-
+  if(Enable::PIPE_MISALIGNMENT)
+    {
+      G4BEAMLINE::starting_z += G4PIPE::pipe_zshift;
+    }
   int verbosity = std::max(Enable::VERBOSITY, Enable::BEAMLINE_VERBOSITY);
 
   G4BEAMLINE::ForwardBeamLineEnclosure = new PHG4CylinderSubsystem("ForwardBeamLineEnclosure");
