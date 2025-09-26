@@ -37,10 +37,10 @@ namespace G4BEAMLINE
 {
   // the beampipes seem to add 2 no_overlaps - needs to be looked at
   // but this z position takes care of our current overlap issues
-  double starting_z =  G4PIPE::max_z + 2*no_overlapp;
-  double enclosure_z_max = 2050. + (800-starting_z);
+  double starting_z {0};
+  double enclosure_z_max {0};
   double enclosure_r_max = 30.;  // 30cm radius to cover magnets
-  double enclosure_center = 0.5 * (starting_z + enclosure_z_max);
+  double enclosure_center {0};
   double skin_thickness = 0.; // if center of magnet iron is black hole - thickness of Fe surrounding it
   int pipe_id_offset = 100;
   int roman_pot_pipe_id_offset = 200;
@@ -51,6 +51,16 @@ namespace G4BEAMLINE
 
 void BeamLineInit()
 {
+  G4BEAMLINE::starting_z =  max(abs(G4PIPE::max_z_north), abs(G4PIPE::max_z_south)) + 2*no_overlapp;
+  G4BEAMLINE::enclosure_z_max = 2050. + (800-G4BEAMLINE::starting_z);
+  G4BEAMLINE::enclosure_center = 0.5 * (G4BEAMLINE::starting_z + G4BEAMLINE::enclosure_z_max);
+  cout << "starting_z: " << G4BEAMLINE::starting_z << endl;
+  cout << "old starting z: " << G4PIPE::max_z + 2*no_overlapp << endl;
+//  G4BEAMLINE::starting_z =  G4PIPE::max_z + 2*no_overlapp;
+  cout << "G4PIPE::max_z_north: " << G4PIPE::max_z_north << endl;
+  cout << "G4PIPE::max_z_south: " << G4PIPE::max_z_south << endl;
+  cout << "G4PIPE::max_z: " << G4PIPE::max_z << endl;
+  
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -G4BEAMLINE::enclosure_z_max);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4BEAMLINE::enclosure_z_max);
   BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4BEAMLINE::enclosure_r_max);
