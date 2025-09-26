@@ -51,15 +51,13 @@ namespace G4BEAMLINE
 
 void BeamLineInit()
 {
+// this is a cheap trick to deal with a shiftd beam pipe, we have now gaps between the end of the sPHENIX beam pipe
+  // and the forward/backward vacuum enclosures. Sadly the magnet and ZDC positions are relative to this volume
+  // it's not clear if we have two different sizes forward/backward how this would affect the positioning
+  // of the beam line magnets and the zdcs. This here should preserve them.
   G4BEAMLINE::starting_z =  max(abs(G4PIPE::max_z_north), abs(G4PIPE::max_z_south)) + 2*no_overlapp;
   G4BEAMLINE::enclosure_z_max = 2050. + (800-G4BEAMLINE::starting_z);
   G4BEAMLINE::enclosure_center = 0.5 * (G4BEAMLINE::starting_z + G4BEAMLINE::enclosure_z_max);
-  cout << "starting_z: " << G4BEAMLINE::starting_z << endl;
-  cout << "old starting z: " << G4PIPE::max_z + 2*no_overlapp << endl;
-//  G4BEAMLINE::starting_z =  G4PIPE::max_z + 2*no_overlapp;
-  cout << "G4PIPE::max_z_north: " << G4PIPE::max_z_north << endl;
-  cout << "G4PIPE::max_z_south: " << G4PIPE::max_z_south << endl;
-  cout << "G4PIPE::max_z: " << G4PIPE::max_z << endl;
   
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -G4BEAMLINE::enclosure_z_max);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4BEAMLINE::enclosure_z_max);
