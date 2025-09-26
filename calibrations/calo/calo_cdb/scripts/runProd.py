@@ -196,9 +196,22 @@ def run_command_and_log(command, current_dir = '.', description="Executing comma
         logger.critical(f"An unexpected error occurred while running '{command}': {e}")
         return False
 
-def check_path_exists(path):
-    """A simple helper function for the multiprocessing pool."""
-    return os.path.exists(path)
+def check_file_validity(path):
+    """
+    A simple helper function for the multiprocessing pool.
+    It checks if the path exists AND if the file size is non-zero.
+    """
+    if os.path.exists(path):
+        # Path exists, now check the size
+        try:
+            # os.path.getsize returns the size in bytes
+            return os.path.getsize(path) > 0
+        except OSError:
+            # Handle cases where the path exists but we can't get the size (e.g., permissions issue, or it's a directory)
+            return False
+    else:
+        # Path does not exist
+        return False
 
 def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
     """
@@ -245,7 +258,7 @@ def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
     # Create a pool of worker processes
     with Pool(processes=num_processes) as pool:
         # pool.map applies the check_path_exists function to each item in file_paths and returns the results as a list of booleans (True/False)
-        mask_exists_list = pool.map(check_path_exists, file_paths)
+        mask_exists_list = pool.map(check_file_validity, file_paths)
 
     # The list of booleans can now be directly used as the mask
     mask_exists = pd.Series(mask_exists_list, index=reduced_process_df.index)
