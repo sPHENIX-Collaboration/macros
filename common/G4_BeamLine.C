@@ -51,6 +51,8 @@ namespace G4BEAMLINE
 
 void BeamLineInit()
 {
+   int verbosity = std::max(Enable::VERBOSITY, Enable::BEAMLINE_VERBOSITY);
+
   // this is a cheap trick to deal with a shiftd beam pipe, we have now gaps between the end of the sPHENIX beam pipe
   // and the forward/backward vacuum enclosures. Sadly the magnet and ZDC positions are relative to this volume
   // it's not clear if we have two different sizes forward/backward how this would affect the positioning
