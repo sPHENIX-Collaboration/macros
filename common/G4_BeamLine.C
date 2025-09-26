@@ -55,7 +55,7 @@ void BeamLineInit()
   // and the forward/backward vacuum enclosures. Sadly the magnet and ZDC positions are relative to this volume
   // it's not clear if we have two different sizes forward/backward how this would affect the positioning
   // of the beam line magnets and the zdcs. This here should preserve them.
-  G4BEAMLINE::starting_z =  max(abs(G4PIPE::max_z_north), abs(G4PIPE::max_z_south)) + 2*no_overlapp;
+  G4BEAMLINE::starting_z =  max(abs(G4PIPE::max_z_north), abs(G4PIPE::max_z_south));
   G4BEAMLINE::enclosure_z_max = 2050. + (800-G4BEAMLINE::starting_z);
   G4BEAMLINE::enclosure_center = 0.5 * (G4BEAMLINE::starting_z + G4BEAMLINE::enclosure_z_max);
   

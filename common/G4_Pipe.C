@@ -140,7 +140,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl = new PHG4CylinderSubsystem("VAC_N_AL_PIPE", ilayer++);
   cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
   cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-  cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp);
+  cyl->set_double_param("place_z", north_pipe_place_z);
   cyl->set_double_param("radius", 0.0);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::al_pipe_north_length + G4PIPE::al_pipe_north_ext_length);
@@ -154,7 +154,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl = new PHG4CylinderSubsystem("N_AL_PIPE", ilayer++);
   cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
   cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-  cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp);
+  cyl->set_double_param("place_z", north_pipe_place_z);
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::al_pipe_north_length + G4PIPE::al_pipe_north_ext_length);
@@ -296,7 +296,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl = new PHG4CylinderSubsystem("VAC_S_AL_PIPE", ilayer++);
   cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
   cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-  cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp);
+  cyl->set_double_param("place_z", south_pipe_place_z);
   cyl->set_double_param("radius", 0.0);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::al_pipe_south_length);
@@ -310,7 +310,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl = new PHG4CylinderSubsystem("S_AL_PIPE", ilayer++);
   cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
   cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-  cyl->set_double_param("place_z", south_pipe_place_z - no_overlapp);
+  cyl->set_double_param("place_z", south_pipe_place_z);
   cyl->set_double_param("radius", G4PIPE::al_pipe_radius);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::al_pipe_south_length);
@@ -389,7 +389,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl = new PHG4CylinderSubsystem("VAC_N_OUTER_PIPE_PRECONE", ilayer++);
   cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
   cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-  cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp);
+  cyl->set_double_param("place_z", north_pipe_place_z);
   cyl->set_double_param("radius", 0.);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::outer_pipe_precone_length);
@@ -404,7 +404,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl = new PHG4CylinderSubsystem("N_OUTER_PIPE_PRECONE", ilayer++);
   cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
   cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-  cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp);
+  cyl->set_double_param("place_z", north_pipe_place_z);
   cyl->set_double_param("radius", G4PIPE::outer_pipe_precone_radius);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::outer_pipe_precone_length);
@@ -423,7 +423,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cone->SetR1(0., G4PIPE::outer_pipe_precone_radius);
   cone->SetR2(0., G4PIPE::outer_pipe_ext_radius);
   cone->SetZlength(G4PIPE::outer_pipe_cone_length / 2);
-  cone->SetPlace(G4PIPE::pipe_xshift, G4PIPE::pipe_yshift, north_pipe_place_z + no_overlapp);
+  cone->SetPlace(G4PIPE::pipe_xshift, G4PIPE::pipe_yshift, north_pipe_place_z);
   cone->SetMaterial("G4_Galactic");
   cone->SuperDetector("PIPE");
   if (AbsorberActive) cone->SetActive();
@@ -435,7 +435,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cone->SetR1(G4PIPE::outer_pipe_precone_radius, G4PIPE::outer_pipe_precone_radius + G4PIPE::outer_pipe_thickness);
   cone->SetR2(G4PIPE::outer_pipe_ext_radius, G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness);
   cone->SetZlength(G4PIPE::outer_pipe_cone_length / 2);
-  cone->SetPlace(G4PIPE::pipe_xshift, G4PIPE::pipe_yshift, north_pipe_place_z + no_overlapp);
+  cone->SetPlace(G4PIPE::pipe_xshift, G4PIPE::pipe_yshift, north_pipe_place_z);
   cone->SetMaterial("G4_Al");
   cone->SuperDetector("PIPE");
   if (AbsorberActive) cone->SetActive();
@@ -447,7 +447,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl = new PHG4CylinderSubsystem("VAC_N_OUTER_PIPE_EXT", ilayer++);
   cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
   cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-  cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp);
+  cyl->set_double_param("place_z", north_pipe_place_z);
   cyl->set_double_param("radius", 0.);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::outer_pipe_ext_length);
@@ -462,7 +462,7 @@ double Pipe(PHG4Reco* g4Reco, double radius)
   cyl = new PHG4CylinderSubsystem("N_OUTER_PIPE_EXT", ilayer++);
   cyl->set_double_param("place_x", G4PIPE::pipe_xshift);
   cyl->set_double_param("place_y", G4PIPE::pipe_yshift);
-  cyl->set_double_param("place_z", north_pipe_place_z + no_overlapp);
+  cyl->set_double_param("place_z", north_pipe_place_z);
   cyl->set_double_param("radius", G4PIPE::outer_pipe_ext_radius);
   cyl->set_int_param("lengthviarapidity", 0);
   cyl->set_double_param("length", G4PIPE::outer_pipe_ext_length);
