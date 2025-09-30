@@ -65,9 +65,9 @@ void TpcReadoutInit(const int RunNumber = 41989)
     }
   else
     {
-      CDBTTree *cdbttree = new CDBTTree(tpc_dv_calib_dir);
-      cdbttree->LoadCalibrations();
-      G4TPC::tpc_drift_velocity_reco = cdbttree->GetSingleFloatValue("tpc_drift_velocity");
+      CDBTTree cdbttree(tpc_dv_calib_dir);
+      cdbttree.LoadCalibrations();
+      G4TPC::tpc_drift_velocity_reco = cdbttree.GetSingleFloatValue("tpc_drift_velocity");
       std::cout << "Use calibrated TPC drift velocity for Run " << RunNumber << ": " << G4TPC::tpc_drift_velocity_reco << " cm/ns" << std::endl;
     }
   // either way
@@ -80,9 +80,9 @@ void TpcReadoutInit(const int RunNumber = 41989)
     }
   else
     {
-      CDBTTree *cdbttree = new CDBTTree(tpc_tzero_calib_dir);
-      cdbttree->LoadCalibrations();
-      G4TPC::tpc_tzero_reco = cdbttree->GetSingleFloatValue("tpc_tzero");
+      CDBTTree cdbttree(tpc_tzero_calib_dir);
+      cdbttree.LoadCalibrations();
+      G4TPC::tpc_tzero_reco = cdbttree.GetSingleFloatValue("tpc_tzero");
       std::cout << "Use calibrated TPC time offset for Run " << RunNumber << ": " << G4TPC::tpc_tzero_reco << " ns" << std::endl;
     }
 }
