@@ -351,6 +351,10 @@ double TPC(PHG4Reco* g4Reco,
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);  // 1cm steps
   tpc->set_double_param("drift_velocity", drift_vel);
+  tpc->set_double_param("tpc_length", G4TPC::maxDriftLength*2 + G4TPC::CM_halfwidth*2);
+  tpc->set_double_param("maxdriftlength", G4TPC::maxDriftLength);
+  tpc->set_double_param("CM_halfwidth", G4TPC::CM_halfwidth);
+  tpc->set_double_param("tpc_adc_clock", G4TPC::tpcAdcClockPeriod);
   tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
   tpc->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
   tpc->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
@@ -486,10 +490,7 @@ void TPC_Cells()
 
   auto padplane = new PHG4TpcPadPlaneReadout;
   padplane->Verbosity(verbosity);
-  double extended_readout_time = 0.0;
-  if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
 
-  padplane->SetReadoutTime(extended_readout_time);
   padplane->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
   padplane->SetDriftVelocity(drift_vel);
 
@@ -524,17 +525,10 @@ void TPC_Cells()
     edrift->setTpcDistortion(distortionMap);
   }
 
-  double tpc_readout_time = 105.5 / drift_vel;  // ns
-  edrift->set_double_param("max_time", tpc_readout_time);
-  edrift->set_double_param("extended_readout_time", extended_readout_time);
-  std::cout << "PHG4TpcElectronDrift readout window is from 0 to " << tpc_readout_time + extended_readout_time << std::endl;
-
   // override the default drift velocity parameter specification
   edrift->set_double_param("drift_velocity", drift_vel);
   edrift->set_double_param("added_smear_trans", 0.085);
   edrift->set_double_param("added_smear_long", 0.105);
-  //edrift->set_double_param("added_smear_trans", G4TPC::tpc_added_smear_trans);
-  //edrift->set_double_param("added_smear_long", G4TPC::tpc_added_smear_long);
 
   //Note that we default to 75:20:05 Ar:CF4:i-C4H10
   if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")

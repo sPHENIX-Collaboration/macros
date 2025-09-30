@@ -52,7 +52,10 @@ namespace ACTSGEOM
     // Geometry must be built before any Acts modules
     MakeActsGeometry* geom = new MakeActsGeometry();
     geom->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
+    geom->set_apply_tpc_tzero_correction(G4TPC::apply_tpc_tzero_correction);   // set true to apply tpc tzero correction
+    std::cout << "G4_ActsGeom: Setting apply_tpc_tzero_correction flag to " <<  G4TPC::apply_tpc_tzero_correction << std::endl;
     geom->set_tpc_tzero(G4TPC::tpc_tzero_reco);
+    //geom->set_sampa_tzero_bias(G4TPC::sampa_tzero_bias);
     geom->Verbosity(verbosity);
     for (int i = 0; i < 57; i++)
     {

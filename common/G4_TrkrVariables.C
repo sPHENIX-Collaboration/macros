@@ -14,7 +14,7 @@ namespace Enable
   bool MVTX_QA = false;
   bool MVTX_SUPPORT = false;
   bool MVTX_APPLYMISALIGNMENT = true;
-
+  
   int MVTX_VERBOSITY = 0;
 
   bool INTT = false;
@@ -205,6 +205,12 @@ namespace G4TPC
   double ArCF4Isobutane_N2_frac = 0.00;
   double ArCF4Isobutane_isobutane_frac = 0.05;
 
+  double maxDriftLength = 102.325;  // new value, CM face to top of GEM stack
+  double CM_halfwidth = 0.28;  // cm
+  double tpcAdcClockPeriod = 50.037280;  // run24
+  double sampa_tzero_bias = 39.6; // ns
+  bool apply_tpc_tzero_correction = false;  // true to apply small correction to TPC time zero in alignment transforms
+  
 }  // namespace G4TPC
 
 namespace G4TRACKING
