@@ -346,10 +346,6 @@ double TPC(PHG4Reco* g4Reco,
   {
   }
 
-  drift_vel = 0.00724;
-  
-  std::cout << "The simulation drift velocity is " << drift_vel << std::endl;
-  
   PHG4TpcSubsystem* tpc = new PHG4TpcSubsystem("TPC");
   tpc->SetActive();
   tpc->SuperDetector("TPC");
