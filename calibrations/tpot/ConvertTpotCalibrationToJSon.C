@@ -7,7 +7,7 @@ R__LOAD_LIBRARY(libmicromegas.so)
 
 #include <nlohmann/json.hpp>
 
-void ConvertCalibrationToJSon( int runnumber = 74871 )
+void ConvertTpotCalibrationToJSon( int runnumber = 74871 )
 {
 
   const auto inputfile = Form("TPOT_Pedestal-%08i-0000.root", runnumber );
