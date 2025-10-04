@@ -350,11 +350,10 @@ double TPC(PHG4Reco* g4Reco,
   tpc->SetActive();
   tpc->SuperDetector("TPC");
   tpc->set_double_param("steplimits", 1);  // 1cm steps
-  tpc->set_double_param("drift_velocity", drift_vel);
+  tpc->set_double_param("drift_velocity_sim", drift_vel);  // this is the only place that drift_velocity_sim is set
   tpc->set_double_param("tpc_length", G4TPC::maxDriftLength*2 + G4TPC::CM_halfwidth*2);
   tpc->set_double_param("maxdriftlength", G4TPC::maxDriftLength);
   tpc->set_double_param("CM_halfwidth", G4TPC::CM_halfwidth);
-  tpc->set_double_param("tpc_adc_clock", G4TPC::tpcAdcClockPeriod);
   tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
   tpc->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
   tpc->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
@@ -411,7 +410,13 @@ double TPC(PHG4Reco* g4Reco,
   }
 
   tpc->OverlapCheck(OverlapCheck);
-  
+
+  std::cout << "PHG4TpcSubsystem z geometry parameters: " << std::endl;
+  std::cout << "    drift_velocity_sim " << drift_vel << std::endl;
+  std::cout << "    max_driftlength " << G4TPC::maxDriftLength << std::endl;
+  std::cout << "    CM_halfwidth " << G4TPC::CM_halfwidth << std::endl;
+  std::cout << "    pp_extended_readout_time " <<  TRACKING::pp_extended_readout_time << std::endl;
+
   g4Reco->registerSubsystem(tpc);
 
   if (Enable::TPC_ENDCAP)
@@ -478,7 +483,7 @@ void TPC_Cells()
     // directLaser->SetFileStepping(13802);
     //___________________________________________________________________
 
-    directLaser->set_double_param("drift_velocity", drift_vel);
+    //    directLaser->set_double_param("drift_velocity", drift_vel);
     se->registerSubsystem(directLaser);
   }
 
@@ -492,7 +497,7 @@ void TPC_Cells()
   padplane->Verbosity(verbosity);
 
   padplane->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
-  padplane->SetDriftVelocity(drift_vel);
+  //  padplane->SetDriftVelocity(drift_vel);
 
   auto edrift = new PHG4TpcElectronDrift;
   edrift->Detector("TPC");
@@ -525,8 +530,6 @@ void TPC_Cells()
     edrift->setTpcDistortion(distortionMap);
   }
 
-  // override the default drift velocity parameter specification
-  edrift->set_double_param("drift_velocity", drift_vel);
   edrift->set_double_param("added_smear_trans", 0.085);
   edrift->set_double_param("added_smear_long", 0.105);
 

@@ -53,9 +53,13 @@ namespace ACTSGEOM
     MakeActsGeometry* geom = new MakeActsGeometry();
     geom->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
     geom->set_apply_tpc_tzero_correction(G4TPC::apply_tpc_tzero_correction);   // set true to apply tpc tzero correction
-    std::cout << "G4_ActsGeom: Setting apply_tpc_tzero_correction flag to " <<  G4TPC::apply_tpc_tzero_correction << std::endl;
     geom->set_tpc_tzero(G4TPC::tpc_tzero_reco);
-    //geom->set_sampa_tzero_bias(G4TPC::sampa_tzero_bias);
+    geom->set_sampa_tzero_bias(G4TPC::sampa_tzero_bias);
+    std::cout << "G4_ActsGeom: " << std::endl;
+    std::cout << "     Setting apply_tpc_tzero_correction flag to " <<  G4TPC::apply_tpc_tzero_correction << std::endl;
+    std::cout << "     Setting tpc_tzero_reco to " <<  G4TPC::tpc_tzero_reco << std::endl;
+    std::cout << "     Setting sampa_tzero_bias to " <<  G4TPC::sampa_tzero_bias << std::endl;
+    std::cout << "     Setting tpc_drift_velocity_reco to " <<  G4TPC::tpc_drift_velocity_reco << std::endl;
     geom->Verbosity(verbosity);
     for (int i = 0; i < 57; i++)
     {
