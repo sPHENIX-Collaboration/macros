@@ -113,8 +113,9 @@ void Mvtx_Cells()
   // override the default timing window - default is +/- 5000 ns
   maps_hits->set_double_param("mvtx_tmin", -maps_readout_window);
   maps_hits->set_double_param("mvtx_tmax", maps_readout_window + extended_readout_time);
-
   std::cout << "PHG4MvtxHitReco: readout window is from " << -maps_readout_window << " to " << maps_readout_window + extended_readout_time << std::endl;
+  std::cout << "PHG4MvtxHitReco: Mvtx set to streaming in simulation? (Enable::MVTX_STREAMING) " << ((Enable::MVTX_STREAMING) ? "True" : "False") << std::endl;
+  maps_hits->set_streaming_mode(Enable::MVTX_STREAMING);
   se->registerSubsystem(maps_hits);
 
   PHG4MvtxDigitizer* digimvtx = new PHG4MvtxDigitizer();
