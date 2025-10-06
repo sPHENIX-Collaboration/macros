@@ -14,7 +14,7 @@ namespace Enable
   bool MVTX_QA = false;
   bool MVTX_SUPPORT = false;
   bool MVTX_APPLYMISALIGNMENT = true;
-  bool MVTX_STREAMING = false;
+  bool MVTX_STREAMING = true;
   
   int MVTX_VERBOSITY = 0;
 
