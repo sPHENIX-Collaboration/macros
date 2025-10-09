@@ -207,7 +207,7 @@ namespace G4TPC
 
   double maxDriftLength = 102.325;  // new value, CM face to top of GEM stack
   double CM_halfwidth = 0.28;  // cm
-  double sampa_tzero_bias = 5.0; // ns, set for simulations/reco matching
+  double sampa_tzero_bias = -65.0; // ns, set for simulations/reco matching with new sampa response
   bool apply_tpc_tzero_correction = false;  // true to apply small correction to TPC time zero in alignment transforms
   
 }  // namespace G4TPC
