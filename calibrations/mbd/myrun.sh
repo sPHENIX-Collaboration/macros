@@ -48,6 +48,31 @@ then
   logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2025/$(get_rundirname ${runno})/
   build=new
   dbtag=newcdbtag
+
+  if [[ $runno -le 53880 ]]
+  then
+    # 2024 Run2pp
+    echo "This is run2pp"
+    pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/2024_PASS0
+    outbase=DST_MBD_CALIBRATION_run2pp
+    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/new_2024/$(get_rundirname ${runno})/
+    logbase=DST_MBD_CALIBRATION_run2pp
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2024/$(get_rundirname ${runno})/
+    build=new
+    dbtag=newcdbtag
+  elif [[ $runno -le 54962 ]]
+  then
+    # 2024 Run2auau
+    echo "This is run2auau"
+    pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/2024_PASS0  # need to check this
+    outbase=DST_MBD_CALIBRATION_run2auau
+    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/new_2024/$(get_rundirname ${runno})/
+    logbase=DST_MBD_CALIBRATION_run2auau
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2024/$(get_rundirname ${runno})/
+    build=new
+    dbtag=newcdbtag
+  fi
+
 else
   pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0
   outbase=DST_MBD_CALIBRATION_run3auau
@@ -57,7 +82,7 @@ else
 
   if [[ $runno -le 53880 ]]
   then
-    # 2024 Run2pp
+    # 2024 Run2pp (old config)
     outbase=DST_MBD_CALIBRATION_run2pp
     outdir=/sphenix/user/chiu/sphenix_bbc/run2024/CALIBPRODUCTION/TEST
     logbase=DST_MBD_CALIBRATION_run2pp
