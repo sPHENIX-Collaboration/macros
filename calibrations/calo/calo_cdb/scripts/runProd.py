@@ -117,7 +117,7 @@ def get_file_paths(engine, runtype='run3auau'):
     ON
         d.runnumber = wt.runnumber AND d.tag = wt.tag
     WHERE
-        d.dsttype LIKE 'HIST_CALOQA%'
+        (d.dsttype LIKE 'HIST_CALOQA%' OR d.dsttype LIKE 'HIST_CALOFITTINGQA%')
         AND d.dsttype NOT LIKE 'HIST_CALOQASKIMMED%'
         AND d.segment != 9999;
     """
