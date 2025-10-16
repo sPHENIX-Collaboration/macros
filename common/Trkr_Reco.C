@@ -205,10 +205,9 @@ void Tracking_Reco_SiliconSeed_run2pp()
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
   silicon_Seeding->setStrobeRange(-5,5);
+  silicon_Seeding->isStreaming();
   // these get us to about 83% INTT > 1
   silicon_Seeding->setinttRPhiSearchWindow(0.2);
-  silicon_Seeding->setinttZSearchWindow(1.0);
-  silicon_Seeding->seedAnalysis(false);
   se->registerSubsystem(silicon_Seeding);
 
   auto merger = new PHSiliconSeedMerger;
@@ -426,9 +425,9 @@ void Tracking_Reco_TrackSeed()
 
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
-
+  silicon_Seeding->isStreaming();
   // modify strobe range
-  silicon_Seeding->setStrobeRange(0,2);
+  silicon_Seeding->setStrobeRange(-1,2);
 
   se->registerSubsystem(silicon_Seeding);
 
