@@ -4,9 +4,9 @@
  * which package  hits, clusters, and clusters on tracks into trees
  * for analysis.
  */
+
 // leave the GlobalVariables.C at the beginning, an empty line afterwards
 // protects its position against reshuffling by clang-format
-
 #include <GlobalVariables.C>
 
 #include <G4_ActsGeom.C>
