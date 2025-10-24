@@ -1,16 +1,18 @@
+#include <GlobalVariables.C>
+
 #include <ffamodules/FlagHandler.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
+
 #include <fun4allraw/Fun4AllStreamingInputManager.h>
 #include <fun4allraw/InputManagerType.h>
 #include <fun4allraw/SingleGl1PoolInput.h>
 #include <fun4allraw/SingleInttPoolInput.h>
-#include <phool/recoConsts.h>
-#include <GlobalVariables.C>
 
-#include <intt/InttOdbcQuery.h>  // To get data taking mode
+#include <phool/recoConsts.h>
+
 #include <inttcalib/InttCalib.h>
 
 R__LOAD_LIBRARY(libinttcalib.so)
