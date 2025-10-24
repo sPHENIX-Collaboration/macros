@@ -1,69 +1,66 @@
 /*
- * This macro shows running the full event combining + tracking for 
- * cosmics running.. There are some analysis modules run at the end 
- * which package  hits, clusters, and clusters on tracks into trees 
+ * This macro shows running the full event combining + tracking for
+ * cosmics running.. There are some analysis modules run at the end
+ * which package  hits, clusters, and clusters on tracks into trees
  * for analysis.
  */
+#include <GlobalVariables.C>
+
 #include "../detectors/sPHENIX/G4Setup_sPHENIX.C"
 
 #include <G4_ActsGeom.C>
 #include <G4_Magnet.C>
-#include <GlobalVariables.C>
 #include <QA.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco.C>
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
 
-#include <intt/InttOdbcQuery.h>
+#include <trackreco/PHActsSiliconSeeding.h>
+#include <trackreco/PHSiliconSeedMerger.h>
+
+#include <cdbobjects/CDBTTree.h>
+
+#include <mvtxrawhitqa/MvtxRawHitQA.h>
+
+#include <inttrawhitqa/InttRawHitQA.h>
+
+#include <tpcqa/TpcRawHitQA.h>
+
+#include <trackingqa/InttClusterQA.h>
+#include <trackingqa/MicromegasClusterQA.h>
+#include <trackingqa/MvtxClusterQA.h>
+#include <trackingqa/SiliconSeedsQA.h>
+#include <trackingqa/TpcClusterQA.h>
+#include <trackingqa/TpcSeedsQA.h>
+#include <trackingqa/TpcSiliconQA.h>
+#include <trackingqa/TrackFittingQA.h>
+
+#include <trackingdiagnostics/TrackResiduals.h>
+#include <trackingdiagnostics/TrkrNtuplizer.h>
+
 #include <ffamodules/CDBInterface.h>
+#include <ffamodules/FlagHandler.h>
+#include <ffamodules/HeadReco.h>
+#include <ffamodules/SyncReco.h>
+
 #include <fun4allraw/Fun4AllStreamingInputManager.h>
 #include <fun4allraw/InputManagerType.h>
 #include <fun4allraw/SingleGl1PoolInput.h>
 #include <fun4allraw/SingleInttPoolInput.h>
 #include <fun4allraw/SingleMicromegasPoolInput.h>
 #include <fun4allraw/SingleMvtxPoolInput.h>
+#include <fun4allraw/SingleTpcTimeFrameInput.h>
+
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
-
-#include <phool/recoConsts.h>
-#include <ffamodules/HeadReco.h>
-#include <ffamodules/FlagHandler.h>
-#include <ffamodules/SyncReco.h>
-
-#include <fun4allraw/SingleTpcTimeFrameInput.h>
-
-#include <cdbobjects/CDBTTree.h>
-
-#include <mvtxrawhitqa/MvtxRawHitQA.h>
-#include <inttrawhitqa/InttRawHitQA.h>
-#include <tpcqa/TpcRawHitQA.h>
-#include <trackingqa/MvtxClusterQA.h>
-#include <trackingqa/InttClusterQA.h>
-#include <trackingqa/TpcClusterQA.h>
-#include <trackingqa/TpcSeedsQA.h>
-#include <trackingqa/SiliconSeedsQA.h>
-#include <trackingqa/TpcSiliconQA.h>
-#include <trackingqa/TrackFittingQA.h>
-#include <trackingqa/MicromegasClusterQA.h>
-
-#include <trackingqa/MvtxClusterQA.h>
-#include <trackreco/PHActsSiliconSeeding.h>
-#include <trackreco/PHSiliconSeedMerger.h>
-
-#include <trackingqa/TpcClusterQA.h>
-#include <trackingqa/TpcSeedsQA.h>
-
-#include <trackingdiagnostics/TrackResiduals.h>
-#include <trackingdiagnostics/TrkrNtuplizer.h>
-
 #include <fun4all/Fun4AllUtils.h>
 
-#include <stdio.h>
+#include <phool/recoConsts.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
@@ -77,11 +74,12 @@ R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
 
-bool isGood(const string &infile);
+bool isGood(const std::string &infile);
+int getrunnumber(const std::string &listfile);
 
 void Fun4All_PRDFReconstruction(
     const int nEvents = 0,
-    const int runnumber = 53756,
+    const int runnumber_unused = 53756,
     const std::string &dir = "/.",
     const std::string &outfilename = "output_tracks",
     const std::string &input_gl1file = "gl1daq.list",
@@ -123,13 +121,12 @@ void Fun4All_PRDFReconstruction(
     const string &input_tpcfile21 = "tpc21_0.list",
     const string &input_tpcfile22 = "tpc22_0.list",
     const string &input_tpcfile23 = "tpc23_0.list",
-    const string &input_tpotfile = "tpot.list"
-)
+    const string &input_tpotfile = "tpot.list")
 {
- vector<string> gl1_infile;
+  vector<string> gl1_infile;
   gl1_infile.push_back(input_gl1file);
 
-// MVTX
+  // MVTX
   vector<string> mvtx_infile;
   mvtx_infile.push_back(input_mvtxfile00);
   mvtx_infile.push_back(input_mvtxfile01);
@@ -138,7 +135,7 @@ void Fun4All_PRDFReconstruction(
   mvtx_infile.push_back(input_mvtxfile04);
   mvtx_infile.push_back(input_mvtxfile05);
 
-// INTT
+  // INTT
   vector<string> intt_infile;
   intt_infile.push_back(input_inttfile00);
   intt_infile.push_back(input_inttfile01);
@@ -175,18 +172,46 @@ void Fun4All_PRDFReconstruction(
   tpc_infile.push_back(input_tpcfile22);
   tpc_infile.push_back(input_tpcfile23);
 
-// TPOT
+  // TPOT
   vector<string> tpot_infile;
   tpot_infile.push_back(input_tpotfile);
 
- auto se = Fun4AllServer::instance();
+  int runnumber = -99999;
+  if (!gl1_infile.empty())
+  {
+    runnumber = getrunnumber(gl1_infile[0]);
+  }
+  else if (!mvtx_infile.empty())
+  {
+    runnumber = getrunnumber(mvtx_infile[0]);
+  }
+  else if (!intt_infile.empty())
+  {
+    runnumber = getrunnumber(intt_infile[0]);
+  }
+  else if (!tpc_infile.empty())
+  {
+    runnumber = getrunnumber(tpc_infile[0]);
+  }
+  else if (!tpot_infile.empty())
+  {
+    runnumber = getrunnumber(tpot_infile[0]);
+  }
+  if (runnumber == -99999)
+  {
+    std::cout << "could not extract run number from input files (all lists empty?)"
+              << std::endl;
+    gSystem->Exit(1);
+  }
+
+  auto se = Fun4AllServer::instance();
   se->Verbosity(1);
   auto rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
-  
+
   rc->set_uint64Flag("TIMESTAMP", runnumber);
 
   //! flags to set
@@ -194,23 +219,23 @@ void Fun4All_PRDFReconstruction(
   TRACKING::tpc_zero_supp = true;
   TRACKING::pp_mode = true;
   G4TRACKING::convert_seeds_to_svtxtracks = false;
-  G4TPC::REJECT_LASER_EVENTS=true;
-  
+  G4TPC::REJECT_LASER_EVENTS = true;
+
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
-  TpcReadoutInit( runnumber );
-  std::cout<< " run: " << runnumber
-	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
-	   << " pre: " << TRACKING::reco_tpc_time_presample
-	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
-	   << std::endl;
+  TpcReadoutInit(runnumber);
+  std::cout << " run: " << runnumber
+            << " samples: " << TRACKING::reco_tpc_maxtime_sample
+            << " pre: " << TRACKING::reco_tpc_time_presample
+            << " vdrift: " << G4TPC::tpc_drift_velocity_reco
+            << std::endl;
 
   CDBInterface::instance()->Verbosity(1);
-  //std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
-  //std::cout << "CDB tracking geometry file "<<geofile << std::endl;
-  //Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
-  //ingeo->AddFile(geofile);
-  //se->registerInputManager(ingeo);
+  // std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
+  // std::cout << "CDB tracking geometry file "<<geofile << std::endl;
+  // Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
+  // ingeo->AddFile(geofile);
+  // se->registerInputManager(ingeo);
 
   Enable::MVTX = true;
   Enable::INTT = true;
@@ -219,24 +244,24 @@ void Fun4All_PRDFReconstruction(
 
   G4Init();
   G4Setup();
-  
+
   CDBInterface *cdb = CDBInterface::instance();
 
   // can use for zero field
-  //double fieldstrength = 0.01;
-  //G4MAGNET::magfield_tracking = "0.01";
+  // double fieldstrength = 0.01;
+  // G4MAGNET::magfield_tracking = "0.01";
   double fieldstrength = std::numeric_limits<double>::quiet_NaN();
-  bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
 
-  if(ConstField && fieldstrength < 0.1)
+  if (ConstField && fieldstrength < 0.1)
   {
     G4MAGNET::magfield = "0.01";
     G4MAGNET::magfield_rescale = 1;
   }
-  
+
   TrackingInit();
 
-  int i= 0;
+  int i = 0;
   int NumInputs = 0;
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
 
@@ -258,19 +283,10 @@ void Fun4All_PRDFReconstruction(
   {
     if (isGood(iter))
     {
-    SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + to_string(i));
-    //    intt_sngl->Verbosity(3);
-    InttOdbcQuery query;
-    bool isStreaming = false;
-    if(runnumber != 0)
-      {
-	query.Query(runnumber);
-	isStreaming = query.IsStreaming();
-      }
-    intt_sngl->streamingMode(isStreaming);
-    intt_sngl->AddListFile(iter);
-    in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
-    i++;
+      SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + to_string(i));
+      intt_sngl->AddListFile(iter);
+      in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
+      i++;
     }
   }
   NumInputs += i;
@@ -280,26 +296,23 @@ void Fun4All_PRDFReconstruction(
   {
     if (isGood(iter))
     {
-    SingleMvtxPoolInput *mvtx_sngl = new SingleMvtxPoolInput("MVTX_" + to_string(i));
-    //    mvtx_sngl->Verbosity(3);
-    mvtx_sngl->AddListFile(iter);
-    in->registerStreamingInput(mvtx_sngl, InputManagerType::MVTX);
-    i++;
+      SingleMvtxPoolInput *mvtx_sngl = new SingleMvtxPoolInput("MVTX_" + to_string(i));
+      //    mvtx_sngl->Verbosity(3);
+      mvtx_sngl->AddListFile(iter);
+      in->registerStreamingInput(mvtx_sngl, InputManagerType::MVTX);
+      i++;
     }
   }
   NumInputs += i;
 
   i = 0;
 
-
-  
   for (auto iter : tpc_infile)
   {
     if (isGood(iter))
     {
-
       SingleTpcTimeFrameInput *tpc_sngl = new SingleTpcTimeFrameInput("TPC_" + to_string(i));
-//    tpc_sngl->Verbosity(2);
+      //    tpc_sngl->Verbosity(2);
       //   tpc_sngl->DryRun();
       tpc_sngl->setHitContainerName("TPCRAWHIT");
       tpc_sngl->AddListFile(iter);
@@ -308,19 +321,19 @@ void Fun4All_PRDFReconstruction(
     }
   }
   NumInputs += i;
-    i = 0;
+  i = 0;
   for (auto iter : tpot_infile)
   {
     if (isGood(iter))
     {
-    SingleMicromegasPoolInput *mm_sngl = new SingleMicromegasPoolInput("MICROMEGAS_" + to_string(i));
-    //   sngl->Verbosity(3);
-    mm_sngl->SetBcoRange(10);
-    mm_sngl->SetNegativeBco(2);
-    mm_sngl->SetBcoPoolSize(50);
-    mm_sngl->AddListFile(iter);
-    in->registerStreamingInput(mm_sngl, InputManagerType::MICROMEGAS);
-    i++;
+      SingleMicromegasPoolInput *mm_sngl = new SingleMicromegasPoolInput("MICROMEGAS_" + to_string(i));
+      //   sngl->Verbosity(3);
+      mm_sngl->SetBcoRange(10);
+      mm_sngl->SetNegativeBco(2);
+      mm_sngl->SetBcoPoolSize(50);
+      mm_sngl->AddListFile(iter);
+      in->registerStreamingInput(mm_sngl, InputManagerType::MICROMEGAS);
+      i++;
     }
   }
   NumInputs += i;
@@ -342,7 +355,6 @@ void Fun4All_PRDFReconstruction(
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
 
-  
   Mvtx_HitUnpacking();
   Intt_HitUnpacking();
   Tpc_HitUnpacking();
@@ -351,7 +363,7 @@ void Fun4All_PRDFReconstruction(
   Mvtx_Clustering();
 
   Intt_Clustering();
-  
+
   Tpc_LaserEventIdentifying();
 
   TPC_Clustering_run2pp();
@@ -359,15 +371,13 @@ void Fun4All_PRDFReconstruction(
 
   Reject_Laser_Events();
 
-  
   Tracking_Reco_TrackSeed_run2pp();
   Tracking_Reco_TrackMatching_run2pp();
 
-  
   Tracking_Reco_TrackFit_run2pp();
-  //vertexing and propagation to vertex
+  // vertexing and propagation to vertex
   Tracking_Reco_Vertex_run2pp();
-  
+
   TString residoutfile = outfilename + "_resid.root";
   std::string residstring(residoutfile.Data());
 
@@ -375,15 +385,14 @@ void Fun4All_PRDFReconstruction(
   resid->Verbosity(0);
   resid->outfileName(residstring);
   resid->alignment(false);
-  //resid->hitTree();
+  // resid->hitTree();
   resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
 
-
-  if(ConstField && fieldstrength < 0.1)
+  if (ConstField && fieldstrength < 0.1)
   {
     resid->zeroField();
   }
-  //se->registerSubsystem(resid);
+  // se->registerSubsystem(resid);
 
   // Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", "/sphenix/tg/tg01/hf/jdosbo/tracking_development/onlineoffline/hitsets.root");
   // se->registerOutputManager(out);
@@ -401,25 +410,23 @@ void Fun4All_PRDFReconstruction(
     se->registerSubsystem(new TpcSeedsQA);
     se->registerSubsystem(new TpcSiliconQA);
     se->registerSubsystem(new TrackFittingQA);
-   
   }
 
   se->run(nEvents);
   se->End();
   se->PrintTimer();
 
-  if(Enable::QA)
-    {
-      TString qaname = outfilename + runnumber +"_qa.root";
-      std::string qaOutputFileName(qaname.Data());
-      QAHistManagerDef::saveQARootFile(qaOutputFileName);
-    }
+  if (Enable::QA)
+  {
+    TString qaname = outfilename + runnumber + "_qa.root";
+    std::string qaOutputFileName(qaname.Data());
+    QAHistManagerDef::saveQARootFile(qaOutputFileName);
+  }
   CDBInterface::instance()->Print();
   delete se;
   std::cout << "Finished" << std::endl;
   gSystem->Exit(0);
 }
-
 
 bool isGood(const string &infile)
 {
@@ -428,11 +435,28 @@ bool isGood(const string &infile)
   bool goodfile = false;
   if (intest.is_open())
   {
-    if (intest.peek() != std::ifstream::traits_type::eof()) // is it non zero?
+    if (intest.peek() != std::ifstream::traits_type::eof())  // is it non zero?
     {
       goodfile = true;
     }
     intest.close();
   }
   return goodfile;
+}
+
+int getrunnumber(const std::string &listfile)
+{
+  if (!isGood(listfile))
+  {
+    std::cout << "listfile " << listfile << " is bad" << std::endl;
+    gSystem->Exit(1);
+  }
+  std::ifstream ifs(listfile);
+  std::string filepath;
+  std::getline(ifs, filepath);
+
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filepath);
+  int runnumber = runseg.first;
+  //  int segment = abs(runseg.second);
+  return runnumber;
 }
