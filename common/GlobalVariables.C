@@ -2,6 +2,8 @@
 #define MACRO_GLOBALVARIABLES_C
 
 #include <g4decayer/EDecayType.hh>
+
+#include <cstdint>
 #include <limits>
 #include <set>
 #include <sstream>
