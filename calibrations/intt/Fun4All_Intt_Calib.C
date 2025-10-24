@@ -1,7 +1,5 @@
 #include <GlobalVariables.C>
 
-#include <intt/InttOdbcQuery.h>  // To get data taking mode
-
 #include <inttcalib/InttCalib.h>
 
 #include <ffamodules/FlagHandler.h>
@@ -38,7 +36,7 @@ void Fun4All_Intt_Calib(
   //  se->Verbosity(1);
   // Input Manager
   recoConsts *rc = recoConsts::instance();
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", run_num);
 
   InttCalib *inttcalib = new InttCalib();
