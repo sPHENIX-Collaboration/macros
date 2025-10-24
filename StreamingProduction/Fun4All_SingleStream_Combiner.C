@@ -1,21 +1,5 @@
 #include <QA.C>
 
-#include <fun4all/Fun4AllDstOutputManager.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllOutputManager.h>
-#include <fun4all/Fun4AllServer.h>
-#include <fun4allraw/Fun4AllStreamingInputManager.h>
-#include <fun4allraw/InputManagerType.h>
-#include <fun4allraw/SingleGl1PoolInput.h>
-#include <fun4allraw/SingleInttPoolInput.h>
-#include <fun4allraw/SingleMicromegasPoolInput.h>
-#include <fun4allraw/SingleMvtxPoolInput.h>
-#include <fun4allraw/SingleTpcPoolInput.h>
-
-#include <intt/InttOdbcQuery.h>
-
-#include <phool/recoConsts.h>
-
 #include <ffarawmodules/InttCheck.h>
 #include <ffarawmodules/StreamingCheck.h>
 #include <ffarawmodules/TpcCheck.h>
@@ -24,15 +8,32 @@
 #include <ffamodules/FlagHandler.h>
 #include <ffamodules/SyncReco.h>
 
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllUtils.h>
+
+#include <fun4allraw/Fun4AllStreamingInputManager.h>
+#include <fun4allraw/InputManagerType.h>
+#include <fun4allraw/SingleGl1PoolInput.h>
+#include <fun4allraw/SingleInttPoolInput.h>
+#include <fun4allraw/SingleMicromegasPoolInput.h>
+#include <fun4allraw/SingleMvtxPoolInput.h>
+#include <fun4allraw/SingleTpcPoolInput.h>
+
+#include <phool/recoConsts.h>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
 R__LOAD_LIBRARY(libintt.so)
 bool isGood(const string &infile);
+int getrunnumber(const std::string &listfile);
 
 void Fun4All_SingleStream_Combiner(int nEvents = 0,
-				   const int runnumber = 30117,
+				   const int runnumber_unused = 30117,
 				   const string &outdir = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpccosmics/",
 				   const string &type = "streaming",
 		        const string &input_gl1file = "gl1daq.list",
@@ -60,9 +61,38 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
   vector<string> tpot_infile;
   tpot_infile.push_back(input_tpotfile);
 
+  int runnumber = -99999;
+  if (!gl1_infile.empty())
+  {
+    runnumber = getrunnumber(gl1_infile[0]);
+  }
+  else if (!mvtx_infile.empty())
+  {
+    runnumber = getrunnumber(mvtx_infile[0]);
+  }
+  else if (!intt_infile.empty())
+  {
+    runnumber = getrunnumber(intt_infile[0]);
+  }
+  else if (!tpc_infile.empty())
+  {
+    runnumber = getrunnumber(tpc_infile[0]);
+  }
+  else if (!tpot_infile.empty())
+  {
+    runnumber = getrunnumber(tpot_infile[0]);
+  }
+  if (runnumber == -99999)
+  {
+    std::cout << "could not extract run number from input files (all lists empty?)"
+              << std::endl;
+    gSystem->Exit(1);
+  }
+
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
 //  in->Verbosity(3);
 
@@ -91,14 +121,6 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
     {
     SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + to_string(i));
     //intt_sngl->Verbosity(3);
-    InttOdbcQuery query;
-    bool isStreaming = false;
-    if(RunNumber != 0)
-      {
-	query.Query(RunNumber);
-	isStreaming = query.IsStreaming();
-      }
-    intt_sngl->streamingMode(isStreaming);
     auto pos = iter.find("intt");
     std::string num = iter.substr(pos+4, 1);
     readoutNumber = "INTT"+num;
@@ -236,4 +258,21 @@ bool isGood(const string &infile)
       intest.close();
   }
   return goodfile;
+}
+
+int getrunnumber(const std::string &listfile)
+{
+  if (!isGood(listfile))
+  {
+    std::cout << "listfile " << listfile << " is bad" << std::endl;
+    gSystem->Exit(1);
+  }
+  std::ifstream ifs(listfile);
+  std::string filepath;
+  std::getline(ifs, filepath);
+
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filepath);
+  int runnumber = runseg.first;
+  //  int segment = abs(runseg.second);
+  return runnumber;
 }

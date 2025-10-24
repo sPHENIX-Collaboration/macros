@@ -1,21 +1,6 @@
 #include <GlobalVariables.C>
 #include <Trkr_TpcReadoutInit.C>
-#include <fun4all/Fun4AllDstOutputManager.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllOutputManager.h>
-#include <fun4all/Fun4AllServer.h>
-#include <fun4allraw/Fun4AllStreamingInputManager.h>
-#include <fun4allraw/InputManagerType.h>
-#include <fun4allraw/SingleGl1PoolInput.h>
-#include <fun4allraw/SingleInttPoolInput.h>
-#include <fun4allraw/SingleInttEventInput.h>
-#include <fun4allraw/SingleMicromegasPoolInput.h>
-#include <fun4allraw/SingleMvtxPoolInput.h>
-#include <fun4allraw/SingleTpcPoolInput.h>
 
-#include <intt/InttOdbcQuery.h>
-
-#include <phool/recoConsts.h>
 
 #include <ffarawmodules/InttCheck.h>
 #include <ffarawmodules/StreamingCheck.h>
@@ -25,6 +10,23 @@
 #include <ffamodules/FlagHandler.h>
 #include <ffamodules/SyncReco.h>
 
+#include <fun4allraw/Fun4AllStreamingInputManager.h>
+#include <fun4allraw/InputManagerType.h>
+#include <fun4allraw/SingleGl1PoolInput.h>
+#include <fun4allraw/SingleInttPoolInput.h>
+#include <fun4allraw/SingleInttEventInput.h>
+#include <fun4allraw/SingleMicromegasPoolInput.h>
+#include <fun4allraw/SingleMvtxPoolInput.h>
+#include <fun4allraw/SingleTpcPoolInput.h>
+
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllUtils.h>
+
+#include <phool/recoConsts.h>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -32,9 +34,9 @@ R__LOAD_LIBRARY(libffarawmodules.so)
 R__LOAD_LIBRARY(libintt.so)
 
 bool isGood(const string &infile);
-bool use_inttpool = true; // set to false if you want to use the intt event input mgr
+int getrunnumber(const std::string &listfile);
 
-void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
+void Fun4All_Stream_Combiner(int nEvents = 5, int runnumber_unused = 41989,
                              const string &input_gl1file = "gl1daq.list",
                              const string &input_inttfile00 = "intt0.list",
                              const string &input_inttfile01 = "intt1.list",
@@ -130,8 +132,36 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
   vector<string> tpot_infile;
   tpot_infile.push_back(input_tpotfile);
 
-  TpcSampleInit( RunNumber );
-  std::cout<< " run: " << RunNumber
+  int runnumber = -99999;
+  if (!gl1_infile.empty())
+  {
+    runnumber = getrunnumber(gl1_infile[0]);
+  }
+  else if (!mvtx_infile.empty())
+  {
+    runnumber = getrunnumber(mvtx_infile[0]);
+  }
+  else if (!intt_infile.empty())
+  {
+    runnumber = getrunnumber(intt_infile[0]);
+  }
+  else if (!tpc_infile.empty())
+  {
+    runnumber = getrunnumber(tpc_infile[0]);
+  }
+  else if (!tpot_infile.empty())
+  {
+    runnumber = getrunnumber(tpot_infile[0]);
+  }
+  if (runnumber == -99999)
+  {
+    std::cout << "could not extract run number from input files (all lists empty?)"
+              << std::endl;
+    gSystem->Exit(1);
+  }
+
+  TpcSampleInit( runnumber );
+  std::cout<< " run: " << runnumber
 	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
 	   << " pre: " << TRACKING::reco_tpc_time_presample
 	   << std::endl;
@@ -139,7 +169,6 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
   recoConsts *rc = recoConsts::instance();
-  rc->set_IntFlag("RUNNUMBER", RunNumber);
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
 //  in->Verbosity(3);
 
@@ -161,45 +190,16 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
   NumInputs += i;
 
   i = 0;
-  if (use_inttpool)
+  for (auto iter : intt_infile)
   {
-    for (auto iter : intt_infile)
+    if (isGood(iter))
     {
-      if (isGood(iter))
-      {
-	cout << "opening file " << iter << endl;
-	SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + to_string(i));
+      cout << "opening file " << iter << endl;
+      SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + to_string(i));
 //    intt_sngl->Verbosity(3);
-	InttOdbcQuery query;
-	bool isStreaming = false;
-	if(RunNumber != 0)
-	  {
-	    query.Query(RunNumber);
-	    isStreaming = query.IsStreaming();
-	  }
-	intt_sngl->streamingMode(isStreaming);
-
-	intt_sngl->AddListFile(iter);
-	in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
-	i++;
-      }
-    }
-  }
-  else
-  {
-    for (auto iter : intt_infile)
-    {
-      if (isGood(iter))
-      {
-	cout << "opening file " << iter << endl;
-	SingleInttEventInput *intt_sngl = new SingleInttEventInput("INTT_" + to_string(i));
-    intt_sngl->Verbosity(3);
-	intt_sngl->SetNegativeBco(120-23);
-	intt_sngl->SetBcoRange(500);
-	intt_sngl->AddListFile(iter);
-	in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
-	i++;
-      }
+      intt_sngl->AddListFile(iter);
+      in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
+      i++;
     }
   }
   NumInputs += i;
@@ -209,11 +209,11 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
   {
     if (isGood(iter))
     {
-    SingleMvtxPoolInput *mvtx_sngl = new SingleMvtxPoolInput("MVTX_" + to_string(i));
-    //mvtx_sngl->Verbosity(5);
-    mvtx_sngl->AddListFile(iter);
-    in->registerStreamingInput(mvtx_sngl, InputManagerType::MVTX);
-    i++;
+      SingleMvtxPoolInput *mvtx_sngl = new SingleMvtxPoolInput("MVTX_" + to_string(i));
+      //mvtx_sngl->Verbosity(5);
+      mvtx_sngl->AddListFile(iter);
+      in->registerStreamingInput(mvtx_sngl, InputManagerType::MVTX);
+      i++;
     }
   }
   NumInputs += i;
@@ -223,15 +223,15 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
   {
     if (isGood(iter))
     {
-    SingleTpcPoolInput *tpc_sngl = new SingleTpcPoolInput("TPC_" + to_string(i));
+      SingleTpcPoolInput *tpc_sngl = new SingleTpcPoolInput("TPC_" + to_string(i));
 //    tpc_sngl->Verbosity(2);
-    //   tpc_sngl->DryRun();
-    tpc_sngl->SetBcoRange(5);
-    tpc_sngl->AddListFile(iter);
+      //   tpc_sngl->DryRun();
+      tpc_sngl->SetBcoRange(5);
+      tpc_sngl->AddListFile(iter);
 //    tpc_sngl->SetMaxTpcTimeSamples(TRACKING::reco_tpc_maxtime_sample);
-    tpc_sngl->SetMaxTpcTimeSamples(1024);
-    in->registerStreamingInput(tpc_sngl, InputManagerType::TPC);
-    i++;
+      tpc_sngl->SetMaxTpcTimeSamples(1024);
+      in->registerStreamingInput(tpc_sngl, InputManagerType::TPC);
+      i++;
     }
   }
   NumInputs += i;
@@ -241,14 +241,14 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int RunNumber = 41989,
   {
     if (isGood(iter))
     {
-    SingleMicromegasPoolInput *mm_sngl = new SingleMicromegasPoolInput("MICROMEGAS_" + to_string(i));
-    //   sngl->Verbosity(3);
-    mm_sngl->SetBcoRange(10);
-    mm_sngl->SetNegativeBco(2);
-    mm_sngl->SetBcoPoolSize(50);
-    mm_sngl->AddListFile(iter);
-    in->registerStreamingInput(mm_sngl, InputManagerType::MICROMEGAS);
-    i++;
+      SingleMicromegasPoolInput *mm_sngl = new SingleMicromegasPoolInput("MICROMEGAS_" + to_string(i));
+      //   sngl->Verbosity(3);
+      mm_sngl->SetBcoRange(10);
+      mm_sngl->SetNegativeBco(2);
+      mm_sngl->SetBcoPoolSize(50);
+      mm_sngl->AddListFile(iter);
+      in->registerStreamingInput(mm_sngl, InputManagerType::MICROMEGAS);
+      i++;
     }
   }
   NumInputs += i;
@@ -310,7 +310,24 @@ bool isGood(const string &infile)
     {
       goodfile = true;
     }
-      intest.close();
+    intest.close();
   }
   return goodfile;
+}
+
+int getrunnumber(const std::string &listfile)
+{
+  if (!isGood(listfile))
+  {
+    std::cout << "listfile " << listfile << " is bad" << std::endl;
+    gSystem->Exit(1);
+  }
+  std::ifstream ifs(listfile);
+  std::string filepath;
+  std::getline(ifs, filepath);
+
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filepath);
+  int runnumber = runseg.first;
+  //  int segment = abs(runseg.second);
+  return runnumber;
 }
