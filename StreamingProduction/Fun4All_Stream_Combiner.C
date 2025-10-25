@@ -1,4 +1,5 @@
 #include <GlobalVariables.C>
+
 #include <Trkr_TpcReadoutInit.C>
 
 #include <ffarawmodules/InttCheck.h>
@@ -26,6 +27,11 @@
 
 #include <phool/recoConsts.h>
 
+#include <Rtypes.h>  // resolves R__LOAD_LIBRARY for clang-tidy
+#include <TSystem.h>
+
+#include <fstream>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -35,7 +41,7 @@ R__LOAD_LIBRARY(libintt.so)
 bool isGood(const std::string &infile);
 int getrunnumber(const std::string &listfile);
 
-void Fun4All_Stream_Combiner(int nEvents = 5, int runnumber_unused = 41989,
+void Fun4All_Stream_Combiner(int nEvents = 5,
                              const std::string &input_gl1file = "gl1daq.list",
                              const std::string &input_inttfile00 = "intt0.list",
                              const std::string &input_inttfile01 = "intt1.list",
@@ -167,7 +173,7 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int runnumber_unused = 41989,
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
-  recoConsts *rc = recoConsts::instance();
+
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
   //  in->Verbosity(3);
 
@@ -175,7 +181,7 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int runnumber_unused = 41989,
   int NumInputs = 0;
   int i = 0;
 
-  for (auto iter : gl1_infile)
+  for (const auto &iter : gl1_infile)
   {
     if (isGood(iter))
     {
@@ -189,7 +195,7 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int runnumber_unused = 41989,
   NumInputs += i;
 
   i = 0;
-  for (auto iter : intt_infile)
+  for (const auto &iter : intt_infile)
   {
     if (isGood(iter))
     {
@@ -204,7 +210,7 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int runnumber_unused = 41989,
   NumInputs += i;
 
   i = 0;
-  for (auto iter : mvtx_infile)
+  for (const auto &iter : mvtx_infile)
   {
     if (isGood(iter))
     {
@@ -218,7 +224,7 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int runnumber_unused = 41989,
   NumInputs += i;
 
   i = 0;
-  for (auto iter : tpc_infile)
+  for (const auto &iter : tpc_infile)
   {
     if (isGood(iter))
     {
@@ -236,7 +242,7 @@ void Fun4All_Stream_Combiner(int nEvents = 5, int runnumber_unused = 41989,
   NumInputs += i;
 
   i = 0;
-  for (auto iter : tpot_infile)
+  for (const auto &iter : tpot_infile)
   {
     if (isGood(iter))
     {
