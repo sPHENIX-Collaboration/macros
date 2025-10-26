@@ -74,7 +74,7 @@ void PipeInit()
     G4PIPE::max_z_south += G4PIPE::pipe_zshift;
   }
 
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness + sqrt(G4PIPE::pipe_xshift * G4PIPE::pipe_xshift + G4PIPE::pipe_yshift * G4PIPE::pipe_yshift) + no_overlapp);
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, G4PIPE::outer_pipe_ext_radius + G4PIPE::outer_pipe_thickness + std::sqrt(G4PIPE::pipe_xshift * G4PIPE::pipe_xshift + G4PIPE::pipe_yshift * G4PIPE::pipe_yshift) + no_overlapp);
   BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4PIPE::max_z_north + no_overlapp);
   BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, G4PIPE::max_z_south - no_overlapp);
 }
@@ -87,15 +87,15 @@ double Pipe(PHG4Reco* g4Reco, double radius)
 
   if (radius > G4PIPE::be_pipe_radius)
   {
-    cout << "inconsistency: radius: " << radius
-         << " larger than pipe inner radius: " << G4PIPE::be_pipe_radius << endl;
+    std::cout << "inconsistency: radius: " << radius
+              << " larger than pipe inner radius: " << G4PIPE::be_pipe_radius << std::endl;
     gSystem->Exit(-1);
   }
 
   if (verbosity > 0)
   {
-    cout << "PHG4Reco::Registering Pipe Subsystems, PIPE_MISALIGNMENT = " << Enable::PIPE_MISALIGNMENT << endl
-         << " pipe is shifted by (x,y,z) = (" << G4PIPE::pipe_xshift << ", " << G4PIPE::pipe_yshift << ", " << G4PIPE::pipe_zshift << ") cm" << endl;
+    std::cout << "PHG4Reco::Registering Pipe Subsystems, PIPE_MISALIGNMENT = " << Enable::PIPE_MISALIGNMENT << std::endl
+              << " pipe is shifted by (x,y,z) = (" << G4PIPE::pipe_xshift << ", " << G4PIPE::pipe_yshift << ", " << G4PIPE::pipe_zshift << ") cm" << std::endl;
   }
 
   int ilayer = 0;
@@ -558,13 +558,13 @@ double Pipe(PHG4Reco* g4Reco, double radius)
 
   if (verbosity > 0)
   {
-    cout << "=========================== G4_Pipe.C::Pipe() =============================" << endl;
-    cout << " PIPE Material Description:" << endl;
-    cout << "  inner radius = " << G4PIPE::be_pipe_radius << " cm" << endl;
-    cout << "  thickness = " << G4PIPE::be_pipe_thickness << " cm" << endl;
-    cout << "  outer radius = " << G4PIPE::be_pipe_radius + G4PIPE::be_pipe_thickness << " cm" << endl;
-    cout << "  length = " << G4PIPE::be_pipe_length << " cm" << endl;
-    cout << "===========================================================================" << endl;
+    std::cout << "=========================== G4_Pipe.C::Pipe() =============================" << std::endl;
+    std::cout << " PIPE Material Description:" << std::endl;
+    std::cout << "  inner radius = " << G4PIPE::be_pipe_radius << " cm" << std::endl;
+    std::cout << "  thickness = " << G4PIPE::be_pipe_thickness << " cm" << std::endl;
+    std::cout << "  outer radius = " << G4PIPE::be_pipe_radius + G4PIPE::be_pipe_thickness << " cm" << std::endl;
+    std::cout << "  length = " << G4PIPE::be_pipe_length << " cm" << std::endl;
+    std::cout << "===========================================================================" << std::endl;
   }
 
   radius += no_overlapp;
