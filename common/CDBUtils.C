@@ -6,12 +6,12 @@
 
 #include <phool/recoConsts.h>
 
-#include <TROOT.h>  // for R__LOAD_LIBRARY
+#include <Rtypes.h>  // for R__LOAD_LIBRARY
 
 R__LOAD_LIBRARY(libsphenixnpc.so)
 R__LOAD_LIBRARY(libphool.so)
 
-CDBUtils *uti = nullptr;
+CDBUtils *uti {nullptr};
 
 CDBUtils *getCDBUtils()
 {
