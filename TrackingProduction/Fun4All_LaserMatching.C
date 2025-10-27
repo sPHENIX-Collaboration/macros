@@ -29,14 +29,14 @@
 //#include <tpc/LaserEventIdentifier.h>
 
 #include <tpccalib/TpcCentralMembraneMatching.h>
-#include <lasermatchingqa/laserMatchingQApp.h>
+//#include <lasermatchingqa/laserMatchingQApp.h>
 
 #include <stdio.h>
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtpccalib.so)
-R__LOAD_LIBRARY(libLaserMatchingQA.so)
+//R__LOAD_LIBRARY(libLaserMatchingQA.so)
 void Fun4All_LaserMatching(
     const int nEvents = 10,
     const std::string filelist = "",
@@ -158,10 +158,10 @@ void Fun4All_LaserMatching(
   se->registerSubsystem(centralMembraneMatcher);
 
 
-  auto lmQA = new laserMatchingQApp;
-  lmQA->setOutfile(Form("%s/LaserMatchingQA-%08d-all",outdir.c_str(),runnumber));
-  lmQA->setRunnumber(runnumber);
-  se->registerSubsystem(lmQA);
+  //auto lmQA = new laserMatchingQApp;
+  //lmQA->setOutfile(Form("%s/LaserMatchingQA-%08d-all",outdir.c_str(),runnumber));
+  //lmQA->setRunnumber(runnumber);
+  //se->registerSubsystem(lmQA);
   
   se->run(nEvents);
   //se->run(-1);
