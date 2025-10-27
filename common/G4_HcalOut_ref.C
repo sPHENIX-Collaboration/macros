@@ -2,6 +2,7 @@
 #define MACRO_G4HCALOUTREF_C
 
 #include <GlobalVariables.C>
+
 #include <QA.C>
 
 #include <g4calo/HcalRawTowerBuilder.h>
@@ -9,6 +10,7 @@
 
 #include <g4ohcal/PHG4OHCalSubsystem.h>
 
+#include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4detectors/PHG4HcalCellReco.h>
 #include <g4detectors/PHG4OuterHcalSubsystem.h>
 
@@ -99,7 +101,7 @@ void HCalOuterInit()
 
 double HCalOuter(PHG4Reco *g4Reco,
                  double radius,
-                 const int crossings)
+                 const int /*crossings*/)
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::HCALOUT_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALOUT_OVERLAPCHECK;
@@ -192,6 +194,7 @@ double HCalOuter(PHG4Reco *g4Reco,
   }
   hcal->set_int_param("saveg4hit", Enable::HCALOUT_G4Hit);
   hcal->set_double_param("phistart", G4HCALOUT::phistart);
+  hcal->Verbosity(verbosity);
   g4Reco->registerSubsystem(hcal);
 
   if (!Enable::HCALOUT_OLD)
@@ -204,15 +207,12 @@ double HCalOuter(PHG4Reco *g4Reco,
     const double hcal_envelope_radius = 182.423 - 5.;
     const double support_ring_z = 175.375 * inch / 2.;
     const double support_ring_dz = 4. * inch;
-    const double z_rings[] =
-        {-support_ring_z, support_ring_z};
-    PHG4CylinderSubsystem *cyl;
-    PHG4CylinderSubsystem *cylout;
+    const double z_rings[] = {-support_ring_z, support_ring_z};
 
     for (int i = 0; i < 2; i++)
     {
       // rings outside of HCal envelope
-      cyl = new PHG4CylinderSubsystem("HCAL_SPT_N1", i);
+      PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("HCAL_SPT_N1", i);
       cyl->set_double_param("place_z", z_rings[i]);
       cyl->SuperDetector("HCALIN_SPT");
       cyl->set_double_param("radius", innerradius);
@@ -227,13 +227,14 @@ double HCalOuter(PHG4Reco *g4Reco,
       {
         cyl->SetActive();
       }
+      cyl->Verbosity(verbosity);
       g4Reco->registerSubsystem(cyl);
 
       // rings inside outer HCal envelope
       // only use if we want to use the old version of the ring instead of the gdml implementation
       if (Enable::HCALOUT_RING)
       {
-        cylout = new PHG4CylinderSubsystem("HCAL_SPT_N1", i + 2);
+        PHG4CylinderSubsystem *cylout = new PHG4CylinderSubsystem("HCAL_SPT_N1", i + 2);
         cylout->set_double_param("place_z", z_rings[i]);
         cylout->SuperDetector("HCALIN_SPT");
         cylout->set_double_param("radius", hcal_envelope_radius + 0.1);  // add a mm to avoid overlaps
@@ -249,6 +250,7 @@ double HCalOuter(PHG4Reco *g4Reco,
         }
         cylout->SetMotherSubsystem(hcal);
         cylout->OverlapCheck(OverlapCheck);
+        cylout->Verbosity(verbosity);
         g4Reco->registerSubsystem(cylout);
       }
     }
@@ -263,7 +265,10 @@ double HCalOuter(PHG4Reco *g4Reco,
 
 void HCALOuter_Cells()
 {
-  if (!Enable::HCALOUT_G4Hit) return;
+  if (!Enable::HCALOUT_G4Hit)
+  {
+    return;
+  }
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -290,16 +295,16 @@ void HCALOuter_Towers()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
-  
+
   if (!Enable::HCALOUT_TOWERINFO)
   {
     // build the raw tower anyways for the geom nodes
-  if (Enable::HCALOUT_G4Hit)
+    if (Enable::HCALOUT_G4Hit)
     {
       HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalOutRawTowerBuilder");
       TowerBuilder->Detector("HCALOUT");
       TowerBuilder->set_sim_tower_node_prefix("SIM");
-      if (!isfinite(G4HCALOUT::phistart))
+      if (!std::isfinite(G4HCALOUT::phistart))
       {
         if (Enable::HCALOUT_OLD)
         {
@@ -311,7 +316,7 @@ void HCALOuter_Towers()
         }
       }
       TowerBuilder->set_double_param("phistart", G4HCALOUT::phistart);
-      if (isfinite(G4HCALOUT::tower_emin))
+      if (std::isfinite(G4HCALOUT::tower_emin))
       {
         TowerBuilder->set_double_param("emin", G4HCALOUT::tower_emin);
       }
@@ -340,7 +345,10 @@ void HCALOuter_Towers()
     TowerDigitizer->set_photonelec_yield_visible_GeV(16. / 5 / (0.2e-3));
     TowerDigitizer->set_zero_suppression_ADC(-0);  // no-zero suppression
     TowerDigitizer->Verbosity(verbosity);
-    if (!Enable::HCALOUT_G4Hit) TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    if (!Enable::HCALOUT_G4Hit)
+    {
+      TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    }
     se->registerSubsystem(TowerDigitizer);
 
     const double visible_sample_fraction_HCALOUT = 3.38021e-02;  // /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV.root_qa.rootQA_Draw_HCALOUT_G4Hit.pdf
@@ -363,7 +371,10 @@ void HCALOuter_Towers()
     }
     TowerCalibration->set_pedstal_ADC(0);
     TowerCalibration->Verbosity(verbosity);
-    if (!Enable::HCALOUT_G4Hit) TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    if (!Enable::HCALOUT_G4Hit)
+    {
+      TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    }
     se->registerSubsystem(TowerCalibration);
   }
   // where I use waveformsim
@@ -415,7 +426,10 @@ void HCALOuter_Clusters()
     ClusterBuilder->Detector("HCALOUT");
     ClusterBuilder->SetCylindricalGeometry();  // has to be called after Detector()
     ClusterBuilder->Verbosity(verbosity);
-    if (!Enable::HCALOUT_G4Hit || Enable::HCALOUT_TOWERINFO) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
+    if (!Enable::HCALOUT_G4Hit || Enable::HCALOUT_TOWERINFO)
+    {
+      ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
+    }
     se->registerSubsystem(ClusterBuilder);
   }
   else if (G4HCALOUT::HCalOut_clusterizer == G4HCALOUT::kHCalOutGraphClusterizer)
@@ -456,7 +470,10 @@ void HCALOuter_QA()
 
   Fun4AllServer *se = Fun4AllServer::instance();
   QAG4SimulationCalorimeter *qa = new QAG4SimulationCalorimeter("HCALOUT");
-  if (Enable::HCALOUT_TOWERINFO) qa->set_flags(QAG4SimulationCalorimeter::kProcessTowerinfo);
+  if (Enable::HCALOUT_TOWERINFO)
+  {
+    qa->set_flags(QAG4SimulationCalorimeter::kProcessTowerinfo);
+  }
   qa->Verbosity(verbosity);
   se->registerSubsystem(qa);
 

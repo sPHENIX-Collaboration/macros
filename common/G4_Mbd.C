@@ -13,6 +13,8 @@
 
 #include <fun4all/Fun4AllServer.h>
 
+#include <TSystem.h>
+
 R__LOAD_LIBRARY(libg4mbd.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libmbd.so)
@@ -36,7 +38,7 @@ void MbdInit()
 {
   if (Enable::MBD && Enable::MBDFAKE)
   {
-    cout << "Enable::MBD and Enable::MBDFAKE cannot be true at the same time" << endl;
+    std::cout << "Enable::MBD and Enable::MBDFAKE cannot be true at the same time" << std::endl;
     gSystem->Exit(1);
   }
   // Set boundary of tracked particles to include MBD (values in cm)
@@ -78,7 +80,7 @@ void Mbd_Reco()
 
   if (Enable::MBDFAKE && Enable::MBDRECO)
   {
-    cout << "Enable::MBDFAKE and Enable::MBDRECO cannot be enabled together" << endl;
+    std::cout << "Enable::MBDFAKE and Enable::MBDRECO cannot be enabled together" << std::endl;
     gSystem->Exit(1);
   }
 
@@ -86,8 +88,8 @@ void Mbd_Reco()
   {
     if (verbosity > 0)
     {
-      cout << "MBDFAKE: Using smeared vtx and t0 resolutions of "
-           << G4MBD::z_smearing << " cm and " << G4MBD::t_smearing * 1000 << " ps" << endl;
+      std::cout << "MBDFAKE: Using smeared vtx and t0 resolutions of "
+           << G4MBD::z_smearing << " cm and " << G4MBD::t_smearing * 1000 << " ps" << std::endl;
     }
     MbdVertexFastSimReco* mbdvertex = new MbdVertexFastSimReco();
     mbdvertex->set_z_smearing(G4MBD::z_smearing);
