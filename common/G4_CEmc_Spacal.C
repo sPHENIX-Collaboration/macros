@@ -345,10 +345,14 @@ void CEMC_Towers()
     caloWaveformSim->set_pedestalsamples(12);
     caloWaveformSim->set_timewidth(0.2);
     caloWaveformSim->set_peakpos(6);
+    caloWaveformSim->get_light_collection_model().load_data_file(
+      string(getenv("CALIBRATIONROOT")) +
+          string("/CEMC/LightCollection/Prototype3Module.xml"),
+      "data_grid_light_guide_efficiency", "data_grid_fiber_trans");
     // pedestal scale down for different beam configurations according to Blair
     if (Input::BEAM_CONFIGURATION == Input::pp_ZEROANGLE)
     {
-      caloWaveformSim->set_pedestal_scale(0.69);
+      caloWaveformSim->set_pedestal_scale(0.75);
     }
     if (Input::BEAM_CONFIGURATION == Input::pp_COLLISION)
     {
