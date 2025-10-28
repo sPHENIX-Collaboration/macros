@@ -6,6 +6,8 @@
 
 #include <fun4all/Fun4AllServer.h>
 
+#include <Rtypes.h>
+
 R__LOAD_LIBRARY(libcalo_reco.so)
 
 void Process_Calo_Fitting()
