@@ -1,31 +1,33 @@
-#include <iostream>
-#include <fstream>
+#include "get_runstr.h"
+#include "make_cdbtree.C"
+#include "read_dstmbd.C"
+#include "recal_mbd_mip.C"
+
+#include <mbd/MbdCalib.h>
+#include <mbd/MbdDefs.h>
+
+#include <ffamodules/CDBInterface.h>
+
+#include <phool/recoConsts.h>
 
 #include <TString.h>
 #include <TFile.h>
 #include <TTree.h>
-#include <TH1F.h>
-#include <TH2F.h>
+#include <TH1.h>
+#include <TH2.h>
 #include <TF1.h>
 #include <TCanvas.h>
 #include <TPad.h>
 #include <TSystem.h>
 
-#include <ffamodules/CDBInterface.h>
-#include <phool/recoConsts.h>
+#include <iostream>
+#include <fstream>
 
-#include "get_runstr.h"
-#include "make_cdbtree.C"
-#include <mbd/MbdCalib.h>
-#include <mbd/MbdDefs.h>
-#include "read_dstmbd.C"
-#include "recal_mbd_mip.C"
 
-#if defined(__CLING__)
+// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libphool.so)
 R__LOAD_LIBRARY(libmbd.so)
-#endif
 
 // This macro executes the sub-passes for the pass2 calibrations
 //pass 2.0: do tt_t0 and tq_t0 offset calibration
@@ -204,7 +206,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
     */
 
     // Make vertex cut
-    if ( subpass!=0 && fabs(f_bz)>60. )
+    if ( subpass!=0 && std::abs(f_bz)>60. )
     {
       continue;
     }
@@ -252,18 +254,18 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       h_tq[ipmt]->Fill( tq );
       h2_tq->Fill( tq, ipmt );
 
-      if ( subpass==0 && fabs(f_tt[ipmt])<26. )
+      if ( subpass==0 && std::abs(f_tt[ipmt])<26. )
       {
         h_q[ipmt]->Fill( f_q[ipmt] );
       }
-      //else if ( subpass>0 && fabs(ttcorr[ipmt])<26. )
-      else if ( subpass>0 && (fabs(ttcorr[ipmt])<26.||f_q[ipmt]>40.) )  // to get around high threshold
+      //else if ( subpass>0 && std::abs(ttcorr[ipmt])<26. )
+      else if ( subpass>0 && (std::abs(ttcorr[ipmt])<26.||f_q[ipmt]>40.) )  // to get around high threshold
       {
         h_q[ipmt]->Fill( f_q[ipmt] );
 
-        //if ( f_q[ipmt] > 1000. && fabs(ttcorr[ipmt])<26. )    // for p+p
-        //if ( f_q[ipmt] > 2000. && fabs(ttcorr[ipmt])<26. )
-        if ( fabs(ttcorr[ipmt])<26. )
+        //if ( f_q[ipmt] > 1000. && std::abs(ttcorr[ipmt])<26. )    // for p+p
+        //if ( f_q[ipmt] > 2000. && std::abs(ttcorr[ipmt])<26. )
+        if ( std::abs(ttcorr[ipmt])<26. )
         {
           nhit[arm] += 1.0;
           armtime[arm] += ttcorr[ipmt];
@@ -299,7 +301,10 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       //int ifeech = (ipmt/8)*16 + 8 + ipmt%8;  // time ifeech only
       int arm = ipmt/64;
 
-      if ( nhit[arm]<2 || f_q[ipmt]<=0. ) continue;
+      if ( nhit[arm]<2 || f_q[ipmt]<=0. )
+      {
+	continue;
+      }
 
       double dt = ttcorr[ipmt] - armtime[arm];
 
@@ -384,12 +389,12 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       // determined by the 1st channel
       h_tt[ipmt]->SetAxisRange(min_twindow,max_twindow);
     }
-    Double_t peak = h_tt[ipmt]->GetMaximum();
+    Double_t thispeak = h_tt[ipmt]->GetMaximum();
     int peakbin = h_tt[ipmt]->GetMaximumBin();
     Double_t mean = h_tt[ipmt]->GetBinCenter( peakbin );
     Double_t sigma = 1.0;
     //Double_t sigma = 3.0;
-    gaussian->SetParameters( peak, mean, 5 );
+    gaussian->SetParameters( thispeak, mean, 5 );
     gaussian->SetRange( mean-3*sigma, mean+3*sigma );
 
     if ( ipmt==0 || ipmt==64 )
@@ -461,12 +466,12 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       // determined by the 1st channel
       h_tq[ipmt]->SetAxisRange(min_twindow,max_twindow);
     }
-    Double_t peak = h_tq[ipmt]->GetMaximum();
+    Double_t thispeak = h_tq[ipmt]->GetMaximum();
     int peakbin = h_tq[ipmt]->GetMaximumBin();
     Double_t mean = h_tq[ipmt]->GetBinCenter( peakbin );
     Double_t sigma = 1.0;
     //Double_t sigma = 3.0;
-    gaussian->SetParameters( peak, mean, 5 );
+    gaussian->SetParameters( thispeak, mean, 5 );
     gaussian->SetRange( mean-3*sigma, mean+3*sigma );
 
     if ( ipmt==0 || ipmt==64 )
