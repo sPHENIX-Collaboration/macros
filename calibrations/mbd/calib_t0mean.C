@@ -1,4 +1,4 @@
-#include <filesystem>
+#include "make_cdbtree.C"
 
 #include <TFile.h>
 #include <TSpectrum.h>
@@ -7,7 +7,7 @@
 #include <TF1.h>
 #include <TStyle.h>
 
-#include "make_cdbtree.C"
+#include <filesystem>
 
 TSpectrum *tspec{nullptr};
 TF1 *FitHitTime{nullptr};
@@ -130,17 +130,17 @@ void calib_t0mean(const char *fname = "results/48700/calmbdpass2.3_q_48700.root"
 
   // Save results to calib files
   filesystem::path dir(fname);
-  //cout << dir.parent_path() << endl;
+  //std::cout << dir.parent_path() << std::endl;
   std::string calibfname = dir.parent_path();
   calibfname += "/mbd_t0corr.calib";
-  cout << "Saving calibs to " << calibfname << endl;
+  std::cout << "Saving calibs to " << calibfname << std::endl;
 
-  ofstream calibsavefile( calibfname );
-  calibsavefile << t0corr_mean << "\t" << t0corr_meanerr << endl;
+  std::ofstream calibsavefile( calibfname );
+  calibsavefile << t0corr_mean << "\t" << t0corr_meanerr << std::endl;
   calibsavefile << gmean[0] << "\t" << gmeanerr[0] << "\t" << gsigma[0] << "\t" << gsigmaerr[0]
-        << "\t" << gmean[1] << "\t" << gmeanerr[1] << "\t" << gsigma[1] << "\t" << gsigmaerr[1] << endl;
+        << "\t" << gmean[1] << "\t" << gmeanerr[1] << "\t" << gsigma[1] << "\t" << gsigmaerr[1] << std::endl;
   calibsavefile << hmean[0] << "\t" << hmeanerr[0] << "\t" << hrms[0] << "\t" << hrmserr[0]
-        << "\t" << hmean[1] << "\t" << hmeanerr[1] << "\t" << hrms[1] << "\t" << hrmserr[1] << endl;
+        << "\t" << hmean[1] << "\t" << hmeanerr[1] << "\t" << hrms[1] << "\t" << hrmserr[1] << std::endl;
   calibsavefile.close();
   make_cdbtree( calibfname.c_str() );
 }

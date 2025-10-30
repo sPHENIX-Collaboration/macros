@@ -37,8 +37,8 @@ R__LOAD_LIBRARY(libmbd.so)
 //runtype 1: p+p 200 GeV
 void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int subpass = 0, const int nevt = 0, const int runtype = 0, const std::string_view dbtag = "")
 {
-  cout << "cal_mbd(), tfname " << tfname << endl;
-  cout << "cal_mbd(), runtype " << runtype << endl;
+  std::cout << "cal_mbd(), tfname " << tfname << std::endl;
+  std::cout << "cal_mbd(), runtype " << runtype << std::endl;
   read_dstmbd( tfname );
 
   //== Create output directory (should already exist)
@@ -49,7 +49,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   TString name = "mkdir -p " + dir;
   gSystem->Exec( name );
 
-  cout << name << endl;
+  std::cout << name << std::endl;
 
   //== Load in calib constants
   //Float_t tq_t0_offsets[MbdDefs::MBD_N_PMT] = {};
@@ -78,7 +78,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
     /*
     calfile = dir + "/mbd_slewcorr.calib";
     mcal->Download_SlewCorr( calfile.Data() );
-    cout << "Loaded " << calfile << endl;
+    std::cout << "Loaded " << calfile << std::endl;
     */
   }
   else if ( subpass==1 || subpass==2 )
@@ -89,18 +89,18 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   {
     savefname += "calmbdpass2."; savefname += subpass; savefname += "_q-"; savefname += runnumber; savefname += ".root";
   }
-  cout << "saving to " << savefname << endl;
+  std::cout << "saving to " << savefname << std::endl;
 
   // Load whatever calibrations are available at each subpass
   if ( subpass==3 )
   {
     calfile = dir + "/pass0_mbd_tq_t0.calib";
     mcal->Download_TQT0( calfile.Data() );
-    cout << "Loaded " << calfile << endl;
+    std::cout << "Loaded " << calfile << std::endl;
 
     calfile = dir + "/pass0_mbd_tt_t0.calib";
     mcal->Download_TTT0( calfile.Data() );
-    cout << "Loaded " << calfile << endl;
+    std::cout << "Loaded " << calfile << std::endl;
   }
   if ( subpass>1 )
   {
@@ -108,7 +108,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
     {
       calfile = dir + "/mbd_slewcorr.calib";
       mcal->Download_SlewCorr( calfile.Data() );
-      cout << "Loaded " << calfile << endl;
+      std::cout << "Loaded " << calfile << std::endl;
     }
     else
     {
@@ -118,14 +118,14 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       CDBInterface *cdb = CDBInterface::instance();
       std::string slew_url = cdb->getUrl("MBD_SLEWCORR");
       mcal->Download_SlewCorr(slew_url);
-      cout << "Loaded " << slew_url << endl;
+      std::cout << "Loaded " << slew_url << std::endl;
     }
   }
   if ( subpass>3 )
   {
     calfile = dir + "/mbd_qfit.calib";
     mcal->Download_Gains( calfile.Data() );
-    cout << "Loaded " << calfile << endl;
+    std::cout << "Loaded " << calfile << std::endl;
   }
 
   TFile *savefile = new TFile(savefname,"RECREATE");
@@ -190,15 +190,15 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
     if (ientry<4)
     {
       // print charge from channels 0 and 127
-      cout << f_evt << "\tch0\t" << f_tt[0] << "\t" << f_tq[0] << "\t" << f_q[0] << endl;
-      cout << "ch127\t" << f_tt[127] << "\t" << f_tq[127] << "\t" << f_q[127] << endl;
+      std::cout << f_evt << "\tch0\t" << f_tt[0] << "\t" << f_tq[0] << "\t" << f_q[0] << std::endl;
+      std::cout << "ch127\t" << f_tt[127] << "\t" << f_tq[127] << "\t" << f_q[127] << std::endl;
     }
 
     // make npmt cut
     /*
     if ( f_npmt==0 )
     {
-      cout << "f_npmt == 0" << endl;
+      std::cout << "f_npmt == 0" << std::endl;
       continue;
     }
     */
@@ -226,11 +226,11 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
 
       if ( subpass>0 )
       {
-        if ( !isnan(mcal->get_tt0(ipmt)) && mcal->get_tt0(ipmt)>-100. && f_q[ipmt]>0. && f_q[ipmt]<16000. )
+        if ( !std::isnan(mcal->get_tt0(ipmt)) && mcal->get_tt0(ipmt)>-100. && f_q[ipmt]>0. && f_q[ipmt]<16000. )
         {
           ttcorr[ipmt] -= mcal->get_tt0(ipmt);
         }
-        if ( !isnan(mcal->get_tq0(ipmt)) && mcal->get_tq0(ipmt)>-100. )
+        if ( !std::isnan(mcal->get_tq0(ipmt)) && mcal->get_tq0(ipmt)>-100. )
         {
           tq -= mcal->get_tq0(ipmt);
         }
@@ -240,7 +240,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       if ( subpass>1 && subpass<3 ) // apply slewcorr if subpass > 1
       {
         int feech = (ipmt / 8) * 16 + ipmt % 8;
-        if ( !isnan(mcal->get_tt0(ipmt)) && mcal->get_tt0(ipmt)>-100. && f_q[ipmt]>0. && f_q[ipmt]<16000. )
+        if ( !std::isnan(mcal->get_tt0(ipmt)) && mcal->get_tt0(ipmt)>-100. && f_q[ipmt]>0. && f_q[ipmt]<16000. )
         {
           ttcorr[ipmt] -= mcal->get_scorr(feech,f_q[ipmt]);
         }
@@ -291,7 +291,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       {
         armtime[iarm] = armtime[iarm]/nhit[iarm];
       }
-      //cout << "aaa " << iarm << "\t" << nhit[iarm] << "\t" << armtime[iarm] << endl;
+      //std::cout << "aaa " << iarm << "\t" << nhit[iarm] << "\t" << armtime[iarm] << std::endl;
     }
 
     for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT; ipmt++)
@@ -303,7 +303,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
 
       double dt = ttcorr[ipmt] - armtime[arm];
 
-      //cout << "filling" << endl;
+      //std::cout << "filling" << std::endl;
       h2_slew[ipmt]->Fill( f_q[ipmt], dt );
     }
   }
@@ -330,7 +330,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
     gPad->Modified();
     gPad->Update();
   }
-  cout << pdfname << endl;
+  std::cout << pdfname << std::endl;
   ac[cvindex]->Print( pdfname + "[");
   ac[cvindex]->Print( pdfname, title );
   ++cvindex;
@@ -351,7 +351,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
     gPad->Modified();
     gPad->Update();
   }
-  cout << pdfname << endl;
+  std::cout << pdfname << std::endl;
   ac[cvindex]->Print( pdfname, title );
   ++cvindex;
 
@@ -359,10 +359,10 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   ac[cvindex] = new TCanvas("cal_tt_ch","tt",550*1.5,425*1.5);
   gPad->SetLogy(1);
 
-  ofstream cal_tt_t0_file;
+  std::ofstream cal_tt_t0_file;
   TString cal_fname = dir; cal_fname += "pass"; cal_fname += subpass; cal_fname += "_mbd_tt_t0.calib";
   cal_tt_t0_file.open( cal_fname );
-  cout << "Creating " << cal_fname << endl;
+  std::cout << "Creating " << cal_fname << std::endl;
 
   TF1 *gaussian = new TF1("gaussian","gaus",-25,25);
   gaussian->SetLineColor(2);
@@ -418,8 +418,8 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       }
     }
 
-    cal_tt_t0_file << ipmt << "\t" << mean << "\t" << meanerr << "\t" << sigma << "\t" << sigmaerr << endl;
-    cout << ipmt << "\t" << mean << "\t" << meanerr << "\t" << sigma << "\t" << sigmaerr << endl;
+    cal_tt_t0_file << ipmt << "\t" << mean << "\t" << meanerr << "\t" << sigma << "\t" << sigmaerr << std::endl;
+    std::cout << ipmt << "\t" << mean << "\t" << meanerr << "\t" << sigma << "\t" << sigmaerr << std::endl;
 
     if ( subpass==0 )
     {
@@ -431,7 +431,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       //name = dir + "h_ttcorr"; name += ipmt; name += ".png";
       title = "h_ttcorr"; title += ipmt;
     }
-    //cout << title << endl;
+    //std::cout << title << std::endl;
     ac[cvindex]->Print( pdfname, title );
   }
   cal_tt_t0_file.close();
@@ -442,7 +442,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   ac[cvindex] = new TCanvas("cal_tq_ch","tq",550*1.5,425*1.5);
   gPad->SetLogy(1);
 
-  ofstream cal_tq_t0_file;
+  std::ofstream cal_tq_t0_file;
   cal_fname = dir; cal_fname += "pass"; cal_fname += subpass; cal_fname += "_mbd_tq_t0.calib";
   cal_tq_t0_file.open( cal_fname );
 
@@ -495,7 +495,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       }
     }
 
-    cal_tq_t0_file << ipmt << "\t" << mean << "\t" << meanerr << "\t" << sigma << "\t" << sigmaerr << endl;
+    cal_tq_t0_file << ipmt << "\t" << mean << "\t" << meanerr << "\t" << sigma << "\t" << sigmaerr << std::endl;
 
     if ( subpass==0 )
     {
@@ -507,7 +507,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       //name = dir + "h_tqcorr"; name += ipmt; name += ".png";
       title = "h_tqcorr"; title += ipmt;
     }
-    //cout << name << endl;
+    //std::cout << name << std::endl;
     ac[cvindex]->Print( pdfname, title );
   }
 
@@ -531,7 +531,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
 
       //name = dir + "h2_slew"; name += ipmt; name += "_pass"; name += subpass; name += ".png";
       name = dir + "h2_slew"; name += ipmt; name += "_pass"; name += subpass;
-      cout << name << endl;
+      std::cout << name << std::endl;
       ac[cvindex]->Print( pdfname, name );
     }
 
@@ -557,7 +557,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
 
       //name = dir + "h_adc"; name += ipmt; name += ".png";
       title = "h_adc"; title += ipmt;
-      //cout << pdfname << " " << title << endl;
+      //std::cout << pdfname << " " << title << std::endl;
       ac[cvindex]->Print( pdfname, title );
     }
     ac[cvindex]->Print( pdfname + "]" );

@@ -2,17 +2,17 @@
 // macro to read in MBD data after the waveforms are processed
 // at this stage, we only have charge and time from each channel, not the full waveform
 //
-#include <fstream>
-#include <TChain.h>
-
 #include <mbd/MbdDefs.h>
 #include <mbd/MbdOut.h>
 #include <mbd/MbdPmtContainer.h>
 #include <mbd/MbdPmtHit.h>
 
-#if defined(__CLING__)
+#include <TChain.h>
+
+#include <fstream>
+
+// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libmbd_io.so)
-#endif
 
 // Set up variables to read from TTree
 Int_t   f_evt{0};
@@ -73,7 +73,7 @@ void dstmbd_GetEntry(const int ientry)
 
 void read_dstmbd(const char *tfname = "beam_mbd-00009184-0000_mbd.root")
 {
-  cout << "tfname " << tfname << endl;
+  std::cout << "tfname " << tfname << std::endl;
 
   // Set up TTree
   int is_dst = 0; // whether reading from DST or private root files
@@ -102,20 +102,20 @@ void read_dstmbd(const char *tfname = "beam_mbd-00009184-0000_mbd.root")
 
   // Event loop, each ientry is one triggered event
   int nentries = tree->GetEntries();
-  cout << "checking output of dst file " << tfname << endl;
-  cout << "nentries = " << nentries << endl;
+  std::cout << "checking output of dst file " << tfname << std::endl;
+  std::cout << "nentries = " << nentries << std::endl;
   for (int ientry=0; ientry<10; ientry++)
   {
-    //cout << "ientry " << ientry << endl;
+    //std::cout << "ientry " << ientry << std::endl;
     dstmbd_GetEntry(ientry);
     //tree->GetEntry(ientry+100);
 
     if (ientry<10)
     {
       // print charge from channels 0 and 127
-      cout << f_evt << "\t" << f_q[0] << "\t" << f_tt[0] << endl;
-      cout <<  "\t" << f_q[127] << "\t" << f_tt[127] << endl;
-      cout <<  "\t" << f_bz << endl;
+      std::cout << f_evt << "\t" << f_q[0] << "\t" << f_tt[0] << std::endl;
+      std::cout <<  "\t" << f_q[127] << "\t" << f_tt[127] << std::endl;
+      std::cout <<  "\t" << f_bz << std::endl;
     }
 
   }
