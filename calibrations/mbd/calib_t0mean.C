@@ -1,5 +1,6 @@
 #include "make_cdbtree.C"
 
+#include <TCanvas.h>
 #include <TFile.h>
 #include <TSpectrum.h>
 #include <TH2.h>
@@ -8,13 +9,14 @@
 #include <TStyle.h>
 
 #include <filesystem>
+#include <fstream>
 
 TSpectrum *tspec{nullptr};
 TF1 *FitHitTime{nullptr};
 
 void FitGausToPeak(TH1 *h1, const Double_t sigma)
 {
-  int npeak = tspec->Search(h1, sigma, "goff",0.2);  // finds the highest peak, draws marker
+//  int npeak = tspec->Search(h1, sigma, "goff",0.2);  // finds the highest peak, draws marker
 
   double *peakpos = tspec->GetPositionX();
   float centerpeak = peakpos[0];
@@ -129,7 +131,7 @@ void calib_t0mean(const char *fname = "results/48700/calmbdpass2.3_q_48700.root"
   float t0corr_meanerr = sqrt(gmeanerr[0]*gmeanerr[0]+gmeanerr[1]*gmeanerr[1])/2.0;
 
   // Save results to calib files
-  filesystem::path dir(fname);
+  std::filesystem::path dir(fname);
   //std::cout << dir.parent_path() << std::endl;
   std::string calibfname = dir.parent_path();
   calibfname += "/mbd_t0corr.calib";
