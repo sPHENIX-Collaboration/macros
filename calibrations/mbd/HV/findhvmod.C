@@ -2,8 +2,9 @@
 // Find the HV mod for a channel
 //
 
-#include "mbd/MbdGeomV2.h"
+#include <mbd/MbdGeomV2.h>
 
+// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libmbd_io.so)
 
@@ -22,7 +23,7 @@ void findhvmod()
     {
       if ( hv.second == pmts[ipmt] )
       {
-        cout << hv.second << "\t" << hv.first << endl;
+        std::cout << hv.second << "\t" << hv.first << std::endl;
         break;
       }
     }

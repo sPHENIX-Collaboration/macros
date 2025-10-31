@@ -47,7 +47,7 @@ using namespace std;
 //void anafile(const char *tfname = "prdf_478_times.root", const int nrun = 0)
 void anafile(const char *tfname = "DST_UNCALMBD-00042674-0000.root", const int nrun = 0)
 {
-  cout << "tfname " << tfname << endl;
+  std::cout << "tfname " << tfname << std::endl;
 
   // Book Histograms, etc
   for (int ich=0; ich<N_PMT; ich++)
@@ -65,7 +65,7 @@ void anafile(const char *tfname = "DST_UNCALMBD-00042674-0000.root", const int n
   Float_t f_q[MAXCH];   // charge
   */
 
-  cout << "tfname " << tfname << endl;
+  std::cout << "tfname " << tfname << std::endl;
 
   read_dstmbd(tfname);
   /*
@@ -91,7 +91,7 @@ void anafile(const char *tfname = "DST_UNCALMBD-00042674-0000.root", const int n
 
     for (int ich=0; ich<N_PMT; ich++)
     {
-      //cout << evt << "\t" << t[1] << "\t" << f_q[1] << "\t" << t[14] << "\t" << f_q[14] << endl;
+      //std::cout << evt << "\t" << t[1] << "\t" << f_q[1] << "\t" << t[14] << "\t" << f_q[14] << std::endl;
       if ( f_q[ich]>0 )
       {
         h_laseramp[nrun][ich]->Fill( f_q[ich] );
@@ -102,7 +102,7 @@ void anafile(const char *tfname = "DST_UNCALMBD-00042674-0000.root", const int n
   // Fit gaussians to get the average amplitude
   for (int ich=0; ich<N_PMT; ich++)
   {
-    //cout << "Fitting ch " << ich << endl;
+    //std::cout << "Fitting ch " << ich << std::endl;
     name = "fgaus"; name += ich; name += "_"; name += nrun;
     fgaus[nrun][ich] = new TF1(name,"gaus",-100,16000);
     fgaus[nrun][ich]->SetLineColor(2);
@@ -159,7 +159,7 @@ float prev_ampl[N_PMT];
 
 void get_prev_gains(const char *prev_gains_file = "gains_at_9_zerofield.out")
 {
-    ifstream infile( prev_gains_file );
+    std::ifstream infile( prev_gains_file );
     int ch;
     float hvscale;
     float ratio;
@@ -168,11 +168,11 @@ void get_prev_gains(const char *prev_gains_file = "gains_at_9_zerofield.out")
         if ( ch>=0 && ch<128 )
         {
           infile >> prev_ampl[ch];
-          cout << ch << "\t" << endl;
+          std::cout << ch << "\t" << std::endl;
         }
         else
         {
-          cout << "Bad ch" << endl;
+          std::cout << "Bad ch" << std::endl;
         }
     }
 }
@@ -186,35 +186,35 @@ void analaserscan(const char *fname = "hvscan.62880")
 
   // Get the number of actual channels to process
   /*
-  ifstream configfile("digsig.cfg");
+  std::ifstream configfile("digsig.cfg");
   if ( configfile.is_open() )
   {
     string junk;
     configfile >> junk >> NCH;
     NBOARDS = NCH/16;
 
-    cout << "Found config file digsig.cfg" << endl;
-    cout << "Setting NCH = " << NCH << endl;
+    std::cout << "Found config file digsig.cfg" << std::endl;
+    std::cout << "Setting NCH = " << NCH << std::endl;
   }
   */
 
   TString rootfname;
-  ifstream scanfile(fname);
+  std::ifstream scanfile(fname);
   int nruns = 0;
   while ( scanfile >> run_number[nruns] >> hvscale[nruns] )
   {
-    cout << run_number[nruns] << "\t" << hvscale[nruns] << endl;
+    std::cout << run_number[nruns] << "\t" << hvscale[nruns] << std::endl;
 
     // get name of root file
     //rootfname.Form( "calib_mbd-%08d-0000_mbd.root", run_number[nruns] );
     rootfname.Form( "DST_UNCALMBD-%08d-0000.root", run_number[nruns] );
-    cout << "Processing " << rootfname << endl;
+    std::cout << "Processing " << rootfname << std::endl;
 
     anafile( rootfname, nruns );
  
     nruns++;
   }
-  cout << "Processed " << nruns << " runs" << endl;
+  std::cout << "Processed " << nruns << " runs" << std::endl;
 
   // Make the canvases for the gain curves
   const int NCANVAS = 4;
@@ -231,8 +231,8 @@ void analaserscan(const char *fname = "hvscan.62880")
   name = "mbdlaser_"; name += fname; name += ".root";
   name.ReplaceAll("hvscan.","");
   TFile *savefile = new TFile(name,"RECREATE");
-  ofstream gainfile("gains.out");
-  ofstream gain9file("gains_at_9.out");
+  std::ofstream gainfile("gains.out");
+  std::ofstream gain9file("gains_at_9.out");
   float gain_wanted = 0.55;
   for (int ipmt=0; ipmt<N_PMT; ipmt++)
   {
@@ -247,7 +247,7 @@ void analaserscan(const char *fname = "hvscan.62880")
     g_laserscan[ipmt]->SetMarkerStyle(20);
     g_laserscan[ipmt]->SetMarkerSize(0.5);
 
-    //cout << "ch " << pmtch << endl;
+    //std::cout << "ch " << pmtch << std::endl;
     c_laserscan[quad]->cd( ipmt%32 + 1 );
     g_laserscan[ipmt]->Draw("acp");
     g_laserscan[ipmt]->GetHistogram()->SetTitleSize(4);
@@ -262,7 +262,7 @@ void analaserscan(const char *fname = "hvscan.62880")
 
     /*
     double ref_gain = g_laserscan[ipmt]->Eval(0.81)/maxgain;
-    gain9file << ipmt << "\t" << 0.81 << "\t" << ref_gain << "\t" << g_laserscan[ipmt]->Eval(0.81) << endl;
+    gain9file << ipmt << "\t" << 0.81 << "\t" << ref_gain << "\t" << g_laserscan[ipmt]->Eval(0.81) << std::endl;
 
     for (double iv=0.5; iv<1.0; iv+=0.001)
     {
@@ -270,13 +270,13 @@ void analaserscan(const char *fname = "hvscan.62880")
         //double ratio = g_laserscan[ipmt]->Eval(iv)/maxgain;
         //if ( ratio>gain_wanted )
         //{
-        //    gainfile << ipmt << "\t" << iv << "\t" << ratio << endl;
+        //    gainfile << ipmt << "\t" << iv << "\t" << ratio << std::endl;
         //    break;
         //}
 
         if ( ampl > prev_ampl[ipmt] )
         {
-            gainfile << ipmt << "\t" << iv << "\t" << ampl/prev_ampl[ipmt] << endl;
+            gainfile << ipmt << "\t" << iv << "\t" << ampl/prev_ampl[ipmt] << std::endl;
             break;
         }
     }
@@ -312,7 +312,7 @@ void analaserscan(const char *fname = "hvscan.62880")
   savefile->Write();
 
   // dump full gainfile
-  ofstream gain2file("gains_full.csv");
+  std::ofstream gain2file("gains_full.csv");
 
   // Header
   gain2file << "iv,";
@@ -320,7 +320,7 @@ void analaserscan(const char *fname = "hvscan.62880")
   {
       gain2file << ipmt << ",";
   }
-  gain2file << endl;
+  gain2file << std::endl;
 
   // Gains
   for (double iv=1.0; iv>0.5; iv -= 0.05)
@@ -330,7 +330,7 @@ void analaserscan(const char *fname = "hvscan.62880")
     {
         gain2file << g_norm_laserscan[ipmt]->Eval(iv) << ",";
     }
-    gain2file << endl;
+    gain2file << std::endl;
   }
   gain2file.close();
 

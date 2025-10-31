@@ -3,6 +3,7 @@
 #include "mbd/MbdGeomV2.h"
 //#include "get_runstr.h"
 
+// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libmbd_io.so)
 
@@ -79,7 +80,7 @@ void calcnew_gainsbyhvgroup(const char *fname = "results/54935/mbd_qfit.calib")
     int hvmod = hv.first;
     int pmt = hv.second;
     double gain = mcal->get_qgain( pmt );
-    cout << hvmod << "\t" << pmt << "\t" << gain << endl;
+    std::cout << hvmod << "\t" << pmt << "\t" << gain << std::endl;
 
     int n = g_gainsbyhv[hvmod]->GetN();
     g_gainsbyhv[hvmod]->SetPoint(n,(double)npmts,gain);
@@ -120,7 +121,7 @@ void calcnew_gainsbyhvgroup(const char *fname = "results/54935/mbd_qfit.calib")
   std::array<double,16> means;
   means.fill(0.);
   
-  cout << "means in each hv group" << endl;
+  std::cout << "means in each hv group" << std::endl;
   std::array<double,16> new_gmin;
   std::array<double,16> new_gmax;
   std::array<double,16> newscale;
@@ -134,7 +135,7 @@ void calcnew_gainsbyhvgroup(const char *fname = "results/54935/mbd_qfit.calib")
     newscale[ihv] = means[0]/means[ihv];
     new_gmin[ihv] = gmin[ihv]*newscale[ihv];
     new_gmax[ihv] = gmax[ihv]*newscale[ihv];
-    cout << ihv << "\t" << means[ihv] << "\t" << newscale[ihv] << "\t" << new_gmin[ihv] << endl;
+    std::cout << ihv << "\t" << means[ihv] << "\t" << newscale[ihv] << "\t" << new_gmin[ihv] << std::endl;
 
     if ( new_gmax[ihv]>overall_newgmax )
     {
@@ -148,21 +149,21 @@ void calcnew_gainsbyhvgroup(const char *fname = "results/54935/mbd_qfit.calib")
     }
   }
 
-  cout << "MIN " << minpmt[minhvmod] << "\t" << minhvmod << "\t" << new_gmin[minhvmod] << endl;
-  cout << "MAX " << maxpmt[maxhvmod] << "\t" << maxhvmod << "\t" << new_gmax[maxhvmod] << endl;
-  cout << "SPREAD " <<  new_gmax[maxhvmod]/new_gmin[minhvmod] << endl;
+  std::cout << "MIN " << minpmt[minhvmod] << "\t" << minhvmod << "\t" << new_gmin[minhvmod] << std::endl;
+  std::cout << "MAX " << maxpmt[maxhvmod] << "\t" << maxhvmod << "\t" << new_gmax[maxhvmod] << std::endl;
+  std::cout << "SPREAD " <<  new_gmax[maxhvmod]/new_gmin[minhvmod] << std::endl;
 
 
   //double minscale = 150./overall_newgmin;   // 150 is the min ADC we want in p+p
   //double minscale = 65./overall_newgmin;   // 65 is the min ADC we want in Au+Au
   double minscale = 80./overall_newgmin;   // 80 is the min ADC we want in Au+Au
 
-  cout << "new means in each hv group" << endl;
-  cout << "hvmod\tnewscale\tnew means [ADC/mip]" << endl;
+  std::cout << "new means in each hv group" << std::endl;
+  std::cout << "hvmod\tnewscale\tnew means [ADC/mip]" << std::endl;
   for (int ihv=0; ihv<16; ihv++)
   {
     newscale[ihv] *= minscale;
-    cout << ihv << "\t" << newscale[ihv] << "\t" << means[ihv]*newscale[ihv] << endl;
+    std::cout << ihv << "\t" << newscale[ihv] << "\t" << means[ihv]*newscale[ihv] << std::endl;
   }
 
   // Plot the gain curves by hvmod
@@ -206,31 +207,31 @@ void calcnew_gainsbyhvgroup(const char *fname = "results/54935/mbd_qfit.calib")
     else                              g_norm_laserscan[pmt]->Draw("cp");
     ++npmts_in_hvmod[hvmod];
 
-    //cout << "ref_hvset " << hvmod << "\t" << ref_hvsetting[hvmod] << endl;
+    //std::cout << "ref_hvset " << hvmod << "\t" << ref_hvsetting[hvmod] << std::endl;
     double ref_gain = g_norm_laserscan[pmt]->Eval( ref_hvsetting[hvmod] );
     double target_gain = newscale[hvmod]*ref_gain;
 
     sumsetting[hvmod] += ginv_norm_laserscan[pmt]->Eval( target_gain );
-    //cout << "xxx " << pmt << "\t" << ref_gain << "\t" << target_gain << "\t" << ginv_norm_laserscan[pmt]->Eval( target_gain ) << endl;
+    //std::cout << "xxx " << pmt << "\t" << ref_gain << "\t" << target_gain << "\t" << ginv_norm_laserscan[pmt]->Eval( target_gain ) << std::endl;
   }
 
-  cout << "New Settings" << endl;
+  std::cout << "New Settings" << std::endl;
   for (int ihv=0; ihv<16; ihv++)
   {
     newsetting[ihv] = sumsetting[ihv]/npmts_in_hvmod[ihv];
-    cout << ihv << "\t" << newsetting[ihv] << endl;
+    std::cout << ihv << "\t" << newsetting[ihv] << std::endl;
   }
 
   // to plug into hvscale.py
-  cout << "hvscale = [ ";
+  std::cout << "hvscale = [ ";
   // first the north
   for (int ihv=8; ihv<16; ihv++)
   {
-    cout << newsetting[ihv] << ", ";
+    std::cout << newsetting[ihv] << ", ";
   }
   for (int ihv=0; ihv<8; ihv++)
   {
-    cout << newsetting[ihv] << ", ";
+    std::cout << newsetting[ihv] << ", ";
   }
-  cout << " ]" << endl;
+  std::cout << " ]" << std::endl;
 }
