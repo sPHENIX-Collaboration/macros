@@ -70,7 +70,7 @@ void Fun4All_MBD_CalPass(const char *input = "/sphenix/user/pinkenbu/testprdf/be
   if ( !cdbtag.empty() )
   {
     std::cout << "Using cdb " << cdbtag << std::endl;
-    rc->set_StringFlag("CDB_GLOBALTAG",cdbtag); 
+    rc->set_StringFlag("CDB_GLOBALTAG",cdbtag);
   }
   else
   {
