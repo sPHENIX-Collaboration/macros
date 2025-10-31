@@ -1,5 +1,5 @@
-#ifndef CALO_FITTING_H
-#define CALO_FITTING_H
+#ifndef MACRO_CALO_FITTING_C
+#define MACRO_CALO_FITTING_C
 
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloWaveformProcessing.h>
