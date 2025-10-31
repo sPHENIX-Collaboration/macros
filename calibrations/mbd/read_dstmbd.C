@@ -1,3 +1,5 @@
+#ifndef MACRO_READ_DSTMBD_C
+#define MACRO_READ_DSTMBD_C
 //
 // macro to read in MBD data after the waveforms are processed
 // at this stage, we only have charge and time from each channel, not the full waveform
@@ -122,4 +124,4 @@ void read_dstmbd(const char *tfname = "beam_mbd-00009184-0000_mbd.root")
   }
 
 }
-
+#endif

@@ -1,3 +1,6 @@
+#ifndef MACRO_MAKE_CDBTREE_C
+#define MACRO_MAKE_CDBTREE_C
+
 #include <mbd/MbdCalib.h>
 
 #include <Rtypes.h> // defines R__LOAD_LIBRARY macro
@@ -94,3 +97,4 @@ void make_cdbtree(const char *calibfname)
   }
 
 }
+#endif

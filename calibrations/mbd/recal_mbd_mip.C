@@ -1,3 +1,5 @@
+#ifndef MACRO_RECAL_MBD_MIP_C
+#define MACRO_RECAL_MBD_MIP_C
 //
 // Do a recalibration of the mip from the saved histograms
 //
@@ -655,4 +657,4 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
   savefile->Write();
   savefile->Close();
 }
-
+#endif
