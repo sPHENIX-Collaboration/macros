@@ -1,11 +1,21 @@
 //
 // Do a recalibration of the mip from the saved histograms
 //
-#include <TSpectrum.h>
-#include <mbd/MbdCalib.h>
-
 #include "get_runstr.h"
 
+#include <mbd/MbdCalib.h>
+
+#include <TCanvas.h>
+#include <TF1.h>
+#include <TFile.h>
+#include <TH1.h>
+#include <TH2.h>
+#include <TMath.h>
+#include <TPad.h>
+#include <TSpectrum.h>
+#include <TSystem.h>
+
+#include <fstream>
 
 // cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libmbd.so)
@@ -19,7 +29,7 @@ TF1 *bkgf[128]{nullptr};
 double minrej = 2000.;
 double peak = 2000.;
 double maxrej = 5000.;
-Double_t powerlaw(Double_t *x, Double_t *par)
+Double_t powerlaw(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parameter)
 {
   Float_t xx =x[0];
   if ( xx>minrej && xx<maxrej )
@@ -37,14 +47,14 @@ Double_t powerlaw(Double_t *x, Double_t *par)
 // [1] = mean
 // [2] = sigma
 // [3] = ampl, peak 2
-Double_t gaus2(Double_t *x, Double_t *par)
+Double_t gaus2(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parameter)
 {
   Double_t xx =x[0];
   Double_t f = par[0]*TMath::Gaus(xx,par[1],par[2]) + par[3]*TMath::Gaus(xx,2.0*par[1],sqrt(2)*par[2]); 
   return f;
 }
 
-Double_t woodssaxon(Double_t *x, Double_t *par)
+Double_t woodssaxon(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parameter)
 {
   Double_t xx =x[0];
   Double_t e = par[0]/(1.0+exp((xx-par[1])/par[2]));
@@ -59,7 +69,7 @@ Double_t woodssaxon(Double_t *x, Double_t *par)
 // [4] = ampl, woods-saxon
 // [5] = a, woods-saxon 
 // [6] = slope, expo
-Double_t gaus2ws(Double_t *x, Double_t *par)
+Double_t gaus2ws(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parameter)
 {
   Double_t xx =x[0];
   Double_t f = par[0]*TMath::Gaus(xx,par[1],par[2]) + par[3]*TMath::Gaus(xx,2.0*par[1],sqrt(2)*par[2]); 
@@ -69,7 +79,7 @@ Double_t gaus2ws(Double_t *x, Double_t *par)
 }
 
 
-Double_t landau2(Double_t *x, Double_t *par)
+Double_t landau2(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parameter)
 {
   Double_t xx =x[0];
   Double_t f = par[0]*TMath::Landau(xx,par[1],par[2]) + par[3]*TMath::Landau(xx,2.0*par[1],par[4]); 
@@ -102,7 +112,8 @@ Double_t langaufun(Double_t *x, Double_t *par)
   Double_t mpc;
   Double_t fland;
   Double_t sum = 0.0;
-  Double_t xlow,xupp;
+  Double_t xlow;
+  Double_t xupp;
   Double_t step;
   Double_t i;
 
@@ -232,7 +243,7 @@ void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax, double thre
 }
 */
 
-void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax, double threshold)
+void FindPeakRange(TH1 *h, double& xmin, double& thispeak, double& xmax, double threshold)
 {
   int verbose = 1;
 
@@ -291,14 +302,14 @@ void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax, double thre
     // if we see this many below the max, the signal is falling
     if ( nbelow==20 )
     {
-      peak = h->GetBinCenter( ibin-20 );
+      thispeak = h->GetBinCenter( ibin-20 );
       break;
     }
 
     ibin++;
   }
 
-  xmax = peak + 4*(peak - xmin);
+  xmax = thispeak + 4*(thispeak - xmin);
 
 }
 
@@ -313,7 +324,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
 
   const int NUM_PMT = 128;
   //const int NUM_PMT = 2;
-  const int NUM_ARMS = 2;
+//  const int NUM_ARMS = 2;
 
   // Create new TFile
   int runnumber = get_runnumber(tfname);
@@ -338,15 +349,15 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
     title = "q"; title += ipmt;
     //h_q[ipmt] = new TH1F(name,title,15100/4,-100,15000);
     h_q[ipmt] = (TH1*)oldfile->Get(name);
-    if ( type == MBDRUNS::AUAU200 )
-    {
-      //h_q[ipmt]->Rebin(2);
-    }
-    else if ( type == MBDRUNS::PP200 )
-    {
-      //h_q[ipmt]->Rebin(4);  // b-off
-      //h_q[ipmt]->Rebin(2);
-    }
+    // if ( type == MBDRUNS::AUAU200 )
+    // {
+    //   //h_q[ipmt]->Rebin(2);
+    // }
+    // else if ( type == MBDRUNS::PP200 )
+    // {
+    //   //h_q[ipmt]->Rebin(4);  // b-off
+    //   //h_q[ipmt]->Rebin(2);
+    // }
 
     name = "h_tq"; name += ipmt;
     title = "tq"; title += ipmt;
@@ -354,7 +365,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
     h_tq[ipmt] = (TH1*)oldfile->Get(name);
   }
   //TH2 *h2_tq = new TH2F("h2_tq","ch vs tq",900,-150,150,NUM_PMT,-0.5,NUM_PMT-0.5);
-  TH2 *h2_tq = (TH2*)oldfile->Get("h2_tq");
+//  TH2 *h2_tq = (TH2*)oldfile->Get("h2_tq");
 
   name = dir; 
   name += "recalmbd_pass"; name += pass; name += ".root";
@@ -489,8 +500,8 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
         h_mip[ipmt]->SetName( name );
         h_mip[ipmt]->SetTitle( name );
 
-        double orig_minrej = minrej;
-        double orig_maxrej = maxrej;
+//        double orig_minrej = minrej;
+//        double orig_maxrej = maxrej;
         minrej = 0.;
         maxrej = 0.;
         h_mip[ipmt]->Add( bkgf[ipmt], -1.0 );

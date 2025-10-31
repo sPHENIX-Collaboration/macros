@@ -8,6 +8,7 @@
 #include <mbd/MbdPmtHit.h>
 
 #include <TChain.h>
+#include <TFile.h>
 
 #include <fstream>
 
@@ -76,7 +77,7 @@ void read_dstmbd(const char *tfname = "beam_mbd-00009184-0000_mbd.root")
   std::cout << "tfname " << tfname << std::endl;
 
   // Set up TTree
-  int is_dst = 0; // whether reading from DST or private root files
+//  int is_dst = 0; // whether reading from DST or private root files
   tfile = new TFile(tfname,"READ");
   tree = (TTree*)tfile->Get("T");
 
