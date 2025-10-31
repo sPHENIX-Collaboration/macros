@@ -76,7 +76,7 @@ void dstmbd_GetEntry(const int ientry)
 
 void read_dstmbd(const char *tfname = "beam_mbd-00009184-0000_mbd.root")
 {
-  std::cout << "tfname " << tfname << std::std::endl;
+  std::cout << "tfname " << tfname << std::endl;
 
   // Set up TTree
 //  int is_dst = 0; // whether reading from DST or private root files
@@ -105,20 +105,20 @@ void read_dstmbd(const char *tfname = "beam_mbd-00009184-0000_mbd.root")
 
   // Event loop, each ientry is one triggered event
   int nentries = tree->GetEntries();
-  std::cout << "checking output of dst file " << tfname << std::std::endl;
-  std::cout << "nentries = " << nentries << std::std::endl;
+  std::cout << "checking output of dst file " << tfname << std::endl;
+  std::cout << "nentries = " << nentries << std::endl;
   for (int ientry=0; ientry<10; ientry++)
   {
-    //std::cout << "ientry " << ientry << std::std::endl;
+    //std::cout << "ientry " << ientry << std::endl;
     dstmbd_GetEntry(ientry);
     //tree->GetEntry(ientry+100);
 
     if (ientry<10)
     {
       // print charge from channels 0 and 127
-      std::cout << f_evt << "\t" << f_q[0] << "\t" << f_tt[0] << std::std::endl;
-      std::cout <<  "\t" << f_q[127] << "\t" << f_tt[127] << std::std::endl;
-      std::cout <<  "\t" << f_bz << std::std::endl;
+      std::cout << f_evt << "\t" << f_q[0] << "\t" << f_tt[0] << std::endl;
+      std::cout <<  "\t" << f_q[127] << "\t" << f_tt[127] << std::endl;
+      std::cout <<  "\t" << f_bz << std::endl;
     }
 
   }

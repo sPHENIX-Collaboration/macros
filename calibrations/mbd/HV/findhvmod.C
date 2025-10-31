@@ -17,11 +17,11 @@ void findhvmod()
   std::multimap hvmap = mbdgeom->get_hvmap();
 
   int pmts[] = { 51, 84, 85, 26, 75, 89, 121 };
-  for (int ipmt=0; ipmt<7; ipmt++)
+  for (int pmt : pmts)
   {
     for ( auto hv : hvmap )
     {
-      if ( hv.second == pmts[ipmt] )
+      if ( hv.second == pmt )
       {
         std::cout << hv.second << "\t" << hv.first << std::endl;
         break;
