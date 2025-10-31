@@ -1,7 +1,9 @@
-#ifndef __GET_RUNSTR__
-#define __GET_RUNSTR__
+#ifndef MACRO_GET_RUNSTR_H
+#define MACRO_GET_RUNSTR_H
 
-//namespace RUNSTR {
+#include <TString.h>
+
+#include <iostream>
 
 TString get_runstr(const char *fname)
 {
@@ -18,7 +20,7 @@ TString get_runstr(const char *fname)
   {
     name.Remove(0,index+1);
   }
-  //cout << "aaa " << name << endl;
+  //std::cout << "aaa " << name << std::endl;
 
   /*
   index = name.Last('-');
@@ -26,7 +28,7 @@ TString get_runstr(const char *fname)
   {
     name.Remove(index,name.Length());
   }
-  //cout << "bbb " << name << endl;
+  //std::cout << "bbb " << name << std::endl;
   */
 
   return name;
@@ -36,17 +38,15 @@ TString get_runstr(const char *fname)
 int get_runnumber(const char *fname)
 {
   TString str = get_runstr(fname);
-  cout << str << endl;
+  std::cout << str << std::endl;
   int index = str.Last('-');
   if ( index > 0 )
   {
     str.Remove(index,str.Length());
   }
-  cout << " get_runnumber " << str << "\t" << str.Atoi() << endl;
+  std::cout << " get_runnumber " << str << "\t" << str.Atoi() << std::endl;
   return str.Atoi();
 }
-
-//} // namespace RUNSTR
 
 namespace MBDRUNS {
   enum type {
@@ -58,4 +58,3 @@ namespace MBDRUNS {
 }
 
 #endif  // __get_runstr__
-
