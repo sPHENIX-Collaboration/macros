@@ -14,7 +14,6 @@
 
 #include <fstream>
 
-// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libmbd_io.so)
 
 // Set up variables to read from TTree
