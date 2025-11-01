@@ -8,6 +8,7 @@
 #include <Rtypes.h> // defines R__LOAD_LIBRARY macro for clang-tidy
 #include <TSystem.h>
 
+// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
