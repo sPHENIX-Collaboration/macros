@@ -27,7 +27,6 @@
 
 #include <filesystem>
 
-// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffamodules.so)
