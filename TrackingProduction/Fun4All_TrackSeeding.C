@@ -131,7 +131,7 @@ void Fun4All_TrackSeeding(
   G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
   G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
    // to use a custom file instead of the database file:
-  G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
+  G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("Tpc_Average_Correction");
    
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
