@@ -3,9 +3,10 @@
 
 #include <GlobalVariables.C>
 
-#include <fun4all/Fun4AllServer.h>
 #include <g4jets/TruthJetInput.h>
+
 #include <globalvertex/GlobalVertex.h>
+
 #include <jetbackground/CopyAndSubtractJets.h>
 #include <jetbackground/DetermineEventRho.h>
 #include <jetbackground/DetermineTowerBackground.h>
@@ -15,13 +16,18 @@
 #include <jetbackground/SubtractTowers.h>
 #include <jetbackground/SubtractTowersCS.h>
 #include <jetbackground/TowerRho.h>
+
 #include <jetbase/FastJetOptions.h>
 #include <jetbase/JetReco.h>
 #include <jetbase/TowerJetInput.h>
 #include <jetbase/TrackJetInput.h>
+
 #include <particleflowreco/ParticleFlowJetInput.h>
+
 #include <eventplaneinfo/Eventplaneinfo.h>
 #include <eventplaneinfo/EventPlaneReco.h>
+
+#include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libglobalvertex.so)

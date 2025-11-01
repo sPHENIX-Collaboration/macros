@@ -1,9 +1,6 @@
 #ifndef MACRO_TRKRRECOINIT_C
 #define MACRO_TRKRRECOINIT_C
 
-R__LOAD_LIBRARY(libtrack_reco.so)
-R__LOAD_LIBRARY(libtpccalib.so)
-
 #include <GlobalVariables.C>
 
 #include <G4_ActsGeom.C>
@@ -14,6 +11,9 @@ R__LOAD_LIBRARY(libtpccalib.so)
 #include <ffamodules/CDBInterface.h>
 
 #include <fun4all/Fun4AllServer.h>
+
+R__LOAD_LIBRARY(libtrack_reco.so)
+R__LOAD_LIBRARY(libtpccalib.so)
 
 void TrackingInit()
 {

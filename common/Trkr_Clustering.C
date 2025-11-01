@@ -8,25 +8,27 @@
 
 #include <intt/InttCombinedRawDataDecoder.h>
 #include <intt/InttOdbcQuery.h>
-#include <micromegas/MicromegasCombinedDataDecoder.h>
-#include <mvtx/MvtxCombinedRawDataDecoder.h>
-#include <tpc/TpcCombinedRawDataUnpacker.h>
-#include <tpc/LaserEventIdentifier.h>
-
 #include <intt/InttClusterizer.h>
+
+#include <micromegas/MicromegasCombinedDataDecoder.h>
+
+#include <mvtx/MvtxCombinedRawDataDecoder.h>
 #include <mvtx/MvtxClusterizer.h>
 #include <mvtx/MvtxClusterPruner.h>
+
+#include <tpc/TpcCombinedRawDataUnpacker.h>
+#include <tpc/LaserEventIdentifier.h>
+#include <tpc/TpcClusterCleaner.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wundefined-internal"
 #include <tpc/TpcClusterizer.h>
 #pragma GCC diagnostic pop
 
-#include <tpc/TpcClusterCleaner.h>
-
 #include <micromegas/MicromegasClusterizer.h>
 
 #include <fun4all/Fun4AllServer.h>
+
 #include <phool/recoConsts.h>
 
 R__LOAD_LIBRARY(libmvtx.so)

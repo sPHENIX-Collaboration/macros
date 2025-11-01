@@ -5,7 +5,7 @@
 
 #include <G4_Input.C>
 
-void RunSettings(int runnumber, const std::string type = "")
+void RunSettings(int runnumber, const std::string &type = "")
 {
   switch (runnumber)
   {

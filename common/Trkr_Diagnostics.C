@@ -1,8 +1,6 @@
 #ifndef MACRO_TRKRDIAGNOSTICS_C
 #define MACRO_TRKRDIAGNOSTICS_C
 
-R__LOAD_LIBRARY(libTrackingDiagnostics.so)
-
 #include <Trkr_RecoInit.C>
 
 #include <trackingdiagnostics/KshortReconstruction.h>
@@ -10,7 +8,7 @@ R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 
 #include <fun4all/Fun4AllServer.h>
 
-
+R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 
 void G4KshortReconstruction(const std::string outputfile)
 {

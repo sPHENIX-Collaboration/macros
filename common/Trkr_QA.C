@@ -2,10 +2,11 @@
 #define MACRO_TRKRQA_C
 
 #include <GlobalVariables.C>
+
 #include <G4_TrkrVariables.C>
 #include <Trkr_TruthTables.C>
 #include <QA.C>
-#include <fun4all/Fun4AllServer.h>
+
 #include <simqa_modules/QAG4SimulationMvtx.h>
 #include <simqa_modules/QAG4SimulationIntt.h>
 #include <simqa_modules/QAG4SimulationTpc.h>
@@ -14,6 +15,8 @@
 #include <simqa_modules/QAG4SimulationUpsilon.h>
 #include <simqa_modules/QAG4SimulationVertex.h>
 #include <simqa_modules/QAG4SimulationDistortions.h>
+
+#include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libsimqa_modules.so)
 

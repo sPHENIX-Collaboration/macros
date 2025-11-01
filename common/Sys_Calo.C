@@ -1,13 +1,14 @@
 #ifndef SYS_CALO_C
 #define SYS_CALO_C
+
 #include <caloreco/CaloTowerCalib.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
+
+#include <ffamodules/CDBInterface.h>
 
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllUtils.h>
 #include <fun4all/SubsysReco.h>
-
-#include <ffamodules/CDBInterface.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libcalo_reco.so)

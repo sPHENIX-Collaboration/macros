@@ -3,7 +3,6 @@
 
 #include <QA.C>
 
-#include <fun4all/Fun4AllServer.h>
 #include <jetqa/CaloStatusMapper.h>
 #include <jetqa/ConstituentsinJets.h>
 #include <jetqa/DijetQA.h>
@@ -15,6 +14,9 @@
 #include <jetqa/StructureinJets.h>
 #include <jetqa/TrksInJetQA.h>
 #include <jetqa/UEvsEtaCentrality.h>
+
+#include <fun4all/Fun4AllServer.h>
+
 #include <map>
 #include <optional>
 #include <string>
@@ -22,7 +24,6 @@
 #include <vector>
 
 R__LOAD_LIBRARY(libjetqa.so)
-
 
 // ----------------------------------------------------------------------------
 //! General options for jet QA

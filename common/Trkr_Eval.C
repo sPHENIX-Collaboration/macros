@@ -2,8 +2,10 @@
 #define MACRO_TRKREVAL_C
 
 #include <GlobalVariables.C>
+
 #include <G4_TrkrVariables.C>
 #include <Trkr_TruthTables.C>
+
 #include <g4eval/SvtxEvaluator.h>
 #include <g4eval/TruthRecoTrackMatching.h>
 #include <g4eval/TrkrClusterIsMatcher.h>

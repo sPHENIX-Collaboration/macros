@@ -1,14 +1,9 @@
 #ifndef MACRO_TPCREADOUTINIT_C
 #define MACRO_TPCREADOUTINIT_C
 
-R__LOAD_LIBRARY(libtpc.so)
-R__LOAD_LIBRARY(libtrack_reco.so)
-R__LOAD_LIBRARY(libtpccalib.so)
-
 #include <GlobalVariables.C>
 
 #include <G4_TrkrVariables.C>
-#include <fun4all/Fun4AllServer.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wundefined-internal"
@@ -16,7 +11,15 @@ R__LOAD_LIBRARY(libtpccalib.so)
 #pragma GCC diagnostic pop
 
 #include <cdbobjects/CDBTTree.h>
+
 #include <ffamodules/CDBInterface.h>
+
+#include <fun4all/Fun4AllServer.h>
+
+
+R__LOAD_LIBRARY(libtpc.so)
+R__LOAD_LIBRARY(libtrack_reco.so)
+R__LOAD_LIBRARY(libtpccalib.so)
 
 void TpcSampleInit(const int RunNumber = 41989)
 {

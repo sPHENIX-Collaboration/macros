@@ -6,8 +6,8 @@
 #include <G4_TrkrVariables.C>
 
 #include <tpc/LaserClusterizer.h>
-#include <tpccalib/TpcLaminationFitting.h>
 
+#include <tpccalib/TpcLaminationFitting.h>
 #include <tpccalib/TpcDirectLaserReconstruction.h>
 
 #include <fun4all/Fun4AllServer.h>
@@ -15,9 +15,6 @@
 
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtpccalib.so)
-
-
-
 
 void TPC_LaserClustering()
 {

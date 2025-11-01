@@ -1,14 +1,16 @@
 #ifndef MACRO_QA_C
 #define MACRO_QA_C
 
-#include <fun4all/Fun4AllServer.h>
 #include <qautils/QAHistManagerDef.h>
+
 #include <simqa_modules/QAG4SimulationCalorimeterSum.h>
 
-#include <TSystem.h>  // for R__LOAD_LIBRARY
+#include <fun4all/Fun4AllServer.h>
 
-R__LOAD_LIBRARY(libfun4all.so)
+#include <Rtypes.h> // defines R__LOAD_LIBRARY macro for clang-tidy
+
 R__LOAD_LIBRARY(libsimqa_modules.so)
+R__LOAD_LIBRARY(libfun4all.so)
 
 namespace Enable
 {
