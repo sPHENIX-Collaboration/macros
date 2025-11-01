@@ -32,14 +32,14 @@ void Centrality()
   cent->Verbosity(verbosity);
   if (Enable::CDB)
   {
-    PHParameterUtils::FillPHParametersFromCDB(cent->GetCalibrationParameters(),"CENTRALITY");
+    PHParameterUtils::FillPHParametersFromCDB(cent->GetCalibrationParameters(), "CENTRALITY");
   }
   else
   {
     cent->GetCalibrationParameters().ReadFromFile("centrality", "xml", 0, 0, std::string(getenv("CALIBRATIONROOT")) + std::string("/Centrality/"));
   }
-  se->registerSubsystem( cent );
-  
+  se->registerSubsystem(cent);
+
   return;
 }
 #endif
