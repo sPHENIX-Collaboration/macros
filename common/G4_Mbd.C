@@ -89,7 +89,7 @@ void Mbd_Reco()
     if (verbosity > 0)
     {
       std::cout << "MBDFAKE: Using smeared vtx and t0 resolutions of "
-           << G4MBD::z_smearing << " cm and " << G4MBD::t_smearing * 1000 << " ps" << std::endl;
+                << G4MBD::z_smearing << " cm and " << G4MBD::t_smearing * 1000 << " ps" << std::endl;
     }
     MbdVertexFastSimReco* mbdvertex = new MbdVertexFastSimReco();
     mbdvertex->set_z_smearing(G4MBD::z_smearing);
@@ -100,11 +100,11 @@ void Mbd_Reco()
   }
   if (Enable::MBDRECO)
   {
-    auto mbddigi = new MbdDigitization();
+    auto* mbddigi = new MbdDigitization();
     mbddigi->Verbosity(verbosity);
     se->registerSubsystem(mbddigi);
 
-    auto mbdreco = new MbdReco();
+    auto* mbdreco = new MbdReco();
     mbdreco->Verbosity(verbosity);
     se->registerSubsystem(mbdreco);
   }
