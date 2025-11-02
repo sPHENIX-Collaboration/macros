@@ -7,7 +7,7 @@
 
 #include <fun4all/Fun4AllServer.h>
 
-#include <Rtypes.h> // defines R__LOAD_LIBRARY macro for clang-tidy
+#include <Rtypes.h>  // defines R__LOAD_LIBRARY macro for clang-tidy
 
 R__LOAD_LIBRARY(libsimqa_modules.so)
 R__LOAD_LIBRARY(libfun4all.so)
@@ -38,7 +38,6 @@ void QA_G4CaloTracking()
 // run this after se->run() to output QA histogram file for all QA modules
 void QA_Output(const std::string& qaOutputFileName)
 {
-  Fun4AllServer* se = Fun4AllServer::instance();
   QAHistManagerDef::saveQARootFile(qaOutputFileName);
   return;
 }

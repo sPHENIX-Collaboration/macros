@@ -112,8 +112,7 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
   }
   g4Reco->registerSubsystem(G4BEAMLINE::BackwardBeamLineEnclosure);
 
-  std::string magFile;
-  magFile = std::string(getenv("CALIBRATIONROOT")) + "/Beam/D0DXMagnets.dat";
+  std::string magFile = std::string(getenv("CALIBRATIONROOT")) + "/Beam/D0DXMagnets.dat";
 
   // if you insert numbers it only displays those magnets, do not comment out the set declaration
   std::set<int> magnetlist;
@@ -233,10 +232,7 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
             bl->set_double_param("skin_thickness", G4BEAMLINE::skin_thickness);
             bl->SetActive(AbsorberActive);
             bl->SetAbsorberActive(AbsorberActive);
-            if (Enable::BEAMLINE_BLACKHOLE)
-            {
-              bl->BlackHole();  // turn magnets into black holes
-            }
+            if (Enable::BEAMLINE_BLACKHOLE) bl->BlackHole();  // turn magnets into black holes
             if (z > 0)
             {
               bl->SetMotherSubsystem(G4BEAMLINE::ForwardBeamLineEnclosure);
@@ -247,10 +243,7 @@ void BeamLineDefineMagnets(PHG4Reco *g4Reco)
             }
             bl->OverlapCheck(overlapCheck);
             bl->SuperDetector("BEAMLINEMAGNET");
-            if (verbosity)
-            {
-              bl->Verbosity(verbosity);
-            }
+            bl->Verbosity(verbosity);
             g4Reco->registerSubsystem(bl);
           }
           imagnet++;
@@ -281,10 +274,7 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
   {
     std::string name = "beamPipe" + nm[i];
     PHG4CylinderSubsystem *pipe = new PHG4CylinderSubsystem(name, G4BEAMLINE::pipe_id_offset + i);
-    if (Enable::BEAMLINE_BLACKHOLE)
-    {
-      pipe->BlackHole();
-    }
+    if (Enable::BEAMLINE_BLACKHOLE) pipe->BlackHole();
     pipe->set_color(1, 0, 0, 1.);
     pipe->set_double_param("radius", qir[i]);
     pipe->set_double_param("thickness", qor[i] - qir[i]);
@@ -301,10 +291,7 @@ void BeamLineDefineBeamPipe(PHG4Reco *g4Reco)
     {
       pipe->set_double_param("place_z", qzC[i] + G4BEAMLINE::enclosure_center);  // relative position to mother vol.
     }
-    if (AbsorberActive)
-    {
-      pipe->SetActive();
-    }
+    if (AbsorberActive) pipe->SetActive();
     pipe->SuperDetector("PIPE");
     if (qzC[i] > 0)
     {

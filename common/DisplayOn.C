@@ -48,17 +48,17 @@ PHG4Reco *DisplayOn(const char *mac = "vis.mac")
 // print out the commands I always forget
 void displaycmd()
 {
-  cout << "draw axis: " << endl;
-  cout << " g4->ApplyCommand(\"/vis/scene/add/axes 0 0 0 50 cm\")" << endl;
-  cout << "zoom" << endl;
-  cout << " g4->ApplyCommand(\"/vis/viewer/zoom 1\")" << endl;
-  cout << "viewpoint:" << endl;
-  cout << " g4->ApplyCommand(\"/vis/viewer/set/viewpointThetaPhi 0 0\")" << endl;
-  cout << "panTo:" << endl;
-  cout << " g4->ApplyCommand(\"/vis/viewer/panTo 0 0 cm\")" << endl;
-  cout << "print to eps:" << endl;
-  cout << " g4->ApplyCommand(\"/vis/ogl/printEPS\")" << endl;
-  cout << "set background color:" << endl;
-  cout << " g4->ApplyCommand(\"/vis/viewer/set/background white\")" << endl;
+  std::cout << "draw axis: " << std::endl;
+  std::cout << " g4->ApplyCommand(\"/vis/scene/add/axes 0 0 0 50 cm\")" << std::endl;
+  std::cout << "zoom" << std::endl;
+  std::cout << " g4->ApplyCommand(\"/vis/viewer/zoom 1\")" << std::endl;
+  std::cout << "viewpoint:" << std::endl;
+  std::cout << " g4->ApplyCommand(\"/vis/viewer/set/viewpointThetaPhi 0 0\")" << std::endl;
+  std::cout << "panTo:" << std::endl;
+  std::cout << " g4->ApplyCommand(\"/vis/viewer/panTo 0 0 cm\")" << std::endl;
+  std::cout << "print to eps:" << std::endl;
+  std::cout << " g4->ApplyCommand(\"/vis/ogl/printEPS\")" << std::endl;
+  std::cout << "set background color:" << std::endl;
+  std::cout << " g4->ApplyCommand(\"/vis/viewer/set/background white\")" << std::endl;
 }
 #endif

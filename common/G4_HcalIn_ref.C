@@ -3,6 +3,7 @@
 #define MACRO_G4HCALINREF_C
 
 #include <GlobalVariables.C>
+
 #include <QA.C>
 
 #include <g4calo/HcalRawTowerBuilder.h>
@@ -199,10 +200,7 @@ double HCalInner(PHG4Reco *g4Reco,
   }
   hcal->SetActive();
   hcal->SuperDetector("HCALIN");
-  if (AbsorberActive)
-  {
-    hcal->SetAbsorberActive();
-  }
+  if (AbsorberActive) hcal->SetAbsorberActive();
   if (!std::isfinite(G4HCALIN::phistart))
   {
     if (Enable::HCALIN_OLD)
