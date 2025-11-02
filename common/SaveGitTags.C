@@ -1,3 +1,6 @@
+#ifndef MACRO_SAVEGITTAGS_C
+#define MACRO_SAVEGITTAGS_C
+
 // This macro parses the rebuild.info file which is written by our build script
 // it extracts in a crude way the build and the git tags for the repos which
 // went into this build and sets stringflags. This even allows us to
@@ -71,3 +74,4 @@ void SetGitTagsFromFile(const std::string &filename)
   }
   return;
 }
+#endif

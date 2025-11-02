@@ -2,10 +2,11 @@
 #define MACRO_G4BLACKHOLE_C
 
 #include <GlobalVariables.C>
-#include <algorithm>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4main/PHG4Reco.h>
+
+#include <algorithm>
 
 R__LOAD_LIBRARY(libg4detectors.so)
 

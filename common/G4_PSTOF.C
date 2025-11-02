@@ -2,6 +2,7 @@
 #define MACRO_G4PSTOF_C
 
 #include <g4detectors/PHG4PSTOFSubsystem.h>
+
 #include <g4main/PHG4Reco.h>
 
 R__LOAD_LIBRARY(libg4detectors.so)

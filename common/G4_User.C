@@ -3,7 +3,7 @@
 
 #include <fun4all/Fun4AllServer.h>
 
-#include <Rtypes.h>
+#include <Rtypes.h> // for R__LOAD_LIBRARY
 
 R__LOAD_LIBRARY(libfun4all.so)
 

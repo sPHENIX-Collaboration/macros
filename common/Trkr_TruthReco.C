@@ -6,6 +6,7 @@
 #include <G4_TrkrVariables.C>
 
 #include <g4eval/SvtxTruthRecoTableEval.h>
+
 #include <trackingdiagnostics/TrackSeedTrackMapConverter.h>
 
 #include <trackreco/MakeActsGeometry.h>

@@ -2,6 +2,7 @@
 #define MACRO_G4TRKRVARIABLES_C
 
 #include <g4intt/PHG4InttDefs.h>
+
 #include <g4mvtx/PHG4MvtxDefs.h>
 
 namespace Enable
