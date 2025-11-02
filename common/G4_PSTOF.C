@@ -24,7 +24,7 @@ void PSTOFInit()
 {
 }
 
-double PSTOF(PHG4Reco* g4Reco, double radius)
+double PSTOF(PHG4Reco* g4Reco, double /*radius*/)
 {
   PHG4PSTOFSubsystem* pstof = new PHG4PSTOFSubsystem("PSTOF");
   pstof->SuperDetector("PSTOF");
