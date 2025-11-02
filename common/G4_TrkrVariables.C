@@ -123,7 +123,7 @@ namespace G4TPC
 
   // module edge distortion corrections
   bool ENABLE_MODULE_EDGE_CORRECTIONS = false;
-  std::string module_edge_correction_filename = "";
+  std::string module_edge_correction_filename;
 
   // static distortion corrections
   bool ENABLE_STATIC_CORRECTIONS = false;
@@ -146,9 +146,9 @@ namespace G4TPC
   float laser_adc_threshold = 100.0;
 
   bool REJECT_LASER_EVENTS = false;
-  std::string laser_event_debug_filename = "";
-  std::string LaminationOutputName = "";
-  std::string LaminationQAName = "";
+  std::string laser_event_debug_filename;
+  std::string LaminationOutputName;
+  std::string LaminationQAName;
 
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
