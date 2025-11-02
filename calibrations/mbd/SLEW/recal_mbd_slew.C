@@ -19,7 +19,6 @@
 #include <fstream>
 #include <iostream>
 
-// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libmbd_io.so)
 
 const int NPOINTS = 16000;  // number of points in correction LUT

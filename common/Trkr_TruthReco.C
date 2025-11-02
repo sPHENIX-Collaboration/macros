@@ -5,8 +5,8 @@
 
 #include <G4_TrkrVariables.C>
 
-
 #include <g4eval/SvtxTruthRecoTableEval.h>
+
 #include <trackingdiagnostics/TrackSeedTrackMapConverter.h>
 
 #include <trackreco/MakeActsGeometry.h>
@@ -34,8 +34,8 @@
 #include <tpccalib/PHTpcResiduals.h>
 #include <tpccalib/TpcSpaceChargeReconstruction.h>
 
-#include <trackermillepedealignment/MakeMilleFiles.h>
 #include <trackermillepedealignment/HelicalFitter.h>
+#include <trackermillepedealignment/MakeMilleFiles.h>
 
 #include <fun4all/Fun4AllServer.h>
 
@@ -64,7 +64,7 @@ void Tracking_Reco_TrackSeed()
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
   // get fun4all server instance
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
 
   if (!G4TRACKING::use_full_truth_track_seeding)
   {
@@ -73,19 +73,21 @@ void Tracking_Reco_TrackSeed()
     {
       // For the silicon, for each truth particle, create a track and associate clusters with it using truth information, write to silicon track map
       // track stubs are given the location of the truth vertex in this module
-      auto pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingSilicon");
+      auto *pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingSilicon");
       pat_rec->Verbosity(verbosity);
       pat_rec->set_track_map_name("SiliconTrackSeedContainer");
       pat_rec->set_min_layer(0);
       pat_rec->set_max_layer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
       se->registerSubsystem(pat_rec);
-    } else {
-      auto silicon_Seeding = new PHActsSiliconSeeding;
+    }
+    else
+    {
+      auto *silicon_Seeding = new PHActsSiliconSeeding;
       silicon_Seeding->Verbosity(verbosity);
       std::cout << "SETTING SI SEED CV" << std::endl;
       se->registerSubsystem(silicon_Seeding);
 
-      auto merger = new PHSiliconSeedMerger;
+      auto *merger = new PHSiliconSeedMerger;
       merger->Verbosity(verbosity);
       se->registerSubsystem(merger);
     }
@@ -95,19 +97,19 @@ void Tracking_Reco_TrackSeed()
     {
       // For the TPC, for each truth particle, create a track and associate clusters with it using truth information, write to Svtx track map
       // track stubs are given the position odf the truth vertex in this module
-      auto pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingTpc");
+      auto *pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingTpc");
       pat_rec->Verbosity(verbosity);
       pat_rec->set_track_map_name("TpcTrackSeedContainer");
       pat_rec->set_min_layer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
       pat_rec->set_max_layer(G4MVTX::n_maps_layer + G4INTT::n_intt_layer + G4TPC::n_gas_layer);
       se->registerSubsystem(pat_rec);
-
-    } else {
-
-      auto seeder = new PHCASeeding("PHCASeeding");
-      seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
-      double fieldstrength = std::numeric_limits<double>::quiet_NaN(); // set by isConstantField if constant
-      bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
+    }
+    else
+    {
+      auto *seeder = new PHCASeeding("PHCASeeding");
+      seeder->set_field_dir(G4MAGNET::magfield_rescale);                // to get charge sign right
+      double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
+      bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
 
       if (!ConstField)
       {
@@ -160,7 +162,7 @@ void Tracking_Reco_TrackSeed()
       se->registerSubsystem(seeder);
 
       // expand stubs in the TPC using simple kalman filter
-      auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
+      auto *cprop = new PHSimpleKFProp("PHSimpleKFProp");
       cprop->set_field_dir(G4MAGNET::magfield_rescale);
       if (!ConstField)
       {
@@ -215,14 +217,16 @@ void Tracking_Reco_TrackSeed()
     {
       std::cout << "Tracking_Reco_TrackSeed - Using truth Si matching " << std::endl;
       // use truth particle matching in TPC to assign clusters in silicon to TPC tracks from CA seeder
-      auto silicon_assoc = new PHTruthSiliconAssociation;
+      auto *silicon_assoc = new PHTruthSiliconAssociation;
       silicon_assoc->Verbosity(verbosity);
       se->registerSubsystem(silicon_assoc);
-    } else {
+    }
+    else
+    {
       std::cout << "Tracking_Reco_TrackSeed - Using stub matching for Si matching " << std::endl;
       // The normal silicon association methods
       // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
-      auto silicon_match = new PHSiliconTpcTrackMatching;
+      auto *silicon_match = new PHSiliconTpcTrackMatching;
       silicon_match->Verbosity(verbosity);
       silicon_match->set_pp_mode(TRACKING::pp_mode);
       std::cout << "PHSiliconTpcTrackMatching pp_mode set to " << TRACKING::pp_mode << std::endl;
@@ -232,7 +236,9 @@ void Tracking_Reco_TrackSeed()
         // tuned values are 0.04 and 0.008 in distorted events
         silicon_match->set_phi_search_window(0.04);
         silicon_match->set_eta_search_window(0.008);
-      } else {
+      }
+      else
+      {
         // after distortion corrections and rerunning clustering, default tuned values are 0.02 and 0.004 in low occupancy events
         silicon_match->set_phi_search_window(0.03);
         silicon_match->set_eta_search_window(0.005);
@@ -242,12 +248,12 @@ void Tracking_Reco_TrackSeed()
     }
 
     // Associate Micromegas clusters with the tracks
-    if( Enable::MICROMEGAS )
+    if (Enable::MICROMEGAS)
     {
       std::cout << "Tracking_Reco_TrackSeed - Using Micromegas matching " << std::endl;
 
       // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-      auto mm_match = new PHMicromegasTpcTrackMatching;
+      auto *mm_match = new PHMicromegasTpcTrackMatching;
       mm_match->Verbosity(verbosity);
 
       mm_match->set_rphi_search_window_lyr1(0.2);
@@ -259,88 +265,87 @@ void Tracking_Reco_TrackSeed()
       mm_match->set_test_windows_printout(false);  // used for tuning search windows only
       se->registerSubsystem(mm_match);
     }
-
-  } else {
-
+  }
+  else
+  {
     // full truth track finding
     std::cout << "Tracking_Reco_TrackSeed - Using full truth track seeding" << std::endl;
 
     // For each truth particle, create a track and associate clusters with it using truth information, write to Svtx track map
     // track stubs are given the position of the truth vertex in this module, but Genfit does not care
     // Includes clusters for TPC, silicon and MM's
-    auto pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingFull");
+    auto *pat_rec = new PHTruthTrackSeeding("PHTruthTrackSeedingFull");
     pat_rec->Verbosity(verbosity);
     pat_rec->set_track_map_name("SvtxTrackSeedContainer");
     se->registerSubsystem(pat_rec);
-
   }
 
-   /*
+  /*
    * all done
    * at this stage tracks are fully assembled. They contain clusters spaning Silicon detectors, TPC and Micromegas
    * they are ready to be fit.
    */
-  if(G4TRACKING::convert_seeds_to_svtxtracks)
-    {
-      convert_seeds();
-    }
+  if (G4TRACKING::convert_seeds_to_svtxtracks)
+  {
+    convert_seeds();
+  }
 }
-
 
 void vertexing()
 {
-  Fun4AllServer* se = Fun4AllServer::instance();
+  Fun4AllServer *se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   if (G4TRACKING::use_truth_vertexing)
-    {
-      auto vtxing = new PHTruthVertexing;
-      vtxing->associate_tracks(true);
-      std::string trackmapnamef = "SvtxTrackMap";
-      vtxing->set_track_map_name(trackmapnamef);
-      se->registerSubsystem(vtxing);
-    } else {
-    auto vtxfinder = new PHSimpleVertexFinder;
+  {
+    auto *vtxing = new PHTruthVertexing;
+    vtxing->associate_tracks(true);
+    std::string trackmapnamef = "SvtxTrackMap";
+    vtxing->set_track_map_name(trackmapnamef);
+    se->registerSubsystem(vtxing);
+  }
+  else
+  {
+    auto *vtxfinder = new PHSimpleVertexFinder;
     vtxfinder->Verbosity(verbosity);
     se->registerSubsystem(vtxfinder);
   }
-
 }
 
 void Tracking_Reco_TrackFit()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
 
   // correct clusters for particle propagation in TPC
-  auto deltazcorr = new PHTpcDeltaZCorrection;
+  auto *deltazcorr = new PHTpcDeltaZCorrection;
   deltazcorr->Verbosity(verbosity);
   se->registerSubsystem(deltazcorr);
 
-  if( G4TRACKING::use_genfit_track_fitter )
+  if (G4TRACKING::use_genfit_track_fitter)
   {
     // perform final track fit with GENFIT
-    auto genfitFit = new PHGenFitTrkFitter;
+    auto *genfitFit = new PHGenFitTrkFitter;
     genfitFit->Verbosity(verbosity);
     genfitFit->set_fit_silicon_mms(G4TRACKING::SC_CALIBMODE);
     se->registerSubsystem(genfitFit);
 
-    if( G4TRACKING::SC_CALIBMODE )
+    if (G4TRACKING::SC_CALIBMODE)
     {
       // Genfit based Tpc space charge Reconstruction
-      auto tpcSpaceChargeReconstruction = new TpcSpaceChargeReconstruction;
+      auto *tpcSpaceChargeReconstruction = new TpcSpaceChargeReconstruction;
       tpcSpaceChargeReconstruction->set_use_micromegas(G4TRACKING::SC_USE_MICROMEGAS);
       tpcSpaceChargeReconstruction->set_outputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
       // reconstructed distortion grid size (phi, r, z)
       tpcSpaceChargeReconstruction->set_grid_dimensions(36, 48, 80);
       se->registerSubsystem(tpcSpaceChargeReconstruction);
     }
-
-  } else {
-
+  }
+  else
+  {
     // perform final track fit with ACTS
-    auto actsFit = new PHActsTrkFitter;
+    auto *actsFit = new PHActsTrkFitter;
     actsFit->Verbosity(verbosity);
-    //actsFit->commissioning(G4TRACKING::use_alignment);
+    // actsFit->commissioning(G4TRACKING::use_alignment);
 
     // in calibration mode, fit only Silicons and Micromegas hits
     actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
@@ -355,10 +360,10 @@ void Tracking_Reco_TrackFit()
     if (G4TRACKING::SC_CALIBMODE)
     {
       /*
-      * in calibration mode, calculate residuals between TPC and fitted tracks,
-      * store in dedicated structure for distortion correction
-      */
-      auto residuals = new PHTpcResiduals;
+       * in calibration mode, calculate residuals between TPC and fitted tracks,
+       * store in dedicated structure for distortion correction
+       */
+      auto *residuals = new PHTpcResiduals;
       residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
       residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
       // reconstructed distortion grid size (phi, r, z)
@@ -376,30 +381,30 @@ void Tracking_Reco_TrackFit()
      * propagate tracks to EMCAL
      */
 
-    if( !G4TRACKING::use_full_truth_track_seeding )
+    if (!G4TRACKING::use_full_truth_track_seeding)
     {
       // Choose the best silicon matched track for each TPC track seed
       /* this breaks in truth_track seeding mode because there is no TpcSeed */
-      auto cleaner = new PHTrackCleaner;
+      auto *cleaner = new PHTrackCleaner;
       cleaner->Verbosity(verbosity);
       se->registerSubsystem(cleaner);
     }
 
     vertexing();
 
-    if( !G4TRACKING::use_genfit_track_fitter )
+    if (!G4TRACKING::use_genfit_track_fitter)
     {
       // Propagate track positions to the vertex position
-      auto vtxProp = new PHActsVertexPropagator;
+      auto *vtxProp = new PHActsVertexPropagator;
       vtxProp->Verbosity(verbosity);
       vtxProp->fieldMap(G4MAGNET::magfield_tracking);
       se->registerSubsystem(vtxProp);
 
       // project tracks to EMCAL
-      auto projection = new PHActsTrackProjection;
+      auto *projection = new PHActsTrackProjection;
       projection->Verbosity(verbosity);
       double fieldstrength = std::numeric_limits<double>::quiet_NaN();
-      if (isConstantField(G4MAGNET::magfield_tracking,fieldstrength))
+      if (isConstantField(G4MAGNET::magfield_tracking, fieldstrength))
       {
         projection->setConstFieldVal(fieldstrength);
       }
@@ -410,27 +415,27 @@ void Tracking_Reco_TrackFit()
 
 void Tracking_Reco_CommissioningTrackSeed()
 {
-   // set up verbosity
+  // set up verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
   // get fun4all server instance
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
 
-  auto silicon_Seeding = new PHActsSiliconSeeding;
+  auto *silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
   silicon_Seeding->sigmaScattering(50.);
   silicon_Seeding->setinttRPhiSearchWindow(0.4);
   se->registerSubsystem(silicon_Seeding);
 
-  auto merger = new PHSiliconSeedMerger;
+  auto *merger = new PHSiliconSeedMerger;
   merger->Verbosity(verbosity);
   se->registerSubsystem(merger);
 
   // Assemble TPC clusters into track stubs
-  auto seeder = new PHCASeeding("PHCASeeding");
-  seeder->set_field_dir(G4MAGNET::magfield_rescale);  // to get charge sign right
-  double fieldstrength = std::numeric_limits<double>::quiet_NaN(); // set by isConstantField if constant
-  bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
+  auto *seeder = new PHCASeeding("PHCASeeding");
+  seeder->set_field_dir(G4MAGNET::magfield_rescale);                // to get charge sign right
+  double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
   if (!ConstField)
   {
     seeder->magFieldFile(G4MAGNET::magfield_tracking);
@@ -483,7 +488,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
-  auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
+  auto *cprop = new PHSimpleKFProp("PHSimpleKFProp");
   cprop->set_field_dir(G4MAGNET::magfield_rescale);
   if (!ConstField)
   {
@@ -532,12 +537,11 @@ void Tracking_Reco_CommissioningTrackSeed()
 
   se->registerSubsystem(cprop);
 
-
   // match silicon track seeds to TPC track seeds
 
   // The normal silicon association methods
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
-  auto silicon_match = new PHSiliconTpcTrackMatching;
+  auto *silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(verbosity);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
 
@@ -550,49 +554,45 @@ void Tracking_Reco_CommissioningTrackSeed()
   silicon_match->set_test_windows_printout(false);  // used for tuning search windows
   se->registerSubsystem(silicon_match);
 
-
   // Associate Micromegas clusters with the tracks
-  if( Enable::MICROMEGAS )
-    {
-      // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-      auto mm_match = new PHMicromegasTpcTrackMatching;
-      mm_match->Verbosity(verbosity);
+  if (Enable::MICROMEGAS)
+  {
+    // Match TPC track stubs from CA seeder to clusters in the micromegas layers
+    auto *mm_match = new PHMicromegasTpcTrackMatching;
+    mm_match->Verbosity(verbosity);
 
-      mm_match->set_rphi_search_window_lyr1(0.4);
-      mm_match->set_rphi_search_window_lyr2(13.0);
-      mm_match->set_z_search_window_lyr1(26.0);
-      mm_match->set_z_search_window_lyr2(0.2);
+    mm_match->set_rphi_search_window_lyr1(0.4);
+    mm_match->set_rphi_search_window_lyr2(13.0);
+    mm_match->set_z_search_window_lyr1(26.0);
+    mm_match->set_z_search_window_lyr2(0.2);
 
-      mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
-      mm_match->set_test_windows_printout(false);  // used for tuning search windows only
-      se->registerSubsystem(mm_match);
-
-
-    }
-  if(G4TRACKING::convert_seeds_to_svtxtracks)
-    {
-      convert_seeds();
-    }
+    mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
+    mm_match->set_test_windows_printout(false);  // used for tuning search windows only
+    se->registerSubsystem(mm_match);
+  }
+  if (G4TRACKING::convert_seeds_to_svtxtracks)
+  {
+    convert_seeds();
+  }
 }
 
-void alignment(std::string datafilename = "mille_output_data_file",
-	       std::string steeringfilename = "mille_steer")
+void alignment(const std::string &datafilename = "mille_output_data_file",
+               const std::string &steeringfilename = "mille_steer")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
-  auto mille = new MakeMilleFiles;
+  auto *mille = new MakeMilleFiles;
   mille->Verbosity(verbosity);
   mille->set_datafile_name(datafilename + ".bin");
   mille->set_steeringfile_name(steeringfilename + ".txt");
   se->registerSubsystem(mille);
 
-  auto helical = new HelicalFitter;
+  auto *helical = new HelicalFitter;
   helical->Verbosity(0);
   helical->set_datafile_name(datafilename + "_helical.bin");
   helical->set_steeringfile_name(steeringfilename + "_helical.txt");
   se->registerSubsystem(helical);
-
 }
 
 void Tracking_Reco()
@@ -601,43 +601,40 @@ void Tracking_Reco()
    * just a wrapper around track seeding and track fitting methods,
    * to minimize disruption to existing steering macros
    */
-  if(G4TRACKING::use_alignment)
-    {
-      Tracking_Reco_CommissioningTrackSeed();
-    }
+  if (G4TRACKING::use_alignment)
+  {
+    Tracking_Reco_CommissioningTrackSeed();
+  }
   else
-    {
-      Tracking_Reco_TrackSeed();
-    }
+  {
+    Tracking_Reco_TrackSeed();
+  }
 
-  if(G4TRACKING::convert_seeds_to_svtxtracks)
-    {
-      vertexing();
-    }
+  if (G4TRACKING::convert_seeds_to_svtxtracks)
+  {
+    vertexing();
+  }
   else
-    {
-      Tracking_Reco_TrackFit();
-    }
+  {
+    Tracking_Reco_TrackFit();
+  }
 
-  if(G4TRACKING::use_alignment)
-    {
-      alignment();
-    }
-
+  if (G4TRACKING::use_alignment)
+  {
+    alignment();
+  }
 }
 
-void  Filter_Conversion_Electrons(std::string ntuple_outfile)
+void Filter_Conversion_Electrons(const std::string &ntuple_outfile)
 {
-  Fun4AllServer* se = Fun4AllServer::instance();
-  SecondaryVertexFinder* secvert = new SecondaryVertexFinder;
+  Fun4AllServer *se = Fun4AllServer::instance();
+  SecondaryVertexFinder *secvert = new SecondaryVertexFinder;
   secvert->Verbosity(0);
   secvert->set_write_electrons_node(true);  // writes copy of filtered electron tracks to node tree
-  secvert->set_write_ntuple(false);  // writes ntuple for tuning cuts
-  secvert->setDecayParticleMass( 0.000511);  // for electrons
+  secvert->set_write_ntuple(false);         // writes ntuple for tuning cuts
+  secvert->setDecayParticleMass(0.000511);  // for electrons
   secvert->setOutfileName(ntuple_outfile);
   se->registerSubsystem(secvert);
 }
-
-
 
 #endif

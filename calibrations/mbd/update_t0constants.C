@@ -8,7 +8,6 @@
 #include <Rtypes.h> // defines R__LOAD_LIBRARY macro
 #include <TString.h>
 
-// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libmbd_io.so)
 

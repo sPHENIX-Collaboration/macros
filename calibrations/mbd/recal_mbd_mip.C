@@ -19,7 +19,6 @@
 
 #include <fstream>
 
-// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libmbd.so)
 
 //using namespace MBDRUNS;

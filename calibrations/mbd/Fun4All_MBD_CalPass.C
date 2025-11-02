@@ -13,11 +13,11 @@
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllUtils.h>
 #include <fun4all/Fun4AllInputManager.h>
-
-#include <fun4allraw/Fun4AllPrdfInputManager.h>
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
+
+#include <fun4allraw/Fun4AllPrdfInputManager.h>
 #include <fun4allraw/Fun4AllEventOutputManager.h>
 
 #include <phool/recoConsts.h>
@@ -28,7 +28,6 @@
 #include <TSystem.h>
 
 #include <fstream>
-// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffamodules.so)

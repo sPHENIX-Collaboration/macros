@@ -3,9 +3,10 @@
 
 #include <GlobalVariables.C>
 
-#include <fun4all/Fun4AllServer.h>
 #include <g4jets/TruthJetInput.h>
+
 #include <globalvertex/GlobalVertex.h>
+
 #include <jetbackground/CopyAndSubtractJets.h>
 #include <jetbackground/DetermineEventRho.h>
 #include <jetbackground/DetermineTowerBackground.h>
@@ -15,13 +16,18 @@
 #include <jetbackground/SubtractTowers.h>
 #include <jetbackground/SubtractTowersCS.h>
 #include <jetbackground/TowerRho.h>
+
 #include <jetbase/FastJetOptions.h>
 #include <jetbase/JetReco.h>
 #include <jetbase/TowerJetInput.h>
 #include <jetbase/TrackJetInput.h>
+
 #include <particleflowreco/ParticleFlowJetInput.h>
-#include <eventplaneinfo/Eventplaneinfo.h>
+
 #include <eventplaneinfo/EventPlaneReco.h>
+#include <eventplaneinfo/Eventplaneinfo.h>
+
+#include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
@@ -30,21 +36,19 @@ R__LOAD_LIBRARY(libjetbase.so)
 R__LOAD_LIBRARY(libparticleflow.so)
 R__LOAD_LIBRARY(libeventplaneinfo.so)
 
-
 // ----------------------------------------------------------------------------
 //! General options for background-subtracted jet reconstruction
 // ----------------------------------------------------------------------------
 namespace Enable
 {
-  bool HIJETS           = false;  ///< do HI jet reconstruction
-  int  HIJETS_VERBOSITY = 0;      ///< verbosity
-  bool HIJETS_MC        = false;  ///< is simulation
-  bool HIJETS_TRUTH     = false;  ///< make truth jets
-  bool HIJETS_TOWER     = true;   ///< make tower jets
-  bool HIJETS_TRACK     = false;  ///< make track jets
-  bool HIJETS_PFLOW     = false;  ///< make particle flow jets
+  bool HIJETS = false;        ///< do HI jet reconstruction
+  int HIJETS_VERBOSITY = 0;   ///< verbosity
+  bool HIJETS_MC = false;     ///< is simulation
+  bool HIJETS_TRUTH = false;  ///< make truth jets
+  bool HIJETS_TOWER = true;   ///< make tower jets
+  bool HIJETS_TRACK = false;  ///< make track jets
+  bool HIJETS_PFLOW = false;  ///< make particle flow jets
 }  // namespace Enable
-
 
 // ----------------------------------------------------------------------------
 //! Options specific to background-subtracted jet reconstruction
@@ -94,10 +98,10 @@ namespace HIJETS
   ///! negative values are typically background particles (HIJING particles)
   int embedding_flag = 1;
 
-
   ///! enumerates reconstructed resolution
   ///! parameters
-  enum Res {
+  enum Res
+  {
     R02 = 0,
     R03 = 1,
     R04 = 2,
@@ -107,9 +111,8 @@ namespace HIJETS
   // --------------------------------------------------------------------------
   //! Helper method to generate releveant FastJet algorithms
   // --------------------------------------------------------------------------
-  FastJetAlgoSub* GetFJAlgo(const float reso)
+  FastJetAlgoSub *GetFJAlgo(const float reso)
   {
-
     // grab current options & update
     // reso parameter
     FastJetOptions opts = fj_opts;
@@ -121,13 +124,11 @@ namespace HIJETS
   }  // end 'GetFJAlgo()'
 }  // namespace HIJETS
 
-
 // ----------------------------------------------------------------------------
 //! Make jets out of appropriate truth particles
 // ----------------------------------------------------------------------------
 void MakeHITruthJets()
 {
-
   // set verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
 
@@ -178,9 +179,7 @@ void MakeHITruthJets()
 
   // exit back to HIJetReco()
   return;
-
 }
-
 
 // ----------------------------------------------------------------------------
 //! Make jets out of subtracted towers
@@ -193,26 +192,25 @@ void MakeHITowerJets()
   // Fun4All server
   //---------------
   Fun4AllServer *se = Fun4AllServer::instance();
-    
-  if(HIJETS::do_flow == 3)
+
+  if (HIJETS::do_flow == 3)
   {
-      EventPlaneReco *epreco = new EventPlaneReco();
-      epreco->set_sepd_epreco(true);
-      se->registerSubsystem(epreco);
+    EventPlaneReco *epreco = new EventPlaneReco();
+    epreco->set_sepd_epreco(true);
+    se->registerSubsystem(epreco);
   }
 
-  RetowerCEMC *rcemc = new RetowerCEMC(); 
-  rcemc->Verbosity(verbosity); 
+  RetowerCEMC *rcemc = new RetowerCEMC();
+  rcemc->Verbosity(verbosity);
   rcemc->set_towerinfo(true);
-  rcemc->set_frac_cut(0.5); //fraction of retower that must be masked to mask the full retower
+  rcemc->set_frac_cut(0.5);  // fraction of retower that must be masked to mask the full retower
   rcemc->set_towerNodePrefix(HIJETS::tower_prefix);
   se->registerSubsystem(rcemc);
 
-
   JetReco *towerjetreco = new JetReco();
-  TowerJetInput *incemc = new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER,HIJETS::tower_prefix);
-  TowerJetInput *inihcal = new TowerJetInput(Jet::HCALIN_TOWERINFO,HIJETS::tower_prefix);
-  TowerJetInput *inohcal = new TowerJetInput(Jet::HCALOUT_TOWERINFO,HIJETS::tower_prefix);
+  TowerJetInput *incemc = new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER, HIJETS::tower_prefix);
+  TowerJetInput *inihcal = new TowerJetInput(Jet::HCALIN_TOWERINFO, HIJETS::tower_prefix);
+  TowerJetInput *inohcal = new TowerJetInput(Jet::HCALOUT_TOWERINFO, HIJETS::tower_prefix);
   if (HIJETS::do_vertex_type)
   {
     incemc->set_GlobalVertexType(HIJETS::vertex_type);
@@ -234,28 +232,26 @@ void MakeHITowerJets()
   dtb->SetSeedType(0);
   dtb->SetSeedJetD(3);
   dtb->set_towerinfo(true);
-  dtb->Verbosity(verbosity); 
+  dtb->Verbosity(verbosity);
   dtb->set_towerNodePrefix(HIJETS::tower_prefix);
   se->registerSubsystem(dtb);
 
   CopyAndSubtractJets *casj = new CopyAndSubtractJets();
   casj->SetFlowModulation(HIJETS::do_flow);
-  casj->Verbosity(verbosity); 
+  casj->Verbosity(verbosity);
   casj->set_towerinfo(true);
   casj->set_towerNodePrefix(HIJETS::tower_prefix);
   se->registerSubsystem(casj);
-  
-  
+
   DetermineTowerBackground *dtb2 = new DetermineTowerBackground();
   dtb2->SetBackgroundOutputName("TowerInfoBackground_Sub2");
   dtb2->SetFlow(HIJETS::do_flow);
   dtb2->SetSeedType(1);
   dtb2->SetSeedJetPt(7);
-  dtb2->Verbosity(verbosity); 
+  dtb2->Verbosity(verbosity);
   dtb2->set_towerinfo(true);
   dtb2->set_towerNodePrefix(HIJETS::tower_prefix);
   se->registerSubsystem(dtb2);
-  
 
   SubtractTowers *st = new SubtractTowers();
   st->SetFlowModulation(HIJETS::do_flow);
@@ -265,9 +261,9 @@ void MakeHITowerJets()
   se->registerSubsystem(st);
 
   towerjetreco = new JetReco();
-  incemc = new TowerJetInput(Jet::CEMC_TOWERINFO_SUB1,HIJETS::tower_prefix);
-  inihcal = new TowerJetInput(Jet::HCALIN_TOWERINFO_SUB1,HIJETS::tower_prefix);
-  inohcal = new TowerJetInput(Jet::HCALOUT_TOWERINFO_SUB1,HIJETS::tower_prefix);
+  incemc = new TowerJetInput(Jet::CEMC_TOWERINFO_SUB1, HIJETS::tower_prefix);
+  inihcal = new TowerJetInput(Jet::HCALIN_TOWERINFO_SUB1, HIJETS::tower_prefix);
+  inohcal = new TowerJetInput(Jet::HCALOUT_TOWERINFO_SUB1, HIJETS::tower_prefix);
   if (HIJETS::do_vertex_type)
   {
     incemc->set_GlobalVertexType(HIJETS::vertex_type);
@@ -287,16 +283,13 @@ void MakeHITowerJets()
   se->registerSubsystem(towerjetreco);
 
   return;
-
 }
-
 
 // ----------------------------------------------------------------------------
 //! Make jets out of tracks with background subtraction
 // ----------------------------------------------------------------------------
 void MakeHITrackJets()
 {
-
   // set verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
 
@@ -312,7 +305,7 @@ void MakeHITrackJets()
             << std::endl;
 
   // book jet reconstruction routines on tracks
-  JetReco* trackjetreco = new JetReco();
+  JetReco *trackjetreco = new JetReco();
   trackjetreco->add_input(new TrackJetInput(Jet::SRC::TRACK));
   trackjetreco->add_algo(HIJETS::GetFJAlgo(0.2), HIJETS::algo_prefix + "_Track_r02");
   trackjetreco->add_algo(HIJETS::GetFJAlgo(0.3), HIJETS::algo_prefix + "_Track_r03");
@@ -325,16 +318,13 @@ void MakeHITrackJets()
 
   // exit back to HIJetReco()
   return;
-
 }
-
 
 // ----------------------------------------------------------------------------
 //! Make jets out of particle-flow elements with background subtraction
 // ----------------------------------------------------------------------------
 void MakeHIPFlowJets()
 {
-
   // set verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
 
@@ -350,7 +340,7 @@ void MakeHIPFlowJets()
             << std::endl;
 
   // book jet reconstruction routines on pflow elements
-  JetReco* pflowjetreco = new JetReco();
+  JetReco *pflowjetreco = new JetReco();
   pflowjetreco->add_input(new ParticleFlowJetInput());
   pflowjetreco->add_algo(HIJETS::GetFJAlgo(0.2), HIJETS::algo_prefix + "_ParticleFlow_r02");
   pflowjetreco->add_algo(HIJETS::GetFJAlgo(0.3), HIJETS::algo_prefix + "_ParticleFlow_r03");
@@ -363,16 +353,13 @@ void MakeHIPFlowJets()
 
   // exit back to HIJetReco()
   return;
-
 }
-
 
 // ----------------------------------------------------------------------------
 //! Run background-subtracted jet reconstruction
 // ----------------------------------------------------------------------------
 void HIJetReco()
 {
-
   // if simulation, make appropriate truth jets
   if (Enable::HIJETS_MC && Enable::HIJETS_TRUTH) MakeHITruthJets();
 
@@ -380,58 +367,54 @@ void HIJetReco()
   if (Enable::HIJETS_TOWER) MakeHITowerJets();
   if (Enable::HIJETS_TRACK) MakeHITrackJets();
   if (Enable::HIJETS_PFLOW) MakeHIPFlowJets();
-
 }
-
 
 // ----------------------------------------------------------------------------
 //! Determine rho from tower input to jet reco (necessary for jet QA)
 // ----------------------------------------------------------------------------
 void DoRhoCalculation()
 {
-
   // set verbosity
-  int verbosity = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
+  //  int verbosity = std::max(Enable::VERBOSITY, Enable::HIJETS_VERBOSITY);
 
   //---------------
   // Fun4All server
   //---------------
-  Fun4AllServer* se = Fun4AllServer::instance();
+  Fun4AllServer *se = Fun4AllServer::instance();
 
   // run rho calculations w/ towers
   if (Enable::HIJETS_TOWER)
   {
-    DetermineTowerRho* towRhoCalc = new DetermineTowerRho();
-    towRhoCalc -> add_method(TowerRho::Method::AREA);
-    towRhoCalc -> add_method(TowerRho::Method::MULT);
-    TowerJetInput * rho_incemc = new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER,HIJETS::tower_prefix);
-    TowerJetInput * rho_inihcal = new TowerJetInput(Jet::HCALIN_TOWERINFO,HIJETS::tower_prefix);
-    TowerJetInput * rho_inohcal = new TowerJetInput(Jet::HCALOUT_TOWERINFO,HIJETS::tower_prefix);
+    DetermineTowerRho *towRhoCalc = new DetermineTowerRho();
+    towRhoCalc->add_method(TowerRho::Method::AREA);
+    towRhoCalc->add_method(TowerRho::Method::MULT);
+    TowerJetInput *rho_incemc = new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER, HIJETS::tower_prefix);
+    TowerJetInput *rho_inihcal = new TowerJetInput(Jet::HCALIN_TOWERINFO, HIJETS::tower_prefix);
+    TowerJetInput *rho_inohcal = new TowerJetInput(Jet::HCALOUT_TOWERINFO, HIJETS::tower_prefix);
     if (HIJETS::do_vertex_type)
     {
       rho_incemc->set_GlobalVertexType(HIJETS::vertex_type);
       rho_inihcal->set_GlobalVertexType(HIJETS::vertex_type);
       rho_inohcal->set_GlobalVertexType(HIJETS::vertex_type);
     }
-    towRhoCalc -> add_tower_input( rho_incemc );
-    towRhoCalc -> add_tower_input( rho_inihcal );
-    towRhoCalc -> add_tower_input( rho_inohcal );
-    se -> registerSubsystem( towRhoCalc );
+    towRhoCalc->add_tower_input(rho_incemc);
+    towRhoCalc->add_tower_input(rho_inihcal);
+    towRhoCalc->add_tower_input(rho_inohcal);
+    se->registerSubsystem(towRhoCalc);
   }
 
   // run rho calculations w/ tracks
   if (Enable::HIJETS_TRACK)
   {
-    DetermineEventRho* trkRhoCalc = new DetermineEventRho();
-    trkRhoCalc -> add_method(EventRho::Method::AREA, "EventRho_AREA");
-    trkRhoCalc -> add_method(EventRho::Method::MULT, "EventRho_MULT");
-    trkRhoCalc -> add_input( new TrackJetInput(Jet::SRC::TRACK) );
-    se -> registerSubsystem( trkRhoCalc );
+    DetermineEventRho *trkRhoCalc = new DetermineEventRho();
+    trkRhoCalc->add_method(EventRho::Method::AREA, "EventRho_AREA");
+    trkRhoCalc->add_method(EventRho::Method::MULT, "EventRho_MULT");
+    trkRhoCalc->add_input(new TrackJetInput(Jet::SRC::TRACK));
+    se->registerSubsystem(trkRhoCalc);
   }
 
   // exit back to main macro
   return;
-
 }
 
 #endif

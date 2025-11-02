@@ -5,7 +5,7 @@
 
 #include <G4_Input.C>
 
-void RunSettings(int runnumber, const std::string type = "")
+void RunSettings(int runnumber, const std::string & /*type*/ = "")
 {
   switch (runnumber)
   {
@@ -65,7 +65,7 @@ void RunSettings(int runnumber, const std::string type = "")
     std::cout << "use ppg08 run33 settings" << std::endl;
     break;
   default:
-    cout << "runnnumber " << runnumber << " not implemented" << endl;
+    std::cout << "runnnumber " << runnumber << " not implemented" << std::endl;
     gSystem->Exit(1);
     break;
   }

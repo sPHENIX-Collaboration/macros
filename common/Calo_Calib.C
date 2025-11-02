@@ -9,11 +9,12 @@
 
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
-#include <phool/recoConsts.h>
 
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>  // for Fun4AllServer
+
+#include <phool/recoConsts.h>
 
 #include <TSystem.h>  // for gSystem
 

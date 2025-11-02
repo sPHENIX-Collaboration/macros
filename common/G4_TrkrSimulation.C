@@ -1,11 +1,13 @@
 #ifndef MACRO_G4TRKRSIM_C
 #define MACRO_G4TRKRSIM_C
 
-#include <G4_ActsGeom.C>
-#include <G4_TrkrVariables.C>
 #include <GlobalVariables.C>
 
+#include <G4_ActsGeom.C>
+#include <G4_TrkrVariables.C>
+
 #include <g4detectors/PHG4CylinderSubsystem.h>
+
 #include <g4mvtx/PHG4MvtxDefs.h>
 #include <g4mvtx/PHG4MvtxDigitizer.h>
 #include <g4mvtx/PHG4MvtxHitReco.h>
@@ -40,7 +42,8 @@
 #include <ffamodules/CDBInterface.h>
 
 #include <cdbobjects/CDBTTree.h>
-#include <ffamodules/CDBInterface.h>
+
+#include <TFile.h>
 
 #include <cmath>
 #include <vector>
@@ -58,7 +61,7 @@ void MvtxInit()
 }
 
 double Mvtx(PHG4Reco* g4Reco, double radius,
-            const int supportactive = 0)
+            const int /*supportactive*/ = 0)
 {
   bool maps_overlapcheck = Enable::OVERLAPCHECK || Enable::MVTX_OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
@@ -73,12 +76,12 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
     //    mvtx->set_double_param(ilayer, "layer_z_offset", G4MVTXAlignment::z_offset[ilayer]);
     if (verbosity)
     {
-      cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << endl;
+      std::cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << std::endl;
     }
     radius = radius_lyr / 10.;
   }
   //  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "alignment_path",  G4MVTXAlignment::alignment_path);
-  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave.gdml"));
+  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", std::string(getenv("CALIBRATIONROOT")) + std::string("/Tracking/geometry/mvtx_stave.gdml"));
 
   mvtx->SetActive();
   if (SupportActive)
@@ -87,12 +90,12 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
   }
   std::cout << "PHG4MvtxSubsystem: Apply misalignment? Enable::MVTX_APPLYMISALIGNMENT=" << Enable::MVTX_APPLYMISALIGNMENT << std::endl;
   mvtx->Apply_Misalignment(Enable::MVTX_APPLYMISALIGNMENT);
-  if(Enable::MVTX_APPLYMISALIGNMENT)
-    {
-      std::string file = CDBInterface::instance()->getUrl("MVTX_ALIGNMENT");
-      std::cout << "applying with file " << file << std::endl;
-      mvtx->MisalignmentFile(file);	
-    }
+  if (Enable::MVTX_APPLYMISALIGNMENT)
+  {
+    std::string file = CDBInterface::instance()->getUrl("MVTX_ALIGNMENT");
+    std::cout << "applying with file " << file << std::endl;
+    mvtx->MisalignmentFile(file);
+  }
   mvtx->OverlapCheck(maps_overlapcheck);
   g4Reco->registerSubsystem(mvtx);
   radius += G4MVTX::radius_offset;
@@ -144,12 +147,11 @@ void InttInit()
     G4INTT::sensor_radius[1] = 7.732 - 36e-4;
     G4INTT::sensor_radius[2] = 9.680 - 36e-4;
     G4INTT::sensor_radius[3] = 10.262 - 36e-4;
-
   }
 }
 
 double Intt(PHG4Reco* g4Reco, double radius,
-            const int absorberactive = 0)
+            const int /*absorberactive*/ = 0)
 {
   std::cout << "G4_TrkrSimulation::Intt" << std::endl;
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
@@ -167,8 +169,8 @@ double Intt(PHG4Reco* g4Reco, double radius,
   for (int i = 0; i < G4INTT::n_intt_layer; i++)
   {
     // We want the sPHENIX layer numbers for the Intt to be from n_maps_layer to n_maps_layer+n_intt_layer - 1
-    vpair.push_back(std::make_pair(G4MVTX::n_maps_layer + i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
-    if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
+    vpair.emplace_back(G4MVTX::n_maps_layer + i, i);  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
+    if (verbosity) std::cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << std::endl;
   }
 
   PHG4InttSubsystem* sitrack = new PHG4InttSubsystem("INTT", vpair);
@@ -189,11 +191,11 @@ double Intt(PHG4Reco* g4Reco, double radius,
 
   // Set the laddertype and ladder spacing configuration
 
-  cout << "Intt has " << G4INTT::n_intt_layer << " layers with layer setup:" << endl;
+  std::cout << "Intt has " << G4INTT::n_intt_layer << " layers with layer setup:" << std::endl;
   for (int i = 0; i < G4INTT::n_intt_layer; i++)
   {
-    cout << " Intt layer " << i << " laddertype " << G4INTT::laddertype[i] << " nladders " << G4INTT::nladder[i]
-         << " sensor radius " << G4INTT::sensor_radius[i] << endl;
+    std::cout << " Intt layer " << i << " laddertype " << G4INTT::laddertype[i] << " nladders " << G4INTT::nladder[i]
+              << " sensor radius " << G4INTT::sensor_radius[i] << std::endl;
     sitrack->set_int_param(i, "laddertype", G4INTT::laddertype[i]);
     sitrack->set_int_param(i, "nladder", G4INTT::nladder[i]);
     sitrack->set_double_param(i, "sensor_radius", G4INTT::sensor_radius[i]);  // expecting cm
@@ -272,7 +274,7 @@ void Intt_Cells()
 void TPCInit()
 {
   std::cout << "G4_TrkrSimulation::TpcInit" << std::endl;
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 82.); // radius of the tpc hanger + .3 cm
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 82.);  // radius of the tpc hanger + .3 cm
 
   if (Enable::TPC_ENDCAP)
   {
@@ -325,34 +327,30 @@ double TPC(PHG4Reco* g4Reco,
   std::cout << "G4_TrkrSimulation::TPC" << std::endl;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::TPC_OVERLAPCHECK;
   bool AbsorberActive = Enable::ABSORBER || Enable::TPC_ABSORBER;
-
   double drift_vel = G4TPC::tpc_drift_velocity_sim;
   if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
   {
-   drift_vel = G4TPC::NeCF4_drift_velocity;  
+    drift_vel = G4TPC::NeCF4_drift_velocity;
   }
   else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
   {
-   drift_vel = G4TPC::ArCF4_drift_velocity;  
+    drift_vel = G4TPC::ArCF4_drift_velocity;
   }
   else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
   {
-   drift_vel = G4TPC::ArCF4N2_drift_velocity;  
+    drift_vel = G4TPC::ArCF4N2_drift_velocity;
   }
   else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
   {
-   drift_vel = G4TPC::ArCF4Isobutane_drift_velocity;  
-  }
-  else
-  {
+    drift_vel = G4TPC::ArCF4Isobutane_drift_velocity;
   }
 
   PHG4TpcSubsystem* tpc = new PHG4TpcSubsystem("TPC");
   tpc->SetActive();
   tpc->SuperDetector("TPC");
-  tpc->set_double_param("steplimits", 1);  // 1cm steps
+  tpc->set_double_param("steplimits", 1);                  // 1cm steps
   tpc->set_double_param("drift_velocity_sim", drift_vel);  // this is the only place that drift_velocity_sim is set
-  tpc->set_double_param("tpc_length", G4TPC::maxDriftLength*2 + G4TPC::CM_halfwidth*2);
+  tpc->set_double_param("tpc_length", G4TPC::maxDriftLength * 2 + G4TPC::CM_halfwidth * 2);
   tpc->set_double_param("maxdriftlength", G4TPC::maxDriftLength);
   tpc->set_double_param("CM_halfwidth", G4TPC::CM_halfwidth);
   tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
@@ -371,8 +369,8 @@ double TPC(PHG4Reco* g4Reco,
   }
 
   tpc->set_double_param("extended_readout_time", extended_readout_time);
- 
-   //Note that we default to 75:20:05 Ar:CF4:i-C4H10
+
+  // Note that we default to 75:20:05 Ar:CF4:i-C4H10
   if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
   {
     tpc->set_double_param("Ne_frac", G4TPC::NeCF4_Ne_frac);
@@ -416,7 +414,7 @@ double TPC(PHG4Reco* g4Reco,
   std::cout << "    drift_velocity_sim " << drift_vel << std::endl;
   std::cout << "    max_driftlength " << G4TPC::maxDriftLength << std::endl;
   std::cout << "    CM_halfwidth " << G4TPC::CM_halfwidth << std::endl;
-  std::cout << "    pp_extended_readout_time " <<  TRACKING::pp_extended_readout_time << std::endl;
+  std::cout << "    pp_extended_readout_time " << TRACKING::pp_extended_readout_time << std::endl;
 
   g4Reco->registerSubsystem(tpc);
 
@@ -435,33 +433,33 @@ double TPC(PHG4Reco* g4Reco,
 void TPC_Cells()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
-  auto se = Fun4AllServer::instance();
-
-  double drift_vel = G4TPC::tpc_drift_velocity_sim;
-  if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
-  {
-   drift_vel = G4TPC::NeCF4_drift_velocity;  
-  }
-  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
-  {
-   drift_vel = G4TPC::ArCF4_drift_velocity;  
-  }
-  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
-  {
-   drift_vel = G4TPC::ArCF4N2_drift_velocity;  
-  }
-  else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
-  {
-   drift_vel = G4TPC::ArCF4Isobutane_drift_velocity;  
-  }
-  else
-  {
-  }
-
+  auto* se = Fun4AllServer::instance();
+  /* // commented out later on
+    double drift_vel = G4TPC::tpc_drift_velocity_sim;
+    if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
+    {
+     drift_vel = G4TPC::NeCF4_drift_velocity;
+    }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4")
+    {
+     drift_vel = G4TPC::ArCF4_drift_velocity;
+    }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4N2")
+    {
+     drift_vel = G4TPC::ArCF4N2_drift_velocity;
+    }
+    else if (G4TPC::TPC_GAS_MIXTURE == "ArCF4Isobutane")
+    {
+     drift_vel = G4TPC::ArCF4Isobutane_drift_velocity;
+    }
+    else
+    {
+    }
+  */
   // central membrane G4Hit generation
   if (G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS)
   {
-    auto centralMembrane = new PHG4TpcCentralMembrane;
+    auto* centralMembrane = new PHG4TpcCentralMembrane;
     centralMembrane->setCentralMembraneDelay(0);
     centralMembrane->setCentralMembraneEventModulo(5);
     se->registerSubsystem(centralMembrane);
@@ -470,7 +468,7 @@ void TPC_Cells()
   // direct laser G4Hit generation
   if (G4TPC::ENABLE_DIRECT_LASER_HITS)
   {
-    auto directLaser = new PHG4TpcDirectLaser;
+    auto* directLaser = new PHG4TpcDirectLaser;
 
     // setup phi and theta steps
     /* use 5deg steps */
@@ -494,18 +492,18 @@ void TPC_Cells()
   // g4tpc/PHG4TpcPadPlaneReadout
   //=========================
 
-  auto padplane = new PHG4TpcPadPlaneReadout;
+  auto* padplane = new PHG4TpcPadPlaneReadout;
   padplane->Verbosity(verbosity);
 
   padplane->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
   //  padplane->SetDriftVelocity(drift_vel);
 
-  auto edrift = new PHG4TpcElectronDrift;
+  auto* edrift = new PHG4TpcElectronDrift;
   edrift->Detector("TPC");
   edrift->Verbosity(verbosity);
   if (G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS)
   {
-    auto distortionMap = new PHG4TpcDistortion;
+    auto* distortionMap = new PHG4TpcDistortion;
 
     distortionMap->set_read_phi_as_radians(G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS);
 
@@ -534,7 +532,7 @@ void TPC_Cells()
   edrift->set_double_param("added_smear_trans", 0.085);
   edrift->set_double_param("added_smear_long", 0.105);
 
-  //Note that we default to 75:20:05 Ar:CF4:i-C4H10
+  // Note that we default to 75:20:05 Ar:CF4:i-C4H10
   if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
   {
     edrift->set_double_param("added_smear_trans", 0.085);
@@ -603,8 +601,8 @@ void TPC_Cells()
   double ADC_threshold = 4.0 * ENC;
   digitpc->SetADCThreshold(ADC_threshold);  // 4 * ENC seems OK
   digitpc->Verbosity(verbosity);
-  cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
-       << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << endl;
+  std::cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
+            << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << std::endl;
   digitpc->set_skip_noise_flag(false);
   se->registerSubsystem(digitpc);
 }
@@ -635,7 +633,7 @@ void Micromegas(PHG4Reco* g4Reco)
   int verbosity = std::max(Enable::VERBOSITY, Enable::MICROMEGAS_VERBOSITY);
   bool SupportActive = Enable::SUPPORT || Enable::MICROMEGAS_SUPPORT;
   const int mm_layer = G4MVTX::n_maps_layer + G4INTT::n_intt_layer + G4TPC::n_gas_layer;
-  auto mm = new PHG4MicromegasSubsystem("MICROMEGAS", mm_layer);
+  auto* mm = new PHG4MicromegasSubsystem("MICROMEGAS", mm_layer);
   mm->Verbosity(verbosity);
   if (SupportActive)
   {
@@ -650,10 +648,10 @@ void Micromegas_Cells()
 {
   // the acts geometry needs to go here since it will be used by the PHG4MicromegasHitReco
   ACTSGEOM::ActsGeomInit();
-  auto se = Fun4AllServer::instance();
+  auto* se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::MICROMEGAS_VERBOSITY);
   // micromegas
-  auto reco = new PHG4MicromegasHitReco;
+  auto* reco = new PHG4MicromegasHitReco;
   reco->Verbosity(verbosity);
   double extended_readout_time = 0.0;
   if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;

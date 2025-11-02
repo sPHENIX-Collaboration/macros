@@ -1,8 +1,9 @@
 #ifndef MACRO_G4INPUT_C
 #define MACRO_G4INPUT_C
 
-#include <G4_TrkrVariables.C>
 #include <GlobalVariables.C>
+
+#include <G4_TrkrVariables.C>
 
 #include <phpythia8/PHPythia8.h>
 
@@ -17,7 +18,9 @@
 // #include <g4main/ReadEICFiles.h>
 
 #include <fermimotionafterburner/FermimotionAfterburner.h>
+
 #include <hijingflipafterburner/HIJINGFlipAfterburner.h>
+
 #include <reactionplaneafterburner/ReactionPlaneAfterburner.h>
 
 #include <phhepmc/Fun4AllHepMCInputManager.h>
@@ -158,14 +161,14 @@ namespace Input
       localbcross = Input::beam_crossing / 2. * 1e-3;
       //  Xing angle is split among both beams, means set to 0.5 mRad
       HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  // 1.5mrad x-ing of sPHENIX
-      HepMCGen->set_vertex_distribution_mean(-0.022,0.223, -4.03, 0.);
+      HepMCGen->set_vertex_distribution_mean(-0.022, 0.223, -4.03, 0.);
       HepMCGen->set_vertex_distribution_width(
           120e-4,         // approximation from past PHENIX data
           120e-4,         // approximation from past PHENIX data
-          9.358,             // measured by intt
+          9.358,          // measured by intt
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
       break;
-      
+
     default:
       std::cout << "ApplysPHENIXBeamParameter: invalid beam_config = " << beam_config << std::endl;
 
@@ -350,7 +353,7 @@ void InputInit()
   }
   // done with consistency checks, create generators in no specific order
 
-  Fun4AllServer *se = Fun4AllServer::instance();
+  //  Fun4AllServer *se = Fun4AllServer::instance();
   if (Input::PYTHIA6)
   {
     std::cout << "Pythia6 not implemented" << std::endl;
@@ -375,7 +378,6 @@ void InputInit()
     {
       INPUTGENERATOR::Pythia8->set_reuse_vertex(Input::VertexEmbedId);
     }
-
   }
   // single particle generators
   if (Input::DZERO)
@@ -477,59 +479,59 @@ void InputRegister()
   if (Input::DZERO)
   {
     int verbosity = std::max(Input::DZERO_VERBOSITY, Input::VERBOSITY);
-    for (size_t icnt = 0; icnt < INPUTGENERATOR::DZeroMesonGenerator.size(); ++icnt)
+    for (auto &icnt : INPUTGENERATOR::DZeroMesonGenerator)
     {
-      INPUTGENERATOR::DZeroMesonGenerator[icnt]->Verbosity(verbosity);
-      se->registerSubsystem(INPUTGENERATOR::DZeroMesonGenerator[icnt]);
+      icnt->Verbosity(verbosity);
+      se->registerSubsystem(icnt);
     }
   }
   if (Input::GUN)
   {
     int verbosity = std::max(Input::GUN_VERBOSITY, Input::VERBOSITY);
-    for (size_t icnt = 0; icnt < INPUTGENERATOR::Gun.size(); ++icnt)
+    for (auto &icnt : INPUTGENERATOR::Gun)
     {
-      INPUTGENERATOR::Gun[icnt]->Verbosity(verbosity);
-      se->registerSubsystem(INPUTGENERATOR::Gun[icnt]);
+      icnt->Verbosity(verbosity);
+      se->registerSubsystem(icnt);
     }
   }
   if (Input::IONGUN)
   {
     int verbosity = std::max(Input::IONGUN_VERBOSITY, Input::VERBOSITY);
-    for (size_t icnt = 0; icnt < INPUTGENERATOR::IonGun.size(); ++icnt)
+    for (auto &icnt : INPUTGENERATOR::IonGun)
     {
-      INPUTGENERATOR::IonGun[icnt]->Verbosity(verbosity);
-      se->registerSubsystem(INPUTGENERATOR::IonGun[icnt]);
+      icnt->Verbosity(verbosity);
+      se->registerSubsystem(icnt);
     }
   }
   if (Input::PGEN)
   {
     int verbosity = std::max(Input::PGEN_VERBOSITY, Input::VERBOSITY);
-    for (size_t icnt = 0; icnt < INPUTGENERATOR::ParticleGenerator.size(); ++icnt)
+    for (auto &icnt : INPUTGENERATOR::ParticleGenerator)
     {
-      INPUTGENERATOR::ParticleGenerator[icnt]->Verbosity(verbosity);
-      se->registerSubsystem(INPUTGENERATOR::ParticleGenerator[icnt]);
+      icnt->Verbosity(verbosity);
+      se->registerSubsystem(icnt);
     }
   }
   if (Input::SIMPLE)
   {
     int verbosity = std::max(Input::SIMPLE_VERBOSITY, Input::VERBOSITY);
-    for (size_t icnt = 0; icnt < INPUTGENERATOR::SimpleEventGenerator.size(); ++icnt)
+    for (auto &icnt : INPUTGENERATOR::SimpleEventGenerator)
     {
-      INPUTGENERATOR::SimpleEventGenerator[icnt]->Verbosity(verbosity);
-      se->registerSubsystem(INPUTGENERATOR::SimpleEventGenerator[icnt]);
+      icnt->Verbosity(verbosity);
+      se->registerSubsystem(icnt);
     }
   }
   if (Input::UPSILON)
   {
-    for (size_t icnt = 0; icnt < INPUTGENERATOR::VectorMesonGenerator.size(); ++icnt)
+    for (auto &icnt : INPUTGENERATOR::VectorMesonGenerator)
     {
       int verbosity = std::max(Input::UPSILON_VERBOSITY, Input::VERBOSITY);
       if (Input::HEPMC || Input::SIMPLE)
       {
-        INPUTGENERATOR::VectorMesonGenerator[icnt]->set_reuse_existing_vertex(true);
+        icnt->set_reuse_existing_vertex(true);
       }
-      INPUTGENERATOR::VectorMesonGenerator[icnt]->Verbosity(verbosity);
-      se->registerSubsystem(INPUTGENERATOR::VectorMesonGenerator[icnt]);
+      icnt->Verbosity(verbosity);
+      se->registerSubsystem(icnt);
     }
   }
   if (Input::READEIC)
@@ -605,11 +607,11 @@ void InputManagers()
       std::cout << "you need to give an input filenames or filelist" << std::endl;
       gSystem->Exit(1);
     }
-    for (auto iter = INPUTEMBED::filename.begin(); iter != INPUTEMBED::filename.end(); ++iter)
+    for (auto &iter : INPUTEMBED::filename)
     {
-      std::string mgrname = "DSTin" + std::to_string(iter->first);
+      std::string mgrname = "DSTin" + std::to_string(iter.first);
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
-      hitsin->fileopen(iter->second);
+      hitsin->fileopen(iter.second);
       hitsin->Verbosity(Input::VERBOSITY);
       if (INPUTEMBED::REPEAT)
       {
@@ -617,11 +619,11 @@ void InputManagers()
       }
       se->registerInputManager(hitsin);
     }
-    for (auto iter = INPUTEMBED::listfile.begin(); iter != INPUTEMBED::listfile.end(); ++iter)
+    for (auto &iter : INPUTEMBED::listfile)
     {
-      std::string mgrname = "DSTin" + std::to_string(iter->first);
+      std::string mgrname = "DSTin" + std::to_string(iter.first);
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
-      hitsin->AddListFile(iter->second);
+      hitsin->AddListFile(iter.second);
       hitsin->Verbosity(Input::VERBOSITY);
       if (INPUTEMBED::REPEAT)
       {
@@ -661,19 +663,19 @@ void InputManagers()
       std::cout << "you need to give an input filenames or filelist" << std::endl;
       gSystem->Exit(1);
     }
-    for (auto iter = INPUTREADHITS::filename.begin(); iter != INPUTREADHITS::filename.end(); ++iter)
+    for (auto &iter : INPUTREADHITS::filename)
     {
-      std::string mgrname = "DSTin" + std::to_string(iter->first);
+      std::string mgrname = "DSTin" + std::to_string(iter.first);
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
-      hitsin->fileopen(iter->second);
+      hitsin->fileopen(iter.second);
       hitsin->Verbosity(Input::VERBOSITY);
       se->registerInputManager(hitsin);
     }
-    for (auto iter = INPUTREADHITS::listfile.begin(); iter != INPUTREADHITS::listfile.end(); ++iter)
+    for (auto &iter : INPUTREADHITS::listfile)
     {
-      std::string mgrname = "DSTin" + std::to_string(iter->first);
+      std::string mgrname = "DSTin" + std::to_string(iter.first);
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
-      hitsin->AddListFile(iter->second);
+      hitsin->AddListFile(iter.second);
       hitsin->Verbosity(Input::VERBOSITY);
       se->registerInputManager(hitsin);
     }
@@ -692,7 +694,10 @@ void InputManagers()
     INPUTMANAGER::HepMCPileupInputManager->set_collision_rate(Input::PILEUPRATE);
     double time_window = G4TPC::maxDriftLength / PILEUP::TpcDriftVelocity;
     double extended_readout_time = 0.0;
-    if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+    if (TRACKING::pp_mode)
+    {
+      extended_readout_time = TRACKING::pp_extended_readout_time;
+    }
     INPUTMANAGER::HepMCPileupInputManager->set_time_window(-time_window, time_window + extended_readout_time);
     std::cout << "Pileup window is from " << -time_window << " to " << time_window + extended_readout_time << std::endl;
     se->registerInputManager(INPUTMANAGER::HepMCPileupInputManager);

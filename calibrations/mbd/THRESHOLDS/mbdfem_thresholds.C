@@ -11,7 +11,6 @@
 #include <filesystem>
 #include <fstream>
 
-// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libmbd.so)
 
 TH2 *h2_qraw{nullptr};

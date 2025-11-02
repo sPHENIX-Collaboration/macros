@@ -24,7 +24,6 @@
 #include <fstream>
 
 
-// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libphool.so)
 R__LOAD_LIBRARY(libmbd.so)
