@@ -38,9 +38,8 @@
 
 #include <fun4all/Fun4AllServer.h>
 
-#include <Rtypes.h>
-
-double CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, int crossings);
+#include <Rtypes.h>  // resolves R__LOAD_LIBRARY for clang-tidy
+#include <TSystem.h>
 
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
@@ -48,6 +47,8 @@ R__LOAD_LIBRARY(libCaloWaveformSim.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libsimqa_modules.so)
+
+double CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, int crossings);
 
 namespace Enable
 {
@@ -346,9 +347,9 @@ void CEMC_Towers()
     caloWaveformSim->set_timewidth(0.2);
     caloWaveformSim->set_peakpos(6);
     caloWaveformSim->get_light_collection_model().load_data_file(
-      std::string(getenv("CALIBRATIONROOT")) +
-          std::string("/CEMC/LightCollection/Prototype3Module.xml"),
-      "data_grid_light_guide_efficiency", "data_grid_fiber_trans");
+        std::string(getenv("CALIBRATIONROOT")) +
+            std::string("/CEMC/LightCollection/Prototype3Module.xml"),
+        "data_grid_light_guide_efficiency", "data_grid_fiber_trans");
     // pedestal scale down for different beam configurations according to Blair
     if (Input::BEAM_CONFIGURATION == Input::pp_ZEROANGLE)
     {
