@@ -5,6 +5,11 @@
 
 #include <phool/recoConsts.h>
 
+#include <Rtypes.h>  // resolves R__LOAD_LIBRARY for clang-tidy
+
+#include <fstream>
+#include <iostream>
+
 R__LOAD_LIBRARY(libphool.so)
 
 void SaveGitTags();
@@ -20,10 +25,8 @@ void SaveGitTags(const std::string &commitid)
 // build the filename from rebuild.info under $OFFLINE_MAIN
 void SaveGitTags()
 {
-  char filename[200];
   const char *offline = getenv("OFFLINE_MAIN");
-  string rebuildinfo = string(offline) + string("/rebuild.info");
-  sprintf(filename, "%s/rebuild.info", offline);
+  std::string rebuildinfo = std::string(offline) + std::string("/rebuild.info");
   SetGitTagsFromFile(rebuildinfo);
   return;
 }
@@ -37,12 +40,12 @@ void SetGitTagsFromFile(const std::string &filename)
   {
     while (std::getline(file, line))
     {
-      if (line.find("install") != string::npos)
+      if (line.find("install") != std::string::npos)
       {
         int res = 0;
         int foundlast = 0;
         while ((res = line.find('/', res + 1)) !=
-               string::npos)
+               std::string::npos)
         {
           foundlast = res;
         }
@@ -50,14 +53,13 @@ void SetGitTagsFromFile(const std::string &filename)
         std::string build = line.substr(foundlast, line.length() - foundlast);
         rc->set_StringFlag("build", build);
       }
-      int repoline = 0;
-      if (line.find("git repo ") != string::npos)
+      if (line.find("git repo ") != std::string::npos)
       {
-        int start = string(" git repo ").length();
+        int start = std::string(" git repo ").length();
         int res = line.find(',');
-        string reponame = line.substr(start, res - start);
+        std::string reponame = line.substr(start, res - start);
         res = line.find(':');
-        string repotag = line.substr(res + 2, line.length() - (res + 2));
+        std::string repotag = line.substr(res + 2, line.length() - (res + 2));
         rc->set_StringFlag(reponame, repotag);
       }
     }
