@@ -36,12 +36,11 @@ PHG4Reco *QTGui()
 // before PHG4Reco was registered with Fun4All
 PHG4Reco *DisplayOn(const char *mac = "vis.mac")
 {
-  char cmd[100];
   Fun4AllServer *se = Fun4AllServer::instance();
   PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
   g4->InitRun(se->topNode());
   g4->ApplyDisplayAction();
-  sprintf(cmd, "/control/execute %s", mac);
+  std::string cmd = "/control/execute " + std::string(mac);
   g4->ApplyCommand(cmd);
   return g4;
 }
