@@ -42,7 +42,7 @@
 #include <phool/PHRandomSeed.h>
 #include <phool/recoConsts.h>
 
-#include <Rtypes.h>
+#include <Rtypes.h>  // resolves R__LOAD_LIBRARY for clang-tidy
 #include <TROOT.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
