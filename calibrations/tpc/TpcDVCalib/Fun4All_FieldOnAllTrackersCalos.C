@@ -1,9 +1,10 @@
 //Track + Calo matching for TPC Drift Velocity Calibration
 //authors: Xudong Yu <xyu3@bnl.gov>
 
+#include <GlobalVariables.C>
+
 #include <G4_ActsGeom.C>
 #include <G4_Magnet.C>
-#include <GlobalVariables.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
@@ -12,7 +13,17 @@
 
 #include <caloreco/RawClusterBuilderTopo.h>
 
+#include <tpcdvcalib/TrackToCalo.h>
+
+#include <trackreco/AzimuthalSeeder.h>
+#include <trackreco/PHActsTrackProjection.h>
+#include <trackingdiagnostics/TrackResiduals.h>
+
+#include <trackbase_historic/SvtxTrack.h>
+
+
 #include <ffamodules/CDBInterface.h>
+
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -23,19 +34,9 @@
 
 #include <phool/recoConsts.h>
 
-#include <tpcdvcalib/TrackToCalo.h>
-
-#include <trackreco/AzimuthalSeeder.h>
-#include <trackreco/PHActsTrackProjection.h>
-#include <trackingdiagnostics/TrackResiduals.h>
-
-#include <trackbase_historic/SvtxTrack.h>
-
-#include <stdio.h>
 #include <iostream>
 #include <filesystem>
 
-// cppcheck-suppress unknownMacro
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libmvtx.so)
@@ -47,19 +48,15 @@ R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libTpcDVCalib.so)
 R__LOAD_LIBRARY(libcalo_reco.so)
 
-using namespace std;
-
-namespace fs = std::filesystem;
-
-std::string GetFirstLine(std::string listname);
-bool is_directory_empty(const fs::path& dir_path);
+std::string GetFirstLine(const std::string& listname);
+bool is_directory_empty(const std::filesystem::path& dir_path);
 
 void Fun4All_FieldOnAllTrackersCalos(
     const int nEvents = 10,
-    vector<string> myInputLists = {
+    std::vector<std::string> myInputLists = {
         "run46730_0000_trkr.txt",
         "run46730_calo.list"},
-    std::string outDir = "./",
+    const std::string& outDir = "./",
     bool doTpcOnlyTracking = true,
     float initial_driftvelocity = 0.00710,
     bool doEMcalRadiusCorr = true,
@@ -75,7 +72,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   int runnumber = runseg.first;
   int segment = runseg.second;
 
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
@@ -100,21 +97,21 @@ void Fun4All_FieldOnAllTrackersCalos(
   //Add all required input files
   for (unsigned int i = 0; i < myInputLists.size(); ++i)
   {
-    Fun4AllInputManager *infile = new Fun4AllDstInputManager("DSTin_" + to_string(i));
+    Fun4AllInputManager *infile = new Fun4AllDstInputManager("DSTin_" + std::to_string(i));
     std::cout << "Including file " << myInputLists[i] << std::endl;
     //infile->AddFile(myInputLists[i]);
     infile->AddListFile(myInputLists[i]);
     se->registerInputManager(infile);
   }
 
-  string outputAnaFileName = "TrackCalo_" + to_string(segment) + "_ana.root";
-  string outputDstFileName = "TrackCalo_" + to_string(segment) + "_dst.root";
+  std::string outputAnaFileName = "TrackCalo_" + std::to_string(segment) + "_ana.root";
+  std::string outputDstFileName = "TrackCalo_" + std::to_string(segment) + "_dst.root";
 
-  string outputRecoDir = outDir + "/inReconstruction/" + to_string(runnumber) + "/";
-  string makeDirectory = "mkdir -p " + outputRecoDir;
+  std::string outputRecoDir = outDir + "/inReconstruction/" + std::to_string(runnumber) + "/";
+  std::string makeDirectory = "mkdir -p " + outputRecoDir;
   system(makeDirectory.c_str());
-  string outputAnaFile = outputRecoDir + outputAnaFileName;
-  string outputDstFile = outputRecoDir + outputDstFileName;
+  std::string outputAnaFile = outputRecoDir + outputAnaFileName;
+  std::string outputDstFile = outputRecoDir + outputDstFileName;
 
   std::cout << "Reco ANA file: " << outputAnaFile << std::endl;
   std::cout << "Dst file: " << outputDstFile << std::endl;
@@ -156,7 +153,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   Mvtx_Clustering();
   Intt_Clustering();
 
-  auto tpcclusterizer = new TpcClusterizer;
+  auto *tpcclusterizer = new TpcClusterizer;
   tpcclusterizer->Verbosity(verbosity);
   tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
   tpcclusterizer->set_rawdata_reco();
@@ -172,7 +169,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   /*
    * Silicon Seeding
    */
-  auto silicon_Seeding = new PHActsSiliconSeeding;
+  auto *silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
   silicon_Seeding->searchInIntt();
   silicon_Seeding->setinttRPhiSearchWindow(0.4);
@@ -180,14 +177,14 @@ void Fun4All_FieldOnAllTrackersCalos(
   silicon_Seeding->seedAnalysis(false);
   se->registerSubsystem(silicon_Seeding);
 
-  auto merger = new PHSiliconSeedMerger;
+  auto *merger = new PHSiliconSeedMerger;
   merger->Verbosity(verbosity);
   se->registerSubsystem(merger);
 
   /*
    * Tpc Seeding
    */
-  auto seeder = new PHCASeeding("PHCASeeding");
+  auto *seeder = new PHCASeeding("PHCASeeding");
   double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
   bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
   if (ConstField)
@@ -213,7 +210,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
-  auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
+  auto *cprop = new PHSimpleKFProp("PHSimpleKFProp");
   cprop->set_field_dir(G4MAGNET::magfield_rescale);
   if (ConstField)
   {
@@ -236,19 +233,19 @@ void Fun4All_FieldOnAllTrackersCalos(
    */
   // The normal silicon association methods
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
-  auto silicon_match = new PHSiliconTpcTrackMatching;
+  auto *silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(verbosity);
   silicon_match->set_x_search_window(2.);
   silicon_match->set_y_search_window(2.);
   silicon_match->set_z_search_window(5.);
   silicon_match->set_phi_search_window(0.2);
   silicon_match->set_eta_search_window(0.1);
-  silicon_match->set_use_old_matching(true);
+//  silicon_match->set_use_old_matching(true); // deprecated
   silicon_match->set_pp_mode(true);
   se->registerSubsystem(silicon_match);
 
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-  auto mm_match = new PHMicromegasTpcTrackMatching;
+  auto *mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(verbosity);
   mm_match->set_pp_mode(TRACKING::pp_mode);
   mm_match->set_rphi_search_window_lyr1(3.);
@@ -270,7 +267,7 @@ void Fun4All_FieldOnAllTrackersCalos(
    */
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
-    auto converter = new TrackSeedTrackMapConverter;
+    auto *converter = new TrackSeedTrackMapConverter;
     // Option to use TpcTrackSeedContainer or SvtxTrackSeeds
     // can be set to SiliconTrackSeedContainer for silicon-only track fit
     if (doTpcOnlyTracking)
@@ -287,12 +284,12 @@ void Fun4All_FieldOnAllTrackersCalos(
   }
   else
   {
-    auto deltazcorr = new PHTpcDeltaZCorrection;
+    auto *deltazcorr = new PHTpcDeltaZCorrection;
     deltazcorr->Verbosity(verbosity);
     se->registerSubsystem(deltazcorr);
 
     // perform final track fit with ACTS
-    auto actsFit = new PHActsTrkFitter;
+    auto *actsFit = new PHActsTrkFitter;
     actsFit->Verbosity(verbosity);
     actsFit->commissioning(G4TRACKING::use_alignment);
     // in calibration mode, fit only Silicons and Micromegas hits
@@ -329,7 +326,7 @@ void Fun4All_FieldOnAllTrackersCalos(
 
   Global_Reco();
 
-  auto projection = new PHActsTrackProjection("CaloProjection");
+  auto *projection = new PHActsTrackProjection("CaloProjection");
   float new_cemc_rad = 100.70;//(1-(-0.077))*93.5 recommended cemc radius
   if (doEMcalRadiusCorr)
   {
@@ -378,24 +375,24 @@ void Fun4All_FieldOnAllTrackersCalos(
   se->End();
   se->PrintTimer();
 
-  ifstream file_ana(outputAnaFile.c_str(), ios::binary | ios::ate);
+  std::ifstream file_ana(outputAnaFile.c_str(), std::ios::binary | std::ios::ate);
   if (file_ana.good() && (file_ana.tellg() > 100))
   {
-    string outputRecoDirMove = outDir + "/Reconstructed/" + to_string(runnumber) + "/";
-    string makeDirectoryMove = "mkdir -p " + outputRecoDirMove;
+    std::string outputRecoDirMove = outDir + "/Reconstructed/" + std::to_string(runnumber) + "/";
+    std::string makeDirectoryMove = "mkdir -p " + outputRecoDirMove;
     system(makeDirectoryMove.c_str());
-    string moveOutput = "mv " + outputAnaFile + " " + outDir + "/Reconstructed/" + to_string(runnumber);
+    std::string moveOutput = "mv " + outputAnaFile + " " + outDir + "/Reconstructed/" + std::to_string(runnumber);
     std::cout << "moveOutput: " << moveOutput << std::endl;
     system(moveOutput.c_str());
   }
 
-  ifstream file_dst(outputDstFile.c_str(), ios::binary | ios::ate);
+  std::ifstream file_dst(outputDstFile.c_str(), std::ios::binary | std::ios::ate);
   if (file_dst.good() && (file_dst.tellg() > 100))
   {
-    string outputRecoDirMove = outDir + "/Reconstructed/" + to_string(runnumber) + "/";
-    string makeDirectoryMove = "mkdir -p " + outputRecoDirMove;
+    std::string outputRecoDirMove = outDir + "/Reconstructed/" + std::to_string(runnumber) + "/";
+    std::string makeDirectoryMove = "mkdir -p " + outputRecoDirMove;
     system(makeDirectoryMove.c_str());
-    string moveOutput = "mv " + outputDstFile + " " + outDir + "/Reconstructed/" + to_string(runnumber);
+    std::string moveOutput = "mv " + outputDstFile + " " + outDir + "/Reconstructed/" + std::to_string(runnumber);
     std::cout << "moveOutput: " << moveOutput << std::endl;
     system(moveOutput.c_str());
   }
@@ -407,11 +404,11 @@ void Fun4All_FieldOnAllTrackersCalos(
   return;
 }
 
-std::string GetFirstLine(std::string listname)
+std::string GetFirstLine(const std::string& listname)
 {
   std::ifstream file(listname);
 
-  std::string firstLine = "";
+  std::string firstLine;
   if (file.is_open()) {
       if (std::getline(file, firstLine)) {
           std::cout << "First Line: " << firstLine << std::endl;
@@ -425,9 +422,9 @@ std::string GetFirstLine(std::string listname)
   return firstLine;
 }
 
-bool is_directory_empty(const fs::path& dir_path) {
-    if (fs::exists(dir_path) && fs::is_directory(dir_path)) {
-        return fs::directory_iterator(dir_path) == fs::directory_iterator();
+bool is_directory_empty(const std::filesystem::path& dir_path) {
+    if (std::filesystem::exists(dir_path) && std::filesystem::is_directory(dir_path)) {
+        return std::filesystem::directory_iterator(dir_path) == std::filesystem::directory_iterator();
     }
     return false;
 }

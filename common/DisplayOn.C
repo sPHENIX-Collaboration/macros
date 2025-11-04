@@ -34,13 +34,13 @@ PHG4Reco *QTGui()
 // start up the visualization, the next event will
 // be displayed. Do not execute this macro
 // before PHG4Reco was registered with Fun4All
-PHG4Reco *DisplayOn(const char *mac = "vis.mac")
+PHG4Reco *DisplayOn(const std::string &mac = "vis.mac")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
   PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
   g4->InitRun(se->topNode());
   g4->ApplyDisplayAction();
-  std::string cmd = "/control/execute " + std::string(mac);
+  std::string cmd = "/control/execute " + mac;
   g4->ApplyCommand(cmd);
   return g4;
 }
