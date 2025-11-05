@@ -1,0 +1,12 @@
+This set of macros runs the EMCal pi0 calibration which is ran over a user defined set of DSTs/runs and produces a C DBTTREE which is the calibration.
+
+doFitAndCalibUpdate.C
+This does the fitting of the pi0 peak, compares it to the target mass and generates a new calibration with which will obtain target mass with subsiquant runnings over the data.
+
+Base directory
+This contains the area where the condor jobs are submitted and the multi-step proceedure is executed via run.sh.
+To exicute the proceedure do sh run.sh
+run.sh contains the logic of how the calibration proceeds. 
+
+Fun4All_EMCal.C
+This is the main histogram-making Fun4All macro and is run over condor generally. It takes arguements of the path to the calibration file to use, a DST file list, number of events to process, and the iteration number (only usered for output naming purposes). 

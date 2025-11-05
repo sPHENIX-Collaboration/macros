@@ -3,8 +3,9 @@
 
 #include <GlobalVariables.C>
 
+#include "G4Setup_sPHENIX.C"
+
 #include <DisplayOn.C>
-#include <G4Setup_sPHENIX.C>
 #include <G4_Mbd.C>
 #include <G4_CaloTrigger.C>
 #include <G4_Centrality.C>
@@ -41,6 +42,9 @@
 #include <phool/PHRandomSeed.h>
 #include <phool/recoConsts.h>
 
+#include <Rtypes.h>  // resolves R__LOAD_LIBRARY for clang-tidy
+#include <TROOT.h>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 
@@ -49,19 +53,20 @@ R__LOAD_LIBRARY(libffamodules.so)
 
 int Fun4All_G4_sPHENIX(
     const int nEvents = 1,
-    const string &inputFile = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
+    const std::string &inputFile = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const double inputpT = 4,
-    const string &outputFile = "G4sPHENIX.root",
-    const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
+    const std::string &outputFile = "G4sPHENIX.root",
+    const std::string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const int skip = 0,
-    const string &outdir = ".")
+    const std::string &outdir = ".")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
 
   //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
   PHRandomSeed::Verbosity(1);
-
+  CDBInterface::instance()->Verbosity(1);
+  
   // just if we set some flags somewhere in this macro
   recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
@@ -345,7 +350,7 @@ int Fun4All_G4_sPHENIX(
   Enable::TRACK_MATCHING_TREE = Enable::TRACK_MATCHING && false;
   Enable::TRACK_MATCHING_TREE_CLUSTERS = Enable::TRACK_MATCHING_TREE && false;
 
-  //Additional tracking tools 
+  //Additional tracking tools
   //Enable::TRACKING_DIAGNOSTICS = Enable::TRACKING_TRACK && true;
   //G4TRACKING::filter_conversion_electrons = true;
   // G4TRACKING::use_alignment = true;
@@ -356,9 +361,10 @@ int Fun4All_G4_sPHENIX(
 
   // set flags to simulate and correct TPC distortions, specify distortion and correction files
   //G4TPC::ENABLE_STATIC_DISTORTIONS = true;
-  //G4TPC::static_distortion_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_event_0_bX180961051_0.distortion_map.hist.root");  
-  //G4TPC::ENABLE_CORRECTIONS = true;
-  //G4TPC::correction_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_smoothed_average.correction_map.hist.root");
+  //G4TPC::static_distortion_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_event_0_bX180961051_0.distortion_map.hist.root");
+  //G4TPC::ENABLE_STATIC_CORRECTIONS = true;
+  //G4TPC::static_correction_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_smoothed_average.correction_map.hist.root");
+  //G4TPC::ENABLE_AVERAGE_CORRECTIONS = false;
 
   //  cemc electronics + thin layer of W-epoxy to get albedo from cemc
   //  into the tracking, cannot run together with CEMC
@@ -461,7 +467,7 @@ int Fun4All_G4_sPHENIX(
   // Magnet Settings
   //---------------
 
-  //  G4MAGNET::magfield =  string(getenv("CALIBRATIONROOT"))+ string("/Field/Map/sphenix3dbigmapxyz.root");  // default map from the calibration database
+  //  G4MAGNET::magfield =  std::string(getenv("CALIBRATIONROOT"))+ std::string("/Field/Map/sphenix3dbigmapxyz.root");  // default map from the calibration database
   //  G4MAGNET::magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
 //  G4MAGNET::magfield_rescale = 1.;  // make consistent with expected Babar field strength of 1.4T
 
@@ -554,13 +560,13 @@ int Fun4All_G4_sPHENIX(
     Tracking_Reco();
   }
 
-  
+
 
   if(Enable::TRACKING_DIAGNOSTICS)
     {
       const std::string kshortFile = "./kshort_" + outputFile;
       const std::string residualsFile = "./residuals_" + outputFile;
- 
+
       G4KshortReconstruction(kshortFile);
       seedResiduals(residualsFile);
     }
@@ -572,7 +578,7 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::GLOBAL_RECO && Enable::GLOBAL_FASTSIM)
   {
-    cout << "You can only enable Enable::GLOBAL_RECO or Enable::GLOBAL_FASTSIM, not both" << endl;
+    std::cout << "You can only enable Enable::GLOBAL_RECO or Enable::GLOBAL_FASTSIM, not both" << std::endl;
     gSystem->Exit(1);
   }
   if (Enable::GLOBAL_RECO)
@@ -614,10 +620,10 @@ int Fun4All_G4_sPHENIX(
   //----------------------
   // Simulation evaluation
   //----------------------
-  string outputroot = outputFile;
-  string remove_this = ".root";
+  std::string outputroot = outputFile;
+  std::string remove_this = ".root";
   size_t pos = outputroot.find(remove_this);
-  if (pos != string::npos)
+  if (pos != std::string::npos)
   {
     outputroot.erase(pos, remove_this.length());
   }
@@ -682,7 +688,7 @@ int Fun4All_G4_sPHENIX(
 
   if (Enable::DSTOUT)
   {
-    string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
+    std::string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", FullOutFile);
     if (Enable::DSTOUT_COMPRESS)
     {
@@ -701,10 +707,10 @@ int Fun4All_G4_sPHENIX(
     gROOT->ProcessLine("Fun4AllServer *se = Fun4AllServer::instance();");
     gROOT->ProcessLine("PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco(\"PHG4RECO\");");
 
-    cout << "-------------------------------------------------" << endl;
-    cout << "You are in event display mode. Run one event with" << endl;
-    cout << "se->run(1)" << endl;
-    cout << "Run Geant4 command with following examples" << endl;
+    std::cout << "-------------------------------------------------" << std::endl;
+    std::cout << "You are in event display mode. Run one event with" << std::endl;
+    std::cout << "se->run(1)" << std::endl;
+    std::cout << "Run Geant4 command with following examples" << std::endl;
     gROOT->ProcessLine("displaycmd()");
 
     return 0;
@@ -719,8 +725,8 @@ int Fun4All_G4_sPHENIX(
   // for embedding it runs forever if the repeat flag is set
   if (nEvents == 0 && !Input::HEPMC && !Input::READHITS && INPUTEMBED::REPEAT)
   {
-    cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
-    cout << "it will run forever, so I just return without running anything" << endl;
+    std::cout << "using 0 for number of events is a bad idea when using particle generators" << std::endl;
+    std::cout << "it will run forever, so I just return without running anything" << std::endl;
     return 0;
   }
 
@@ -738,7 +744,7 @@ int Fun4All_G4_sPHENIX(
   // Exit
   //-----
 
-//  CDBInterface::instance()->Print(); // print used DB files
+  CDBInterface::instance()->Print(); // print used DB files
   se->End();
 
   se->PrintTimer();

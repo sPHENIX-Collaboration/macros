@@ -3,15 +3,20 @@
 
 #include <GlobalVariables.C>
 
+#ifndef HomogeneousField  // for the clang-tidy check happiness
 #define HomogeneousField
-#include <kfparticle_sphenix/KFParticle_sPHENIX.h>
+#endif
+
 #include <decayfinder/DecayFinder.h>
-#include <qa_modules/QAG4SimulationKFParticle.h>
+
+#include <kfparticle_sphenix/KFParticle_sPHENIX.h>
+
+#include <simqa_modules/QAG4SimulationKFParticle.h>
 
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libkfparticle_sphenix.so)
-R__LOAD_LIBRARY(libqa_kfparticle.so)
+R__LOAD_LIBRARY(libsimqa_kfparticle.so)
 R__LOAD_LIBRARY(libdecayfinder.so)
 
 namespace Enable
@@ -35,7 +40,7 @@ namespace KFPARTICLE
   std::string UpsilonDecayDescriptor = UpsilonName + " -> e^+ e^-";
   std::pair<float, float> UpsilonMassRange(8, 11);
   bool UpsilonTrigger = false;
- 
+
   bool runD0Reco = false;
   std::string D0Name = "D0";
   std::string D0DecayDescriptor = "[" + D0Name + " -> K^- pi^+]cc";
@@ -47,16 +52,16 @@ namespace KFPARTICLE
   std::string LambdacDecayDescriptor = "[" + LambdacName + " -> proton^+ K^- pi^+]cc";
   std::pair<float, float> LambdacMassRange(2.15, 2.45);
   bool LambdacTrigger = false;
-} //namesppace KFPARTICLE
+}  // namespace KFPARTICLE
 
 namespace KFParticleBaseCut
 {
-  float minTrackPT = 0.5; // GeV
+  float minTrackPT = 0.5;  // GeV
   float maxTrackchi2nDoF = 2;
-  float minTrackIPchi2 = 15; // IP = DCA of track with vertex
+  float minTrackIPchi2 = 15;  // IP = DCA of track with vertex
   float maxVertexchi2nDoF = 2;
-  float maxTrackTrackDCA = 0.05; // cm
-  float minMotherPT = 0; // GeV
+  float maxTrackTrackDCA = 0.05;  // cm
+  float minMotherPT = 0;          // GeV
 }  // namespace KFParticleBaseCut
 
 void KFParticle_Upsilon_Reco()
@@ -69,13 +74,13 @@ void KFParticle_Upsilon_Reco()
   kfparticle->Verbosity(verbosity);
   kfparticle->setDecayDescriptor(KFPARTICLE::UpsilonDecayDescriptor);
 
-  kfparticle->saveDST(Enable::KFPARTICLE_APPEND_TO_DST);
-  kfparticle->saveOutput(Enable::KFPARTICLE_SAVE_NTUPLE);
-  kfparticle->doTruthMatching(Enable::KFPARTICLE_TRUTH_MATCH);
-  kfparticle->getDetectorInfo(Enable::KFPARTICLE_DETECTOR_INFO);
+  if (Enable::KFPARTICLE_APPEND_TO_DST) kfparticle->saveDST();
+  if (!Enable::KFPARTICLE_SAVE_NTUPLE) kfparticle->saveOutput(false);
+  if (Enable::KFPARTICLE_TRUTH_MATCH) kfparticle->doTruthMatching();
+  if (Enable::KFPARTICLE_DETECTOR_INFO) kfparticle->getDetectorInfo();
 
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
-  kfparticle->setMinimumTrackIPchi2(0); // Upsilon decays are prompt, tracks are more likely to point to vertex
+  kfparticle->setMinimumTrackIPchi2(0);  // Upsilon decays are prompt, tracks are more likely to point to vertex
   kfparticle->setMaximumTrackchi2nDOF(KFParticleBaseCut::maxTrackchi2nDoF);
 
   kfparticle->setMaximumVertexchi2nDOF(KFParticleBaseCut::maxVertexchi2nDoF);
@@ -84,18 +89,16 @@ void KFParticle_Upsilon_Reco()
   kfparticle->setMinimumMass(KFPARTICLE::UpsilonMassRange.first);
   kfparticle->setMaximumMass(KFPARTICLE::UpsilonMassRange.second);
   kfparticle->setMotherPT(KFParticleBaseCut::minMotherPT);
-  kfparticle->constrainToPrimaryVertex(false);
 
   kfparticle->setContainerName(KFPARTICLE::UpsilonName);
   kfparticle->setOutputName("KFParticleOutput_" + KFPARTICLE::UpsilonName + "_reconstruction.root");
-
+  kfparticle->magFieldFile(G4MAGNET::magfield_tracking);
   se->registerSubsystem(kfparticle);
 
   KFPARTICLE::runUpsilonReco = true;
 
   return;
 }
-
 
 void KFParticle_D0_Reco()
 {
@@ -107,10 +110,10 @@ void KFParticle_D0_Reco()
   kfparticle->Verbosity(verbosity);
   kfparticle->setDecayDescriptor(KFPARTICLE::D0DecayDescriptor);
 
-  kfparticle->saveDST(Enable::KFPARTICLE_APPEND_TO_DST);
-  kfparticle->saveOutput(Enable::KFPARTICLE_SAVE_NTUPLE);
-  kfparticle->doTruthMatching(Enable::KFPARTICLE_TRUTH_MATCH);
-  kfparticle->getDetectorInfo(Enable::KFPARTICLE_DETECTOR_INFO);
+  if (Enable::KFPARTICLE_APPEND_TO_DST) kfparticle->saveDST();
+  if (!Enable::KFPARTICLE_SAVE_NTUPLE) kfparticle->saveOutput(false);
+  if (Enable::KFPARTICLE_TRUTH_MATCH) kfparticle->doTruthMatching();
+  if (Enable::KFPARTICLE_DETECTOR_INFO) kfparticle->getDetectorInfo();
 
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
   kfparticle->setMinimumTrackIPchi2(KFParticleBaseCut::minTrackIPchi2);
@@ -122,10 +125,10 @@ void KFParticle_D0_Reco()
   kfparticle->setMinimumMass(KFPARTICLE::D0MassRange.first);
   kfparticle->setMaximumMass(KFPARTICLE::D0MassRange.second);
   kfparticle->setMotherPT(KFParticleBaseCut::minMotherPT);
-  kfparticle->constrainToPrimaryVertex(false);
 
   kfparticle->setContainerName(KFPARTICLE::D0Name);
   kfparticle->setOutputName("KFParticleOutput_" + KFPARTICLE::D0Name + "_reconstruction.root");
+  kfparticle->magFieldFile(G4MAGNET::magfield_tracking);
 
   se->registerSubsystem(kfparticle);
 
@@ -133,7 +136,6 @@ void KFParticle_D0_Reco()
 
   return;
 }
-
 
 void KFParticle_Lambdac_Reco()
 {
@@ -145,10 +147,10 @@ void KFParticle_Lambdac_Reco()
   kfparticle->Verbosity(verbosity);
   kfparticle->setDecayDescriptor(KFPARTICLE::LambdacDecayDescriptor);
 
-  kfparticle->saveDST(Enable::KFPARTICLE_APPEND_TO_DST);
-  kfparticle->saveOutput(Enable::KFPARTICLE_SAVE_NTUPLE);
-  kfparticle->doTruthMatching(Enable::KFPARTICLE_TRUTH_MATCH);
-  kfparticle->getDetectorInfo(Enable::KFPARTICLE_DETECTOR_INFO);
+  if (Enable::KFPARTICLE_APPEND_TO_DST) kfparticle->saveDST();
+  if (!Enable::KFPARTICLE_SAVE_NTUPLE) kfparticle->saveOutput(false);
+  if (Enable::KFPARTICLE_TRUTH_MATCH) kfparticle->doTruthMatching();
+  if (Enable::KFPARTICLE_DETECTOR_INFO) kfparticle->getDetectorInfo();
 
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
   kfparticle->setMinimumTrackIPchi2(KFParticleBaseCut::minTrackIPchi2);
@@ -160,10 +162,10 @@ void KFParticle_Lambdac_Reco()
   kfparticle->setMinimumMass(KFPARTICLE::LambdacMassRange.first);
   kfparticle->setMaximumMass(KFPARTICLE::LambdacMassRange.second);
   kfparticle->setMotherPT(KFParticleBaseCut::minMotherPT);
-  kfparticle->constrainToPrimaryVertex(false);
 
   kfparticle->setContainerName(KFPARTICLE::LambdacName);
   kfparticle->setOutputName("KFParticleOutput_" + KFPARTICLE::LambdacName + "_reconstruction.root");
+  kfparticle->magFieldFile(G4MAGNET::magfield_tracking);
 
   se->registerSubsystem(kfparticle);
 
@@ -189,10 +191,10 @@ void KFParticle_QA()
     UpsilonFinder->allowPhotons(true);
     se->registerSubsystem(UpsilonFinder);
 
-    QAG4SimulationKFParticle *UpsilonQA = new QAG4SimulationKFParticle("QA_" + KFPARTICLE::UpsilonName, 
-      								       KFPARTICLE::UpsilonName, 
-								       KFPARTICLE::UpsilonMassRange.first,  
-								       KFPARTICLE::UpsilonMassRange.second);
+    QAG4SimulationKFParticle *UpsilonQA = new QAG4SimulationKFParticle("QA_" + KFPARTICLE::UpsilonName,
+                                                                       KFPARTICLE::UpsilonName,
+                                                                       KFPARTICLE::UpsilonMassRange.first,
+                                                                       KFPARTICLE::UpsilonMassRange.second);
     se->registerSubsystem(UpsilonQA);
   }
 
@@ -225,9 +227,9 @@ void KFParticle_QA()
     LambdacFinder->allowPhotons(true);
     se->registerSubsystem(LambdacFinder);
 
-    QAG4SimulationKFParticle *LambdacQA = new QAG4SimulationKFParticle("QA_" + KFPARTICLE::LambdacName, 
-                                                                       KFPARTICLE::LambdacName, 
-                                                                       KFPARTICLE::LambdacMassRange.first,  
+    QAG4SimulationKFParticle *LambdacQA = new QAG4SimulationKFParticle("QA_" + KFPARTICLE::LambdacName,
+                                                                       KFPARTICLE::LambdacName,
+                                                                       KFPARTICLE::LambdacMassRange.first,
                                                                        KFPARTICLE::LambdacMassRange.second);
     se->registerSubsystem(LambdacQA);
   }

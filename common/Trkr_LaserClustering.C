@@ -3,96 +3,88 @@
 
 #include <GlobalVariables.C>
 
+#include <G4_ActsGeom.C>
 #include <G4_TrkrVariables.C>
-//#include <G4_ActsGeom.C>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wundefined-internal"
-#include <tpc/TpcClusterizer.h>
-#include <tpc/TpcSimpleClusterizer.h>
-#pragma GCC diagnostic pop
+#include <tpc/LaserClusterizer.h>
 
-#include <tpc/TpcClusterCleaner.h>
-
-#include <tpccalib/PHTpcCentralMembraneClusterizer.h>
-#include <tpccalib/PHTpcCentralMembraneMatcher.h>
 #include <tpccalib/TpcDirectLaserReconstruction.h>
-#include <micromegas/MicromegasClusterizer.h>
+#include <tpccalib/TpcLaminationFitting.h>
 
 #include <fun4all/Fun4AllServer.h>
-
 
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 
-
-
-
 void TPC_LaserClustering()
 {
-  int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
-  ACTSGEOM::ActsGeomInit();
-  Fun4AllServer* se = Fun4AllServer::instance();
-
-  //-------------
-  // Cluster Hits
-  //-------------
-
-  // For the Tpc
-  //==========
-  if( G4TPC::USE_SIMPLE_CLUSTERIZER )
+  // central membrane reconstruction
+  if (G4TPC::ENABLE_CENTRAL_MEMBRANE_CLUSTERING)
   {
-    
-    auto tpcclusterizer = new TpcSimpleClusterizer;
-    tpcclusterizer->Verbosity(verbosity);
-    se->registerSubsystem(tpcclusterizer);
-    
-  } else {
+    int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
+    ACTSGEOM::ActsGeomInit();
+    Fun4AllServer *se = Fun4AllServer::instance();
 
-    auto tpcclusterizer = new TpcClusterizer;
-    tpcclusterizer->Verbosity(verbosity);
-    tpcclusterizer->set_do_hit_association( G4TPC::DO_HIT_ASSOCIATION );
-    se->registerSubsystem(tpcclusterizer);
-
-  }
-  
-  if( !G4TPC::ENABLE_DIRECT_LASER_HITS )
-  {
-    auto tpcclustercleaner = new TpcClusterCleaner;
-    tpcclustercleaner->Verbosity(verbosity);
-    se->registerSubsystem(tpcclustercleaner);
+    LaserClusterizer *laserClusterizer = new LaserClusterizer;
+    laserClusterizer->Verbosity(verbosity);
+    laserClusterizer->set_max_time_samples(TRACKING::reco_tpc_maxtime_sample);
+    laserClusterizer->set_adc_threshold(G4TPC::laser_adc_threshold);
+    laserClusterizer->set_do_sequential(G4TPC::LaserClusteringSequential);
+    laserClusterizer->set_do_fitting(G4TPC::laserClusterFitting);
+    se->registerSubsystem(laserClusterizer);
   }
 
   // direct laser reconstruction
-  if( G4TPC::ENABLE_DIRECT_LASER_HITS )
-  { 
-    auto directLaserReconstruction = new TpcDirectLaserReconstruction;
-    directLaserReconstruction->set_outputfile( G4TPC::DIRECT_LASER_ROOTOUTPUT_FILENAME );
-    directLaserReconstruction->set_savehistograms( G4TPC::DIRECT_LASER_SAVEHISTOGRAMS );
-    directLaserReconstruction->set_histogram_outputfile( G4TPC::DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME );
-    se->registerSubsystem(directLaserReconstruction); 
+  if (G4TPC::ENABLE_DIRECT_LASER_HITS)
+  {
+    Fun4AllServer *se = Fun4AllServer::instance();
+    auto *directLaserReconstruction = new TpcDirectLaserReconstruction;
+    directLaserReconstruction->set_outputfile(G4TPC::DIRECT_LASER_ROOTOUTPUT_FILENAME);
+    directLaserReconstruction->set_savehistograms(G4TPC::DIRECT_LASER_SAVEHISTOGRAMS);
+    directLaserReconstruction->set_histogram_outputfile(G4TPC::DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME);
+    se->registerSubsystem(directLaserReconstruction);
   }
-  
-  // central membrane reconstruction
-  if( G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS )
-    {
-      // central membrane clusterizer
-      auto centralMembraneClusterizer = new PHTpcCentralMembraneClusterizer;
-      centralMembraneClusterizer->Verbosity(verbosity);
-      centralMembraneClusterizer->set_histos_on( false );
-      centralMembraneClusterizer->set_modulo_threshold(5);
-      centralMembraneClusterizer->set_metaCluster_threshold(18);
-      se->registerSubsystem(centralMembraneClusterizer);
-    
-
-      // match central membrane clusters to pads and generate distortion correction
-      auto centralMembraneMatcher = new PHTpcCentralMembraneMatcher;
-      centralMembraneMatcher->setSavehistograms( false );
-      centralMembraneMatcher->Verbosity( verbosity );
-      centralMembraneMatcher->setNMatchIter(2);
-      se->registerSubsystem(centralMembraneMatcher);
-    }
 }
 
+void TPC_LaminationClustering()
+{
+  // central membrane reconstruction
+  if (G4TPC::ENABLE_CENTRAL_MEMBRANE_CLUSTERING)
+  {
+    int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
+    ACTSGEOM::ActsGeomInit();
+    Fun4AllServer *se = Fun4AllServer::instance();
+
+    LaserClusterizer *laminationClusterizer = new LaserClusterizer;
+    laminationClusterizer->Verbosity(verbosity);
+    laminationClusterizer->set_max_time_samples(TRACKING::reco_tpc_maxtime_sample);
+    laminationClusterizer->set_adc_threshold(G4TPC::laser_adc_threshold);
+    laminationClusterizer->set_do_sequential(G4TPC::LaserClusteringSequential);
+    laminationClusterizer->set_do_fitting(G4TPC::laserClusterFitting);
+    laminationClusterizer->set_lamination(true);
+    se->registerSubsystem(laminationClusterizer);
+  }
+}
+
+void TPC_LaminationFitting()
+{
+  if (G4TPC::ENABLE_CENTRAL_MEMBRANE_CLUSTERING)
+  {
+    int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
+    ACTSGEOM::ActsGeomInit();
+    Fun4AllServer *se = Fun4AllServer::instance();
+
+    TpcLaminationFitting *laminations = new TpcLaminationFitting;
+    laminations->Verbosity(verbosity);
+    laminations->set_nLayerCut(2);
+    laminations->set_ppMode(TRACKING::pp_mode);
+    laminations->setOutputfile(G4TPC::LaminationOutputName);
+    if (!G4TPC::LaminationQAName.empty())
+    {
+      laminations->set_QAFileName(G4TPC::LaminationQAName);
+    }
+    se->registerSubsystem(laminations);
+  }
+}
 
 #endif

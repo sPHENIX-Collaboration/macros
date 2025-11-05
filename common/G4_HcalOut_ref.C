@@ -2,6 +2,7 @@
 #define MACRO_G4HCALOUTREF_C
 
 #include <GlobalVariables.C>
+
 #include <QA.C>
 
 #include <g4calo/HcalRawTowerBuilder.h>
@@ -9,6 +10,7 @@
 
 #include <g4ohcal/PHG4OHCalSubsystem.h>
 
+#include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4detectors/PHG4HcalCellReco.h>
 #include <g4detectors/PHG4OuterHcalSubsystem.h>
 
@@ -16,20 +18,29 @@
 
 #include <g4main/PHG4Reco.h>
 
+#include <calowaveformsim/CaloWaveformSim.h>
+
+#include <calobase/TowerInfoDefs.h>
+
+#include <caloreco/CaloTowerBuilder.h>
+#include <caloreco/CaloTowerCalib.h>
+#include <caloreco/CaloTowerStatus.h>
+#include <caloreco/CaloWaveformProcessing.h>
 #include <caloreco/RawClusterBuilderGraph.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawTowerCalibration.h>
 
-#include <qa_modules/QAG4SimulationCalorimeter.h>
+#include <simqa_modules/QAG4SimulationCalorimeter.h>
 
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
+R__LOAD_LIBRARY(libCaloWaveformSim.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
 R__LOAD_LIBRARY(libg4ohcal.so)
-R__LOAD_LIBRARY(libqa_modules.so)
+R__LOAD_LIBRARY(libsimqa_modules.so)
 
 namespace Enable
 {
@@ -42,8 +53,9 @@ namespace Enable
   bool HCALOUT_EVAL = false;
   bool HCALOUT_QA = false;
   bool HCALOUT_OLD = false;
-  bool HCALOUT_RING = true;
+  bool HCALOUT_RING = false;
   bool HCALOUT_G4Hit = true;
+  bool HCALOUT_TOWERINFO = false;
   int HCALOUT_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -71,6 +83,8 @@ namespace G4HCALOUT
     kHCalOutTemplateClusterizer
   };
 
+  bool useTowerInfoV2 = true;
+
   //! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
   enu_HCalOut_clusterizer HCalOut_clusterizer = kHCalOutTemplateClusterizer;
   //! graph clusterizer, RawClusterBuilderGraph
@@ -87,7 +101,7 @@ void HCalOuterInit()
 
 double HCalOuter(PHG4Reco *g4Reco,
                  double radius,
-                 const int crossings)
+                 const int /*crossings*/)
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::HCALOUT_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALOUT_OVERLAPCHECK;
@@ -144,6 +158,11 @@ double HCalOuter(PHG4Reco *g4Reco,
   else
   {
     hcal = new PHG4OHCalSubsystem("HCALOUT");
+    if (Enable::HCALOUT_RING)
+    {
+      std::string gdmlfile_no_ring = std::string(getenv("CALIBRATIONROOT")) + "/HcalGeo/OuterHCalAbsorberTiles_merged.gdml";
+      hcal->set_string_param("GDMPath", gdmlfile_no_ring);
+    }
     // hcal->set_string_param("GDMPath", "mytestgdml.gdml"); // try other gdml file
     // common setting with tracking, we likely want to move to the cdb with this
     hcal->set_string_param("IronFieldMapPath", G4MAGNET::magfield_OHCAL_steel);
@@ -162,7 +181,7 @@ double HCalOuter(PHG4Reco *g4Reco,
     hcal->SetAbsorberActive();
   }
   hcal->OverlapCheck(OverlapCheck);
-  if (!isfinite(G4HCALOUT::phistart))
+  if (!std::isfinite(G4HCALOUT::phistart))
   {
     if (Enable::HCALOUT_OLD)
     {
@@ -175,9 +194,10 @@ double HCalOuter(PHG4Reco *g4Reco,
   }
   hcal->set_int_param("saveg4hit", Enable::HCALOUT_G4Hit);
   hcal->set_double_param("phistart", G4HCALOUT::phistart);
+  hcal->Verbosity(verbosity);
   g4Reco->registerSubsystem(hcal);
 
-  if (Enable::HCALOUT_RING && !Enable::HCALOUT_OLD)
+  if (!Enable::HCALOUT_OLD)
   {
     // HCal support rings, approximated as solid rings
     // note there is only one ring on either side, but to allow part of the ring inside the HCal envelope two rings are used
@@ -187,15 +207,12 @@ double HCalOuter(PHG4Reco *g4Reco,
     const double hcal_envelope_radius = 182.423 - 5.;
     const double support_ring_z = 175.375 * inch / 2.;
     const double support_ring_dz = 4. * inch;
-    const double z_rings[] =
-        {-support_ring_z, support_ring_z};
-    PHG4CylinderSubsystem *cyl;
-    PHG4CylinderSubsystem *cylout;
+    const double z_rings[] = {-support_ring_z, support_ring_z};
 
     for (int i = 0; i < 2; i++)
     {
       // rings outside of HCal envelope
-      cyl = new PHG4CylinderSubsystem("HCAL_SPT_N1", i);
+      PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("HCAL_SPT_N1", i);
       cyl->set_double_param("place_z", z_rings[i]);
       cyl->SuperDetector("HCALIN_SPT");
       cyl->set_double_param("radius", innerradius);
@@ -210,26 +227,32 @@ double HCalOuter(PHG4Reco *g4Reco,
       {
         cyl->SetActive();
       }
+      cyl->Verbosity(verbosity);
       g4Reco->registerSubsystem(cyl);
 
       // rings inside outer HCal envelope
-      cylout = new PHG4CylinderSubsystem("HCAL_SPT_N1", i + 2);
-      cylout->set_double_param("place_z", z_rings[i]);
-      cylout->SuperDetector("HCALIN_SPT");
-      cylout->set_double_param("radius", hcal_envelope_radius + 0.1);  // add a mm to avoid overlaps
-      cylout->set_int_param("lengthviarapidity", 0);
-      cylout->set_double_param("length", support_ring_dz);
-      cylout->set_string_param("material", "G4_Al");
-      cylout->set_double_param("thickness", support_ring_outer_radius - (hcal_envelope_radius + 0.1));
-      cylout->set_double_param("start_phi_rad", 1.867);
-      cylout->set_double_param("delta_phi_rad", 5.692);
-      if (AbsorberActive)
+      // only use if we want to use the old version of the ring instead of the gdml implementation
+      if (Enable::HCALOUT_RING)
       {
-        cylout->SetActive();
+        PHG4CylinderSubsystem *cylout = new PHG4CylinderSubsystem("HCAL_SPT_N1", i + 2);
+        cylout->set_double_param("place_z", z_rings[i]);
+        cylout->SuperDetector("HCALIN_SPT");
+        cylout->set_double_param("radius", hcal_envelope_radius + 0.1);  // add a mm to avoid overlaps
+        cylout->set_int_param("lengthviarapidity", 0);
+        cylout->set_double_param("length", support_ring_dz);
+        cylout->set_string_param("material", "G4_Al");
+        cylout->set_double_param("thickness", support_ring_outer_radius - (hcal_envelope_radius + 0.1));
+        cylout->set_double_param("start_phi_rad", 1.867);
+        cylout->set_double_param("delta_phi_rad", 5.692);
+        if (AbsorberActive)
+        {
+          cylout->SetActive();
+        }
+        cylout->SetMotherSubsystem(hcal);
+        cylout->OverlapCheck(OverlapCheck);
+        cylout->Verbosity(verbosity);
+        g4Reco->registerSubsystem(cylout);
       }
-      cylout->SetMotherSubsystem(hcal);
-      cylout->OverlapCheck(OverlapCheck);
-      g4Reco->registerSubsystem(cylout);
     }
   }
 
@@ -242,7 +265,10 @@ double HCalOuter(PHG4Reco *g4Reco,
 
 void HCALOuter_Cells()
 {
-  if (!Enable::HCALOUT_G4Hit) return;
+  if (!Enable::HCALOUT_G4Hit)
+  {
+    return;
+  }
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -269,75 +295,121 @@ void HCALOuter_Towers()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALOUT_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
-  if (Enable::HCALOUT_G4Hit)
-  {
-    HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalOutRawTowerBuilder");
-    TowerBuilder->Detector("HCALOUT");
-    TowerBuilder->set_sim_tower_node_prefix("SIM");
-    if (!isfinite(G4HCALOUT::phistart))
-    {
-      if (Enable::HCALOUT_OLD)
-      {
-        G4HCALOUT::phistart = 0.026598397;  // offet in phi (from zero) extracted from geantinos
-      }
-      else
-      {
-        G4HCALOUT::phistart = 0.0240615415;  // offet in phi (from zero) extracted from geantinos
-      }
-    }
-    TowerBuilder->set_double_param("phistart", G4HCALOUT::phistart);
-    if (isfinite(G4HCALOUT::tower_emin))
-    {
-      TowerBuilder->set_double_param("emin", G4HCALOUT::tower_emin);
-    }
-    if (G4HCALOUT::tower_energy_source >= 0)
-    {
-      TowerBuilder->set_int_param("tower_energy_source", G4HCALOUT::tower_energy_source);
-    }
-    // this sets specific decalibration factors
-    // for a given cell
-    // TowerBuilder->set_cell_decal_factor(1,10,0.1);
-    // for a whole tower
-    // TowerBuilder->set_tower_decal_factor(0,10,0.2);
-    // TowerBuilder->set_cell_decal_factor(1,10,0.1);
-    // TowerBuilder->set_tower_decal_factor(0,10,0.2);
-    TowerBuilder->Verbosity(verbosity);
-    se->registerSubsystem(TowerBuilder);
-  }
-  // From 2016 Test beam sim
-  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalOutRawTowerDigitizer");
-  TowerDigitizer->Detector("HCALOUT");
-  //  TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
-  TowerDigitizer->set_digi_algorithm(G4HCALOUT::TowerDigi);
-  TowerDigitizer->set_pedstal_central_ADC(0);
-  TowerDigitizer->set_pedstal_width_ADC(1);  // From Jin's guess. No EMCal High Gain data yet! TODO: update
-  TowerDigitizer->set_photonelec_ADC(16. / 5.);
-  TowerDigitizer->set_photonelec_yield_visible_GeV(16. / 5 / (0.2e-3));
-  TowerDigitizer->set_zero_suppression_ADC(-0);                  // no-zero suppression
-  TowerDigitizer->Verbosity(verbosity);
-  if (!Enable::HCALOUT_G4Hit) TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
-  se->registerSubsystem(TowerDigitizer);
 
-  const double visible_sample_fraction_HCALOUT = 3.38021e-02;  // /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV.root_qa.rootQA_Draw_HCALOUT_G4Hit.pdf
-
-  RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalOutRawTowerCalibration");
-  TowerCalibration->Detector("HCALOUT");
-  //  TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
-  //  TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
-  TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  if (G4HCALOUT::TowerDigi == RawTowerDigitizer::kNo_digitization)
+  if (!Enable::HCALOUT_TOWERINFO)
   {
-    // 0.033 extracted from electron sims (edep(scintillator)/edep(total))
-    TowerCalibration->set_calib_const_GeV_ADC(1. / 0.033);
+    // build the raw tower anyways for the geom nodes
+    if (Enable::HCALOUT_G4Hit)
+    {
+      HcalRawTowerBuilder *TowerBuilder = new HcalRawTowerBuilder("HcalOutRawTowerBuilder");
+      TowerBuilder->Detector("HCALOUT");
+      TowerBuilder->set_sim_tower_node_prefix("SIM");
+      if (!std::isfinite(G4HCALOUT::phistart))
+      {
+        if (Enable::HCALOUT_OLD)
+        {
+          G4HCALOUT::phistart = 0.026598397;  // offet in phi (from zero) extracted from geantinos
+        }
+        else
+        {
+          G4HCALOUT::phistart = 0.0240615415;  // offet in phi (from zero) extracted from geantinos
+        }
+      }
+      TowerBuilder->set_double_param("phistart", G4HCALOUT::phistart);
+      if (std::isfinite(G4HCALOUT::tower_emin))
+      {
+        TowerBuilder->set_double_param("emin", G4HCALOUT::tower_emin);
+      }
+      if (G4HCALOUT::tower_energy_source >= 0)
+      {
+        TowerBuilder->set_int_param("tower_energy_source", G4HCALOUT::tower_energy_source);
+      }
+      // this sets specific decalibration factors
+      // for a given cell
+      // TowerBuilder->set_cell_decal_factor(1,10,0.1);
+      // for a whole tower
+      // TowerBuilder->set_tower_decal_factor(0,10,0.2);
+      // TowerBuilder->set_cell_decal_factor(1,10,0.1);
+      // TowerBuilder->set_tower_decal_factor(0,10,0.2);
+      TowerBuilder->Verbosity(verbosity);
+      se->registerSubsystem(TowerBuilder);
+    }
+    // From 2016 Test beam sim
+    RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("HcalOutRawTowerDigitizer");
+    TowerDigitizer->Detector("HCALOUT");
+    //  TowerDigitizer->set_raw_tower_node_prefix("RAW_LG");
+    TowerDigitizer->set_digi_algorithm(G4HCALOUT::TowerDigi);
+    TowerDigitizer->set_pedstal_central_ADC(0);
+    TowerDigitizer->set_pedstal_width_ADC(1);  // From Jin's guess. No EMCal High Gain data yet! TODO: update
+    TowerDigitizer->set_photonelec_ADC(16. / 5.);
+    TowerDigitizer->set_photonelec_yield_visible_GeV(16. / 5 / (0.2e-3));
+    TowerDigitizer->set_zero_suppression_ADC(-0);  // no-zero suppression
+    TowerDigitizer->Verbosity(verbosity);
+    if (!Enable::HCALOUT_G4Hit)
+    {
+      TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    }
+    se->registerSubsystem(TowerDigitizer);
+
+    const double visible_sample_fraction_HCALOUT = 3.38021e-02;  // /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV.root_qa.rootQA_Draw_HCALOUT_G4Hit.pdf
+
+    RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalOutRawTowerCalibration");
+    TowerCalibration->Detector("HCALOUT");
+    TowerCalibration->set_usetowerinfo_v2(G4HCALOUT::useTowerInfoV2);
+
+    //  TowerCalibration->set_raw_tower_node_prefix("RAW_LG");
+    //  TowerCalibration->set_calib_tower_node_prefix("CALIB_LG");
+    TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
+    if (G4HCALOUT::TowerDigi == RawTowerDigitizer::kNo_digitization)
+    {
+      // 0.033 extracted from electron sims (edep(scintillator)/edep(total))
+      TowerCalibration->set_calib_const_GeV_ADC(1. / 0.033);
+    }
+    else
+    {
+      TowerCalibration->set_calib_const_GeV_ADC(0.2e-3 / visible_sample_fraction_HCALOUT);
+    }
+    TowerCalibration->set_pedstal_ADC(0);
+    TowerCalibration->Verbosity(verbosity);
+    if (!Enable::HCALOUT_G4Hit)
+    {
+      TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    }
+    se->registerSubsystem(TowerCalibration);
   }
+  // where I use waveformsim
   else
   {
-    TowerCalibration->set_calib_const_GeV_ADC(0.2e-3 / visible_sample_fraction_HCALOUT);
+    CaloWaveformSim *caloWaveformSim = new CaloWaveformSim();
+    caloWaveformSim->set_detector_type(CaloTowerDefs::HCALOUT);
+    caloWaveformSim->set_detector("HCALOUT");
+    caloWaveformSim->set_nsamples(12);
+    caloWaveformSim->set_pedestalsamples(12);
+    caloWaveformSim->set_timewidth(0.2);
+    caloWaveformSim->set_peakpos(6);
+    // caloWaveformSim->Verbosity(2);
+    // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+    se->registerSubsystem(caloWaveformSim);
+
+    CaloTowerBuilder *ca2 = new CaloTowerBuilder();
+    ca2->set_detector_type(CaloTowerDefs::HCALOUT);
+    ca2->set_nsamples(12);
+    ca2->set_dataflag(false);
+    ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+    ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
+    ca2->set_softwarezerosuppression(true, 30);
+    se->registerSubsystem(ca2);
+
+    CaloTowerStatus *statusHCALOUT = new CaloTowerStatus("HCALOUTSTATUS");
+    statusHCALOUT->set_detector_type(CaloTowerDefs::HCALOUT);
+    statusHCALOUT->set_time_cut(2);
+    se->registerSubsystem(statusHCALOUT);
+
+    CaloTowerCalib *calibOHCal = new CaloTowerCalib("HCALOUTCALIB");
+    calibOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
+    calibOHCal->set_outputNodePrefix("TOWERINFO_CALIB_");
+    se->registerSubsystem(calibOHCal);
   }
-  TowerCalibration->set_pedstal_ADC(0);
-  TowerCalibration->Verbosity(verbosity);
-  if (!Enable::HCALOUT_G4Hit) TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
-  se->registerSubsystem(TowerCalibration);
 
   return;
 }
@@ -352,9 +424,12 @@ void HCALOuter_Clusters()
   {
     RawClusterBuilderTemplate *ClusterBuilder = new RawClusterBuilderTemplate("HcalOutRawClusterBuilderTemplate");
     ClusterBuilder->Detector("HCALOUT");
-    ClusterBuilder->SetCylindricalGeometry();                      // has to be called after Detector()
+    ClusterBuilder->SetCylindricalGeometry();  // has to be called after Detector()
     ClusterBuilder->Verbosity(verbosity);
-    if (!Enable::HCALOUT_G4Hit) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
+    if (!Enable::HCALOUT_G4Hit || Enable::HCALOUT_TOWERINFO)
+    {
+      ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
+    }
     se->registerSubsystem(ClusterBuilder);
   }
   else if (G4HCALOUT::HCalOut_clusterizer == G4HCALOUT::kHCalOutGraphClusterizer)
@@ -362,12 +437,12 @@ void HCALOuter_Clusters()
     RawClusterBuilderGraph *ClusterBuilder = new RawClusterBuilderGraph("HcalOutRawClusterBuilderGraph");
     ClusterBuilder->Detector("HCALOUT");
     ClusterBuilder->Verbosity(verbosity);
-    //if (!Enable::HCALOUT_G4Hit) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
+    // if (!Enable::HCALOUT_G4Hit) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
     se->registerSubsystem(ClusterBuilder);
   }
   else
   {
-    cout << "HCALOuter_Clusters - unknown clusterizer setting!" << endl;
+    std::cout << "HCALOuter_Clusters - unknown clusterizer setting!" << std::endl;
     exit(1);
   }
 
@@ -383,6 +458,7 @@ void HCALOuter_Eval(const std::string &outputfile, int start_event = 0)
   CaloEvaluator *eval = new CaloEvaluator("HCALOUTEVALUATOR", "HCALOUT", outputfile);
   eval->set_event(start_event);
   eval->Verbosity(verbosity);
+  eval->set_use_towerinfo(Enable::HCALOUT_TOWERINFO);
   se->registerSubsystem(eval);
 
   return;
@@ -394,6 +470,10 @@ void HCALOuter_QA()
 
   Fun4AllServer *se = Fun4AllServer::instance();
   QAG4SimulationCalorimeter *qa = new QAG4SimulationCalorimeter("HCALOUT");
+  if (Enable::HCALOUT_TOWERINFO)
+  {
+    qa->set_flags(QAG4SimulationCalorimeter::kProcessTowerinfo);
+  }
   qa->Verbosity(verbosity);
   se->registerSubsystem(qa);
 
