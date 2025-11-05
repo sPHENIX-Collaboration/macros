@@ -1,0 +1,134 @@
+#ifndef FUN4ALL_YEAR2_FITTING_C
+#define FUN4ALL_YEAR2_FITTING_C
+
+#include "/sphenix/u/bseidlitz/work/devMac/macros/CaloProduction/condor/Calo_Fitting.C"
+#include <QA.C>
+
+#include <calotrigger/TriggerRunInfoReco.h>
+
+#include <calovalid/CaloFittingQA.h>
+
+#include <ffamodules/CDBInterface.h>
+#include <ffamodules/FlagHandler.h>
+#include <ffamodules/HeadReco.h>
+#include <ffamodules/SyncReco.h>
+
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllRunNodeInputManager.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllUtils.h>
+#include <fun4all/SubsysReco.h>
+
+#include <mbd/MbdReco.h>
+#include <globalvertex/GlobalVertexReco.h>
+
+#include <phool/recoConsts.h>
+
+R__LOAD_LIBRARY(libfun4allraw.so)
+R__LOAD_LIBRARY(libcalovalid.so)
+R__LOAD_LIBRARY(libcalotrigger.so)
+
+// this pass containis the reco process that's stable wrt time stamps(raw tower building)
+void Fun4All_PrepDataFitting(int nEvents = 1e4,
+			   const std::string inlist = "test.list",
+                           const std::string &outfile = "DST_CALOFITTING",
+                           const std::string &outfile_hist = "HIST_CALOFITTINGQA",
+                           const std::string &dbtag = "ProdA_2024")
+{
+  gSystem->Load("libg4dst.so");
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+  se->Verbosity(0);
+  se->VerbosityDownscale(1000);
+
+  recoConsts *rc = recoConsts::instance();
+
+  // conditions DB global tag
+  rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
+  CDBInterface::instance()->Verbosity(1);
+
+  FlagHandler *flag = new FlagHandler();
+  se->registerSubsystem(flag);
+
+  // Get info from DB and store in DSTs
+  TriggerRunInfoReco *triggerinfo = new TriggerRunInfoReco();
+  se->registerSubsystem(triggerinfo);
+
+  // MBD/BBC Reconstruction
+  MbdReco *mbdreco = new MbdReco();
+  se->registerSubsystem(mbdreco);
+
+  // Official vertex storage
+  GlobalVertexReco *gvertex = new GlobalVertexReco();
+  se->registerSubsystem(gvertex);
+
+  Process_Calo_Fitting();
+
+  ///////////////////////////////////
+  // Validation
+  CaloFittingQA *ca = new CaloFittingQA("CaloFittingQA");
+  se->registerSubsystem(ca);
+
+// loop over all files in file list and create an input manager for each one  
+  Fun4AllInputManager *In = nullptr;
+  ifstream infile;
+  infile.open(inlist);
+  int iman = 0;
+  std::string line;
+  bool first {true};
+  int runnumber = 0;
+  int segment = 99999;
+  if (infile.is_open())
+  {
+    while (std::getline(infile, line))
+    {
+      if (line[0] == '#')
+      {
+	std::cout << "found commented out line " << line << std::endl;
+	continue;
+      }
+      // extract run number from first not commented out file in list
+      if (first)
+      {
+	pair<int, int> runseg = Fun4AllUtils::GetRunSegment(line);
+	runnumber = runseg.first;
+	segment = runseg.second;
+	rc->set_uint64Flag("TIMESTAMP", runnumber);
+	first = false;
+      }
+      std::string magname = "DSTin_" + std::to_string(iman);
+      In = new Fun4AllDstInputManager(magname);
+      In->Verbosity(1);
+      In->AddFile(line);
+      se->registerInputManager(In);
+      iman++;
+    }
+    infile.close();
+  }
+  
+// this strips all nodes under the Packets PHCompositeNode
+// (means removes all offline packets)
+  char dstoutfile[500];
+  sprintf(dstoutfile,"%s-%08d-%05d.root",outfile.c_str(), runnumber,segment);
+  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", dstoutfile);
+  out->StripCompositeNode("Packets");
+  se->registerOutputManager(out);
+  // se->Print();
+  if (nEvents < 0)
+  {
+    return;
+  }
+  se->run(nEvents);
+  se->End();
+  sprintf(dstoutfile,"%s-%08d-%05d.root",outfile_hist.c_str(), runnumber,segment);
+  QAHistManagerDef::saveQARootFile(dstoutfile);
+
+  CDBInterface::instance()->Print();  // print used DB files
+  se->PrintTimer();
+  delete se;
+  std::cout << "All done!" << std::endl;
+  gSystem->Exit(0);
+}
+#endif

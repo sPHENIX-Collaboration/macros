@@ -14,9 +14,12 @@
 
 void SetsPhenixStyle()
 {
-  static TStyle* sphenixStyle = 0;
+  static TStyle* sphenixStyle = nullptr;
   std::cout << "sPhenixStyle: Applying nominal settings." << std::endl;
-  if (sphenixStyle == 0) sphenixStyle = sPhenixStyle();
+  if (sphenixStyle == nullptr)
+  {
+    sphenixStyle = sPhenixStyle();
+  }
   gROOT->SetStyle("sPHENIX");
   gROOT->ForceStyle();
 }
@@ -34,7 +37,7 @@ TStyle* sPhenixStyle()
   sphenixStyle->SetPadBorderMode(icol);
   sphenixStyle->SetPadColor(icol);
   sphenixStyle->SetStatColor(icol);
-  //sphenixStyle->SetFillColor(icol); // don't use: white fill color for *all* objects
+  // sphenixStyle->SetFillColor(icol); // don't use: white fill color for *all* objects
 
   // set the paper & margin sizes
   sphenixStyle->SetPaperSize(20, 26);
@@ -50,7 +53,7 @@ TStyle* sPhenixStyle()
   sphenixStyle->SetTitleYOffset(1.4);
 
   // use large fonts
-  //Int_t font=72; // Helvetica italics
+  // Int_t font=72; // Helvetica italics
   Int_t font = 42;  // Helvetica
   Double_t tsize = 0.05;
   sphenixStyle->SetTextFont(font);
@@ -77,15 +80,15 @@ TStyle* sPhenixStyle()
   sphenixStyle->SetLineStyleString(2, "[12 12]");  // postscript dashes
 
   // get rid of X error bars
-  //sphenixStyle->SetErrorX(0.001);
+  // sphenixStyle->SetErrorX(0.001);
   // get rid of error bar caps
   sphenixStyle->SetEndErrorSize(0.);
 
   // do not display any of the standard histogram decorations
   sphenixStyle->SetOptTitle(0);
-  //sphenixStyle->SetOptStat(1111);
+  // sphenixStyle->SetOptStat(1111);
   sphenixStyle->SetOptStat(0);
-  //sphenixStyle->SetOptFit(1111);
+  // sphenixStyle->SetOptFit(1111);
   sphenixStyle->SetOptFit(0);
 
   // put tick marks on top and RHS of plots

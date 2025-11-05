@@ -49,16 +49,14 @@ R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libJetDSTSkimmer.so)
 
-void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
-                   const std::string &fname = "DST_CALOFITTING_run2pp_ana437_2024p007-00047289-00000.root",
-                   const std::string& outfile_low= "DST_CALO-00000000-000000.root",
-                   const std::string& outfile_high= "DST_Jet-00000000-000000.root",
-                   const std::string& outfile_hist= "HIST_CALOQA-00000000-000000.root",
-		               const std::string& outfile_tree= "TREE_CALOQA-00000000-000000.root",
-                   const std::string& dbtag= "ProdA_2024"
+void Fun4All_JetSkimmedProductionYear2(int nEvents=1000,
+                        const std::string &fname = "DST_CALOFITTING_run2pp_ana446_2024p007-00052661-00000.root",
+                        const std::string& outfile_low= "DST_JETCALO-00000000-000000.root",
+                        const std::string& outfile_high= "DST_Jet-00000000-000000.root",
+                        const std::string& outfile_tree= "TREE_CALOQA-00000000-000000.root",
+                        const std::string& dbtag= "ProdA_2024"
   )
 {
-
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
@@ -83,15 +81,6 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   // Official vertex storage
   GlobalVertexReco *gvertex = new GlobalVertexReco();
   se->registerSubsystem(gvertex);
-
-  /////////////////////
-  // Geometry 
-  std::cout << "Adding Geometry file" << std::endl;
-  Fun4AllInputManager *intrue2 = new Fun4AllRunNodeInputManager("DST_GEO");
-  std::string geoLocation = CDBInterface::instance()->getUrl("calo_geo");
-  intrue2->AddFile(geoLocation);
-  se->registerInputManager(intrue2);
-
 
   /////////////////////////////////////////////////////
   // Set status of CALO towers, Calibrate towers,  Cluster
@@ -118,8 +107,6 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   JetQA::RestrictPtToTrig = false;
   JetQA::RestrictEtaByR = true;
 
-  // do vertex & centrality reconstruction
-  Global_Reco();
   if (!HIJETS::is_pp)
   {
     Centrality();
@@ -128,14 +115,27 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   // do jet reconstruction & rho calculation
   HIJetReco();
 
+  // do unsubtracted jet reconstruction
+  std::string jetreco_input_prefix = "TOWERINFO_CALIB";
+  JetReco *_jetRecoUnsub = new JetReco();
+  _jetRecoUnsub->add_input(new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER, jetreco_input_prefix));
+  _jetRecoUnsub->add_input(new TowerJetInput(Jet::HCALIN_TOWERINFO, jetreco_input_prefix));
+  _jetRecoUnsub->add_input(new TowerJetInput(Jet::HCALOUT_TOWERINFO, jetreco_input_prefix));
+  _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.2), "AntiKt_unsubtracted_r02");
+  _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.3), "AntiKt_unsubtracted_r03");
+  _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.4), "AntiKt_unsubtracted_r04");
+  _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.5), "AntiKt_unsubtracted_r05");
+  _jetRecoUnsub->set_algo_node("ANTIKT");
+  _jetRecoUnsub->set_input_node("TOWER");
+  se->registerSubsystem(_jetRecoUnsub);
+
   JetDSTSkimmer *jetDSTSkimmer = new JetDSTSkimmer();
   //these are all default values
-  jetDSTSkimmer->SetMinJetPt(10);
+  jetDSTSkimmer->SetMinJetPt(7);
   jetDSTSkimmer->SetMinClusterPt(5);
-  jetDSTSkimmer->SetJetNodeName("AntiKt_Tower_r04_Sub1");
+  jetDSTSkimmer->SetJetNodeName("AntiKt_unsubtracted_r04");
   jetDSTSkimmer->SetClusterNodeName("CLUSTERINFO_CEMC");
   se->registerSubsystem(jetDSTSkimmer);
-
 
   // register modules necessary for QA
   if (Enable::QA)
@@ -144,7 +144,6 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
     Jet_QA();
   }
 
-  
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
   In->AddFile(fname);
   se->registerInputManager(In);
@@ -152,6 +151,7 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   Fun4AllDstOutputManager *outlower = new Fun4AllDstOutputManager("DSTOUTLOW", outfile_low);
   outlower->AddNode("Sync");
   outlower->AddNode("EventHeader");
+  outlower->AddNode("GL1Packet");
   //outlower->AddNode("TOWERINFO_CALIB_HCALIN");
   outlower->AddNode("TOWERS_HCALIN");
   //outlower->AddNode("TOWERINFO_CALIB_HCALOUT");
@@ -163,7 +163,8 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   outlower->AddNode("TOWERS_ZDC");
   outlower->AddNode("MbdOut");
   outlower->AddNode("MbdPmtContainer");
-
+  outlower->AddNode("MBDPackets");
+  outlower->AddNode("TriggerRunInfo");
   se->registerOutputManager(outlower);
 
   Fun4AllDstOutputManager *outhigher = new Fun4AllDstOutputManager("DSTOUTHIGH", outfile_high);
@@ -172,7 +173,6 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   outhigher->StripNode("TOWERINFO_CALIB_HCALOUT");
   outhigher->StripNode("TOWERS_HCALOUT");
   outhigher->StripNode("TOWERINFO_CALIB_CEMC");
-  outhigher->StripNode("TOWERINFO_CALIB_CEMC_RETOWER");
   outhigher->StripNode("TOWERS_CEMC");
   outhigher->StripNode("TOWERS_SEPD");
   outhigher->StripNode("TOWERINFO_CALIB_ZDC");
@@ -180,9 +180,6 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   outhigher->StripNode("MBDPackets");
   outhigher->StripNode("MbdOut");
   outhigher->StripNode("MbdPmtContainer");
-
-
-
   se->registerOutputManager(outhigher);
 
   se->run(nEvents);
