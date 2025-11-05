@@ -1,46 +1,38 @@
+#include "G4Setup_sPHENIX.C"
+
+#include <G4_TrkrVariables.C>
+#include <G4_ActsGeom.C>
+#include <Trkr_Clustering.C>
+
+#include <intt/InttCombinedRawDataDecoder.h>
+
+#include <ffarawmodules/InttCheck.h>
+
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllUtils.h>
+
 #include <fun4allraw/Fun4AllStreamingInputManager.h>
 #include <fun4allraw/InputManagerType.h>
 #include <fun4allraw/SingleInttPoolInput.h>
 
 #include <phool/recoConsts.h>
 
-#include <ffarawmodules/InttCheck.h>
-
-#include <intt/InttCombinedRawDataDecoder.h>
-
-#include <G4Setup_sPHENIX.C>
-#include <G4_TrkrVariables.C>
-#include <G4_ActsGeom.C>
-#include <Trkr_Clustering.C>
+#include <format>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
 R__LOAD_LIBRARY(libintt.so)
 
-bool isGood(const string &infile)
-{
-  ifstream intest;
-  intest.open(infile);
-  bool goodfile = false;
-  if (intest.is_open())
-  {
-    if (intest.peek() != std::ifstream::traits_type::eof()) // is it non zero?
-    {
-      goodfile = true;
-    }
-      intest.close();
-  }
-  return goodfile;
-}
+bool isGood(const std::string &infile);
+int getrunnumber(const std::string &listfile);
 
 void Fun4All_Intt_Combiner(int nEvents = 0,
-                           const int runnumber = 20869,
-                           const string cdbglobaltag = "ProdA_2023",
+                           const int /*runnumber_obsolete */= 20869,
+                           const std::string &cdbglobaltag = "newcdbtag",
                            const bool runTrkrHits = true,
                            const bool applyHotChannel = true,
                            const bool applyBCOCut = true,
@@ -50,10 +42,12 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
                            const bool stripRawHit = true)
 {
 
-  vector<string> infile = {"intt0.list", "intt1.list", "intt2.list", "intt3.list", "intt4.list", "intt5.list", "intt6.list", "intt7.list"};
+  std::vector<std::string> infile = {"intt0.list", "intt1.list", "intt2.list", "intt3.list", "intt4.list", "intt5.list", "intt6.list", "intt7.list"};
 
-  TString outfilename = Form("intt-%08d.root", runnumber);
-  TString outdirinitial = "ProdDST";
+  int runnumber = getrunnumber(infile[0]);
+
+  std::string outfilename = std::format("intt-{:08}.root",runnumber);
+  std::string outdirinitial = "ProdDST";
   if (applyHotChannel)
   {
     outdirinitial += "-HotDead";
@@ -70,8 +64,8 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
   {
     outdirinitial += "-Survey";
   }
-
-  system(Form("mkdir -p %s", outdirinitial.Data()));
+  std::string cmd = "mkdir -p " + outdirinitial;
+  system(cmd.c_str());
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
@@ -84,11 +78,11 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
   //  in->Verbosity(10);
   int i = 0;
-  for (auto iter : infile)
+  for (const auto& iter : infile)
   {
     if (isGood(iter))
     {
-      SingleInttPoolInput *sngl = new SingleInttPoolInput("INTT_" + to_string(i));
+      SingleInttPoolInput *sngl = new SingleInttPoolInput("INTT_" + std::to_string(i));
       //    sngl->Verbosity(3);
       sngl->AddListFile(iter);
       int nBcoVal = runTrkrHits ? 0 : 2;
@@ -111,8 +105,8 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
     myDecoder->runInttStandalone(true);
     myDecoder->writeInttEventHeader(true);
     if (applyHotChannel) myDecoder->LoadHotChannelMapRemote("INTT_HotMap");
-    string DACmap = (applyADCConversion) ? "INTT_DACMAP" : "";
-    string BCOmap = (applyBCOCut) ? "INTT_BCOMAP" : "";
+    std::string DACmap = (applyADCConversion) ? "INTT_DACMAP" : "";
+    std::string BCOmap = (applyBCOCut) ? "INTT_BCOMAP" : "";
     myDecoder->SetCalibDAC(DACmap);
     myDecoder->SetCalibBCO(BCOmap);
     se->registerSubsystem(myDecoder);
@@ -132,8 +126,8 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
     ClusteringInit();   // ActsGeomInit() is called here
     Intt_Clustering();  // Be careful!!! INTT z-clustering may be off which is not what you want!
   }
-
-  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", Form("%s/%s", outdirinitial.Data(), outfilename.Data()));
+  std::string fulloutfile = outdirinitial + "/" + outfilename;
+  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", fulloutfile);
   if (stripRawHit)
   {
     out->StripNode("INTTRAWHIT");
@@ -145,4 +139,37 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
   se->End();
   delete se;
   gSystem->Exit(0);
+}
+
+bool isGood(const std::string &infile)
+{
+  std::ifstream intest;
+  intest.open(infile);
+  bool goodfile = false;
+  if (intest.is_open())
+  {
+    if (intest.peek() != std::ifstream::traits_type::eof())  // is it non zero?
+    {
+      goodfile = true;
+    }
+    intest.close();
+  }
+  return goodfile;
+}
+
+int getrunnumber(const std::string &listfile)
+{
+  if (!isGood(listfile))
+  {
+    std::cout << "listfile " << listfile << " is bad" << std::endl;
+    gSystem->Exit(1);
+  }
+  std::ifstream ifs(listfile);
+  std::string filepath;
+  std::getline(ifs, filepath);
+
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filepath);
+  int runnumber = runseg.first;
+  //  int segment = abs(runseg.second);
+  return runnumber;
 }
