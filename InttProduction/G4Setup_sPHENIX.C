@@ -42,7 +42,7 @@ void G4Init()
   // Check on invalid combinations
   if (Enable::CEMC && Enable::CEMCALBEDO)
   {
-    cout << "Enable::CEMCALBEDO and Enable::CEMC cannot be set simultanously" << endl;
+    std::cout << "Enable::CEMCALBEDO and Enable::CEMC cannot be set simultanously" << std::endl;
     gSystem->Exit(1);
   }
   // load detector/material macros and execute Init() function
@@ -93,12 +93,12 @@ int G4Setup()
   g4Reco->CustomizeEvtGenDecay(EVTGENDECAYER::DecayFile);
 
   double fieldstrength;
-  istringstream stringline(G4MAGNET::magfield);
+  std::istringstream stringline(G4MAGNET::magfield);
   stringline >> fieldstrength;
   if (stringline.fail())
   {  // conversion to double fails -> we have a string
 
-    if (G4MAGNET::magfield.find("sphenix3dbigmapxyz") != string::npos ||
+    if (G4MAGNET::magfield.find("sphenix3dbigmapxyz") != std::string::npos ||
         G4MAGNET::magfield == "CDB")
     {
       g4Reco->set_field_map(G4MAGNET::magfield, PHFieldConfig::Field3DCartesian);
@@ -157,7 +157,7 @@ int G4Setup()
   return 0;
 }
 
-void ShowerCompress(int verbosity = 0)
+void ShowerCompress(int /*verbosity*/ = 0)
 {
   Fun4AllServer *se = Fun4AllServer::instance();
 
