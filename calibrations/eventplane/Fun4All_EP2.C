@@ -24,7 +24,7 @@ void Fun4All_EP2(const int nevents = 2, const std::string &inputcaloList = "dst_
   EventPlaneReco *epreco = new EventPlaneReco();
   epreco->set_mbd_epreco(true);
   epreco->set_MBD_Min_Qcut(0.0);
-  epreco->set_MBD_Vetex_cut(60.0);
+  epreco->set_MBD_Vertex_cut(60.0);
   se->registerSubsystem(epreco);
 
   Fun4AllInputManager *in = new Fun4AllDstInputManager("DSTcalo");

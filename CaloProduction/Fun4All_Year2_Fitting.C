@@ -23,6 +23,8 @@
 
 #include <phool/recoConsts.h>
 
+#include <TSystem.h>
+
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libcalotrigger.so)
@@ -41,7 +43,7 @@ void Fun4All_Year2_Fitting(int nEvents = 100,
 
   recoConsts *rc = recoConsts::instance();
 
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
   int runnumber = runseg.first;
 
   // conditions DB flags and timestamp
