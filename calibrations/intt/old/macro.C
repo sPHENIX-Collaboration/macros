@@ -5,22 +5,26 @@
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
-R__LOAD_LIBRARY(libfun4all.so)
 
 #include <fun4allraw/Fun4AllStreamingInputManager.h>
 #include <fun4allraw/InputManagerType.h>
 #include <fun4allraw/SingleInttPoolInput.h>
-R__LOAD_LIBRARY(libfun4allraw.so)
 
 #include <inttcalib/InttCalib.h>
-R__LOAD_LIBRARY(libinttcalib.so)
 
 #include <phool/recoConsts.h>
-R__LOAD_LIBRARY(libphool.so)
+
+#include <Rtypes.h>  // resolves R__LOAD_LIBRARY for clang-tidy
+#include <TSystem.h>
 
 #include <filesystem>
 #include <iostream>
 #include <string>
+
+R__LOAD_LIBRARY(libfun4allraw.so)
+R__LOAD_LIBRARY(libinttcalib.so)
+R__LOAD_LIBRARY(libfun4all.so)
+R__LOAD_LIBRARY(libphool.so)
 
 void
 macro (
@@ -47,9 +51,9 @@ macro (
 	std::vector<std::string> missing_list_files = {};
 
 	for(int i = 0; i < 8; ++i) {
-		snprintf(buff, sizeof(buff), intt_format.c_str(), run_num, i);
+	  snprintf(buff, sizeof(buff), intt_format.c_str(), run_num, i); //NOLINT (hicpp-vararg)
 		if(!std::filesystem::exists(buff)) {
-			missing_list_files.push_back(buff);
+			missing_list_files.emplace_back(buff);
 			continue;
 		}
 
@@ -61,7 +65,7 @@ macro (
 	}
 	se->registerInputManager(in);
 
-	if(missing_list_files.size()) {
+	if(!missing_list_files.empty()) {
 		std::cerr << "Missing expected list files:" << std::endl;
 		for(std::string const& file : missing_list_files) {
 			std::cerr << "\t" << file << std::endl;

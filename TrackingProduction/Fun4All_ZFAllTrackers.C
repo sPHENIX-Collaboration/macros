@@ -55,8 +55,8 @@ R__LOAD_LIBRARY(libtrackingqa.so)
 R__LOAD_LIBRARY(libEventDisplay.so)
 void Fun4All_ZFAllTrackers(
     const int nEvents = 0,
-    const std::string tpcfilename = "DST_STREAMING_EVENT_run2pp_new_2024p002-00052077-00015.root",
-    const std::string tpcdir = "/sphenix/lustre01/sphnxpro/physics/slurp/streaming/physics/new_2024p002/run_00052000_00052100/",
+    const std::string tpcfilename = "DST_TRKR_CLUSTER_run2pp_ana466_2024p012_v001-00052077-00000.root",
+    const std::string tpcdir = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana466_2024p012_v001/DST_TRKR_CLUSTER/run_00052000_00052100/dst/",
     const std::string outfilename = "clusters_seeds",
     const bool convertSeeds = true)
 {
@@ -69,10 +69,15 @@ void Fun4All_ZFAllTrackers(
   int runnumber = runseg.first;
   int segment = runseg.second;
 
+  G4TRACKING::SC_CALIBMODE = false;
+  Enable::MVTX_APPLYMISALIGNMENT = true;
+  ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
+  TRACKING::pp_mode = true;
+
   auto rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "2024p008");
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
@@ -83,9 +88,7 @@ void Fun4All_ZFAllTrackers(
 	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
 	   << std::endl;
 
-  ACTSGEOM::mvtxMisalignment = 100;
-  ACTSGEOM::inttMisalignment = 1000.;
-  ACTSGEOM::tpotMisalignment = 100.;
+
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
   std::string theOutfile = outfile.Data();
   auto se = Fun4AllServer::instance();
@@ -106,6 +109,7 @@ void Fun4All_ZFAllTrackers(
   se->registerInputManager(hitsin);
 
   TRACKING::tpc_zero_supp = true;
+  /*
   Mvtx_HitUnpacking();
   Intt_HitUnpacking();
   Tpc_HitUnpacking();
@@ -121,17 +125,22 @@ void Fun4All_ZFAllTrackers(
   se->registerSubsystem(tpcclusterizer);
 
   Micromegas_Clustering();
+  */
 
   // this now does Si and TPC seeding only
   Tracking_Reco_TrackSeed_ZeroField();
 
   auto silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
-  silicon_match->set_x_search_window(0.36);
-  silicon_match->set_y_search_window(0.36);
-  silicon_match->set_z_search_window(2.5);
-  silicon_match->set_phi_search_window(0.014);
-  silicon_match->set_eta_search_window(0.0091);
+  // set search windows matching Silicon to TPC seeds
+  // Selected for tracks with ntpc>34,|z_Si-z_TPC|<30,crossing==0
+  // see https://indico.bnl.gov/event/26202/attachments/59703/102575/2025_01_31_ZeroField.pdf
+  // Will probably be narrowed from improved alignment soon.
+  silicon_match->window_dx.set_QoverpT_maxabs({2.6,0,0});
+  silicon_match->window_dy.set_QoverpT_maxabs({2.3,0,0});
+  silicon_match->window_dz.set_QoverpT_range({-2.9,0,0},{4.2,0,0});
+  silicon_match->window_deta.set_QoverpT_maxabs({0.06,0,0});
+  silicon_match->window_dphi.set_QoverpT_maxabs({0.11,0,0});
   silicon_match->set_test_windows_printout(false);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
   silicon_match->zeroField(true);
@@ -139,6 +148,7 @@ void Fun4All_ZFAllTrackers(
 
   auto mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(0);
+  mm_match->set_pp_mode(TRACKING::pp_mode);
 
   mm_match->set_rphi_search_window_lyr1(3.);
   mm_match->set_rphi_search_window_lyr2(15.0);
