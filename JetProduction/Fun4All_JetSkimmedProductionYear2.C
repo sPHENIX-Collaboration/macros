@@ -49,11 +49,11 @@ R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libJetDSTSkimmer.so)
 
-void Fun4All_JetSkimmedProductionYear2(int nEvents=1000,
-                        const std::string &fname = "DST_CALOFITTING_run2pp_ana446_2024p007-00052661-00000.root",
-                        const std::string& outfile_low= "DST_JETCALO-00000000-000000.root",
-                        const std::string& outfile_high= "DST_Jet-00000000-000000.root",
-                        const std::string& outfile_tree= "TREE_CALOQA-00000000-000000.root",
+void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
+                        const std::string &fname = "DST_CALOFITTING_run2pp_ana509_2024p022_v001-00047289-00000.root",
+                        const std::string& outfile_low= "DST_JETCALO_run2pp_ana509_2024p022_v001-00047289-00000.root",
+                        const std::string& outfile_high= "DST_Jet_run2pp_ana509_2024p022_v001-00047289-00000.root",
+                        const std::string& outfile_hist= "HIST_JETQA_run2pp_ana509_2024p022_v001-00047289-00000.root",
                         const std::string& dbtag= "ProdA_2024"
   )
 {
@@ -84,6 +84,7 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=1000,
 
   /////////////////////////////////////////////////////
   // Set status of CALO towers, Calibrate towers,  Cluster
+  std::cout << "Processing Calo Calibration" << std::endl;
   Process_Calo_Calib();
 
   ///////////////////////////////////
@@ -125,16 +126,28 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=1000,
   _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.3), "AntiKt_unsubtracted_r03");
   _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.4), "AntiKt_unsubtracted_r04");
   _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.5), "AntiKt_unsubtracted_r05");
+  _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.6), "AntiKt_unsubtracted_r06");
+  _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.7), "AntiKt_unsubtracted_r07");
+  _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.8), "AntiKt_unsubtracted_r08");
+
+  
   _jetRecoUnsub->set_algo_node("ANTIKT");
   _jetRecoUnsub->set_input_node("TOWER");
   se->registerSubsystem(_jetRecoUnsub);
 
   JetDSTSkimmer *jetDSTSkimmer = new JetDSTSkimmer();
-  //these are all default values
-  jetDSTSkimmer->SetMinJetPt(7);
-  jetDSTSkimmer->SetMinClusterPt(5);
-  jetDSTSkimmer->SetJetNodeName("AntiKt_unsubtracted_r04");
-  jetDSTSkimmer->SetClusterNodeName("CLUSTERINFO_CEMC");
+  std::map<std::string, float> jetNodePts;
+  jetNodePts["AntiKt_unsubtracted_r02"] = 7;
+  jetNodePts["AntiKt_unsubtracted_r03"] = 7;
+  jetNodePts["AntiKt_unsubtracted_r04"] = 7;
+  jetNodePts["AntiKt_unsubtracted_r05"] = 7;
+  jetNodePts["AntiKt_unsubtracted_r06"] = 7;
+  jetNodePts["AntiKt_unsubtracted_r07"] = 7;
+  jetNodePts["AntiKt_unsubtracted_r08"] = 7;
+  jetDSTSkimmer->SetJetNodeThresholds(jetNodePts);
+  std::map<std::string, float> clusterNodePts;
+  clusterNodePts["CLUSTERINFO_CEMC"] = 5;
+  jetDSTSkimmer->SetClusterNodeThresholds(clusterNodePts);
   se->registerSubsystem(jetDSTSkimmer);
 
   // register modules necessary for QA
@@ -151,23 +164,24 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=1000,
   Fun4AllDstOutputManager *outlower = new Fun4AllDstOutputManager("DSTOUTLOW", outfile_low);
   outlower->AddNode("Sync");
   outlower->AddNode("EventHeader");
-  outlower->AddNode("GL1Packet");
-  //outlower->AddNode("TOWERINFO_CALIB_HCALIN");
+  //outlower->AddNode("PacketsKeep");
+  outlower->AddNode("14001");
+  outlower->AddNode("1001");
+  outlower->AddNode("1002");
   outlower->AddNode("TOWERS_HCALIN");
-  //outlower->AddNode("TOWERINFO_CALIB_HCALOUT");
   outlower->AddNode("TOWERS_HCALOUT");
-  //outlower->AddNode("TOWERINFO_CALIB_CEMC");
   outlower->AddNode("TOWERS_CEMC");
   outlower->AddNode("TOWERS_SEPD");
-  //outlower->AddNode("TOWERINFO_CALIB_ZDC");
   outlower->AddNode("TOWERS_ZDC");
-  outlower->AddNode("MbdOut");
-  outlower->AddNode("MbdPmtContainer");
-  outlower->AddNode("MBDPackets");
+  //outlower->AddNode("MbdOut");
+  //outlower->AddNode("MbdPmtContainer");
+  //outlower->AddNode("MBDPackets");
   outlower->AddNode("TriggerRunInfo");
   se->registerOutputManager(outlower);
 
   Fun4AllDstOutputManager *outhigher = new Fun4AllDstOutputManager("DSTOUTHIGH", outfile_high);
+  outhigher->StripNode("1001");
+  outhigher->StripNode("1002");
   outhigher->StripNode("TOWERINFO_CALIB_HCALIN");
   outhigher->StripNode("TOWERS_HCALIN");
   outhigher->StripNode("TOWERINFO_CALIB_HCALOUT");
@@ -177,18 +191,11 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=1000,
   outhigher->StripNode("TOWERS_SEPD");
   outhigher->StripNode("TOWERINFO_CALIB_ZDC");
   outhigher->StripNode("TOWERS_ZDC");
-  outhigher->StripNode("MBDPackets");
-  outhigher->StripNode("MbdOut");
-  outhigher->StripNode("MbdPmtContainer");
   se->registerOutputManager(outhigher);
 
   se->run(nEvents);
   se->End();
 
-  if (Enable::QA)
-  {
-    QAHistManagerDef::saveQARootFile(outfile_hist);
-  }
 
   CDBInterface::instance()->Print();  // print used DB files
   se->PrintTimer();
