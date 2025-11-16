@@ -2,6 +2,7 @@
 #define MACRO_G4JETS_C
 
 #include <GlobalVariables.C>
+
 #include <QA.C>
 
 #include <jetbase/ClusterJetInput.h>
@@ -9,9 +10,11 @@
 #include <jetbase/JetReco.h>
 #include <jetbase/TowerJetInput.h>
 #include <jetbase/TrackJetInput.h>
+
 #include <g4jets/TruthJetInput.h>
 
 #include <g4eval/JetEvaluator.h>
+
 #include <simqa_modules/QAG4SimulationJet.h>
 
 #include <fun4all/Fun4AllServer.h>

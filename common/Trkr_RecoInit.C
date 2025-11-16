@@ -1,9 +1,6 @@
 #ifndef MACRO_TRKRRECOINIT_C
 #define MACRO_TRKRRECOINIT_C
 
-R__LOAD_LIBRARY(libtrack_reco.so)
-R__LOAD_LIBRARY(libtpccalib.so)
-
 #include <GlobalVariables.C>
 
 #include <G4_ActsGeom.C>
@@ -15,6 +12,9 @@ R__LOAD_LIBRARY(libtpccalib.so)
 
 #include <fun4all/Fun4AllServer.h>
 
+R__LOAD_LIBRARY(libtrack_reco.so)
+R__LOAD_LIBRARY(libtpccalib.so)
+
 void TrackingInit()
 {
   ACTSGEOM::ActsGeomInit();
@@ -23,8 +23,8 @@ void TrackingInit()
   // space charge correction
   if (G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS || G4TPC::ENABLE_STATIC_CORRECTIONS || G4TPC::ENABLE_AVERAGE_CORRECTIONS)
   {
-    auto se = Fun4AllServer::instance();
-    auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
+    auto *se = Fun4AllServer::instance();
+    auto *tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
 
     tpcLoadDistortionCorrection->set_read_phi_as_radians(TpcLoadDistortionCorrection::DistortionType_Static, G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS);
     tpcLoadDistortionCorrection->set_read_phi_as_radians(TpcLoadDistortionCorrection::DistortionType_Average, G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS);

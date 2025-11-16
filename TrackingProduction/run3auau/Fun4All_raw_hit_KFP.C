@@ -5,18 +5,44 @@
  * hits, clusters, and clusters on tracks into trees for analysis.
  */
 
-#include <fun4all/Fun4AllUtils.h>
+// leave the GlobalVariables.C at the beginning, an empty line afterwards
+// protects its position against reshuffling by clang-format
+#include <GlobalVariables.C>
+
 #include <G4_ActsGeom.C>
 #include <G4_Global.C>
 #include <G4_Magnet.C>
 #include <G4_Mbd.C>
-#include <GlobalVariables.C>
 #include <QA.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_LaserClustering.C>
 #include <Trkr_Reco.C>
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
+
+#include <cdbobjects/CDBTTree.h>
+
+#include <tpccalib/PHTpcResiduals.h>
+
+#include <mvtxrawhitqa/MvtxRawHitQA.h>
+
+#include <inttrawhitqa/InttRawHitQA.h>
+
+#include <trackingqa/InttClusterQA.h>
+#include <trackingqa/MicromegasClusterQA.h>
+#include <trackingqa/MvtxClusterQA.h>
+#include <trackingqa/SiliconSeedsQA.h>
+#include <trackingqa/TpcClusterQA.h>
+#include <trackingqa/TpcSeedsQA.h>
+#include <trackingqa/TpcSiliconQA.h>
+
+#include <tpcqa/TpcRawHitQA.h>
+
+#include <trackingdiagnostics/KshortReconstruction.h>
+#include <trackingdiagnostics/TrackResiduals.h>
+#include <trackingdiagnostics/TrkrNtuplizer.h>
+
+#include <kfparticle_sphenix/KFParticle_sPHENIX.h>
 
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
@@ -27,30 +53,9 @@
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllUtils.h>
 
 #include <phool/recoConsts.h>
-
-#include <cdbobjects/CDBTTree.h>
-
-#include <tpccalib/PHTpcResiduals.h>
-
-#include <mvtxrawhitqa/MvtxRawHitQA.h>
-#include <inttrawhitqa/InttRawHitQA.h>
-#include <trackingqa/InttClusterQA.h>
-#include <trackingqa/MicromegasClusterQA.h>
-#include <trackingqa/MvtxClusterQA.h>
-#include <trackingqa/TpcClusterQA.h>
-#include <tpcqa/TpcRawHitQA.h>
-#include <trackingqa/SiliconSeedsQA.h>
-#include <trackingqa/TpcSeedsQA.h>
-#include <trackingqa/TpcSiliconQA.h>
-
-#include <trackingdiagnostics/TrackResiduals.h>
-#include <trackingdiagnostics/TrkrNtuplizer.h>
-#include <trackingdiagnostics/KshortReconstruction.h>
-#include <kfparticle_sphenix/KFParticle_sPHENIX.h>
-
-#include <stdio.h>
 
 R__LOAD_LIBRARY(libkfparticle_sphenix.so)
 R__LOAD_LIBRARY(libfun4all.so)
@@ -69,22 +74,22 @@ namespace HeavyFlavorReco
 {
   int VERBOSITY = 0;
 
-  std::string output_dir = "./"; //Top dir of where the output nTuples will be written
+  std::string output_dir = "./";  // Top dir of where the output nTuples will be written
   std::string kfp_header = "outputKFParticle_";
   std::string processing_folder = "inReconstruction/";
   std::string trailer = ".root";
 
-  std::string pipi_decay_descriptor = "K_S0 -> pi^+ pi^-"; //See twiki on how to set this
-  std::string pipi_reconstruction_name = "pipi_reco"; //Used for naming output folder, file and node
+  std::string pipi_decay_descriptor = "K_S0 -> pi^+ pi^-";  // See twiki on how to set this
+  std::string pipi_reconstruction_name = "pipi_reco";       // Used for naming output folder, file and node
   std::string pipi_output_reco_file;
   std::string pipi_output_dir;
 
-  std::string ppi_decay_descriptor = "[Lambda0 -> proton^+ pi^-]cc"; //See twiki on how to set this
-  std::string ppi_reconstruction_name = "ppi_reco"; //Used for naming output folder, file and node
+  std::string ppi_decay_descriptor = "[Lambda0 -> proton^+ pi^-]cc";  // See twiki on how to set this
+  std::string ppi_reconstruction_name = "ppi_reco";                   // Used for naming output folder, file and node
   std::string ppi_output_reco_file;
   std::string ppi_output_dir;
 
-    bool save_tracks_to_DST = false;
+  bool save_tracks_to_DST = false;
   bool dont_use_global_vertex = true;
   bool require_track_and_vertex_match = true;
   bool save_all_vtx_info = true;
@@ -98,7 +103,7 @@ namespace HeavyFlavorReco
   bool constrain_to_primary_vertex = true;
   bool use_pid = true;
   float pid_frac = 0.4;
-}; // namespace HeavyFlavorReco
+};  // namespace HeavyFlavorReco
 
 using namespace HeavyFlavorReco;
 
@@ -113,13 +118,12 @@ void create_hf_directories(std::string reconstruction_name, std::string &final_o
   system(makeDirectory.c_str());
 }
 
-
 void end_kfparticle(std::string full_file_name, std::string final_path)
 {
-  ifstream file(full_file_name.c_str());
+  std::ifstream file(full_file_name.c_str());
   if (file.good())
   {
-    string moveOutput = "mv " + full_file_name + " " + final_path;
+    std::string moveOutput = "mv " + full_file_name + " " + final_path;
     system(moveOutput.c_str());
   }
 }
@@ -136,7 +140,7 @@ void Fun4All_raw_hit_KFP(
   se->Verbosity(2);
   auto rc = recoConsts::instance();
 
-   //input manager for QM production raw hit DST file
+  // input manager for QM production raw hit DST file
   std::ifstream ifs(filelist);
   std::string filepath;
 
@@ -144,35 +148,34 @@ void Fun4All_raw_hit_KFP(
   int runnumber = std::numeric_limits<int>::quiet_NaN();
   int segment = std::numeric_limits<int>::quiet_NaN();
   bool process_endpoints = false;
-  
-  while(std::getline(ifs,filepath))
+
+  while (std::getline(ifs, filepath))
+  {
+    std::cout << "Adding DST with filepath: " << filepath << std::endl;
+    if (i == 0)
     {
-      std::cout << "Adding DST with filepath: " << filepath << std::endl; 
-     if(i==0)
-	  {
-	    std::pair<int, int>
-	      runseg = Fun4AllUtils::GetRunSegment(filepath);
-	    runnumber = runseg.first;
-	    segment = runseg.second;
-	    rc->set_IntFlag("RUNNUMBER", runnumber);
-	    rc->set_uint64Flag("TIMESTAMP", runnumber);
-        
-	  }
-     if(filepath.find("ebdc") != std::string::npos)
-       {
-	 if(filepath.find("_0_") != std::string::npos or
-	     filepath.find("_1_") != std::string::npos)
-	    {
-	      process_endpoints = true;
-	    }
-       }
-      std::string inputname = "InputManager" + std::to_string(i);
-      auto hitsin = new Fun4AllDstInputManager(inputname);
-      hitsin->fileopen(filepath);
-      se->registerInputManager(hitsin);
-      i++;
+      std::pair<int, int>
+          runseg = Fun4AllUtils::GetRunSegment(filepath);
+      runnumber = runseg.first;
+      segment = runseg.second;
+      rc->set_IntFlag("RUNNUMBER", runnumber);
+      rc->set_uint64Flag("TIMESTAMP", runnumber);
     }
-  
+    if (filepath.find("ebdc") != std::string::npos)
+    {
+      if (filepath.find("_0_") != std::string::npos or
+          filepath.find("_1_") != std::string::npos)
+      {
+        process_endpoints = true;
+      }
+    }
+    std::string inputname = "InputManager" + std::to_string(i);
+    auto hitsin = new Fun4AllDstInputManager(inputname);
+    hitsin->fileopen(filepath);
+    se->registerInputManager(hitsin);
+    i++;
+  }
+
   rc->set_IntFlag("RUNNUMBER", runnumber);
   rc->set_IntFlag("RUNSEGMENT", segment);
 
@@ -181,46 +184,42 @@ void Fun4All_raw_hit_KFP(
   rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
 
-
-
   std::stringstream nice_runnumber;
-  nice_runnumber << std::setw(8) << std::setfill('0') << to_string(runnumber);
+  nice_runnumber << std::setw(8) << std::setfill('0') << std::to_string(runnumber);
 
-  int rounded_up = 100*(std::ceil((float) runnumber/100));
+  int rounded_up = 100 * (std::ceil((float) runnumber / 100));
   std::stringstream nice_rounded_up;
-  nice_rounded_up << std::setw(8) << std::setfill('0') << to_string(rounded_up);
+  nice_rounded_up << std::setw(8) << std::setfill('0') << std::to_string(rounded_up);
 
-  int rounded_down = 100*(std::floor((float) runnumber/100));
+  int rounded_down = 100 * (std::floor((float) runnumber / 100));
   std::stringstream nice_rounded_down;
-  nice_rounded_down << std::setw(8) << std::setfill('0') << to_string(rounded_down);
+  nice_rounded_down << std::setw(8) << std::setfill('0') << std::to_string(rounded_down);
 
   std::stringstream nice_segment;
-  nice_segment << std::setw(5) << std::setfill('0') << to_string(segment);
+  nice_segment << std::setw(5) << std::setfill('0') << std::to_string(segment);
 
   std::stringstream nice_skip;
-  nice_skip << std::setw(5) << std::setfill('0') << to_string(nSkip);
+  nice_skip << std::setw(5) << std::setfill('0') << std::to_string(nSkip);
 
-
-  output_dir = "./"; //Top dir of where the output nTuples will be written
+  output_dir = "./";  // Top dir of where the output nTuples will be written
   trailer = "_" + nice_runnumber.str() + "_" + nice_segment.str() + "_" + nice_skip.str() + ".root";
 
-  if(doKFParticle){
-  create_hf_directories(pipi_reconstruction_name, pipi_output_dir, pipi_output_reco_file);
-  create_hf_directories(ppi_reconstruction_name, ppi_output_dir, ppi_output_reco_file);
+  if (doKFParticle)
+  {
+    create_hf_directories(pipi_reconstruction_name, pipi_output_dir, pipi_output_reco_file);
+    create_hf_directories(ppi_reconstruction_name, ppi_output_dir, ppi_output_reco_file);
   }
-
 
   G4TRACKING::convert_seeds_to_svtxtracks = convertSeeds;
   std::cout << "Converting to seeds : " << G4TRACKING::convert_seeds_to_svtxtracks << std::endl;
- 
 
-  std::cout<< " run: " << runnumber
-	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
-	   << " pre: " << TRACKING::reco_tpc_time_presample
-	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
-	   << std::endl;
+  std::cout << " run: " << runnumber
+            << " samples: " << TRACKING::reco_tpc_maxtime_sample
+            << " pre: " << TRACKING::reco_tpc_time_presample
+            << " vdrift: " << G4TPC::tpc_drift_velocity_reco
+            << std::endl;
 
- TRACKING::pp_mode = false;
+  TRACKING::pp_mode = false;
 
   // distortion calibration mode
   /*
@@ -240,68 +239,66 @@ void Fun4All_raw_hit_KFP(
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
-  TpcReadoutInit( runnumber );
-  G4TPC::REJECT_LASER_EVENTS=true;
+  TpcReadoutInit(runnumber);
+  G4TPC::REJECT_LASER_EVENTS = true;
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
-  //Flag for running the tpc hit unpacker with zero suppression on
+  // Flag for running the tpc hit unpacker with zero suppression on
   TRACKING::tpc_zero_supp = true;
 
-  //MVTX
+  // MVTX
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
 
-  //to turn on the default static corrections, enable the two lines below
+  // to turn on the default static corrections, enable the two lines below
   G4TPC::ENABLE_STATIC_CORRECTIONS = true;
   G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
 
-  //to turn on the average corrections derived from simulation, enable the three lines below
-  //note: these are designed to be used only if static corrections are also applied
-  //G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  //G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-  //G4TPC::average_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/average_minus_static_distortion_inverted_10-new.root";
-
+  // to turn on the average corrections derived from simulation, enable the three lines below
+  // note: these are designed to be used only if static corrections are also applied
+  // G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
+  // G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
+  // G4TPC::average_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/average_minus_static_distortion_inverted_10-new.root";
 
   G4MAGNET::magfield_rescale = 1;
-  
-  
+
   TrackingInit();
 
-  for(int felix=0; felix < 6; felix++)
+  for (int felix = 0; felix < 6; felix++)
   {
     Mvtx_HitUnpacking(std::to_string(felix));
   }
-  for(int server = 0; server < 8; server++)
+  for (int server = 0; server < 8; server++)
   {
     Intt_HitUnpacking(std::to_string(server));
   }
-  ostringstream ebdcname;
-  for(int ebdc = 0; ebdc < 24; ebdc++)
+  std::ostringstream ebdcname;
+  for (int ebdc = 0; ebdc < 24; ebdc++)
+  {
+    if (!process_endpoints)
     {
-      if(!process_endpoints)
-	{
-	  ebdcname.str("");
-	  if(ebdc < 10)
-	    {
-	      ebdcname<<"0";
-	    }
-	  ebdcname<<ebdc;
-	  Tpc_HitUnpacking(ebdcname.str());
-	}
-      
-      else if(process_endpoints)
-	{
-	  for(int endpoint = 0; endpoint <2; endpoint++)
-	    {
-	      ebdcname.str("");
-	      if(ebdc < 10)
-		{
-		  ebdcname<<"0";
-		}
-	      ebdcname<<ebdc <<"_"<<endpoint;
-	      Tpc_HitUnpacking(ebdcname.str());
-	    }
-	}
+      ebdcname.str("");
+      if (ebdc < 10)
+      {
+        ebdcname << "0";
+      }
+      ebdcname << ebdc;
+      Tpc_HitUnpacking(ebdcname.str());
     }
+
+    else if (process_endpoints)
+    {
+      for (int endpoint = 0; endpoint < 2; endpoint++)
+      {
+        ebdcname.str("");
+        if (ebdc < 10)
+        {
+          ebdcname << "0";
+        }
+        ebdcname << ebdc << "_" << endpoint;
+        Tpc_HitUnpacking(ebdcname.str());
+      }
+    }
+  }
 
   Micromegas_HitUnpacking();
 
@@ -318,7 +315,6 @@ void Fun4All_raw_hit_KFP(
   tpcclusterizer->set_reject_event(G4TPC::REJECT_LASER_EVENTS);
   se->registerSubsystem(tpcclusterizer);
 
-
   Micromegas_Clustering();
 
   Reject_Laser_Events();
@@ -326,10 +322,9 @@ void Fun4All_raw_hit_KFP(
    * Begin Track Seeding
    */
 
-
   auto silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
-  silicon_Seeding->setStrobeRange(-5,5);
+  silicon_Seeding->setStrobeRange(-5, 5);
   // these get us to about 83% INTT > 1
   silicon_Seeding->setinttRPhiSearchWindow(0.4);
   silicon_Seeding->setinttZSearchWindow(2.0);
@@ -359,9 +354,9 @@ void Fun4All_raw_hit_KFP(
   }
   seeder->Verbosity(0);
   seeder->SetLayerRange(7, 55);
-  seeder->SetSearchWindow(2.,0.05); // z-width and phi-width, default in macro at 1.5 and 0.05
-  seeder->SetClusAdd_delta_window(3.0,0.06); //  (0.5, 0.005) are default; sdzdr_cutoff, d2/dr2(phi)_cutoff
-  //seeder->SetNClustersPerSeedRange(4,60); // default is 6, 6
+  seeder->SetSearchWindow(2., 0.05);           // z-width and phi-width, default in macro at 1.5 and 0.05
+  seeder->SetClusAdd_delta_window(3.0, 0.06);  //  (0.5, 0.005) are default; sdzdr_cutoff, d2/dr2(phi)_cutoff
+  // seeder->SetNClustersPerSeedRange(4,60); // default is 6, 6
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
@@ -402,33 +397,33 @@ void Fun4All_raw_hit_KFP(
   auto silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
-  if(G4TPC::ENABLE_AVERAGE_CORRECTIONS)
+  if (G4TPC::ENABLE_AVERAGE_CORRECTIONS)
   {
     // for general tracking
     // Eta/Phi window is determined by 3 sigma window
     // X/Y/Z window is determined by 4 sigma window
-    silicon_match->window_deta.set_posQoverpT_maxabs({-0.014,0.0331,0.48});
-    silicon_match->window_deta.set_negQoverpT_maxabs({-0.006,0.0235,0.52});
+    silicon_match->window_deta.set_posQoverpT_maxabs({-0.014, 0.0331, 0.48});
+    silicon_match->window_deta.set_negQoverpT_maxabs({-0.006, 0.0235, 0.52});
     silicon_match->set_deltaeta_min(0.03);
-    silicon_match->window_dphi.set_QoverpT_range({-0.15,0,0}, {0.15,0,0});
-    silicon_match->window_dx.set_QoverpT_maxabs({3.0,0,0});
-    silicon_match->window_dy.set_QoverpT_maxabs({3.0,0,0});
-    silicon_match->window_dz.set_posQoverpT_maxabs({1.138,0.3919,0.84});
-    silicon_match->window_dz.set_negQoverpT_maxabs({0.719,0.6485,0.65});
+    silicon_match->window_dphi.set_QoverpT_range({-0.15, 0, 0}, {0.15, 0, 0});
+    silicon_match->window_dx.set_QoverpT_maxabs({3.0, 0, 0});
+    silicon_match->window_dy.set_QoverpT_maxabs({3.0, 0, 0});
+    silicon_match->window_dz.set_posQoverpT_maxabs({1.138, 0.3919, 0.84});
+    silicon_match->window_dz.set_negQoverpT_maxabs({0.719, 0.6485, 0.65});
     silicon_match->set_crossing_deltaz_max(30);
     silicon_match->set_crossing_deltaz_min(2);
 
     // for distortion correction using SI-TPOT fit and track pT>0.5
     if (G4TRACKING::SC_CALIBMODE)
     {
-      silicon_match->window_deta.set_posQoverpT_maxabs({0.016,0.0060,1.13});
-      silicon_match->window_deta.set_negQoverpT_maxabs({0.022,0.0022,1.44});
+      silicon_match->window_deta.set_posQoverpT_maxabs({0.016, 0.0060, 1.13});
+      silicon_match->window_deta.set_negQoverpT_maxabs({0.022, 0.0022, 1.44});
       silicon_match->set_deltaeta_min(0.03);
-      silicon_match->window_dphi.set_QoverpT_range({-0.15,0,0}, {0.09,0,0});
-      silicon_match->window_dx.set_QoverpT_maxabs({2.0,0,0});
-      silicon_match->window_dy.set_QoverpT_maxabs({1.5,0,0});
-      silicon_match->window_dz.set_posQoverpT_maxabs({1.213,0.0211,2.09});
-      silicon_match->window_dz.set_negQoverpT_maxabs({1.307,0.0001,4.52});
+      silicon_match->window_dphi.set_QoverpT_range({-0.15, 0, 0}, {0.09, 0, 0});
+      silicon_match->window_dx.set_QoverpT_maxabs({2.0, 0, 0});
+      silicon_match->window_dy.set_QoverpT_maxabs({1.5, 0, 0});
+      silicon_match->window_dz.set_posQoverpT_maxabs({1.213, 0.0211, 2.09});
+      silicon_match->window_dz.set_negQoverpT_maxabs({1.307, 0.0001, 4.52});
       silicon_match->set_crossing_deltaz_min(1.2);
     }
   }
@@ -492,22 +487,21 @@ void Fun4All_raw_hit_KFP(
     if (G4TRACKING::SC_CALIBMODE)
     {
       /*
-      * in calibration mode, calculate residuals between TPC and fitted tracks,
-      * store in dedicated structure for distortion correction
-      */
+       * in calibration mode, calculate residuals between TPC and fitted tracks,
+       * store in dedicated structure for distortion correction
+       */
       auto residuals = new PHTpcResiduals;
       const TString tpc_residoutfile = theOutfile + "_PhTpcResiduals.root";
       residuals->setOutputfile(tpc_residoutfile.Data());
       residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
 
       // matches Tony's analysis
-      residuals->setMinPt( 0.2 );
+      residuals->setMinPt(0.2);
 
       // reconstructed distortion grid size (phi, r, z)
       residuals->setGridDimensions(36, 48, 80);
       se->registerSubsystem(residuals);
     }
-
   }
 
   auto finder = new PHSimpleVertexFinder;
@@ -528,34 +522,32 @@ void Fun4All_raw_hit_KFP(
     vtxProp->fieldMap(G4MAGNET::magfield_tracking);
     se->registerSubsystem(vtxProp);
   }
-  
-   TString residoutfile = theOutfile + "_resid.root";
-   std::string residstring(residoutfile.Data());
 
-   auto resid = new TrackResiduals("TrackResiduals");
-   resid->outfileName(residstring);
-   resid->alignment(false);
-   resid->vertexTree();
-//   // adjust track map name
-//   if(G4TRACKING::SC_CALIBMODE && !G4TRACKING::convert_seeds_to_svtxtracks)
-//   {
-//     resid->trackmapName("SvtxSiliconMMTrackMap");
-//     if( G4TRACKING::SC_USE_MICROMEGAS )
-//     { resid->set_doMicromegasOnly(true); }
-//   }
+  TString residoutfile = theOutfile + "_resid.root";
+  std::string residstring(residoutfile.Data());
 
-//   resid->clusterTree();
-//   resid->hitTree();
-   resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
+  auto resid = new TrackResiduals("TrackResiduals");
+  resid->outfileName(residstring);
+  resid->alignment(false);
+  resid->vertexTree();
+  //   // adjust track map name
+  //   if(G4TRACKING::SC_CALIBMODE && !G4TRACKING::convert_seeds_to_svtxtracks)
+  //   {
+  //     resid->trackmapName("SvtxSiliconMMTrackMap");
+  //     if( G4TRACKING::SC_USE_MICROMEGAS )
+  //     { resid->set_doMicromegasOnly(true); }
+  //   }
 
-//   resid->Verbosity(0);
-   //se->registerSubsystem(resid);
+  //   resid->clusterTree();
+  //   resid->hitTree();
+  resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
 
-   
-   
-  //auto ntuplizer = new TrkrNtuplizer("TrkrNtuplizer");
-  //se->registerSubsystem(ntuplizer);
-   
+  //   resid->Verbosity(0);
+  // se->registerSubsystem(resid);
+
+  // auto ntuplizer = new TrkrNtuplizer("TrkrNtuplizer");
+  // se->registerSubsystem(ntuplizer);
+
   /*
     // To write an output DST
     TString dstfile = theOutfile;
@@ -592,24 +584,24 @@ void Fun4All_raw_hit_KFP(
     converter->setFieldMap(G4MAGNET::magfield_tracking);
     converter->Verbosity(0);
     se->registerSubsystem(converter);
-    
-    auto finder = new PHSimpleVertexFinder("SiliconVertexFinder");
-    finder->Verbosity(0);
-    finder->setDcaCut(0.1);
-    finder->setTrackPtCut(0.2);
-    finder->setBeamLineCut(1);
-    finder->setTrackQualityCut(500);
-    finder->setNmvtxRequired(3);
-    finder->setOutlierPairCut(0.1);
-    finder->setTrackMapName("SiliconSvtxTrackMap");
-    finder->setVertexMapName("SiliconSvtxVertexMap");
-    se->registerSubsystem(finder);
-    
+
+    auto finder_svx = new PHSimpleVertexFinder("SiliconVertexFinder");
+    finder_svx->Verbosity(0);
+    finder_svx->setDcaCut(0.1);
+    finder_svx->setTrackPtCut(0.2);
+    finder_svx->setBeamLineCut(1);
+    finder_svx->setTrackQualityCut(500);
+    finder_svx->setNmvtxRequired(3);
+    finder_svx->setOutlierPairCut(0.1);
+    finder_svx->setTrackMapName("SiliconSvtxTrackMap");
+    finder_svx->setVertexMapName("SiliconSvtxVertexMap");
+    se->registerSubsystem(finder_svx);
+
     auto siliconqa = new SiliconSeedsQA;
     siliconqa->setTrackMapName("SiliconSvtxTrackMap");
     siliconqa->setVertexMapName("SiliconSvtxVertexMap");
     se->registerSubsystem(siliconqa);
-    
+
     auto convertertpc = new TrackSeedTrackMapConverter("TpcSeedConverter");
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
@@ -618,20 +610,20 @@ void Fun4All_raw_hit_KFP(
     convertertpc->setFieldMap(G4MAGNET::magfield_tracking);
     convertertpc->Verbosity(0);
     se->registerSubsystem(convertertpc);
-    
+
     auto findertpc = new PHSimpleVertexFinder("TpcSimpleVertexFinder");
     findertpc->Verbosity(0);
     findertpc->setDcaCut(0.5);
     findertpc->setTrackPtCut(0.2);
     findertpc->setBeamLineCut(1);
     findertpc->setTrackQualityCut(1000000000);
-    //findertpc->setNmvtxRequired(3);
+    // findertpc->setNmvtxRequired(3);
     findertpc->setRequireMVTX(false);
     findertpc->setOutlierPairCut(0.1);
     findertpc->setTrackMapName("TpcSvtxTrackMap");
     findertpc->setVertexMapName("TpcSvtxVertexMap");
     se->registerSubsystem(findertpc);
-    
+
     auto tpcqa = new TpcSeedsQA;
     tpcqa->setTrackMapName("TpcSvtxTrackMap");
     tpcqa->setVertexMapName("TpcSvtxVertexMap");
@@ -639,133 +631,127 @@ void Fun4All_raw_hit_KFP(
     se->registerSubsystem(tpcqa);
 
     se->registerSubsystem(new TpcSiliconQA);
-    
   }
 
-  if(doKFParticle){
-  //KFParticle dependancy
-     Global_Reco();
+  if (doKFParticle)
+  {
+    // KFParticle dependancy
+    Global_Reco();
 
-  //KFParticle setup
+    // KFParticle setup
 
-  KFParticle_sPHENIX *kfparticle = new KFParticle_sPHENIX("pipi_reco");
-  kfparticle->Verbosity(10);
-  kfparticle->setDecayDescriptor("K_S0 -> pi^+ pi^-");
-  //kfparticle->setDecayDescriptor("[K_S0 -> pi^+ pi^+]cc");
+    KFParticle_sPHENIX *kfparticle = new KFParticle_sPHENIX("pipi_reco");
+    kfparticle->Verbosity(10);
+    kfparticle->setDecayDescriptor("K_S0 -> pi^+ pi^-");
+    // kfparticle->setDecayDescriptor("[K_S0 -> pi^+ pi^+]cc");
 
-   kfparticle->usePID(use_pid);
-  kfparticle->setPIDacceptFraction(pid_frac);
-  kfparticle->dontUseGlobalVertex(dont_use_global_vertex);
-  kfparticle->requireTrackVertexBunchCrossingMatch(require_track_and_vertex_match);
-  kfparticle->getAllPVInfo(save_all_vtx_info);
-  kfparticle->allowZeroMassTracks();
-  kfparticle->use2Dmatching(use_2D_matching);
-  kfparticle->getTriggerInfo(get_trigger_info);
-  kfparticle->getDetectorInfo(get_detector_info);
-  kfparticle->saveDST(save_tracks_to_DST);
-  kfparticle->saveParticleContainer(false);
-  kfparticle->magFieldFile("FIELDMAP_TRACKING");
+    kfparticle->usePID(use_pid);
+    kfparticle->setPIDacceptFraction(pid_frac);
+    kfparticle->dontUseGlobalVertex(dont_use_global_vertex);
+    kfparticle->requireTrackVertexBunchCrossingMatch(require_track_and_vertex_match);
+    kfparticle->getAllPVInfo(save_all_vtx_info);
+    kfparticle->allowZeroMassTracks();
+    kfparticle->use2Dmatching(use_2D_matching);
+    kfparticle->getTriggerInfo(get_trigger_info);
+    kfparticle->getDetectorInfo(get_detector_info);
+    kfparticle->saveDST(save_tracks_to_DST);
+    kfparticle->saveParticleContainer(false);
+    kfparticle->magFieldFile("FIELDMAP_TRACKING");
 
-  //PV to SV cuts
-  kfparticle->constrainToPrimaryVertex(constrain_to_primary_vertex);
-  kfparticle->setMotherIPchi2(100);
-  kfparticle->setFlightDistancechi2(-1.);
-  kfparticle->setMinDIRA(0.88); //was .95
-  kfparticle->setDecayLengthRange(-0.1, FLT_MAX); //was 0.1 min
+    // PV to SV cuts
+    kfparticle->constrainToPrimaryVertex(constrain_to_primary_vertex);
+    kfparticle->setMotherIPchi2(100);
+    kfparticle->setFlightDistancechi2(-1.);
+    kfparticle->setMinDIRA(0.88);                    // was .95
+    kfparticle->setDecayLengthRange(-0.1, FLT_MAX);  // was 0.1 min
 
-  kfparticle->setDecayLengthRange_XY(-10000, FLT_MAX);
-  kfparticle->setDecayTimeRange_XY(-10000, FLT_MAX);
-  kfparticle->setDecayTimeRange(-10000, FLT_MAX);
-  kfparticle->setMinDecayTimeSignificance(-1e5);
-  kfparticle->setMinDecayLengthSignificance(-1e5);
-  kfparticle->setMinDecayLengthSignificance_XY(-1e5);
-  kfparticle->setMaximumDaughterDCA_XY(100);
+    kfparticle->setDecayLengthRange_XY(-10000, FLT_MAX);
+    kfparticle->setDecayTimeRange_XY(-10000, FLT_MAX);
+    kfparticle->setDecayTimeRange(-10000, FLT_MAX);
+    kfparticle->setMinDecayTimeSignificance(-1e5);
+    kfparticle->setMinDecayLengthSignificance(-1e5);
+    kfparticle->setMinDecayLengthSignificance_XY(-1e5);
+    kfparticle->setMaximumDaughterDCA_XY(100);
 
-  //Track parameters
-  kfparticle->setMinimumTrackPT(0.0);
-  kfparticle->setMinimumTrackIPchi2(-1.);
-  kfparticle->setMinimumTrackIP(-1.);
-  kfparticle->setMaximumTrackchi2nDOF(100.);
-  kfparticle->setMinINTThits(0);
-  kfparticle->setMinMVTXhits(0);
-  kfparticle->setMinTPChits(20);
+    // Track parameters
+    kfparticle->setMinimumTrackPT(0.0);
+    kfparticle->setMinimumTrackIPchi2(-1.);
+    kfparticle->setMinimumTrackIP(-1.);
+    kfparticle->setMaximumTrackchi2nDOF(100.);
+    kfparticle->setMinINTThits(0);
+    kfparticle->setMinMVTXhits(0);
+    kfparticle->setMinTPChits(20);
 
-  //Vertex parameters
-  kfparticle->setMaximumVertexchi2nDOF(20);
-  kfparticle->setMaximumDaughterDCA(0.5); //5 mm
+    // Vertex parameters
+    kfparticle->setMaximumVertexchi2nDOF(20);
+    kfparticle->setMaximumDaughterDCA(0.5);  // 5 mm
 
-  //Parent parameters
-  kfparticle->setMotherPT(0);
-  kfparticle->setMinimumMass(0.40); //Check mass ranges
-  kfparticle->setMaximumMass(0.60);
-  kfparticle->setMaximumMotherVertexVolume(0.1);
+    // Parent parameters
+    kfparticle->setMotherPT(0);
+    kfparticle->setMinimumMass(0.40);  // Check mass ranges
+    kfparticle->setMaximumMass(0.60);
+    kfparticle->setMaximumMotherVertexVolume(0.1);
 
-  kfparticle->setOutputName(pipi_output_reco_file);
+    kfparticle->setOutputName(pipi_output_reco_file);
 
-  se->registerSubsystem(kfparticle);
+    se->registerSubsystem(kfparticle);
 
+    // Lambda reconstruction
+    KFParticle_sPHENIX *kfparticleLambda = new KFParticle_sPHENIX("ppi_reco");
+    kfparticleLambda->Verbosity(0);
+    kfparticleLambda->setDecayDescriptor("[Lambda0 -> proton^+ pi^-]cc");
 
+    kfparticle->usePID(use_pid);
+    kfparticle->setPIDacceptFraction(pid_frac);
+    kfparticle->dontUseGlobalVertex(dont_use_global_vertex);
+    kfparticle->requireTrackVertexBunchCrossingMatch(require_track_and_vertex_match);
+    kfparticle->getAllPVInfo(save_all_vtx_info);
+    kfparticle->allowZeroMassTracks();
+    kfparticle->use2Dmatching(use_2D_matching);
+    kfparticle->getTriggerInfo(get_trigger_info);
+    kfparticle->getDetectorInfo(get_detector_info);
+    kfparticle->saveDST(save_tracks_to_DST);
+    kfparticle->saveParticleContainer(false);
+    kfparticle->magFieldFile("FIELDMAP_TRACKING");
 
-  //Lambda reconstruction
-  KFParticle_sPHENIX *kfparticleLambda = new KFParticle_sPHENIX("ppi_reco");
-  kfparticleLambda->Verbosity(0);
-  kfparticleLambda->setDecayDescriptor("[Lambda0 -> proton^+ pi^-]cc");
+    // PV to SV cuts
+    kfparticle->constrainToPrimaryVertex(constrain_to_primary_vertex);
+    kfparticle->setMotherIPchi2(100);
+    kfparticle->setFlightDistancechi2(-1.);
+    kfparticle->setMinDIRA(0.88);
+    kfparticle->setDecayLengthRange(0.2, FLT_MAX);
 
-   kfparticle->usePID(use_pid);
-  kfparticle->setPIDacceptFraction(pid_frac);
-  kfparticle->dontUseGlobalVertex(dont_use_global_vertex);
-  kfparticle->requireTrackVertexBunchCrossingMatch(require_track_and_vertex_match);
-  kfparticle->getAllPVInfo(save_all_vtx_info);
-  kfparticle->allowZeroMassTracks();
-  kfparticle->use2Dmatching(use_2D_matching);
-  kfparticle->getTriggerInfo(get_trigger_info);
-  kfparticle->getDetectorInfo(get_detector_info);
-  kfparticle->saveDST(save_tracks_to_DST);
-  kfparticle->saveParticleContainer(false);
-  kfparticle->magFieldFile("FIELDMAP_TRACKING");
+    // Track parameters
+    kfparticle->setMinimumTrackPT(0.1);
+    kfparticle->setMinimumTrackIPchi2(-1.);
+    kfparticle->setMinimumTrackIP(-1.);
+    kfparticle->setMaximumTrackchi2nDOF(100.);
+    kfparticle->setMinTPChits(25);
 
-  //PV to SV cuts
-  kfparticle->constrainToPrimaryVertex(constrain_to_primary_vertex);
-  kfparticle->setMotherIPchi2(100);
-  kfparticle->setFlightDistancechi2(-1.);
-  kfparticle->setMinDIRA(0.88);
-  kfparticle->setDecayLengthRange(0.2, FLT_MAX);
+    // Vertex parameters
+    kfparticle->setMaximumVertexchi2nDOF(20);
+    kfparticle->setMaximumDaughterDCA(0.5);  // 5 mm
 
-  //Track parameters
-  kfparticle->setMinimumTrackPT(0.1);
-  kfparticle->setMinimumTrackIPchi2(-1.);
-  kfparticle->setMinimumTrackIP(-1.);
-  kfparticle->setMaximumTrackchi2nDOF(100.);
-  kfparticle->setMinTPChits(25);
+    // Parent parameters
+    kfparticle->setMotherPT(0);
+    kfparticle->setMinimumMass(0.900);  // Check mass ranges
+    kfparticle->setMaximumMass(1.300);
+    kfparticle->setMaximumMotherVertexVolume(0.1);
 
-  //Vertex parameters
-  kfparticle->setMaximumVertexchi2nDOF(20);
-  kfparticle->setMaximumDaughterDCA(0.5); //5 mm
+    kfparticle->setOutputName(ppi_output_reco_file);
 
-  //Parent parameters
-  kfparticle->setMotherPT(0);
-  kfparticle->setMinimumMass(0.900); //Check mass ranges
-  kfparticle->setMaximumMass(1.300);
-  kfparticle->setMaximumMotherVertexVolume(0.1);
-
-  kfparticle->setOutputName(ppi_output_reco_file);
-
-  se->registerSubsystem(kfparticleLambda);
-
+    se->registerSubsystem(kfparticleLambda);
   }
-
-  
-
-
 
   se->skip(nSkip);
   se->run(nEvents);
   se->End();
   se->PrintTimer();
 
-  if(doKFParticle){
-  end_kfparticle(pipi_output_reco_file, pipi_output_dir);
-  end_kfparticle(ppi_output_reco_file, ppi_output_dir);
+  if (doKFParticle)
+  {
+    end_kfparticle(pipi_output_reco_file, pipi_output_dir);
+    end_kfparticle(ppi_output_reco_file, ppi_output_dir);
   }
   if (Enable::QA)
   {

@@ -2,6 +2,8 @@
 #define MACRO_GLOBALVARIABLES_C
 
 #include <g4decayer/EDecayType.hh>
+
+#include <cstdint>
 #include <limits>
 #include <set>
 #include <sstream>
@@ -73,7 +75,7 @@ namespace TRACKING
 {
   std::string TrackNodeName = "SvtxTrackMap";
   bool pp_mode = false;
-  double pp_extended_readout_time = 7000.0;  // ns
+  double pp_extended_readout_time = 24900.0;  // ns
   bool reco_tpc_is_configured = false;
   int reco_tpc_maxtime_sample = 425;
   int reco_tpc_time_presample = 40;  // 120 - 80
@@ -107,9 +109,9 @@ namespace G4MICROMEGAS
 
 namespace G4TPC
 {
-  double tpc_drift_velocity_reco = 8.0 / 1000.0;  // cm/ns   // this is the Ne version of the gas, it is very close to our Ar-CF4 mixture
-  double tpc_tzero_reco = 0.0;  // ns  
-}
+  double tpc_drift_velocity_reco = 7.55 / 1000.0;  // cm/ns   // this is the Ne version of the gas, it is very close to our Ar-CF4 mixture
+  double tpc_tzero_reco = 0.0;                     // ns
+}  // namespace G4TPC
 
 namespace G4TRACKING
 {
@@ -118,8 +120,8 @@ namespace G4TRACKING
 
 namespace EVTGENDECAYER
 {
-  std::string DecayFile = "";  // The default is no need to force decay anything and use the default file DECAY.DEC from the official EvtGen software
-                               // DECAY.DEC is located at: https://gitlab.cern.ch/evtgen/evtgen/-/blob/master/DECAY.DEC
+  std::string DecayFile;  // The default is no need to force decay anything and use the default file DECAY.DEC from the official EvtGen software
+                          // DECAY.DEC is located at: https://gitlab.cern.ch/evtgen/evtgen/-/blob/master/DECAY.DEC
 }
 
 namespace CDB
@@ -132,7 +134,6 @@ namespace CDB
 // cheap check via extension if we have a root file (pre c++17)
 bool isRootFile(const std::string &fname)
 {
-  std::string tmp = fname;
   size_t i = fname.rfind('.', fname.length());
   if (i != std::string::npos)
   {
@@ -144,7 +145,7 @@ bool isRootFile(const std::string &fname)
   return false;
 }
 
-bool isConstantField(const std::string &name, double &fieldstrength)
+bool isConstantField(const std::string & /*name*/, double &fieldstrength)
 {
   std::istringstream stringline(G4MAGNET::magfield_tracking);
   stringline >> fieldstrength;
@@ -153,10 +154,8 @@ bool isConstantField(const std::string &name, double &fieldstrength)
     fieldstrength = std::numeric_limits<double>::quiet_NaN();
     return false;
   }
-  else
-  {
-    return true;
-  }
+
+  return true;
 }
 
 #endif

@@ -3,38 +3,42 @@
 
 #include <GlobalVariables.C>
 
-#include <fun4all/Fun4AllServer.h>
 #include <g4jets/TruthJetInput.h>
+
 #include <globalvertex/GlobalVertex.h>
-#include <globalvertex/GlobalVertex.h>
+
 #include <jetbackground/FastJetAlgoSub.h>
 #include <jetbackground/RetowerCEMC.h>
+
 #include <jetbase/FastJetOptions.h>
 #include <jetbase/JetReco.h>
 #include <jetbase/TowerJetInput.h>
 #include <jetbase/TrackJetInput.h>
+
 #include <particleflowreco/ParticleFlowJetInput.h>
+
+#include <fun4all/Fun4AllServer.h>
+
+#include <Rtypes.h>  // resolves R__LOAD_LIBRARY for clang-tidy
 
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libjetbackground.so)
 R__LOAD_LIBRARY(libjetbase.so)
 R__LOAD_LIBRARY(libparticleflow.so)
 
-
 // ----------------------------------------------------------------------------
 //! General options for no subtraction (NS) jet reconstruction
 // ----------------------------------------------------------------------------
 namespace Enable
 {
-  int  NSJETS_VERBOSITY = 0;      ///< verbosity
-  bool NSJETS           = false;  ///< do no-subtraction jet reco
-  bool NSJETS_MC        = false;  ///< is simulation
-  bool NSJETS_TRUTH     = false;  ///< make truth jets
-  bool NSJETS_TOWER     = false;  ///< make tower jets
-  bool NSJETS_TRACK     = true;   ///< make track jets
-  bool NSJETS_PFLOW     = false;  ///< make particle flow jets
+  int NSJETS_VERBOSITY = 0;   ///< verbosity
+  bool NSJETS = false;        ///< do no-subtraction jet reco
+  bool NSJETS_MC = false;     ///< is simulation
+  bool NSJETS_TRUTH = false;  ///< make truth jets
+  bool NSJETS_TOWER = false;  ///< make tower jets
+  bool NSJETS_TRACK = true;   ///< make track jets
+  bool NSJETS_PFLOW = false;  ///< make particle flow jets
 }  // end namespace Enable
-
 
 // ----------------------------------------------------------------------------
 //! Options specific to no subtraction jet reconstruction
@@ -69,7 +73,8 @@ namespace NSJETS
 
   ///! enumerates reconstructed resolution
   ///! parameters
-  enum Res {
+  enum Res
+  {
     R02 = 0,
     R03 = 1,
     R04 = 2,
@@ -81,7 +86,6 @@ namespace NSJETS
   // --------------------------------------------------------------------------
   FastJetAlgoSub* GetFJAlgo(const float reso)
   {
-
     // grab current options & update
     // reso parameter
     FastJetOptions opts = fj_opts;
@@ -93,20 +97,18 @@ namespace NSJETS
   }  // end 'GetFJAlgo()'
 }  // end namespace NSJETS
 
-
 // ----------------------------------------------------------------------------
 //! Make jets out of appropriate truth particles
 // ----------------------------------------------------------------------------
 void MakeNSTruthJets()
 {
-
   // set verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::NSJETS_VERBOSITY);
 
   //---------------
   // Fun4All server
   //---------------
-  Fun4AllServer *se = Fun4AllServer::instance();
+  Fun4AllServer* se = Fun4AllServer::instance();
 
   // if making track jets, make truth jets out of only charged particles
   if (Enable::NSJETS_TRACK)
@@ -145,26 +147,24 @@ void MakeNSTruthJets()
 
 }  // end 'MakeNSTruthJets()'
 
-
 // ----------------------------------------------------------------------------
 //! Make jets out of unsubtracted towers
 // ----------------------------------------------------------------------------
 void MakeNSTowerJets()
 {
-
   // set verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::NSJETS_VERBOSITY);
 
   //---------------
   // Fun4All server
   //---------------
-  Fun4AllServer *se = Fun4AllServer::instance();
+  Fun4AllServer* se = Fun4AllServer::instance();
 
   // retower the emcal to match I/OHCal granularity
-  RetowerCEMC* rcemc = new RetowerCEMC(); 
-  rcemc->Verbosity(verbosity); 
+  RetowerCEMC* rcemc = new RetowerCEMC();
+  rcemc->Verbosity(verbosity);
   rcemc->set_towerinfo(true);
-  rcemc->set_frac_cut(0.5); //fraction of retower that must be masked to mask the full retower
+  rcemc->set_frac_cut(0.5);  // fraction of retower that must be masked to mask the full retower
   rcemc->set_towerNodePrefix(NSJETS::tower_prefix);
   se->registerSubsystem(rcemc);
 
@@ -179,7 +179,7 @@ void MakeNSTowerJets()
     ohTwrInput->set_GlobalVertexType(NSJETS::vertex_type);
   }
 
-  // book jet reconstruction on towers  
+  // book jet reconstruction on towers
   JetReco* twrRecoJets = new JetReco();
   twrRecoJets->add_input(emTwrInput);
   twrRecoJets->add_input(ihTwrInput);
@@ -198,20 +198,18 @@ void MakeNSTowerJets()
 
 }  // end 'MakeNSTowerJets()'
 
-
 // ----------------------------------------------------------------------------
 //! Make jets out of tracks without background subtraction
 // ----------------------------------------------------------------------------
 void MakeNSTrackJets()
 {
-
   // set verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::NSJETS_VERBOSITY);
 
   //---------------
   // Fun4All server
   //---------------
-  Fun4AllServer *se = Fun4AllServer::instance();
+  Fun4AllServer* se = Fun4AllServer::instance();
 
   // book jet reconstruction routines on tracks
   JetReco* trkRecoJets = new JetReco();
@@ -230,20 +228,18 @@ void MakeNSTrackJets()
 
 }  // end 'MakeNSTrackJets()'
 
-
 // ----------------------------------------------------------------------------
 //! Make jets out of particle-flow elements without background subtraction
 // ----------------------------------------------------------------------------
 void MakeNSPFlowJets()
 {
-
   // set verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::NSJETS_VERBOSITY);
 
   //---------------
   // Fun4All server
   //---------------
-  Fun4AllServer *se = Fun4AllServer::instance();
+  Fun4AllServer* se = Fun4AllServer::instance();
 
   // book jet reconstruction routines on pflow elements
   JetReco* pfRecoJets = new JetReco();
@@ -262,20 +258,30 @@ void MakeNSPFlowJets()
 
 }  // end 'MakeNSPFlowJets()'
 
-
 // ----------------------------------------------------------------------------
 //! Run jet reconstruction without background subtraction
 // ----------------------------------------------------------------------------
 void NoBkgdSubJetReco()
 {
-
   // if simulation, make appropriate truth jets
-  if (Enable::NSJETS_MC && Enable::NSJETS_TRUTH) MakeNSTruthJets();
+  if (Enable::NSJETS_MC && Enable::NSJETS_TRUTH)
+  {
+    MakeNSTruthJets();
+  }
 
   // run approriate jet reconstruction routines
-  if (Enable::NSJETS_TOWER) MakeNSTowerJets();
-  if (Enable::NSJETS_TRACK) MakeNSTrackJets();
-  if (Enable::NSJETS_PFLOW) MakeNSPFlowJets();
+  if (Enable::NSJETS_TOWER)
+  {
+    MakeNSTowerJets();
+  }
+  if (Enable::NSJETS_TRACK)
+  {
+    MakeNSTrackJets();
+  }
+  if (Enable::NSJETS_PFLOW)
+  {
+    MakeNSPFlowJets();
+  }
 
 }  // end 'NoBkgdSubJetReco()'
 

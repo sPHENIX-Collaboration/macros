@@ -130,7 +130,7 @@ echo pass0dir: ${pass0dir}
 echo nevents: ${nevents}
 
 
-if [[ $runno -lt 44100 ]]
+if [[ $runno -le 53880 ]]
 then
   runtype=1  # pp200
 else
@@ -211,7 +211,7 @@ ls -la *.root
 # Pass 2 calibrations (t0 offsets)
 # Pass 2 calibrations mip fits
 fname=$(ls -tr DST_UNCALMBD*.root | tail -1)
-echo XXX
+echo Waveform processing done
 ls -ltr
 
 echo "###############################################################################################################"

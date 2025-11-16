@@ -1,6 +1,8 @@
 //
 // Plot laser amplitudes, make gain curves, extract HV to run gain at 
 //
+#include "read_dstmbd.C"
+
 #include <TH1.h>
 #include <TF1.h>
 #include <TCanvas.h>
@@ -12,7 +14,6 @@
 #include <fstream>
 #include <vector>
 
-#include "read_dstmbd.C"
 
 const int MAXRUNS = 100;    // 11 is the typical
 const int MAXCH = 256;
@@ -41,21 +42,19 @@ const int verbose = 1;
 TString name;
 TString title;
 
-using namespace std;
-
 // 
 //void anafile(const char *tfname = "prdf_478_times.root", const int nrun = 0)
-void anafile(const char *tfname = "DST_UNCALMBD-00042674-0000.root", const int nrun = 0)
+void anafile(const char *tfname = "DST_UNCALMBD-00042674-0000.root", const int nrun_local = 0)
 {
-  cout << "tfname " << tfname << endl;
+  std::cout << "tfname " << tfname << std::endl;
 
   // Book Histograms, etc
   for (int ich=0; ich<N_PMT; ich++)
   {
-    name = "h_laseramp"; name += ich; name += "_"; name += nrun;
+    name = "h_laseramp"; name += ich; name += "_"; name += nrun_local;
     title = name;
-    h_laseramp[nrun][ich] = new TH1F(name,title,1620,-100,16100);
-    //h_laseramp[nrun][ich] = new TH1F(name,title,160,0,16000);
+    h_laseramp[nrun_local][ich] = new TH1F(name,title,1620,-100,16100);
+    //h_laseramp[nrun_local][ich] = new TH1F(name,title,160,0,16000);
   }
 
   /*
@@ -65,7 +64,7 @@ void anafile(const char *tfname = "DST_UNCALMBD-00042674-0000.root", const int n
   Float_t f_q[MAXCH];   // charge
   */
 
-  cout << "tfname " << tfname << endl;
+  std::cout << "tfname " << tfname << std::endl;
 
   read_dstmbd(tfname);
   /*
@@ -91,10 +90,10 @@ void anafile(const char *tfname = "DST_UNCALMBD-00042674-0000.root", const int n
 
     for (int ich=0; ich<N_PMT; ich++)
     {
-      //cout << evt << "\t" << t[1] << "\t" << f_q[1] << "\t" << t[14] << "\t" << f_q[14] << endl;
+      //std::cout << evt << "\t" << t[1] << "\t" << f_q[1] << "\t" << t[14] << "\t" << f_q[14] << std::endl;
       if ( f_q[ich]>0 )
       {
-        h_laseramp[nrun][ich]->Fill( f_q[ich] );
+        h_laseramp[nrun_local][ich]->Fill( f_q[ich] );
       }
     }
   }
@@ -102,32 +101,32 @@ void anafile(const char *tfname = "DST_UNCALMBD-00042674-0000.root", const int n
   // Fit gaussians to get the average amplitude
   for (int ich=0; ich<N_PMT; ich++)
   {
-    //cout << "Fitting ch " << ich << endl;
-    name = "fgaus"; name += ich; name += "_"; name += nrun;
-    fgaus[nrun][ich] = new TF1(name,"gaus",-100,16000);
-    fgaus[nrun][ich]->SetLineColor(2);
+    //std::cout << "Fitting ch " << ich << std::endl;
+    name = "fgaus"; name += ich; name += "_"; name += nrun_local;
+    fgaus[nrun_local][ich] = new TF1(name,"gaus",-100,16000);
+    fgaus[nrun_local][ich]->SetLineColor(2);
 
-    //h_laseramp[nrun][ich]->Rebin(2);
+    //h_laseramp[nrun_local][ich]->Rebin(2);
 
     float ampl = 0.;
     float amplerr = 0.;
-    if ( h_laseramp[nrun][ich]->GetEntries() > 10 )
+    if ( h_laseramp[nrun_local][ich]->GetEntries() > 10 )
     {
-      double seed_mean = h_laseramp[nrun][ich]->GetMean();
-      double seed_rms = h_laseramp[nrun][ich]->GetRMS();
-      fgaus[nrun][ich]->SetParameters(1000,seed_mean,seed_rms);
-      fgaus[nrun][ich]->SetRange( seed_mean-5*seed_rms, seed_mean+5*seed_rms );
-      //h_laseramp[nrun][ich]->Fit( fgaus[nrun][ich], "QR" );
-      h_laseramp[nrun][ich]->Fit( fgaus[nrun][ich], "LLRQ" );
+      double seed_mean = h_laseramp[nrun_local][ich]->GetMean();
+      double seed_rms = h_laseramp[nrun_local][ich]->GetRMS();
+      fgaus[nrun_local][ich]->SetParameters(1000,seed_mean,seed_rms);
+      fgaus[nrun_local][ich]->SetRange( seed_mean-5*seed_rms, seed_mean+5*seed_rms );
+      //h_laseramp[nrun_local][ich]->Fit( fgaus[nrun_local][ich], "QR" );
+      h_laseramp[nrun_local][ich]->Fit( fgaus[nrun_local][ich], "LLRQ" );
     }
 
-    ampl = fgaus[nrun][ich]->GetParameter(1);
-    amplerr = fgaus[nrun][ich]->GetParError(1);
-    laseramp[ich][nrun] = ampl;
-    laseramperr[ich][nrun] = amplerr;
+    ampl = fgaus[nrun_local][ich]->GetParameter(1);
+    amplerr = fgaus[nrun_local][ich]->GetParError(1);
+    laseramp[ich][nrun_local] = ampl;
+    laseramperr[ich][nrun_local] = amplerr;
   }
 
-  if ( verbose && nrun==0 )
+  if ( verbose && nrun_local==0 )
   {
     const int NCANVAS = 4;
     TCanvas *c_laseramp[NCANVAS];
@@ -142,8 +141,8 @@ void anafile(const char *tfname = "DST_UNCALMBD-00042674-0000.root", const int n
     {
       int quad = ipmt/32;    // quadrant
       c_laseramp[quad]->cd( ipmt%32 + 1 );
-      //h_laseramp[nrun][ipmt]->Rebin(100);
-      h_laseramp[nrun][ipmt]->Draw();
+      //h_laseramp[nrun_local][ipmt]->Rebin(100);
+      h_laseramp[nrun_local][ipmt]->Draw();
       /*
       gPad->SetLogy(1);
       gPad->Modified();
@@ -159,20 +158,20 @@ float prev_ampl[N_PMT];
 
 void get_prev_gains(const char *prev_gains_file = "gains_at_9_zerofield.out")
 {
-    ifstream infile( prev_gains_file );
+    std::ifstream infile( prev_gains_file );
     int ch;
-    float hvscale;
+    float hvscale_local;
     float ratio;
-    while ( infile >> ch >> hvscale >> ratio )
+    while ( infile >> ch >> hvscale_local >> ratio )
     {
         if ( ch>=0 && ch<128 )
         {
           infile >> prev_ampl[ch];
-          cout << ch << "\t" << endl;
+          std::cout << ch << "\t" << std::endl;
         }
         else
         {
-          cout << "Bad ch" << endl;
+          std::cout << "Bad ch" << std::endl;
         }
     }
 }
@@ -186,35 +185,35 @@ void analaserscan(const char *fname = "hvscan.62880")
 
   // Get the number of actual channels to process
   /*
-  ifstream configfile("digsig.cfg");
+  std::ifstream configfile("digsig.cfg");
   if ( configfile.is_open() )
   {
     string junk;
     configfile >> junk >> NCH;
     NBOARDS = NCH/16;
 
-    cout << "Found config file digsig.cfg" << endl;
-    cout << "Setting NCH = " << NCH << endl;
+    std::cout << "Found config file digsig.cfg" << std::endl;
+    std::cout << "Setting NCH = " << NCH << std::endl;
   }
   */
 
   TString rootfname;
-  ifstream scanfile(fname);
+  std::ifstream scanfile(fname);
   int nruns = 0;
   while ( scanfile >> run_number[nruns] >> hvscale[nruns] )
   {
-    cout << run_number[nruns] << "\t" << hvscale[nruns] << endl;
+    std::cout << run_number[nruns] << "\t" << hvscale[nruns] << std::endl;
 
     // get name of root file
     //rootfname.Form( "calib_mbd-%08d-0000_mbd.root", run_number[nruns] );
-    rootfname.Form( "DST_UNCALMBD-%08d-0000.root", run_number[nruns] );
-    cout << "Processing " << rootfname << endl;
+    rootfname.Form( "DST_UNCALMBD-%08d-0000.root", run_number[nruns] ); // NOLINT(hicpp-vararg)
+    std::cout << "Processing " << rootfname << std::endl;
 
     anafile( rootfname, nruns );
  
     nruns++;
   }
-  cout << "Processed " << nruns << " runs" << endl;
+  std::cout << "Processed " << nruns << " runs" << std::endl;
 
   // Make the canvases for the gain curves
   const int NCANVAS = 4;
@@ -231,9 +230,9 @@ void analaserscan(const char *fname = "hvscan.62880")
   name = "mbdlaser_"; name += fname; name += ".root";
   name.ReplaceAll("hvscan.","");
   TFile *savefile = new TFile(name,"RECREATE");
-  ofstream gainfile("gains.out");
-  ofstream gain9file("gains_at_9.out");
-  float gain_wanted = 0.55;
+  std::ofstream gainfile("gains.out");
+  std::ofstream gain9file("gains_at_9.out");
+//  float gain_wanted = 0.55;
   for (int ipmt=0; ipmt<N_PMT; ipmt++)
   {
     int quad = ipmt/32;  // quadrant
@@ -241,13 +240,13 @@ void analaserscan(const char *fname = "hvscan.62880")
     // Create the TGraph with the summary results
     name = "g_laserscan"; name += ipmt;
     title = "ch "; title += ipmt;
-    g_laserscan[ipmt] = new TGraphErrors(nruns,hvscale,laseramp[ipmt],0,laseramperr[ipmt]);
+    g_laserscan[ipmt] = new TGraphErrors(nruns,hvscale,laseramp[ipmt],nullptr,laseramperr[ipmt]);
     g_laserscan[ipmt]->SetName(name);
     g_laserscan[ipmt]->SetTitle(title);
     g_laserscan[ipmt]->SetMarkerStyle(20);
     g_laserscan[ipmt]->SetMarkerSize(0.5);
 
-    //cout << "ch " << pmtch << endl;
+    //std::cout << "ch " << pmtch << std::endl;
     c_laserscan[quad]->cd( ipmt%32 + 1 );
     g_laserscan[ipmt]->Draw("acp");
     g_laserscan[ipmt]->GetHistogram()->SetTitleSize(4);
@@ -258,11 +257,11 @@ void analaserscan(const char *fname = "hvscan.62880")
     //g_laserscan[ipmt]->Fit( f_gain[ipmt] );
 
     // now step down until we find the gain we want
-    double maxgain = g_laserscan[ipmt]->Eval(1.0);
+//    double maxgain = g_laserscan[ipmt]->Eval(1.0);
 
     /*
     double ref_gain = g_laserscan[ipmt]->Eval(0.81)/maxgain;
-    gain9file << ipmt << "\t" << 0.81 << "\t" << ref_gain << "\t" << g_laserscan[ipmt]->Eval(0.81) << endl;
+    gain9file << ipmt << "\t" << 0.81 << "\t" << ref_gain << "\t" << g_laserscan[ipmt]->Eval(0.81) << std::endl;
 
     for (double iv=0.5; iv<1.0; iv+=0.001)
     {
@@ -270,13 +269,13 @@ void analaserscan(const char *fname = "hvscan.62880")
         //double ratio = g_laserscan[ipmt]->Eval(iv)/maxgain;
         //if ( ratio>gain_wanted )
         //{
-        //    gainfile << ipmt << "\t" << iv << "\t" << ratio << endl;
+        //    gainfile << ipmt << "\t" << iv << "\t" << ratio << std::endl;
         //    break;
         //}
 
         if ( ampl > prev_ampl[ipmt] )
         {
-            gainfile << ipmt << "\t" << iv << "\t" << ampl/prev_ampl[ipmt] << endl;
+            gainfile << ipmt << "\t" << iv << "\t" << ampl/prev_ampl[ipmt] << std::endl;
             break;
         }
     }
@@ -296,7 +295,7 @@ void analaserscan(const char *fname = "hvscan.62880")
     }
     name = "g_norm_laserscan"; name += ipmt;
     title = "ch "; title += ipmt; title += ", norm";
-    g_norm_laserscan[ipmt] = new TGraphErrors(nruns,hvscale,norm_laseramp[ipmt],0,norm_laseramperr[ipmt]);
+    g_norm_laserscan[ipmt] = new TGraphErrors(nruns,hvscale,norm_laseramp[ipmt],nullptr,norm_laseramperr[ipmt]);
     g_norm_laserscan[ipmt]->SetName(name);
     g_norm_laserscan[ipmt]->SetTitle(title);
     g_norm_laserscan[ipmt]->SetMarkerStyle(20);
@@ -312,7 +311,7 @@ void analaserscan(const char *fname = "hvscan.62880")
   savefile->Write();
 
   // dump full gainfile
-  ofstream gain2file("gains_full.csv");
+  std::ofstream gain2file("gains_full.csv");
 
   // Header
   gain2file << "iv,";
@@ -320,7 +319,7 @@ void analaserscan(const char *fname = "hvscan.62880")
   {
       gain2file << ipmt << ",";
   }
-  gain2file << endl;
+  gain2file << std::endl;
 
   // Gains
   for (double iv=1.0; iv>0.5; iv -= 0.05)
@@ -330,7 +329,7 @@ void analaserscan(const char *fname = "hvscan.62880")
     {
         gain2file << g_norm_laserscan[ipmt]->Eval(iv) << ",";
     }
-    gain2file << endl;
+    gain2file << std::endl;
   }
   gain2file.close();
 

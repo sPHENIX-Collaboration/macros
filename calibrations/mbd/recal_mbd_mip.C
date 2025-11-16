@@ -1,16 +1,25 @@
+#ifndef MACRO_RECAL_MBD_MIP_C
+#define MACRO_RECAL_MBD_MIP_C
 //
 // Do a recalibration of the mip from the saved histograms
 //
-#include <TSpectrum.h>
-#include <mbd/MbdCalib.h>
-
 #include "get_runstr.h"
 
+#include <mbd/MbdCalib.h>
 
-#if defined(__CLING__)
-//R__LOAD_LIBRARY(libmbd_io.so)
+#include <TCanvas.h>
+#include <TF1.h>
+#include <TFile.h>
+#include <TH1.h>
+#include <TH2.h>
+#include <TMath.h>
+#include <TPad.h>
+#include <TSpectrum.h>
+#include <TSystem.h>
+
+#include <fstream>
+
 R__LOAD_LIBRARY(libmbd.so)
-#endif
 
 //using namespace MBDRUNS;
 
@@ -21,7 +30,7 @@ TF1 *bkgf[128]{nullptr};
 double minrej = 2000.;
 double peak = 2000.;
 double maxrej = 5000.;
-Double_t powerlaw(Double_t *x, Double_t *par)
+Double_t powerlaw(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parameter)
 {
   Float_t xx =x[0];
   if ( xx>minrej && xx<maxrej )
@@ -39,14 +48,14 @@ Double_t powerlaw(Double_t *x, Double_t *par)
 // [1] = mean
 // [2] = sigma
 // [3] = ampl, peak 2
-Double_t gaus2(Double_t *x, Double_t *par)
+Double_t gaus2(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parameter)
 {
   Double_t xx =x[0];
   Double_t f = par[0]*TMath::Gaus(xx,par[1],par[2]) + par[3]*TMath::Gaus(xx,2.0*par[1],sqrt(2)*par[2]); 
   return f;
 }
 
-Double_t woodssaxon(Double_t *x, Double_t *par)
+Double_t woodssaxon(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parameter)
 {
   Double_t xx =x[0];
   Double_t e = par[0]/(1.0+exp((xx-par[1])/par[2]));
@@ -61,7 +70,7 @@ Double_t woodssaxon(Double_t *x, Double_t *par)
 // [4] = ampl, woods-saxon
 // [5] = a, woods-saxon 
 // [6] = slope, expo
-Double_t gaus2ws(Double_t *x, Double_t *par)
+Double_t gaus2ws(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parameter)
 {
   Double_t xx =x[0];
   Double_t f = par[0]*TMath::Gaus(xx,par[1],par[2]) + par[3]*TMath::Gaus(xx,2.0*par[1],sqrt(2)*par[2]); 
@@ -71,7 +80,7 @@ Double_t gaus2ws(Double_t *x, Double_t *par)
 }
 
 
-Double_t landau2(Double_t *x, Double_t *par)
+Double_t landau2(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parameter)
 {
   Double_t xx =x[0];
   Double_t f = par[0]*TMath::Landau(xx,par[1],par[2]) + par[3]*TMath::Landau(xx,2.0*par[1],par[4]); 
@@ -104,7 +113,8 @@ Double_t langaufun(Double_t *x, Double_t *par)
   Double_t mpc;
   Double_t fland;
   Double_t sum = 0.0;
-  Double_t xlow,xupp;
+  Double_t xlow;
+  Double_t xupp;
   Double_t step;
   Double_t i;
 
@@ -163,7 +173,7 @@ void FindThreshold(TH1 *h, double& threshold)
       double ratio = val/prev_val;
       if ( val>(absmaxval*0.25) )
       {
-        //cout << ibin << "\t" << ratio << endl;
+        //std::cout << ibin << "\t" << ratio << std::endl;
         if ( ratio>maxratio )
         {
           maxratio = ratio;
@@ -186,7 +196,7 @@ void FindThreshold(TH1 *h, double& threshold)
     // use max bin in threshold range
     threshold = h->GetBinLowEdge( maxbin );
   }
-  //cout << threshold << endl;
+  //std::cout << threshold << std::endl;
 }
 
 
@@ -234,7 +244,7 @@ void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax, double thre
 }
 */
 
-void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax, double threshold)
+void FindPeakRange(TH1 *h, double& xmin, double& thispeak, double& xmax, double threshold)
 {
   int verbose = 1;
 
@@ -293,14 +303,14 @@ void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax, double thre
     // if we see this many below the max, the signal is falling
     if ( nbelow==20 )
     {
-      peak = h->GetBinCenter( ibin-20 );
+      thispeak = h->GetBinCenter( ibin-20 );
       break;
     }
 
     ibin++;
   }
 
-  xmax = peak + 4*(peak - xmin);
+  xmax = thispeak + 4*(thispeak - xmin);
 
 }
 
@@ -310,12 +320,12 @@ void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax, double thre
 // method0:  TSpectrum bkg + 2 gaus fit
 void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 3, const int type = 0, const int method = 0)
 {
-  cout << "recal_mbd_mip(), type method " << type << " " << method << endl;
-  cout << "tfname " << tfname << endl;
+  std::cout << "recal_mbd_mip(), type method " << type << " " << method << std::endl;
+  std::cout << "tfname " << tfname << std::endl;
 
   const int NUM_PMT = 128;
   //const int NUM_PMT = 2;
-  const int NUM_ARMS = 2;
+//  const int NUM_ARMS = 2;
 
   // Create new TFile
   int runnumber = get_runnumber(tfname);
@@ -340,15 +350,15 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
     title = "q"; title += ipmt;
     //h_q[ipmt] = new TH1F(name,title,15100/4,-100,15000);
     h_q[ipmt] = (TH1*)oldfile->Get(name);
-    if ( type == MBDRUNS::AUAU200 )
-    {
-      //h_q[ipmt]->Rebin(2);
-    }
-    else if ( type == MBDRUNS::PP200 )
-    {
-      //h_q[ipmt]->Rebin(4);  // b-off
-      //h_q[ipmt]->Rebin(2);
-    }
+    // if ( type == MBDRUNS::AUAU200 )
+    // {
+    //   //h_q[ipmt]->Rebin(2);
+    // }
+    // else if ( type == MBDRUNS::PP200 )
+    // {
+    //   //h_q[ipmt]->Rebin(4);  // b-off
+    //   //h_q[ipmt]->Rebin(2);
+    // }
 
     name = "h_tq"; name += ipmt;
     title = "tq"; title += ipmt;
@@ -356,11 +366,11 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
     h_tq[ipmt] = (TH1*)oldfile->Get(name);
   }
   //TH2 *h2_tq = new TH2F("h2_tq","ch vs tq",900,-150,150,NUM_PMT,-0.5,NUM_PMT-0.5);
-  TH2 *h2_tq = (TH2*)oldfile->Get("h2_tq");
+//  TH2 *h2_tq = (TH2*)oldfile->Get("h2_tq");
 
   name = dir; 
   name += "recalmbd_pass"; name += pass; name += ".root";
-  cout << name << endl;
+  std::cout << name << std::endl;
 
   TFile *savefile = new TFile(name,"RECREATE");
 
@@ -377,7 +387,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
     ac[cvindex]->cd(1);
   }
 
-  ofstream cal_mip_file;
+  std::ofstream cal_mip_file;
   TString calfname;
   if ( pass==3 ) 
   {
@@ -393,7 +403,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
 
   if ( type==MBDRUNS::PP200 )
   {
-    cout << "setting up for pp200" << endl;
+    std::cout << "setting up for pp200" << std::endl;
     //qmin = 200;
     //qmax = 10000;       // Run24pp boff
     //qmin = 100;
@@ -419,7 +429,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
 
   // Set up output pdf to save plots
   TString pdfname = dir; pdfname += "calmbdpass2."; pdfname += pass; pdfname += "_mip-"; pdfname += runnumber; pdfname += ".pdf";
-  cout << pdfname << endl;
+  std::cout << pdfname << std::endl;
   ac[cvindex]->Print( pdfname + "[" );
 
   for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
@@ -433,7 +443,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       h_bkg[ipmt]->SetLineColor(2);
       double threshold = qmin + 2.;
       FindThreshold( h_q[ipmt], threshold );
-      cout << "threshold " << ipmt << "\t" << threshold << endl;
+      std::cout << "threshold " << ipmt << "\t" << threshold << std::endl;
       h_q[ipmt]->GetXaxis()->SetRangeUser( threshold, qmax );
       h_q[ipmt]->Sumw2();
 
@@ -463,14 +473,14 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
         best_peak = xpeaks[1];
         }
 
-        cout << "peaks\t" << ipmt << "\t" << nfound << "\t" << best_peak << endl;
+        std::cout << "peaks\t" << ipmt << "\t" << nfound << "\t" << best_peak << std::endl;
         */
 
       }
       else if ( method==1 )
       {
         FindPeakRange( h_bkg[ipmt], minrej, peak, maxrej, threshold );
-        cout << "peak range\t" << minrej << "\t" << peak << "\t" << maxrej << endl;
+        std::cout << "peak range\t" << minrej << "\t" << peak << "\t" << maxrej << std::endl;
         sigma = peak-minrej;
         seedmean = peak;
 
@@ -491,8 +501,8 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
         h_mip[ipmt]->SetName( name );
         h_mip[ipmt]->SetTitle( name );
 
-        double orig_minrej = minrej;
-        double orig_maxrej = maxrej;
+//        double orig_minrej = minrej;
+//        double orig_maxrej = maxrej;
         minrej = 0.;
         maxrej = 0.;
         h_mip[ipmt]->Add( bkgf[ipmt], -1.0 );
@@ -506,7 +516,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       mipfit[ipmt]->SetLineColor(4);
       mipfit[ipmt]->SetParameter( 0, 5.0*h_mip[ipmt]->GetMaximum() );
       Double_t seedmean = h_mip[ipmt]->GetBinCenter( h_mip[ipmt]->GetMaximumBin() );
-      cout << "SEEDMEAN " << seedmean << endl;
+      std::cout << "SEEDMEAN " << seedmean << std::endl;
       mipfit[ipmt]->SetParameter( 1, seedmean );
       mipfit[ipmt]->SetParameter( 2, 20. );
       */
@@ -518,7 +528,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       //mipfit[ipmt] = new TF1(name,langaufun,qmin,qmax,4);
 
       seedmean = h_mip[ipmt]->GetBinCenter( h_mip[ipmt]->GetMaximumBin() );
-      cout << "SEEDMEAN " << seedmean << endl;
+      std::cout << "SEEDMEAN " << seedmean << std::endl;
       Double_t seedsigma = sigma;
       if ( type==MBDRUNS::SIMAUAU200 )
       {
@@ -562,10 +572,10 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
 
       cal_mip_file << ipmt << "\t" << integ << "\t" << best_peak << "\t" << width << "\t"
         << integerr << "\t" << best_peakerr << "\t" << widtherr << "\t"
-        << chi2/ndf << endl;
-      cout << ipmt << "\t" << integ << "\t" << best_peak << "\t" << width << "\t"
+        << chi2/ndf << std::endl;
+      std::cout << ipmt << "\t" << integ << "\t" << best_peak << "\t" << width << "\t"
         << integerr << "\t" << best_peakerr << "\t" << widtherr << "\t"
-        << chi2/ndf << endl;
+        << chi2/ndf << std::endl;
 
       // Get full fit
       h_bkgmip[ipmt] = (TH1*)h_bkg[ipmt]->Clone();
@@ -617,13 +627,13 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
 
       /*
          string junk;
-         cout << "? ";
+         std::cout << "? ";
          cin >> junk;
          */
 
       //name = dir + "h_qfit"; name += ipmt; name += ".png";
       title = "h_qfit"; title += ipmt;
-      //cout << pdfname << " " << title << endl;
+      //std::cout << pdfname << " " << title << std::endl;
       ac[cvindex]->Print( pdfname, title );
     }
 
@@ -646,4 +656,4 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
   savefile->Write();
   savefile->Close();
 }
-
+#endif

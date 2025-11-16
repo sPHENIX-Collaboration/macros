@@ -49,7 +49,8 @@ if [[ -s ${all_files} ]]
 then
   echo "New DSTs:"
   wc -l ${all_files}
-  cat ${tstamp_file} >> tstamp.history
+  cp -p ${TOPDIR}/tstamp.history .
+  cat ${tstamp_file} >> ${TOPDIR}/tstamp.history
 else
   echo "No new DSTs found"
   exit
@@ -60,12 +61,18 @@ ${TOPDIR}/splitbyrun.sh flist.tobedone
 
 # copy macros and scripts
 cd ${SUBMITDIR}
-cp -p /sphenix/user/chiu/sphenix_bbc/offline/macros/calibrations/mbd/* .
+if [[ $USER == "sphnxpro" ]]
+then
+  cp -p ${HOME}/chiu/offline/macros/calibrations/mbd/* .
+elif [[ $USER == "chiu" ]]
+then
+  cp -p /sphenix/user/chiu/sphenix_bbc/offline/macros/calibrations/mbd/* .
+fi
 
 # submit jobs to condor
 wc -l ?????.list | grep -v total | while read ndsts fname
 do
-  if [[ $ndsts -lt 30 ]]
+  if [[ $ndsts -lt 19 ]]
   then
     #maxdsts=$(grep ${fname%.list} ${tmp_runsfile} | awk '{print int($3/100000)}')
     echo $ndsts $fname >> SKIPPING
