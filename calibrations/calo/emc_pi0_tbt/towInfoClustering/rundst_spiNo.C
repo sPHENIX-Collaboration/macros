@@ -3,8 +3,9 @@
 
 #include <GlobalVariables.C>
 
+#include "G4Setup_sPHENIX.C"
+
 #include <DisplayOn.C>
-#include <G4Setup_sPHENIX.C>
 #include <G4_Mbd.C>
 #include <G4_CaloTrigger.C>
 #include <G4_DSTReader.C>
@@ -15,21 +16,25 @@
 #include <G4_ParticleFlow.C>
 #include <G4_Production.C>
 #include <G4_TopoClusterReco.C>
-#include <G4_Tracking.C>
 #include <G4_User.C>
+#include <Trkr_Clustering.C>
+#include <Trkr_Eval.C>
+#include <Trkr_QA.C>
+#include <Trkr_Reco.C>
+#include <Trkr_RecoInit.C>
+
+#include <litecaloeval/LiteCaloEval.h>
+
+#include <calib_emc_pi0/CaloCalibEmc_Pi0.h>
 
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
 
-//#include <litecaloeval/LiteCaloEval.h>
-
-
 #include <phool/PHRandomSeed.h>
 #include <phool/recoConsts.h>
 
-#include <litecaloeval/LiteCaloEval.h>
-#include <calib_emc_pi0/CaloCalibEmc_Pi0.h>
+#include <TROOT.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libcaloCalibDBFile.so)
@@ -42,29 +47,29 @@ R__LOAD_LIBRARY(libLiteCaloEvalTowSlope.so)
 
 int rundst_spiNo(
     const int nEvents = 5,
-    //    const string &inputFile0 = "DST_CALO_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-10000.root",
-    //const string &inputFile1 = "DST_VERTEX_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-10000.root",
+    //    const std::string &inputFile0 = "DST_CALO_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-10000.root",
+    //const std::string &inputFile1 = "DST_VERTEX_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-10000.root",
     const int mdc2_4_file_num = 20,
-    const string &outputFile = "dstnewoutput5_calo5",
-    //      const string &inputFile0 = "/gpfs/mnt/gpfs02/sphenix/sim/sim01/sphnxpro/MDC2/sHijing_HepMC/fm_0_20/pileup/DST_CALO_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000003-00001.root",  //"DST_CALO_G4HIT_sHijing_0_12fm-0000000001-00000.root",
-    //      const string &inputFile1 = "/gpfs/mnt/gpfs02/sphenix/sim/sim01/sphnxpro/MDC2/sHijing_HepMC/fm_0_20/pileup/DST_VERTEX_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000003-00001.root", //"DST_VERTEX_sHijing_0_12fm-0000000001-00000.root",
-    //      const string &outputFile = "G4sPHENIX_calo1",
-      const string &outdir = ".")
+    const std::string &outputFile = "dstnewoutput5_calo5",
+    //      const std::string &inputFile0 = "/gpfs/mnt/gpfs02/sphenix/sim/sim01/sphnxpro/MDC2/sHijing_HepMC/fm_0_20/pileup/DST_CALO_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000003-00001.root",  //"DST_CALO_G4HIT_sHijing_0_12fm-0000000001-00000.root",
+    //      const std::string &inputFile1 = "/gpfs/mnt/gpfs02/sphenix/sim/sim01/sphnxpro/MDC2/sHijing_HepMC/fm_0_20/pileup/DST_VERTEX_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000003-00001.root", //"DST_VERTEX_sHijing_0_12fm-0000000001-00000.root",
+    //      const std::string &outputFile = "G4sPHENIX_calo1",
+      const std::string &outdir = ".")
 {
    Fun4AllServer *se = Fun4AllServer::instance();
    se->Verbosity(0);
 
 
-   //   string inputFile0 = "DST_CALO_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-10000.root";
-   //   string inputFile1 = "DST_VERTEX_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-10000.root";
+   //   std::string inputFile0 = "DST_CALO_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-10000.root";
+   //   std::string inputFile1 = "DST_VERTEX_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000004-10000.root";
 
-   //   string inputFile0 = "DST_CALO_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
-   //string inputFile0 = "DST_CALO_CLUSTER_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-00000.root";
-   //   string inputFile1 = "DST_VERTEX_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
+   //   std::string inputFile0 = "DST_CALO_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
+   //std::string inputFile0 = "DST_CALO_CLUSTER_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-00000.root";
+   //   std::string inputFile1 = "DST_VERTEX_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
 
-   string inputFile0 = "DST_CALO_G4HIT_single_pi0_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
+   std::string inputFile0 = "DST_CALO_G4HIT_single_pi0_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
 
-   string inputFile1 =     "DST_VERTEX_single_pi0_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
+   std::string inputFile1 =     "DST_VERTEX_single_pi0_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
 
    
    int ynum_int = 100000+ mdc2_4_file_num;
@@ -77,11 +82,11 @@ int rundst_spiNo(
    inputFile0 += ".root";
    inputFile1 += ".root";
    
-   cout << "running over these files" << endl;
-   cout << inputFile0 << endl;
-   cout << inputFile1 << endl;
+   std::cout << "running over these files" << std::endl;
+   std::cout << inputFile0 << std::endl;
+   std::cout << inputFile1 << std::endl;
 
-   //const string &outputFile = "newoutput1_calo1",
+   //const std::string &outputFile = "newoutput1_calo1",
 
 
   //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
@@ -90,13 +95,13 @@ int rundst_spiNo(
   long mtime = gSystem->Now();   
   TString fileOut = outputFile.c_str();
   fileOut += (mtime / 100000 - 8542922)/3;
-  string outputFile2 = fileOut.Data();
+  std::string outputFile2 = fileOut.Data();
   */
-  string outputFile2 = outputFile.c_str();
+  std::string outputFile2 = outputFile;
   outputFile2 = outputFile2 + ".root";
 
   // just if we set some flags somewhere in this macro
-  recoConsts *rc = recoConsts::instance();
+  // recoConsts *rc = recoConsts::instance();
   // By default every random number generator uses
   // PHRandomSeed() which reads /dev/urandom to get its seed
   // if the RANDOMSEED flag is set its value is taken as seed
@@ -201,8 +206,8 @@ int rundst_spiNo(
   // Magnet Settings
   //---------------
 
-  //  const string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
-  //  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
+  //  const std::string magfield = "1.5"; // alternatively to specify a constant magnetic field, give a float number, which will be translated to solenoidal field in T, if string use as fieldmap name (including path)
+  //  G4MAGNET::magfield = std::string(getenv("CALIBRATIONROOT")) + std::string("/Field/Map/sPHENIX.2d.root");  // default map from the calibration database
 //  G4MAGNET::magfield_rescale = 1;  // make consistent with expected Babar field strength of 1.4T
 
   //---------------
@@ -282,7 +287,7 @@ int rundst_spiNo(
 
   if (Enable::GLOBAL_RECO && Enable::GLOBAL_FASTSIM)
   {
-    cout << "You can only enable Enable::GLOBAL_RECO or Enable::GLOBAL_FASTSIM, not both" << endl;
+    std::cout << "You can only enable Enable::GLOBAL_RECO or Enable::GLOBAL_FASTSIM, not both" << std::endl;
     gSystem->Exit(1);
   }
   if (Enable::GLOBAL_RECO)
@@ -315,10 +320,10 @@ int rundst_spiNo(
   //----------------------
   // Simulation evaluation
   //----------------------
-  string outputroot = outputFile;
-  string remove_this = ".root";
+  std::string outputroot = outputFile;
+  std::string remove_this = ".root";
   size_t pos = outputroot.find(remove_this);
-  if (pos != string::npos)
+  if (pos != std::string::npos)
   {
     outputroot.erase(pos, remove_this.length());
   }
@@ -336,7 +341,7 @@ int rundst_spiNo(
 
   if (Enable::DSTOUT)
   {
-    string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
+    std::string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", FullOutFile);
     out->AddNode("Sync");
     out->AddNode("EventHeader");
@@ -374,24 +379,24 @@ int rundst_spiNo(
     gROOT->ProcessLine("Fun4AllServer *se = Fun4AllServer::instance();");
     gROOT->ProcessLine("PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco(\"PHG4RECO\");");
 
-    cout << "-------------------------------------------------" << endl;
-    cout << "You are in event display mode. Run one event with" << endl;
-    cout << "se->run(1)" << endl;
-    cout << "Run Geant4 command with following examples" << endl;
+    std::cout << "-------------------------------------------------" << std::endl;
+    std::cout << "You are in event display mode. Run one event with" << std::endl;
+    std::cout << "se->run(1)" << std::endl;
+    std::cout << "Run Geant4 command with following examples" << std::endl;
     gROOT->ProcessLine("displaycmd()");
 
     return 0;
   }
 
-  string outputfile = outputFile2 + "_ho4ho_eval.root";
-  string outputfile2 = outputFile2 + "_piemc.root";
-  string outputfile3 = outputFile2 + "_towslopemc.root";
-  string outputfile4 = outputFile2 + "_hcalin.root";
-  string outputfile5 = outputFile2 + "_hcalin_mod.root";
-  string outputfile6 = outputFile2 + "_emcal.root";
+  // std::string outputfile = outputFile2 + "_ho4ho_eval.root";
+  // std::string outputfile2 = outputFile2 + "_piemc.root";
+  std::string outputfile3 = outputFile2 + "_towslopemc.root";
+  // std::string outputfile4 = outputFile2 + "_hcalin.root";
+  // std::string outputfile5 = outputFile2 + "_hcalin_mod.root";
+  // std::string outputfile6 = outputFile2 + "_emcal.root";
 
 
-  LiteCaloEval *eval3a = new LiteCaloEval("CEMCEVALUATOR", "CEMC", outputfile3.c_str());
+  LiteCaloEval *eval3a = new LiteCaloEval("CEMCEVALUATOR", "CEMC", outputfile3);
   //  LiteCaloEval *eval3a = new LiteCaloEval("HOCEMCEVALUATOR", "HCALOUT", outputfile3.c_str());
   //  eval->Verbosity(verbosity);
   eval3a->CaloType(LiteCaloEval::CEMC);
@@ -429,7 +434,7 @@ int rundst_spiNo(
   //  eval_pi2->set_mode(1);
   //  eval->Verbosity(verbosity);
   se->registerSubsystem(eval_pi2);
-  cout << "successful registration of pi0 " << endl;
+  std::cout << "successful registration of pi0 " << std::endl;
   */
 
   /*
@@ -454,8 +459,8 @@ int rundst_spiNo(
   // if we run the particle generator and use 0 it'll run forever
   if (nEvents == 0 && !Input::HEPMC && !Input::READHITS)
   {
-    cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
-    cout << "it will run forever, so I just return without running anything" << endl;
+    std::cout << "using 0 for number of events is a bad idea when using particle generators" << std::endl;
+    std::cout << "it will run forever, so I just return without running anything" << std::endl;
     return 0;
   }
 

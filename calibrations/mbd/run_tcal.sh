@@ -39,7 +39,7 @@ fi
 
 pass=0
 runtype=0 # 0=auau,1=pp
-#dbtag="ProdA_2024"
+#dbtag="newcdbtag"
 dbtag=""
 if [[ -n "$PASS0DIR" ]]
 then

@@ -12,7 +12,7 @@ tmpfile=/tmp/make_dst_uncal_noslew.out
 
 nevts=20000 # number to process in each group
 
-export PASS0DIR=${PWD}/PASS0/54937
+export PASS0DIR=${PWD}/PASS0/66737
 echo $PASS0DIR
 
 for fullprdf in $(cat $prdflist)

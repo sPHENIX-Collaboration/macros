@@ -44,8 +44,8 @@ ln -sf ../../Fun4All_MBD_CalPass.C .
 echo processing run $run in directory $dir
 
 # Set PASS0DIR to bypass default in CDB calibrations
-#export PASS0DIR=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0/
-#echo "Setting PASS0DIR to $PASS0DIR"
+export PASS0DIR=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0/
+echo "Setting PASS0DIR to $PASS0DIR"
 
 # do the pass1 calibrations (only 20K events)
 echo run_mbdcalpass.sh $infile 1

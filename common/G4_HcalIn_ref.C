@@ -3,6 +3,7 @@
 #define MACRO_G4HCALINREF_C
 
 #include <GlobalVariables.C>
+
 #include <QA.C>
 
 #include <g4calo/HcalRawTowerBuilder.h>
@@ -115,7 +116,7 @@ void HCalInnerInit(const int iflag = 0)
 
 double HCalInner(PHG4Reco *g4Reco,
                  double radius,
-                 const int crossings)
+                 const int /*crossings*/)
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::HCALIN_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::HCALIN_OVERLAPCHECK;
@@ -199,10 +200,7 @@ double HCalInner(PHG4Reco *g4Reco,
   }
   hcal->SetActive();
   hcal->SuperDetector("HCALIN");
-  if (AbsorberActive)
-  {
-    hcal->SetAbsorberActive();
-  }
+  if (AbsorberActive) hcal->SetAbsorberActive();
   if (!std::isfinite(G4HCALIN::phistart))
   {
     if (Enable::HCALIN_OLD)
@@ -230,7 +228,10 @@ double HCalInner(PHG4Reco *g4Reco,
 
 void HCALInner_Cells()
 {
-  if (!Enable::HCALIN_G4Hit) return;
+  if (!Enable::HCALIN_G4Hit)
+  {
+    return;
+  }
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
 
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -257,7 +258,7 @@ void HCALInner_Towers()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::HCALIN_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();
-  
+
   if (!Enable::HCALIN_TOWERINFO)
   {
     if (Enable::HCALIN_G4Hit)
@@ -304,13 +305,19 @@ void HCALInner_Towers()
     TowerDigitizer->set_photonelec_yield_visible_GeV(32. / 5 / (0.4e-3));
     TowerDigitizer->set_zero_suppression_ADC(-0);  // no-zero suppression
     TowerDigitizer->Verbosity(verbosity);
-    if (!Enable::HCALIN_G4Hit) TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    if (!Enable::HCALIN_G4Hit)
+    {
+      TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    }
     se->registerSubsystem(TowerDigitizer);
 
     // Default sampling fraction for SS310
     double visible_sample_fraction_HCALIN = 0.0631283;  //, /gpfs/mnt/gpfs04/sphenix/user/jinhuang/prod_analysis/hadron_shower_res_nightly/./G4Hits_sPHENIX_pi-_eta0_16GeV-0000.root_qa.rootQA_Draw_HCALIN_G4Hit.pdf
 
-    if (G4HCALIN::inner_hcal_material_Al) visible_sample_fraction_HCALIN = 0.162166;  // for "G4_Al", Abhisek Sen <sen.abhisek@gmail.com>
+    if (G4HCALIN::inner_hcal_material_Al)
+    {
+      visible_sample_fraction_HCALIN = 0.162166;  // for "G4_Al", Abhisek Sen <sen.abhisek@gmail.com>
+    }
 
     RawTowerCalibration *TowerCalibration = new RawTowerCalibration("HcalInRawTowerCalibration");
     TowerCalibration->Detector("HCALIN");
@@ -329,7 +336,10 @@ void HCALInner_Towers()
     }
     TowerCalibration->set_pedstal_ADC(0);
     TowerCalibration->Verbosity(verbosity);
-    if (!Enable::HCALIN_G4Hit) TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    if (!Enable::HCALIN_G4Hit)
+    {
+      TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    }
     se->registerSubsystem(TowerCalibration);
   }
   else
@@ -379,7 +389,10 @@ void HCALInner_Clusters()
     ClusterBuilder->Detector("HCALIN");
     ClusterBuilder->SetCylindricalGeometry();  // has to be called after Detector()
     ClusterBuilder->Verbosity(verbosity);
-    if (!Enable::HCALIN_G4Hit || Enable::HCALIN_TOWERINFO) ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
+    if (!Enable::HCALIN_G4Hit || Enable::HCALIN_TOWERINFO)
+    {
+      ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
+    }
     se->registerSubsystem(ClusterBuilder);
   }
   else if (G4HCALIN::HCalIn_clusterizer == G4HCALIN::kHCalInGraphClusterizer)
@@ -418,7 +431,10 @@ void HCALInner_QA()
 
   Fun4AllServer *se = Fun4AllServer::instance();
   QAG4SimulationCalorimeter *qa = new QAG4SimulationCalorimeter("HCALIN");
-  if (Enable::HCALIN_TOWERINFO) qa->set_flags(QAG4SimulationCalorimeter::kProcessTowerinfo);
+  if (Enable::HCALIN_TOWERINFO)
+  {
+    qa->set_flags(QAG4SimulationCalorimeter::kProcessTowerinfo);
+  }
   qa->Verbosity(verbosity);
   se->registerSubsystem(qa);
 

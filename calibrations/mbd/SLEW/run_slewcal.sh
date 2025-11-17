@@ -40,16 +40,18 @@ then
   BATCH=-b
 fi
 
-subpass=1  # generate slew curves (slew calibrations may or may not be applied)
-echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\)
-root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\) 
-
-# after this, run recal_mbd_slew.C to generate the slewcorr calib file,
 run=${mbd_uncalrootf##*/}
 run=${run#*-}
 run=${run%.root}
 run=${run%-*}
 run=$((10#${run}))
+echo Processing $run
+
+subpass=1  # generate slew curves (slew calibrations may or may not be applied in dst_uncal)
+echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\)
+root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\) 
+
+# after this, run recal_mbd_slew.C to generate the slewcorr calib file,
 
 slewrootf=results/${run}/calmbdpass2.${subpass}_slew-${run}.root
 echo root.exe ${BATCH} -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 

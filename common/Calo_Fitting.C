@@ -1,10 +1,12 @@
-#ifndef CALO_FITTING_H
-#define CALO_FITTING_H
+#ifndef MACRO_CALO_FITTING_C
+#define MACRO_CALO_FITTING_C
 
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloWaveformProcessing.h>
 
 #include <fun4all/Fun4AllServer.h>
+
+#include <Rtypes.h> // for R__LOAD_LIBRARY
 
 R__LOAD_LIBRARY(libcalo_reco.so)
 

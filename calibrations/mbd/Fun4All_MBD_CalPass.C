@@ -1,32 +1,39 @@
-#ifndef __FUN4ALL_MBD_CALPASS_H__
-#define __FUN4ALL_MBD_CALPASS_H__
+#ifndef MACRO_FUN4ALL_MBD_CALPASS_C
+#define MACRO_FUN4ALL_MBD_CALPASS_C
 
-#include <fun4all/Fun4AllServer.h>
-#include <fun4all/Fun4AllUtils.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4allraw/Fun4AllPrdfInputManager.h>
-#include <fun4all/Fun4AllDstInputManager.h>
-#include <fun4all/Fun4AllOutputManager.h>
-#include <fun4all/Fun4AllDstOutputManager.h>
-#include <fun4allraw/Fun4AllEventOutputManager.h>
-#include <phool/recoConsts.h>
+#include <globalvertex/GlobalVertexReco.h>
+
+#include <mbd/MbdReco.h>
 
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
 #include <ffamodules/HeadReco.h>
 #include <ffamodules/SyncReco.h>
 
-#include <globalvertex/GlobalVertexReco.h>
-#include <mbd/MbdReco.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllUtils.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
 
-#if defined(__CLING__)
+#include <fun4allraw/Fun4AllPrdfInputManager.h>
+#include <fun4allraw/Fun4AllEventOutputManager.h>
+
+#include <phool/recoConsts.h>
+
+
+#include <Rtypes.h> // defines R__LOAD_LIBRARY macro for clang-tidy
+#include <TString.h>
+#include <TSystem.h>
+
+#include <fstream>
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libphool.so)
 R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
-#endif
 
 void Fun4All_MBD_CalPass(const char *input = "/sphenix/user/pinkenbu/testprdf/beam-00002609-0000.prdf",
     const int calpass = 0, int nEvents = 0, const int nskip = 0, const std::string& cdbtag = "")
@@ -48,31 +55,31 @@ void Fun4All_MBD_CalPass(const char *input = "/sphenix/user/pinkenbu/testprdf/be
   std::string first_line = all_inputfnames[0];
   if ( first_line.ends_with(".list") )
   {
-    ifstream listfile(all_inputfnames[0]);
+    std::ifstream listfile(all_inputfnames[0]);
     getline(listfile, first_line);
     listfile.close();
   }
 
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(first_line);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(first_line);
   int runnumber = runseg.first;
   int segment = runseg.second;
-  cout << "run number = " << runnumber << endl;
+  std::cout << "run number = " << runnumber << std::endl;
 
   recoConsts *rc = recoConsts::instance();
-  if ( cdbtag.length() !=0 )
+  if ( !cdbtag.empty() )
   {
-    cout << "Using cdb " << cdbtag << endl;
-    rc->set_StringFlag("CDB_GLOBALTAG",cdbtag.c_str()); 
+    std::cout << "Using cdb " << cdbtag << std::endl;
+    rc->set_StringFlag("CDB_GLOBALTAG",cdbtag);
   }
   else
   {
-    cout << "RUN\t" << runnumber << endl;
+    std::cout << "RUN\t" << runnumber << std::endl;
     rc->set_uint64Flag("TIMESTAMP", runnumber);
 
     // For local calibrations
     TString bdir = "./results/";
     bdir += runnumber;
-    cout << bdir << endl;
+    std::cout << bdir << std::endl;
     rc->set_StringFlag("MBD_CALDIR",bdir.Data()); 
   }
 
@@ -104,7 +111,7 @@ void Fun4All_MBD_CalPass(const char *input = "/sphenix/user/pinkenbu/testprdf/be
   //GlobalVertexReco *gvertex = new GlobalVertexReco();
   //se->registerSubsystem(gvertex);
 
-  vector<Fun4AllInputManager *> in;
+  std::vector<Fun4AllInputManager *> in;
 
   if ( all_inputfnames[0].ends_with(".prdf") )
   {
@@ -130,7 +137,7 @@ void Fun4All_MBD_CalPass(const char *input = "/sphenix/user/pinkenbu/testprdf/be
   {
     for ( const auto& inputfname : all_inputfnames )
     {
-      cout << "adding " << inputfname << endl;
+      std::cout << "adding " << inputfname << std::endl;
       Fun4AllDstInputManager *inputman = new Fun4AllDstInputManager("DST");
       inputman->AddListFile( inputfname );
       in.push_back( inputman );
@@ -141,9 +148,9 @@ void Fun4All_MBD_CalPass(const char *input = "/sphenix/user/pinkenbu/testprdf/be
   if ( calpass == 2 )
   {
     TString outfile = "DST_UNCALMBD-";
-    outfile += Form("%08d-%04d",runnumber,segment);
+    outfile += Form("%08d-%04d",runnumber,segment); // NOLINT(hicpp-vararg)
     outfile += ".root";
-    cout << outfile << endl;
+    std::cout << outfile << std::endl;
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfile.Data());
     out->StripNode("CEMCPackets");
     out->StripNode("HCALPackets");
@@ -165,7 +172,7 @@ void Fun4All_MBD_CalPass(const char *input = "/sphenix/user/pinkenbu/testprdf/be
   delete se;
   gSystem->Exit(0);
 
-  cout << "Finished" << endl;
+  std::cout << "Finished" << std::endl;
 }
 
 #endif

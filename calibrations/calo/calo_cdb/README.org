@@ -9,7 +9,7 @@ This package automates the generation of the CDB maps for the calorimeters. Spec
 
 ** Steps
 
-1) The ~FileCatalog~ is queried for all runnumber, tag, file paths, and time given a run type and minimum event threshold. By default the run type is set to ~run3auau~ and minimum event threshold is 500k events.
+1) The ~FileCatalog~ is queried for all runnumber, tag, file paths, and time given a run type. By default the run type is set to ~run3auau~.
 2) The result is reduced as follows: Only the tag corresponding to the latest time among duplicate instaces of run numbers is kept. For example, if there are two instances (run, tag, time) of (A,B,C) and (A,D,E) where E > C then (A,B,C) is dropped and only (A,D,E) is kept.
 3) Using the ~filter-datasets~ binary, the CDB (Calibrations Database) is pinged given the run number and specific calibration name. If no result is returned by the CDB or if the tag in the calibration name does not match the latest tag, then the pair of run number and tag is kept to produce the calibration files. Otherwise the pair is removed since the latest calibration already exists in the CDB. A list of all such runs is written to ~{runtype}-process.csv~.
 4) Using the ~{runtype}-process.csv~ file, a unique file is created for each run number which consists of all of the ~HIST_CALOQA~ for that run number.
@@ -26,7 +26,6 @@ This package automates the generation of the CDB maps for the calorimeters. Spec
 To get a quick list of all options allowed, run the script using the ~-h~ flag as follows: ~runProd.py -h~.
 Some key flags:
 - ~--run-type~: By default is set to ~run3auau~ but can also work with ~run2auau~ or ~run2pp~.
-- ~--min-events~: By default is set to ~500k~. Only runs with at least this many events are considered.
 - ~--output~: By default is set to ~test~. This directory is where all relevant log files and condor files are stored.
 - ~--condor-log-dir~: By default is set to ~/tmp/<USER>/dump~. This directory is where the condor log files are stored. As long as the location is under ~/tmp~ it should be fine.
 - ~--do-condor-submit~: By default this is disabled. Enabling this option submits the condor jobs as needed. Useful for embedding the script in a cron job. Note: Jobs are only submitted if there exists a run with outdated or missing calibrations.
@@ -34,10 +33,53 @@ Some key flags:
 
 Example:
 #+begin_src bash
-runProd.py --run-type run3auau --min-events 500000 --output run3auau --verbose
+runProd.py --run-type run3auau --output run3auau --verbose
 #+end_src
 
 Example Cron Job (Once a day at midnight):
 #+begin_src
-0 0 * * * runProd.py --run-type run3auau --min-events 500000 --output run3auau --verbose --do-condor-submit
+0 0 * * * runProd.py --run-type run3auau --output run3auau --verbose --do-condor-submit
 #+end_src
+
+* runProd.C Macro Details
+
+** Overview
+This is a macro designed to automate the generation of calorimeter calibration files for the sPHENIX Calibrations Database (CDB). The macro checks if up-to-date calibrations already exist for a given run and dataset. If they are missing or outdated, it invokes the necessary calo_cdb library to process the data and generate the new calibration files.
+
+** Features
+- Modern C++20 Implementation: Utilizes modern C++ features like std::filesystem for robust path handling, std::regex for reliable filename parsing, and std::format for clean output.
+- Object-Oriented Design: All logic is encapsulated within a ProductionManager class, ensuring clean state management and eliminating global variables.
+- Intelligent CDB Checking: Automatically connects to the CDB using a specified global tag and checks a predefined list of essential calorimeter calibrations (CEMC_BadTowerMap, CEMC_meanTime, etc.).
+- Outdated Calibration Detection: Compares the production dataset tag found in the CDB with the one from the input file to determine if existing calibrations are outdated.
+- Robust Error Handling: Implements comprehensive argument validation and uses exceptions for error handling to ensure predictable behavior.
+- Force Option: Includes a ~--force~ flag to override the CDB check and regenerate calibrations regardless of their current status.
+  Examples
+
+** Usage
+1. Standard Check and Generate:
+Check if run 68006 from the new_newcdbtag_v008 dataset needs new calibrations. If so, generate them in the cdb_output directory.
+
+#+begin_src bash
+root -b -l -q 'runProd.C("/path/to/lists/68006_new_newcdbtag_v008.list", "cdb_output")'
+#+end_src
+
+2. Force Regeneration:
+Regenerate calibrations for run 68006, overwriting any existing entries, using a specific database tag.
+
+#+begin_src bash
+root -b -l -q 'runProd.C("/path/to/lists/68006_new_newcdbtag_v008.list", "cdb_output", 1, "newcdbtag")'
+#+end_src
+
+** Workflow Logic
+
+1. Argument Parsing & Validation: The macro ensures the input list exists and the output directory is valid.
+
+2. Run Info Extraction: The run number and dataset tag are parsed directly from the input filename using a regular expression.
+
+3. CDB Status Check:
+- If the ~--force~ flag is not used, the macro connects to the CDB.
+- It iterates through a hardcoded list of essential calibration names.
+- For each name, it checks if an entry exists for the given run number and if the production tag matches the one from the input file.
+- If any calibration is missing or has an outdated tag, the check fails.
+- If all calibrations are present and up-to-date, the macro prints a message and exits successfully without doing any work.
+- Calibration Generation: If the CDB check fails or if ~--force~ is used, the macro instantiates the GenStatus class and calls its ~process()~ method, passing the input list and output directory to generate the new calibration files.

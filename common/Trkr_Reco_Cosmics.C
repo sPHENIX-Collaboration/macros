@@ -1,9 +1,12 @@
 #ifndef MACRO_TRKRRECO_COSMICS_C
 #define MACRO_TRKRRECO_COSMICS_C
 
+#include <GlobalVariables.C>
+
 #include <G4_TrkrVariables.C>
 
 #include <g4eval/SvtxTruthRecoTableEval.h>
+
 #include <trackingdiagnostics/TrackSeedTrackMapConverter.h>
 
 #include <trackreco/MakeActsGeometry.h>
@@ -36,6 +39,7 @@ R__LOAD_LIBRARY(libtpccalib.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtrackeralign.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
+
 void convert_seeds()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -57,7 +61,7 @@ void Tracking_Reco_TrackSeed()
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
   // get fun4all server instance
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
 
   PHCosmicSeeder *seeder = new PHCosmicSeeder;
   seeder->adcCut(175.);
@@ -67,7 +71,7 @@ void Tracking_Reco_TrackSeed()
   PHCosmicSiliconPropagator *hprop = new PHCosmicSiliconPropagator("HelicalPropagator");
   hprop->Verbosity(verbosity);
   double fieldstrength = std::numeric_limits<double>::quiet_NaN();
-  bool ConstField = isConstantField(G4MAGNET::magfield_tracking,fieldstrength);
+  bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
   if (ConstField && fieldstrength < 0.1)
   {
     hprop->zero_field();
@@ -78,7 +82,7 @@ void Tracking_Reco_TrackSeed()
 
   // Associate Micromegas clusters with the tracks
 
-  auto merger = new PHCosmicTrackMerger("PHCosmicMerger");
+  auto *merger = new PHCosmicTrackMerger("PHCosmicMerger");
   merger->Verbosity(verbosity);
   if (ConstField && fieldstrength < 0.1)
   {
@@ -98,7 +102,7 @@ void Tracking_Reco_TrackSeed()
 
   se->registerSubsystem(hprop2);
 
-  auto merger2 = new PHCosmicTrackMerger("PHCosmicMerger2");
+  auto *merger2 = new PHCosmicTrackMerger("PHCosmicMerger2");
   merger2->Verbosity(0);
   merger2->dca_xycut(0.5);
   merger2->dca_rzcut(1);
@@ -114,7 +118,7 @@ void vertexing()
   Fun4AllServer *se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
-  auto vtxfinder = new PHSimpleVertexFinder;
+  auto *vtxfinder = new PHSimpleVertexFinder;
   vtxfinder->Verbosity(verbosity);
   se->registerSubsystem(vtxfinder);
 }
@@ -122,15 +126,15 @@ void vertexing()
 void Tracking_Reco_TrackFit()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
 
   // correct clusters for particle propagation in TPC
-  auto deltazcorr = new PHTpcDeltaZCorrection;
+  auto *deltazcorr = new PHTpcDeltaZCorrection;
   deltazcorr->Verbosity(verbosity);
   se->registerSubsystem(deltazcorr);
 
   // perform final track fit with ACTS
-  auto actsFit = new PHCosmicsTrkFitter;
+  auto *actsFit = new PHCosmicsTrkFitter;
   actsFit->Verbosity(verbosity);
   // actsFit->commissioning(G4TRACKING::use_alignment);
   // actsFit->set_cluster_version(G4TRACKING::cluster_version);
@@ -141,20 +145,20 @@ void Tracking_Reco_TrackFit()
   se->registerSubsystem(actsFit);
 }
 
-void alignment(std::string datafilename = "mille_output_data_file",
-               std::string steeringfilename = "mille_steer")
+void alignment(const std::string &datafilename = "mille_output_data_file",
+               const std::string &steeringfilename = "mille_steer")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
-  auto mille = new MakeMilleFiles;
+  auto *mille = new MakeMilleFiles;
   mille->Verbosity(verbosity);
   mille->set_datafile_name(datafilename + ".bin");
   mille->set_steeringfile_name(steeringfilename + ".txt");
   // mille->set_cluster_version(G4TRACKING::cluster_version);
   se->registerSubsystem(mille);
 
-  auto helical = new HelicalFitter;
+  auto *helical = new HelicalFitter;
   helical->Verbosity(0);
   helical->set_datafile_name(datafilename + "_helical.bin");
   helical->set_steeringfile_name(steeringfilename + "_helical.txt");

@@ -3,22 +3,19 @@
 
 #include <GlobalVariables.C>
 
-#include <G4_Mbd.C>
+#include <G4_BeamLine.C>
 #include <G4_BlackHole.C>
 #include <G4_CEmc_Albedo.C>
 #include <G4_CEmc_Spacal.C>
 #include <G4_EPD.C>
 #include <G4_HcalIn_ref.C>
 #include <G4_HcalOut_ref.C>
-#include <G4_BeamLine.C>
-#include <G4_Intt.C>
 #include <G4_Magnet.C>
-#include <G4_Micromegas.C>
-#include <G4_Mvtx.C>
+#include <G4_Mbd.C>
 #include <G4_PSTOF.C>
 #include <G4_Pipe.C>
 #include <G4_PlugDoor.C>
-#include <G4_TPC.C>
+#include <G4_TrkrSimulation.C>
 #include <G4_User.C>
 #include <G4_World.C>
 #include <G4_ZDC.C>
@@ -37,6 +34,8 @@
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
 
+#include <sstream>
+
 R__LOAD_LIBRARY(libg4decayer.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 
@@ -45,8 +44,8 @@ void G4Init()
   // Check on invalid combinations
   if (Enable::CEMC && Enable::CEMCALBEDO)
   {
-      cout << "Enable::CEMCALBEDO and Enable::CEMC cannot be set simultanously" << endl;
-      gSystem->Exit(1);
+    std::cout << "Enable::CEMCALBEDO and Enable::CEMC cannot be set simultanously" << std::endl;
+    gSystem->Exit(1);
   }
   // load detector/material macros and execute Init() function
 
@@ -60,7 +59,7 @@ void G4Init()
   if (Enable::CEMC) CEmcInit();
   if (Enable::HCALIN) HCalInnerInit();
   if (Enable::MAGNET) MagnetInit();
-  MagnetFieldInit(); // We want the field - even if the magnet volume is disabled
+  MagnetFieldInit();  // We want the field - even if the magnet volume is disabled
   if (Enable::HCALOUT) HCalOuterInit();
   if (Enable::PLUGDOOR) PlugDoorInit();
   if (Enable::EPD) EPDInit();
@@ -87,19 +86,22 @@ int G4Setup()
   PHG4Reco *g4Reco = new PHG4Reco();
   g4Reco->set_rapidity_coverage(1.1);  // according to drawings
   WorldInit(g4Reco);
+  // PYTHIA 6
   if (G4P6DECAYER::decayType != EDecayType::kAll)
   {
     g4Reco->set_force_decay(G4P6DECAYER::decayType);
   }
+  // EvtGen
+  g4Reco->CustomizeEvtGenDecay(EVTGENDECAYER::DecayFile);
 
   double fieldstrength;
-  istringstream stringline(G4MAGNET::magfield);
+  std::istringstream stringline(G4MAGNET::magfield);
   stringline >> fieldstrength;
   if (stringline.fail())
   {  // conversion to double fails -> we have a string
 
-    if (G4MAGNET::magfield.find("sphenix3dbigmapxyz") != string::npos ||
-        G4MAGNET::magfield == "CDB")
+    if (G4MAGNET::magfield.find("sphenix3dbigmapxyz") != std::string::npos ||
+        G4MAGNET::magfield.find(".root") == std::string::npos)
     {
       g4Reco->set_field_map(G4MAGNET::magfield, PHFieldConfig::Field3DCartesian);
     }
@@ -110,12 +112,13 @@ int G4Setup()
   }
   else
   {
-    g4Reco->set_field(fieldstrength);  // use const soleniodal field
+    g4Reco->set_field(fieldstrength);                  // use const soleniodal field
+    G4MAGNET::magfield_tracking = G4MAGNET::magfield;  // set tracking fieldmap to value
   }
   g4Reco->set_field_rescale(G4MAGNET::magfield_rescale);
 
-// the radius is an older protection against overlaps, it is not
-// clear how well this works nowadays but it doesn't hurt either
+  // the radius is an older protection against overlaps, it is not
+  // clear how well this works nowadays but it doesn't hurt either
   double radius = 0.;
 
   if (Enable::PIPE) radius = Pipe(g4Reco, radius);
@@ -142,7 +145,6 @@ int G4Setup()
   }
   if (Enable::USER) UserDetector(g4Reco);
 
-
   //----------------------------------------
   // BLACKHOLE
 
@@ -158,7 +160,7 @@ int G4Setup()
   return 0;
 }
 
-void ShowerCompress(int verbosity = 0)
+void ShowerCompress(int /*verbosity*/ = 0)
 {
   Fun4AllServer *se = Fun4AllServer::instance();
 
@@ -178,7 +180,7 @@ void ShowerCompress(int verbosity = 0)
   compress->AddHitContainer("G4HIT_BH_1");
   compress->AddHitContainer("G4HIT_BH_FORWARD_PLUS");
   compress->AddHitContainer("G4HIT_BH_FORWARD_NEG");
-  compress->AddHitContainer("G4HIT_MBD");
+  compress->AddHitContainer("G4HIT_BBC");
   compress->AddCellContainer("G4CELL_CEMC");
   compress->AddCellContainer("G4CELL_HCALIN");
   compress->AddCellContainer("G4CELL_HCALOUT");
@@ -215,7 +217,7 @@ void DstCompress(Fun4AllDstOutputManager *out)
     out->StripNode("G4HIT_BH_1");
     out->StripNode("G4HIT_BH_FORWARD_PLUS");
     out->StripNode("G4HIT_BH_FORWARD_NEG");
-    out->StripNode("G4HIT_MBD");
+    out->StripNode("G4HIT_BBC");
     out->StripNode("G4CELL_CEMC");
     out->StripNode("G4CELL_HCALIN");
     out->StripNode("G4CELL_HCALOUT");

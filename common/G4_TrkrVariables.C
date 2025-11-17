@@ -2,6 +2,7 @@
 #define MACRO_G4TRKRVARIABLES_C
 
 #include <g4intt/PHG4InttDefs.h>
+
 #include <g4mvtx/PHG4MvtxDefs.h>
 
 namespace Enable
@@ -13,8 +14,9 @@ namespace Enable
   bool MVTX_CLUSTER = false;
   bool MVTX_QA = false;
   bool MVTX_SUPPORT = false;
-  bool MVTX_APPLYMISALIGNMENT = false;
-
+  bool MVTX_APPLYMISALIGNMENT = true;
+  bool MVTX_STREAMING = true;
+  
   int MVTX_VERBOSITY = 0;
 
   bool INTT = false;
@@ -122,7 +124,7 @@ namespace G4TPC
 
   // module edge distortion corrections
   bool ENABLE_MODULE_EDGE_CORRECTIONS = false;
-  std::string module_edge_correction_filename = "";
+  std::string module_edge_correction_filename;
 
   // static distortion corrections
   bool ENABLE_STATIC_CORRECTIONS = false;
@@ -145,9 +147,9 @@ namespace G4TPC
   float laser_adc_threshold = 100.0;
 
   bool REJECT_LASER_EVENTS = false;
-  std::string laser_event_debug_filename = "";
-  std::string LaminationOutputName = "";
-  std::string LaminationQAName = "";
+  std::string laser_event_debug_filename;
+  std::string LaminationOutputName;
+  std::string LaminationQAName;
 
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
@@ -162,7 +164,7 @@ namespace G4TPC
   std::string DIRECT_LASER_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";
   std::string DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME = "TpcDirectLaserReconstruction.root";
 
-  std::string TPC_GAS_MIXTURE = "NeCF4";
+  std::string TPC_GAS_MIXTURE = "ArCF4Isobutane";
   // drift velocity is set here for all relevant modules
   //  double tpc_drift_velocity_reco now set in GlobalVariables.C
   double tpc_drift_velocity_sim = 0.007550;  // cm/ns   // this is the ArCF4Isobutane version of the gas
@@ -205,6 +207,11 @@ namespace G4TPC
   double ArCF4Isobutane_N2_frac = 0.00;
   double ArCF4Isobutane_isobutane_frac = 0.05;
 
+  double maxDriftLength = 102.325;  // new value, CM face to top of GEM stack
+  double CM_halfwidth = 0.28;  // cm
+  double sampa_tzero_bias = -65.0; // ns, set for simulations/reco matching with new sampa response
+  bool apply_tpc_tzero_correction = false;  // true to apply small correction to TPC time zero in alignment transforms
+  
 }  // namespace G4TPC
 
 namespace G4TRACKING
