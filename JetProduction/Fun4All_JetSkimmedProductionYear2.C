@@ -49,8 +49,8 @@ R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libJetDSTSkimmer.so)
 
-void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
-                        const std::string &fname = "DST_CALOFITTING_run2pp_ana509_2024p022_v001-00047289-00000.root",
+void Fun4All_JetSkimmedProductionYear2(int nEvents=1000,
+                        const std::string &fname = "/sphenix/lustre01/sphnxpro/production2/run2pp/physics/calofitting/ana509_2024p022_v001/run_00047200_00047300/DST_CALOFITTING_run2pp_ana509_2024p022_v001-00047289-00000.root",
                         const std::string& outfile_low= "DST_JETCALO_run2pp_ana509_2024p022_v001-00047289-00000.root",
                         const std::string& outfile_high= "DST_Jet_run2pp_ana509_2024p022_v001-00047289-00000.root",
                         const std::string& outfile_hist= "HIST_JETQA_run2pp_ana509_2024p022_v001-00047289-00000.root",
@@ -113,15 +113,30 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
     Centrality();
   }
 
-  // do jet reconstruction & rho calculation
-  HIJetReco();
+  GlobalVertex::VTXTYPE vertex_type = GlobalVertex::MBD;
+
+  std::string tower_prefix = "TOWERINFO_CALIB";
+
+  RetowerCEMC *rcemc = new RetowerCEMC();
+  rcemc->Verbosity(0);
+  rcemc->set_towerinfo(true);
+  rcemc->set_frac_cut(0.5);  // fraction of retower that must be masked to mask the full retower
+  rcemc->set_towerNodePrefix(tower_prefix);
+  se->registerSubsystem(rcemc);
+
 
   // do unsubtracted jet reconstruction
-  std::string jetreco_input_prefix = "TOWERINFO_CALIB";
+  TowerJetInput *incemc = new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER,tower_prefix);
+  TowerJetInput *inihcal = new TowerJetInput(Jet::HCALIN_TOWERINFO, tower_prefix);
+  TowerJetInput *inohcal = new TowerJetInput(Jet::HCALOUT_TOWERINFO,tower_prefix);
+  incemc->set_GlobalVertexType(vertex_type);
+  inihcal->set_GlobalVertexType(vertex_type);
+  inohcal->set_GlobalVertexType(vertex_type);
+  
   JetReco *_jetRecoUnsub = new JetReco();
-  _jetRecoUnsub->add_input(new TowerJetInput(Jet::CEMC_TOWERINFO_RETOWER, jetreco_input_prefix));
-  _jetRecoUnsub->add_input(new TowerJetInput(Jet::HCALIN_TOWERINFO, jetreco_input_prefix));
-  _jetRecoUnsub->add_input(new TowerJetInput(Jet::HCALOUT_TOWERINFO, jetreco_input_prefix));
+  _jetRecoUnsub->add_input(incemc);
+  _jetRecoUnsub->add_input(inihcal);
+  _jetRecoUnsub->add_input(inohcal);
   _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.2), "AntiKt_unsubtracted_r02");
   _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.3), "AntiKt_unsubtracted_r03");
   _jetRecoUnsub->add_algo(new FastJetAlgoSub(Jet::ANTIKT, 0.4), "AntiKt_unsubtracted_r04");
@@ -137,13 +152,13 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
 
   JetDSTSkimmer *jetDSTSkimmer = new JetDSTSkimmer();
   std::map<std::string, float> jetNodePts;
-  jetNodePts["AntiKt_unsubtracted_r02"] = 7;
-  jetNodePts["AntiKt_unsubtracted_r03"] = 7;
-  jetNodePts["AntiKt_unsubtracted_r04"] = 7;
-  jetNodePts["AntiKt_unsubtracted_r05"] = 7;
-  jetNodePts["AntiKt_unsubtracted_r06"] = 7;
-  jetNodePts["AntiKt_unsubtracted_r07"] = 7;
-  jetNodePts["AntiKt_unsubtracted_r08"] = 7;
+  jetNodePts["AntiKt_unsubtracted_r02"] = 6.6;
+  jetNodePts["AntiKt_unsubtracted_r03"] = 7.3;
+  jetNodePts["AntiKt_unsubtracted_r04"] = 7.6;
+  jetNodePts["AntiKt_unsubtracted_r05"] = 7.9;
+  jetNodePts["AntiKt_unsubtracted_r06"] = 8.0;
+  jetNodePts["AntiKt_unsubtracted_r07"] = 11.0;
+  jetNodePts["AntiKt_unsubtracted_r08"] = 12.0;
   jetDSTSkimmer->SetJetNodeThresholds(jetNodePts);
   std::map<std::string, float> clusterNodePts;
   clusterNodePts["CLUSTERINFO_CEMC"] = 5;
@@ -196,6 +211,10 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=100,
   se->run(nEvents);
   se->End();
 
+  if (Enable::QA)
+  {
+    QAHistManagerDef::saveQARootFile(outfile_hist);
+  }
 
   CDBInterface::instance()->Print();  // print used DB files
   se->PrintTimer();
