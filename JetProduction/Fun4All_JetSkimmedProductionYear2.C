@@ -5,7 +5,6 @@
 #include <Calo_Calib.C>
 #include <HIJetReco.C>
 #include <Jet_QA.C>
-//copying from the JetProductionYear2.C, but isn't it wierd to use macro with G4 prefix here?
 #include <G4_Global.C>
 #include <G4_Centrality.C>
 
@@ -63,7 +62,7 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=1000,
 
   recoConsts *rc = recoConsts::instance();
 
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
   int runnumber = runseg.first;
 
   // conditions DB flags and timestamp
