@@ -1,41 +1,53 @@
 #ifndef FUN4ALL_CALOONLYJETVALID_C
 #define FUN4ALL_CALOONLYJETVALID_C
 
-// c++ utilities
-#include <fstream>
-#include <iostream>
-#include <optional>
-#include <string>
-#include <utility>
-#include <vector>
+// f4a macros
+// GlobalVariables.C has to be the first one, leave empty line behind
+// otherwise reformatting tools like clang-format will sort this alphabetically
+#include <GlobalVariables.C>
+
+#include <G4_ActsGeom.C>
+#include <G4_Centrality.C>
+#include <G4_Global.C>
+#include <G4_Magnet.C>
+#include <HIJetReco.C>
+#include <Jet_QA.C>
+#include <QA.C>
 
 // coresoftware headers
+#include <g4centrality/PHG4CentralityReco.h>
+
+#include <globalvertex/GlobalVertexReco.h>
+
+#include <jetbackground/DetermineTowerRho.h>
+#include <jetbackground/TowerRho.h>
+
+#include <mbd/MbdReco.h>
+
+#include <zdcinfo/ZdcReco.h>
+
+#include <qautils/QAHistManagerDef.h>
+
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
+
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllUtils.h>
-#include <g4centrality/PHG4CentralityReco.h>
-#include <globalvertex/GlobalVertexReco.h>
-#include <jetbackground/DetermineTowerRho.h>
-#include <jetbackground/TowerRho.h>
-#include <mbd/MbdReco.h>
-#include <phool/recoConsts.h>
-#include <qautils/QAHistManagerDef.h>
-#include <zdcinfo/ZdcReco.h>
 
-// f4a macros
-#include <G4_ActsGeom.C>
-#include <G4_Centrality.C>
-#include <G4_Global.C>
-#include <G4_Magnet.C>
-#include <GlobalVariables.C>
-#include <HIJetReco.C>
-#include <Jet_QA.C>
-#include <QA.C>
+#include <phool/recoConsts.h>
+
+
+// c++ headers
+#include <fstream>
+#include <iostream>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 // load libraries
 R__LOAD_LIBRARY(libcentrality.so)
@@ -50,9 +62,7 @@ R__LOAD_LIBRARY(libqautils.so)
 R__LOAD_LIBRARY(libzdcinfo.so)
 
 // types for convenience
-typedef std::vector<std::string> SVec;
-
-
+using SVec = std::vector<std::string>;
 
 // macro body -----------------------------------------------------------------
 
@@ -60,10 +70,10 @@ void Fun4All_CaloOnlyJetValid(
   const int  verb   = 10,
   const int  nEvts  = 100,
   const int  nSkip  = 0,
-  const SVec inputs = {
+  const SVec& inputs = {
     "./lists/runs/dst_calo_run2pp-00042586.list"
   },
-  const std::string  qaBase = "HIST_JET_QA_TEST",
+  const std::string&  qaBase = "HIST_JET_QA_TEST",
   std::optional<int> run    = std::nullopt
 ) {
 
@@ -89,9 +99,9 @@ void Fun4All_CaloOnlyJetValid(
 
   // grab instances f4a, the cdb, etc.
   Fun4AllServer* se = Fun4AllServer::instance();
-  CDBInterface*  cb = CDBInterface::instance();
+//  CDBInterface*  cb = CDBInterface::instance();
   recoConsts*    rc = recoConsts::instance();
-  se -> Verbosity(verb);
+  se->Verbosity(verb);
 
   // turn on cdb
   Enable::CDB = true;
@@ -102,8 +112,8 @@ void Fun4All_CaloOnlyJetValid(
   if (!run.has_value()) {
 
     // grab first file from first input list
-    ifstream    firstList(inputs.at(0));
-    std::string firstFile("");
+    std::ifstream    firstList(inputs.at(0));
+    std::string firstFile;
     std::getline(firstList, firstFile);
 
     // now extract the run and segment numbers...
@@ -115,14 +125,14 @@ void Fun4All_CaloOnlyJetValid(
   }
 
   // set cdb tags
-  rc -> set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
-  rc -> set_uint64Flag("TIMESTAMP", runNum);
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
+  rc->set_uint64Flag("TIMESTAMP", runNum);
 
   // register dst input managers
   for (size_t iInput = 0; iInput < inputs.size(); ++iInput) {
     Fun4AllDstInputManager* inManager = new Fun4AllDstInputManager("InputManager" + std::to_string(iInput));
-    inManager -> AddListFile(inputs[iInput], 1);
-    se        -> registerInputManager(inManager);
+    inManager->AddListFile(inputs[iInput], 1);
+    se->registerInputManager(inManager);
   }
 
   // register & run necessary reconstruction ----------------------------------
@@ -144,9 +154,9 @@ void Fun4All_CaloOnlyJetValid(
   // run modules and exit -----------------------------------------------------
 
   // run4all
-  se -> run(nEvts);
-  se -> skip(nSkip);
-  se -> End();
+  se->run(nEvts);
+  se->skip(nSkip);
+  se->End();
 
   // create output file name
   std::string qaFileName = qaBase;
@@ -160,7 +170,7 @@ void Fun4All_CaloOnlyJetValid(
 
   // announce end and exit
   std::cout << "\n -------- UwU -- Finished Jet QA Macro -- UwU -------- \n " << std::endl;
-  gSystem -> Exit(0);
+  gSystem->Exit(0);
   return;
 
 }

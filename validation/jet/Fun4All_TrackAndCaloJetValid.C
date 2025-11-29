@@ -1,45 +1,58 @@
 #ifndef FUN4ALL_TRACKANDCALOJETVALID_C
 #define FUN4ALL_TRACKANDCALOJETVALID_C
 
-// c++ utilities
-#include <fstream>
-#include <iostream>
-#include <optional>
-#include <string>
-#include <utility>
-#include <vector>
+// f4a macros
+// GlobalVariables.C has to be the first one, leave empty line behind
+// otherwise reformatting tools like clang-format will sort this alphabetically
+#include <GlobalVariables.C>
+
+#include <G4_ActsGeom.C>
+#include <G4_Centrality.C>
+#include <G4_Global.C>
+#include <G4_Magnet.C>
+#include <HIJetReco.C>
+#include <Jet_QA.C>
+#include <QA.C>
+#include <Trkr_Clustering.C>
 
 // coresoftware headers
-#include <ffamodules/CDBInterface.h>
-#include <fun4all/Fun4AllDstInputManager.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllRunNodeInputManager.h>
-#include <fun4all/Fun4AllServer.h>
-#include <fun4all/Fun4AllUtils.h>
-#include <g4centrality/PHG4CentralityReco.h>
-#include <globalvertex/GlobalVertexReco.h>
-#include <jetbackground/DetermineTowerRho.h>
-#include <jetbackground/TowerRho.h>
 #include <jetqa/ConstituentsinJets.h>
 #include <jetqa/JetKinematicCheck.h>
 #include <jetqa/JetSeedCount.h>
 #include <jetqa/StructureinJets.h>
 #include <jetqa/TrksInJetQA.h>
 #include <jetqa/RhosinEvent.h>
+
+#include <g4centrality/PHG4CentralityReco.h>
+
+#include <globalvertex/GlobalVertexReco.h>
+
+#include <jetbackground/DetermineTowerRho.h>
+#include <jetbackground/TowerRho.h>
+
 #include <mbd/MbdReco.h>
-#include <phool/recoConsts.h>
-#include <qautils/QAHistManagerDef.h>
+
 #include <zdcinfo/ZdcReco.h>
 
-// f4a macros
-#include <G4_ActsGeom.C>
-#include <G4_Global.C>
-#include <G4_Magnet.C>
-#include <GlobalVariables.C>
-#include <HIJetReco.C>
-#include <Jet_QA.C>
-#include <QA.C>
-#include <Trkr_Clustering.C>
+#include <qautils/QAHistManagerDef.h>
+
+#include <ffamodules/CDBInterface.h>
+
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllRunNodeInputManager.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllUtils.h>
+
+#include <phool/recoConsts.h>
+
+// c++ includes
+#include <fstream>
+#include <iostream>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 // load libraries
 R__LOAD_LIBRARY(libcentrality.so)
@@ -53,7 +66,7 @@ R__LOAD_LIBRARY(libqautils.so)
 R__LOAD_LIBRARY(libzdcinfo.so)
 
 // types for convenience
-typedef std::vector<std::string> SVec;
+using SVec = std::vector<std::string>;
 
 
 
@@ -63,7 +76,7 @@ void Fun4All_TrackAndCaloJetValid(
   const int  verb   = 10,
   const int  nEvts  = 10,
   const int  nSkip  = 0,
-  const SVec inputs = {
+  const SVec& inputs = {
     "../input/dst_global.list",
     "../input/dst_mbd_epd.list",
     "../input/dst_calo_cluster.list",
@@ -72,7 +85,7 @@ void Fun4All_TrackAndCaloJetValid(
     "../input/dst_trackseeds.list",
     "../input/dst_tracks.list"
   },
-  const std::string  qaBase = "HIST_JET_QA",
+  const std::string&  qaBase = "HIST_JET_QA",
   std::optional<int> run    = std::nullopt
 ) {
 
@@ -100,7 +113,7 @@ void Fun4All_TrackAndCaloJetValid(
   Fun4AllServer* se = Fun4AllServer::instance();
   CDBInterface*  cb = CDBInterface::instance();
   recoConsts*    rc = recoConsts::instance();
-  se -> Verbosity(verb);
+  se->Verbosity(verb);
 
   // turn on cdb
   Enable::CDB = true;
@@ -111,8 +124,8 @@ void Fun4All_TrackAndCaloJetValid(
   if (!run.has_value()) {
 
     // grab first file from first input list
-    ifstream    firstList(inputs.at(0));
-    std::string firstFile("");
+    std::ifstream    firstList(inputs.at(0));
+    std::string firstFile;
     std::getline(firstList, firstFile);
 
     // now extract the run and segment numbers...
@@ -124,23 +137,23 @@ void Fun4All_TrackAndCaloJetValid(
   }
 
   // set cdb tags
-  rc -> set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
-  rc -> set_uint64Flag("TIMESTAMP", runNum);
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2023");
+  rc->set_uint64Flag("TIMESTAMP", runNum);
 
   // get url of geo file
-  const std::string inGeoFile = cb -> getUrl("Tracking_Geometry");
+  const std::string inGeoFile = cb->getUrl("Tracking_Geometry");
 
   // register dst input managers
   for (size_t iInput = 0; iInput < inputs.size(); ++iInput) {
     Fun4AllDstInputManager* inManager = new Fun4AllDstInputManager("InputManager" + std::to_string(iInput));
-    inManager -> AddListFile(inputs[iInput], 1);
-    se        -> registerInputManager(inManager);
+    inManager->AddListFile(inputs[iInput], 1);
+    se->registerInputManager(inManager);
   }
 
   // register geometry manager
   Fun4AllRunNodeInputManager* geoManager = new Fun4AllRunNodeInputManager("GeometryManager");
-  geoManager -> AddFile(inGeoFile.data());
-  se         -> registerInputManager(geoManager);
+  geoManager->AddFile(inGeoFile);
+  se->registerInputManager(geoManager);
 
   // initialize acts geometry
   G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;
@@ -171,9 +184,9 @@ void Fun4All_TrackAndCaloJetValid(
   // run modules and exit -----------------------------------------------------
 
   // run4all
-  se -> run(nEvts);
-  se -> skip(nSkip);
-  se -> End();
+  se->run(nEvts);
+  se->skip(nSkip);
+  se->End();
 
   // create output file name
   std::string qaFileName = qaBase;
@@ -187,7 +200,7 @@ void Fun4All_TrackAndCaloJetValid(
 
   // announce end and exit
   std::cout << "\n -------- UwU -- Finished Jet QA Macro -- UwU -------- \n " << std::endl;
-  gSystem -> Exit(0);
+  gSystem->Exit(0);
   return;
 
 }
