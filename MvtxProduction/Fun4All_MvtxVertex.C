@@ -5,12 +5,18 @@
  * hits, clusters, and clusters on tracks into trees for analysis.
  */
 
+// leave the GlobalVariables.C at the beginning, an empty line afterwards
+// protects its position against reshuffling by clang-format
+#include <GlobalVariables.C>
+
 #include <G4_ActsGeom.C>
 #include <G4_Magnet.C>
-#include <GlobalVariables.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_RecoInit.C>
 #include <Trkr_Reco.C>
+
+#include <trackreco/AzimuthalSeeder.h>
+#include <trackingdiagnostics/TrackResiduals.h>
 
 #include <ffamodules/CDBInterface.h>
 #include <fun4all/Fun4AllDstInputManager.h>
@@ -24,11 +30,6 @@
 
 #include <phool/recoConsts.h>
 
-#include <trackreco/AzimuthalSeeder.h>
-#include <trackingdiagnostics/TrackResiduals.h>
-
-#include <stdio.h>
-
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libmvtx.so)
@@ -38,19 +39,19 @@ R__LOAD_LIBRARY(libmicromegas.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 void Fun4All_MvtxVertex(
     const int nEvents = 0,
-    const std::string filename = "DST_INTT_RAW_beam_new_2023p011-00041620-0000.root",
-    const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/slurp/inttbeam/run_00041600_00041700/",
-    const std::string outfilename = "clusters_seeds_40630.root")
+    const std::string& filename = "DST_INTT_RAW_beam_new_2023p011-00041620-0000.root",
+    const std::string& dir = "/sphenix/lustre01/sphnxpro/commissioning/slurp/inttbeam/run_00041600_00041700/",
+    const std::string& outfilename = "clusters_seeds_40630.root")
 {
   std::string inputRawHitFile = dir + filename;
 
   std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filename);
   int runnumber = runseg.first;
-  int segment = runseg.second;
+  // int segment = runseg.second;
 
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
@@ -68,7 +69,7 @@ void Fun4All_MvtxVertex(
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
-  auto hitsin = new Fun4AllDstInputManager("InputManager");
+  auto *hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->fileopen(inputRawHitFile);
   se->registerInputManager(hitsin);
 
@@ -80,7 +81,7 @@ void Fun4All_MvtxVertex(
   AzimuthalSeeder *seeder = new AzimuthalSeeder;
   se->registerSubsystem(seeder);
 
-  auto converter = new TrackSeedTrackMapConverter;
+  auto *converter = new TrackSeedTrackMapConverter;
   converter->setTrackSeedName("SiliconTrackSeedContainer");
   converter->setFieldMap(G4MAGNET::magfield_tracking);
   converter->Verbosity(0);
@@ -100,7 +101,7 @@ void Fun4All_MvtxVertex(
   TString residoutfile = outfilename + filename + "_resid.root";
   std::string residstring(residoutfile.Data());
 
-  auto resid = new TrackResiduals("TrackResiduals");
+  auto *resid = new TrackResiduals("TrackResiduals");
   resid->outfileName(residstring);
   resid->alignment(false);
   resid->clusterTree();
