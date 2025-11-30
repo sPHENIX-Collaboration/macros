@@ -1,16 +1,23 @@
-#include <fun4all/Fun4AllServer.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllDstOutputManager.h>
-#include <fun4allraw/SingleGl1TriggeredInput.h>
-#include <fun4allraw/Fun4AllTriggeredInputManager.h>
-#include <fun4allraw/InputManagerType.h>
-#include <fun4all/Fun4AllOutputManager.h>
-
 #include <ffamodules/FlagHandler.h>
 #include <ffamodules/HeadReco.h>
 #include <ffamodules/SyncReco.h>
 
 #include <ffarawmodules/ClockDiffCheck.h>
+
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+
+#include <fun4allraw/SingleGl1TriggeredInput.h>
+#include <fun4allraw/Fun4AllTriggeredInputManager.h>
+#include <fun4allraw/InputManagerType.h>
+
+
+#include <Rtypes.h>
+#include <TSystem.h>
+
+#include <format>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -18,7 +25,7 @@ R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
 
 void Fun4All_New_Prdf_Combiner(int nEvents = 0,
-			       const std::string &daqhost = "seb15",
+			       const std::string &daqhost_out = "seb15",
 			       const std::string &outdir = "/sphenix/user/pinkenbu")
 {
 
@@ -31,20 +38,18 @@ void Fun4All_New_Prdf_Combiner(int nEvents = 0,
   gl1->AddListFile("gl1daq.list");
 //  gl1->Verbosity(10);
   in->registerGl1TriggeredInput(gl1);
-  ifstream infile;
+  std::ifstream infile;
   SingleTriggeredInput *input = nullptr;
   for (int i=0; i<21; i++)
   {
-    char daqhost[200];
-    char daqlist[200];
-    sprintf(daqhost,"seb%02d",i);
-    sprintf(daqlist,"%s.list",daqhost);
+    std::string daqhost = std::format("seb{:02}",i);
+    std::string daqlist = std::format("{}.list",daqhost);
     infile.open(daqlist);
     if (infile.is_open())
     {
       infile.close();
       input = new SingleTriggeredInput(daqhost);
-      if (strcmp(daqhost,"seb18") == 0)
+      if (daqhost == "seb18")
       {
 	input->KeepPackets();
       }
@@ -69,7 +74,7 @@ void Fun4All_New_Prdf_Combiner(int nEvents = 0,
 //   clkchk->Verbosity(3);
  clkchk->set_delBadPkts(true);
   se->registerSubsystem(clkchk);
-  std::string outfile = "DST_TRIGGERED_EVENT_" + daqhost + "_run2auau_new_nocdbtag_v004.root";
+  std::string outfile = outdir + "/DST_TRIGGERED_EVENT_" + daqhost_out + "_run2auau_new_nocdbtag_v004.root";
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("dstout",outfile);
   out->SplitLevel(0);
   out->UseFileRule();
