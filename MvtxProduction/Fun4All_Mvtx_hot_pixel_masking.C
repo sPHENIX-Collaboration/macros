@@ -1,8 +1,6 @@
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllServer.h>
-#include <fun4allraw/Fun4AllStreamingInputManager.h>
-#include <fun4allraw/InputManagerType.h>
-#include <fun4allraw/SingleMvtxPoolInput.h>
+// leave the GlobalVariables.C at the beginning, an empty line afterwards
+// protects its position against reshuffling by clang-format
+#include <GlobalVariables.C>
 
 #include <mvtxcalib/MvtxFakeHitRate.h>
 
@@ -11,14 +9,25 @@
 #include <trackbase/MvtxDefs.h>
 #include <trackbase/TrkrDefs.h>
 
-#include <TFile.h>
-#include <TTree.h>
-
 #include <cdbobjects/CDBTTree.h>
 
-#include <GlobalVariables.C>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllServer.h>
+
+#include <fun4allraw/Fun4AllStreamingInputManager.h>
+#include <fun4allraw/InputManagerType.h>
+#include <fun4allraw/SingleMvtxPoolInput.h>
+
 #include <phool/recoConsts.h>
 
+#include <TFile.h>
+#include <TSystem.h>
+#include <TTree.h>
+
+#include <nlohmann/json.hpp>
+
+#include <iomanip>
+#include <fstream>
 #include <string>
 
 R__LOAD_LIBRARY(libfun4all.so)
@@ -85,7 +94,7 @@ std::map<std::string, int> felix_map{
 //https://stackoverflow.com/questions/997946/how-to-get-current-time-and-date-in-c
 std::string getDate()
 {
-    std::time_t t = std::time(0);   // get time now
+    std::time_t t = std::time(nullptr);   // get time now
     std::tm* now = std::localtime(&t);
 
     std::stringstream date;
@@ -94,9 +103,9 @@ std::string getDate()
 }
 
 // https://stackoverflow.com/questions/478898/how-do-i-execute-a-command-and-get-the-output-of-the-command-within-c-using-po
-string exec(const char *cmd)
+std::string exec(const char *cmd)
 {
-  std::array<char, 128> buffer;
+  std::array<char, 128> buffer{};
   std::string result;
   std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
   if (!pipe)
@@ -110,7 +119,7 @@ string exec(const char *cmd)
   return result;
 }
 
-void calculate_FHR(const int run_number = 64639, std::string output_name = "output.root")
+void calculate_FHR(const int run_number = 64639, const std::string& output_name = "output.root")
 {
   std::string calib_files = "/sphenix/lustre01/sphnxpro/physics/MVTX/calib/calib_mvtx";
   std::stringstream nice_run_number;
@@ -139,7 +148,7 @@ void calculate_FHR(const int run_number = 64639, std::string output_name = "outp
   int counter = 0;
   for(int iflx = 0; iflx < felix_count; iflx++)
   {
-    SingleMvtxPoolInput* mvtx_sngl = new SingleMvtxPoolInput("MVTX_FLX" + to_string(iflx));
+    SingleMvtxPoolInput* mvtx_sngl = new SingleMvtxPoolInput("MVTX_FLX" + std::to_string(iflx));
     mvtx_sngl->Verbosity(1);
     mvtx_sngl->SetBcoRange(10);
     mvtx_sngl->SetNegativeBco(10);
@@ -151,7 +160,7 @@ void calculate_FHR(const int run_number = 64639, std::string output_name = "outp
       if (counter == 6) break;
 
       std::string infile = calib_files + std::to_string(counter) + "-" +  nice_run_number.str() + "-0000.evt";
-      ifstream file(infile.c_str());
+      std::ifstream file(infile.c_str());
       if (file.good())
       {
         mvtx_sngl->AddFile(infile);
@@ -175,7 +184,7 @@ void calculate_FHR(const int run_number = 64639, std::string output_name = "outp
 }
 
 void generate_JSON_mask(const std::string &calibration_file = "output.root",
-                        const std::string output_file = "masked_pixels",
+                        const std::string& output_file = "masked_pixels",
                         const double target_threshold = 3.2e-9)
 {
   TFile* f = new TFile(calibration_file.c_str(), "READ");
@@ -183,7 +192,7 @@ void generate_JSON_mask(const std::string &calibration_file = "output.root",
   int num_strobes = 0;
   int num_masked_pixels = 0;
   double noise_threshold = 0.0;
-  std::vector<uint64_t> * masked_pixels = 0;
+  std::vector<uint64_t> * masked_pixels = nullptr;
   t->SetBranchAddress("num_strobes", &num_strobes);
   t->SetBranchAddress("num_masked_pixels", &num_masked_pixels);
   t->SetBranchAddress("noise_threshold", &noise_threshold);
@@ -203,7 +212,8 @@ void generate_JSON_mask(const std::string &calibration_file = "output.root",
 
   t->GetEntry(selected_entry);
 
-  json masked_pixels_file, masked_pixels_file_by_felix[6];
+  json masked_pixels_file;
+  json masked_pixels_file_by_felix[6];
 
   for (int i = 0; i < num_masked_pixels; i++)
   {
@@ -236,10 +246,10 @@ void generate_JSON_mask(const std::string &calibration_file = "output.root",
   json_output << masked_pixels_file.dump(2);
   json_output.close();
 
-  string output_file_no_trailer = output_file;
-  string trailer = ".json";
+  std::string output_file_no_trailer = output_file;
+  std::string trailer = ".json";
   size_t pos = output_file_no_trailer.find(trailer);
-  if (pos != string::npos)
+  if (pos != std::string::npos)
   {
     output_file_no_trailer.erase(pos, trailer.length());
   }
@@ -253,12 +263,12 @@ void generate_JSON_mask(const std::string &calibration_file = "output.root",
   }
 }
 
-void generate_CDB_mask(const std::string input_file = "masked_pixels.json")
+void generate_CDB_mask(const std::string& input_file = "masked_pixels.json")
 {
-  string output_file = input_file;
-  string trailer = ".json";
+  std::string output_file = input_file;
+  std::string trailer = ".json";
   size_t pos = output_file.find(trailer);
-  if (pos != string::npos)
+  if (pos != std::string::npos)
   {
     output_file.erase(pos, trailer.length());
   }
@@ -269,7 +279,7 @@ void generate_CDB_mask(const std::string input_file = "masked_pixels.json")
 
   unsigned int nStave[3] = {12, 16, 20};
 
-  char *calibrationsroot = getenv("CALIBRATIONROOT");
+//  char *calibrationsroot = getenv("CALIBRATIONROOT");
 
   std::ifstream f(input_file);
   json data = json::parse(f);
