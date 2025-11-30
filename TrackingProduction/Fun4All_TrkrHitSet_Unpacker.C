@@ -3,9 +3,14 @@
  * example showing how to unpack the raw hits into the offline tracker hit
  * format. No other reconstruction or analysis is performed
  */
+// leave the GlobalVariables.C at the beginning, an empty line afterwards
+// protects its position against reshuffling by clang-format
 #include <GlobalVariables.C>
+
 #include <Trkr_Clustering.C>
 #include <Trkr_TpcReadoutInit.C>
+
+#include <ffamodules/CDBInterface.h>
 
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -14,11 +19,9 @@
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 
-#include <ffamodules/CDBInterface.h>
-
 #include <phool/recoConsts.h>
 
-#include <stdio.h>
+#include <format>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
@@ -29,18 +32,17 @@ R__LOAD_LIBRARY(libmicromegas.so)
 void Fun4All_TrkrHitSet_Unpacker(
     const int nEvents = 2,
     const int runnumber = 26048,
-    const std::string outfilename = "cosmics",
-    const std::string dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all_4/",
-    const std::string file = "cosmics-")
+    const std::string& outfilename = "cosmics",
+    const std::string& dir = "/sphenix/lustre01/sphnxpro/commissioning/aligned_streaming_all_4/",
+    const std::string& file = "cosmics-")
 {
   gSystem->Load("libg4dst.so");
   std::string inputRawHitFile = dir + file;
-  char filename[500];
-  sprintf(filename, "%s%08d-0000.root", inputRawHitFile.c_str(), runnumber);
+  std::string filename = std::format("{}{:08}-0000.root",inputRawHitFile,runnumber);
 
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
   std::cout<< " run: " << runnumber
 	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
 	   << " pre: " << TRACKING::reco_tpc_time_presample
@@ -59,7 +61,7 @@ void Fun4All_TrkrHitSet_Unpacker(
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
 
-  auto hitsin = new Fun4AllDstInputManager("InputManager");
+  auto *hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->fileopen(filename);
   se->registerInputManager(hitsin);
 

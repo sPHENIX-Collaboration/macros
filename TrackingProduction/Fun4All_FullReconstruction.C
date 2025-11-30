@@ -5,6 +5,8 @@
  * hits, clusters, and clusters on tracks into trees for analysis.
  */
 
+// leave the GlobalVariables.C at the beginning, an empty line afterwards
+// protects its position against reshuffling by clang-format
 #include <GlobalVariables.C>
 
 #include <G4_ActsGeom.C>
@@ -109,8 +111,7 @@ void Fun4All_FullReconstruction(
    */
   G4TRACKING::SC_CALIBMODE = false;
 
-  TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
-  std::string theOutfile = outfile.Data();
+  std::string theOutfile = outfilename + "_" + std::to_string(runnumber) + "-" + std::to_string(segment) + ".root";
 
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
@@ -363,8 +364,8 @@ void Fun4All_FullReconstruction(
        * store in dedicated structure for distortion correction
        */
       auto *residuals = new PHTpcResiduals;
-      const TString tpc_residoutfile = theOutfile + "_PhTpcResiduals.root";
-      residuals->setOutputfile(tpc_residoutfile.Data());
+      std::string tpc_residoutfile = theOutfile + "_PhTpcResiduals.root";
+      residuals->setOutputfile(tpc_residoutfile);
       residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
 
       // matches Tony's analysis
@@ -392,8 +393,7 @@ void Fun4All_FullReconstruction(
   vtxProp->fieldMap(G4MAGNET::magfield_tracking);
   se->registerSubsystem(vtxProp);
 
-  TString residoutfile = theOutfile + "_resid.root";
-  std::string residstring(residoutfile.Data());
+  std::string residstring = theOutfile + "_resid.root";
 
   auto *resid = new TrackResiduals("TrackResiduals");
   resid->outfileName(residstring);
@@ -440,8 +440,7 @@ void Fun4All_FullReconstruction(
   CDBInterface::instance()->Print();
   if (Enable::QA)
   {
-    TString qaname = theOutfile + "_qa.root";
-    std::string qaOutputFileName(qaname.Data());
+    std::string qaOutputFileName = theOutfile + "_qa.root";
     QAHistManagerDef::saveQARootFile(qaOutputFileName);
   }
 
