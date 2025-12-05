@@ -286,6 +286,10 @@ void Tracking_Reco_TrackSeed_ZeroField()
 
   auto *silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
+  silicon_Seeding->setStrobeRange(-5, 5);
+  silicon_Seeding->isStreaming();
+  // these get us to about 83% INTT > 1
+  silicon_Seeding->setinttRPhiSearchWindow(0.2);
   se->registerSubsystem(silicon_Seeding);
 
   auto *merger = new PHSiliconSeedMerger;
