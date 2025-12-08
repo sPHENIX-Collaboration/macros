@@ -119,12 +119,12 @@ void Fun4All_JetSkimmedProductionYear3(
   // Jet thresholds: map from node name [set min jet pT]
   std::map<std::string, float> jetNodePts;
   
-  jetNodePts["AntiKt_Tower_r04_Sub1"] = 7.0f;
+  jetNodePts["AntiKt_Tower_r04_Sub1"] = 7.0F;
   jetDSTSkimmer->SetJetNodeThresholds(jetNodePts);
   
   // Cluster thresholds: map from cluster node [set min cluster pT]
   std::map<std::string, float> clusterNodePts;
-  clusterNodePts["CLUSTERINFO_CEMC"] = 5.0f;
+  clusterNodePts["CLUSTERINFO_CEMC"] = 5.0F;
   jetDSTSkimmer->SetClusterNodeThresholds(clusterNodePts);
   
   jetDSTSkimmer->Verbosity(0);
