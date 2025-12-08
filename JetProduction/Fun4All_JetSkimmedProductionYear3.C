@@ -10,6 +10,11 @@
 
 #include <mbd/MbdReco.h>
 #include <globalvertex/GlobalVertexReco.h>
+#include <jetbackground/BeamBackgroundFilterAndQA.h>
+#include <centrality/CentralityReco.h>
+#include <calotrigger/MinimumBiasClassifier.h>
+#include <calovalid/CaloValid.h>
+#include <jetdstskimmer/JetDSTSkimmer.h>
 
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
@@ -17,7 +22,6 @@
 #include <ffamodules/SyncReco.h>
 
 #include <fun4allraw/Fun4AllPrdfInputManager.h>
-
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
@@ -28,16 +32,8 @@
 
 #include <phool/recoConsts.h>
 
-#include <jetbackground/BeamBackgroundFilterAndQA.h>
-#include <centrality/CentralityReco.h>
-#include <calotrigger/MinimumBiasClassifier.h>
-
-#include <calovalid/CaloValid.h>
-
-#include <jetdstskimmer/JetDSTSkimmer.h>
-
-#include <map>
 #include <iostream>
+#include <map>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -144,7 +140,7 @@ void Fun4All_JetSkimmedProductionYear3(
 		      .debug          = false,
 		      .doQA           = Enable::QA,
 		      .doEvtAbort     = false,
-		      .filtersToApply = {"StreakSideband"},
+		      .filtersToApply = {"StreakSideband"}
 		    });
   se->registerSubsystem(filter);
   
