@@ -1,5 +1,5 @@
 #include <cdbobjects/CDBTTree.h> 
-#include "TowerInfoDefs.h"
+#include <TowerInfoDefs.h>
 
 R__LOAD_LIBRARY(libcdbobjects)
 R__LOAD_LIBRARY(libcalo_io.so)
