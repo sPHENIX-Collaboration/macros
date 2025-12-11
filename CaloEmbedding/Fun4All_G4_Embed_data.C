@@ -3,9 +3,8 @@
 
 #include <GlobalVariables.C>
 
-#include <G4Setup_sPHENIX.C>
+#include "G4Setup_sPHENIX.C"
 #include <G4_Input.C>
-// #include <G4_Mbd.C>
 #include <G4_Production.C>
 #include <globalvertex/GlobalVertexReco.h>
 
@@ -13,13 +12,6 @@
 #include <caloembedding/HepMCCollisionVertex.h>
 #include <caloembedding/caloTowerEmbed.h>
 #include <caloembedding/CopyIODataNodes.h>
-
-/*
-#include <eventselection/EventSelector.h>
-#include <eventselection/MinBiasCut.h>
-#include <eventselection/TowerChi2Cut.h>
-#include <eventselection/ZVertexCut.h>
-*/
 
 #include <jetbase/JetReco.h>
 #include <jetbase/TowerJetInput.h>
@@ -47,10 +39,11 @@
 #include <phool/PHRandomSeed.h>
 #include <phool/recoConsts.h>
 
+#include <TRandom3.h>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libCaloEmbedding.so)
-// R__LOAD_LIBRARY( libeventselection.so )
 R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcentrality.so)
 R__LOAD_LIBRARY(libcalotrigger.so)
@@ -63,7 +56,7 @@ R__LOAD_LIBRARY(libg4jets.so)
 
 // namespace OUTPUTMANAGER
 //{
-// set<string> outfiles;
+// set<std::string> outfiles;
 // }
 
 void AddCommonNodes(Fun4AllOutputManager *out);
@@ -71,11 +64,11 @@ void AddCommonNodes(Fun4AllOutputManager *out);
 int Fun4All_G4_Embed_data(
     const int nEvents = 1000,
     const int segment = 00000,
-    const string &embed_input_file0 = "/sphenix/u/bseidlitz/work/devMac/macros/CaloProduction/condor/test.root",
-    const string &outdir = "./",
-    const string &outnameEnd = "embed_test.root",
-    const string &jettrigger = "Jet30",
-    const string &cdbtag = "MDC2")
+    const std::string &embed_input_file0 = "/sphenix/u/bseidlitz/work/devMac/macros/CaloProduction/condor/test.root",
+    const std::string &outdir = "./",
+    const std::string &outnameEnd = "embed_test.root",
+    const std::string &jettrigger = "Jet30",
+    const std::string &cdbtag = "MDC2")
 {
 
   std::cout << "segment: " << segment << std::endl;
@@ -174,7 +167,7 @@ int Fun4All_G4_Embed_data(
   Input::PYTHIA8 = true;
   if (Input::PYTHIA8)
   {
-    std::string pythia8_config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/JetStructure_TG/";
+    std::string pythia8_config_file = std::string(getenv("CALIBRATIONROOT")) + "/Generators/JetStructure_TG/";
     std::cout << "pythia config path: " << pythia8_config_file << std::endl;
     if (jettrigger == "Jet10")
     {
@@ -194,7 +187,7 @@ int Fun4All_G4_Embed_data(
     }
     else
     {
-      cout << "invalid jettrigger: " << jettrigger << endl;
+      std::cout << "invalid jettrigger: " << jettrigger << std::endl;
       gSystem->Exit(1);
     }
     PYTHIA8::config_file = pythia8_config_file;
@@ -226,17 +219,17 @@ int Fun4All_G4_Embed_data(
     }
     else if (jettrigger == "Jet40")
     {
-      p8_js_signal_trigger->SetMinJetPt(30); // require a 30 GeV minimum pT jet in the event
+      p8_js_signal_trigger->SetMinJetPt(40); // require a 40 GeV minimum pT jet in the event
     }
     else if (jettrigger == "PhotonJet")
     {
       delete p8_js_signal_trigger;
       p8_js_signal_trigger = nullptr;
-      cout << "no cut for PhotonJet" << endl;
+      std::cout << "no cut for PhotonJet" << std::endl;
     }
     else
     {
-      cout << "invalid jettrigger: " << jettrigger << endl;
+      std::cout << "invalid jettrigger: " << jettrigger << std::endl;
       gSystem->Exit(1);
     }
     if (p8_js_signal_trigger)
@@ -555,11 +548,11 @@ int Fun4All_G4_Embed_data(
   // Set up Input Managers
   //--------------
 
-  for (auto iter = INPUTEMBED::filename.begin(); iter != INPUTEMBED::filename.end(); ++iter)
+  for (auto & iter : INPUTEMBED::filename)
   {
-    string mgrname = "DSTin" + to_string(iter->first);
+    std::string mgrname = "DSTin" + std::to_string(iter.first);
     Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname, "DST", DataTopNode);
-    hitsin->fileopen(iter->second);
+    hitsin->fileopen(iter.second);
     hitsin->Verbosity(Input::VERBOSITY);
     if (INPUTEMBED::REPEAT)
     {
@@ -596,7 +589,7 @@ int Fun4All_G4_Embed_data(
 
   //  InputManagers();
 
-  string FullOutFile = outdir + "DST_TRUTH_G4HIT_" + outnameEnd;
+  std::string FullOutFile = outdir + "DST_TRUTH_G4HIT_" + outnameEnd;
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("TRUTHOUT", FullOutFile);
   AddCommonNodes(out);
   out->AddNode("G4TruthInfo");
@@ -667,8 +660,8 @@ int Fun4All_G4_Embed_data(
   // if we run the particle generator and use 0 it'll run forever
   if (nEvents == 0 && !Input::HEPMC && !Input::READHITS && INPUTEMBED::REPEAT)
   {
-    cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
-    cout << "it will run forever, so I just return without running anything" << endl;
+    std::cout << "using 0 for number of events is a bad idea when using particle generators" << std::endl;
+    std::cout << "it will run forever, so I just return without running anything" << std::endl;
     return 0;
   }
 
