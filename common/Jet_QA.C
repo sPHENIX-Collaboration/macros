@@ -670,21 +670,24 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   }
 
   // register underlying event module
-  UEvsEtaCentrality* UEvsEtaCentralityQA = new UEvsEtaCentrality("UEvsEtaCent" + trig_tag);
-  UEvsEtaCentralityQA->SetConfig(
-      {
-          .debug = false,
-          .histTag = "",
-      });
-  if (trg.has_value())
+  if (!JetQA::DoPP)
   {
+    UEvsEtaCentrality* UEvsEtaCentralityQA = new UEvsEtaCentrality("UEvsEtaCent" + trig_tag);
     UEvsEtaCentralityQA->SetConfig(
         {
-            .doTrgSelect = true,
-            .trgToSelect = trg.value(),
+            .debug = false,
+            .histTag = "",
         });
+    if (trg.has_value())
+    {
+      UEvsEtaCentralityQA->SetConfig(
+          {
+              .doTrgSelect = true,
+              .trgToSelect = trg.value(),
+          });
+    }
+    se->registerSubsystem(UEvsEtaCentralityQA);
   }
-  se->registerSubsystem(UEvsEtaCentralityQA);
 
   // create modules that take single R values ---------------------------------
 
