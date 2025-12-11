@@ -51,7 +51,8 @@ TH2F* CaloCDBTreeToHist(string inputfile, string fieldName, int icalo){
 
   CDBTTree* cdbttree = new CDBTTree(inputfile);
 
-  int neta,nphi;
+  int neta;
+  int nphi;
 
   if (icalo != 0 && icalo != 1) return nullptr;
 
