@@ -6,7 +6,8 @@ R__LOAD_LIBRARY(libcalo_io.so)
 
 void histToCaloCDBTree(string outputfile, string fieldName, int icalo, TH2F* hist){
 
-  int neta,nphi;
+  int neta;
+  int nphi;
 
   if (icalo != 0 && icalo != 1) return;
 
