@@ -13,7 +13,7 @@ void genCaloSyst(){
     int begin = 46000;
     int end   = 53862;
   
-    float tbyt_stat,shift,sys_v1,sys_v2,had_frac;
+    float tbyt_stat,shift,sys_v1,sys_v2,had_frac,no_calib;
     int eta,phi;
     bool embool;
     float had_resp_unc = 0.117; // value from test beam
@@ -55,6 +55,7 @@ void genCaloSyst(){
     TH2F* h_v1        = (TH2F*) h_sys->Clone("h_v1");
     TH2F* h_v2        = (TH2F*) h_sys->Clone("h_v2");
     TH2F* h_had_resp  = (TH2F*) h_sys->Clone("h_had_resp");
+    TH2F* h_no_calib  = (TH2F*) h_sys->Clone("h_no_calib");
   
     TRandom3* rnd = new TRandom3();
   
@@ -70,6 +71,7 @@ void genCaloSyst(){
         float had_resp = 1.0 + 2.0*had_resp_unc*had_frac/(sqrt(12));
         std::cout << had_resp << " ";
         h_had_resp->SetBinContent(ie,ip,had_resp);
+        h_no_calib->SetBinContent(ie,ip,1.0);
       }
     }
     std::cout << std::endl;
@@ -80,8 +82,9 @@ void genCaloSyst(){
     histToCaloCDBTree(Form("cdbFiles/%s_shift_syst_%d_%d.root"       ,calo.c_str(),begin,end),"calo_sys", embool, h_shift);
     histToCaloCDBTree(Form("cdbFiles/%s_v1Modulation_syst_%d_%d.root",calo.c_str(),begin,end),"calo_sys", embool, h_v1);
   //  histToCaloCDBTree(Form("cdbFilesAuAu/%s_v2Modulation_syst_%d_%d.root",calo.c_str(),begin,end),"calo_sys", embool, h_v2);
-    histToCaloCDBTree(Form("cdbFiles/%s_had_resp_syst_%d_%d.root"     ,calo.c_str(),begin,end),"calo_sys", embool, h_had_resp);
-  
+    histToCaloCDBTree(Form("cdbFiles/%s_had_resp_syst_%d_%d.root"    ,calo.c_str(),begin,end),"calo_sys", embool, h_had_resp);
+    histToCaloCDBTree(Form("cdbFiles/%s_no_calib_syst_%d_%d.root"    ,calo.c_str(),begin,end),"calo_sys", embool, h_no_calib);
+
     TCanvas* c1 = new TCanvas("c1","c1",600,600);
     h_had_resp->Draw("COLZ");
     c1->Draw();
@@ -101,6 +104,11 @@ void genCaloSyst(){
     h_v1->Draw("COLZ");
     c4->Draw();
     c4->SaveAs(Form("h_v1_%s.png",calo.c_str()));
+
+    TCanvas* c5 = new TCanvas("c5","c5",600,600);
+    h_no_calib->Draw("COLZ");
+    c4->Draw();
+    c4->SaveAs(Form("h_no_calib_%s.png",calo.c_str()));
 
   };
 
