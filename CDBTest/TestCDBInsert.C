@@ -5,6 +5,8 @@
 
 #include <phool/recoConsts.h>
 
+#include <Rtypes.h>
+
 R__LOAD_LIBRARY(libsphenixnpc.so)
 R__LOAD_LIBRARY(libphool.so)
 
