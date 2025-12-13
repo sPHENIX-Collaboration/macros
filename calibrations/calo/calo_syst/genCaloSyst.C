@@ -22,9 +22,9 @@ void genCaloSyst()
     float tbyt_stat;
     float shift;
     float sys_v1;
-    float sys_v2;
+//    float sys_v2;
     float had_frac;
-    float no_calib;
+//    float no_calib;
     int eta;
     int phi;
     bool embool;
@@ -95,12 +95,12 @@ void genCaloSyst()
   
     
         
-    histToCaloCDBTree(Form("cdbFiles/%s_stat_syst_%d_%d.root"        ,calo.c_str(),begin,end),"calo_sys", embool, h_stat);
-    histToCaloCDBTree(Form("cdbFiles/%s_shift_syst_%d_%d.root"       ,calo.c_str(),begin,end),"calo_sys", embool, h_shift);
-    histToCaloCDBTree(Form("cdbFiles/%s_v1Modulation_syst_%d_%d.root",calo.c_str(),begin,end),"calo_sys", embool, h_v1);
-  //  histToCaloCDBTree(Form("cdbFilesAuAu/%s_v2Modulation_syst_%d_%d.root",calo.c_str(),begin,end),"calo_sys", embool, h_v2);
-    histToCaloCDBTree(Form("cdbFiles/%s_had_resp_syst_%d_%d.root"    ,calo.c_str(),begin,end),"calo_sys", embool, h_had_resp);
-    histToCaloCDBTree(Form("cdbFiles/%s_no_calib_syst_%d_%d.root"    ,calo.c_str(),begin,end),"calo_sys", embool, h_no_calib);
+    histToCaloCDBTree(std::format("cdbFiles/{}_stat_syst_{}_{}.root"        ,calo,begin,end),"calo_sys", embool, h_stat);
+    histToCaloCDBTree(std::format("cdbFiles/{}_shift_syst_{}_{}.root"       ,calo,begin,end),"calo_sys", embool, h_shift);
+    histToCaloCDBTree(std::format("cdbFiles/{}_v1Modulation_syst_{}_{}.root",calo,begin,end),"calo_sys", embool, h_v1);
+  //  histToCaloCDBTree(std::format("cdbFilesAuAu/{}_v2Modulation_syst_{}_{}.root",calo.c_str(),begin,end),"calo_sys", embool, h_v2);
+    histToCaloCDBTree(std::format("cdbFiles/{}_had_resp_syst_{}_{}.root"    ,calo,begin,end),"calo_sys", embool, h_had_resp);
+    histToCaloCDBTree(std::format("cdbFiles/{}_no_calib_syst_{}_{}.root"    ,calo,begin,end),"calo_sys", embool, h_no_calib);
 
     TCanvas* c1 = new TCanvas("c1","c1",600,600);
     h_had_resp->Draw("COLZ");
@@ -120,12 +120,12 @@ void genCaloSyst()
     TCanvas* c4 = new TCanvas("c4", "c4", 600, 600);
     h_v1->Draw("COLZ");
     c4->Draw();
-    c4->SaveAs(Form("h_v1_%s.png",calo.c_str()));
+    c4->SaveAs(std::format("h_v1_{}.png",calo).c_str());
 
     TCanvas* c5 = new TCanvas("c5","c5",600,600);
     h_no_calib->Draw("COLZ");
-    c4->Draw();
-    c4->SaveAs(Form("h_no_calib_%s.png",calo.c_str()));
+    c5->Draw();
+    c5->SaveAs(std::format("h_no_calib_{}.png",calo).c_str());
 
   };
 }
