@@ -6,6 +6,12 @@
  * local coordinates translation offsets are hard-coded
  */
 
+#include <g4detectors/PHG4CylinderGeomContainer.h>
+
+#include <micromegas/CylinderGeomMicromegas.h>
+
+#include <trackreco/MakeActsGeometry.h>
+
 #include <ffamodules/CDBInterface.h>
 
 #include <fun4all/Fun4AllRunNodeInputManager.h>
@@ -16,7 +22,8 @@
 #include <phool/getClass.h>
 #include <phool/recoConsts.h>
 
-#include <trackreco/MakeActsGeometry.h>
+#include <Rtypes.h> // for R__LOAD_LIBRARY macro
+#include <TVector3.h>
 
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libfun4all.so)
@@ -25,12 +32,12 @@ R__LOAD_LIBRARY(libtrack_reco.so)
 namespace
 {
   //! small class to restore std::cout precision at end-of-scope
-  class std_precision_restore_t
+  class std_precision_restore_t // NOLINT(hicpp-special-member-functions)
   {
     public:
 
     //! constructor
-    std_precision_restore_t( std::ostream& out = std::cout ):
+    explicit std_precision_restore_t( std::ostream& out = std::cout ):
       m_out( out ),
       m_precision( out.precision() )
     {}
@@ -55,12 +62,14 @@ namespace
       m_local_y( local_y )
     {}
 
+//NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     TrkrDefs::hitsetkey m_hitsetkey = 0;
     double m_local_x = 0;
     double m_local_y = 0;
     double m_global_x = 0;
     double m_global_y = 0;
     double m_global_z = 0;
+//NOLINTEND(misc-non-private-member-variables-in-classes)
 
     friend std::ostream& operator << (std::ostream& out, const translation_parameters_t& p )
     {
@@ -109,9 +118,9 @@ void ConvertTpotAlignment()
 {
 
   // initialization
-  auto rc = recoConsts::instance();
-  auto se = Fun4AllServer::instance();
-  auto topNode = se->topNode();
+  auto *rc = recoConsts::instance();
+  auto *se = Fun4AllServer::instance();
+  auto *topNode = se->topNode();
 
   // set run number to get proper CDB entries
   const int runnumber = 52077;
@@ -124,28 +133,28 @@ void ConvertTpotAlignment()
   // load geometry file
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
   std::cout << "Geometry - geofile: " << geofile << std::endl;
-  auto ingeo = new Fun4AllRunNodeInputManager("GeoIn");
+  auto *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
   ingeo->AddFile(geofile);
   ingeo->run(0);
 
   // acts geometry initialization
-  auto geom = new MakeActsGeometry;
+  auto *geom = new MakeActsGeometry;
   geom->set_mvtx_applymisalign(true);
   geom->InitRun( topNode );
 
   // get relevant nodes
   // micromegas geometry
-  auto m_micromegas_geomcontainer = findNode::getClass<PHG4CylinderGeomContainer>(topNode, "CYLINDERGEOM_MICROMEGAS_FULL");
+  auto *m_micromegas_geomcontainer = findNode::getClass<PHG4CylinderGeomContainer>(topNode, "CYLINDERGEOM_MICROMEGAS_FULL");
 
   // ACTS geometry
-  auto m_tGeometry = findNode::getClass<ActsGeometry>(topNode, "ActsGeometry");
+  auto *m_tGeometry = findNode::getClass<ActsGeometry>(topNode, "ActsGeometry");
 
   // write down the center of all tiles
   const auto [begin,end] = m_micromegas_geomcontainer->get_begin_end();
   for( auto iter = begin; iter != end; ++iter )
   {
 
-    auto layergeom = dynamic_cast<CylinderGeomMicromegas*>(iter->second);
+    auto *layergeom = dynamic_cast<CylinderGeomMicromegas*>(iter->second);
 
     // get layer
     const unsigned int layer = layergeom->get_layer();
@@ -171,7 +180,7 @@ void ConvertTpotAlignment()
     const auto tileid = MicromegasDefs::getTileId(p.m_hitsetkey);
 
     // get relevant geometry
-    const auto layergeom =  static_cast<const CylinderGeomMicromegas*>(m_micromegas_geomcontainer->GetLayerGeom(layer));
+    const auto *const layergeom =  static_cast<const CylinderGeomMicromegas*>(m_micromegas_geomcontainer->GetLayerGeom(layer));
 
     // get global translation
     const auto translation_global = layergeom->get_world_from_local_vect(tileid, m_tGeometry, {p.m_local_x, p.m_local_y, 0} );
