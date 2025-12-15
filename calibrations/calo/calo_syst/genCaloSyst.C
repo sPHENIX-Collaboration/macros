@@ -107,17 +107,17 @@ void genCaloSyst()
     TCanvas* c1 = new TCanvas("c1","c1",600,600);
     h_had_resp_up->Draw("COLZ");
     c1->Draw();
-    c1->SaveAs(std::format("h_had_resp_up_%s.png", calo).c_str());
+    c1->SaveAs(std::format("h_had_resp_up_{}.png", calo).c_str());
 
     TCanvas* c2 = new TCanvas("c2", "c2", 600, 600);
     h_calib_unc_up->Draw("COLZ");
     c2->Draw();
-    c2->SaveAs(std::format("h_calib_unc_up_%s.png", calo).c_str());
+    c2->SaveAs(std::format("h_calib_unc_up_{}.png", calo).c_str());
 
     TCanvas* c3 = new TCanvas("c3", "c3", 600, 600);
     h_calib_stat->Draw("COLZ");
     c3->Draw();
-    c3->SaveAs(std::format("h_calib_stat_%s.png", calo).c_str());
+    c3->SaveAs(std::format("h_calib_stat_{}.png", calo).c_str());
 
     TCanvas* c4 = new TCanvas("c4", "c4", 600, 600);
     h_v1->Draw("COLZ");
