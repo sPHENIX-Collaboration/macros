@@ -1,4 +1,6 @@
 #include "getCaloTemp.C"
+
+#include <format>
 #include <fstream>
 #include <set>
 
@@ -12,10 +14,21 @@ void loopCaloTemp(const char* runListFile = "runList.txt",
                   int passes              = 1)   // set >1 to automatically re-try failed runs
 {
 
-  TString outdir = (TString(detector)=="HCALOUT") ? "temp_ohcal"
-                 : (TString(detector)=="HCALIN")  ? "temp_ihcal"
-                 : (TString(detector)=="CEMC")    ? "temp_emcal"
-                 : "temp_other";
+  TString outdir;
+
+  if (TString(detector) == "HCALOUT") {
+    outdir = "temp_ohcal";
+  }
+  else if (TString(detector) == "HCALIN") {
+    outdir = "temp_ihcal";
+  }
+  else if (TString(detector) == "CEMC") {
+    outdir = "temp_emcal";
+  }
+  else {
+    outdir = "temp_other";
+  }
+
   gSystem->mkdir(outdir, kTRUE);
 
   std::ifstream fin(runListFile);
@@ -39,7 +52,7 @@ void loopCaloTemp(const char* runListFile = "runList.txt",
   for (int r : pending) {
   // Expected output file
   
-  TString outname = Form("%s/%s_temp_%d.root",
+    TString outname = std::format("{}/{}_temp_{}.root",
                              outdir.Data(),
                              TString(detector).Data(),
                              r);
@@ -65,15 +78,15 @@ void loopCaloTemp(const char* runListFile = "runList.txt",
 }
 
 
-    // Write failure list for this pass
-    std::ofstream flog(Form("failed_runs_pass%d_%s.txt", pass, detector));
-    for (int r : failures) flog << r << "\n";
-    flog.close();
-    std::cout << "Pass " << pass << " failures written to failed_runs_pass"
-              << pass << "_" << detector << ".txt" << std::endl;
+  // Write failure list for this pass
+  std::ofstream flog(std::format("failed_runs_pass{}_{}.txt", pass, detector));
+  for (int r : failures) flog << r << "\n";
+  flog.close();
+  std::cout << "Pass " << pass << " failures written to failed_runs_pass"
+	    << pass << "_" << detector << ".txt" << std::endl;
 
-    // Prepare for next pass
-    pending = failures;
+  // Prepare for next pass
+  pending = failures;
   }
 
   std::cout << "\nAll passes done." << std::endl;

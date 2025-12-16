@@ -1,38 +1,42 @@
+#include <calobase/TowerInfoDefs.h>
+
 #include <TSystem.h>
 #include <TString.h>
 #include <TFile.h>
 #include <TProfile2D.h>
 #include <TTree.h>
+
+#include <format>
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <ctime>
-#include "TowerInfoDefs.h"
+
 R__LOAD_LIBRARY(libcalo_io.so)
 
 // Helper: run a psql command, capture output, retry with backoff.
 // flags should be like "-t -A" (scalar) or "-t -A -F," (CSV)
-static bool psql_run(const TString& dbhost,
-                     const TString& dbname,
-                     const TString& sql,   // already fully quoted: e.g. "\"SELECT ...;\""
-                     TString& out,
-                     const char* flags,
-                     int max_retries = 5,
-                     int backoff_ms  = 500)
+bool psql_run(const TString& dbhost,
+	      const TString& dbname,
+	      const TString& sql,   // already fully quoted: e.g. "\"SELECT ...;\""
+	      TString& out,
+	      const char* flags,
+	      int max_retries = 5,
+	      int backoff_ms  = 500)
 {
   out.Clear();
   for (int attempt = 1; attempt <= max_retries; ++attempt) {
     // temp file unique per attempt
     Long64_t now = static_cast<Long64_t>(time(nullptr));
-    TString tmp = Form("/tmp/getCaloTemp_%d_%lld_%d.txt",
+    TString tmp = std::format("/tmp/getCaloTemp_{}_{}_{}.txt",
                    gSystem->GetPid(), now, attempt);
 
     // Build command; stderr suppressed (2>/dev/null) so output is clean
-    TString cmd = Form("psql -h %s -d %s %s -c %s > %s 2>/dev/null",
+    TString cmd = std::format("psql -h {} -d {} {} -c {} > {} 2>/dev/null",
                        dbhost.Data(), dbname.Data(), flags, sql.Data(), tmp.Data());
 
     int code = gSystem->Exec(cmd.Data());
-    TString contents = gSystem->GetFromPipe(Form("cat %s; rm -f %s", tmp.Data(), tmp.Data()));
+    TString contents = gSystem->GetFromPipe(std::format("cat {}; rm -f {}", tmp.Data(), tmp.Data()).c_str());
     contents = contents.Strip(TString::kBoth, '\n');
 
     // Success if exit code is 0 and we got some content (and not an obvious error string)
@@ -47,7 +51,7 @@ static bool psql_run(const TString& dbhost,
   return false;
 }
 
-void getCaloTemp(int runnumber = 54263, TString detector = "HCALIN",
+void getCaloTemp(int runnumber = 54263, const TString& detector = "HCALIN",
                  int max_retries = 5, int backoff_ms = 500)
 {
   // Database info
@@ -55,7 +59,7 @@ void getCaloTemp(int runnumber = 54263, TString detector = "HCALIN",
   const TString dbname = "daq";
 
   // --- 1) Get run start time (brtimestamp)
-  TString sql = Form("\"SELECT brtimestamp FROM run WHERE runnumber=%d;\"", runnumber);
+  TString sql = std::format("\"SELECT brtimestamp FROM run WHERE runnumber={};\"", runnumber);
 
   TString runtime;
   if (!psql_run(dbhost, dbname, sql, runtime, "-t -A", max_retries, backoff_ms)) {
@@ -67,7 +71,8 @@ void getCaloTemp(int runnumber = 54263, TString detector = "HCALIN",
   std::cout << "Run " << runnumber << " runtime: " << runtime << std::endl;
 
   // --- 2) Choose detector table & columns
-  TString tablename, tempstring = "temp";
+  TString tablename;
+  TString tempstring = "temp";
   int det = -1;
   if (detector == "CEMC") {
     tablename = "emcal_heartbeat";
@@ -88,16 +93,16 @@ void getCaloTemp(int runnumber = 54263, TString detector = "HCALIN",
   
   // --- 3) Find closest timestamp to run start (fast + filtered)
   
-  sql = Form("\"SELECT time FROM %s "
-           "WHERE %s "
-           "ORDER BY ABS(EXTRACT(epoch FROM time) - EXTRACT(epoch FROM '%s'::timestamp)) "
+  sql = std::format("\"SELECT time FROM {} "
+           "WHERE {} "
+           "ORDER BY ABS(EXTRACT(epoch FROM time) - EXTRACT(epoch FROM '{}'::timestamp)) "
            "LIMIT 1;\"",
            tablename.Data(),
-           (det >= 0 ? Form("detector=%d", det) : "TRUE"),
+           (det >= 0 ? std::format("detector={}", det) : "TRUE"),
            runtime.Data());
   
 /*
-  sql = Form("\"SELECT time FROM %s " 
+  sql = std::format("\"SELECT time FROM %s " 
              "ORDER BY ABS(EXTRACT(epoch FROM time) - EXTRACT(epoch FROM '%s'::timestamp)) "
              "LIMIT 1;\"", tablename.Data(), runtime.Data()); 
 */ 
@@ -112,11 +117,11 @@ void getCaloTemp(int runnumber = 54263, TString detector = "HCALIN",
   std::cout << "Closest DB time: " << closest_time << std::endl;
 
   // --- 4) Get temperatures (CSV) for that timestamp (retry)
-  sql = Form("\"SELECT towerid, %s FROM %s WHERE time='%s'%s;\"",
+  sql = std::format("\"SELECT towerid, {} FROM {} WHERE time='{}'{};\"",
              tempstring.Data(),
              tablename.Data(),
              closest_time.Data(),
-             (det >= 0 ? Form(" AND detector=%d", det) : ""));
+             (det >= 0 ? std::format(" AND detector={}", det) : ""));
 
   TString csvrows;
   if (!psql_run(dbhost, dbname, sql, csvrows, "-t -A -F,", max_retries, backoff_ms)) {
@@ -149,7 +154,7 @@ void getCaloTemp(int runnumber = 54263, TString detector = "HCALIN",
   gSystem->mkdir(outdir, kTRUE);
 
   // Build full output filename
-  TString outname = Form("%s/%s_temp_%d.root",
+  TString outname = std::format("{}/{}_temp_{}.root",
                        outdir.Data(),
                        detector.Data(),
                        runnumber);
@@ -160,7 +165,7 @@ void getCaloTemp(int runnumber = 54263, TString detector = "HCALIN",
   if (detector == "CEMC")
     htemp = new TProfile2D("h_cemc_temp", ";eta;phi", 96, 0, 96, 256, 0, 256);
   else
-    htemp = new TProfile2D(Form("h_%s_temp", detector.Data()), ";eta;phi", 24, 0, 24, 64, 0, 64);
+    htemp = new TProfile2D(std::format("h_{}_temp", detector.Data()).c_str(), ";eta;phi", 24, 0, 24, 64, 0, 64);
 
   while (std::getline(iss, line)) {
     if (line.empty()) continue;
@@ -175,7 +180,7 @@ void getCaloTemp(int runnumber = 54263, TString detector = "HCALIN",
     int towerid = 0;
     try { towerid = std::stoi(parts[0]); } catch (...) { continue; }
 
-    float temp = 0.0f;
+    float temp = 0.0F;
     try { temp = std::stof(parts[1]); } catch (...) { continue; }
 
     int calo_key;
