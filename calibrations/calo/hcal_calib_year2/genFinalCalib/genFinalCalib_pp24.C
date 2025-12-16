@@ -1,4 +1,13 @@
+#include "tsc_cos_merge.C"  // provides genCdbCorr_HH / genCdbCorr
+#include "getCosmicTemps.C" // This macro reads the temp of cosmic runs from DB and it takes few min
+
+#include <TSystem.h>
+#include <TFile.h>
+#include <TH1F.h>
+#include <TString.h>
+
 #include <iostream>
+#include <format>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -7,26 +16,17 @@
 #include <cstdlib>
 #include <climits>
 
-#include "TSystem.h"
-#include "TFile.h"
-#include "TH1F.h"
-#include "TString.h"
-
-#include "tsc_cos_merge.C"  // provides genCdbCorr_HH / genCdbCorr
-#include "getCosmicTemps.C" // This macro reads the temp of cosmic runs from DB and it takes few min
 
 // Input files needed
 // cos_runs_pp_2024.txt, runList_pp_2024_ana509.txt, anaOut.root, cdbFiles/ohcal_cdb_tsc_cos_calib_%d.root 
 
-static inline float fetch_ohcal_temp_degC(int run,
-                                          int max_retries = 3,
-                                          int backoff_ms  = 400)
+float fetch_ohcal_temp_degC(int run,
+			    int max_retries = 3,
+			    int backoff_ms  = 400)
 {
   // default detector is OHCal
   return fetch_hcal_temp_degC(run, "HCALOUT", max_retries, backoff_ms);
 }
-
-using namespace std;
 
 struct TowerData {
   int   tower_ieta;
@@ -47,9 +47,9 @@ void genFinalCalib_pp24(const char *runs = "cos_runs_pp_2024.txt")
   gSystem->mkdir("final_ohcal_calib_run2pp_hh_abscosmic_nov23", kTRUE);
 
   // ---- read cosmic runs ----
-  ifstream runlist(runs);
-  vector<int> cosmic_runnumbers;
-  string line;
+  std::ifstream runlist(runs);
+  std::vector<int> cosmic_runnumbers;
+  std::string line;
   while (getline(runlist,line)) {
     if (line.empty() || line[0]=='#') continue;
     cosmic_runnumbers.push_back(stoi(line));
@@ -57,17 +57,17 @@ void genFinalCalib_pp24(const char *runs = "cos_runs_pp_2024.txt")
   sort(cosmic_runnumbers.begin(), cosmic_runnumbers.end());
 
   // ---- read beam runs ----
-  ifstream runlistBeam("runList_pp_2024_ana509.txt");
-  vector<int> runnumbersBeam;
+  std::ifstream runlistBeam("runList_pp_2024_ana509.txt");
+  std::vector<int> runnumbersBeam;
   while (getline(runlistBeam, line)) {
     if (line.empty() || line[0]=='#') continue;
     runnumbersBeam.push_back(stoi(line));
   }
 
   const int RUN_MAX = runnumbersBeam.back(); // get the last element in the list
-  cout << "last run in the list of beam runs is:" << RUN_MAX << endl;
+  std::cout << "last run in the list of beam runs is:" << RUN_MAX << std::endl;
 
-  vector<int> runsWritten;   // to collect missing runs
+  std::vector<int> runsWritten;   // to collect missing runs
  
   // ---- open anaOut.root ----
   TFile* ftemp = TFile::Open("analyze_hits/anaOut.root","READ"); // input file from ana_hits.C macro
@@ -77,7 +77,7 @@ void genFinalCalib_pp24(const char *runs = "cos_runs_pp_2024.txt")
 
   // ---- get temperature for cosmic runs (approx: nearest beam bin) ----
   /*
-  vector<float> cosmic_temps;
+  std::vector<float> cosmic_temps;
   for (int cos_run : cosmic_runnumbers) {
     int minDelta = INT_MAX;
     float cos_temp = 0;
@@ -94,30 +94,30 @@ void genFinalCalib_pp24(const char *runs = "cos_runs_pp_2024.txt")
     }
     cosmic_temps.push_back(cos_temp);
   // --- print debug info ---
-  cout << "[Cosmic] Run " << cos_run
+  std::cout << "[Cosmic] Run " << cos_run
        << " → nearest beam run " << matched_beam
        << " with temperature = " << cos_temp << " C"
-       << endl;
+       << std::endl;
   }
   */
 
   // ---- get temperature for cosmic runs from DB via getCosmicTemps.C ----
 
-  vector<float> cosmic_temps;
+  std::vector<float> cosmic_temps;
   cosmic_temps.reserve(cosmic_runnumbers.size());
 
   for (int cos_run : cosmic_runnumbers) {
     float cos_temp = fetch_ohcal_temp_degC(cos_run);   // function from getCosmicTemps.C
     cosmic_temps.push_back(cos_temp);
 
-    cout << "[Cosmic] Run " << cos_run
+    std::cout << "[Cosmic] Run " << cos_run
          << " | extracted OHCal temperature = " << cos_temp << " C"
-         << endl;
+         << std::endl;
   }
 
 
   // ---- load half-height corrections ----
-  vector<TowerData> hh_data;
+  std::vector<TowerData> hh_data;
   loadCSV("halfHeights_pp_2024_anjaly_dec6.csv", hh_data);
 
   // ---- loop over beam runs ----
@@ -128,8 +128,8 @@ void genFinalCalib_pp24(const char *runs = "cos_runs_pp_2024.txt")
     if (irb+1  < runnumbersBeam.size() ) runnumber_last = runnumbersBeam[irb+1]-1;
     else runnumber_last = RUN_MAX;
     
-    cout << "----------------------------------" << endl;
-    cout << "starting run " << runnumber << endl;
+    std::cout << "----------------------------------" << std::endl;
+    std::cout << "starting run " << runnumber << std::endl;
 
     int asoCosmic = 0;
     int minDelta  = INT_MAX;
@@ -155,7 +155,7 @@ void genFinalCalib_pp24(const char *runs = "cos_runs_pp_2024.txt")
     }
 
     if (temp_beam < 10) {
-      cout << "Run " << runnumber << " skipped (temp < 10)" << endl;
+      std::cout << "Run " << runnumber << " skipped (temp < 10)" << std::endl;
       continue;
     }
 
@@ -163,18 +163,18 @@ void genFinalCalib_pp24(const char *runs = "cos_runs_pp_2024.txt")
     float deltaT = temp_beam - asoCosmicTemp;
     float correction = 1 + alpha*deltaT;
 
-    cout << "Beam run " << runnumber
+    std::cout << "Beam run " << runnumber
          << " uses cosmic " << asoCosmic
          << " : T_beam=" << temp_beam
          << " T_cosmic=" << asoCosmicTemp
-         << " corr=" << correction << endl;
+         << " corr=" << correction << std::endl;
 
     csv_log << runnumber << "," << asoCosmic << "," << temp_beam << "," << asoCosmicTemp << "," << correction << "\n";
 
 
-    string cosmic_CDB_file_oh = Form("cdbFiles/ohcal_cdb_tsc_cos_calib_%d.root",asoCosmic);  //input file needed
+    std::string cosmic_CDB_file_oh = std::format("cdbFiles/ohcal_cdb_tsc_cos_calib_{}.root",asoCosmic);  //input file needed
     auto hh_towersForRun = getTowersForRun(hh_data, runnumber);
-    string cdbFileName_hh = Form("final_ohcal_calib_run2pp_hh_abscosmic_nov23/cdb_ohcal_tsc_temp_cosmic_hh_%d_%d.root",
+    std::string cdbFileName_hh = std::format("final_ohcal_calib_run2pp_hh_abscosmic_nov23/cdb_ohcal_tsc_temp_cosmic_hh_{}_{}.root",
                                  runnumber, runnumber_last); //output file name
     genCdbCorr(correction, cosmic_CDB_file_oh, cdbFileName_hh, 0);                       // Without HH correction
     //genCdbCorr_HH(correction, cosmic_CDB_file_oh, cdbFileName_hh, 0, hh_towersForRun); // With HH correction
@@ -182,16 +182,16 @@ void genFinalCalib_pp24(const char *runs = "cos_runs_pp_2024.txt")
   } //beam run loop ends
 
   csv_log << "skipped_run\n";
-  cout << "\n=== Summary of runs with no file written ===\n";
+  std::cout << "\n=== Summary of runs with no file written ===\n";
   int skippedCount = 0;
   for (int r : runnumbersBeam) {
     if (std::find(runsWritten.begin(), runsWritten.end(), r) == runsWritten.end()) {
-        cout << r << " ";
+        std::cout << r << " ";
 	csv_log << r << "\n";
 	skippedCount++;
     }
 }
-  cout << "\nTotal skipped runs: " << skippedCount << endl;
+  std::cout << "\nTotal skipped runs: " << skippedCount << std::endl;
   csv_log.close();
 
 
@@ -202,10 +202,10 @@ void genFinalCalib_pp24(const char *runs = "cos_runs_pp_2024.txt")
 void loadCSV(const std::string& filename, std::vector<TowerData>& data) {
   std::ifstream file(filename);
   std::string line;
-  while (std::getline(file, line)) {
+  while (getline(file, line)) {
     if (line.empty() || line[0]=='#') continue;
     std::stringstream ss(line);
-    TowerData t;
+    TowerData t{};
     char comma;
     ss >> t.tower_ieta >> comma
        >> t.tower_iphi >> comma

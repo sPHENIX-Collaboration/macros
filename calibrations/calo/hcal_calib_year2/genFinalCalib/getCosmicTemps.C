@@ -2,33 +2,36 @@
 
 #include <TSystem.h>
 #include <TString.h>
+
 #include <ctime>
+#include <format>
+#include <fstream>
 #include <iostream>
 #include <limits>
 #include <cmath>
 
 // --- run a psql command and capture output (no prompts), with retries ---
-static bool psql_run(const TString& dbhost,
-                     const TString& dbname,
-                     const TString& sql_quoted,      // e.g. "\"SELECT 1;\""
-                     TString& out,
-                     const char* flags = "-X -q -t -A -w",
-                     int max_retries   = 3,
-                     int backoff_ms    = 400)
+bool psql_run(const TString& dbhost,
+	      const TString& dbname,
+	      const TString& sql_quoted,      // e.g. "\"SELECT 1;\""
+	      TString& out,
+	      const char* flags = "-X -q -t -A -w",
+	      int max_retries   = 3,
+	      int backoff_ms    = 400)
 {
   out.Clear();
 
   for (int attempt = 1; attempt <= max_retries; ++attempt) {
     Long64_t now = static_cast<Long64_t>(time(nullptr));
-    TString tmp = Form("/tmp/getCaloTemp_%d_%lld_%d.txt",
-                       gSystem->GetPid(), now, attempt);
+    TString tmp = std::format("/tmp/getCaloTemp_{}_{}_{}.txt",
+			      gSystem->GetPid(), now, attempt).c_str();
 
     // stderr to /dev/null; keep output clean for scalar reads
-    TString cmd = Form("psql -h %s -d %s %s -c %s > %s 2>/dev/null",
+    TString cmd = std::format("psql -h {} -d {} {} -c {} > {} 2>/dev/null",
                        dbhost.Data(), dbname.Data(), flags, sql_quoted.Data(), tmp.Data());
 
     int code = gSystem->Exec(cmd.Data());
-    TString contents = gSystem->GetFromPipe(Form("cat %s; rm -f %s", tmp.Data(), tmp.Data()));
+    TString contents = gSystem->GetFromPipe(std::format("cat {}; rm -f {}", tmp.Data(), tmp.Data()).c_str());
     contents = contents.Strip(TString::kBoth, '\n');
 
     if (code == 0 && contents.Length() > 0 && !contents.Contains("ERROR")) {
@@ -54,7 +57,7 @@ float fetch_hcal_temp_degC(int runnumber,
 
   TString runtime;
   {
-    TString sql = Form("\"SELECT brtimestamp FROM run WHERE runnumber=%d;\"", runnumber);
+    TString sql = std::format("\"SELECT brtimestamp FROM run WHERE runnumber={};\"", runnumber);
     if (!psql_run(dbhost, dbname, sql, runtime, "-X -q -t -A -w", max_retries, backoff_ms)) {
       std::cout << "Run " << runnumber << ": FAILED to fetch brtimestamp" << std::endl;
       return std::numeric_limits<float>::quiet_NaN();
@@ -71,9 +74,9 @@ float fetch_hcal_temp_degC(int runnumber,
 
   TString closest_time;
   {
-    TString sql = Form("\"SELECT time FROM hcal_heartbeat "
-                       "WHERE detector=%d "
-                       "ORDER BY ABS(EXTRACT(epoch FROM time) - EXTRACT(epoch FROM '%s'::timestamp)) "
+    TString sql = std::format("\"SELECT time FROM hcal_heartbeat "
+                       "WHERE detector={} "
+                       "ORDER BY ABS(EXTRACT(epoch FROM time) - EXTRACT(epoch FROM '{}'::timestamp)) "
                        "LIMIT 1;\"",
                        det, runtime.Data());
     if (!psql_run(dbhost, dbname, sql, closest_time, "-X -q -t -A -w", max_retries, backoff_ms)) {
@@ -85,9 +88,9 @@ float fetch_hcal_temp_degC(int runnumber,
 
   TString avg_temp_str;
   {
-    TString sql = Form("\"SELECT AVG(temp) "
+    TString sql = std::format("\"SELECT AVG(temp) "
                        "FROM hcal_heartbeat "
-                       "WHERE detector=%d AND time='%s' "
+                       "WHERE detector=%d AND time='{}' "
                        "  AND temp > -50 AND temp < 100;\"",
                        det, closest_time.Data());
     if (!psql_run(dbhost, dbname, sql, avg_temp_str, "-X -q -t -A -w", max_retries, backoff_ms)) {
@@ -97,7 +100,8 @@ float fetch_hcal_temp_degC(int runnumber,
   }
 
   float tdeg = std::numeric_limits<float>::quiet_NaN();
-  try { tdeg = std::stof(std::string(avg_temp_str.Data())); } catch (...) {}
+  try { tdeg = std::stof(std::string(avg_temp_str.Data())); }
+  catch (...) {std::cout << "caught unknown exception from std::stof" << std::endl;}
 
   return tdeg;
 }
