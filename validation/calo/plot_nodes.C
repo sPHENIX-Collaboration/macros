@@ -1,9 +1,17 @@
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TH1.h>
+#include <TString.h>
+#include <TText.h>
+
+#include <iostream>
+
 void plot_nodes()
 {
 	TFile *file = new TFile("HIST_CALOR_QA-00043901-0004.root", "READ");
 	
 	TString name = "h_CaloValid_nodes_exists";
-	TH1F *hist = (TH1F*)file->Get(name.Data());
+	TH1 *hist = (TH1*)file->Get(name.Data());
 
 	TCanvas *c1 = new TCanvas("c1", "Histogram with Bin Labels", 800, 600);
 

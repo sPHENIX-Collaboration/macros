@@ -3,15 +3,22 @@
  * You can add some analysis modules at the end which package tracks and calo clusters into trees for analysis.
  */
 
+// leave the GlobalVariables.C at the beginning, an empty line afterwards
+// protects its position against reshuffling by clang-format
+#include <GlobalVariables.C>
+
 #include <G4_ActsGeom.C>
 #include <G4_Global.C>
 #include <G4_Magnet.C>
-#include <GlobalVariables.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco.C>
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
 #include <QA.C>
+
+#include <trackreco/PHActsTrackProjection.h>
+
+#include <trackbase_historic/SvtxTrack.h>
 
 #include <ffamodules/CDBInterface.h>
 
@@ -25,11 +32,6 @@
 
 #include <phool/recoConsts.h>
 
-#include <trackreco/PHActsTrackProjection.h>
-
-#include <trackbase_historic/SvtxTrack.h>
-
-#include <stdio.h>
 #include <iostream>
 #include <filesystem>
 
@@ -46,35 +48,30 @@ R__LOAD_LIBRARY(libepd.so)
 R__LOAD_LIBRARY(libzdcinfo.so)
 void Fun4All_TrackCaloAnalysis(
     const int nEvents = 10,
-    const std::string trackfilename = "DST_TRKR_TRACKS_run2pp_ana475_2024p017_v001-00053877-00000.root",
-    const std::string trackdir = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana475_2024p017_v001/DST_TRKR_TRACKS/run_00053800_00053900/dst/",
-    const std::string calofilename = "DST_CALO_run2pp_ana468_2024p012_v001-00053877-00000.root",
-    const std::string calodir = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana468_2024p012_v001/DST_CALO/run_00053800_00053900/dst/",
-    const std::string outfilename = "tracks_calos",
-    const std::string outdir = "./")
+    const std::string& trackfilename = "DST_TRKR_TRACKS_run2pp_ana475_2024p017_v001-00053877-00000.root",
+    const std::string& trackdir = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana475_2024p017_v001/DST_TRKR_TRACKS/run_00053800_00053900/dst/",
+    const std::string& calofilename = "DST_CALO_run2pp_ana468_2024p012_v001-00053877-00000.root",
+    const std::string& calodir = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana468_2024p012_v001/DST_CALO/run_00053800_00053900/dst/",
+    const std::string& outfilename = "tracks_calos",
+    const std::string& outdir = "./")
 {
   std::string inputTrackFile = trackdir + trackfilename;
   std::string inputCaloFile = calodir + calofilename;
 
-  std::pair<int, int>
-      runseg = Fun4AllUtils::GetRunSegment(trackfilename);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(trackfilename);
   int runnumber = runseg.first;
   int segment = runseg.second;
 
-  TString outfileheader = outdir + outfilename + "_" + runnumber + "-" + segment;
-  std::cout<<"outfile header: "<<outfileheader<<std::endl;
-  std::string theOutfileheader = outfileheader.Data();
+  std::string theOutfileheader = outdir + outfilename + "_" + std::to_string(runnumber) + "-" + std::to_string(segment);
 
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
   TRACKING::pp_mode = true;
 
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
 
-  int verbosity = 0;
-
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
   rc->set_IntFlag("RUNSEGMENT", segment);
 
@@ -110,17 +107,17 @@ void Fun4All_TrackCaloAnalysis(
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
-  auto trackin = new Fun4AllDstInputManager("TrackInManager");
+  auto *trackin = new Fun4AllDstInputManager("TrackInManager");
   trackin->fileopen(inputTrackFile);
   se->registerInputManager(trackin);
 
-  auto caloin = new Fun4AllDstInputManager("CaloInManager");
+  auto *caloin = new Fun4AllDstInputManager("CaloInManager");
   caloin->fileopen(inputCaloFile);
   se->registerInputManager(caloin);
 
   Global_Reco();
 
-  auto projection = new PHActsTrackProjection("CaloProjection");
+  auto *projection = new PHActsTrackProjection("CaloProjection");
   float new_cemc_rad = 99; // from DetailedCalorimeterGeometry, project to inner surface
   bool doEMcalRadiusCorr = true;
   if (doEMcalRadiusCorr)
@@ -130,13 +127,11 @@ void Fun4All_TrackCaloAnalysis(
   se->registerSubsystem(projection);
 
   //add your analysis module here
-  TString ananame = theOutfileheader + "_ana.root";
-  std::string anaOutputFileName(ananame.Data());
+//  std::string anaOutputFileName = theOutfileheader + "_ana.root";
 
   if (Enable::DSTOUT)
   {
-    TString dstname = theOutfileheader + "_dst.root";
-    std::string dstOutputFileName(dstname.Data());
+    std::string dstOutputFileName= theOutfileheader + "_dst.root";
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", dstOutputFileName);
     out->AddNode("Sync");
     out->AddNode("EventHeader");
@@ -152,8 +147,7 @@ void Fun4All_TrackCaloAnalysis(
 
   if(Enable::QA)
   {
-    TString qaname = theOutfileheader + "_qa.root";
-    std::string qaOutputFileName(qaname.Data());
+    std::string qaOutputFileName = theOutfileheader + "_qa.root";
     QAHistManagerDef::saveQARootFile(qaOutputFileName);
   }
 
@@ -165,11 +159,11 @@ void Fun4All_TrackCaloAnalysis(
   return;
 }
 
-std::string GetFirstLine(std::string listname)
+std::string GetFirstLine(const std::string& listname)
 {
   std::ifstream file(listname);
 
-  std::string firstLine = "";
+  std::string firstLine;
   if (file.is_open()) {
       if (std::getline(file, firstLine)) {
           std::cout << "First Line: " << firstLine << std::endl;

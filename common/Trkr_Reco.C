@@ -31,7 +31,6 @@
 #include <tpc/TpcLoadDistortionCorrection.h>
 
 #include <tpccalib/PHTpcResiduals.h>
-#include <tpccalib/TpcSpaceChargeReconstruction.h>
 
 #include <trackermillepedealignment/HelicalFitter.h>
 #include <trackermillepedealignment/MakeMilleFiles.h>
@@ -84,6 +83,7 @@ void Tracking_Reco_Vertex_run2pp()
   vtxProp->Verbosity(verbosity);
   vtxProp->fieldMap(G4MAGNET::magfield_tracking);
   se->registerSubsystem(vtxProp);
+
 }
 void Tracking_Reco_TrackFit_run2pp(const std::string &outfile = "run2pptrackfit.root")
 {
@@ -286,6 +286,10 @@ void Tracking_Reco_TrackSeed_ZeroField()
 
   auto *silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
+  silicon_Seeding->setStrobeRange(-5, 5);
+  silicon_Seeding->isStreaming();
+  // these get us to about 83% INTT > 1
+  silicon_Seeding->setinttRPhiSearchWindow(0.2);
   se->registerSubsystem(silicon_Seeding);
 
   auto *merger = new PHSiliconSeedMerger;
@@ -697,14 +701,21 @@ void Tracking_Reco_TrackFit()
 
     if (G4TRACKING::SC_CALIBMODE)
     {
-      // Genfit based Tpc space charge Reconstruction
-      auto *tpcSpaceChargeReconstruction = new TpcSpaceChargeReconstruction;
-      tpcSpaceChargeReconstruction->set_use_micromegas(G4TRACKING::SC_USE_MICROMEGAS);
-      tpcSpaceChargeReconstruction->set_outputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
+
+      /*
+       * in calibration mode, calculate residuals between TPC and fitted tracks,
+       * store in dedicated structure for distortion correction
+       */
+      auto *residuals = new PHTpcResiduals();
+      residuals->setTrackMapName("SvtxTrackMap");
+      residuals->setOutputfile(G4TRACKING::SC_ROOTOUTPUT_FILENAME);
+      residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
       // reconstructed distortion grid size (phi, r, z)
-      tpcSpaceChargeReconstruction->set_grid_dimensions(36, 48, 80);
-      se->registerSubsystem(tpcSpaceChargeReconstruction);
+      residuals->setGridDimensions(36, 48, 80);
+      residuals->Verbosity(verbosity);
+      se->registerSubsystem(residuals);
     }
+
   }
   else
   {

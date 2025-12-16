@@ -137,7 +137,7 @@ void Fun4All_raw_hit_KFP(
     const bool doKFParticle = false)
 {
   auto *se = Fun4AllServer::instance();
-  se->Verbosity(2);
+  se->Verbosity(1);
   auto *rc = recoConsts::instance();
 
   // input manager for QM production raw hit DST file
@@ -147,7 +147,7 @@ void Fun4All_raw_hit_KFP(
   int i = 0;
   int runnumber = std::numeric_limits<int>::quiet_NaN();
   int segment = std::numeric_limits<int>::quiet_NaN();
-  bool process_endpoints = false;
+  
 
   while (std::getline(ifs, filepath))
   {
@@ -161,14 +161,7 @@ void Fun4All_raw_hit_KFP(
       rc->set_IntFlag("RUNNUMBER", runnumber);
       rc->set_uint64Flag("TIMESTAMP", runnumber);
     }
-    if (filepath.find("ebdc") != std::string::npos)
-    {
-      if (filepath.find("_0_") != std::string::npos ||
-          filepath.find("_1_") != std::string::npos)
-      {
-        process_endpoints = true;
-      }
-    }
+  
     std::string inputname = "InputManager" + std::to_string(i);
     auto *hitsin = new Fun4AllDstInputManager(inputname);
     hitsin->fileopen(filepath);
@@ -219,7 +212,7 @@ void Fun4All_raw_hit_KFP(
             << " vdrift: " << G4TPC::tpc_drift_velocity_reco
             << std::endl;
 
-  TRACKING::pp_mode = false;
+  TRACKING::pp_mode = true;
 
   // distortion calibration mode
   /*
@@ -274,31 +267,18 @@ void Fun4All_raw_hit_KFP(
   std::ostringstream ebdcname;
   for (int ebdc = 0; ebdc < 24; ebdc++)
   {
-    if (!process_endpoints)
-    {
-      ebdcname.str("");
-      if (ebdc < 10)
-      {
-        ebdcname << "0";
-      }
-      ebdcname << ebdc;
-      Tpc_HitUnpacking(ebdcname.str());
-    }
-
-    else if (process_endpoints)
-    {
-      for (int endpoint = 0; endpoint < 2; endpoint++)
+    for (int endpoint = 0; endpoint < 2; endpoint++)
       {
         ebdcname.str("");
         if (ebdc < 10)
-        {
-          ebdcname << "0";
-        }
+	  {
+	    ebdcname << "0";
+	  }
         ebdcname << ebdc << "_" << endpoint;
         Tpc_HitUnpacking(ebdcname.str());
       }
-    }
   }
+
 
   Micromegas_HitUnpacking();
 
@@ -321,130 +301,9 @@ void Fun4All_raw_hit_KFP(
   /*
    * Begin Track Seeding
    */
-
-  auto *silicon_Seeding = new PHActsSiliconSeeding;
-  silicon_Seeding->Verbosity(0);
-  silicon_Seeding->setStrobeRange(-5, 5);
-  // these get us to about 83% INTT > 1
-  silicon_Seeding->setinttRPhiSearchWindow(0.4);
-  silicon_Seeding->setinttZSearchWindow(2.0);
-  silicon_Seeding->seedAnalysis(false);
-  se->registerSubsystem(silicon_Seeding);
-
-  auto *merger = new PHSiliconSeedMerger;
-  merger->Verbosity(0);
-  se->registerSubsystem(merger);
-
-  /*
-   * Tpc Seeding
-   */
-  auto *seeder = new PHCASeeding("PHCASeeding");
-  double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
-  bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
-  if (ConstField)
-  {
-    seeder->useConstBField(true);
-    seeder->constBField(fieldstrength);
-  }
-  else
-  {
-    seeder->set_field_dir(-1 * G4MAGNET::magfield_rescale);
-    seeder->useConstBField(false);
-    seeder->magFieldFile(G4MAGNET::magfield_tracking);  // to get charge sign right
-  }
-  seeder->Verbosity(0);
-  seeder->SetLayerRange(7, 55);
-  seeder->SetSearchWindow(2., 0.05);           // z-width and phi-width, default in macro at 1.5 and 0.05
-  seeder->SetClusAdd_delta_window(3.0, 0.06);  //  (0.5, 0.005) are default; sdzdr_cutoff, d2/dr2(phi)_cutoff
-  // seeder->SetNClustersPerSeedRange(4,60); // default is 6, 6
-  seeder->SetMinHitsPerCluster(0);
-  seeder->SetMinClustersPerTrack(3);
-  seeder->useFixedClusterError(true);
-  seeder->set_pp_mode(true);
-  se->registerSubsystem(seeder);
-
-  // expand stubs in the TPC using simple kalman filter
-  auto *cprop = new PHSimpleKFProp("PHSimpleKFProp");
-  cprop->set_field_dir(G4MAGNET::magfield_rescale);
-  if (ConstField)
-  {
-    cprop->useConstBField(true);
-    cprop->setConstBField(fieldstrength);
-  }
-  else
-  {
-    cprop->magFieldFile(G4MAGNET::magfield_tracking);
-    cprop->set_field_dir(-1 * G4MAGNET::magfield_rescale);
-  }
-  cprop->useFixedClusterError(true);
-  cprop->set_max_window(5.);
-  cprop->Verbosity(0);
-  cprop->set_pp_mode(true);
-  se->registerSubsystem(cprop);
-
-  // Always apply preliminary distortion corrections to TPC clusters before silicon matching
-  // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
-  auto *prelim_distcorr = new PrelimDistortionCorrection;
-  prelim_distcorr->set_pp_mode(true);
-  prelim_distcorr->Verbosity(0);
-  se->registerSubsystem(prelim_distcorr);
-
-  /*
-   * Track Matching between silicon and TPC
-   */
-  // The normal silicon association methods
-  // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
-  auto *silicon_match = new PHSiliconTpcTrackMatching;
-  silicon_match->Verbosity(0);
-  silicon_match->set_pp_mode(TRACKING::pp_mode);
-  if (G4TPC::ENABLE_AVERAGE_CORRECTIONS)
-  {
-    // for general tracking
-    // Eta/Phi window is determined by 3 sigma window
-    // X/Y/Z window is determined by 4 sigma window
-    silicon_match->window_deta.set_posQoverpT_maxabs({-0.014, 0.0331, 0.48});
-    silicon_match->window_deta.set_negQoverpT_maxabs({-0.006, 0.0235, 0.52});
-    silicon_match->set_deltaeta_min(0.03);
-    silicon_match->window_dphi.set_QoverpT_range({-0.15, 0, 0}, {0.15, 0, 0});
-    silicon_match->window_dx.set_QoverpT_maxabs({3.0, 0, 0});
-    silicon_match->window_dy.set_QoverpT_maxabs({3.0, 0, 0});
-    silicon_match->window_dz.set_posQoverpT_maxabs({1.138, 0.3919, 0.84});
-    silicon_match->window_dz.set_negQoverpT_maxabs({0.719, 0.6485, 0.65});
-    silicon_match->set_crossing_deltaz_max(30);
-    silicon_match->set_crossing_deltaz_min(2);
-
-    // for distortion correction using SI-TPOT fit and track pT>0.5
-    if (G4TRACKING::SC_CALIBMODE)
-    {
-      silicon_match->window_deta.set_posQoverpT_maxabs({0.016, 0.0060, 1.13});
-      silicon_match->window_deta.set_negQoverpT_maxabs({0.022, 0.0022, 1.44});
-      silicon_match->set_deltaeta_min(0.03);
-      silicon_match->window_dphi.set_QoverpT_range({-0.15, 0, 0}, {0.09, 0, 0});
-      silicon_match->window_dx.set_QoverpT_maxabs({2.0, 0, 0});
-      silicon_match->window_dy.set_QoverpT_maxabs({1.5, 0, 0});
-      silicon_match->window_dz.set_posQoverpT_maxabs({1.213, 0.0211, 2.09});
-      silicon_match->window_dz.set_negQoverpT_maxabs({1.307, 0.0001, 4.52});
-      silicon_match->set_crossing_deltaz_min(1.2);
-    }
-  }
-  se->registerSubsystem(silicon_match);
-
-  // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-  auto *mm_match = new PHMicromegasTpcTrackMatching;
-  mm_match->Verbosity(0);
-  mm_match->set_rphi_search_window_lyr1(3.);
-  mm_match->set_rphi_search_window_lyr2(15.0);
-  mm_match->set_z_search_window_lyr1(30.0);
-  mm_match->set_z_search_window_lyr2(3.);
-
-  mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
-  mm_match->set_test_windows_printout(false);  // used for tuning search windows only
-  se->registerSubsystem(mm_match);
-
-  /*
-   * End Track Seeding
-   */
-
+  
+  Tracking_Reco_TrackSeed_run2pp();
+  Tracking_Reco_TrackMatching_run2pp();
   /*
    * Either converts seeds to tracks with a straight line/helix fit
    * or run the full Acts track kalman filter fit
