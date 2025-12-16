@@ -1,5 +1,7 @@
 #include"tsc_cos_merge.C"
 
+#include <TSystem.h>
+
 #include <format>
 #include <fstream>
 #include <set>
@@ -34,15 +36,15 @@ void genFinalCalib(const std::string &runs = "cos_runs.txt")
   std::ifstream runlist(runs);
   std::string line;
   std::vector<int> cosmic_runnumbers;
-  std::while(getline(runlist,line))
+  while(getline(runlist,line))
   {
     cosmic_runnumbers.push_back(stoi(line));
 
     //std::string oh_out = "fitResults/oh_cosmicsMerged_fitted_" + line + ".root";
     std::string oh_out = "../tsc_cos_comb/fitResults/avgCorr.root";
-    std::string ih_out = "fitResults/ih_cosmicsMerged_fitted_" + line + ".root";
+//    std::string ih_out = "fitResults/ih_cosmicsMerged_fitted_" + line + ".root";
 
-    string cosmic_CDB_file_oh = std::format("/sphenix/u/bseidlitz/work/macros/calibrations/calo/hcal_towerSlope_y2/cosmicCalibFiles/ohcal_cosmic_calibration_{}.root",line);
+    std::string cosmic_CDB_file_oh = std::format("/sphenix/u/bseidlitz/work/macros/calibrations/calo/hcal_towerSlope_y2/cosmicCalibFiles/ohcal_cosmic_calibration_{}.root",line);
 
     tsc_cos_merge(oh_out,cosmic_CDB_file_oh,std::format("cdbFiles/ohcal_cdb_tsc_cos_calib_{}.root",line),0);
 
@@ -74,12 +76,12 @@ void genFinalCalib(const std::string &runs = "cos_runs.txt")
   std::vector<float> cosmic_temps;
   for (int cos_run : cosmic_runnumbers){
     int minDelta = 1000000;
-    int minRun = 0;
+//    int minRun = 0;
     float cos_temp = 0;
     for( int it=0; it<h_runnumbers_temp->GetNbinsX(); it++){   
       int delta = std::abs(cos_run - h_runnumbers_temp->GetBinContent(it));
       if (delta < minDelta  && h_temp_run->GetBinContent(it) > 10){
-        minRun = h_runnumbers_temp->GetBinContent(it);
+//        minRun = h_runnumbers_temp->GetBinContent(it);
         minDelta = delta;
         cos_temp =h_temp_run->GetBinContent(it);
       }
@@ -136,9 +138,9 @@ void genFinalCalib(const std::string &runs = "cos_runs.txt")
          if (temp < 10) continue;
          std::cout << "correction=" << correction << std::endl;
 
-         string cdbFileName = std::format("cdbFiles/cdb_ohcal_tsc_temp_cosmic_{}.root",runnumber);
-         //string cosmic_CDB_file_oh = std::format("/sphenix/u/bseidlitz/work/macros/calibrations/calo/hcal_towerSlope_y2/cosmicCalibFiles/ohcal_cosmic_calibration_{}.root",asoCosmic);
-         string cosmic_CDB_file_oh = std::format("cdbFiles/ohcal_cdb_tsc_cos_calib_{}.root",asoCosmic);
+         // std::string cdbFileName = std::format("cdbFiles/cdb_ohcal_tsc_temp_cosmic_{}.root",runnumber);
+         //std::string cosmic_CDB_file_oh = std::format("/sphenix/u/bseidlitz/work/macros/calibrations/calo/hcal_towerSlope_y2/cosmicCalibFiles/ohcal_cosmic_calibration_{}.root",asoCosmic);
+         std::string cosmic_CDB_file_oh = std::format("cdbFiles/ohcal_cdb_tsc_cos_calib_{}.root",asoCosmic);
 
           // gen calibration file with cosmics, tsc and temp correction
           // but no half hieght corrections
@@ -161,11 +163,15 @@ void genFinalCalib(const std::string &runs = "cos_runs.txt")
 void loadCSV(const std::string& filename, std::vector<TowerData>& data) {
     std::ifstream file(filename);
     std::string line;
-    if(!file) {std::cout << std::endl << "ccan't find file" << std::endl; exit; }
+    if(!file.is_open())
+    {
+      std::cout << std::endl << "ccan't find file" << std::endl;
+      gSystem->Exit(1);
+    }
 
-    while (std::getline(file, line)) {
+    while (getline(file, line)) {
         std::stringstream ss(line);
-        TowerData towerData;
+        TowerData towerData{};
 
         // Parse the line and fill the struct
         char comma;  // To consume the commas between values
