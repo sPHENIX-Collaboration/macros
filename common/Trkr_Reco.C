@@ -213,7 +213,7 @@ void Tracking_Reco_SiliconSeed_run2pp()
   se->registerSubsystem(counter);
       
       
-  auto silicon_Seeding2 = new PHActsSiliconSeeding("ActsSeedingIt1");
+  auto *silicon_Seeding2 = new PHActsSiliconSeeding("ActsSeedingIt1");
   silicon_Seeding2->Verbosity(verbosity);
   silicon_Seeding2->setIter2();
   se->registerSubsystem(silicon_Seeding2);
@@ -454,7 +454,7 @@ void Tracking_Reco_TrackSeed()
   se->registerSubsystem(counter);
   
   
-  auto silicon_Seeding2 = new PHActsSiliconSeeding("ActsSeedingIt1");
+  auto *silicon_Seeding2 = new PHActsSiliconSeeding("ActsSeedingIt1");
   silicon_Seeding2->Verbosity(verbosity);
   silicon_Seeding2->setIter2();
   se->registerSubsystem(silicon_Seeding2);
