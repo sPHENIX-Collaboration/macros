@@ -130,7 +130,7 @@ echo pass0dir: ${pass0dir}
 echo nevents: ${nevents}
 
 
-if [[ $runno -le 53880 ]]
+if [[ $runno -le 53880 ]] || [[ $runno -ge 79151 ]]
 then
   runtype=1  # pp200
 else
@@ -245,7 +245,7 @@ mv results/${runno}/mbd_t0corr.root results/${runno}/mbd_t0corr-${runno}.root
 
 # Copy out files
 mkdir -p ${outdir}/${runno}
-#cp -p ${fname} ${outdir}/${runno}/   # dst_uncal root file
+
 for r in ${caldir}/*
 do
     # skip linked files

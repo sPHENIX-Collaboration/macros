@@ -93,13 +93,13 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   std::cout << "saving to " << savefname << std::endl;
 
   // Load whatever calibrations are available at each subpass
-  if ( subpass==3 )
+  if ( subpass>0 )
   {
-    calfile = dir + "/pass0_mbd_tq_t0.calib";
+    calfile = dir + "/mbd_tq_t0.calib";
     mcal->Download_TQT0( calfile.Data() );
     std::cout << "Loaded " << calfile << std::endl;
 
-    calfile = dir + "/pass0_mbd_tt_t0.calib";
+    calfile = dir + "/mbd_tt_t0.calib";
     mcal->Download_TTT0( calfile.Data() );
     std::cout << "Loaded " << calfile << std::endl;
   }
@@ -257,12 +257,12 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       {
         h_q[ipmt]->Fill( f_q[ipmt] );
       }
-      //else if ( subpass>0 && std::abs(ttcorr[ipmt])<26. )
-      else if ( subpass>0 && (std::abs(ttcorr[ipmt])<26.||f_q[ipmt]>40.) )  // to get around high threshold
+      else if ( subpass>0 && std::abs(ttcorr[ipmt])<26. )
+      //else if ( subpass>0 && (std::abs(ttcorr[ipmt])<26.||f_q[ipmt]>40.) )  // to get around high threshold
       {
         h_q[ipmt]->Fill( f_q[ipmt] );
 
-        //if ( f_q[ipmt] > 1000. && std::abs(ttcorr[ipmt])<26. )    // for p+p
+        //if ( f_q[ipmt] > 500. && std::abs(ttcorr[ipmt])<26. )    // for p+p
         //if ( f_q[ipmt] > 2000. && std::abs(ttcorr[ipmt])<26. )
         if ( std::abs(ttcorr[ipmt])<26. )
         {

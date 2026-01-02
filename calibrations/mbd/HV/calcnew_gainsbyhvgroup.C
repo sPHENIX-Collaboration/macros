@@ -42,8 +42,8 @@ double gmean(TGraph *g)
 }
 
 // void calcnew_gainsbyhvgroup(const char *fname = "results/42045/mbd_qfit.calib")
-// void calcnew_gainsbyhvgroup(const char *fname = "results/53635/mbd_qfit.calib")
-void calcnew_gainsbyhvgroup(const char *fname = "results/54935/mbd_qfit.calib")
+void calcnew_gainsbyhvgroup(const char *fname = "results/53635/mbd_qfit.calib")
+//void calcnew_gainsbyhvgroup(const char *fname = "results/54935/mbd_qfit.calib")
 {
   mbdgeom = new MbdGeomV2();
 
@@ -121,7 +121,7 @@ void calcnew_gainsbyhvgroup(const char *fname = "results/54935/mbd_qfit.calib")
     g_gainsbyhv[ihv]->Draw("p");
   }
 
-  // return;
+  return;
 
   // calculate means, and the scaling to normalize all of them to the same
   std::array<double, 16> means{};
