@@ -78,11 +78,14 @@ void Tracking_Reco_Vertex_run2pp()
 
   se->registerSubsystem(finder);
 
-  // Propagate track positions to the vertex position
-  auto *vtxProp = new PHActsVertexPropagator;
-  vtxProp->Verbosity(verbosity);
-  vtxProp->fieldMap(G4MAGNET::magfield_tracking);
-  se->registerSubsystem(vtxProp);
+  if (!G4TRACKING::convert_seeds_to_svtxtracks)
+  {
+    // Propagate track positions to the vertex position
+    auto *vtxProp = new PHActsVertexPropagator;
+    vtxProp->Verbosity(verbosity);
+    vtxProp->fieldMap(G4MAGNET::magfield_tracking);
+    se->registerSubsystem(vtxProp);
+  }
 
 }
 void Tracking_Reco_TrackFit_run2pp(const std::string &outfile = "run2pptrackfit.root")
