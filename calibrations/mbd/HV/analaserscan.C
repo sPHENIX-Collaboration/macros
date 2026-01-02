@@ -117,7 +117,7 @@ void anafile(const char *tfname = "DST_UNCALMBD-00042674-0000.root", const int n
     {
       double seed_mean = h_laseramp[nrun_local][ich]->GetMean();
       double seed_rms = h_laseramp[nrun_local][ich]->GetRMS();
-      cout << "mean rms " << nrun_local << "\t" << ich << "\t" << seed_mean << "\t" << seed_rms << endl;
+      std::cout << "mean rms " << nrun_local << "\t" << ich << "\t" << seed_mean << "\t" << seed_rms << std::endl;
       fgaus[nrun_local][ich]->SetParameters(1000,seed_mean,seed_rms);
       fgaus[nrun_local][ich]->SetRange( seed_mean-5*seed_rms, seed_mean+5*seed_rms );
       //h_laseramp[nrun_local][ich]->Fit( fgaus[nrun_local][ich], "QR" );
@@ -153,9 +153,9 @@ void anafile(const char *tfname = "DST_UNCALMBD-00042674-0000.root", const int n
       gPad->Modified();
       gPad->Update();
       
-      string junk;
-      cout << nrun_local << "\t" << ipmt;
-      cin >> junk;
+      std::string junk;
+      std::cout << nrun_local << "\t" << ipmt;
+      std::cin >> junk;
     }
 
   }
