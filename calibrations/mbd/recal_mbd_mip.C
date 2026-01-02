@@ -171,7 +171,7 @@ Double_t langaufun(Double_t *x, Double_t *par)
 // Read in the seeds
 void ReadSeeds(const std::string& sfname = "mipseeds.txt")
 {
-  ifstream seedsfile( sfname.c_str() );
+  std::ifstream seedsfile( sfname.c_str() );
   int pmt;
   for ( int ipmt=0; ipmt<128; ipmt++ )
   {
@@ -499,7 +499,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
   ac[cvindex]->Print( pdfname + "[" );
 
   // output file
-  ofstream savefits("savefits.txt");
+  std::ofstream savefits("savefits.txt");
 
   for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
   {
@@ -601,8 +601,8 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       //gPad->SetLogy(1);
       gPad->Modified();
       gPad->Update();
-      string junk;
-      cout << "? ";
+      //string junk;
+      std::cout << "? ";
       //cin >> junk;
       //if ( junk[0] == 'y' )
      
