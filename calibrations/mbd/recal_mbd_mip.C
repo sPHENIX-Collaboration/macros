@@ -24,12 +24,38 @@ R__LOAD_LIBRARY(libmbd.so)
 //using namespace MBDRUNS;
 
 Double_t qmin = 25.;
-Double_t qmax = 1600;
+Double_t qmax = 4000;
 TF1 *bkgf[128]{nullptr};
 
 double minrej = 2000.;
 double peak = 2000.;
 double maxrej = 5000.;
+
+const int NPAR_BKGF = 5;
+double seed_threshold[128]{0};
+double seed_qmin[128]{0};
+double seed_minrej[128]{0};
+double seed_natpeak[128]{0};
+double seed_maxrej[128]{0};
+double seed_qmax[128]{0};
+double seed_par[128][NPAR_BKGF]{{0}};
+
+Double_t expopowerlaw(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parameter)
+{
+  Float_t xx =x[0];
+
+  if ( xx>minrej && xx<maxrej )
+  {
+    TF1::RejectPoint();
+    //return std::numeric_limits<double>::quiet_NaN();
+    return 100;
+  }
+
+  Double_t f = par[0]*pow((par[1]/(par[1]+xx)),par[2]) + par[3]*exp(-1.0*par[4]*xx);
+
+  return f;
+}
+
 Double_t powerlaw(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parameter)
 {
   Float_t xx =x[0];
@@ -142,6 +168,26 @@ Double_t langaufun(Double_t *x, Double_t *par)
   return (par[2] * step * sum * invsq2pi / par[3]);
 }
 
+// Read in the seeds
+void ReadSeeds(const std::string& sfname = "mipseeds.txt")
+{
+  std::ifstream seedsfile( sfname.c_str() );
+  int pmt;
+  for ( int ipmt=0; ipmt<128; ipmt++ )
+  {
+    seedsfile >> pmt;
+    if ( pmt != ipmt )
+    {
+      std::cout << "ERROR, seedsfile is bad" << std::endl;
+    }
+    seedsfile >> seed_threshold[pmt] >> seed_minrej[pmt]
+      >> seed_natpeak[pmt] >> seed_maxrej[pmt] >> seed_qmax[pmt];
+    for (int ipar=0; ipar<NPAR_BKGF; ipar++)
+    {
+      seedsfile >> seed_par[pmt][ipar];
+    }
+  }
+}
 
 // find the threshold
 // may also want to consider getting threshold from turn-on curves
@@ -149,7 +195,8 @@ void FindThreshold(TH1 *h, double& threshold)
 {
   threshold = 0.;
   double absolute_min = 10.;
-  double absolute_max = 70.;    // max adc where the threshold could be
+  //double absolute_max = 70.;    // max adc where the threshold could be
+  double absolute_max = 100.;    // max adc where the threshold could be
   int absminbin = h->FindBin( absolute_min );
   int absmaxbin = h->FindBin( absolute_max );
   double absmaxval = h->GetBinContent( h->GetMaximumBin() );
@@ -244,10 +291,11 @@ void FindPeakRange(TH1 *h, double& xmin, double& peak, double& xmax, double thre
 }
 */
 
-void FindPeakRange(TH1 *h, double& xmin, double& thispeak, double& xmax, double threshold)
+void FindPeakRange(TH1 *horig, double& xmin, double& thispeak, double& xmax, double threshold)
 {
-  int verbose = 1;
+  int verbose = 0;
 
+  TH1 *h = (TH1*)horig->Clone("hnew");
   int bin = h->FindBin( threshold );
   int maxbin = h->FindBin( qmax );
   double ymin = 1e12; // the minimum y val
@@ -310,15 +358,28 @@ void FindPeakRange(TH1 *h, double& xmin, double& thispeak, double& xmax, double 
     ibin++;
   }
 
-  xmax = thispeak + 4*(thispeak - xmin);
+  xmax = 2*thispeak + 3*(thispeak - xmin);
 
+  double orig_xmin = xmin;
+  xmin = thispeak - 1.8*(thispeak-xmin);
+  if ( xmin < threshold )
+  {
+    xmin = (threshold + orig_xmin)/2.;
+  }
+  if ( xmin < threshold )
+  {
+    xmin = threshold + 50;
+  }
+
+  delete h;
 }
 
 
 // type0: auau200
 // type1: pp200
 // method0:  TSpectrum bkg + 2 gaus fit
-void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 3, const int type = 0, const int method = 0)
+// method1:  expopowerlaw + 2 gaus fit
+void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 3, const int type = 1, const int method = 1)
 {
   std::cout << "recal_mbd_mip(), type method " << type << " " << method << std::endl;
   std::cout << "tfname " << tfname << std::endl;
@@ -326,6 +387,9 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
   const int NUM_PMT = 128;
   //const int NUM_PMT = 2;
 //  const int NUM_ARMS = 2;
+
+  // Read in Seeds File
+  ReadSeeds();
 
   // Create new TFile
   int runnumber = get_runnumber(tfname);
@@ -408,8 +472,10 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
     //qmax = 10000;       // Run24pp boff
     //qmin = 100;
     //qmin = 50;
-    qmin = 10;
-    qmax = 2000;       // Run24pp bon
+    //qmin = 10;
+    //qmax = 2000;       // Run24pp bon
+    qmin = 20;
+    qmax = 4000;       // Run25pp bon
   }
 
   if ( type==MBDRUNS::SIMAUAU200 || type==MBDRUNS::SIMPP200 )
@@ -432,8 +498,12 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
   std::cout << pdfname << std::endl;
   ac[cvindex]->Print( pdfname + "[" );
 
+  // output file
+  std::ofstream savefits("savefits.txt");
+
   for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
   {
+    //if ( ipmt!=123 ) continue;
     if (pass>0)
     {
       h_bkg[ipmt] = (TH1*)h_q[ipmt]->Clone();
@@ -480,17 +550,26 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       else if ( method==1 )
       {
         FindPeakRange( h_bkg[ipmt], minrej, peak, maxrej, threshold );
-        std::cout << "peak range\t" << minrej << "\t" << peak << "\t" << maxrej << std::endl;
+        qmin = threshold;
+        std::cout << "peak range\t" << minrej << "\t" << peak << "\t" << maxrej << "\t" << qmin << "\t" << qmax << std::endl;
+        //minrej = 262; maxrej = 1200;
+        //qmin = 50; qmax = 4000;
+        qmax = seed_qmax[ipmt];
         sigma = peak-minrej;
         seedmean = peak;
 
         // Fit background
         name = "bkgf"; name += ipmt;
-        bkgf[ipmt] = new TF1(name,powerlaw,qmin,qmax,3);
-        bkgf[ipmt]->SetParameter(0,240e-5);
-        bkgf[ipmt]->SetParameter(1,1240);
-        bkgf[ipmt]->SetParameter(2,2);
+        bkgf[ipmt] = new TF1(name,expopowerlaw,qmin,qmax,5);
+        bkgf[ipmt]->SetNpx(1000);
+        //bkgf[ipmt] = new TF1(name,powerlaw,qmin,qmax,3);
+        bkgf[ipmt]->SetParameter(0,1000*(600/1500.));
+        bkgf[ipmt]->SetParameter(1,3000);
+        bkgf[ipmt]->SetParameter(2,10);
+        bkgf[ipmt]->SetParameter(3,2000*(600/1500.));
+        bkgf[ipmt]->SetParameter(4,2e-2);
         bkgf[ipmt]->SetLineColor(3);
+        h_bkg[ipmt]->GetXaxis()->SetRangeUser(threshold,qmax);
         h_bkg[ipmt]->Draw();
         //h_bkg[ipmt]->Fit(bkgf[ipmt],"MR");
         h_bkg[ipmt]->Fit(bkgf[ipmt],"R");
@@ -501,13 +580,32 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
         h_mip[ipmt]->SetName( name );
         h_mip[ipmt]->SetTitle( name );
 
-//        double orig_minrej = minrej;
-//        double orig_maxrej = maxrej;
+        double orig_minrej = minrej;
+        double orig_maxrej = maxrej;
         minrej = 0.;
         maxrej = 0.;
         h_mip[ipmt]->Add( bkgf[ipmt], -1.0 );
+        minrej = orig_minrej;
+        maxrej = orig_maxrej;
+
+        Float_t n_at_peak = h_bkg[ipmt]->GetBinContent( h_bkg[ipmt]->FindBin( peak ) );
+        savefits << ipmt << "\t" << threshold << "\t" << minrej << "\t" << n_at_peak << "\t" << maxrej << "\t" << qmax
+          << "\t" << bkgf[ipmt]->GetParameter(0) 
+          << "\t" << bkgf[ipmt]->GetParameter(1)
+          << "\t" << bkgf[ipmt]->GetParameter(2)
+          << "\t" << bkgf[ipmt]->GetParameter(3)
+          << "\t" << bkgf[ipmt]->GetParameter(4)
+          << std::endl;
       }
 
+      //gPad->SetLogy(1);
+      gPad->Modified();
+      gPad->Update();
+      //string junk;
+      std::cout << "? ";
+      //cin >> junk;
+      //if ( junk[0] == 'y' )
+     
       // Fit the mip peak after background subtraction
       name = "mipfit"; name += ipmt;
       /*
@@ -637,8 +735,12 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       ac[cvindex]->Print( pdfname, title );
     }
 
+
   }
 
+  //savefits.write();
+  savefits.close();
+ 
   ac[cvindex]->Print( pdfname + "]" );
   ++cvindex;
 
