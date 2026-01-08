@@ -88,7 +88,7 @@ void Tracking_Reco_Vertex_run2pp(const std::string& clusterMapName="TRKR_CLUSTER
   }
 
 }
-void Tracking_Reco_TrackFit_run2pp(const std::string& clusterMapName = "TRKR_CLUSTER", const std::string &outfile = "run2pptrackfit.root")
+void Tracking_Reco_TrackFit_run2pp(const std::string &outfile = "run2pptrackfit.root", const std::string& clusterMapName = "TRKR_CLUSTER",)
 {
   auto *se = Fun4AllServer::instance();
   //  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
