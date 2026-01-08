@@ -241,9 +241,9 @@ void Tracking_Reco_TrackSeed_run2pp()
   Tracking_Reco_SiliconSeed_run2pp();
   Tracking_Reco_TpcSeed_run2pp();
 }
-
-void Tracking_Reco_TrackMatching_run2pp()
+void Tracking_Reco_SiTpcTrackMatching_run2pp()
 {
+  
   auto *se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   /*
@@ -286,6 +286,12 @@ void Tracking_Reco_TrackMatching_run2pp()
   }
   se->registerSubsystem(silicon_match);
 
+}
+void Tracking_Reco_TpcTpotTrackMatching_run2pp()
+{
+  
+  auto *se = Fun4AllServer::instance();
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
   auto *mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(verbosity);
@@ -298,6 +304,12 @@ void Tracking_Reco_TrackMatching_run2pp()
   mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
   mm_match->set_test_windows_printout(false);  // used for tuning search windows only
   se->registerSubsystem(mm_match);
+}
+void Tracking_Reco_TrackMatching_run2pp()
+{
+  Tracking_Reco_SiTpcTrackMatching_run2pp();
+  Tracking_Reco_TpcTpotTrackMatching_run2pp();
+
 }
 void Tracking_Reco_TrackSeed_ZeroField()
 {
