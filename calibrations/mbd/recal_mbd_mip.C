@@ -110,8 +110,12 @@ Double_t gaus2(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parame
 Double_t skgaus2(Double_t *x, Double_t *par) //NOLINT(readability-non-const-parameter)
 {
   Double_t xx =x[0];
-  Double_t f = par[0]*exp(-0.5*pow((xx-par[1])/(par[2]+par[3]*(xx-par[1])),2.0))
+
+  Double_t denom = par[2]+par[3]*(xx-par[1]);
+  if (std::abs(denom) < 1e-12) denom = 1e-12;  // prevent division by zero
+  Double_t f = par[0]*exp(-0.5*pow((xx-par[1])/denom,2.0))
     + par[4]*TMath::Gaus(xx,2.0*par[1],sqrt(2)*par[2]); 
+
   return f;
 }
 
@@ -883,10 +887,13 @@ cout << "PPP " << width << "\t" << best_peak << "\t" << std::abs(width/best_peak
       h_bkg[ipmt]->Draw("histsame");
       h_bkgmip[ipmt]->Draw("histsame");
       TPaveStats *st = (TPaveStats*)h_q[ipmt]->FindObject("stats");
-      st->SetX1NDC(0.6); // X start position (0 to 1)
-      st->SetY1NDC(0.4); // Y start position (0 to 1)
-      st->SetX2NDC(0.99); // X end position
-      st->SetY2NDC(0.99); // Y end position
+      if ( st )
+      {
+        st->SetX1NDC(0.6); // X start position (0 to 1)
+        st->SetY1NDC(0.4); // Y start position (0 to 1)
+        st->SetX2NDC(0.99); // X end position
+        st->SetY2NDC(0.99); // Y end position
+      }
 
       gPad->Modified();
       gPad->Update();
@@ -953,6 +960,6 @@ cout << "PPP " << width << "\t" << best_peak << "\t" << std::abs(width/best_peak
     h_q[ipmt]->Write();
   }
   savefile->Write();
-  //savefile->Close();
+  savefile->Close();
 }
 #endif

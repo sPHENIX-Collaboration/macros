@@ -9,7 +9,7 @@ namespace MBDRUNS {
   enum type {
     RUN24AUAU = 0,
     RUN24PP,
-    RUN25AUAU = 0,
+    RUN25AUAU,
     RUN25PP,
     SIMAUAU200,
     SIMPP200

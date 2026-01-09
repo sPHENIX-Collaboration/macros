@@ -220,7 +220,7 @@ echo "##########################################################################
 echo "Running pass2.3 calibration"
 #./cups.py -r ${runnumber} -s ${segment} -d ${outbase} message "Running PASS 2.3 calibration"
 pass=3
-echo root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents}\)
+echo root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents},\"${dbtag}\"\)
 root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents},\"${dbtag}\"\)
 mv results/${runno}/mbd_qfit.root results/${runno}/mbd_qfit-${runno}.root
 

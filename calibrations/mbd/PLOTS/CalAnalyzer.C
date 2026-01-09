@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <vector>
 #include <map>
@@ -66,6 +67,18 @@ public:
     }
   }
 
+  ~CalAnalyzer()
+  {
+    for (int ch = 0; ch < NPMT; ch++)
+    {
+      for (int p = 0; p < NPAR; p++)
+      {
+        delete hists[p][ch];
+        delete graphs[p][ch];
+      }
+    }
+  }
+
   void LoadRun(int runID, const std::string& filename)
   {
     std::ifstream file(filename);
@@ -93,11 +106,11 @@ public:
           file >> val;
 
           /*
-          if ( p==1 && pmtch==0 )
-          {
-            cout << "xxx " << runID << "\t" << p << "\t" << pmtch << "\t" << val << endl;
-          }
-          */
+             if ( p==1 && pmtch==0 )
+             {
+             cout << "xxx " << runID << "\t" << p << "\t" << pmtch << "\t" << val << endl;
+             }
+             */
 
           //channels[pmtch].params[p] = val;
           channels[p][pmtch] = val;
@@ -164,7 +177,7 @@ public:
     // 2. Find the Median Absolute Deviation (MAD)
     std::vector<double> diffs;
     for (double v : values) {
-        diffs.push_back(std::abs(v - median));
+      diffs.push_back(std::abs(v - median));
     }
     std::sort(diffs.begin(), diffs.end());
     double mad = diffs[diffs.size() / 2];
@@ -178,30 +191,30 @@ public:
     double sum = 0, sumSq = 0;
     int n = 0;
     for (double v : values) {
-        if (std::abs(v - median) < (sigmaEquivalent * robustSigma)) {
-            sum += v;
-            sumSq += v * v;
-            n++;
-        }
+      if (std::abs(v - median) < (sigmaEquivalent * robustSigma)) {
+        sum += v;
+        sumSq += v * v;
+        n++;
+      }
     }
 
     if (n > 0) {
-        double mean = sum / n;
-        double rms = std::sqrt(std::abs((sumSq / n) - (mean * mean)));
-        cleanStats[p][ch] = {mean, rms, n};
-        
-        //cout << "aaa " << ch << "\t" << p << "\t" << median << "\t" << mad << "\t" << mean << "\t" << rms << "\t" << n << endl;
+      double mean = sum / n;
+      double rms = std::sqrt(std::abs((sumSq / n) - (mean * mean)));
+      cleanStats[p][ch] = {mean, rms, n};
 
-        // Update the to focus on the "Clean" area
-        graphs[p][ch]->SetMinimum(mean - 7*rms);
-        graphs[p][ch]->SetMaximum(mean + 7*rms);
+      //cout << "aaa " << ch << "\t" << p << "\t" << median << "\t" << mad << "\t" << mean << "\t" << rms << "\t" << n << endl;
 
-        delete hists[p][ch];
-        hists[p][ch] = new TH1F(Form("h_ch%d_p%d", ch, p), Form("Dist: Param %d, Ch %d;Value;Entries", p, ch), 200, mean-7*rms, mean+7*rms);
-        for (double v : values)
-        {
-          hists[p][ch]->Fill( v );
-        }
+      // Update the to focus on the "Clean" area
+      graphs[p][ch]->SetMinimum(mean - 7*rms);
+      graphs[p][ch]->SetMaximum(mean + 7*rms);
+
+      delete hists[p][ch];
+      hists[p][ch] = new TH1F(Form("h_ch%d_p%d", ch, p), Form("Dist: Param %d, Ch %d;Value;Entries", p, ch), 200, mean-7*rms, mean+7*rms);
+      for (double v : values)
+      {
+        hists[p][ch]->Fill( v );
+      }
     }
 
   }
