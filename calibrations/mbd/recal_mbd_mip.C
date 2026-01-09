@@ -895,7 +895,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
     mcal.Write_CDB_Gains( calfname.Data() );
   }
 
-  for (int ipmt=0; ipmt<NPMT; ipmt++)
+  for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
   {
     h_q[ipmt]->Write();
   }

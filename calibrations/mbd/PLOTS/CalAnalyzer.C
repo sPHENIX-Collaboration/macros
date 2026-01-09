@@ -9,6 +9,7 @@
 #include "TGraph.h"
 #include "TCanvas.h"
 
+// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
 class CalAnalyzer {
 private:
 
@@ -39,9 +40,9 @@ private:
   std::vector<std::vector<TGraph*>> graphs;
 
 public:
-  CalAnalyzer(std::string_view input_name = "none")
+  explicit CalAnalyzer(std::string_view input_name = "none")
+  : run_name{input_name}
   {
-    run_name = input_name;
     if ( run_name.find("auau") != std::string::npos )
     {
       NPAR = 5;
@@ -56,11 +57,11 @@ public:
     {
       for (int p = 0; p < NPAR; p++)
       {
-        hists[p][ch] = new TH1F(Form("h_ch%d_p%d", ch, p), Form("Dist: Param %d, Ch %d;Value;Entries", p, ch), 200, 0., -1.);
+        hists[p][ch] = new TH1F(Form("h_ch%d_p%d", ch, p), Form("Dist: Param %d, Ch %d;Value;Entries", p, ch), 200, 0., -1.); // NOLINT
 
         graphs[p][ch] = new TGraph();
-        graphs[p][ch]->SetName(Form("g_ch%d_p%d", ch, p));
-        graphs[p][ch]->SetTitle(Form("Param %d, Ch %d vs Run;Run ID;Value", p, ch));
+        graphs[p][ch]->SetName(Form("g_ch%d_p%d", ch, p));  // NOLINT
+        graphs[p][ch]->SetTitle(Form("Param %d, Ch %d vs Run;Run ID;Value", p, ch)); // NOLINT
         graphs[p][ch]->SetMarkerStyle(20);
         graphs[p][ch]->SetMarkerSize(0.2);
       }
@@ -97,7 +98,7 @@ public:
       if (pmtch >= 0 && pmtch < NPMT)
       {
         // other stuff
-        double seed_threshold, seed_minrej, seed_natpeak, seed_maxrej, seed_qmax;
+        double seed_threshold, seed_minrej, seed_natpeak, seed_maxrej, seed_qmax; // NOLINT
         file >> seed_threshold >> seed_minrej >> seed_natpeak >> seed_maxrej >> seed_qmax;
 
         //cout << "xxx " << pmtch << "\t" << seed_qmax << endl;
@@ -177,7 +178,7 @@ public:
     // 2. Find the Median Absolute Deviation (MAD)
     std::vector<double> diffs;
     for (double v : values) {
-      diffs.push_back(std::abs(v - median));
+      diffs.push_back(std::abs(v - median));  // NOLINT
     }
     std::sort(diffs.begin(), diffs.end());
     double mad = diffs[diffs.size() / 2];
@@ -188,7 +189,7 @@ public:
     if (robustSigma == 0) robustSigma = 1e-9; // Avoid division by zero
 
     // 4. Pass 2: Calculate Mean/RMS only for points within the robust window
-    double sum = 0, sumSq = 0;
+    double sum = 0, sumSq = 0;  // NOLINT
     int n = 0;
     for (double v : values) {
       if (std::abs(v - median) < (sigmaEquivalent * robustSigma)) {
@@ -210,7 +211,7 @@ public:
       graphs[p][ch]->SetMaximum(mean + 7*rms);
 
       delete hists[p][ch];
-      hists[p][ch] = new TH1F(Form("h_ch%d_p%d", ch, p), Form("Dist: Param %d, Ch %d;Value;Entries", p, ch), 200, mean-7*rms, mean+7*rms);
+      hists[p][ch] = new TH1F(Form("h_ch%d_p%d", ch, p), Form("Dist: Param %d, Ch %d;Value;Entries", p, ch), 200, mean-7*rms, mean+7*rms);  // NOLINT
       for (double v : values)
       {
         hists[p][ch]->Fill( v );
@@ -279,7 +280,7 @@ public:
 
   void DrawSummary(int ch, int p)
   {
-    TCanvas *c = new TCanvas(Form("c_%d_%d", ch, p), "Calibration Summary", 800, 400);
+    TCanvas *c = new TCanvas(Form("c_%d_%d", ch, p), "Calibration Summary", 800, 400);  // NOLINT
     c->Divide(2, 1);
     c->cd(1);
     hists[p][ch]->Draw();
@@ -297,7 +298,7 @@ public:
     c->Divide(2, 1);
 
     for (int p = 0; p < NPAR; ++p) {
-      TString fileName = Form("mbd_%s_par%d.pdf", run_name.c_str(), p);
+      TString fileName = Form("mbd_%s_par%d.pdf", run_name.c_str(), p);  // NOLINT
 
       // Start the PDF file
       c->Print(fileName + "[");

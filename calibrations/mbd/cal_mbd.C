@@ -133,9 +133,9 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
 
   TFile *savefile = new TFile(savefname,"RECREATE");
 
-  TH1 *h_q[MbdDefs::MBD_N_PMT];
-  TH1 *h_tt[MbdDefs::MBD_N_PMT];
-  TH1 *h_tq[MbdDefs::MBD_N_PMT];
+  TH1 *h_q[MbdDefs::MBD_N_PMT];   // NOLINT(clang-diagnostic-shadow)
+  TH1 *h_tt[MbdDefs::MBD_N_PMT];  // NOLINT(clang-diagnostic-shadow)
+  TH1 *h_tq[MbdDefs::MBD_N_PMT];  // NOLINT(clang-diagnostic-shadow)
 
   TH2 *h2_slew[MbdDefs::MBD_N_PMT];
 
