@@ -1,19 +1,19 @@
 #include "CalAnalyzer.C"
 
-void run_calanalyzer(std::string_view runflist = "run24pp.list")
+void run_calanalyzer(const std::string& runflist = "run24pp.list")
 {
-  TString name = runflist.data();
-  name.ReplaceAll(".list","");
-
-  CalAnalyzer *cal = new CalAnalyzer( name );
-
   // Load data
-  ifstream runlistfile( runflist.data() );
+  std::ifstream runlistfile( runflist.c_str() );  // NOLINT(bugprone-suspicious-stringview-data-usage)
   if (!runlistfile.is_open())
   {
     std::cerr << "Error: Could not open runlist file " << runflist << std::endl;
     return;
   }
+
+  TString name = runflist.c_str();  // NOLINT(bugprone-suspicious-stringview-data-usage)
+  name.ReplaceAll(".list","");
+
+  CalAnalyzer *cal = new CalAnalyzer( name );
 
   int run{0};
   while ( runlistfile >> run )
@@ -23,6 +23,7 @@ void run_calanalyzer(std::string_view runflist = "run24pp.list")
       std::cerr << "Warning: Failed to read run number from " << runflist << std::endl;
       break;
     }
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     cal->LoadRun(run, Form("results/%d/savefitspass2.3_mip-%d.txt", run, run));
   }
 

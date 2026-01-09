@@ -135,13 +135,14 @@ Double_t expopowerlawskgaus2(Double_t *x, Double_t *par) //NOLINT(readability-no
   return f;
 }
 
-// Two gaussians
+// Two skewed gaussians
 // [0] = ampl, peak 1
 // [1] = xi (almost mean)
 // [2] = omega (almost sigma)
 // [3] = alpha (skewness)
 // [4] = ampl, peak 2
-Double_t skewedgaus2(Double_t *x, Double_t *par) {
+Double_t skewedgaus2(Double_t *x, Double_t *par) // NOLINT(readability-non-const-parameter)
+{
   double xx = x[0];
   double xi = par[1];
   double omega = par[2];
@@ -187,7 +188,7 @@ Double_t landau2(Double_t *x, Double_t *par) //NOLINT(readability-non-const-para
   return f;
 }
 
-Double_t langaufun(Double_t *x, Double_t *par)
+Double_t langaufun(Double_t *x, Double_t *par) // NOLINT(readability-non-const-parameter)
 {
   //Fit parameters:
   //par[0]=Width (scale) parameter of Landau density
@@ -457,6 +458,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
     h_q[ipmt] = (TH1*)oldfile->Get(name);
     h_q[ipmt]->SetMarkerSize(0.6);
 
+    /*
     if ( type == MBDRUNTYPE::AUAU200 )
     {
       //h_q[ipmt]->Rebin(2);
@@ -466,6 +468,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       //h_q[ipmt]->Rebin(4);  // b-off
       //h_q[ipmt]->Rebin(2);
     }
+    */
 
     name = "h_tq"; name += ipmt;
     title = "tq"; title += ipmt;
@@ -534,7 +537,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
   TString savefitsname = dir;
   savefitsname += "savefitspass2."; savefitsname += pass; savefitsname += "_mip-";
   savefitsname += runnumber; savefitsname += ".txt";
-  ofstream savefits(savefitsname);
+  std::ofstream savefits(savefitsname);
 
   for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
   {
@@ -575,22 +578,6 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
 
         seedmean = h_mip[ipmt]->GetBinCenter( h_mip[ipmt]->GetMaximumBin() );
         seedsigma = 0.2*seedmean;
-
-        /*
-           Int_t nfound = s.Search(h_q[ipmt],sigma,"",0.1);
-           Double_t *xpeaks = s.GetPositionX();
-
-        //h_bkg[ipmt] = s.Background( h_q[ipmt] );
-
-        double best_peak = xpeaks[0];
-        if ( best_peak < 50. )
-        {
-        best_peak = xpeaks[1];
-        }
-
-        std::cout << "peaks\t" << ipmt << "\t" << nfound << "\t" << best_peak << std::endl;
-        */
-
       }
       else if ( method==1 )
       {
@@ -604,13 +591,6 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
         name = "bkgf"; name += ipmt;
         bkgf[ipmt] = new TF1(name,expopowerlaw,qmin,qmax,5);
         bkgf[ipmt]->SetNpx(1000);
-        /*
-        bkgf[ipmt]->SetParameter(0,1000*(600/1500.));
-        bkgf[ipmt]->SetParameter(1,3000);
-        bkgf[ipmt]->SetParameter(2,10);
-        bkgf[ipmt]->SetParameter(3,2000*(600/1500.));
-        bkgf[ipmt]->SetParameter(4,2e-2);
-        */
         bkgf[ipmt]->SetParameter(0,seed_par[ipmt][0]*n_at_peak);
         bkgf[ipmt]->SetParameter(1,seed_par[ipmt][1]);
         bkgf[ipmt]->SetParameter(2,seed_par[ipmt][2]);
@@ -628,8 +608,8 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
 
         if (verbose ) // after bkg fit
         {
-          string junk2;
-          cin >> junk2;
+          std::string junk2;
+          std::cin >> junk2;
         }
 
         // get mip histogram
@@ -648,14 +628,6 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
         h_bkg[ipmt]->Add(bkgf[ipmt]);
         h_q[ipmt]->Draw();
         h_bkg[ipmt]->Draw("same");
-
-        /*
-        for (int ibin=1; ibin<=h_bkg[ipmt]->GetNbinsx(); ibin++)
-        {
-          h_bkg[ipmt]->SetBinError( h_q->GetBinError(ibin) );
-        }
-        h_bkg[ipmt]->Sumw2();
-        */
       }
 
       ac[cvindex]->cd(2);
@@ -708,8 +680,8 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
 
       if ( verbose ) // after mip fit
       {
-        string junk2;
-        cin >> junk2;
+        std::string junk2;
+        std::cin >> junk2;
       }
 
       // Now do total re-fit (after we have gotten seeds for mip and background)
@@ -758,9 +730,9 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
         gPad->Update();
         if (verbose)
         {
-          string junk;
+          std::string junk;
           std::cout << "? ";
-          cin >> junk;
+          std::cin >> junk;
         }
 
         for (int ipar=0; ipar<5; ipar++)
@@ -797,7 +769,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       {
         double ORIG_chi2 = chi2;
         chi2 = h_mip[ipmt]->Chisquare(mipfit[ipmt],"R"); // from re-fit
-        cout << "CHI2COMPARE " << ipmt << "\t" << chi2 << "\t" << ORIG_chi2 << "\t" << ORIG_chi2-chi2 << endl;
+        std::cout << "CHI2COMPARE " << ipmt << "\t" << chi2 << "\t" << ORIG_chi2 << "\t" << ORIG_chi2-chi2 << endl;
         mipfit[ipmt]->SetChisquare( chi2 );
       }
 
@@ -807,8 +779,6 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       std::cout << ipmt << "\t" << integ << "\t" << best_peak << "\t" << width << "\t"
         << integerr << "\t" << best_peakerr << "\t" << widtherr << "\t"
         << chi2/ndf << std::endl;
-
-cout << "PPP " << width << "\t" << best_peak << "\t" << std::abs(width/best_peak) << endl;
 
       if ( method==0 )
       {
@@ -855,29 +825,6 @@ cout << "PPP " << width << "\t" << best_peak << "\t" << std::abs(width/best_peak
       h_bkgmip[ipmt]->Add( mipfit[ipmt] );
       h_bkgmip[ipmt]->SetLineColor( kCyan );
 
-      /*
-         gPad->Modified();
-         gPad->Update();
-      //mipfit->SetRange( xpeaks[0]-2.5*sigma, 600 );
-      mipfit->SetRange( qmin, 600 );
-      mipfit->SetParameter( 0, 1000 );
-      mipfit->SetParameter( 1, best_peak );
-      mipfit->SetParameter( 2, sigma );
-
-      mipfit->SetParameter( 8, f_expo->GetParameter(0) );
-      mipfit->SetParameter( 9, f_expo->GetParameter(1) );
-      h_q[ipmt]->Fit( mipfit, "R" );
-      */
-
-
-      /*
-         int npar = f_bkg->GetNpar();
-         for (int ipar=0; ipar<npar; ipar++)
-         {
-         f_bkg->SetParameter( ipar, mipfit->GetParameter(ipar+3) );
-         }
-         */
-
       // Now draw the full dist, plus fit
       ac[cvindex]->cd(1);
       gPad->SetLogy(1);
@@ -912,20 +859,13 @@ cout << "PPP " << width << "\t" << best_peak << "\t" << std::abs(width/best_peak
       {
         h_mip[ipmt]->GetXaxis()->SetRangeUser(qmin,1000);
       }
-      //mipfit[ipmt]->Draw();
-      //mipfit[ipmt]->GetHistogram()->GetXaxis()->SetRangeUser(qmin,1200);
-      //mipfit[ipmt]->GetHistogram()->SetXTitle("ADC");
-      //h_mip[ipmt]->Draw("same");
-      //mipfit[ipmt]->Draw("same");
-      //mipfit[ipmt]->SetMaximum( h_mip[ipmt]->GetMaximum()*1.05 );
-      //mipfit[ipmt]->SetMinimum( h_mip[ipmt]->GetMinimum()*1.05 );
       gPad->SetGridy(1);
       gPad->Modified();
       gPad->Update();
 
       if (verbose)
       {
-        string junk;
+        std::string junk;
         std::cout << "? ";
         cin >> junk;
       }
@@ -955,7 +895,7 @@ cout << "PPP " << width << "\t" << best_peak << "\t" << std::abs(width/best_peak
     mcal.Write_CDB_Gains( calfname.Data() );
   }
 
-  for (int ipmt=0; ipmt<128; ipmt++)
+  for (int ipmt=0; ipmt<NPMT; ipmt++)
   {
     h_q[ipmt]->Write();
   }
