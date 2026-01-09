@@ -241,7 +241,7 @@ Double_t langaufun(Double_t *x, Double_t *par)
 // Read in the seeds
 void ReadSeeds(const std::string& sfname = "mipseeds.txt")
 {
-  ifstream seedsfile( sfname.c_str() );
+  std::ifstream seedsfile( sfname.c_str() );
   int pmt;
   for ( int ipmt=0; ipmt<128; ipmt++ )
   {
