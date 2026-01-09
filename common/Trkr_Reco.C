@@ -60,14 +60,14 @@ void convert_seeds()
   converter->Verbosity(verbosity);
   se->registerSubsystem(converter);
 }
-void Tracking_Reco_Vertex_run2pp()
+void Tracking_Reco_Vertex_run2pp(const std::string& clusterMapName="TRKR_CLUSTER")
 {
   auto *se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
   auto *finder = new PHSimpleVertexFinder;
   finder->Verbosity(verbosity);
-
+  finder->setTrkrClusterContainerName(clusterMapName);
   // new cuts
   finder->setDcaCut(0.05);
   finder->setTrackPtCut(0.1);
@@ -88,18 +88,20 @@ void Tracking_Reco_Vertex_run2pp()
   }
 
 }
-void Tracking_Reco_TrackFit_run2pp(const std::string &outfile = "run2pptrackfit.root")
+void Tracking_Reco_TrackFit_run2pp(const std::string &outfile = "run2pptrackfit.root", const std::string& clusterMapName = "TRKR_CLUSTER")
 {
   auto *se = Fun4AllServer::instance();
   //  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   auto *deltazcorr = new PHTpcDeltaZCorrection;
   deltazcorr->Verbosity(0);
+  deltazcorr->setTrkrClusterContainerName(clusterMapName);
   se->registerSubsystem(deltazcorr);
 
   // perform final track fit with ACTS
   auto *actsFit = new PHActsTrkFitter;
   actsFit->Verbosity(0);
   actsFit->commissioning(G4TRACKING::use_alignment);
+  actsFit->setTrkrClusterContainerName(clusterMapName);
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
   actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
@@ -241,7 +243,7 @@ void Tracking_Reco_TrackSeed_run2pp()
   Tracking_Reco_SiliconSeed_run2pp();
   Tracking_Reco_TpcSeed_run2pp();
 }
-void Tracking_Reco_SiTpcTrackMatching_run2pp()
+void Tracking_Reco_SiTpcTrackMatching_run2pp(const std::string& clusterMapName = "TRKR_CLUSTER")
 {
   
   auto *se = Fun4AllServer::instance();
@@ -254,6 +256,7 @@ void Tracking_Reco_SiTpcTrackMatching_run2pp()
   auto *silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(verbosity);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
+  silicon_match->set_cluster_map_name(clusterMapName);
   if (G4TPC::ENABLE_AVERAGE_CORRECTIONS)
   {
     // for general tracking
