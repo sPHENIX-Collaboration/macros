@@ -34,12 +34,9 @@ R__LOAD_LIBRARY(libmbd.so)
 //pass 2.2: do the next iteration of the slew correction calibration
 //pass 2.3: do the mip fits for charge calibration 
 
-//runtype 0: au+au 200 GeV
-//runtype 1: p+p 200 GeV
-void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int subpass = 0, const int nevt = 0, const int runtype = 0, const std::string_view dbtag = "")
+void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int subpass = 0, const int nevt = 0, const std::string_view dbtag = "")
 {
   std::cout << "cal_mbd(), tfname " << tfname << std::endl;
-  std::cout << "cal_mbd(), runtype " << runtype << std::endl;
   read_dstmbd( tfname );
 
   //== Create output directory (should already exist)
@@ -51,6 +48,11 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   gSystem->Exec( name );
 
   std::cout << name << std::endl;
+
+  //runtype 0: au+au 200 GeV
+  //runtype 1: p+p 200 GeV
+  //int runtype = get_runtype( runnumber );
+  //std::cout << "cal_mbd(), runtype " << runtype << std::endl;
 
   //== Load in calib constants
   //Float_t tq_t0_offsets[MbdDefs::MBD_N_PMT] = {};
@@ -573,7 +575,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
 
   if ( subpass==3 )
   {
-    recal_mbd_mip( tfname, subpass, runtype );
+    recal_mbd_mip( tfname, subpass );
   }
 
 }
