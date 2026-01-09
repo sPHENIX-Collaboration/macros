@@ -80,6 +80,12 @@ public:
     }
   }
 
+  CalAnalyzer(const CalAnalyzer&) = delete;
+  CalAnalyzer& operator=(const CalAnalyzer&) = delete;
+  CalAnalyzer(CalAnalyzer&&) = delete;
+  CalAnalyzer& operator=(CalAnalyzer&&) = delete;
+
+
   void LoadRun(int runID, const std::string& filename)
   {
     std::ifstream file(filename);

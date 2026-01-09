@@ -133,9 +133,9 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
 
   TFile *savefile = new TFile(savefname,"RECREATE");
 
-  TH1 *h_q[MbdDefs::MBD_N_PMT];   // NOLINT(clang-diagnostic-shadow)
-  TH1 *h_tt[MbdDefs::MBD_N_PMT];  // NOLINT(clang-diagnostic-shadow)
-  TH1 *h_tq[MbdDefs::MBD_N_PMT];  // NOLINT(clang-diagnostic-shadow)
+  TH1 *h_qp[MbdDefs::MBD_N_PMT];
+  TH1 *h_tt[MbdDefs::MBD_N_PMT];
+  TH1 *h_tqp[MbdDefs::MBD_N_PMT];
 
   TH2 *h2_slew[MbdDefs::MBD_N_PMT];
 
@@ -144,8 +144,8 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
   {
     name = "h_q"; name += ipmt;
     title = "q"; title += ipmt;
-    h_q[ipmt] = new TH1F(name,title,3000,-100,15000-100);
-    h_q[ipmt]->SetXTitle("ADC");
+    h_qp[ipmt] = new TH1F(name,title,3000,-100,15000-100);
+    h_qp[ipmt]->SetXTitle("ADC");
 
     name = "h_tt"; name += ipmt;
     title = "tt"; title += ipmt;
@@ -155,8 +155,8 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
 
     name = "h_tq"; name += ipmt;
     title = "tq"; title += ipmt;
-    h_tq[ipmt] = new TH1F(name,title,7000,-150,31*17.76);
-    h_tq[ipmt]->SetXTitle("ns");
+    h_tqp[ipmt] = new TH1F(name,title,7000,-150,31*17.76);
+    h_tqp[ipmt]->SetXTitle("ns");
 
     if ( subpass>0 )
     {
@@ -252,17 +252,17 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       h_tt[ipmt]->Fill( ttcorr[ipmt] );
       h2_tt->Fill( ttcorr[ipmt], ipmt );
 
-      h_tq[ipmt]->Fill( tq );
+      h_tqp[ipmt]->Fill( tq );
       h2_tq->Fill( tq, ipmt );
 
       if ( subpass==0 && std::abs(f_tt[ipmt])<26. )
       {
-        h_q[ipmt]->Fill( f_q[ipmt] );
+        h_qp[ipmt]->Fill( f_q[ipmt] );
       }
       else if ( subpass>0 && std::abs(ttcorr[ipmt])<26. )
       //else if ( subpass>0 && (std::abs(ttcorr[ipmt])<26.||f_q[ipmt]>40.) )  // to get around high threshold
       {
-        h_q[ipmt]->Fill( f_q[ipmt] );
+        h_qp[ipmt]->Fill( f_q[ipmt] );
 
         //if ( f_q[ipmt] > 500. && std::abs(ttcorr[ipmt])<26. )    // for p+p
         //if ( f_q[ipmt] > 2000. && std::abs(ttcorr[ipmt])<26. )
@@ -277,11 +277,11 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
         /*
         if ( arm==0 && f_bn[0]<30 )
         {
-          h_q[ipmt]->Fill( f_q[ipmt] );
+          h_qp[ipmt]->Fill( f_q[ipmt] );
         }
         else if ( arm==1 && f_bn[1]<30 )
         {
-          h_q[ipmt]->Fill( f_q[ipmt] );
+          h_qp[ipmt]->Fill( f_q[ipmt] );
         }
         */
       }
@@ -458,18 +458,18 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
     if ( ipmt==0 || ipmt==64 )
     {
       // use wide range for 1st channel in each arm
-      h_tq[ipmt]->SetAxisRange(-25.,25.);
-      //h_tq[ipmt]->SetAxisRange(9.,13.); // kludge to select middle bunch during stochastic cooling
+      h_tqp[ipmt]->SetAxisRange(-25.,25.);
+      //h_tqp[ipmt]->SetAxisRange(9.,13.); // kludge to select middle bunch during stochastic cooling
     }
     else
     {
       // for subsequent channels in an arm, use a window
       // determined by the 1st channel
-      h_tq[ipmt]->SetAxisRange(min_twindow,max_twindow);
+      h_tqp[ipmt]->SetAxisRange(min_twindow,max_twindow);
     }
-    Double_t thispeak = h_tq[ipmt]->GetMaximum();
-    int peakbin = h_tq[ipmt]->GetMaximumBin();
-    Double_t mean = h_tq[ipmt]->GetBinCenter( peakbin );
+    Double_t thispeak = h_tqp[ipmt]->GetMaximum();
+    int peakbin = h_tqp[ipmt]->GetMaximumBin();
+    Double_t mean = h_tqp[ipmt]->GetBinCenter( peakbin );
     Double_t sigma = 1.0;
     //Double_t sigma = 3.0;
     gaussian->SetParameters( thispeak, mean, 5 );
@@ -481,8 +481,8 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
       max_twindow = mean + 3*sigma;
     }
 
-    h_tq[ipmt]->Fit(gaussian,"R");
-    h_tq[ipmt]->SetAxisRange(mean-12.*sigma,mean+12.*sigma);
+    h_tqp[ipmt]->Fit(gaussian,"R");
+    h_tqp[ipmt]->SetAxisRange(mean-12.*sigma,mean+12.*sigma);
     //gPad->SetLogy(1);
     mean = gaussian->GetParameter(1);
     Double_t meanerr = gaussian->GetParError(1);
@@ -559,7 +559,7 @@ void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int s
 
     for (int ipmt=0; ipmt<MbdDefs::MBD_N_PMT && subpass==0; ipmt++)
     {
-      h_q[ipmt]->Draw();
+      h_qp[ipmt]->Draw();
 
       //name = dir + "h_adc"; name += ipmt; name += ".png";
       title = "h_adc"; title += ipmt;
