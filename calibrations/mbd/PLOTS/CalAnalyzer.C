@@ -9,7 +9,6 @@
 #include "TGraph.h"
 #include "TCanvas.h"
 
-// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
 class CalAnalyzer {
 private:
 
@@ -18,10 +17,6 @@ private:
 
   std::string run_name;
 
-  struct ChannelData {
-    std::vector<double> params;
-  };
-
   struct CalibrationStats {
         double mean;
         double rms;
@@ -29,7 +24,6 @@ private:
   };
 
   // Data storage: [RunID][ChannelIdx]
-  //std::map<int, std::vector<ChannelData>> dataStore;
   std::map<int, std::vector<std::vector<double>>> dataStore;
 
   // Stats: [ParamIdx][ChannelIdx]
@@ -53,15 +47,21 @@ public:
     graphs.resize(NPAR, std::vector<TGraph*>(NPMT));
     cleanStats.resize(NPAR, std::vector<CalibrationStats>(NPMT));
 
+    TString name;
+    TString title;
     for (int ch = 0; ch < NPMT; ch++)
     {
       for (int p = 0; p < NPAR; p++)
       {
-        hists[p][ch] = new TH1F(Form("h_ch%d_p%d", ch, p), Form("Dist: Param %d, Ch %d;Value;Entries", p, ch), 200, 0., -1.); // NOLINT
+        name = "h_ch"; name += ch; name += "_p"; name += p;
+        title = "Dist: Param "; title += p; title += ", Ch "; title += ch; title += ";Value;Entries";
+        hists[p][ch] = new TH1F(name, title, 200, 0., -1.);
 
         graphs[p][ch] = new TGraph();
-        graphs[p][ch]->SetName(Form("g_ch%d_p%d", ch, p));  // NOLINT
-        graphs[p][ch]->SetTitle(Form("Param %d, Ch %d vs Run;Run ID;Value", p, ch)); // NOLINT
+        name = "g_ch"; name += ch; name += "_p"; name += p;
+        graphs[p][ch]->SetName( name );
+        title = "Param "; title += p; title += ", Ch "; title += ch; title += " vs Run;Run ID;Value";
+        graphs[p][ch]->SetTitle( title );
         graphs[p][ch]->SetMarkerStyle(20);
         graphs[p][ch]->SetMarkerSize(0.2);
       }
@@ -94,7 +94,6 @@ public:
       return;
     }
 
-    //std::vector<ChannelData> channels;
     std::vector<std::vector<double>> channels;
     channels.resize(NPAR, std::vector<double>(NPMT));
     int pmtch{-1};
@@ -119,7 +118,6 @@ public:
              }
              */
 
-          //channels[pmtch].params[p] = val;
           channels[p][pmtch] = val;
 
           // Update Histogram
@@ -165,13 +163,11 @@ public:
     std::vector<double> values;
     for (auto const& [run, runData] : dataStore)
     {
-      //if ( std::isnan(runData[ch].params[p]) )
       if ( std::isnan(runData[p][ch]) )
       {
         continue;
       }
 
-      //values.push_back(runData[ch].params[p]);
       values.push_back(runData[p][ch]);
     }
 
@@ -179,12 +175,13 @@ public:
 
     // 1. Find the Median
     std::sort(values.begin(), values.end());
-    double median = values[values.size() / 2];
+    double middle = values[values.size() / 2];
 
     // 2. Find the Median Absolute Deviation (MAD)
     std::vector<double> diffs;
-    for (double v : values) {
-      diffs.push_back(std::abs(v - median));  // NOLINT
+    for (double v : values)
+    {
+      diffs.push_back(std::abs(v - middle));  // NOLINT
     }
     std::sort(diffs.begin(), diffs.end());
     double mad = diffs[diffs.size() / 2];
@@ -195,10 +192,11 @@ public:
     if (robustSigma == 0) robustSigma = 1e-9; // Avoid division by zero
 
     // 4. Pass 2: Calculate Mean/RMS only for points within the robust window
-    double sum = 0, sumSq = 0;  // NOLINT
+    double sum = 0;
+    double sumSq = 0;
     int n = 0;
     for (double v : values) {
-      if (std::abs(v - median) < (sigmaEquivalent * robustSigma)) {
+      if (std::abs(v - middle) < (sigmaEquivalent * robustSigma)) {
         sum += v;
         sumSq += v * v;
         n++;
@@ -210,14 +208,16 @@ public:
       double rms = std::sqrt(std::abs((sumSq / n) - (mean * mean)));
       cleanStats[p][ch] = {mean, rms, n};
 
-      //cout << "aaa " << ch << "\t" << p << "\t" << median << "\t" << mad << "\t" << mean << "\t" << rms << "\t" << n << endl;
+      //cout << "aaa " << ch << "\t" << p << "\t" << middle << "\t" << mad << "\t" << mean << "\t" << rms << "\t" << n << endl;
 
       // Update the to focus on the "Clean" area
       graphs[p][ch]->SetMinimum(mean - 7*rms);
       graphs[p][ch]->SetMaximum(mean + 7*rms);
 
       delete hists[p][ch];
-      hists[p][ch] = new TH1F(Form("h_ch%d_p%d", ch, p), Form("Dist: Param %d, Ch %d;Value;Entries", p, ch), 200, mean-7*rms, mean+7*rms);  // NOLINT
+      TString name = "h_ch"; name += ch; name += "_"; name += p;
+      TString title = "Dist: Param"; title += p; title += ", Ch "; title += ";Value;Entries";
+      hists[p][ch] = new TH1F(name, title, 200, mean-7*rms, mean+7*rms);
       for (double v : values)
       {
         hists[p][ch]->Fill( v );
@@ -229,8 +229,8 @@ public:
   CalibrationStats GetCleanStats(int ch, int p) { return cleanStats[p][ch]; }
 
   /**
-   * Saves the robustly calculated means to a text file.
-   * Format: ch  par0  par1  par2  ...  par9
+   * Saves the calculated means to a text file.
+   * Format: ch  par0  par1  par2  ...  NPAR
    */
   void SaveCleanMeans(const std::string& outFilename = "temp_mipseeds.txt")
   {
@@ -276,7 +276,6 @@ public:
   // Accessors
   double GetVal(int runID, int ch, int p)
   {
-    //return (dataStore.count(runID)) ? dataStore[runID][ch].params[p] : -1e9;
     return (dataStore.count(runID)) ? dataStore[runID][p][ch] : -1e9;
   }
 
@@ -286,7 +285,8 @@ public:
 
   void DrawSummary(int ch, int p)
   {
-    TCanvas *c = new TCanvas(Form("c_%d_%d", ch, p), "Calibration Summary", 800, 400);  // NOLINT
+    TString name = "c_"; name += ch; name += "_"; name += p;
+    TCanvas *c = new TCanvas(name, "Calibration Summary", 800, 400);
     c->Divide(2, 1);
     c->cd(1);
     hists[p][ch]->Draw();
@@ -304,10 +304,10 @@ public:
     c->Divide(2, 1);
 
     for (int p = 0; p < NPAR; ++p) {
-      TString fileName = Form("mbd_%s_par%d.pdf", run_name.c_str(), p);  // NOLINT
+      TString pdfname = "mbd_"; pdfname += run_name; pdfname += "_par"; pdfname += p; pdfname += ".pdf";
 
       // Start the PDF file
-      c->Print(fileName + "[");
+      c->Print(pdfname + "[");
 
       for (int ch = 0; ch < NPMT; ++ch) {
         // Left side: Histogram
@@ -322,12 +322,12 @@ public:
         graphs[p][ch]->Draw("AP");
 
         // Print current page
-        c->Print(fileName);
+        c->Print(pdfname);
       }
 
       // Close the PDF file
-      c->Print(fileName + "]"); 
-      std::cout << "Created: " << fileName << std::endl;
+      c->Print(pdfname + "]"); 
+      std::cout << "Created: " << pdfname << std::endl;
     }
     delete c;
   }

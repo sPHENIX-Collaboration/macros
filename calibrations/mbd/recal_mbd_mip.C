@@ -19,6 +19,7 @@
 #include <TPaveStats.h>
 #include <TSpectrum.h>
 #include <TSystem.h>
+#include <TPaveStats.h>
 
 #include <fstream>
 
@@ -462,7 +463,18 @@ void recal_mbd_mip(const std::string &tfname = "DST_MBDUNCAL-00020869-0000.root"
   name += "calmbdpass2.3_q-";
   name += runnumber;
   name += ".root";
-  TFile *oldfile = new TFile(name,"READ");
+  TFile *oldfile = TFile::Open(name,"READ");
+
+  if ( oldfile == nullptr )
+  {
+    std::cout << "Error: bad tfile " << name << std::endl;
+    return;
+  }
+  else if ( oldfile->IsZombie() )
+  {
+    std::cout << "Error: zombie tfile " << name << std::endl;
+    return;
+  }
 
   TString title;
   for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
@@ -912,9 +924,9 @@ void recal_mbd_mip(const std::string &tfname = "DST_MBDUNCAL-00020869-0000.root"
     mcal.Write_CDB_Gains( calfname.Data() );
   }
 
-  for (auto & ipmt : h_q)
+  for (auto & hist: h_q)
   {
-    ipmt->Write();
+    hist->Write();
   }
   savefile->Write();
   savefile->Close();

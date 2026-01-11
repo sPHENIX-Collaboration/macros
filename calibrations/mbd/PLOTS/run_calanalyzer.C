@@ -5,28 +5,20 @@
 void run_calanalyzer(const std::string& runflist = "run24pp.list")
 {
   // Load data
-  std::ifstream runlistfile( runflist.c_str() );  // NOLINT(bugprone-suspicious-stringview-data-usage)
+  std::ifstream runlistfile( runflist.c_str() );
   if (!runlistfile.is_open())
   {
     std::cerr << "Error: Could not open runlist file " << runflist << std::endl;
     return;
   }
 
-  // checks if there is a suffix ".list"
-  // if not needed
-  // name.erase(name.size() - 5);
-  // could be used
-  const std::string suffix = ".list";
-  std::string name = runflist;
-  auto pos = name.rfind(suffix);
-  if (pos != std::string::npos)
-  {
-    name.erase(pos, suffix.length());
-  }
+  TString name = runflist.c_str();
+  name.ReplaceAll(".list","");
 
   CalAnalyzer *cal = new CalAnalyzer( name );
 
   int run{0};
+  TString savefname;
   while ( runlistfile >> run )
   {
     if (runlistfile.fail())
@@ -34,7 +26,9 @@ void run_calanalyzer(const std::string& runflist = "run24pp.list")
       std::cerr << "Warning: Failed to read run number from " << runflist << std::endl;
       break;
     }
-    cal->LoadRun(run, std::format("results/{}/savefitspass2.3_mip-{}.txt", run, run));
+
+    savefname = "results/"; savefname += run; savefname += "/savefitspass2.3_mip-"; savefname += run; savefname += ".txt";
+    cal->LoadRun( run, savefname.Data() );
   }
 
   cal->CalculateCleanStats();
