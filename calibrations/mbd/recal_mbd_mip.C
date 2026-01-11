@@ -7,6 +7,8 @@
 
 #include <mbd/MbdCalib.h>
 
+#include <fun4all/Fun4AllUtils.h>
+
 #include <TCanvas.h>
 #include <TF1.h>
 #include <TFile.h>
@@ -14,6 +16,7 @@
 #include <TH2.h>
 #include <TMath.h>
 #include <TPad.h>
+#include <TPaveStats.h>
 #include <TSpectrum.h>
 #include <TSystem.h>
 
@@ -414,7 +417,7 @@ void FindPeakRange(TH1 *horig, double& xmin, double& thispeak, double& xmax, dou
 }
 
 
-void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 3)
+void recal_mbd_mip(const std::string &tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 3)
 {
   std::cout << "tfname " << tfname << std::endl;
 
@@ -423,7 +426,9 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
   // type1: pp200
   // method0:  TSpectrum bkg + 2 gaus fit
   // method1:  expopowerlaw + 2 skgaus fit
-  int runnumber = get_runnumber(tfname);
+//  int runnumber = get_runnumber(tfname);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(tfname);
+  int runnumber = runseg.first;
   int type = get_runtype( runnumber );
   int method = 1;
   if ( type == MBDRUNTYPE::AUAU200 )
@@ -619,8 +624,8 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
         h_mip[ipmt]->SetTitle( name );
 
 
-        double orig_minrej = minrej;
-        double orig_maxrej = maxrej;
+        // double orig_minrej = minrej;
+        // double orig_maxrej = maxrej;
         minrej = 0.;
         maxrej = 0.;
         h_mip[ipmt]->Add( bkgf[ipmt], -1.0 );
@@ -769,7 +774,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       {
         double ORIG_chi2 = chi2;
         chi2 = h_mip[ipmt]->Chisquare(mipfit[ipmt],"R"); // from re-fit
-        std::cout << "CHI2COMPARE " << ipmt << "\t" << chi2 << "\t" << ORIG_chi2 << "\t" << ORIG_chi2-chi2 << endl;
+        std::cout << "CHI2COMPARE " << ipmt << "\t" << chi2 << "\t" << ORIG_chi2 << "\t" << ORIG_chi2-chi2 << std::endl;
         mipfit[ipmt]->SetChisquare( chi2 );
       }
 
@@ -867,7 +872,7 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
       {
         std::string junk;
         std::cout << "? ";
-        cin >> junk;
+        std::cin >> junk;
       }
 
       title = "h_qfit"; title += ipmt;
@@ -895,9 +900,9 @@ void recal_mbd_mip(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const
     mcal.Write_CDB_Gains( calfname.Data() );
   }
 
-  for (int ipmt=0; ipmt<NUM_PMT; ipmt++)
+  for (auto & ipmt : h_q)
   {
-    h_q[ipmt]->Write();
+    ipmt->Write();
   }
   savefile->Write();
   savefile->Close();
