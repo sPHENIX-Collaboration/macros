@@ -453,11 +453,15 @@ void recal_mbd_mip(const std::string &tfname = "DST_MBDUNCAL-00020869-0000.root"
   TString dir = "results/";
   dir += runnumber;
   dir += "/";
-  TString name = "mkdir -p "; name += dir;
+  TString name = "mkdir -p ";
+  name += dir;
   gSystem->Exec( name );
 
   // Read in TFile with h_q
-  name = dir; name += "calmbdpass2.3_q-"; name += runnumber; name += ".root";
+  name = dir;
+  name += "calmbdpass2.3_q-";
+  name += runnumber;
+  name += ".root";
   TFile *oldfile = new TFile(name,"READ");
 
   TString title;
@@ -465,7 +469,7 @@ void recal_mbd_mip(const std::string &tfname = "DST_MBDUNCAL-00020869-0000.root"
   {
     name = "h_q"; name += ipmt;
     title = "q"; title += ipmt;
-    h_q[ipmt] = (TH1*)oldfile->Get(name);
+    oldfile->GetObject(name, h_q[ipmt]);
     h_q[ipmt]->SetMarkerSize(0.6);
 
     /*
@@ -482,12 +486,14 @@ void recal_mbd_mip(const std::string &tfname = "DST_MBDUNCAL-00020869-0000.root"
 
     name = "h_tq"; name += ipmt;
     title = "tq"; title += ipmt;
-    h_tq[ipmt] = (TH1*)oldfile->Get(name);
+    oldfile->GetObject(name,h_tq[ipmt]);
   }
 
   // Create new TFile
   name = dir; 
-  name += "recalmbd_pass"; name += pass; name += ".root";
+  name += "recalmbd_pass";
+  name += pass;
+  name += ".root";
   std::cout << name << std::endl;
 
   TFile *savefile = new TFile(name,"RECREATE");
@@ -509,7 +515,8 @@ void recal_mbd_mip(const std::string &tfname = "DST_MBDUNCAL-00020869-0000.root"
   TString calfname;
   if ( pass==3 ) 
   {
-    calfname = dir; calfname += "mbd_qfit.calib";
+    calfname = dir;
+    calfname += "mbd_qfit.calib";
     cal_mip_file.open( calfname );
     std::cout << "Writing to " << calfname << std::endl;
   }
