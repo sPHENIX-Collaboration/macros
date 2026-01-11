@@ -1,5 +1,7 @@
 #include "CalAnalyzer.C"
 
+#include <format>
+
 void run_calanalyzer(const std::string& runflist = "run24pp.list")
 {
   // Load data
@@ -10,8 +12,17 @@ void run_calanalyzer(const std::string& runflist = "run24pp.list")
     return;
   }
 
-  TString name = runflist.c_str();  // NOLINT(bugprone-suspicious-stringview-data-usage)
-  name.ReplaceAll(".list","");
+  // checks if there is a suffix ".list"
+  // if not needed
+  // name.erase(name.size() - 5);
+  // could be used
+  const std::string suffix = ".list";
+  std::string name = runflist;
+  auto pos = name.rfind(suffix);
+  if (pos != std::string::npos)
+  {
+    name.erase(pos, suffix.length());
+  }
 
   CalAnalyzer *cal = new CalAnalyzer( name );
 
@@ -23,8 +34,7 @@ void run_calanalyzer(const std::string& runflist = "run24pp.list")
       std::cerr << "Warning: Failed to read run number from " << runflist << std::endl;
       break;
     }
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    cal->LoadRun(run, Form("results/%d/savefitspass2.3_mip-%d.txt", run, run));
+    cal->LoadRun(run, std::format("results/{}/savefitspass2.3_mip-{}.txt", run, run));
   }
 
   cal->CalculateCleanStats();
