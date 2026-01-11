@@ -19,7 +19,6 @@
 #include <TPaveStats.h>
 #include <TSpectrum.h>
 #include <TSystem.h>
-#include <TPaveStats.h>
 
 #include <fstream>
 
