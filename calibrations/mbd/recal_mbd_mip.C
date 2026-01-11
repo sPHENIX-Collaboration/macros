@@ -249,7 +249,12 @@ Double_t langaufun(Double_t *x, Double_t *par) // NOLINT(readability-non-const-p
 // Read in the seeds
 void ReadSeeds(const std::string& sfname = "mipseeds.txt")
 {
-  std::ifstream seedsfile( sfname.c_str() );
+  std::ifstream seedsfile( sfname );
+  if (!seedsfile.is_open())
+  {
+    std::cout << "ERROR: Could not open seed file " << sfname << std::endl;
+    return;
+  }
   int pmt;
   for ( int ipmt=0; ipmt<128; ipmt++ )
   {
