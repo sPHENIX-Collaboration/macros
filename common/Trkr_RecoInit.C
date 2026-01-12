@@ -20,7 +20,6 @@ void TrackingInit()
 {
    // server
   auto *se = Fun4AllServer::instance();
-  se->Verbosity(1);
   
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
@@ -34,7 +33,6 @@ void TrackingInit()
   // space charge correction
   if (G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS || G4TPC::ENABLE_STATIC_CORRECTIONS || G4TPC::ENABLE_AVERAGE_CORRECTIONS)
   {
-    auto *se = Fun4AllServer::instance();
     auto *tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
 
     tpcLoadDistortionCorrection->set_read_phi_as_radians(TpcLoadDistortionCorrection::DistortionType_Static, G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS);
