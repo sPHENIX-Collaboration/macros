@@ -464,14 +464,9 @@ void recal_mbd_mip(const std::string &tfname = "DST_MBDUNCAL-00020869-0000.root"
   name += ".root";
   TFile *oldfile = TFile::Open(name,"READ");
 
-  if ( oldfile == nullptr )
+  if ( (oldfile == nullptr) || oldfile->IsZombie() )
   {
     std::cout << "Error: bad tfile " << name << std::endl;
-    return;
-  }
-  else if ( oldfile->IsZombie() )
-  {
-    std::cout << "Error: zombie tfile " << name << std::endl;
     return;
   }
 
