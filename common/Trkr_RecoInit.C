@@ -10,13 +10,24 @@
 
 #include <ffamodules/CDBInterface.h>
 
+#include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
-
+R__LOAD_LIBRARY(libfun4all.so)
 void TrackingInit()
 {
+   // server
+  auto *se = Fun4AllServer::instance();
+  se->Verbosity(1);
+  
+  std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
+
+  Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
+  ingeo->AddFile(geofile);
+  se->registerInputManager(ingeo);
+  
   ACTSGEOM::ActsGeomInit();
   G4TPC::module_edge_correction_filename = CDBInterface::instance()->getUrl("TPC_Module_Edge");
 
