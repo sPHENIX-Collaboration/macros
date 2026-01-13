@@ -7,7 +7,10 @@
 #include <G4_TrkrVariables.C>
 
 #include <tpc/TpcLoadDistortionCorrection.h>
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wundefined-internal"
+#include <tpc/TpcClusterZCrossingCorrection.h>
+#pragma GCC diagnostic pop
 #include <ffamodules/CDBInterface.h>
 
 #include <fun4all/Fun4AllRunNodeInputManager.h>
@@ -26,7 +29,7 @@ void TrackingInit()
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
-  
+  TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
   ACTSGEOM::ActsGeomInit();
   G4TPC::module_edge_correction_filename = CDBInterface::instance()->getUrl("TPC_Module_Edge");
 
