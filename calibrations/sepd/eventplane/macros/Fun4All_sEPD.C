@@ -59,27 +59,26 @@ void Fun4All_sEPD(const std::string &fname,
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   CDBInterface::instance()->Verbosity(Fun4AllBase::VERBOSITY_SOME);
 
-  std::unique_ptr<FlagHandler> flag = std::make_unique<FlagHandler>();
-  se->registerSubsystem(flag.release());
+  SubsysReco* flag = new FlagHandler();
+  se->registerSubsystem(flag);
 
   // MBD Reconstruction
-  std::unique_ptr<MbdReco> mbdreco = std::make_unique<MbdReco>();
-  se->registerSubsystem(mbdreco.release());
+  SubsysReco* mbdreco = new MbdReco();
+  se->registerSubsystem(mbdreco);
 
   // sEPD Reconstruction--Calib Info
-  std::unique_ptr<EpdReco> epdreco = std::make_unique<EpdReco>();
-  se->registerSubsystem(epdreco.release());
+  SubsysReco* epdreco = new EpdReco();
+  se->registerSubsystem(epdreco);
 
   // ZDC Reconstruction--Calib Info
-  std::unique_ptr<ZdcReco> zdcreco = std::make_unique<ZdcReco>();
+  ZdcReco* zdcreco = new ZdcReco();
   zdcreco->set_zdc1_cut(0.0);
   zdcreco->set_zdc2_cut(0.0);
-  se->registerSubsystem(zdcreco.release());
+  se->registerSubsystem(zdcreco);
 
   // Official vertex storage
-  std::unique_ptr<GlobalVertexReco> gvertex = std::make_unique<GlobalVertexReco>();
-  gvertex->Verbosity(Fun4AllBase::VERBOSITY_QUIET);
-  se->registerSubsystem(gvertex.release());
+  SubsysReco* gvertex = new GlobalVertexReco();
+  se->registerSubsystem(gvertex);
 
   // ###############################################################################
   // Temporary Setup until the default Centrality Scale CDB for Run 3 Au+Au is Fixed
@@ -90,26 +89,26 @@ void Fun4All_sEPD(const std::string &fname,
   // ###############################################################################
 
   // Minimum Bias Classifier
-  std::unique_ptr<MinimumBiasClassifier> mb = std::make_unique<MinimumBiasClassifier>();
+  MinimumBiasClassifier* mb = new MinimumBiasClassifier();
   mb->setOverwriteScale(cdb_centrality_scale); // Temporary
   mb->Verbosity(Fun4AllBase::VERBOSITY_QUIET);
-  se->registerSubsystem(mb.release());
+  se->registerSubsystem(mb);
 
   // Centrality
-  std::unique_ptr<CentralityReco> cent = std::make_unique<CentralityReco>();
+  CentralityReco* cent = new CentralityReco();
   cent->setOverwriteScale(cdb_centrality_scale); // Temporary
-  se->registerSubsystem(cent.release());
+  se->registerSubsystem(cent);
 
   // sEPD Tree Gen
-  std::unique_ptr<sEPD_TreeGen> sepd_gen = std::make_unique<sEPD_TreeGen>();
+  sEPD_TreeGen* sepd_gen = new sEPD_TreeGen();
   sepd_gen->set_filename(output);
   sepd_gen->set_tree_filename(output_tree);
   sepd_gen->Verbosity(Fun4AllBase::VERBOSITY_MORE);
-  se->registerSubsystem(sepd_gen.release());
+  se->registerSubsystem(sepd_gen);
 
-  std::unique_ptr<Fun4AllInputManager> In = std::make_unique<Fun4AllDstInputManager>("in");
+  Fun4AllInputManager* In = new Fun4AllDstInputManager("in");
   In->AddListFile(fname);
-  se->registerInputManager(In.release());
+  se->registerInputManager(In);
 
   se->Verbosity(Fun4AllBase::VERBOSITY_QUIET);
   se->run(nEvents);
