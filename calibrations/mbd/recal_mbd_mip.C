@@ -24,7 +24,7 @@
 
 R__LOAD_LIBRARY(libmbd.so)
 
-int verbose{0};
+int verbose{10};
 
 Double_t qmin = 25.;
 Double_t qmax = 4000;
@@ -191,6 +191,8 @@ Double_t landau2(Double_t *x, Double_t *par) //NOLINT(readability-non-const-para
   return f;
 }
 
+/*
+// Not used
 Double_t langaufun(Double_t *x, Double_t *par) // NOLINT(readability-non-const-parameter)
 {
   //Fit parameters:
@@ -220,7 +222,6 @@ Double_t langaufun(Double_t *x, Double_t *par) // NOLINT(readability-non-const-p
   Double_t xlow;
   Double_t xupp;
   Double_t step;
-  Double_t i;
 
 
   // MP shift correction
@@ -233,8 +234,9 @@ Double_t langaufun(Double_t *x, Double_t *par) // NOLINT(readability-non-const-p
   step = (xupp-xlow) / np;
 
   // Convolution integral of Landau and Gaussian by sum
-  for(i=1.0; i<=np/2; i++) {
-    xx = xlow + (i-.5) * step;
+  for(double i=1.0; i<=np/2.0; i+=1.0)
+  {
+    xx = xlow + (i-0.5) * step;
     fland = TMath::Landau(xx,mpc,par[0]) / par[0];
     sum += fland * TMath::Gaus(x[0],xx,par[3]);
 
@@ -245,6 +247,7 @@ Double_t langaufun(Double_t *x, Double_t *par) // NOLINT(readability-non-const-p
 
   return (par[2] * step * sum * invsq2pi / par[3]);
 }
+*/
 
 // Read in the seeds
 void ReadSeeds(const std::string& sfname = "mipseeds.txt")
@@ -261,7 +264,7 @@ void ReadSeeds(const std::string& sfname = "mipseeds.txt")
     seedsfile >> pmt;
     if ( pmt != ipmt )
     {
-      std::cout << "ERROR, seedsfile is bad" << std::endl;
+      std::cout << "ERROR, seedsfile is bad" << ipmt << "\t" << pmt << std::endl;
     }
     //seedsfile >> seed_threshold[pmt] >> seed_minrej[pmt] >> seed_natpeak[pmt] >> seed_maxrej[pmt] >> seed_qmax[pmt];
     for (int ipar=0; ipar<NPAR_BKGF; ipar++)
@@ -338,85 +341,86 @@ void FindThreshold(TH1 *horig, double& threshold, const int runtype = 0)
   //std::cout << threshold << std::endl;
 }
 
-
-void FindPeakRange(TH1 *horig, double& xmin, double& thispeak, double& xmax, double threshold)
+void FindPeakRange(TH1 *horig, double& xmin, double& thispeak, double& xmax, const double threshold)
 {
   TH1 *h = (TH1*)horig->Clone("hnew");
+  Double_t integ = h->Integral();
+  if ( integ<12000. )
+  {
+    h->Rebin(4);
+  }
+  else if ( integ<24000. )
+  {
+    h->Rebin(2);
+  }
   h->Smooth();
-  int bin = h->FindBin( threshold );
-  int maxbin = h->FindBin( qmax );
-  double ymin = 1e12; // the minimum y val
-  int nabove = 0;     // num points above the min
-
-  // look for 1st min
-  int ibin = bin;
-  while ( ibin<=maxbin )
+  
+  // zero up to threshold
+  int threshbin = h->FindBin(threshold);
+  for (int ibin=1; ibin<threshbin; ibin++)
   {
-    double val = h->GetBinContent( ibin );
-    if ( val < ymin )
-    {
-      ymin = val;
-      nabove = 0; // new min, reset nabove
-    }
-    else
-    {
-      nabove++;
-    }
-
-    if ( verbose>5 )
-    {
-      double x = h->GetBinCenter( ibin );
-      std::cout << "bin x y nabove " << ibin << "\t" << x << "\t" << val << "\t" << nabove << std::endl;
-    }
-
-    // if we see this many above the min, the signal is rising
-    if ( nabove==5 )
-    {
-      xmin = h->GetBinCenter( ibin-5 );
-      break;
-    }
-
-    ibin++;
+    h->SetBinContent(ibin,0.);
   }
 
-  // now look for peak after first min
-  double ymax = 0; // the minimum y val
-  int nbelow = 0;     // num points below the max
-  while ( ibin<=maxbin )
+  // find mip peak
+  Double_t binwid = h->GetBinWidth(1);
+  Double_t ymax{0.};
+  Int_t peakbin{0};
+
+  Double_t temp_threshold = threshold;
+  thispeak = temp_threshold;
+
+  while ( std::abs(thispeak-temp_threshold) < (5.0*binwid) )
   {
-    double val = h->GetBinContent( ibin );
-    if ( val > ymax )
+    h->SetBinContent( peakbin, 0. );
+    ymax = h->GetMaximum();
+    peakbin = h->GetMaximumBin();
+    thispeak = h->GetBinCenter( peakbin );
+
+    if ( std::abs(thispeak-temp_threshold) < (5.0*binwid) )
     {
-      ymax = val;
-      nbelow = 0; // new max, reset nbelow
+      temp_threshold = thispeak;
     }
-    else
+    
+    if ( verbose>=5 )
     {
-      nbelow++;
+      std::cout << "peakfind thresh x_at_peak peakval\t" << temp_threshold << "\t" << thispeak << "\t" << ymax << "\t" << peakbin << std::endl;
     }
 
-    // if we see this many below the max, the signal is falling
-    if ( nbelow==20 )
-    {
-      thispeak = h->GetBinCenter( ibin-20 );
-      break;
-    }
-
-    ibin++;
+    /*
+    h->GetXaxis()->SetRangeUser(62,300);
+    h->Draw();
+    gPad->SetGridx(1);
+    gPad->SetGridy(1);
+    gPad->Modified();
+    gPad->Update();
+    std::string junk;
+    cin >> junk;
+    */
   }
 
-  xmax = 2*thispeak + 3*(thispeak - xmin);
+  delete h;
 
-  double orig_xmin = xmin;
-  xmin = thispeak - 1.8*(thispeak-xmin);
-  if ( xmin < threshold )
+  // find xmin (min between threshold and peak)
+  h = (TH1*)horig->Clone("hnew");
+  h->Smooth();
+  int nbinsx = h->GetNbinsX();
+  for (int ibin=1; ibin<=nbinsx; ibin++)
   {
-    xmin = (threshold + orig_xmin)/2.;
+    if ( ibin<threshbin || ibin>peakbin )
+    {
+      h->SetBinContent( ibin, 1e12 );
+    }
   }
-  if ( xmin < threshold )
+
+  xmin = h->GetBinLowEdge( h->GetMinimumBin() );
+  if ( xmin==threshold )
   {
-    xmin = threshold + 50;
+    xmin += binwid;     // no bkg b4 mip situation
   }
+
+  Double_t peakmindiff = thispeak - xmin;
+  xmax = 2*thispeak + 2.0*peakmindiff;  // 1.0 for pp
 
   delete h;
 }
@@ -567,7 +571,7 @@ void recal_mbd_mip(const std::string &tfname = "DST_MBDUNCAL-00020869-0000.root"
     ac[cvindex]->cd(1);
     h_q[ipmt]->Draw();
 
-    //if ( ipmt!=33 ) continue;
+    if ( verbose>9 && ipmt!=0 ) continue;  // check sgl channel
     if (pass>0)
     {
       double threshold{0.};
