@@ -211,13 +211,13 @@ public:
       //cout << "aaa " << ch << "\t" << p << "\t" << middle << "\t" << mad << "\t" << mean << "\t" << rms << "\t" << n << endl;
 
       // Update the to focus on the "Clean" area
-      graphs[p][ch]->SetMinimum(mean - 7*rms);
-      graphs[p][ch]->SetMaximum(mean + 7*rms);
+      graphs[p][ch]->SetMinimum(mean - 12*rms);
+      graphs[p][ch]->SetMaximum(mean + 10*rms);
 
       delete hists[p][ch];
       TString name = "h_ch"; name += ch; name += "_"; name += p;
-      TString title = "Dist: Param"; title += p; title += ", Ch "; title += ";Value;Entries";
-      hists[p][ch] = new TH1F(name, title, 200, mean-7*rms, mean+7*rms);
+      TString title = "Dist: Param"; title += p; title += ", Ch "; title += ch; title += ";Value;Entries";
+      hists[p][ch] = new TH1F(name, title, 200, mean-12*rms, mean+10*rms);
       for (double v : values)
       {
         hists[p][ch]->Fill( v );
@@ -240,13 +240,15 @@ public:
       return;
     }
 
-    // Add a header for readability
+    /*
+    // Header
     outFile << "# ch";
     for (int p = 0; p < NPAR; ++p)
     {
       outFile << "      par" << p;
     }
     outFile << std::endl;
+    */
 
     // Set fixed precision for clean columns
     outFile << std::fixed << std::setprecision(6);
@@ -303,13 +305,25 @@ public:
     TCanvas *c = new TCanvas("c_print", "Printing Canvas", 1000, 500);
     c->Divide(2, 1);
 
-    for (int p = 0; p < NPAR; ++p) {
+    // num mip fits out of range
+    TString mipfitname = "mbd_"; mipfitname += run_name; mipfitname += "_mip.result";
+    std::ofstream mipfile( mipfitname.Data() );
+
+    int par_mip = 6;
+    if ( run_name.find("auau") != std::string::npos )
+    {
+      par_mip = 1;
+    }
+
+    for (int p = 0; p < NPAR; ++p)
+    {
       TString pdfname = "mbd_"; pdfname += run_name; pdfname += "_par"; pdfname += p; pdfname += ".pdf";
 
       // Start the PDF file
       c->Print(pdfname + "[");
 
-      for (int ch = 0; ch < NPMT; ++ch) {
+      for (int ch = 0; ch < NPMT; ++ch)
+      {
         // Left side: Histogram
         c->cd(1);
         hists[p][ch]->SetLineColor(kBlue);
@@ -323,11 +337,23 @@ public:
 
         // Print current page
         c->Print(pdfname);
+
+        if ( p == par_mip )
+        {
+          int oflowbin = hists[p][ch]->GetNbinsX() + 1;
+          mipfile << ch << "\t" << hists[p][ch]->GetBinContent(0) << "\t" << hists[p][ch]->GetBinContent(oflowbin) << std::endl;
+        }
+
       }
 
       // Close the PDF file
       c->Print(pdfname + "]"); 
       std::cout << "Created: " << pdfname << std::endl;
+
+      if ( p==6 )
+      {
+        mipfile.close();
+      }
     }
     delete c;
   }
