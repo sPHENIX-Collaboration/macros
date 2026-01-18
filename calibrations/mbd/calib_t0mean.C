@@ -57,6 +57,9 @@ void FitGausToPeak(TH1 *h1, const Double_t sigma)
 
 void calib_t0mean(const char *fname = "results/48700/calmbdpass2.3_q_48700.root")
 {
+  gStyle->SetOptFit(1111);
+  gStyle->SetOptStat(111111);
+
   double gmean[2];
   double gmeanerr[2];
   double gsigma[2];

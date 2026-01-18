@@ -19,12 +19,13 @@
 #include <TPaveStats.h>
 #include <TSpectrum.h>
 #include <TSystem.h>
+#include <TStyle.h>
 
 #include <fstream>
 
 R__LOAD_LIBRARY(libmbd.so)
 
-int verbose{10};
+int verbose{0};
 
 Double_t qmin = 25.;
 Double_t qmax = 4000;
@@ -429,6 +430,8 @@ void FindPeakRange(TH1 *horig, double& xmin, double& thispeak, double& xmax, con
 void recal_mbd_mip(const std::string &tfname = "DST_MBDUNCAL-00020869-0000.root", const int pass = 3)
 {
   std::cout << "tfname " << tfname << std::endl;
+  gStyle->SetOptFit(1111);
+  gStyle->SetOptStat(111111);
 
   // set up run-dependent settings
   // type0: auau200
