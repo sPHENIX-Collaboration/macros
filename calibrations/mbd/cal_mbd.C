@@ -19,6 +19,7 @@
 #include <TCanvas.h>
 #include <TPad.h>
 #include <TSystem.h>
+#include <TStyle.h>
 
 #include <iostream>
 #include <fstream>
@@ -36,6 +37,9 @@ R__LOAD_LIBRARY(libmbd.so)
 
 void cal_mbd(const char *tfname = "DST_MBDUNCAL-00020869-0000.root", const int subpass = 0, const int nevt = 0, const std::string_view dbtag = "")
 {
+  gStyle->SetOptFit(1111);
+  gStyle->SetOptStat(111111);
+
   std::cout << "cal_mbd(), tfname " << tfname << std::endl;
   read_dstmbd( tfname );
 
