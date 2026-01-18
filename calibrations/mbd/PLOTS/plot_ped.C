@@ -6,10 +6,11 @@
 #include <TTree.h>
 #include <TGraphErrors.h>
 #include <TString.h>
+#include <TCanvas.h>
+#include <TPad.h>
+
 #include <iostream>
 #include <fstream>
-
-using namespace std;
 
 const int NFEECH = 256;
 const int MAXRUNS = 10000;
@@ -40,7 +41,7 @@ void plot_ped(const char *fname = "results/ped.list")
   TString runtext;
   TFile *cdbfile[MAXRUNS];
 
-  ifstream inflist;
+  std::ifstream inflist;
   inflist.open( fname );
 
   int nruns = 0;
@@ -54,7 +55,7 @@ void plot_ped(const char *fname = "results/ped.list")
     runtext.ReplaceAll("/mbd_ped.root","");
     runtext.ReplaceAll("results/","");
     runs[nruns] = runtext.Atof();
-    cout << rootfname << ", run " << runs[nruns] << endl;
+    std::cout << rootfname << ", run " << runs[nruns] << std::endl;
 
     TTree *pedtree = (TTree*)cdbfile[nruns]->Get("Multiple");
     pedtree->SetBranchAddress("Fpedmean",&temp_mean);
@@ -64,15 +65,16 @@ void plot_ped(const char *fname = "results/ped.list")
     pedtree->SetBranchAddress("IID",&temp_feech);
 
     Stat_t nentries = pedtree->GetEntries();
-    //cout << nentries << endl;
+    //std::cout << nentries << std::endl;
     for (Stat_t ientry=0; ientry<nentries; ientry++)
     {
       pedtree->GetEntry( ientry );
 
-      //if (nruns==0 ) cout << temp_feech << endl;
+      //if (nruns==0 ) std::cout << temp_feech << std::endl;
       if ( temp_feech<0 || temp_feech>255 )
       {
-        cout << "ERROR feech " << temp_feech << endl;
+        std::cout << "ERROR feech " << temp_feech << std::endl;
+        continue;
       }
       mean[temp_feech][nruns] = temp_mean;
       meanerr[temp_feech][nruns] = temp_meanerr;
@@ -84,18 +86,18 @@ void plot_ped(const char *fname = "results/ped.list")
     nruns++;
   }
 
-  cout << "Processed " << nruns << " runs" << NFEECH << endl;
+  std::cout << "Processed " << nruns << " runs" << NFEECH << std::endl;
 
   // Make the plots
   for (int ifeech=0; ifeech<NFEECH; ifeech++)
   {
-    g_mean[ifeech] = new TGraphErrors(nruns,runs,mean[ifeech],0,meanerr[ifeech]);
+    g_mean[ifeech] = new TGraphErrors(nruns,runs,mean[ifeech],nullptr,meanerr[ifeech]);
     name = "g_mean"; name += ifeech;
     g_mean[ifeech]->SetName( name );
     g_mean[ifeech]->SetTitle( name );
     //g_mean[ifeech]->SetMarkerStyle( 20 );
 
-    g_sigma[ifeech] = new TGraphErrors(nruns,runs,sigma[ifeech],0,sigmaerr[ifeech]);
+    g_sigma[ifeech] = new TGraphErrors(nruns,runs,sigma[ifeech],nullptr,sigmaerr[ifeech]);
     name = "g_sigma"; name += ifeech;
     g_sigma[ifeech]->SetName( name );
     g_sigma[ifeech]->SetTitle( name );
@@ -108,7 +110,7 @@ void plot_ped(const char *fname = "results/ped.list")
   ac[0]->Print("ped.pdf[");
   for (int ifeech=0; ifeech<NFEECH; ifeech++)
   {
-    cout << "feech " << ifeech << endl;
+    std::cout << "feech " << ifeech << std::endl;
     ac[0]->cd(1);
     g_mean[ifeech]->Draw("alp");
     gPad->Modified();
