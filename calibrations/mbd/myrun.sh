@@ -122,7 +122,7 @@ ORIG_DIR=${PWD}
 if [[ ! -z "${_CONDOR_SCRATCH_DIR}" ]]
 then
   mkdir -p ${_CONDOR_SCRATCH_DIR}
-  cp ${inputs} *.sh *.h *.C ${_CONDOR_SCRATCH_DIR}/
+  cp ${inputs} *.sh *.h *.C mipseeds.txt ${_CONDOR_SCRATCH_DIR}/
   cd ${_CONDOR_SCRATCH_DIR}
   pwd
   ls -lR
