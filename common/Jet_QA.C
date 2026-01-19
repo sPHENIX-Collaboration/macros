@@ -624,6 +624,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   // get list of jet nodes to analyze
   std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA(JetQA::Source::Calos);
 
+  /*
   // initialize and register emcluster jet kinematic QA
   EMClusterKinematics* emclusterJetsQA = new EMClusterKinematics(
       "EMClusterKinematics" + trig_tag,
@@ -636,7 +637,21 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   }
   emclusterJetsQA->Verbosity(verbosity);
   se->registerSubsystem(emclusterJetsQA);
-
+  */
+  EMClusterKinematics* em = new EMClusterKinematics(
+						    "EMClusterKinematics" + trig_tag,
+						    "CLUSTERINFO_CEMC",
+						    "");
+  
+  // make the output name explicit
+  em->SetHistTag(JetQA::GetTriggerTag(trg));   // or just JetQA::GL1Tag[trg.value()] when trg has value
+  
+  // for debugging: disable trigger selection entirely
+  if (trg.has_value()) em->SetTrgToSelect(trg.value());
+  
+  em->SetDoOptHist(false);
+  se->registerSubsystem(em);
+  
   // initialize and register event-wise rho check
   RhosinEvent* evtRhoQA = new RhosinEvent("EventWiseCaloRho" + trig_tag, "");
   evtRhoQA->Verbosity(verbosity);

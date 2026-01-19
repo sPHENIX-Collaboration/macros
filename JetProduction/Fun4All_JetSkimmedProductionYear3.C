@@ -35,6 +35,45 @@
 #include <iostream>
 #include <map>
 
+#include <TString.h>
+#include <TSystem.h>
+
+std::string ResolveInputFile(const std::string &baseDir, const std::string &fname)
+{
+  if (fname.find('/') != std::string::npos)
+  {
+    return fname;
+  }
+
+  std::string candidate = baseDir + "/" + fname;
+  if (!gSystem->AccessPathName(candidate.c_str()))  // returns kFALSE if file exists
+    {
+    return candidate;
+  }
+  std::string pattern = baseDir + "/run_*/" + fname;
+
+  // build the shell command
+  std::string cmd = "ls " + pattern + " 2>/dev/null | head -n1";
+
+  // GetFromPipe returns a TString
+  TString t = gSystem->GetFromPipe(cmd.c_str());
+  std::string result = std::string(t.Data());
+
+  // strip trailing newline(s)
+  while (!result.empty() && (result.back() == '\n' || result.back() == '\r'))
+  {
+    result.pop_back();
+  }
+  if (!result.empty())
+  {
+    return result;  // found a match
+  }
+  std::cerr << "ResolveInputFile: could not find " << fname
+            << " under " << baseDir << std::endl;
+  return fname;
+}
+
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libcalo_reco.so)
@@ -48,6 +87,19 @@ R__LOAD_LIBRARY(libjetbackground.so)
 R__LOAD_LIBRARY(libJetDSTSkimmer.so)
 
 void Fun4All_JetSkimmedProductionYear3(
+                                       int nEvents = 1000,
+                                       const std::string &fname =
+                                       //"DST_CALOFITTING_run3auau_new_newcdbtag_v008-00075142-00000.root",
+                                       "DST_CALOFITTING_run3pp_new_newcdbtag_v008-00079151-00010.root",
+                                       const std::string &outfile_low  = "DST_JETCALO-00000000-000000.root",
+                                       const std::string &outfile_high = "DST_Jet-00000000-000000.root",
+                                       const std::string &outfile_hist = "HIST_JETQA-00000000-000000.root",
+                                       const std::string &dbtag        = "newcdbtag",
+                                       const std::string &basedir =
+                                       //"/sphenix/lustre01/sphnxpro/production2/run3auau/physics/calofitting/new_newcdbtag_v008")
+                                       "/sphenix/lustre01/sphnxpro/production2/run3pp/physics/calofitting/new_newcdbtag_v008")
+/*
+void Fun4All_JetSkimmedProductionYear3(
 				       int nEvents = 1000,
 				       const std::string &fname =
 				       "DST_CALOFITTING_run3auau_new_newcdbtag_v008-00075142-00000.root",
@@ -55,6 +107,7 @@ void Fun4All_JetSkimmedProductionYear3(
 				       const std::string &outfile_high = "DST_Jet-00000000-000000.root",
 				       const std::string &outfile_hist = "HIST_JETQA-00000000-000000.root",
 				       const std::string &dbtag        = "newcdbtag")
+*/
 {
   Fun4AllServer *se = Fun4AllServer::instance();
   recoConsts::instance()->set_IntFlag("PHOOL_VERBOSITY", 0);
@@ -90,7 +143,7 @@ void Fun4All_JetSkimmedProductionYear3(
   Enable::QA = true;
   
   // Au+Au mode
-  HIJETS::is_pp = false;
+  HIJETS::is_pp = true;
   
   // QA options
   JetQA::HasTracks        = false;
@@ -106,12 +159,11 @@ void Fun4All_JetSkimmedProductionYear3(
     {
       std::cout << ">>> Running Centrality()" << std::endl;
       Centrality();
+
     }
   
-  // HIJetReco macro 
-  std::cout << ">>> Running HIJetReco()" << std::endl;
-  HIJetReco();
-  
+  HIJetReco();  
+
   // Jet DST skimmer with map-based threshold
   std::cout << ">>> Configuring JetDSTSkimmer" << std::endl;
   JetDSTSkimmer *jetDSTSkimmer = new JetDSTSkimmer();
@@ -119,15 +171,15 @@ void Fun4All_JetSkimmedProductionYear3(
   // Jet thresholds: map from node name [set min jet pT]
   std::map<std::string, float> jetNodePts;
   
-  jetNodePts["AntiKt_Tower_r04_Sub1"] = 7.0F;
-  jetDSTSkimmer->SetJetNodeThresholds(jetNodePts);
+  //jetNodePts["AntiKt_Tower_r04_Sub1"] = 7.0F;
+  //jetDSTSkimmer->SetJetNodeThresholds(jetNodePts);
   
   // Cluster thresholds: map from cluster node [set min cluster pT]
   std::map<std::string, float> clusterNodePts;
-  clusterNodePts["CLUSTERINFO_CEMC"] = 5.0F;
-  jetDSTSkimmer->SetClusterNodeThresholds(clusterNodePts);
+  //  clusterNodePts["CLUSTERINFO_CEMC"] = 5.0F;
+  //jetDSTSkimmer->SetClusterNodeThresholds(clusterNodePts);
   
-  jetDSTSkimmer->Verbosity(0);
+  jetDSTSkimmer->Verbosity(10);
   se->registerSubsystem(jetDSTSkimmer);
   std::cout << ">>> JetDSTSkimmer registered" << std::endl;
   
@@ -156,7 +208,17 @@ void Fun4All_JetSkimmedProductionYear3(
   
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
   In->Verbosity(1);
-  In->AddFile(fname);
+
+    const std::string inFile = ResolveInputFile(basedir, fname);
+  std::cout << ">>> Input file resolved to: " << inFile << std::endl;
+
+  if (gSystem->AccessPathName(inFile.c_str()))
+  {
+    std::cerr << "FATAL: cannot access input file: " << inFile << std::endl;
+    gSystem->Exit(1);
+  }
+
+  In->AddFile(inFile);
   se->registerInputManager(In);
   
   Fun4AllDstOutputManager *outlower =
