@@ -3,9 +3,10 @@
  * using the production track cluster and track seed DSTs
  */
 
+#include <GlobalVariables.C>
+
 #include <G4_ActsGeom.C>
 #include <G4_Magnet.C>
-#include <GlobalVariables.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
@@ -14,17 +15,6 @@
 
 #include <caloreco/RawClusterBuilderTopo.h>
 
-#include <ffamodules/CDBInterface.h>
-
-#include <fun4all/Fun4AllDstInputManager.h>
-#include <fun4all/Fun4AllDstOutputManager.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllUtils.h>
-#include <fun4all/Fun4AllOutputManager.h>
-#include <fun4all/Fun4AllRunNodeInputManager.h>
-#include <fun4all/Fun4AllServer.h>
-
-#include <phool/recoConsts.h>
 
 #include <tpcdvcalib/TrackToCalo.h>
 
@@ -39,7 +29,18 @@
 #include <trackreco/PHActsTrackProjection.h>
 #include <trackbase_historic/SvtxTrack.h>
 
-#include <stdio.h>
+#include <ffamodules/CDBInterface.h>
+
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllUtils.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllRunNodeInputManager.h>
+#include <fun4all/Fun4AllServer.h>
+
+#include <phool/recoConsts.h>
+
 #include <iostream>
 #include <filesystem>
 
@@ -57,19 +58,16 @@ R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libTpcDVCalib.so)
 R__LOAD_LIBRARY(libcalo_reco.so)
 
-using namespace std;
-namespace fs = std::filesystem;
-
-std::string GetFirstLine(std::string listname);
-bool is_directory_empty(const fs::path& dir_path);
+std::string GetFirstLine(const std::string& listname);
+bool is_directory_empty(const std::filesystem::path& dir_path);
 
 void Fun4All_TrackAnalysis(
     const int nEvents = 10,
-    vector<string> myInputLists = {
+    std::vector<std::string> myInputLists = {
         "run46730_0000_trkr_seed.txt",
         "run46730_0000_trkr_cluster.txt",
         "run46730_calo.list"}, 
-    std::string outDir = "./",
+    const std::string& outDir = "./",
     bool doTpcOnlyTracking = true,
     float initial_driftvelocity = 0.00710,
     bool doEMcalRadiusCorr = true,
@@ -103,9 +101,9 @@ void Fun4All_TrackAnalysis(
   ACTSGEOM::inttMisalignment = 100.;
   ACTSGEOM::tpotMisalignment = 100.;
 
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
@@ -129,7 +127,7 @@ void Fun4All_TrackAnalysis(
   //Add all required input files
   for (unsigned int i = 0; i < myInputLists.size(); ++i)
   {
-    Fun4AllInputManager *infile = new Fun4AllDstInputManager("DSTin_" + to_string(i));
+    Fun4AllInputManager *infile = new Fun4AllDstInputManager("DSTin_" + std::to_string(i));
     std::cout << "Including file " << myInputLists[i] << std::endl;
     infile->AddListFile(myInputLists[i]);
     se->registerInputManager(infile);
@@ -141,7 +139,7 @@ void Fun4All_TrackAnalysis(
    */
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
-    auto converter = new TrackSeedTrackMapConverter;
+    auto *converter = new TrackSeedTrackMapConverter;
     // Option to use TpcTrackSeedContainer or SvtxTrackSeeds
     // can be set to SiliconTrackSeedContainer for silicon-only track fit
     if (doTpcOnlyTracking)
@@ -158,12 +156,12 @@ void Fun4All_TrackAnalysis(
   }
   else
   {
-    auto deltazcorr = new PHTpcDeltaZCorrection;
+    auto *deltazcorr = new PHTpcDeltaZCorrection;
     deltazcorr->Verbosity(0);
     se->registerSubsystem(deltazcorr);
 
     // perform final track fit with ACTS
-    auto actsFit = new PHActsTrkFitter;
+    auto *actsFit = new PHActsTrkFitter;
     actsFit->Verbosity(0);
     actsFit->commissioning(G4TRACKING::use_alignment);
     // in calibration mode, fit only Silicons and Micromegas hits
@@ -200,7 +198,7 @@ void Fun4All_TrackAnalysis(
 
   Global_Reco();
 
-  auto projection = new PHActsTrackProjection("CaloProjection");
+  auto *projection = new PHActsTrackProjection("CaloProjection");
   float new_cemc_rad = 100.70;//(1-(-0.077))*93.5 recommended cemc radius
   if (doEMcalRadiusCorr)
   {
@@ -222,11 +220,11 @@ void Fun4All_TrackAnalysis(
   ClusterBuilder1->set_R_shower(0.025);
   se->registerSubsystem(ClusterBuilder1);
 
-  string outputAnaFileName = "TrackCalo_" + to_string(segment) + "_ana.root";
-  string outputRecoDir = outDir + "inReconstruction/" + to_string(runnumber) + "/";
-  string makeDirectory = "mkdir -p " + outputRecoDir;
+  std::string outputAnaFileName = "TrackCalo_" + std::to_string(segment) + "_ana.root";
+  std::string outputRecoDir = outDir + "inReconstruction/" + std::to_string(runnumber) + "/";
+  std::string makeDirectory = "mkdir -p " + outputRecoDir;
   system(makeDirectory.c_str());
-  string outputAnaFile = outputRecoDir + outputAnaFileName;
+  std::string outputAnaFile = outputRecoDir + outputAnaFileName;
   std::cout << "Reco ANA file: " << outputAnaFile << std::endl;
 
   TrackToCalo *ttc = new TrackToCalo("Tracks_And_Calo", outputAnaFile);
@@ -234,13 +232,13 @@ void Fun4All_TrackAnalysis(
   ttc->setEMcalRadius(new_cemc_rad);
   se->registerSubsystem(ttc);
 
-  ifstream file_ana(outputAnaFile.c_str(), ios::binary | ios::ate);
+  std::ifstream file_ana(outputAnaFile.c_str(), std::ios::binary | std::ios::ate);
   if (file_ana.good() && (file_ana.tellg() > 100))
   {
-    string outputRecoDirMove = outDir + "Reconstructed/" + to_string(runnumber) + "/";
-    string makeDirectoryMove = "mkdir -p " + outputRecoDirMove;
+    std::string outputRecoDirMove = outDir + "Reconstructed/" + std::to_string(runnumber) + "/";
+    std::string makeDirectoryMove = "mkdir -p " + outputRecoDirMove;
     system(makeDirectoryMove.c_str());
-    string moveOutput = "mv " + outputAnaFile + " " + outDir + "Reconstructed/" + to_string(runnumber);
+    std::string moveOutput = "mv " + outputAnaFile + " " + outDir + "Reconstructed/" + std::to_string(runnumber);
     std::cout << "moveOutput: " << moveOutput << std::endl;
     system(moveOutput.c_str());
   }
@@ -254,11 +252,11 @@ void Fun4All_TrackAnalysis(
   gSystem->Exit(0);
 }
 
-std::string GetFirstLine(std::string listname)
+std::string GetFirstLine(const std::string& listname)
 {
   std::ifstream file(listname);
 
-  std::string firstLine = "";
+  std::string firstLine;
   if (file.is_open()) {
       if (std::getline(file, firstLine)) {
           std::cout << "First Line: " << firstLine << std::endl;
@@ -272,9 +270,9 @@ std::string GetFirstLine(std::string listname)
   return firstLine;
 }
 
-bool is_directory_empty(const fs::path& dir_path) {
-    if (fs::exists(dir_path) && fs::is_directory(dir_path)) {
-        return fs::directory_iterator(dir_path) == fs::directory_iterator();
+bool is_directory_empty(const std::filesystem::path& dir_path) {
+    if (std::filesystem::exists(dir_path) && std::filesystem::is_directory(dir_path)) {
+        return std::filesystem::directory_iterator(dir_path) == std::filesystem::directory_iterator();
     }
     return false;
 }

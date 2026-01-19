@@ -1,9 +1,8 @@
 #ifndef MACRO_G4TRKRVARIABLES_C
 #define MACRO_G4TRKRVARIABLES_C
 
-#include <GlobalVariables.C>
-
 #include <g4intt/PHG4InttDefs.h>
+
 #include <g4mvtx/PHG4MvtxDefs.h>
 
 namespace Enable
@@ -15,8 +14,9 @@ namespace Enable
   bool MVTX_CLUSTER = false;
   bool MVTX_QA = false;
   bool MVTX_SUPPORT = false;
-  bool MVTX_APPLYMISALIGNMENT = false;
-
+  bool MVTX_APPLYMISALIGNMENT = true;
+  bool MVTX_STREAMING = true;
+  
   int MVTX_VERBOSITY = 0;
 
   bool INTT = false;
@@ -66,7 +66,7 @@ namespace G4MVTX
 
 namespace G4MVTXAlignment
 {
-  std::string alignment_path = string(getenv("CALIBRATIONROOT")) + "/Tracking/MVTX/alignment";
+  std::string alignment_path = std::string(getenv("CALIBRATIONROOT")) + "/Tracking/MVTX/alignment";
   double z_offset[] = {0.0, 0.0, 200.0};
 }  // namespace G4MVTXAlignment
 
@@ -96,13 +96,12 @@ namespace G4TPC
 {
   int n_tpc_layer_inner = 16;
 
-  int tpc_layer_rphi_count_inner = 1128; // 94 * 12
+  int tpc_layer_rphi_count_inner = 1128;  // 94 * 12
 
   int n_tpc_layer_mid = 16;
   int n_tpc_layer_outer = 16;
   int n_gas_layer = n_tpc_layer_inner + n_tpc_layer_mid + n_tpc_layer_outer;
   double tpc_outer_radius = 77. + 2.;
-
 
   // use simple clusterizer
   bool USE_SIMPLE_CLUSTERIZER = false;
@@ -120,12 +119,12 @@ namespace G4TPC
   bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
   std::string time_ordered_distortion_filename = "TPC_TIMEORDERED_DISTORTION";
 
-  // allow distortions to remove electrons that 
+  // allow distortions to remove electrons that
   bool ENABLE_REACHES_READOUT = true;
 
   // module edge distortion corrections
   bool ENABLE_MODULE_EDGE_CORRECTIONS = false;
-  std::string module_edge_correction_filename = "";
+  std::string module_edge_correction_filename;
 
   // static distortion corrections
   bool ENABLE_STATIC_CORRECTIONS = false;
@@ -136,17 +135,21 @@ namespace G4TPC
   bool ENABLE_AVERAGE_CORRECTIONS = false;
   std::string average_correction_filename;
   bool USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-
+  bool average_correction_interpolate = true;
+  
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
 
-  //enable diffuse laser clustering
+  // enable diffuse laser clustering
   bool ENABLE_CENTRAL_MEMBRANE_CLUSTERING = true;
+  bool LaserClusteringSequential = false;
+  bool laserClusterFitting = false;
+  float laser_adc_threshold = 100.0;
 
-  bool REJECT_LASER_EVENTS = true;
-  float laser_adc_threshold = 0.0;
-  std::string laser_clusterizer_debug_filename = "";
-  std::string laser_event_debug_filename = "";
+  bool REJECT_LASER_EVENTS = false;
+  std::string laser_event_debug_filename;
+  std::string LaminationOutputName;
+  std::string LaminationQAName;
 
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
@@ -161,7 +164,7 @@ namespace G4TPC
   std::string DIRECT_LASER_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";
   std::string DIRECT_LASER_HISTOGRAMOUTPUT_FILENAME = "TpcDirectLaserReconstruction.root";
 
-  std::string TPC_GAS_MIXTURE = "NeCF4";
+  std::string TPC_GAS_MIXTURE = "ArCF4Isobutane";
   // drift velocity is set here for all relevant modules
   //  double tpc_drift_velocity_reco now set in GlobalVariables.C
   double tpc_drift_velocity_sim = 0.007550;  // cm/ns   // this is the ArCF4Isobutane version of the gas
@@ -204,6 +207,11 @@ namespace G4TPC
   double ArCF4Isobutane_N2_frac = 0.00;
   double ArCF4Isobutane_isobutane_frac = 0.05;
 
+  double maxDriftLength = 102.325;  // new value, CM face to top of GEM stack
+  double CM_halfwidth = 0.28;  // cm
+  double sampa_tzero_bias = -65.0; // ns, set for simulations/reco matching with new sampa response
+  bool apply_tpc_tzero_correction = false;  // true to apply small correction to TPC time zero in alignment transforms
+  
 }  // namespace G4TPC
 
 namespace G4TRACKING
@@ -231,9 +239,6 @@ namespace G4TRACKING
   // Runs a converter from TrackSeed object to SvtxTrack object to enable
   // use of the various evaluation tools already available
   bool convert_seeds_to_svtxtracks = false;
-
-  // Runs a second pass of seeding to pick up missed seeds in the first pass
-  bool iterative_seeding = false;
 
   // Flag to run commissioning seeding workflow with tuned parameters for
   // misaligned + distorted tracks

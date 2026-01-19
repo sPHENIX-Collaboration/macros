@@ -1,5 +1,9 @@
-#ifndef FUN4ALL_YEAR1_C
-#define FUN4ALL_YEAR1_C
+#ifndef FUN4ALL_HCALCOSMICS_C
+#define FUN4ALL_HCALCOSMICS_C
+
+#include <calovalid/CaloValid.h>
+
+#include <litecaloeval/HCalCosmics.h>
 
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloTowerCalib.h>
@@ -23,9 +27,8 @@
 
 #include <phool/recoConsts.h>
 
-#include <calovalid/CaloValid.h>
-
-#include <litecaloeval/HCalCosmics.h>
+#include <Rtypes.h> // for R__LOAD_LIBRARY
+#include <TSystem.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -54,7 +57,7 @@ void Fun4All_HCalCosmics(int nEvents = 100,
 
   recoConsts *rc = recoConsts::instance();
 
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
   int runnumber = runseg.first;
 
   // conditions DB flags and timestamp
@@ -116,13 +119,22 @@ void Fun4All_HCalCosmics(int nEvents = 100,
   ///////////////////////////////////////////
   // Cosmics histMaker 
   HCalCosmics *wt2 = new HCalCosmics("HCalCalib_HCALIN",outfile_hist2);
+  wt2->set_tower_threshold(0.2498); //500*0.0004996=0.2498
+  wt2->set_vert_threshold(0.2498); //500*0.0004996=0.2498
+  wt2->set_veto_threshold(0.17486); //350*0.0004996=0.17486
+  wt2->HistBinWidth(0.01);
   wt2->Detector("HCALIN");
+  wt2->TowerPrefix("TOWERINFO_CALIB_");
   se->registerSubsystem(wt2);
 
   HCalCosmics *wt3 = new HCalCosmics("HCalCosmics_HCALOUT",outfile_hist1);
+  wt3->set_tower_threshold(1.665); //500*0.00333=1.665 
+  wt3->set_vert_threshold(1.665); //500*0.00333=1.665
+  wt3->set_veto_threshold(1.1655); //350*0.00333=1.1655
+  wt3->HistBinWidth(0.05);
   wt3->Detector("HCALOUT");
+  wt3->TowerPrefix("TOWERINFO_CALIB_");
   se->registerSubsystem(wt3);
-
 /*
   ///////////////////////////////////
   // Validation 

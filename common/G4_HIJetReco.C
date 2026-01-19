@@ -15,11 +15,15 @@
 #include <jetbackground/SubtractTowers.h>
 #include <jetbackground/SubtractTowersCS.h>
 
+#include <eventplaneinfo/Eventplaneinfo.h>
+#include <eventplaneinfo/EventPlaneReco.h>
+
 #include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libjetbase.so)
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libjetbackground.so)
+R__LOAD_LIBRARY(libeventplaneinfo.so)
 
 namespace Enable
 {
@@ -29,7 +33,11 @@ namespace Enable
 
 namespace G4HIJETS
 {
-  bool do_flow = false;
+  // do_flow = 0 --noflow
+  // do_flow = 1 --psi2 derived from calo
+  // do_flow = 2 --psi2 derived from HIJING
+  // do_flow = 3 --psi2 derived from sEPD
+  int do_flow = 0;
   bool do_CS = false;
 }  // namespace G4HIJETS
 
@@ -57,6 +65,14 @@ void HIJetReco()
   truthjetreco->Verbosity(verbosity);
   se->registerSubsystem(truthjetreco);
 
+  if(G4HIJETS::do_flow == 3)
+  {
+      EventPlaneReco *epreco = new EventPlaneReco();
+      epreco->set_sepd_epreco(true);
+      epreco->set_isSim(true);
+      se->registerSubsystem(epreco);
+  }
+
 
 
   RetowerCEMC *rcemc = new RetowerCEMC(); 
@@ -79,7 +95,7 @@ void HIJetReco()
   dtb->SetFlow(G4HIJETS::do_flow);
   dtb->SetSeedType(0);
   dtb->SetSeedJetD(3);
-  dtb->set_towerinfo(true);
+  // dtb->set_towerinfo(true);
   dtb->Verbosity(verbosity); 
   se->registerSubsystem(dtb);
 
@@ -97,7 +113,7 @@ void HIJetReco()
   dtb2->SetSeedType(1);
   dtb2->SetSeedJetPt(7);
   dtb2->Verbosity(verbosity); 
-  dtb2->set_towerinfo(true);
+  // dtb2->set_towerinfo(true);
   se->registerSubsystem(dtb2);
   
 

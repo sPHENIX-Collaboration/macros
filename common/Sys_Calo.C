@@ -1,188 +1,122 @@
 #ifndef SYS_CALO_C
 #define SYS_CALO_C
-#include <caloreco/CaloTowerCalib.h>
-#include <caloreco/RawClusterBuilderTemplate.h>
 
+#include <caloreco/CaloTowerCalib.h>
+
+#include <ffamodules/CDBInterface.h>
 #include <fun4all/Fun4AllServer.h>
-#include <fun4all/Fun4AllUtils.h>
 #include <fun4all/SubsysReco.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libcalo_reco.so)
 
-//draft macro... put all info under namespace, so user only need to turn on and off the option
+// =====================================================================
+//  SYSTEMATIC CONFIGURATION
+// =====================================================================
+namespace CALOSYS 
+{
 
-namespace CALOSYS{
+struct SysConfig {
+  std::string label;                   // systematic name
+  std::string payload;                   // CDB payload name root
+  bool do_calo[3];                     // calo 1 = EMCal, 2 = IHCal, 3 = OHCal
+};
 
-    std::vector<std::string> EMCalinputprefix = {
-      "TOWERINFO_CALIB_", 
-      "TOWERINFO_CALIB_",
-      "TOWERINFO_CALIB_", 
-      "TOWERINFO_CALIB_", 
-      "TOWERINFO_CALIB_"
-    };
-    std::vector<std::string> EMCaloutputprefix = {
-      "TOWERINFO_CALIB_SYST1", 
-      "TOWERINFO_CALIB_SYST2",
-      "TOWERINFO_CALIB_SYST3U", 
-      "TOWERINFO_CALIB_SYST3D", 
-      "TOWERINFO_CALIB_SYST4"
-    };
-    std::vector<std::string> EMCalfieldname = {
-       "cemc_sys", 
-       "cemc_sys",
-       "cemc_sys", 
-       "cemc_sys", 
-       "cemc_sys"
-    };
-    std::vector<std::string> EMCalcaliburl = {
-      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/pi0_stat_syst.root",
-      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/pi0_shift_syst.root",
-      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/TSC_syst_up.root",
-      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/TSC_syst_down.root",
-      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/TSC_stat_syst.root"
-    };
-    std::vector<bool> EMCaldosys = {
-      true, 
-      true,
-      true,
-      true,
-      true
-    };
+inline std::vector<SysConfig> default_variations()
+{
+  return {
+  {"EMCal calib unc up", "_calib_unc_up_syst", {true, false, false}},
+  {"HCal calib unc up", "_calib_unc_up_syst", {false, true, true}},
+  {"EMCal calib stat unc", "_calib_stat_syst", {true, false, false}},
+  {"IHCal calib stat unc", "_calib_stat_syst", {false, true, false}},
+  {"OHCal calib stat unc", "_calib_stat_syst", {false, false, true}},
+  //{"EMCal v1Mod", "_v1Modulation_syst", {true, false, false}}, // v1 modulation syst currently not implemented by default
+  //{"IHCal v1Mod", "_v1Modulation_syst", {false, true, false}},
+  //{"OHCal v1Mod", "_v1Modulation_syst", {false, false, true}},
+  {"Had Resp up", "_had_resp_up_syst", {true, true, true}},
+  {"EMCal calib unc down", "_calib_unc_down_syst", {true, false, false}},
+  {"HCal calib unc down", "_calib_unc_down_syst", {false, true, true}},
+  {"Had Resp down", "_had_resp_down_syst", {true, true, true}},
+  };
+}
 
+static const std::string inputPrefix = "TOWERINFO_CALIB_";
+std::string detName[3] = {"CEMC","HCALIN","HCALOUT"};
 
-    std::vector<std::string> OHCalinputprefix = {
-      "TOWERINFO_CALIB_", 
-      "TOWERINFO_CALIB_",
-      "TOWERINFO_CALIB_", 
-      "TOWERINFO_CALIB_"
-    };
-    std::vector<std::string> OHCaloutputprefix = {
-      "TOWERINFO_CALIB_SYST1_", 
-      "TOWERINFO_CALIB_SYST2_",
-      "TOWERINFO_CALIB_SYST3_", 
-      "TOWERINFO_CALIB_SYST4_"
-    };
-    std::vector<std::string> OHCalfieldname = {
-       "ohcal_sys", 
-       "ohcal_sys",
-       "ohcal_sys", 
-       "ohcal_sys"
-    };
+} // namespace CALOSYS
 
-    std::vector<std::string> OHCalcaliburl = {
-      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ohcal_cos_syst_1.root",
-      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ohcal_cos_syst_2.root",
-      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ohcal_cos_syst_3.root",
-      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ohcal_cos_syst_4.root"
-    };
-    std::vector<bool> OHCaldosys = {
-      true, 
-      true,
-      true,
-      true
-    };
-
-
-    std::vector<std::string> IHCalinputprefix = {
-      "TOWERINFO_CALIB_", 
-      "TOWERINFO_CALIB_",
-      "TOWERINFO_CALIB_", 
-      "TOWERINFO_CALIB_"
-    };
-    std::vector<std::string> IHCaloutputprefix = {
-      "TOWERINFO_CALIB_SYST1_", 
-      "TOWERINFO_CALIB_SYST2_",
-      "TOWERINFO_CALIB_SYST3_", 
-      "TOWERINFO_CALIB_SYST4_"
-    };
-    std::vector<std::string> IHCalfieldname = {
-       "ihcal_sys", 
-       "ihcal_sys",
-       "ihcal_sys", 
-       "ihcal_sys"
-    };
-
-    std::vector<std::string> IHCalcaliburl = {
-      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ihcal_cos_syst_1.root",
-      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ihcal_cos_syst_2.root",
-      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ihcal_cos_syst_3.root",
-      "/sphenix/u/bseidlitz/work/macros/calibrations/calo/emcal_calib_year1/systs/ihcal_cos_syst_4.root"
-    };
-    std::vector<bool> IHCaldosys = {
-      true, 
-      true,
-      true,
-      true
-    };
-/*
-    std::vector<std::string> OHCalinputprefix = {"TOWERINFO_CALIB_", "TOWERINFO_CALIB_"};
-    std::vector<std::string> OHCaloutputprefix = {"TOWERINFO_CALIB_SYSALL", "TOWERINFO_CALIB_SYSETA"};
-    std::vector<std::string> OHCalfieldname = {"ohcal_sys", "ohcal_sys"};
-    std::vector<std::string> OHCalcaliburl = {"/sphenix/user/shuhangli/DB/ohcalAllSys.root", "/sphenix/user/shuhangli/DB/ohcalEtaSys.root"};
-    std::vector<bool> OHCaldosys = {true, true};
-    std::vector<std::string> IHCalinputprefix = {"TOWERINFO_CALIB_", "TOWERINFO_CALIB_"};
-    std::vector<std::string> IHCaloutputprefix = {"TOWERINFO_CALIB_SYSALL", "TOWERINFO_CALIB_SYSETA"};
-    std::vector<std::string> IHCalfieldname = {"ihcal_sys", "ihcal_sys"};
-    std::vector<std::string> IHCalcaliburl = {"/sphenix/user/shuhangli/DB/ihcalAllSys.root", "/sphenix/user/shuhangli/DB/ihcalEtaSys.root"};
-    std::vector<bool> IHCaldosys = {true, true};
-*/
-
-
-}//namespace CALOSYS
-
-void Register_Tower_sys(){
-    Fun4AllServer *se = Fun4AllServer::instance();
-    //EMCal
-    for (int i = 0; i< (int) CALOSYS::EMCaldosys.size(); i++){
-        if (CALOSYS::EMCaldosys[i]){
-            //tower calib
-            std::cout<< "Adding Node:"<< CALOSYS::EMCaloutputprefix[i] <<"_EMCAL"<<std::endl;
-            CaloTowerCalib *EMCalsys = new CaloTowerCalib(Form("CaloCalib_CEMC_SYST%d",i));
-            EMCalsys->set_inputNodePrefix(CALOSYS::EMCalinputprefix[i]);
-            EMCalsys->set_outputNodePrefix(CALOSYS::EMCaloutputprefix[i]);
-            EMCalsys->set_directURL(CALOSYS::EMCalcaliburl[i]);
-            EMCalsys->setFieldName(CALOSYS::EMCalfieldname[i]);
-            EMCalsys->set_detector_type(CaloTowerDefs::CEMC);
-            se->registerSubsystem(EMCalsys);
-
-        //cluster stuff?
-        }
+// =====================================================================
+//  RUN ONE SYSTEMATIC INDEX
+// =====================================================================
+void Register_Tower_sys(int syst_index, const std::vector<CALOSYS::SysConfig>& variations)
+{
+    size_t nsyst = variations.size();
+    if(syst_index < 1 || syst_index > (int)nsyst) {
+        std::cerr << "ERROR: Systematic index " << syst_index << " is out of range (1–" << nsyst << ")\n";
+        return;
     }
 
-    //OHCal
-    for (int i = 0; i< (int) CALOSYS::OHCaldosys.size(); i++){
-        if (CALOSYS::OHCaldosys[i]){
-            //tower calib
-            std::cout<< "Adding Node:"<< CALOSYS::OHCalfieldname[i] <<"_HCALOUT"<<std::endl;
-            CaloTowerCalib *OHCalsys = new CaloTowerCalib(CALOSYS::OHCalfieldname[i]);
-            OHCalsys->set_inputNodePrefix(CALOSYS::OHCalinputprefix[i]);
-            OHCalsys->set_outputNodePrefix(CALOSYS::OHCaloutputprefix[i]);
-            OHCalsys->set_directURL(CALOSYS::OHCalcaliburl[i]);
-            OHCalsys->setFieldName(CALOSYS::OHCalfieldname[i]);
-            OHCalsys->set_detector_type(CaloTowerDefs::HCALOUT);
-            se->registerSubsystem(OHCalsys);
+    Fun4AllServer* se = Fun4AllServer::instance();
+    const CALOSYS::SysConfig& cfg = variations[syst_index - 1];
+    const std::string outputPrefix = "TOWERINFO_CALIB_SYST" + std::to_string(syst_index) + "_";
 
-        }
+    for(int ic = 0; ic < 3; ++ic)
+    {
+      std::string det = CALOSYS::detName[ic];
+      std::string fullPayload = det + "_no_calib_syst";
+      if (cfg.do_calo[ic]) {
+        fullPayload = det + cfg.payload;
+      }
+
+      std::string caliburl = CDBInterface::instance()->getUrl(fullPayload);
+      CaloTowerCalib* calib = new CaloTowerCalib("CaloCalib_syst_" + det + "_" + std::to_string(syst_index));
+      calib->set_inputNodePrefix(CALOSYS::inputPrefix);
+      calib->set_outputNodePrefix(outputPrefix);
+      calib->set_directURL(caliburl);
+      calib->setFieldName("calo_sys");
+      calib->set_doCalibOnly(true);
+
+      if(ic == 0)      calib->set_detector_type(CaloTowerDefs::CEMC);
+      else if(ic == 1) calib->set_detector_type(CaloTowerDefs::HCALIN);
+      else              calib->set_detector_type(CaloTowerDefs::HCALOUT);
+      se->registerSubsystem(calib);
     }
+}
 
-    //IHCal
-    for (int i = 0; i< (int) CALOSYS::IHCaldosys.size(); i++){
-        if (CALOSYS::IHCaldosys[i]){
-            //tower calib
-            std::cout<< "Adding Node:"<< CALOSYS::IHCalfieldname[i] <<"_HCALIN"<<std::endl;
-            CaloTowerCalib *IHCalsys = new CaloTowerCalib(CALOSYS::IHCalfieldname[i]);
-            IHCalsys->set_inputNodePrefix(CALOSYS::IHCalinputprefix[i]);
-            IHCalsys->set_outputNodePrefix(CALOSYS::IHCaloutputprefix[i]);
-            IHCalsys->set_directURL(CALOSYS::IHCalcaliburl[i]);
-            IHCalsys->setFieldName(CALOSYS::IHCalfieldname[i]);
-            IHCalsys->set_detector_type(CaloTowerDefs::HCALIN);
-            se->registerSubsystem(IHCalsys);
+// =====================================================================
+//  RUN ONE DEFAULT SYSTEMATIC
+// =====================================================================
+void Register_Tower_sys(int syst_index)
+{
+  auto vars = CALOSYS::default_variations();
+  std::cout << ">>> [Sys_Calo] Running ONE default systematic: index SYST" << syst_index << " of " << vars.size() << " (“" << vars[syst_index-1].label << "”)" << std::endl;
+  Register_Tower_sys(syst_index, vars);
+}
 
-        }
-    }
+// =====================================================================
+//  RUN ALL DEFAULT SYSTEMATICS
+// =====================================================================
+void Register_Tower_sys()
+{
+  auto vars = CALOSYS::default_variations();
+  std::cout << ">>> [Sys_Calo] Running ALL default systematics (" << vars.size() << " variations)" << std::endl;
+  for (size_t i = 1; i <= vars.size(); ++i) {
+    std::cout << ">>>   Running SYST" << i << " / " << vars.size() << " (“" << vars[i-1].label << "”)" << std::endl;
+    Register_Tower_sys(i, vars);
+  }
+}
 
-  std::cout << "All calo systematics added" << std::endl;
+// =====================================================================
+//  RUN ALL USER-PROVIDED SYSTEMATICS
+// =====================================================================
+void Register_Tower_sys(const std::vector<CALOSYS::SysConfig>& vars)
+{
+  std::cout << ">>> [Sys_Calo] Running ALL USER-PROVIDED systematics (" << vars.size() << " variations)" << std::endl;
+  for (size_t i = 1; i <= vars.size(); ++i)
+  {
+    std::cout << ">>>   Running SYST" << i << " / " << vars.size() << " (“" << vars[i-1].label << "”)" << std::endl;
+    Register_Tower_sys(i, vars);
+  }
 }
 
 #endif /* SYS_CALO_C */
