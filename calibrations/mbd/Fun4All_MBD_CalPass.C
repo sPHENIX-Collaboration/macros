@@ -157,6 +157,9 @@ void Fun4All_MBD_CalPass(const char *input = "/sphenix/user/pinkenbu/testprdf/be
     out->StripNode("ZDCPackets");
     out->StripNode("SEPDPackets");
     out->StripNode("MBDPackets");
+    out->StripNode("1001");
+    out->StripNode("1002");
+    out->StripNode("MbdRawContainer");
     out->StripNode("TOWERS_ZDC");
     out->StripNode("TOWERS_SEPD");
     out->StripNode("TOWERS_CEMC");

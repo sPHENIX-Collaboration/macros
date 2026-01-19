@@ -116,10 +116,10 @@ done < "$input_file"  # redirect the input of the
 # Set the directory where the files are located
 file_directory="${TargetDir}/OutDir*/DONE.root"
 
-while [ $(find condorout/OutDir* -name "DONE.txt" -print0 | xargs -0 cat | wc -l) -lt $((i)) ]; do
-    current_file_count=$(find condorout/OutDir* -name "DONE.txt" -print0 | xargs -0 cat | wc -l)
-    echo "Waiting for $((i)) files, currently $current_file_count"
-    sleep 30  # Adjust the sleep duration as needed
-done
+# while [ $(find condorout/OutDir* -name "DONE.txt" -print0 | xargs -0 cat | wc -l) -lt $((i)) ]; do
+#    current_file_count=$(find condorout/OutDir* -name "DONE.txt" -print0 | xargs -0 cat | wc -l)
+#    echo "Waiting for $((i)) files, currently $current_file_count"
+#    sleep 30  # Adjust the sleep duration as needed
+# done
 
 

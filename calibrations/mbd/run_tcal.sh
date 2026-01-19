@@ -38,7 +38,7 @@ then
 fi
 
 pass=0
-runtype=0 # 0=auau,1=pp
+runtype=1 # 0=auau,1=pp
 #dbtag="newcdbtag"
 dbtag=""
 if [[ -n "$PASS0DIR" ]]

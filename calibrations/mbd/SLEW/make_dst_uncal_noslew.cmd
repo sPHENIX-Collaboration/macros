@@ -49,10 +49,10 @@ echo "Setting PASS0DIR to $PASS0DIR"
 
 # do the pass1 calibrations (only 20K events)
 echo run_mbdcalpass.sh $infile 1
-run_mbdcalpass.sh $infile 1
+./run_mbdcalpass.sh $infile 1
 
 # process waveforms, output a DST_UNCALMBD
 # here time is in ns and charge in adc
 echo run_mbdcalpass.sh $infile 2 $nevts $nskip
-run_mbdcalpass.sh $infile 2 $nevts $nskip
+./run_mbdcalpass.sh $infile 2 $nevts $nskip
 

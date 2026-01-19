@@ -131,7 +131,7 @@ void Fun4All_CaloOnlyJetValid(
   // register dst input managers
   for (size_t iInput = 0; iInput < inputs.size(); ++iInput) {
     Fun4AllDstInputManager* inManager = new Fun4AllDstInputManager("InputManager" + std::to_string(iInput));
-    inManager->AddListFile(inputs[iInput], 1);
+    inManager->AddListFile(inputs[iInput]);
     se->registerInputManager(inManager);
   }
 
