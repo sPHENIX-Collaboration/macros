@@ -6,6 +6,8 @@
 
 #include <calotrigger/TriggerRunInfoReco.h>
 
+#include <caloreco/sEPDGeomMapping.h>
+
 #include <calovalid/CaloFittingQA.h>
 
 #include <calopacketskimmer/CaloPacketSkimmer.h>
@@ -65,6 +67,9 @@ void Fun4All_New_Year2_Fitting(int nEvents = 100,
   se->registerSubsystem(calopacket);
 
   Process_Calo_Fitting();
+
+  sEPDGeomMapping *sepdgeom = new sEPDGeomMapping();
+  se->registerSubsystem(sepdgeom);
 
   ///////////////////////////////////
   // Validation
