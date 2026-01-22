@@ -54,6 +54,7 @@ namespace Input
   bool PYTHIA8 = false;
   int PYTHIA8_EmbedId = 0;
 
+  bool PYTHIA8_double_interaction = false;
   // Single/multiple particle generators
   bool DZERO = false;
   int DZERO_NUMBER = 1;
@@ -290,6 +291,7 @@ namespace PYTHIA6
 namespace PYTHIA8
 {
   std::string config_file = std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg";
+  std::string config_file_mb = std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8_detroit_minBias.cfg";
 }
 
 namespace PILEUP
@@ -309,6 +311,7 @@ namespace INPUTGENERATOR
   std::vector<PHG4ParticleGun *> Gun;
   PHPythia8 *Pythia6 = nullptr;
   PHPythia8 *Pythia8 = nullptr;
+  PHPythia8 *Pythia8_mb = nullptr;
   //  ReadEICFiles *EICFileReader = nullptr;
   CosmicSpray *Cosmic = nullptr;
 }  // namespace INPUTGENERATOR
@@ -379,6 +382,18 @@ void InputInit()
       INPUTGENERATOR::Pythia8->set_reuse_vertex(Input::VertexEmbedId);
     }
   }
+
+  if (Input::PYTHIA8_double_interaction)
+    {
+      Input::BEAM_CONFIGURATION = Input::BeamConfiguration::pp_ZEROANGLE;
+      INPUTGENERATOR::Pythia8_mb = new PHPythia8("PHPythia8_mb");
+      INPUTGENERATOR::Pythia8_mb->set_config_file(PYTHIA8::config_file_mb);
+      INPUTGENERATOR::Pythia8_mb->set_embedding_id(2);
+      INPUTGENERATOR::Pythia8_mb->save_integrated_luminosity(false);
+      INPUTGENERATOR::Pythia8 = new PHPythia8();
+      INPUTGENERATOR::Pythia8->set_config_file(PYTHIA8::config_file);
+      INPUTGENERATOR::Pythia8->set_embedding_id(1);
+    }
   // single particle generators
   if (Input::DZERO)
   {
@@ -476,6 +491,11 @@ void InputRegister()
   {
     se->registerSubsystem(INPUTGENERATOR::Pythia8);
   }
+  if (Input::PYTHIA8_double_interaction)
+  {
+    se->registerSubsystem(INPUTGENERATOR::Pythia8_mb);
+    se->registerSubsystem(INPUTGENERATOR::Pythia8);
+  }
   if (Input::DZERO)
   {
     int verbosity = std::max(Input::DZERO_VERBOSITY, Input::VERBOSITY);
@@ -550,7 +570,7 @@ void InputRegister()
   }
   // here are the various utility modules which read particles and
   // put them onto the G4 particle stack
-  if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6 || Input::READEIC)
+  if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6 || Input::READEIC || Input::PYTHIA8_double_interaction)
   {
     if (Input::HEPMC)
     {
