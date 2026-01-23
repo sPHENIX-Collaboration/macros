@@ -15,7 +15,6 @@
 #include <g4main/PHG4ParticleGeneratorVectorMeson.h>
 #include <g4main/PHG4ParticleGun.h>
 #include <g4main/PHG4SimpleEventGenerator.h>
-// #include <g4main/ReadEICFiles.h>
 
 #include <fermimotionafterburner/FermimotionAfterburner.h>
 
@@ -107,10 +106,11 @@ namespace Input
     switch (beam_config)
     {
     case AA_COLLISION:
+    case mRad_10:
       // heavy ion mode
       Input::beam_crossing = 1.;  // +1 mRad for late 2024 with triggered readout for mvtx
-      localbcross = Input::beam_crossing / 2. * 1e-3;
       //  Xing angle is split among both beams, means set to 0.5 mRad
+      localbcross = Input::beam_crossing / 2. * 1e-3;
       HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  // 1.5mrad x-ing of sPHENIX
       HepMCGen->set_vertex_distribution_width(
           100e-4,         // approximation from past STAR/Run16 AuAu data
@@ -124,7 +124,7 @@ namespace Input
       // pA mode
 
       // 1.5mRad is split among both beams, means set to 0.75 mRad
-      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  // 1.5mrad x-ing of sPHENIX
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
       HepMCGen->set_vertex_distribution_width(
           100e-4,         // set to be similar to AA
           100e-4,         // set to be similar to AA
@@ -133,10 +133,11 @@ namespace Input
 
       break;
     case pp_COLLISION:
+    case mRad_15:
 
       // pp mode
       // 1.5mRad is split among both beams, means set to 0.75 mRad
-      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  // 1.5mrad x-ing of sPHENIX
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
       HepMCGen->set_vertex_distribution_width(
           120e-4,         // approximation from past PHENIX data
           120e-4,         // approximation from past PHENIX data
@@ -144,8 +145,9 @@ namespace Input
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
-    case pp_ZEROANGLE:
 
+    case pp_ZEROANGLE:
+    case mRad_00:
       // pp mode
 
       HepMCGen->set_vertex_distribution_width(
@@ -169,6 +171,19 @@ namespace Input
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
       break;
 
+    case mRad_05:
+      Input::beam_crossing = 0.5;
+      //0.5 mRad is split among both beams, means set to 0.25 mRad
+      localbcross = Input::beam_crossing / 2. * 1e-3;
+
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
+      HepMCGen->set_vertex_distribution_width(
+          120e-4,         // approximation from past PHENIX data
+          120e-4,         // approximation from past PHENIX data
+          24.5,             // estimate from Colorado
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
     default:
       std::cout << "ApplysPHENIXBeamParameter: invalid beam_config = " << beam_config << std::endl;
 
