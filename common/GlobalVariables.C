@@ -29,7 +29,11 @@ namespace Input
     pA_COLLISION = 1,
     pp_COLLISION = 2,
     pp_ZEROANGLE = 3,
-    ppg02 = 4
+    ppg02 = 4,
+    mRad_00 = 5,
+    mRad_05 = 6,
+    mRad_10 = 7,
+    mRad_15 = 8
   };
 
   BeamConfiguration BEAM_CONFIGURATION = AA_COLLISION;
