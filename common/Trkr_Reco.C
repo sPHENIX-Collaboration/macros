@@ -237,6 +237,13 @@ void Tracking_Reco_SiliconSeed_run2pp()
   combiner->newContainerName("SiliconTrackSeedContainer");
   combiner->oldContainerName("SiliconTrackSeedContainerIt1");
   se->registerSubsystem(combiner);
+
+
+
+  PHSiliconSeedMerger *merger = new PHSiliconSeedMerger;
+  merger->Verbosity(verbosity);
+  se->registerSubsystem(merger);
+  
 }
 void Tracking_Reco_TrackSeed_run2pp()
 {
