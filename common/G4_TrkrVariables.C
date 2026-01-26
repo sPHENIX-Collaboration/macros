@@ -239,7 +239,8 @@ namespace G4TRACKING
   // Runs a converter from TrackSeed object to SvtxTrack object to enable
   // use of the various evaluation tools already available
   bool convert_seeds_to_svtxtracks = false;
-
+  std::string convertSeedsContainerName = "SvtxTrackSeedContainer";
+  
   // Flag to run commissioning seeding workflow with tuned parameters for
   // misaligned + distorted tracks
   bool use_alignment = false;
