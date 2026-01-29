@@ -237,6 +237,13 @@ void Tracking_Reco_SiliconSeed_run2pp()
   combiner->newContainerName("SiliconTrackSeedContainer");
   combiner->oldContainerName("SiliconTrackSeedContainerIt1");
   se->registerSubsystem(combiner);
+
+
+
+  PHSiliconSeedMerger *merger = new PHSiliconSeedMerger;
+  merger->Verbosity(verbosity);
+  se->registerSubsystem(merger);
+  
 }
 void Tracking_Reco_TrackSeed_run2pp()
 {
@@ -459,40 +466,7 @@ void Tracking_Reco_TrackSeed()
   // get fun4all server instance
   auto *se = Fun4AllServer::instance();
 
-  // Assemble silicon clusters into track stubs
-  auto *silicon_Seeding = new PHActsSiliconSeeding;
-  silicon_Seeding->Verbosity(verbosity);
-  silicon_Seeding->setIter1();
-  se->registerSubsystem(silicon_Seeding);
-  
-  TrackingIterationCounter* counter = new TrackingIterationCounter("TrkrIter1");
-  counter->Verbosity(verbosity);
-  counter->iteration(1);
-  counter->setTrackMapName("SiliconTrackSeedContainer");
-  counter->seedIterations();
-  se->registerSubsystem(counter);
-  
-  
-  auto *silicon_Seeding2 = new PHActsSiliconSeeding("ActsSeedingIt1");
-  silicon_Seeding2->Verbosity(verbosity);
-  silicon_Seeding2->setIter2();
-  se->registerSubsystem(silicon_Seeding2);
-  
-  
-  TrackingIterationCounter* counter2 = new TrackingIterationCounter("TrkrIter2");
-  counter2->Verbosity(verbosity);
-  /// Clusters already used are in the 1st iteration
-  counter2->iteration(2);
-  counter2->setTrackMapName("SiliconTrackSeedContainerIt1");
-  counter2->seedIterations();
-  se->registerSubsystem(counter2);
-  
-  TrackContainerCombiner* combiner = new TrackContainerCombiner;
-  combiner->Verbosity(verbosity);
-  combiner->newContainerName("SiliconTrackSeedContainer");
-  combiner->oldContainerName("SiliconTrackSeedContainerIt1");
-  combiner->Verbosity(verbosity);
-  se->registerSubsystem(combiner);
+  Tracking_Reco_SiliconSeed_run2pp();
 
   auto *seeder = new PHCASeeding("PHCASeeding");
   double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
