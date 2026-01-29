@@ -37,6 +37,7 @@ void TrackingInit()
     }
   else
     {
+      std::cout << "Setting reconstruction for data with CDB tag " << rc->get_StringFlag("CDB_GLOBALTAG") << std::endl;
       CDB::is_data_reco = true;
     }
   

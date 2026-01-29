@@ -227,7 +227,7 @@ void Tracking_Reco_SiliconSeed_run2pp()
   silicon_Seeding2->setIter2();
   if(!CDB::is_data_reco)
     {
-      silicon_Seeding->set_beamSpotXY(0,0);
+      silicon_Seeding2->set_beamSpotXY(0,0);
     }
   se->registerSubsystem(silicon_Seeding2);
   
