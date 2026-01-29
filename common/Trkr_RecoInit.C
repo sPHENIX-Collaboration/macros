@@ -29,6 +29,16 @@ void TrackingInit()
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
+
+  auto *rc = recoConsts::insance();
+  if(rc->get_StringFlag("CDB_GLOBALTAG").find("MDC") != std::string::npos)
+    {
+      CDB::is_data_reco = false;
+    }
+  else
+    {
+      CDB::is_data_reco = true;
+    }
   
   TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
 
