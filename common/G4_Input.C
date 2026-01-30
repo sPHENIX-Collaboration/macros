@@ -316,10 +316,10 @@ namespace PYTHIA6
 
 namespace PYTHIA8
 {
-  std::map<int, std::string> config_file;
-  // backward compatible - set default to our default pythia8 config
-  // can be overwritten in the macro
-  config_file[0] = std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg";
+  std::map<int, std::string> config_file =
+  {
+    {0, std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg"}
+  };
 }
 
 namespace PILEUP
