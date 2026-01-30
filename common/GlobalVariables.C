@@ -132,6 +132,7 @@ namespace CDB
 {
   std::string global_tag = "MDC2";
   uint64_t timestamp = 6;
+  bool is_data_reco = false;
 }  // namespace CDB
 
 // multi purpose functions

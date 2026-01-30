@@ -6,6 +6,7 @@
 #include <G4_ActsGeom.C>
 #include <G4_TrkrVariables.C>
 
+#include <phool/recoConsts.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <tpc/TpcLoadDistortionCorrection.h>
 #pragma GCC diagnostic push
@@ -29,6 +30,17 @@ void TrackingInit()
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
   ingeo->AddFile(geofile);
   se->registerInputManager(ingeo);
+
+  auto *rc = recoConsts::instance();
+  if(rc->get_StringFlag("CDB_GLOBALTAG").find("MDC") != std::string::npos)
+    {
+      CDB::is_data_reco = false;
+    }
+  else
+    {
+      std::cout << "Setting reconstruction for data with CDB tag " << rc->get_StringFlag("CDB_GLOBALTAG") << std::endl;
+      CDB::is_data_reco = true;
+    }
   
   TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
 

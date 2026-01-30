@@ -208,6 +208,10 @@ void Tracking_Reco_SiliconSeed_run2pp()
   auto *silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
   silicon_Seeding->setIter1();
+  if(!CDB::is_data_reco)
+    {
+      silicon_Seeding->set_beamSpotXY(0,0);
+    }
   se->registerSubsystem(silicon_Seeding);
   
   TrackingIterationCounter* counter = new TrackingIterationCounter("TrkrIter1");
@@ -221,6 +225,10 @@ void Tracking_Reco_SiliconSeed_run2pp()
   auto *silicon_Seeding2 = new PHActsSiliconSeeding("ActsSeedingIt1");
   silicon_Seeding2->Verbosity(verbosity);
   silicon_Seeding2->setIter2();
+  if(!CDB::is_data_reco)
+    {
+      silicon_Seeding2->set_beamSpotXY(0,0);
+    }
   se->registerSubsystem(silicon_Seeding2);
   
   
