@@ -28,8 +28,6 @@
 
 #include <sepd_eventplanecalib/sEPD_TreeGen.h>
 
-#include <CDBUtils.C>
-
 R__LOAD_LIBRARY(libsepd_eventplanecalib.so)
 
 void Fun4All_sEPD(const std::string &fname,
@@ -80,23 +78,13 @@ void Fun4All_sEPD(const std::string &fname,
   SubsysReco* gvertex = new GlobalVertexReco();
   se->registerSubsystem(gvertex);
 
-  // ###############################################################################
-  // Temporary Setup until the default Centrality Scale CDB for Run 3 Au+Au is Fixed
-  setGlobalTag(dbtag);
-
-  uint64_t default_centrality_run = 54912;
-  std::string cdb_centrality_scale = getCalibration("CentralityScale", default_centrality_run);
-  // ###############################################################################
-
   // Minimum Bias Classifier
   MinimumBiasClassifier* mb = new MinimumBiasClassifier();
-  mb->setOverwriteScale(cdb_centrality_scale); // Temporary
   mb->Verbosity(Fun4AllBase::VERBOSITY_QUIET);
   se->registerSubsystem(mb);
 
   // Centrality
   CentralityReco* cent = new CentralityReco();
-  cent->setOverwriteScale(cdb_centrality_scale); // Temporary
   se->registerSubsystem(cent);
 
   // sEPD Tree Gen
