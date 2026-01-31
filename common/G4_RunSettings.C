@@ -69,10 +69,14 @@ void RunSettings(int runnumber, const std::string & /*type*/ = "")
     Enable::MVTX_APPLYMISALIGNMENT = true;
     break;
   default:
-    std::cout << "runnnumber " << runnumber << " not implemented" << std::endl;
-    gSystem->Exit(1);
     break;
   }
+  if (runnumber < 100)
+  {
+    std::cout << "runnnumber " << runnumber << " not implemented" << std::endl;
+    gSystem->Exit(1);
+  }
+  Input::BEAM_CONFIGURATION = Input::mRad_00;
   return;
 }
 
