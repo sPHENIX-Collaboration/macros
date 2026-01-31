@@ -6,9 +6,11 @@
 #include "G4Setup_sPHENIX.C"
 #include <G4_Input.C>
 #include <G4_Production.C>
+
 #include <globalvertex/GlobalVertexReco.h>
 
 #include <phpythia8/PHPy8JetTrigger.h>
+
 #include <caloembedding/HepMCCollisionVertex.h>
 #include <caloembedding/caloTowerEmbed.h>
 #include <caloembedding/CopyIODataNodes.h>
@@ -17,13 +19,7 @@
 #include <jetbase/TowerJetInput.h>
 #include <jetbase/FastJetAlgo.h>
 
-#include <jetbackground/FastJetAlgoSub.h>
-#include <jetbackground/RetowerCEMC.h>
-
 #include <g4jets/TruthJetInput.h>
-
-#include <centrality/CentralityInfov2.h>
-#include <calotrigger/MinimumBiasInfov1.h>
 
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
@@ -40,6 +36,8 @@
 #include <phool/recoConsts.h>
 
 #include <TRandom3.h>
+
+#include <format>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
@@ -95,15 +93,6 @@ int Fun4All_G4_Embed_data(
   // or set it to a fixed value so you can debug your code
   //  rc->set_IntFlag("RANDOMSEED", 12345);
 
-  //===============
-  // conditions DB flags
-  //===============
-  Enable::CDB = true;
-  // tag
-  rc->set_StringFlag("CDB_GLOBALTAG", cdbtag);
-  // 64 bit timestamp
-  rc->set_uint64Flag("TIMESTAMP", CDB::timestamp);
-
   //  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(embed_input_file0);
   // int runnumber = runseg.first;
   // int segment = runseg.second;
@@ -114,6 +103,15 @@ int Fun4All_G4_Embed_data(
     Fun4AllSyncManager *syncman = se->getSyncManager();
     syncman->SegmentNumber(segment);
   }
+  //===============
+  // conditions DB flags
+  //===============
+  Enable::CDB = true;
+  // tag
+  rc->set_StringFlag("CDB_GLOBALTAG", cdbtag);
+  // 64 bit timestamp
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
+
 
   // Sync Headers and Flags
   SyncReco *sync = new SyncReco();
@@ -190,7 +188,7 @@ int Fun4All_G4_Embed_data(
       std::cout << "invalid jettrigger: " << jettrigger << std::endl;
       gSystem->Exit(1);
     }
-    PYTHIA8::config_file = pythia8_config_file;
+    PYTHIA8::config_file[0] = pythia8_config_file;
   }
 
   //-----------------
@@ -234,8 +232,8 @@ int Fun4All_G4_Embed_data(
     }
     if (p8_js_signal_trigger)
     {
-      INPUTGENERATOR::Pythia8->register_trigger(p8_js_signal_trigger);
-      INPUTGENERATOR::Pythia8->set_trigger_AND();
+      INPUTGENERATOR::Pythia8[0]->register_trigger(p8_js_signal_trigger);
+      INPUTGENERATOR::Pythia8[0]->set_trigger_AND();
     }
     Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia8);
   }
@@ -568,11 +566,7 @@ int Fun4All_G4_Embed_data(
     randGen.SetSeed(seed);
     // a int from 0 to 3259
     int sequence = randGen.Integer(3260);
-    // pad the name
-    std::ostringstream opedname;
-    opedname << "pedestal-54256-0" << std::setw(4) << std::setfill('0') << sequence << ".root";
-
-    std::string pedestalname = opedname.str();
+    std::string pedestalname = std::format("pedestal-54256-{:05}.root",sequence);
 
     Fun4AllInputManager *hitsin = new Fun4AllNoSyncDstInputManager("DST2");
     hitsin->AddFile(pedestalname);
