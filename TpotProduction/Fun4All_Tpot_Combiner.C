@@ -9,27 +9,30 @@
 
 #include <phool/recoConsts.h>
 
+#include <Rtypes.h> // for R__LOAD_LIBRARY
+#include <TSystem.h>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
 
 void Fun4All_Tpot_Combiner(int nEvents = 0,
-		      const string &input_file00 = "tpot.list"
+		      const std::string &input_file00 = "tpot.list"
 )
 {
-  vector<string> infile;
+  std::vector<std::string> infile;
   infile.push_back(input_file00);
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
-recoConsts *rc = recoConsts::instance();
-//rc->set_IntFlag("RUNNUMBER",20445);
+//  recoConsts *rc = recoConsts::instance();
+//  rc->set_IntFlag("RUNNUMBER",20445);
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
   in->Verbosity(10);
   int i=0;
-  for (auto iter : infile)
+  for (const auto& iter : infile)
   {
-    SingleMicromegasPoolInput *sngl= new SingleMicromegasPoolInput("MICROMEGAS_" + to_string(i));
+    SingleMicromegasPoolInput *sngl= new SingleMicromegasPoolInput("MICROMEGAS_" + std::to_string(i));
     sngl->Verbosity(3);
     sngl->SetBcoRange(10);
     sngl->SetNegativeBco(2);
@@ -39,17 +42,17 @@ recoConsts *rc = recoConsts::instance();
   }
   se->registerInputManager(in);
 
-   // MicromegasCheck *micromegascheck = new MicromegasCheck();
-   // micromegascheck->Verbosity(3);
-   // micromegascheck->SetBcoRange(10);
-   // se->registerSubsystem(micromegascheck);
+  // MicromegasCheck *micromegascheck = new MicromegasCheck();
+  // micromegascheck->Verbosity(3);
+  // micromegascheck->SetBcoRange(10);
+  // se->registerSubsystem(micromegascheck);
 
-   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out","micromegas.root");
-   se->registerOutputManager(out);
+  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out","micromegas.root");
+  se->registerOutputManager(out);
 
-   se->run(nEvents);
+  se->run(nEvents);
 
-   se->End();
-   delete se;
-   gSystem->Exit(0);
+  se->End();
+  delete se;
+  gSystem->Exit(0);
 }

@@ -47,31 +47,37 @@ run=${run%-*}
 run=$((10#${run}))
 echo Processing $run
 
-subpass=1  # generate slew curves (slew calibrations may or may not be applied in dst_uncal)
-echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\)
-root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\) 
+runtype=1  # 0=auau, 1=pp
 
-# after this, run recal_mbd_slew.C to generate the slewcorr calib file,
+# we should run_tcal.sh first to get updated tt_t0, etc.
 
-slewrootf=results/${run}/calmbdpass2.${subpass}_slew-${run}.root
-echo root.exe ${BATCH} -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 
-root.exe ${BATCH} -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 
+#subpass=1  # generate slew curves (slew calibrations may or may not be applied in dst_uncal)
+#echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events},${runtype}\)
+#root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events},${runtype}\)
+#
+## after this, run recal_mbd_slew.C to generate the slewcorr calib file,
+#
+#slewrootf=results/${run}/calmbdpass2.${subpass}_slew-${run}.root
+#echo root.exe ${BATCH} -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 
+#root.exe ${BATCH} -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 
 
-# cp the slewcorr file so that it is used in the subpass 2
-echo cp -p results/${run}/pass${subpass}_mbd_slewcorr.calib results/${run}/mbd_slewcorr.calib
-cp -p results/${run}/pass${subpass}_mbd_slewcorr.calib results/${run}/mbd_slewcorr.calib
-echo Updating mbd_slewcorr.calib using pass${subpass}_mbd_slewcorr.calib
+# cp the pass1 slewcorr file so that it is used in the subpass 2
+# this applies the slew correction to whatever was already in the dst_uncal
+# (you should not run the addslew.c here)
+#echo cp -p results/${run}/pass${subpass}_mbd_slewcorr.calib results/${run}/mbd_slewcorr.calib
+#cp -p results/${run}/pass${subpass}_mbd_slewcorr.calib results/${run}/mbd_slewcorr.calib
+#echo Updating mbd_slewcorr.calib using pass${subpass}_mbd_slewcorr.calib
 
-# then run addt0.C to get combined t0 calibs and cp it
-echo root.exe -b -q addt0.C\(\"results/${run}/mbd_tt_t0.calib\",\"results/${run}/pass${subpass}_mbd_tt_t0.calib\"\)
-root.exe -b -q addt0.C\(\"results/${run}/mbd_tt_t0.calib\",\"results/${run}/pass${subpass}_mbd_tt_t0.calib\"\)
-rm -f results/${run}/mbd_tt_t0.calib results/${run}/mbd_tq_t0.calib
-cp -p results/${run}/add_mbd_tt_t0.calib results/${run}/mbd_tt_t0.calib
-cp -p results/${run}/add_mbd_tq_t0.calib results/${run}/mbd_tq_t0.calib
+## then run addt0.C to get combined t0 calibs and cp it
+#echo root.exe -b -q addt0.C\(\"results/${run}/mbd_tt_t0.calib\",\"results/${run}/pass${subpass}_mbd_tt_t0.calib\"\)
+#root.exe -b -q addt0.C\(\"results/${run}/mbd_tt_t0.calib\",\"results/${run}/pass${subpass}_mbd_tt_t0.calib\"\)
+#rm -f results/${run}/mbd_tt_t0.calib results/${run}/mbd_tq_t0.calib
+#cp -p results/${run}/add_mbd_tt_t0.calib results/${run}/mbd_tt_t0.calib
+#cp -p results/${run}/add_mbd_tq_t0.calib results/${run}/mbd_tq_t0.calib
 
 subpass=2  # do slew calibrations, applying any that exist
-echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\)
-root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events}\) 
+echo root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events},${runtype}\)
+root.exe $BATCH -q cal_mbd.C\(\"${mbd_uncalrootf}\",${subpass},${tcalib_events},${runtype}\) 
 
 slewrootf=results/${run}/calmbdpass2.${subpass}_slew-${run}.root
 echo root.exe ${BATCH} -q recal_mbd_slew.C\(\"${slewrootf}\",${subpass}\) 

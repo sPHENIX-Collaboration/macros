@@ -4,17 +4,23 @@
  * to the full TPC acceptance
  */
 
+#include <g4detectors/PHG4CylinderGeomContainer.h>
+
+#include <micromegas/CylinderGeomMicromegas.h>
+#include <micromegas/MicromegasDefs.h>
+
+#include <trackreco/MakeActsGeometry.h>
+
 #include <ffamodules/CDBInterface.h>
 
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 
-#include <micromegas/MicromegasDefs.h>
-
 #include <phool/getClass.h>
 #include <phool/recoConsts.h>
 
-#include <trackreco/MakeActsGeometry.h>
+
+#include <Rtypes.h> // for R__LOAD_LIBRARY macro
 
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libfun4all.so)
@@ -27,7 +33,7 @@ namespace
   template<class T> class range_adaptor
   {
     public:
-    range_adaptor( const T& range ):m_range(range){}
+    explicit range_adaptor( const T& range ):m_range(range){}
     const typename T::first_type& begin() {return m_range.first;}
     const typename T::second_type& end() {return m_range.second;}
     private:
@@ -64,9 +70,9 @@ void ExportTpotAcceptanceRange()
 {
 
   // initialization
-  auto rc = recoConsts::instance();
-  auto se = Fun4AllServer::instance();
-  auto topNode = se->topNode();
+  auto *rc = recoConsts::instance();
+  auto *se = Fun4AllServer::instance();
+  auto *topNode = se->topNode();
 
   // set run number to get proper CDB entries
   const int runnumber = 52077;
@@ -78,22 +84,23 @@ void ExportTpotAcceptanceRange()
 
   // load geometry file
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
-  std::cout << "Geometry - geofile: " << geofile << std::endl;
-  auto ingeo = new Fun4AllRunNodeInputManager("GeoIn");
+  // the std::string::c_str() is needed, a string barfs with the above generic printout
+  std::cout << "Geometry - geofile: " << geofile.c_str() << std::endl;
+  auto *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
   ingeo->AddFile(geofile);
   ingeo->run(0);
 
   // acts geometry initialization
-  auto geom = new MakeActsGeometry;
+  auto *geom = new MakeActsGeometry;
   geom->set_mvtx_applymisalign(true);
   geom->InitRun( topNode );
 
   // get relevant nodes
   // micromegas geometry
-  auto m_micromegas_geomcontainer = findNode::getClass<PHG4CylinderGeomContainer>(topNode, "CYLINDERGEOM_MICROMEGAS_FULL");
+  auto *m_micromegas_geomcontainer = findNode::getClass<PHG4CylinderGeomContainer>(topNode, "CYLINDERGEOM_MICROMEGAS_FULL");
 
   // ACTS geometry
-  auto m_tGeometry = findNode::getClass<ActsGeometry>(topNode, "ActsGeometry");
+  auto *m_tGeometry = findNode::getClass<ActsGeometry>(topNode, "ActsGeometry");
 
   using range_list_t = std::vector<CylinderGeomMicromegas::range_t>;
   range_list_t theta_range_list;
@@ -105,7 +112,7 @@ void ExportTpotAcceptanceRange()
     // sanity
     assert(layer == layergeom->get_layer());
 
-    auto micromegas_layergeom = static_cast<CylinderGeomMicromegas*>(layergeom);
+    auto *micromegas_layergeom = static_cast<CylinderGeomMicromegas*>(layergeom);
 
     // tiles
     const unsigned int tile_count = micromegas_layergeom->get_tiles_count();
@@ -129,7 +136,7 @@ void ExportTpotAcceptanceRange()
   }
 
   // calculate inner phi range for each sector
-  auto get_phi_range = [phi_range_list]( std::vector<int> indexes )
+  auto get_phi_range = [phi_range_list]( const std::vector<int>& indexes )
   {
     CylinderGeomMicromegas::range_t out{0,0};
     for(const auto& i:indexes)

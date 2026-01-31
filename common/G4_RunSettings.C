@@ -64,11 +64,19 @@ void RunSettings(int runnumber, const std::string & /*type*/ = "")
     INPUTHEPMC::FLOW_SCALING = 0.0;
     std::cout << "use ppg08 run33 settings" << std::endl;
     break;
+  case 34:  // 0.5mRad xing angle, mvtx rotated
+    Input::BEAM_CONFIGURATION = Input::mRad_05;
+    Enable::MVTX_APPLYMISALIGNMENT = true;
+    break;
   default:
-    std::cout << "runnnumber " << runnumber << " not implemented" << std::endl;
-    gSystem->Exit(1);
     break;
   }
+  if (runnumber < 100)
+  {
+    std::cout << "runnnumber " << runnumber << " not implemented" << std::endl;
+    gSystem->Exit(1);
+  }
+  Input::BEAM_CONFIGURATION = Input::mRad_00;
   return;
 }
 

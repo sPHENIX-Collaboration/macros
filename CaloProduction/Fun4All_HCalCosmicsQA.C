@@ -1,5 +1,9 @@
-#ifndef FUN4ALL_NEW_HCALCOSMICS_C
-#define FUN4ALL_NEW_HCALCOSMICS_C
+#ifndef FUN4ALL_HCALCOSMICSQA_C
+#define FUN4ALL_HCALCOSMICSQA_C
+
+#include <calovalid/CaloValid.h>
+
+#include <litecaloeval/HCalCosmics.h>
 
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloTowerCalib.h>
@@ -23,9 +27,11 @@
 
 #include <phool/recoConsts.h>
 
-#include <calovalid/CaloValid.h>
+#include <Rtypes.h>
+#include <TSystem.h>
 
-#include <litecaloeval/HCalCosmics.h>
+#include <format>
+#include <fstream>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -35,7 +41,7 @@ R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libLiteCaloEvalTowSlope.so)
 
 void Fun4All_HCalCosmicsQA(int nEvents = 100,
-                             const std::string inlist = "files.list",
+                             const std::string& inlist = "files.list",
                              const std::string &outfile_hist1 = "HIST_COSMIC_HCALOUT_run2auau_ana487_2024p018_v001",
                              const std::string &outfile_hist2 = "HIST_COSMIC_HCALIN_run2auau_ana487_2024p018_v001",
                              const std::string &dbtag = "ProdA_2024")
@@ -104,7 +110,7 @@ void Fun4All_HCalCosmicsQA(int nEvents = 100,
 
   // loop over all files in file list and create an input manager for each one
   Fun4AllInputManager *In = nullptr;
-  ifstream infile;
+  std::ifstream infile;
   infile.open(inlist);
   int iman = 0;
   std::string line;
@@ -123,7 +129,7 @@ void Fun4All_HCalCosmicsQA(int nEvents = 100,
       // extract run number from first not commented out file in list
       if (first)
       {
-        pair<int, int> runseg = Fun4AllUtils::GetRunSegment(line);
+	std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(line);
         runnumber = runseg.first;
         segment = runseg.second;
         rc->set_uint64Flag("TIMESTAMP", runnumber);
@@ -146,8 +152,7 @@ void Fun4All_HCalCosmicsQA(int nEvents = 100,
 
   ///////////////////////////////////////////
   // Cosmics histMaker
-  char outfile_hist[500];
-sprintf(outfile_hist, "%s-%08d-%05d.root", outfile_hist2.c_str(), runnumber, segment);
+  std::string outfile_hist = std::format("{}-{:08}-{:05}.root",outfile_hist2, runnumber, segment);
   HCalCosmics *wt2 = new HCalCosmics("HCalCalib_HCALIN", outfile_hist);
   wt2->set_tower_threshold(0.2498); 
   wt2->set_vert_threshold(0.2498);  
@@ -157,7 +162,7 @@ sprintf(outfile_hist, "%s-%08d-%05d.root", outfile_hist2.c_str(), runnumber, seg
   wt2->TowerPrefix("TOWERINFO_CALIB_");
   se->registerSubsystem(wt2);
 
-  sprintf(outfile_hist, "%s-%08d-%05d.root", outfile_hist1.c_str(), runnumber, segment);
+  outfile_hist = std::format("{}-{:08}-{:05}.root",outfile_hist1, runnumber, segment);
   HCalCosmics *wt3 = new HCalCosmics("HCalCosmics_HCALOUT", outfile_hist);
   wt3->set_tower_threshold(1.665); 
   wt3->set_vert_threshold(1.665);  

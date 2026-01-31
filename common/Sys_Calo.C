@@ -2,141 +2,121 @@
 #define SYS_CALO_C
 
 #include <caloreco/CaloTowerCalib.h>
-#include <caloreco/RawClusterBuilderTemplate.h>
 
 #include <ffamodules/CDBInterface.h>
-
 #include <fun4all/Fun4AllServer.h>
-#include <fun4all/Fun4AllUtils.h>
 #include <fun4all/SubsysReco.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libcalo_reco.so)
 
-// draft macro... put all info under namespace, so user only need to turn on and off the option
-
-namespace CALOSYS
+// =====================================================================
+//  SYSTEMATIC CONFIGURATION
+// =====================================================================
+namespace CALOSYS 
 {
 
-  std::vector<std::string> EMCalinputprefix = {
-      "TOWERINFO_CALIB_",
-      "TOWERINFO_CALIB_",
-      "TOWERINFO_CALIB_"};
-  std::vector<std::string> EMCaloutputprefix = {
-      "TOWERINFO_CALIB_SYST1_",
-      "TOWERINFO_CALIB_SYST2_",
-      "TOWERINFO_CALIB_SYST3_"};
+struct SysConfig {
+  std::string label;                   // systematic name
+  std::string payload;                   // CDB payload name root
+  bool do_calo[3];                     // calo 1 = EMCal, 2 = IHCal, 3 = OHCal
+};
 
-  std::vector<std::string> EMCalpayload = {
-      "CEMC_stat_syst",
-      "CEMC_shift_syst",
-      "CEMC_v1Modulation_syst"};
-  std::vector<bool> EMCaldosys = {
-      true,
-      true,
-      true};
+inline std::vector<SysConfig> default_variations()
+{
+  return {
+  {"EMCal calib unc up", "_calib_unc_up_syst", {true, false, false}},
+  {"HCal calib unc up", "_calib_unc_up_syst", {false, true, true}},
+  {"EMCal calib stat unc", "_calib_stat_syst", {true, false, false}},
+  {"IHCal calib stat unc", "_calib_stat_syst", {false, true, false}},
+  {"OHCal calib stat unc", "_calib_stat_syst", {false, false, true}},
+  //{"EMCal v1Mod", "_v1Modulation_syst", {true, false, false}}, // v1 modulation syst currently not implemented by default
+  //{"IHCal v1Mod", "_v1Modulation_syst", {false, true, false}},
+  //{"OHCal v1Mod", "_v1Modulation_syst", {false, false, true}},
+  {"Had Resp up", "_had_resp_up_syst", {true, true, true}},
+  {"EMCal calib unc down", "_calib_unc_down_syst", {true, false, false}},
+  {"HCal calib unc down", "_calib_unc_down_syst", {false, true, true}},
+  {"Had Resp down", "_had_resp_down_syst", {true, true, true}},
+  };
+}
 
-  std::vector<std::string> OHCalinputprefix = {
-      "TOWERINFO_CALIB_",
-      "TOWERINFO_CALIB_",
-      "TOWERINFO_CALIB_"};
-  std::vector<std::string> OHCaloutputprefix = {
-      "TOWERINFO_CALIB_SYST1_",
-      "TOWERINFO_CALIB_SYST2_",
-      "TOWERINFO_CALIB_SYST3_"};
+static const std::string inputPrefix = "TOWERINFO_CALIB_";
+std::string detName[3] = {"CEMC","HCALIN","HCALOUT"};
 
-  std::vector<std::string> OHCalpayload = {
-      "HCALOUT_stat_syst",
-      "HCALOUT_shift_syst",
-      "HCALOUT_v1Modulation_syst"};
-  std::vector<bool> OHCaldosys = {
-      true,
-      false,
-      false};
+} // namespace CALOSYS
 
-  std::vector<std::string> IHCalinputprefix = {
-      "TOWERINFO_CALIB_",
-      "TOWERINFO_CALIB_",
-      "TOWERINFO_CALIB_"};
-  std::vector<std::string> IHCaloutputprefix = {
-      "TOWERINFO_CALIB_SYST1_",
-      "TOWERINFO_CALIB_SYST2_",
-      "TOWERINFO_CALIB_SYST3_"};
+// =====================================================================
+//  RUN ONE SYSTEMATIC INDEX
+// =====================================================================
+void Register_Tower_sys(int syst_index, const std::vector<CALOSYS::SysConfig>& variations)
+{
+    size_t nsyst = variations.size();
+    if(syst_index < 1 || syst_index > (int)nsyst) {
+        std::cerr << "ERROR: Systematic index " << syst_index << " is out of range (1–" << nsyst << ")\n";
+        return;
+    }
 
-  std::vector<std::string> IHCalpayload = {
-      "HCALIN_stat_syst",
-      "HCALIN_shift_syst",
-      "HCALIN_v1Modulation_syst"};
-  std::vector<bool> IHCaldosys = {
-      true,
-      false,
-      false};
+    Fun4AllServer* se = Fun4AllServer::instance();
+    const CALOSYS::SysConfig& cfg = variations[syst_index - 1];
+    const std::string outputPrefix = "TOWERINFO_CALIB_SYST" + std::to_string(syst_index) + "_";
 
-}  // namespace CALOSYS
+    for(int ic = 0; ic < 3; ++ic)
+    {
+      std::string det = CALOSYS::detName[ic];
+      std::string fullPayload = det + "_no_calib_syst";
+      if (cfg.do_calo[ic]) {
+        fullPayload = det + cfg.payload;
+      }
 
+      std::string caliburl = CDBInterface::instance()->getUrl(fullPayload);
+      CaloTowerCalib* calib = new CaloTowerCalib("CaloCalib_syst_" + det + "_" + std::to_string(syst_index));
+      calib->set_inputNodePrefix(CALOSYS::inputPrefix);
+      calib->set_outputNodePrefix(outputPrefix);
+      calib->set_directURL(caliburl);
+      calib->setFieldName("calo_sys");
+      calib->set_doCalibOnly(true);
+
+      if(ic == 0)      calib->set_detector_type(CaloTowerDefs::CEMC);
+      else if(ic == 1) calib->set_detector_type(CaloTowerDefs::HCALIN);
+      else              calib->set_detector_type(CaloTowerDefs::HCALOUT);
+      se->registerSubsystem(calib);
+    }
+}
+
+// =====================================================================
+//  RUN ONE DEFAULT SYSTEMATIC
+// =====================================================================
+void Register_Tower_sys(int syst_index)
+{
+  auto vars = CALOSYS::default_variations();
+  std::cout << ">>> [Sys_Calo] Running ONE default systematic: index SYST" << syst_index << " of " << vars.size() << " (“" << vars[syst_index-1].label << "”)" << std::endl;
+  Register_Tower_sys(syst_index, vars);
+}
+
+// =====================================================================
+//  RUN ALL DEFAULT SYSTEMATICS
+// =====================================================================
 void Register_Tower_sys()
 {
-  Fun4AllServer *se = Fun4AllServer::instance();
-  // EMCal
-  for (int i = 0; i < (int) CALOSYS::EMCaldosys.size(); i++)
-  {
-    if (CALOSYS::EMCaldosys[i])
-    {
-      // tower calib
-      std::cout << "Adding Node:" << CALOSYS::EMCaloutputprefix[i] << "_EMCAL" << std::endl;
-      std::string caliburl = CDBInterface::instance()->getUrl(CALOSYS::EMCalpayload[i]);
-      CaloTowerCalib *EMCalsys = new CaloTowerCalib("CaloCalib_calo_sysT" + std::to_string(i));
-      EMCalsys->set_inputNodePrefix(CALOSYS::EMCalinputprefix[i]);
-      EMCalsys->set_outputNodePrefix(CALOSYS::EMCaloutputprefix[i]);
-      EMCalsys->set_directURL(caliburl);
-      EMCalsys->setFieldName("calo_sys");
-      EMCalsys->set_doCalibOnly(true);
-      EMCalsys->set_detector_type(CaloTowerDefs::CEMC);
-      se->registerSubsystem(EMCalsys);
-
-      // cluster stuff?
-    }
+  auto vars = CALOSYS::default_variations();
+  std::cout << ">>> [Sys_Calo] Running ALL default systematics (" << vars.size() << " variations)" << std::endl;
+  for (size_t i = 1; i <= vars.size(); ++i) {
+    std::cout << ">>>   Running SYST" << i << " / " << vars.size() << " (“" << vars[i-1].label << "”)" << std::endl;
+    Register_Tower_sys(i, vars);
   }
+}
 
-  // OHCal
-  for (int i = 0; i < (int) CALOSYS::OHCaldosys.size(); i++)
+// =====================================================================
+//  RUN ALL USER-PROVIDED SYSTEMATICS
+// =====================================================================
+void Register_Tower_sys(const std::vector<CALOSYS::SysConfig>& vars)
+{
+  std::cout << ">>> [Sys_Calo] Running ALL USER-PROVIDED systematics (" << vars.size() << " variations)" << std::endl;
+  for (size_t i = 1; i <= vars.size(); ++i)
   {
-    if (CALOSYS::OHCaldosys[i])
-    {
-      // tower calib
-      std::cout << "Adding Node:" << "_HCALOUT" << std::endl;
-      std::string caliburl = CDBInterface::instance()->getUrl(CALOSYS::OHCalpayload[i]);
-      CaloTowerCalib *OHCalsys = new CaloTowerCalib();
-      OHCalsys->set_inputNodePrefix(CALOSYS::OHCalinputprefix[i]);
-      OHCalsys->set_outputNodePrefix(CALOSYS::OHCaloutputprefix[i]);
-      OHCalsys->set_directURL(caliburl);
-      OHCalsys->setFieldName("calo_sys");
-      OHCalsys->set_doCalibOnly(true);
-      OHCalsys->set_detector_type(CaloTowerDefs::HCALOUT);
-      se->registerSubsystem(OHCalsys);
-    }
+    std::cout << ">>>   Running SYST" << i << " / " << vars.size() << " (“" << vars[i-1].label << "”)" << std::endl;
+    Register_Tower_sys(i, vars);
   }
-
-  // IHCal
-  for (int i = 0; i < (int) CALOSYS::IHCaldosys.size(); i++)
-  {
-    if (CALOSYS::IHCaldosys[i])
-    {
-      // tower calib
-      std::cout << "Adding Node:" << "_HCALIN" << std::endl;
-      std::string caliburl = CDBInterface::instance()->getUrl(CALOSYS::IHCalpayload[i]);
-      CaloTowerCalib *IHCalsys = new CaloTowerCalib();
-      IHCalsys->set_inputNodePrefix(CALOSYS::IHCalinputprefix[i]);
-      IHCalsys->set_outputNodePrefix(CALOSYS::IHCaloutputprefix[i]);
-      IHCalsys->set_directURL(caliburl);
-      IHCalsys->setFieldName("calo_sys");
-      IHCalsys->set_doCalibOnly(true);
-      IHCalsys->set_detector_type(CaloTowerDefs::HCALIN);
-      se->registerSubsystem(IHCalsys);
-    }
-  }
-
-  std::cout << "All calo systematics added" << std::endl;
 }
 
 #endif /* SYS_CALO_C */

@@ -1,6 +1,18 @@
 #include "BlairUtils.C"
 #include "sPhenixStyle.C"
 
+#include <TCanvas.h>
+#include <TF1.h>
+#include <TFile.h>
+#include <TH1.h>
+#include <TH2.h>
+#include <TPad.h>
+#include <TProfile.h>
+#include <TProfile2D.h>
+
+#include <fstream>
+#include <sstream>
+
 std::vector<int> runNumbers;    // Stores the run numbers
 std::vector<double> timestamps;  // Stores the timestamps
 std::vector<double> values;     // Stores the corresponding values
@@ -60,7 +72,7 @@ void plot_hits() {
         gr_hits_run->SetPointError(it,0,hits_err); 
 
         gr_rate_time->SetPoint(it,timestamps[ir],values[ir]);
-        cout << "timestamps[ir] " << timestamps[ir] << " values[ir]] " << values[ir] << endl;
+        std::cout << "timestamps[ir] " << timestamps[ir] << " values[ir]] " << values[ir] << std::endl;
 
         pr_temp_hour->Fill(hours[ir],h_temp_run->GetBinContent(1+it));
         gr_temp_time->SetPoint(it,timestamps[ir],h_temp_run->GetBinContent(1+it));
@@ -89,7 +101,7 @@ void plot_hits() {
    
 
   for(int ir=0; ir<runNumbers_cosmic.size(); ir++){
-    cout << timestamps_cosmic[ir] << endl;
+    std::cout << timestamps_cosmic[ir] << std::endl;
     gr_cosmic_times->SetPoint(ir*2,timestamps_cosmic[ir],10000*(ir%2));
     gr_cosmic_times->SetPoint(ir*2+1,timestamps_cosmic[ir],10000*((ir+1)%2));
   }
@@ -97,9 +109,9 @@ void plot_hits() {
    TCanvas *c1 = new TCanvas("c1","c1",600,600);
    //h_hits_per_event->Draw("ex0");
    gr_hits_run->Draw("ap");
-
+   c1->Update();
     TCanvas* c2 = new TCanvas("c2","c2",2000,600);
-    TH1F* h_frame = new TH1F("h_frame","",100,1.7183e+09,1.729e+09);
+    TH1* h_frame = new TH1F("h_frame","",100,1.7183e+09,1.729e+09);
     h_frame->GetXaxis()->SetTimeFormat("%m-%d %H:%M");
     h_frame->GetXaxis()->SetTimeDisplay(1);
     h_frame->GetXaxis()->SetTitle("run time");
@@ -160,8 +172,8 @@ void plot_hits() {
    
    myText(0.20, 0.9, 1, "#bf{#it{sPHENIX}} Internal", 0.05);
    myText(0.20, 0.85, 1, "OHCal", 0.05);
-   myText(0.20, 0.8, 1, Form("Fit #mu/#sigma = %.3f", fsigma/fmean), 0.05);
-   myText(0.20, 0.75, 1, Form("RMS/Mean = %.3f", h_hits_corr_dis->GetRMS()/h_hits_corr_dis->GetMean()), 0.05);
+   myText(0.20, 0.8, 1, std::format("Fit #mu/#sigma = {:.3f}", fsigma/fmean).c_str(), 0.05);
+   myText(0.20, 0.75, 1, std::format("RMS/Mean = {:.3f}", h_hits_corr_dis->GetRMS()/h_hits_corr_dis->GetMean()).c_str(), 0.05);
 
    c11->SaveAs("figures/hit_rate_allRuns.pdf");
 
@@ -176,7 +188,7 @@ void plot_hits() {
   for(int ix=0; ix<24; ix++){
     for(int iy=0; iy<64; iy++){
       float var = pr2d_temp->GetBinError(ix+1,iy+1);
-      cout << var << endl;
+      std::cout << var << std::endl;
       pr2d_temp_var->SetBinContent(ix+1,iy+1,var);
       pr2d_temp_var->SetBinError(ix+1,iy+1,0);
     }
@@ -188,9 +200,9 @@ void plot_hits() {
    pr2d_temp->SetXTitle("OHCal #it{#eta}^{i}");
    pr2d_temp->SetYTitle("OHCal #it{#phi}^{i}");
    gPad->SetRightMargin(0.15);
-
+   c3->Update();
   TCanvas *c4 = new TCanvas("c4","c4",2000,600);
-  TH1F* h_frame2 = new TH1F("h_frame2","",100,1.7183e+09,1.729e+09);
+  TH1* h_frame2 = new TH1F("h_frame2","",100,1.7183e+09,1.729e+09);
   h_frame2->GetXaxis()->SetTimeFormat("%m-%d %H:%M");
   h_frame2->GetXaxis()->SetTimeDisplay(1);
   h_frame2->GetXaxis()->SetTitle("run time");
@@ -212,7 +224,7 @@ void plot_hits() {
   gr_temp_time->GetYaxis()->SetTitle("ohcal tower avg temp [C]");
   gr_temp_time->GetXaxis()->SetRangeUser(1.7185e+09,1.729e+09);
 
-  myText         (0.11,0.90-0.5,1,"#bf{#it{sPHENIX}} Internal",0.05);
+  myText(0.11,0.90-0.5,1,"#bf{#it{sPHENIX}} Internal",0.05);
 
   c4->SaveAs("figures/OHCal_mean_temp.pdf");
 
@@ -223,7 +235,7 @@ float corrDouble(float hits_per_event,double rate){
   //double newnumber = TMath::Abs(lambda * (double)(endtime-starttime)*(111*78e3));
   //double prob = newnumber / 78e3/111; 
   double prob1orMore = rate / 78.e3/111.;
-  double lambda = -1.0*TMath::Log(1-prob1orMore);
+  double lambda = -1.0*std::log(1-prob1orMore);
   // labda = prob of a single collision
   // p_double = prob of an additional collsion which = lambda
   // x = true probability of a hit per a single mb event 
@@ -250,7 +262,9 @@ void getInfo(){
     std::string line;
     while (std::getline(file, line)) {
         std::istringstream ss(line);
-        std::string runNumberStr, timestampStr, valueStr;
+        std::string runNumberStr;
+        std::string timestampStr;
+        std::string valueStr;
 
         // Read the run number, timestamp, and value from each line
         std::getline(ss, runNumberStr, ',');
@@ -262,15 +276,20 @@ void getInfo(){
 
 
     
-        int year, month, day, hour, minute, second;
-        sscanf(timestampStr.c_str(), "%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second);
+        int year;
+        int month;
+        int day;
+        int hour;
+        int minute;
+        int second;
+        sscanf(timestampStr.c_str(), "%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second); // NOLINT (hicpp-vararg)
         TDatime t(year, month, day, hour, minute, second);
         double timeStamp = t.Convert();
 
         // Convert the value to double
         double value = valueStr.empty() ? 0.0 : std::stod(valueStr);
 
-       // cout << runNumber << "  "   << timeStamp << "  "  << value << endl;
+       // std::cout << runNumber << "  "   << timeStamp << "  "  << value << std::endl;
         // Store the values in the vectors
         runNumbers.push_back(runNumber);
         timestamps.push_back(timeStamp);
@@ -296,7 +315,9 @@ void getCosmicInfo(){
     std::string line;
     while (std::getline(file, line)) {
         std::istringstream ss(line);
-        std::string runNumberStr, timestampStr, valueStr;
+        std::string runNumberStr;
+        std::string timestampStr;
+        std::string valueStr;
 
         std::getline(ss, runNumberStr, ',');
         std::getline(ss, timestampStr, ',');
@@ -304,12 +325,17 @@ void getCosmicInfo(){
 
         int runNumber = std::stoi(runNumberStr);
 
-        int year, month, day, hour, minute, second;
-        sscanf(timestampStr.c_str(), "%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second);
+        int year;
+        int month;
+        int day;
+        int hour;
+        int minute;
+        int second;
+        sscanf(timestampStr.c_str(), "%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second); // NOLINT (hicpp-vararg)
         TDatime t(year, month, day, hour, minute, second);
         double timeStamp = t.Convert();
     
-         cout << runNumber << "  "   << timeStamp << endl;
+         std::cout << runNumber << "  "   << timeStamp << std::endl;
 
         runNumbers_cosmic.push_back(runNumber);
         timestamps_cosmic.push_back(timeStamp);

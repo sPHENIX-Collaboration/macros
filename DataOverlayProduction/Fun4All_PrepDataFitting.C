@@ -1,12 +1,16 @@
-#ifndef FUN4ALL_YEAR2_FITTING_C
-#define FUN4ALL_YEAR2_FITTING_C
+#ifndef FUN4ALL_PREPDATAFITTING_C
+#define FUN4ALL_PREPDATAFITTING_C
 
-#include "/sphenix/u/bseidlitz/work/devMac/macros/CaloProduction/condor/Calo_Fitting.C"
+#include <Calo_Fitting.C>
 #include <QA.C>
 
 #include <calotrigger/TriggerRunInfoReco.h>
 
 #include <calovalid/CaloFittingQA.h>
+
+#include <mbd/MbdReco.h>
+
+#include <globalvertex/GlobalVertexReco.h>
 
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
@@ -21,10 +25,13 @@
 #include <fun4all/Fun4AllUtils.h>
 #include <fun4all/SubsysReco.h>
 
-#include <mbd/MbdReco.h>
-#include <globalvertex/GlobalVertexReco.h>
-
 #include <phool/recoConsts.h>
+
+#include <Rtypes.h> // for R__LOAD_LIBRARY
+#include <TSystem.h>
+
+#include <format>
+#include <fstream>
 
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libcalovalid.so)
@@ -32,7 +39,7 @@ R__LOAD_LIBRARY(libcalotrigger.so)
 
 // this pass containis the reco process that's stable wrt time stamps(raw tower building)
 void Fun4All_PrepDataFitting(int nEvents = 1e4,
-			   const std::string inlist = "test.list",
+			   const std::string& inlist = "test.list",
                            const std::string &outfile = "DST_CALOFITTING",
                            const std::string &outfile_hist = "HIST_CALOFITTINGQA",
                            const std::string &dbtag = "ProdA_2024")
@@ -73,7 +80,7 @@ void Fun4All_PrepDataFitting(int nEvents = 1e4,
 
 // loop over all files in file list and create an input manager for each one  
   Fun4AllInputManager *In = nullptr;
-  ifstream infile;
+  std::ifstream infile;
   infile.open(inlist);
   int iman = 0;
   std::string line;
@@ -92,7 +99,7 @@ void Fun4All_PrepDataFitting(int nEvents = 1e4,
       // extract run number from first not commented out file in list
       if (first)
       {
-	pair<int, int> runseg = Fun4AllUtils::GetRunSegment(line);
+	std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(line);
 	runnumber = runseg.first;
 	segment = runseg.second;
 	rc->set_uint64Flag("TIMESTAMP", runnumber);
@@ -110,8 +117,7 @@ void Fun4All_PrepDataFitting(int nEvents = 1e4,
   
 // this strips all nodes under the Packets PHCompositeNode
 // (means removes all offline packets)
-  char dstoutfile[500];
-  sprintf(dstoutfile,"%s-%08d-%05d.root",outfile.c_str(), runnumber,segment);
+  std::string dstoutfile = std::format("{}-{:08}-{:05}.root",outfile, runnumber,segment);
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", dstoutfile);
   out->StripCompositeNode("Packets");
   se->registerOutputManager(out);
@@ -122,7 +128,7 @@ void Fun4All_PrepDataFitting(int nEvents = 1e4,
   }
   se->run(nEvents);
   se->End();
-  sprintf(dstoutfile,"%s-%08d-%05d.root",outfile_hist.c_str(), runnumber,segment);
+  dstoutfile = std::format("{}-{:08}-{:05}.root",outfile_hist, runnumber,segment);
   QAHistManagerDef::saveQARootFile(dstoutfile);
 
   CDBInterface::instance()->Print();  // print used DB files

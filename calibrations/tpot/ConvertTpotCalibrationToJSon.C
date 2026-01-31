@@ -1,17 +1,21 @@
-R__LOAD_LIBRARY(libmicromegas.so)
-
-#include <micromegas/MicromegasCalibrationData.h>
 
 #include <micromegas/MicromegasCalibrationData.h>
 #include <micromegas/MicromegasMapping.h>
 
 #include <nlohmann/json.hpp>
 
+#include <Rtypes.h> // for R__LOAD_LIBRARY macro
+
+#include <format>
+#include <fstream>
+
+R__LOAD_LIBRARY(libmicromegas.so)
+
 void ConvertTpotCalibrationToJSon( int runnumber = 74871 )
 {
 
-  const auto inputfile = Form("TPOT_Pedestal-%08i-0000.root", runnumber );
-  const auto outputfile = Form("TPOT_Pedestal-%08i-0000.json", runnumber );
+  const auto inputfile = std::format("TPOT_Pedestal-{:08}-0000.root", runnumber );
+  const auto outputfile = std::format("TPOT_Pedestal-{:08}-0000.json", runnumber );
 
   std::cout << "EvaluateCalibration - inputfile: " << inputfile << std::endl;
   std::cout << "EvaluateCalibration - outputfile: " << outputfile << std::endl;

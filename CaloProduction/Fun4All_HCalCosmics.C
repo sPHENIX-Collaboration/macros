@@ -1,5 +1,9 @@
-#ifndef FUN4ALL_YEAR1_C
-#define FUN4ALL_YEAR1_C
+#ifndef FUN4ALL_HCALCOSMICS_C
+#define FUN4ALL_HCALCOSMICS_C
+
+#include <calovalid/CaloValid.h>
+
+#include <litecaloeval/HCalCosmics.h>
 
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloTowerCalib.h>
@@ -23,9 +27,8 @@
 
 #include <phool/recoConsts.h>
 
-#include <calovalid/CaloValid.h>
-
-#include <litecaloeval/HCalCosmics.h>
+#include <Rtypes.h> // for R__LOAD_LIBRARY
+#include <TSystem.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -54,7 +57,7 @@ void Fun4All_HCalCosmics(int nEvents = 100,
 
   recoConsts *rc = recoConsts::instance();
 
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
   int runnumber = runseg.first;
 
   // conditions DB flags and timestamp

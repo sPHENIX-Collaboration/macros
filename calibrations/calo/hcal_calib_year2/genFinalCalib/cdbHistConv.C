@@ -1,12 +1,17 @@
+#include <calobase/TowerInfoDefs.h>
+
 #include <cdbobjects/CDBTTree.h> 
-#include "TowerInfoDefs.h"
+
+#include <Rtypes.h> // for R__LOAD_LIBRARY macro
+#include <TH2.h>
 
 R__LOAD_LIBRARY(libcdbobjects)
 R__LOAD_LIBRARY(libcalo_io.so)
 
-void histToCaloCDBTree(string outputfile, string fieldName, int icalo, TH2F* hist){
+void histToCaloCDBTree(const std::string &outputfile, const std::string &fieldName, int icalo, TH2* hist){
 
-  int neta,nphi;
+  int neta;
+  int nphi;
 
   if (icalo != 0 && icalo != 1) return;
 
@@ -38,7 +43,7 @@ void histToCaloCDBTree(string outputfile, string fieldName, int icalo, TH2F* his
     }
   }
 
-  cout << "Writing " << outputfile.c_str() << "   with mean=" << mean/count << endl; 
+  std::cout << "Writing " << outputfile << "   with mean=" << mean/count << std::endl;
   cdbttree->Commit();
   cdbttree->WriteCDBTTree();
   //cdbttree->Print();
@@ -46,11 +51,12 @@ void histToCaloCDBTree(string outputfile, string fieldName, int icalo, TH2F* his
 }
 
 
-TH2F* CaloCDBTreeToHist(string inputfile, string fieldName, int icalo){
+TH2* CaloCDBTreeToHist(const std::string &inputfile, const std::string &fieldName, int icalo){
 
   CDBTTree* cdbttree = new CDBTTree(inputfile);
 
-  int neta,nphi;
+  int neta;
+  int nphi;
 
   if (icalo != 0 && icalo != 1) return nullptr;
 
@@ -63,8 +69,8 @@ TH2F* CaloCDBTreeToHist(string inputfile, string fieldName, int icalo){
     nphi = 64;
   }
 
-  TH2F* h2 = new TH2F("h_temp","",neta,0,neta,nphi,0,nphi);
-  h_temp->SetDirectory(nullptr);
+  TH2* h2 = new TH2F("h_temp","",neta,0,neta,nphi,0,nphi);
+  h2->SetDirectory(nullptr);
 
   for(int ie = 0; ie < neta ; ie++)
   {

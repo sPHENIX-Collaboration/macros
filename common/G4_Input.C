@@ -52,7 +52,9 @@ namespace Input
   int PYTHIA6_EmbedId = 0;
 
   bool PYTHIA8 = false;
-  int PYTHIA8_EmbedId = 0;
+  int PYTHIA8_NUMBER = 1;
+  int PYTHIA8_VERBOSITY = 0;
+  std::set<int> PYTHIA8_EmbedIds;
 
   // Single/multiple particle generators
   bool DZERO = false;
@@ -107,11 +109,12 @@ namespace Input
     switch (beam_config)
     {
     case AA_COLLISION:
+    case mRad_10:
       // heavy ion mode
       Input::beam_crossing = 1.;  // +1 mRad for late 2024 with triggered readout for mvtx
-      localbcross = Input::beam_crossing / 2. * 1e-3;
       //  Xing angle is split among both beams, means set to 0.5 mRad
-      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  // 1.5mrad x-ing of sPHENIX
+      localbcross = Input::beam_crossing / 2. * 1e-3;
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
       HepMCGen->set_vertex_distribution_width(
           100e-4,         // approximation from past STAR/Run16 AuAu data
           100e-4,         // approximation from past STAR/Run16 AuAu data
@@ -124,7 +127,7 @@ namespace Input
       // pA mode
 
       // 1.5mRad is split among both beams, means set to 0.75 mRad
-      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  // 1.5mrad x-ing of sPHENIX
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
       HepMCGen->set_vertex_distribution_width(
           100e-4,         // set to be similar to AA
           100e-4,         // set to be similar to AA
@@ -133,10 +136,11 @@ namespace Input
 
       break;
     case pp_COLLISION:
+    case mRad_15:
 
       // pp mode
       // 1.5mRad is split among both beams, means set to 0.75 mRad
-      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  // 1.5mrad x-ing of sPHENIX
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
       HepMCGen->set_vertex_distribution_width(
           120e-4,         // approximation from past PHENIX data
           120e-4,         // approximation from past PHENIX data
@@ -145,6 +149,7 @@ namespace Input
 
       break;
     case pp_ZEROANGLE:
+    case mRad_00:
 
       // pp mode
 
@@ -169,6 +174,19 @@ namespace Input
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
       break;
 
+    case mRad_05:
+      Input::beam_crossing = 0.5;
+      //0.5 mRad is split among both beams, means set to 0.25 mRad
+      localbcross = Input::beam_crossing / 2. * 1e-3;
+
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
+      HepMCGen->set_vertex_distribution_width(
+          120e-4,         // approximation from past PHENIX data
+          120e-4,         // approximation from past PHENIX data
+          24.5,             // estimate from Colorado
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
     default:
       std::cout << "ApplysPHENIXBeamParameter: invalid beam_config = " << beam_config << std::endl;
 
@@ -187,6 +205,15 @@ namespace Input
   void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen)
   {
     ApplysPHENIXBeamParameter(HepMCGen, Input::BEAM_CONFIGURATION);
+  }
+
+  void ApplysPHENIXBeamParameter(std::vector<PHPythia8 *> &HepMCGenVec)
+  {
+    PHHepMCGenHelper *gen = dynamic_cast<PHHepMCGenHelper *> (HepMCGenVec[0]);
+    if (gen)
+    {
+      ApplysPHENIXBeamParameter(gen, Input::BEAM_CONFIGURATION);
+    }
   }
 
   //! apply EIC beam parameter to any HepMC generator following EIC CDR,
@@ -289,7 +316,10 @@ namespace PYTHIA6
 
 namespace PYTHIA8
 {
-  std::string config_file = std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg";
+  std::map<int, std::string> config_file =
+  {
+    {0, std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg"}
+  };
 }
 
 namespace PILEUP
@@ -308,7 +338,7 @@ namespace INPUTGENERATOR
   std::vector<PHG4SimpleEventGenerator *> SimpleEventGenerator;
   std::vector<PHG4ParticleGun *> Gun;
   PHPythia8 *Pythia6 = nullptr;
-  PHPythia8 *Pythia8 = nullptr;
+  std::vector<PHPythia8 *> Pythia8;
   //  ReadEICFiles *EICFileReader = nullptr;
   CosmicSpray *Cosmic = nullptr;
 }  // namespace INPUTGENERATOR
@@ -367,16 +397,31 @@ void InputInit()
   }
   if (Input::PYTHIA8)
   {
-    INPUTGENERATOR::Pythia8 = new PHPythia8();
-    // see coresoftware/generators/PHPythia8 for example config
-    INPUTGENERATOR::Pythia8->set_config_file(PYTHIA8::config_file);
-
-    INPUTGENERATOR::Pythia8->set_embedding_id(Input::EmbedId);
-    Input::PYTHIA8_EmbedId = Input::EmbedId;
-    Input::EmbedId++;
-    if (Input::EMBED)
+    for (int i = 0; i < Input::PYTHIA8_NUMBER; i++)
     {
-      INPUTGENERATOR::Pythia8->set_reuse_vertex(Input::VertexEmbedId);
+      std::string name = "PYTHIA_" + std::to_string(i);
+      PHPythia8 *pythia8 = new PHPythia8(name);
+      INPUTGENERATOR::Pythia8.push_back(pythia8);
+      pythia8->set_embedding_id(Input::EmbedId);
+      // see coresoftware/generators/PHPythia8 for example config
+      if (PYTHIA8::config_file[i].empty())
+      {
+	std::cout << "No Pythia8 config file for pythia8 generator no " << i << std::endl;
+	gSystem->Exit(1);
+      }
+      pythia8->set_config_file(PYTHIA8::config_file[i]);
+      // luminosity makes no sense when running multiple pythia8 generators
+      if (Input::PYTHIA8_NUMBER > 1)
+      {
+	pythia8->save_integrated_luminosity(false);
+      }
+
+      Input::PYTHIA8_EmbedIds.insert(Input::EmbedId);
+      Input::EmbedId++;
+      if (Input::EMBED)
+      {
+	pythia8->set_reuse_vertex(Input::VertexEmbedId);
+      }
     }
   }
   // single particle generators
@@ -474,64 +519,69 @@ void InputRegister()
   // }
   if (Input::PYTHIA8)
   {
-    se->registerSubsystem(INPUTGENERATOR::Pythia8);
+    int verbosity = std::max(Input::PYTHIA8_VERBOSITY, Input::VERBOSITY);
+    for (auto &generator : INPUTGENERATOR::Pythia8)
+    {
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
+    }
   }
   if (Input::DZERO)
   {
     int verbosity = std::max(Input::DZERO_VERBOSITY, Input::VERBOSITY);
-    for (auto &icnt : INPUTGENERATOR::DZeroMesonGenerator)
+    for (auto &generator : INPUTGENERATOR::DZeroMesonGenerator)
     {
-      icnt->Verbosity(verbosity);
-      se->registerSubsystem(icnt);
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
     }
   }
   if (Input::GUN)
   {
     int verbosity = std::max(Input::GUN_VERBOSITY, Input::VERBOSITY);
-    for (auto &icnt : INPUTGENERATOR::Gun)
+    for (auto &generator : INPUTGENERATOR::Gun)
     {
-      icnt->Verbosity(verbosity);
-      se->registerSubsystem(icnt);
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
     }
   }
   if (Input::IONGUN)
   {
     int verbosity = std::max(Input::IONGUN_VERBOSITY, Input::VERBOSITY);
-    for (auto &icnt : INPUTGENERATOR::IonGun)
+    for (auto &generator : INPUTGENERATOR::IonGun)
     {
-      icnt->Verbosity(verbosity);
-      se->registerSubsystem(icnt);
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
     }
   }
   if (Input::PGEN)
   {
     int verbosity = std::max(Input::PGEN_VERBOSITY, Input::VERBOSITY);
-    for (auto &icnt : INPUTGENERATOR::ParticleGenerator)
+    for (auto &generator : INPUTGENERATOR::ParticleGenerator)
     {
-      icnt->Verbosity(verbosity);
-      se->registerSubsystem(icnt);
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
     }
   }
   if (Input::SIMPLE)
   {
     int verbosity = std::max(Input::SIMPLE_VERBOSITY, Input::VERBOSITY);
-    for (auto &icnt : INPUTGENERATOR::SimpleEventGenerator)
+    for (auto &generator : INPUTGENERATOR::SimpleEventGenerator)
     {
-      icnt->Verbosity(verbosity);
-      se->registerSubsystem(icnt);
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
     }
   }
   if (Input::UPSILON)
   {
-    for (auto &icnt : INPUTGENERATOR::VectorMesonGenerator)
+    for (auto &generator : INPUTGENERATOR::VectorMesonGenerator)
     {
       int verbosity = std::max(Input::UPSILON_VERBOSITY, Input::VERBOSITY);
       if (Input::HEPMC || Input::SIMPLE)
       {
-        icnt->set_reuse_existing_vertex(true);
+        generator->set_reuse_existing_vertex(true);
       }
-      icnt->Verbosity(verbosity);
-      se->registerSubsystem(icnt);
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
     }
   }
   if (Input::READEIC)

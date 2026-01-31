@@ -4,8 +4,6 @@
 #include <GlobalVariables.C>
 
 #include <DisplayOn.C>
-#include <G4Setup_sPHENIX.C>
-#include <G4_Mbd.C>
 #include <G4_CaloTrigger.C>
 #include <G4_Centrality.C>
 #include <G4_DSTReader.C>
@@ -14,12 +12,20 @@
 #include <G4_Input.C>
 #include <G4_Jets.C>
 #include <G4_KFParticle.C>
+#include <G4_Mbd.C>
 #include <G4_ParticleFlow.C>
 #include <G4_Production.C>
 #include <G4_TopoClusterReco.C>
-#include <G4_Tracking.C>
 #include <G4_User.C>
 #include <QA.C>
+#include <Trkr_Clustering.C>
+#include <Trkr_Eval.C>
+#include <Trkr_QA.C>
+#include <Trkr_Reco.C>
+#include <Trkr_RecoInit.C>
+#include "G4Setup_sPHENIX.C"
+
+#include <calib_emc_pi0/CaloCalibEmc_Pi0.h>
 
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
@@ -28,7 +34,7 @@
 #include <phool/PHRandomSeed.h>
 #include <phool/recoConsts.h>
 
-#include <calib_emc_pi0/CaloCalibEmc_Pi0.h>
+#include <TROOT.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libcaloCalibDBFile.so)
@@ -39,40 +45,39 @@ R__LOAD_LIBRARY(libcalibCaloEmc_pi0.so)
 
 int Fun4All_pi0tbt_SIMPLE_EMBED(
     const int nEvents = 3,
-		const int mdc2_4_file_num = 1,
-    const string &outputFile = "out_jan23.root",
+    const int mdc2_4_file_num = 1,
+    const std::string &outputFile = "out_jan23.root",
     const int skip = 0,
-    const string &outdir = ".")
+    const std::string &outdir = ".")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
 
-	string inputFile0 = "DST_CALO_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
-  string inputFile1 = "DST_VERTEX_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
-	string inputFile2 = "DST_TRUTH_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
+  std::string inputFile0 = "DST_CALO_G4HIT_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
+  std::string inputFile1 = "DST_VERTEX_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
+  std::string inputFile2 = "DST_TRUTH_sHijing_0_20fm_50kHz_bkg_0_20fm-0000000062-";
 
-
-	int ynum_int = 100000+ mdc2_4_file_num;
+  int ynum_int = 100000 + mdc2_4_file_num;
   TString yn_tstr = "";
   yn_tstr += ynum_int;
-  yn_tstr.Remove(0,1);
+  yn_tstr.Remove(0, 1);
   inputFile0 += yn_tstr.Data();
   inputFile1 += yn_tstr.Data();
-	inputFile2 += yn_tstr.Data();
+  inputFile2 += yn_tstr.Data();
 
   inputFile0 += ".root";
   inputFile1 += ".root";
-	inputFile2 += ".root";
-   
-  cout << "running over these files" << endl;
-  cout << inputFile0 << endl;
-  cout << inputFile1 << endl;
+  inputFile2 += ".root";
 
-  //Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
+  std::cout << "running over these files" << std::endl;
+  std::cout << inputFile0 << std::endl;
+  std::cout << inputFile1 << std::endl;
+
+  // Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
   PHRandomSeed::Verbosity(1);
 
   // just if we set some flags somewhere in this macro
-  recoConsts *rc = recoConsts::instance();
+  //  recoConsts *rc = recoConsts::instance();
 
   //===============
   // Input options
@@ -80,14 +85,14 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   // verbosity setting (applies to all input managers)
   Input::VERBOSITY = 1;
 
-	Input::READHITS = false; // true;
-	//INPUTREADHITS::filename[0] = inputFile0;
-	//INPUTREADHITS::filename[1] = inputFile1;
+  Input::READHITS = false;  // true;
+                            // INPUTREADHITS::filename[0] = inputFile0;
+  // INPUTREADHITS::filename[1] = inputFile1;
 
   Input::EMBED = true;
-	INPUTEMBED::filename[0] = inputFile0;  //0;
-	INPUTEMBED::filename[1] = inputFile1;
-	INPUTEMBED::filename[2] = inputFile2;
+  INPUTEMBED::filename[0] = inputFile0;  // 0;
+  INPUTEMBED::filename[1] = inputFile1;
+  INPUTEMBED::filename[2] = inputFile2;
 
   Input::SIMPLE = true;
   Input::SIMPLE_VERBOSITY = 0;
@@ -104,10 +109,10 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   // add the settings for other with [1], next with [2]...
   if (Input::SIMPLE)
   {
-    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi0",10);     
+    INPUTGENERATOR::SimpleEventGenerator[0]->add_particles("pi0", 10);
     if (Input::HEPMC || Input::EMBED)
     {
-			//INPUTGENERATOR::SimpleEventGenerator[0]->set_reuse_global_vertex(true);
+      // INPUTGENERATOR::SimpleEventGenerator[0]->set_reuse_global_vertex(true);
       INPUTGENERATOR::SimpleEventGenerator[0]->set_reuse_existing_vertex(true);
       INPUTGENERATOR::SimpleEventGenerator[0]->set_existing_vertex_offset_vector(0.0, 0.0, 0.0);
     }
@@ -124,7 +129,6 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
     INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(1.6, 5.);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_power_law_n(-6.5);
   }
-
 
   if (Input::PILEUPRATE > 0)
   {
@@ -146,8 +150,8 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   DstOut::OutputDir = outdir;
   DstOut::OutputFile = outputFile;
 
-  //Option to convert DST to human command readable TTree for quick poke around the outputs
-  //  Enable::DSTREADER = true;
+  // Option to convert DST to human command readable TTree for quick poke around the outputs
+  //   Enable::DSTREADER = true;
 
   // turn the display on (default off)
   Enable::DISPLAY = false;
@@ -166,13 +170,13 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
 
   // Enable::MBD = true;
   // Enable::MBD_SUPPORT = true; // save hist in MBD/BBC support structure
-  //Enable::MBDFAKE = true;  // Smeared vtx and t0, use if you don't want real MBD/BBC in simulation
+  // Enable::MBDFAKE = true;  // Smeared vtx and t0, use if you don't want real MBD/BBC in simulation
 
-  //Enable::PIPE = true;
-  //Enable::PIPE_ABSORBER = true;
-  //Enable::INTT = false;
-//  Enable::INTT_ABSORBER = true; // enables layerwise support structure readout
-//  Enable::INTT_SUPPORT = true; // enable global support structure readout
+  // Enable::PIPE = true;
+  // Enable::PIPE_ABSORBER = true;
+  // Enable::INTT = false;
+  //  Enable::INTT_ABSORBER = true; // enables layerwise support structure readout
+  //  Enable::INTT_SUPPORT = true; // enable global support structure readout
   Enable::INTT_CELL = Enable::INTT && true;
   Enable::INTT_CLUSTER = Enable::INTT_CELL && true;
   Enable::INTT_QA = Enable::INTT_CLUSTER && Enable::QA && true;
@@ -197,14 +201,14 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   //  Enable::CEMCALBEDO = true;
 
   Enable::CEMC = true;
- // Enable::CEMC_ABSORBER = true;
+  // Enable::CEMC_ABSORBER = true;
   Enable::CEMC_CELL = Enable::CEMC && true;
   Enable::CEMC_TOWER = Enable::CEMC_CELL && true;
   Enable::CEMC_CLUSTER = Enable::CEMC_TOWER && true;
-  //Enable::CEMC_EVAL = false;//Enable::CEMC_CLUSTER && true;
-  //Enable::CEMC_QA = false;//Enable::CEMC_CLUSTER && Enable::QA && true;
+  // Enable::CEMC_EVAL = false;//Enable::CEMC_CLUSTER && true;
+  // Enable::CEMC_QA = false;//Enable::CEMC_CLUSTER && Enable::QA && true;
 
-  Enable::HCALIN =false;
+  Enable::HCALIN = false;
   Enable::HCALIN_ABSORBER = true;
   Enable::HCALIN_CELL = Enable::HCALIN && true;
   Enable::HCALIN_TOWER = Enable::HCALIN_CELL && true;
@@ -226,25 +230,25 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   Enable::EPD = false;
 
   Enable::BEAMLINE = true;
-//  Enable::BEAMLINE_ABSORBER = true;  // makes the beam line magnets sensitive volumes
-//  Enable::BEAMLINE_BLACKHOLE = true; // turns the beamline magnets into black holes
+  //  Enable::BEAMLINE_ABSORBER = true;  // makes the beam line magnets sensitive volumes
+  //  Enable::BEAMLINE_BLACKHOLE = true; // turns the beamline magnets into black holes
   Enable::ZDC = false;
-//  Enable::ZDC_ABSORBER = true;
-//  Enable::ZDC_SUPPORT = true;
+  //  Enable::ZDC_ABSORBER = true;
+  //  Enable::ZDC_SUPPORT = true;
   Enable::ZDC_TOWER = Enable::ZDC && true;
   Enable::ZDC_EVAL = Enable::ZDC_TOWER && true;
 
   //! forward flux return plug door. Out of acceptance and off by default.
-  //Enable::PLUGDOOR = true;
-  //Enable::PLUGDOOR_ABSORBER = true;
+  // Enable::PLUGDOOR = true;
+  // Enable::PLUGDOOR_ABSORBER = true;
 
-	//Enable::GLOBAL_RECO = true;
-  //Enable::GLOBAL_FASTSIM = true;
+  // Enable::GLOBAL_RECO = true;
+  // Enable::GLOBAL_FASTSIM = true;
 
-  //Enable::KFPARTICLE = true;
-  //Enable::KFPARTICLE_VERBOSITY = 1;
-  //Enable::KFPARTICLE_TRUTH_MATCH = true;
-  //Enable::KFPARTICLE_SAVE_NTUPLE = true;
+  // Enable::KFPARTICLE = true;
+  // Enable::KFPARTICLE_VERBOSITY = 1;
+  // Enable::KFPARTICLE_TRUTH_MATCH = true;
+  // Enable::KFPARTICLE_SAVE_NTUPLE = true;
 
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && false;
 
@@ -260,14 +264,14 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   // 3-D topoCluster reconstruction, potentially in all calorimeter layers
   Enable::TOPOCLUSTER = false && Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER;
   // particle flow jet reconstruction - needs topoClusters!
-  //Enable::PARTICLEFLOW = true && Enable::TOPOCLUSTER;
+  // Enable::PARTICLEFLOW = true && Enable::TOPOCLUSTER;
   // centrality reconstruction
-  //Enable::CENTRALITY = true;
+  // Enable::CENTRALITY = true;
 
   // new settings using Enable namespace in GlobalVariables.C
-  //Enable::BLACKHOLE = true;
-  //Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
-  //BlackHoleGeometry::visible = true;
+  // Enable::BLACKHOLE = true;
+  // Enable::BLACKHOLE_SAVEHITS = false; // turn off saving of bh hits
+  // BlackHoleGeometry::visible = true;
 
   // Initialize the selected subsystems
   G4Init();
@@ -276,12 +280,10 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   // GEANT4 Detector description
   //---------------------
 
-		
   if (!Input::READHITS)
   {
     G4Setup();
   }
-		
 
   //------------------
   // Detector Division
@@ -323,10 +325,10 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   //--------------
   // SVTX tracking
   //--------------
-  if(Enable::TRACKING_TRACK)
-    {
-      TrackingInit();
-    }
+  if (Enable::TRACKING_TRACK)
+  {
+    TrackingInit();
+  }
   if (Enable::MVTX_CLUSTER) Mvtx_Clustering();
   if (Enable::INTT_CLUSTER) Intt_Clustering();
   if (Enable::TPC_CLUSTER) TPC_Clustering();
@@ -339,21 +341,21 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   //-----------------
   // Global Vertexing
   //-----------------
-	/*
-  if (Enable::GLOBAL_RECO && Enable::GLOBAL_FASTSIM)
-  {
-    cout << "You can only enable Enable::GLOBAL_RECO or Enable::GLOBAL_FASTSIM, not both" << endl;
-    gSystem->Exit(1);
-  }
-  if (Enable::GLOBAL_RECO)
-  {
-    Global_Reco();
-  }
-  else if (Enable::GLOBAL_FASTSIM)
-  {
-    Global_FastSim();
-  }
-*/	
+  /*
+if (Enable::GLOBAL_RECO && Enable::GLOBAL_FASTSIM)
+{
+std::cout << "You can only enable Enable::GLOBAL_RECO or Enable::GLOBAL_FASTSIM, not both" << std::endl;
+gSystem->Exit(1);
+}
+if (Enable::GLOBAL_RECO)
+{
+Global_Reco();
+}
+else if (Enable::GLOBAL_FASTSIM)
+{
+Global_FastSim();
+}
+*/
 
   //-----------------
   // Centrality Determination
@@ -361,7 +363,7 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
 
   if (Enable::CENTRALITY)
   {
-      Centrality();
+    Centrality();
   }
 
   //-----------------
@@ -385,10 +387,10 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   //----------------------
   // Simulation evaluation
   //----------------------
-  string outputroot = outputFile;
-  string remove_this = ".root";
+  std::string outputroot = outputFile;
+  std::string remove_this = ".root";
   size_t pos = outputroot.find(remove_this);
-  if (pos != string::npos)
+  if (pos != std::string::npos)
   {
     outputroot.erase(pos, remove_this.length());
   }
@@ -396,7 +398,7 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   if (Enable::TRACKING_EVAL) Tracking_Eval(outputroot + "_g4svtx_eval.root");
 
   if (Enable::CEMC_EVAL) CEMC_Eval(outputroot + "_g4cemc_eval.root");
-  
+
   if (Enable::HCALIN_EVAL) HCALInner_Eval(outputroot + "_g4hcalin_eval.root");
 
   if (Enable::HCALOUT_EVAL) HCALOuter_Eval(outputroot + "_g4hcalout_eval.root");
@@ -406,9 +408,6 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   if (Enable::DSTREADER) G4DSTreader(outputroot + "_DSTReader.root");
 
   if (Enable::USER) UserAnalysisInit();
-
-
-  
 
   //======================
   // Run KFParticle on evt
@@ -447,7 +446,7 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
 
   if (Enable::DSTOUT)
   {
-    string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
+    std::string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
     Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", FullOutFile);
     if (Enable::DSTOUT_COMPRESS)
     {
@@ -466,23 +465,22 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
     gROOT->ProcessLine("Fun4AllServer *se = Fun4AllServer::instance();");
     gROOT->ProcessLine("PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco(\"PHG4RECO\");");
 
-    cout << "-------------------------------------------------" << endl;
-    cout << "You are in event display mode. Run one event with" << endl;
-    cout << "se->run(1)" << endl;
-    cout << "Run Geant4 command with following examples" << endl;
+    std::cout << "-------------------------------------------------" << std::endl;
+    std::cout << "You are in event display mode. Run one event with" << std::endl;
+    std::cout << "se->run(1)" << std::endl;
+    std::cout << "Run Geant4 command with following examples" << std::endl;
     gROOT->ProcessLine("displaycmd()");
 
     return 0;
   }
 
-  CaloCalibEmc_Pi0 *eval_pi2 = new CaloCalibEmc_Pi0("dummy", outputroot+"_piemc.root");
-                                                // this call is needed for embedding
+  CaloCalibEmc_Pi0 *eval_pi2 = new CaloCalibEmc_Pi0("dummy", outputroot + "_piemc.root");
+  // this call is needed for embedding
   eval_pi2->set_centrality_nclusters_cut(350);  // which uses more central events
                                                 // than we will for data to enhance Bkg
                                                 // to match the enhanced signal from embed
   se->registerSubsystem(eval_pi2);
-  cout << "successful registration of pi0 " << endl;
-
+  std::cout << "successful registration of pi0 " << std::endl;
 
   // if we use a negative number of events we go back to the command line here
   if (nEvents < 0)
@@ -493,8 +491,8 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   // for embedding it runs forever if the repeat flag is set
   if (nEvents == 0 && !Input::HEPMC && !Input::READHITS && INPUTEMBED::REPEAT)
   {
-    cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
-    cout << "it will run forever, so I just return without running anything" << endl;
+    std::cout << "using 0 for number of events is a bad idea when using particle generators" << std::endl;
+    std::cout << "it will run forever, so I just return without running anything" << std::endl;
     return 0;
   }
 
@@ -514,12 +512,12 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   se->End();
   std::cout << "All done" << std::endl;
   delete se;
-	/*
-  if (Enable::PRODUCTION)
-  {
-    Production_MoveOutput();
-  }
-	*/
+  /*
+if (Enable::PRODUCTION)
+{
+Production_MoveOutput();
+}
+  */
   gSystem->Exit(0);
   return 0;
 }
