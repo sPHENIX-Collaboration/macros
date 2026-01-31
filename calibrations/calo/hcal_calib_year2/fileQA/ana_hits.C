@@ -1,11 +1,21 @@
+#include <TFile.h>
+#include <TH1.h>
+#include <TList.h>
+#include <TProfile2D.h>
+#include <TSystemDirectory.h>
 
-float getTempRun(int);
+#include <format>
+#include <fstream>
+#include <iostream>
+#include <string>
+
+float getTempRun(int /*runnumber*/);
 
 TProfile2D* pr2d_temp = new TProfile2D("pr2d_temp","",24,0,24,64,0,64,15.0,30.0,"s");
 
 void ana_hits() {
-    //string parantDir = "../output_cosmic_tsc_temp/";
-    string parantDir = "../cos_only_tsc_spec_output//";
+    //std::string parantDir = "../output_cosmic_tsc_temp/";
+    std::string parantDir = "../cos_only_tsc_spec_output//";
     TSystemDirectory dir(parantDir.c_str(),parantDir.c_str()); // Adjust the directory path
     TList *files = dir.GetListOfFiles();
 
@@ -64,11 +74,11 @@ void ana_hits() {
     //  analyze rooot files
     //////////////////////////////////////////
 
-    TH1F *entryCountHist = new TH1F("h_hits", "Entries in h", numFiles, 0, numFiles);
-    TH1F *h_events_run =  new TH1F("h_events_run", "Entries in h", numFiles, 0, numFiles);
-    TH1F *h_towerHits_run =  new TH1F("h_towerHits_run", "Entries in h", numFiles, 0, numFiles);
-    TH1F *runNumberHist = new TH1F("runNumberHist", "Run Numbers for Each File", numFiles, 0, numFiles);
-    TH1F *h_temp_run = new TH1F("h_temp_run", "", numFiles, 0, numFiles);
+    TH1 *entryCountHist = new TH1F("h_hits", "Entries in h", numFiles, 0, numFiles);
+    TH1 *h_events_run =  new TH1F("h_events_run", "Entries in h", numFiles, 0, numFiles);
+    //TH1 *h_towerHits_run =  new TH1F("h_towerHits_run", "Entries in h", numFiles, 0, numFiles);
+    TH1 *runNumberHist = new TH1F("runNumberHist", "Run Numbers for Each File", numFiles, 0, numFiles);
+    TH1 *h_temp_run = new TH1F("h_temp_run", "", numFiles, 0, numFiles);
 
     // Loop over all the files
     for (int i = 0; i < numFiles; ++i) {
@@ -76,8 +86,10 @@ void ana_hits() {
         TFile *file = TFile::Open(fileName);
 
         if (file && !file->IsZombie()) {
-            TH1F *h = (TH1F*)file->Get("hcalout_eta_20");
-            TH1F *h_event = (TH1F*) file->Get("h_event");
+	  TH1 *h {nullptr};
+	  file->GetObject("hcalout_eta_20",h);
+	  TH1 *h_event {nullptr};
+	  file->GetObject("h_event",h_event);
 
             if (h) {
                 float eLow = 1;
@@ -114,18 +126,19 @@ void ana_hits() {
 
 float getTempRun(int runnumber){
 
-  TFile* f = new TFile(Form("../tempHists/ohcal_temp_hist_%d.root",runnumber));
+  TFile* f = new TFile(std::format("../tempHists/ohcal_temp_hist_{}.root",runnumber).c_str());
   if (!f){
-     cout << "could not find temp file" << endl;
+     std::cout << "could not find temp file" << std::endl;
      return 0;
 
     }
 
 
-  TH2F* h = (TH2F*) f->Get("h_ohcal_temp");
+  TH2* h {nullptr};
+  f->GetObject("h_ohcal_temp",h);
 
   if (!h){
-     cout << "no temp hist" << endl;
+     std::cout << "no temp hist" << std::endl;
      return 0;
 
    }
