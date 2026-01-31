@@ -28,7 +28,7 @@ void Fun4All_EP1(const int nevents = 2, const std::string &inputcaloList = "dst_
   se->registerSubsystem(epreco);
 
   Fun4AllInputManager *in = new Fun4AllDstInputManager("DSTcalo");
-  in->AddListFile(inputcaloList, 1);
+  in->AddListFile(inputcaloList);
   se->registerInputManager(in);
 
   se->run(nevents);

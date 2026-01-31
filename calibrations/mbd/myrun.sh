@@ -42,10 +42,10 @@ dbtag=""
 if [[ $USER == "sphnxpro" ]]
 then
   pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0
-  outbase=DST_MBD_CALIBRATION_run3auau
-  outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/new_2025/$(get_rundirname ${runno})/
-  logbase=DST_MBD_CALIBRATION_run3auau
-  logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2025/$(get_rundirname ${runno})/
+  outbase=DST_MBD_CALIBRATION_run3pp
+  outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/new_2025pp/$(get_rundirname ${runno})/
+  logbase=DST_MBD_CALIBRATION_run3pp
+  logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2025pp/$(get_rundirname ${runno})/
   build=new
   dbtag=newcdbtag
 
@@ -71,13 +71,24 @@ then
     logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2024/$(get_rundirname ${runno})/
     build=new
     dbtag=newcdbtag
+  elif [[ $runno -le 78954 ]]
+  then
+    # 2025 Run3auau
+    echo "This is run3auau"
+    pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0
+    outbase=DST_MBD_CALIBRATION_run3auau
+    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/new_2025/$(get_rundirname ${runno})/
+    logbase=DST_MBD_CALIBRATION_run3auau
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2025/$(get_rundirname ${runno})/
+    build=new
+    dbtag=newcdbtag
   fi
 
 else
   pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0
-  outbase=DST_MBD_CALIBRATION_run3auau
+  outbase=DST_MBD_CALIBRATION_run3pp
   outdir=/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST
-  logbase=DST_MBD_CALIBRATION_run3auau
+  logbase=DST_MBD_CALIBRATION_run3pp
   logdir=/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST/log
 
   if [[ $runno -le 53880 ]]
@@ -94,6 +105,13 @@ else
     outdir=/sphenix/user/chiu/sphenix_bbc/run2024/CALIBPRODUCTION/TEST
     logbase=DST_MBD_CALIBRATION_run2auau
     logdir=/sphenix/user/chiu/sphenix_bbc/run2024/CALIBPRODUCTION/TEST/log
+  elif [[ $runno -le 78954 ]]
+  then
+    # 2025 Run3auau
+    outbase=DST_MBD_CALIBRATION_run3auau
+    outdir=/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST
+    logbase=DST_MBD_CALIBRATION_run3auau
+    logdir=/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST/log
   fi
 fi
 
@@ -104,7 +122,7 @@ ORIG_DIR=${PWD}
 if [[ ! -z "${_CONDOR_SCRATCH_DIR}" ]]
 then
   mkdir -p ${_CONDOR_SCRATCH_DIR}
-  cp ${inputs} *.sh *.h *.C ${_CONDOR_SCRATCH_DIR}/
+  cp ${inputs} *.sh *.h *.C mipseeds.txt ${_CONDOR_SCRATCH_DIR}/
   cd ${_CONDOR_SCRATCH_DIR}
   pwd
   ls -lR

@@ -55,9 +55,9 @@ R__LOAD_LIBRARY(libffamodules.so)
 
 int Fun4All_G4_sPHENIX(
     const int nEvents = 5,
-    const string &inputFile = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
-    const string &outputFile = "G4sPHENIX.root",
-    const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
+    const std::string &inputFile = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
+    const std::string &outputFile = "G4sPHENIX.root",
+    const std::string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const int skip = 0,
     const std::string &outdir = ".")
 {
@@ -112,10 +112,8 @@ int Fun4All_G4_sPHENIX(
   // Enable this is emulating the nominal pp/pA/AA collision vertex distribution
    Input::BEAM_CONFIGURATION = Input::pp_COLLISION; // Input::AA_COLLISION (default), Input::pA_COLLISION, Input::pp_COLLISION
 
-  //  Input::PYTHIA6 = true;
-
    Input::PYTHIA8 = true;
-   PYTHIA8::config_file = "./phpythia8_charm_jet.cfg";
+   PYTHIA8::config_file[0] = "./phpythia8_charm_jet.cfg";
 
   //  Input::GUN = true;
   //  Input::GUN_NUMBER = 3; // if you need 3 of them
@@ -225,12 +223,6 @@ int Fun4All_G4_sPHENIX(
     INPUTGENERATOR::Gun[0]->set_vtx(0, 0, 0);
   }
 
-  // pythia6
-  if (Input::PYTHIA6)
-  {
-    //! Nominal collision geometry is selected by Input::BEAM_CONFIGURATION
-    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia6);
-  }
   // pythia8
   if (Input::PYTHIA8)
   {
@@ -239,12 +231,12 @@ int Fun4All_G4_sPHENIX(
     theTrigger->SetEtaHighLow(-.7, .7);
     theTrigger->SetJetR(.4);
     theTrigger->SetMinJetPt(20);
-    INPUTGENERATOR::Pythia8->register_trigger(theTrigger);
+    INPUTGENERATOR::Pythia8[0]->register_trigger(theTrigger);
 
 
     //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
     //! Nominal collision geometry is selected by Input::BEAM_CONFIGURATION
-    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia8, Input::BEAM_CONFIGURATION);
+    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia8); // uses Input::BEAM_CONFIGURATION internally
   }
 
   //--------------
@@ -702,7 +694,7 @@ int Fun4All_G4_sPHENIX(
   if (Enable::MICROMEGAS_QA) Micromegas_QA();
   if (Enable::TRACKING_QA) Tracking_QA();
 
-  if (Enable::TRACKING_QA and Enable::CEMC_QA and Enable::HCALIN_QA and Enable::HCALOUT_QA) QA_G4CaloTracking();
+  if (Enable::TRACKING_QA && Enable::CEMC_QA && Enable::HCALIN_QA && Enable::HCALOUT_QA) QA_G4CaloTracking();
   if (Enable::KFPARTICLE)  KFParticle_QA();
 
   if (Enable::TRACK_MATCHING) Track_Matching(outputroot + "_g4trackmatching.root");
@@ -780,7 +772,7 @@ int Fun4All_G4_sPHENIX(
   se->End();
     
   se->PrintTimer();
-  se->PrintMemoryTracker();
+  Fun4AllServer::PrintMemoryTracker();
     
   std::cout << "All done" << std::endl;
   delete se;

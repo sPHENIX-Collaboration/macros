@@ -1,32 +1,32 @@
-#pragma once
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,00,0)
-#include <fun4all/SubsysReco.h>
-#include <fun4all/Fun4AllServer.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4allraw/Fun4AllPrdfInputManager.h>
-#include <fun4all/Fun4AllDstInputManager.h>
-#include <phool/recoConsts.h>
-#include <fun4all/Fun4AllRunNodeInputManager.h>
+#ifndef Fun4All_CaloProduction_PreQM23_C
+#define Fun4All_CaloProduction_PreQM23_C
 
-
-// #include <calotowerbuilder/CaloTowerBuilder.h>
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloWaveformProcessing.h>
 #include <caloreco/CaloTowerCalib.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawClusterPositionCorrection.h>
+#include <caloreco/DeadHotMapLoader.h>
+#include <caloreco/TowerInfoDeadHotMask.h>
+#include <caloreco/RawClusterDeadHotMask.h>
 
 #include <ffamodules/FlagHandler.h>
 #include <ffamodules/HeadReco.h>
 #include <ffamodules/SyncReco.h>
 #include <ffamodules/CDBInterface.h>
 
+#include <fun4all/SubsysReco.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4allraw/Fun4AllPrdfInputManager.h>
+#include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
-#include <caloreco/DeadHotMapLoader.h>
+#include <fun4all/Fun4AllRunNodeInputManager.h>
 
-#include <caloreco/TowerInfoDeadHotMask.h>
+#include <phool/recoConsts.h>
 
-#include <caloreco/RawClusterDeadHotMask.h>
+#include <Rtypes.h>
+#include <TSystem.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -34,8 +34,7 @@ R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libffamodules.so)
 
 
-#endif
-void Fun4All_CaloProduction_PreQM23(string fname = "full-00007359-0000.prdf", const char *outfile = "testfile.root", int nEvents = 2)
+void Fun4All_CaloProduction_PreQM23(const std::string& fname = "full-00007359-0000.prdf", const char *outfile = "testfile.root", int nEvents = 2)
 { 
    
   gSystem->Load("libg4dst");
@@ -53,30 +52,30 @@ void Fun4All_CaloProduction_PreQM23(string fname = "full-00007359-0000.prdf", co
   rc->set_uint64Flag("TIMESTAMP",stoi(fname.substr(fname.length()-15,5)));
 
   Fun4AllInputManager *dstIn = new Fun4AllDstInputManager("DSTIN");
-  dstIn -> AddFile(fname.c_str());
+  dstIn -> AddFile(fname);
   se -> registerInputManager(dstIn);
   
   std::cout << "Calibrating EMCal" << std::endl;
   CaloTowerCalib *calibEMC = new CaloTowerCalib("CEMCCALIB");
-  calibEMC -> set_detector_type(CaloTowerCalib::CEMC);
+  calibEMC -> set_detector_type(CaloTowerDefs::CEMC);
   se -> registerSubsystem(calibEMC);
   
   std::cout << "Calibrating OHcal" << std::endl;
 
   CaloTowerCalib *calibOHCal = new CaloTowerCalib("HCALOUT");
-  calibOHCal -> set_detector_type(CaloTowerCalib::HCALOUT);
+  calibOHCal -> set_detector_type(CaloTowerDefs::HCALOUT);
   se -> registerSubsystem(calibOHCal);
   
   std::cout << "Calibrating IHcal" << std::endl;
 
   CaloTowerCalib *calibIHCal = new CaloTowerCalib("HCALIN");
-  calibIHCal -> set_detector_type(CaloTowerCalib::HCALIN);
+  calibIHCal -> set_detector_type(CaloTowerDefs::HCALIN);
   se -> registerSubsystem(calibIHCal);
 
   std::cout << "Calibrating ZDC" << std::endl;
 
   CaloTowerCalib *calibZDC = new CaloTowerCalib("ZDC");
-  calibZDC -> set_detector_type(CaloTowerCalib::ZDC);
+  calibZDC -> set_detector_type(CaloTowerDefs::ZDC);
   se -> registerSubsystem(calibZDC);
 
   std::cout << "Loading EMCal deadmap" << std::endl;
@@ -152,3 +151,5 @@ void Fun4All_CaloProduction_PreQM23(string fname = "full-00007359-0000.prdf", co
   std::cout << "All done!" << std::endl;
   gSystem->Exit(0);
 }
+
+#endif

@@ -105,20 +105,20 @@ namespace HeavyFlavorReco
   float pid_frac = 0.4;
 };  // namespace HeavyFlavorReco
 
-using namespace HeavyFlavorReco;
+//using namespace HeavyFlavorReco;
 
-void create_hf_directories(std::string reconstruction_name, std::string &final_output_dir, std::string &output_reco_file)
+void create_hf_directories(const std::string& reconstruction_name, std::string &final_output_dir, std::string &output_reco_file)
 {
-  std::string output_file_name = kfp_header + reconstruction_name + trailer;
-  final_output_dir = output_dir + reconstruction_name + "/";
-  std::string output_reco_dir = final_output_dir + processing_folder;
+  std::string output_file_name = HeavyFlavorReco::kfp_header + reconstruction_name + HeavyFlavorReco::trailer;
+  final_output_dir = HeavyFlavorReco::output_dir + reconstruction_name + "/";
+  std::string output_reco_dir = final_output_dir + HeavyFlavorReco::processing_folder;
   output_reco_file = output_reco_dir + output_file_name;
 
   std::string makeDirectory = "mkdir -p " + output_reco_dir;
   system(makeDirectory.c_str());
 }
 
-void end_kfparticle(std::string full_file_name, std::string final_path)
+void end_kfparticle(const std::string& full_file_name, const std::string& final_path)
 {
   std::ifstream file(full_file_name.c_str());
   if (file.good())
@@ -130,15 +130,15 @@ void end_kfparticle(std::string full_file_name, std::string final_path)
 
 void Fun4All_raw_hit_KFP(
     const int nEvents = 10,
-    const std::string filelist = "filelist.list",
-    const std::string outfilename = "clusters_seeds",
+    const std::string& filelist = "filelist.list",
+    const std::string& outfilename = "clusters_seeds",
     const bool convertSeeds = false,
     const int nSkip = 0,
     const bool doKFParticle = false)
 {
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(2);
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
 
   // input manager for QM production raw hit DST file
   std::ifstream ifs(filelist);
@@ -163,14 +163,14 @@ void Fun4All_raw_hit_KFP(
     }
     if (filepath.find("ebdc") != std::string::npos)
     {
-      if (filepath.find("_0_") != std::string::npos or
+      if (filepath.find("_0_") != std::string::npos ||
           filepath.find("_1_") != std::string::npos)
       {
         process_endpoints = true;
       }
     }
     std::string inputname = "InputManager" + std::to_string(i);
-    auto hitsin = new Fun4AllDstInputManager(inputname);
+    auto *hitsin = new Fun4AllDstInputManager(inputname);
     hitsin->fileopen(filepath);
     se->registerInputManager(hitsin);
     i++;
@@ -201,13 +201,13 @@ void Fun4All_raw_hit_KFP(
   std::stringstream nice_skip;
   nice_skip << std::setw(5) << std::setfill('0') << std::to_string(nSkip);
 
-  output_dir = "./";  // Top dir of where the output nTuples will be written
-  trailer = "_" + nice_runnumber.str() + "_" + nice_segment.str() + "_" + nice_skip.str() + ".root";
+  HeavyFlavorReco::output_dir = "./";  // Top dir of where the output nTuples will be written
+  HeavyFlavorReco::trailer = "_" + nice_runnumber.str() + "_" + nice_segment.str() + "_" + nice_skip.str() + ".root";
 
   if (doKFParticle)
   {
-    create_hf_directories(pipi_reconstruction_name, pipi_output_dir, pipi_output_reco_file);
-    create_hf_directories(ppi_reconstruction_name, ppi_output_dir, ppi_output_reco_file);
+    create_hf_directories(HeavyFlavorReco::pipi_reconstruction_name, HeavyFlavorReco::pipi_output_dir, HeavyFlavorReco::pipi_output_reco_file);
+    create_hf_directories(HeavyFlavorReco::ppi_reconstruction_name, HeavyFlavorReco::ppi_output_dir, HeavyFlavorReco::ppi_output_reco_file);
   }
 
   G4TRACKING::convert_seeds_to_svtxtracks = convertSeeds;
@@ -308,7 +308,7 @@ void Fun4All_raw_hit_KFP(
 
   Tpc_LaserEventIdentifying();
 
-  auto tpcclusterizer = new TpcClusterizer;
+  auto *tpcclusterizer = new TpcClusterizer;
   tpcclusterizer->Verbosity(0);
   tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
   tpcclusterizer->set_rawdata_reco();
@@ -322,7 +322,7 @@ void Fun4All_raw_hit_KFP(
    * Begin Track Seeding
    */
 
-  auto silicon_Seeding = new PHActsSiliconSeeding;
+  auto *silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
   silicon_Seeding->setStrobeRange(-5, 5);
   // these get us to about 83% INTT > 1
@@ -331,14 +331,14 @@ void Fun4All_raw_hit_KFP(
   silicon_Seeding->seedAnalysis(false);
   se->registerSubsystem(silicon_Seeding);
 
-  auto merger = new PHSiliconSeedMerger;
+  auto *merger = new PHSiliconSeedMerger;
   merger->Verbosity(0);
   se->registerSubsystem(merger);
 
   /*
    * Tpc Seeding
    */
-  auto seeder = new PHCASeeding("PHCASeeding");
+  auto *seeder = new PHCASeeding("PHCASeeding");
   double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
   bool ConstField = isConstantField(G4MAGNET::magfield_tracking, fieldstrength);
   if (ConstField)
@@ -364,7 +364,7 @@ void Fun4All_raw_hit_KFP(
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
-  auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
+  auto *cprop = new PHSimpleKFProp("PHSimpleKFProp");
   cprop->set_field_dir(G4MAGNET::magfield_rescale);
   if (ConstField)
   {
@@ -384,7 +384,7 @@ void Fun4All_raw_hit_KFP(
 
   // Always apply preliminary distortion corrections to TPC clusters before silicon matching
   // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
-  auto prelim_distcorr = new PrelimDistortionCorrection;
+  auto *prelim_distcorr = new PrelimDistortionCorrection;
   prelim_distcorr->set_pp_mode(true);
   prelim_distcorr->Verbosity(0);
   se->registerSubsystem(prelim_distcorr);
@@ -394,7 +394,7 @@ void Fun4All_raw_hit_KFP(
    */
   // The normal silicon association methods
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
-  auto silicon_match = new PHSiliconTpcTrackMatching;
+  auto *silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
   if (G4TPC::ENABLE_AVERAGE_CORRECTIONS)
@@ -430,7 +430,7 @@ void Fun4All_raw_hit_KFP(
   se->registerSubsystem(silicon_match);
 
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-  auto mm_match = new PHMicromegasTpcTrackMatching;
+  auto *mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(0);
   mm_match->set_rphi_search_window_lyr1(3.);
   mm_match->set_rphi_search_window_lyr2(15.0);
@@ -451,7 +451,7 @@ void Fun4All_raw_hit_KFP(
    */
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
-    auto converter = new TrackSeedTrackMapConverter;
+    auto *converter = new TrackSeedTrackMapConverter;
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
     converter->setTrackSeedName("SvtxTrackSeedContainer");
@@ -461,12 +461,12 @@ void Fun4All_raw_hit_KFP(
   }
   else
   {
-    auto deltazcorr = new PHTpcDeltaZCorrection;
+    auto *deltazcorr = new PHTpcDeltaZCorrection;
     deltazcorr->Verbosity(0);
     se->registerSubsystem(deltazcorr);
 
     // perform final track fit with ACTS
-    auto actsFit = new PHActsTrkFitter;
+    auto *actsFit = new PHActsTrkFitter;
     actsFit->Verbosity(0);
     actsFit->commissioning(G4TRACKING::use_alignment);
     // in calibration mode, fit only Silicons and Micromegas hits
@@ -479,7 +479,7 @@ void Fun4All_raw_hit_KFP(
     actsFit->setFieldMap(G4MAGNET::magfield_tracking);
     se->registerSubsystem(actsFit);
 
-    auto cleaner = new PHTrackCleaner();
+    auto *cleaner = new PHTrackCleaner();
     cleaner->Verbosity(0);
     cleaner->set_pp_mode(TRACKING::pp_mode);
     se->registerSubsystem(cleaner);
@@ -490,7 +490,7 @@ void Fun4All_raw_hit_KFP(
        * in calibration mode, calculate residuals between TPC and fitted tracks,
        * store in dedicated structure for distortion correction
        */
-      auto residuals = new PHTpcResiduals;
+      auto *residuals = new PHTpcResiduals;
       const TString tpc_residoutfile = theOutfile + "_PhTpcResiduals.root";
       residuals->setOutputfile(tpc_residoutfile.Data());
       residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
@@ -504,7 +504,7 @@ void Fun4All_raw_hit_KFP(
     }
   }
 
-  auto finder = new PHSimpleVertexFinder;
+  auto *finder = new PHSimpleVertexFinder;
   finder->Verbosity(0);
   finder->setDcaCut(0.5);
   finder->setTrackPtCut(0.3);
@@ -517,7 +517,7 @@ void Fun4All_raw_hit_KFP(
   if (!G4TRACKING::convert_seeds_to_svtxtracks)
   {
     // Propagate track positions to the vertex position
-    auto vtxProp = new PHActsVertexPropagator;
+    auto *vtxProp = new PHActsVertexPropagator;
     vtxProp->Verbosity(0);
     vtxProp->fieldMap(G4MAGNET::magfield_tracking);
     se->registerSubsystem(vtxProp);
@@ -526,7 +526,7 @@ void Fun4All_raw_hit_KFP(
   TString residoutfile = theOutfile + "_resid.root";
   std::string residstring(residoutfile.Data());
 
-  auto resid = new TrackResiduals("TrackResiduals");
+  auto *resid = new TrackResiduals("TrackResiduals");
   resid->outfileName(residstring);
   resid->alignment(false);
   resid->vertexTree();
@@ -576,7 +576,7 @@ void Fun4All_raw_hit_KFP(
     se->registerSubsystem(new TpcClusterQA);
     se->registerSubsystem(new MicromegasClusterQA);
 
-    auto converter = new TrackSeedTrackMapConverter("SiliconSeedConverter");
+    auto *converter = new TrackSeedTrackMapConverter("SiliconSeedConverter");
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
     converter->setTrackSeedName("SiliconTrackSeedContainer");
@@ -585,7 +585,7 @@ void Fun4All_raw_hit_KFP(
     converter->Verbosity(0);
     se->registerSubsystem(converter);
 
-    auto finder_svx = new PHSimpleVertexFinder("SiliconVertexFinder");
+    auto *finder_svx = new PHSimpleVertexFinder("SiliconVertexFinder");
     finder_svx->Verbosity(0);
     finder_svx->setDcaCut(0.1);
     finder_svx->setTrackPtCut(0.2);
@@ -597,12 +597,12 @@ void Fun4All_raw_hit_KFP(
     finder_svx->setVertexMapName("SiliconSvtxVertexMap");
     se->registerSubsystem(finder_svx);
 
-    auto siliconqa = new SiliconSeedsQA;
+    auto *siliconqa = new SiliconSeedsQA;
     siliconqa->setTrackMapName("SiliconSvtxTrackMap");
     siliconqa->setVertexMapName("SiliconSvtxVertexMap");
     se->registerSubsystem(siliconqa);
 
-    auto convertertpc = new TrackSeedTrackMapConverter("TpcSeedConverter");
+    auto *convertertpc = new TrackSeedTrackMapConverter("TpcSeedConverter");
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
     convertertpc->setTrackSeedName("TpcTrackSeedContainer");
@@ -611,7 +611,7 @@ void Fun4All_raw_hit_KFP(
     convertertpc->Verbosity(0);
     se->registerSubsystem(convertertpc);
 
-    auto findertpc = new PHSimpleVertexFinder("TpcSimpleVertexFinder");
+    auto *findertpc = new PHSimpleVertexFinder("TpcSimpleVertexFinder");
     findertpc->Verbosity(0);
     findertpc->setDcaCut(0.5);
     findertpc->setTrackPtCut(0.2);
@@ -624,7 +624,7 @@ void Fun4All_raw_hit_KFP(
     findertpc->setVertexMapName("TpcSvtxVertexMap");
     se->registerSubsystem(findertpc);
 
-    auto tpcqa = new TpcSeedsQA;
+    auto *tpcqa = new TpcSeedsQA;
     tpcqa->setTrackMapName("TpcSvtxTrackMap");
     tpcqa->setVertexMapName("TpcSvtxVertexMap");
     tpcqa->setSegment(rc->get_IntFlag("RUNSEGMENT"));
@@ -645,21 +645,21 @@ void Fun4All_raw_hit_KFP(
     kfparticle->setDecayDescriptor("K_S0 -> pi^+ pi^-");
     // kfparticle->setDecayDescriptor("[K_S0 -> pi^+ pi^+]cc");
 
-    kfparticle->usePID(use_pid);
-    kfparticle->setPIDacceptFraction(pid_frac);
-    kfparticle->dontUseGlobalVertex(dont_use_global_vertex);
-    kfparticle->requireTrackVertexBunchCrossingMatch(require_track_and_vertex_match);
-    kfparticle->getAllPVInfo(save_all_vtx_info);
+    kfparticle->usePID(HeavyFlavorReco::use_pid);
+    kfparticle->setPIDacceptFraction(HeavyFlavorReco::pid_frac);
+    kfparticle->dontUseGlobalVertex(HeavyFlavorReco::dont_use_global_vertex);
+    kfparticle->requireTrackVertexBunchCrossingMatch(HeavyFlavorReco::require_track_and_vertex_match);
+    kfparticle->getAllPVInfo(HeavyFlavorReco::save_all_vtx_info);
     kfparticle->allowZeroMassTracks();
-    kfparticle->use2Dmatching(use_2D_matching);
-    kfparticle->getTriggerInfo(get_trigger_info);
-    kfparticle->getDetectorInfo(get_detector_info);
-    kfparticle->saveDST(save_tracks_to_DST);
+    kfparticle->use2Dmatching(HeavyFlavorReco::use_2D_matching);
+    kfparticle->getTriggerInfo(HeavyFlavorReco::get_trigger_info);
+    kfparticle->getDetectorInfo(HeavyFlavorReco::get_detector_info);
+    kfparticle->saveDST(HeavyFlavorReco::save_tracks_to_DST);
     kfparticle->saveParticleContainer(false);
     kfparticle->magFieldFile("FIELDMAP_TRACKING");
 
     // PV to SV cuts
-    kfparticle->constrainToPrimaryVertex(constrain_to_primary_vertex);
+    kfparticle->constrainToPrimaryVertex(HeavyFlavorReco::constrain_to_primary_vertex);
     kfparticle->setMotherIPchi2(100);
     kfparticle->setFlightDistancechi2(-1.);
     kfparticle->setMinDIRA(0.88);                    // was .95
@@ -692,7 +692,7 @@ void Fun4All_raw_hit_KFP(
     kfparticle->setMaximumMass(0.60);
     kfparticle->setMaximumMotherVertexVolume(0.1);
 
-    kfparticle->setOutputName(pipi_output_reco_file);
+    kfparticle->setOutputName(HeavyFlavorReco::pipi_output_reco_file);
 
     se->registerSubsystem(kfparticle);
 
@@ -701,21 +701,21 @@ void Fun4All_raw_hit_KFP(
     kfparticleLambda->Verbosity(0);
     kfparticleLambda->setDecayDescriptor("[Lambda0 -> proton^+ pi^-]cc");
 
-    kfparticle->usePID(use_pid);
-    kfparticle->setPIDacceptFraction(pid_frac);
-    kfparticle->dontUseGlobalVertex(dont_use_global_vertex);
-    kfparticle->requireTrackVertexBunchCrossingMatch(require_track_and_vertex_match);
-    kfparticle->getAllPVInfo(save_all_vtx_info);
+    kfparticle->usePID(HeavyFlavorReco::use_pid);
+    kfparticle->setPIDacceptFraction(HeavyFlavorReco::pid_frac);
+    kfparticle->dontUseGlobalVertex(HeavyFlavorReco::dont_use_global_vertex);
+    kfparticle->requireTrackVertexBunchCrossingMatch(HeavyFlavorReco::require_track_and_vertex_match);
+    kfparticle->getAllPVInfo(HeavyFlavorReco::save_all_vtx_info);
     kfparticle->allowZeroMassTracks();
-    kfparticle->use2Dmatching(use_2D_matching);
-    kfparticle->getTriggerInfo(get_trigger_info);
-    kfparticle->getDetectorInfo(get_detector_info);
-    kfparticle->saveDST(save_tracks_to_DST);
+    kfparticle->use2Dmatching(HeavyFlavorReco::use_2D_matching);
+    kfparticle->getTriggerInfo(HeavyFlavorReco::get_trigger_info);
+    kfparticle->getDetectorInfo(HeavyFlavorReco::get_detector_info);
+    kfparticle->saveDST(HeavyFlavorReco::save_tracks_to_DST);
     kfparticle->saveParticleContainer(false);
     kfparticle->magFieldFile("FIELDMAP_TRACKING");
 
     // PV to SV cuts
-    kfparticle->constrainToPrimaryVertex(constrain_to_primary_vertex);
+    kfparticle->constrainToPrimaryVertex(HeavyFlavorReco::constrain_to_primary_vertex);
     kfparticle->setMotherIPchi2(100);
     kfparticle->setFlightDistancechi2(-1.);
     kfparticle->setMinDIRA(0.88);
@@ -738,7 +738,7 @@ void Fun4All_raw_hit_KFP(
     kfparticle->setMaximumMass(1.300);
     kfparticle->setMaximumMotherVertexVolume(0.1);
 
-    kfparticle->setOutputName(ppi_output_reco_file);
+    kfparticle->setOutputName(HeavyFlavorReco::ppi_output_reco_file);
 
     se->registerSubsystem(kfparticleLambda);
   }
@@ -750,13 +750,12 @@ void Fun4All_raw_hit_KFP(
 
   if (doKFParticle)
   {
-    end_kfparticle(pipi_output_reco_file, pipi_output_dir);
-    end_kfparticle(ppi_output_reco_file, ppi_output_dir);
+    end_kfparticle(HeavyFlavorReco::pipi_output_reco_file, HeavyFlavorReco::pipi_output_dir);
+    end_kfparticle(HeavyFlavorReco::ppi_output_reco_file, HeavyFlavorReco::ppi_output_dir);
   }
   if (Enable::QA)
   {
-    TString qaname = theOutfile + "_qa.root";
-    std::string qaOutputFileName(qaname.Data());
+    std::string qaOutputFileName = theOutfile + "_qa.root";
     QAHistManagerDef::saveQARootFile(qaOutputFileName);
   }
   CDBInterface::instance()->Print();

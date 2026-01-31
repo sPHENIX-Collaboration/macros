@@ -18,6 +18,10 @@
 
 #include <phool/recoConsts.h>
 
+#include <Rtypes.h> // for R__LOAD_LIBRARY
+#include <TSystem.h>
+
+#include <format>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -38,15 +42,13 @@ void Fun4All_WaveformFit(const std::string &fname = "/sphenix/lustre01/sphnxpro/
 
   recoConsts *rc = recoConsts::instance();
 
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
   int runnumber = runseg.first;
   int segment = runseg.second;
-  char outfile[100];
-  char outfile_hist[100];
-  sprintf(outfile, "DST_CALOR-%08d-%04d.root", runnumber, segment);
-  sprintf(outfile_hist, "HIST_CALOR-%08d-%04d.root", runnumber, segment);
-  string fulloutfile = string("./") + outfile;
-  string fulloutfile_hist = string("./") + outfile_hist;
+  std::string outfile = std::format("DST_CALOR-{:08}-{:04}.root", runnumber, segment);
+//  std::string outfile_hist = std::format("HIST_CALOR-{:08}-{:04}.root", runnumber, segment);
+  std::string fulloutfile = "./" + outfile;
+//  std::string fulloutfile_hist = "./" + outfile_hist;
   //===============
   // conditions DB flags
   //===============

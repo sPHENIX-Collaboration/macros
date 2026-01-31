@@ -40,7 +40,10 @@
 
 #include <ffamodules/CDBInterface.h>
 
+#include <TFile.h>
+
 #include <cmath>
+#include <format>
 #include <vector>
 
 R__LOAD_LIBRARY(libg4tpc.so)
@@ -56,7 +59,7 @@ void MvtxInit()
 }
 
 double Mvtx(PHG4Reco* g4Reco, double radius,
-            const int supportactive = 0)
+            const int  /*supportactive*/ = 0)
 {
   bool maps_overlapcheck = Enable::OVERLAPCHECK || Enable::MVTX_OVERLAPCHECK;
   int verbosity = std::max(Enable::VERBOSITY, Enable::MVTX_VERBOSITY);
@@ -71,12 +74,12 @@ double Mvtx(PHG4Reco* g4Reco, double radius,
     //    mvtx->set_double_param(ilayer, "layer_z_offset", G4MVTXAlignment::z_offset[ilayer]);
     if (verbosity)
     {
-      cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << endl;
+      std::cout << "Create Maps layer " << ilayer << " with radius " << radius_lyr << " mm." << std::endl;
     }
     radius = radius_lyr / 10.;
   }
   //  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "alignment_path",  G4MVTXAlignment::alignment_path);
-  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", string(getenv("CALIBRATIONROOT")) + string("/Tracking/geometry/mvtx_stave.gdml"));
+  mvtx->set_string_param(PHG4MvtxDefs::GLOBAL, "stave_geometry_file", std::string(getenv("CALIBRATIONROOT")) + std::string("/Tracking/geometry/mvtx_stave.gdml"));
 
   mvtx->SetActive();
   if (SupportActive)
@@ -138,7 +141,7 @@ void InttInit()
 }
 
 double Intt(PHG4Reco* g4Reco, double radius,
-            const int absorberactive = 0)
+            const int  /*absorberactive*/ = 0)
 {
   std::cout << "G4_TrkrSimulation::Intt" << std::endl;
   int verbosity = std::max(Enable::VERBOSITY, Enable::INTT_VERBOSITY);
@@ -156,8 +159,8 @@ double Intt(PHG4Reco* g4Reco, double radius,
   for (int i = 0; i < G4INTT::n_intt_layer; i++)
   {
     // We want the sPHENIX layer numbers for the Intt to be from n_maps_layer to n_maps_layer+n_intt_layer - 1
-    vpair.push_back(std::make_pair(G4MVTX::n_maps_layer + i, i));  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
-    if (verbosity) cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << endl;
+    vpair.emplace_back(G4MVTX::n_maps_layer + i, i);  // sphxlayer=n_maps_layer+i corresponding to inttlayer=i
+    if (verbosity) std::cout << "Create strip tracker layer " << vpair[i].second << " as  sphenix layer  " << vpair[i].first << std::endl;
   }
 
   PHG4InttSubsystem* sitrack = new PHG4InttSubsystem("INTT", vpair);
@@ -178,11 +181,11 @@ double Intt(PHG4Reco* g4Reco, double radius,
 
   // Set the laddertype and ladder spacing configuration
 
-  cout << "Intt has " << G4INTT::n_intt_layer << " layers with layer setup:" << endl;
+  std::cout << "Intt has " << G4INTT::n_intt_layer << " layers with layer setup:" << std::endl;
   for (int i = 0; i < G4INTT::n_intt_layer; i++)
   {
-    cout << " Intt layer " << i << " laddertype " << G4INTT::laddertype[i] << " nladders " << G4INTT::nladder[i]
-         << " sensor radius " << G4INTT::sensor_radius[i] << endl;
+    std::cout << " Intt layer " << i << " laddertype " << G4INTT::laddertype[i] << " nladders " << G4INTT::nladder[i]
+         << " sensor radius " << G4INTT::sensor_radius[i] << std::endl;
     sitrack->set_int_param(i, "laddertype", G4INTT::laddertype[i]);
     sitrack->set_int_param(i, "nladder", G4INTT::nladder[i]);
     sitrack->set_double_param(i, "sensor_radius", G4INTT::sensor_radius[i]);  // expecting cm
@@ -206,12 +209,12 @@ void Intt_Cells()
 
     for (int i = 0; i < G4INTT::n_intt_layer; i++)
     {
-      string DeadMapConfigName = Form("intt_layer%d/", i);
+      std::string DeadMapConfigName = std::format("intt_layer{}/", i);
 
       if (G4INTT::InttDeadMapOption == G4INTT::kInttDeadMap)
       {
-        string DeadMapPath = string(getenv("CALIBRATIONROOT")) + string("/Tracking/INTT/DeadMap/");
-        // string DeadMapPath = "/sphenix/u/wxie/sphnx_software/INTT" + string("/DeadMap/");
+        std::string DeadMapPath = std::string(getenv("CALIBRATIONROOT")) + std::string("/Tracking/INTT/DeadMap/");
+        // std::string DeadMapPath = "/sphenix/u/wxie/sphnx_software/INTT" + std::string("/DeadMap/");
 
         DeadMapPath += DeadMapConfigName;
 
@@ -219,7 +222,7 @@ void Intt_Cells()
       }
       else
       {
-        cout << "G4_Intt.C - fatal error - invalid InttDeadMapOption = " << G4INTT::InttDeadMapOption << endl;
+        std::cout << "G4_Intt.C - fatal error - invalid InttDeadMapOption = " << G4INTT::InttDeadMapOption << std::endl;
         exit(1);
       }
     }
@@ -386,12 +389,12 @@ double TPC(PHG4Reco* g4Reco,
 void TPC_Cells()
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::TPC_VERBOSITY);
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
 
   // central membrane G4Hit generation
   if (G4TPC::ENABLE_CENTRAL_MEMBRANE_HITS)
   {
-    auto centralMembrane = new PHG4TpcCentralMembrane;
+    auto *centralMembrane = new PHG4TpcCentralMembrane;
     centralMembrane->setCentralMembraneDelay(0);
     centralMembrane->setCentralMembraneEventModulo(5);
     se->registerSubsystem(centralMembrane);
@@ -400,7 +403,7 @@ void TPC_Cells()
   // direct laser G4Hit generation
   if (G4TPC::ENABLE_DIRECT_LASER_HITS)
   {
-    auto directLaser = new PHG4TpcDirectLaser;
+    auto *directLaser = new PHG4TpcDirectLaser;
 
     // setup phi and theta steps
     /* use 5deg steps */
@@ -424,7 +427,7 @@ void TPC_Cells()
   // g4tpc/PHG4TpcPadPlaneReadout
   //=========================
 
-  auto padplane = new PHG4TpcPadPlaneReadout;
+  auto *padplane = new PHG4TpcPadPlaneReadout;
   padplane->Verbosity(verbosity);
   double extended_readout_time = 0.0;
   if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
@@ -433,12 +436,12 @@ void TPC_Cells()
   padplane->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
   padplane->SetDriftVelocity(G4TPC::tpc_drift_velocity_sim);
 
-  auto edrift = new PHG4TpcElectronDrift;
+  auto *edrift = new PHG4TpcElectronDrift;
   edrift->Detector("TPC");
   edrift->Verbosity(verbosity);
   if (G4TPC::ENABLE_STATIC_DISTORTIONS || G4TPC::ENABLE_TIME_ORDERED_DISTORTIONS)
   {
-    auto distortionMap = new PHG4TpcDistortion;
+    auto *distortionMap = new PHG4TpcDistortion;
 
     distortionMap->set_read_phi_as_radians(G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS);
 
@@ -488,8 +491,8 @@ void TPC_Cells()
   double ADC_threshold = 4.0 * ENC;
   digitpc->SetADCThreshold(ADC_threshold);  // 4 * ENC seems OK
   digitpc->Verbosity(verbosity);
-  cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
-       << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << endl;
+  std::cout << " Tpc digitizer: Setting ENC to " << ENC << " ADC threshold to " << ADC_threshold
+       << " maps+Intt layers set to " << G4MVTX::n_maps_layer + G4INTT::n_intt_layer << std::endl;
   digitpc->set_skip_noise_flag(true);
   se->registerSubsystem(digitpc);
 }
@@ -520,7 +523,7 @@ void Micromegas(PHG4Reco* g4Reco)
   int verbosity = std::max(Enable::VERBOSITY, Enable::MICROMEGAS_VERBOSITY);
   bool SupportActive = Enable::SUPPORT || Enable::MICROMEGAS_SUPPORT;
   const int mm_layer = G4MVTX::n_maps_layer + G4INTT::n_intt_layer + G4TPC::n_gas_layer;
-  auto mm = new PHG4MicromegasSubsystem("MICROMEGAS", mm_layer);
+  auto *mm = new PHG4MicromegasSubsystem("MICROMEGAS", mm_layer);
   mm->Verbosity(verbosity);
   if (SupportActive)
   {
@@ -535,10 +538,10 @@ void Micromegas_Cells()
 {
   // the acts geometry needs to go here since it will be used by the PHG4MicromegasHitReco
   ACTSGEOM::ActsGeomInit();
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::MICROMEGAS_VERBOSITY);
   // micromegas
-  auto reco = new PHG4MicromegasHitReco;
+  auto *reco = new PHG4MicromegasHitReco;
   reco->Verbosity(verbosity);
   double extended_readout_time = 0.0;
   if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;

@@ -541,6 +541,7 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
   {
     evtRhoQA->setTrgToSelect(trg.value());
   }
+  evtRhoQA->setPPMode(JetQA::DoPP);
   se->registerSubsystem(evtRhoQA);
 
   // create modules that take single R values ---------------------------------
@@ -646,6 +647,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   {
     evtRhoQA->setTrgToSelect(trg.value());
   }
+  evtRhoQA->setPPMode(JetQA::DoPP);
   se->registerSubsystem(evtRhoQA);
 
   // initialize and register jet seed counter qa module
@@ -670,21 +672,24 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   }
 
   // register underlying event module
-  UEvsEtaCentrality* UEvsEtaCentralityQA = new UEvsEtaCentrality("UEvsEtaCent" + trig_tag);
-  UEvsEtaCentralityQA->SetConfig(
-      {
-          .debug = false,
-          .histTag = "",
-      });
-  if (trg.has_value())
+  if (!JetQA::DoPP)
   {
+    UEvsEtaCentrality* UEvsEtaCentralityQA = new UEvsEtaCentrality("UEvsEtaCent" + trig_tag);
     UEvsEtaCentralityQA->SetConfig(
         {
-            .doTrgSelect = true,
-            .trgToSelect = trg.value(),
+            .debug = false,
+            .histTag = "",
         });
+    if (trg.has_value())
+    {
+      UEvsEtaCentralityQA->SetConfig(
+          {
+              .doTrgSelect = true,
+              .trgToSelect = trg.value(),
+          });
+    }
+    se->registerSubsystem(UEvsEtaCentralityQA);
   }
-  se->registerSubsystem(UEvsEtaCentralityQA);
 
   // create modules that take single R values ---------------------------------
 
@@ -738,10 +743,11 @@ void Jet_QA(const std::vector<uint32_t>& vecTrigsToUse = JetQA::GetDefaultTrigge
     caloStatusQA->SetConfig(
         {
             .debug = false,
-            .doNorm = false,     // do NOT try to normalize histograms
-            .doOptHist = false,  // turn off extra histograms
+            .doNorm = false,       // do NOT try to normalize histograms
+            .doOptHist = false,    // turn off extra histograms
             .histTag = "",
-            .doTrgSelect = false  // n.b. differential in trigger not useful here
+            .doTrgSelect = false,  // n.b. differential in trigger not useful here
+            .inPPMode = JetQA::DoPP
         });
 
     se->Verbosity(verbosity);

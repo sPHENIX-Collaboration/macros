@@ -7,6 +7,23 @@
 #include <caloreco/RawClusterLikelihoodProfile.h>
 #include <caloreco/RawClusterPositionCorrection.h>
 
+#include <calotrigger/MinimumBiasClassifier.h>
+#include <calotrigger/TriggerRunInfoReco.h>
+
+
+#include <centrality/CentralityInfo.h>
+
+#include <cdbobjects/CDBTTree.h>  // for CDBTTree
+
+#include <litecaloeval/LiteCaloEval.h>
+
+#include <calib_emc_pi0/pi0EtaByEta.h>
+
+#include <mbd/MbdReco.h>
+
+#include <globalvertex/GlobalVertexReco.h>
+
+#include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
 #include <ffamodules/HeadReco.h>
 #include <ffamodules/SyncReco.h>
@@ -23,22 +40,11 @@
 
 #include <phool/recoConsts.h>
 
-#include <calotrigger/MinimumBiasClassifier.h>
-#include <centrality/CentralityInfo.h>
 
-#include <cdbobjects/CDBTTree.h>  // for CDBTTree
-#include <ffamodules/CDBInterface.h>
-//#include <GlobalVariables.C>
+#include <TSystem.h>
 
-#include <litecaloeval/LiteCaloEval.h>
-#include <calib_emc_pi0/pi0EtaByEta.h>
-#include <calotrigger/MinimumBiasClassifier.h>
-#include <calotrigger/TriggerRunInfoReco.h>
-
-#include <mbd/MbdReco.h>
-#include <globalvertex/GlobalVertexReco.h>
-
-
+#include <format>
+#include <fstream>
 
 R__LOAD_LIBRARY(libcdbobjects)
 R__LOAD_LIBRARY(libfun4all.so)
@@ -54,7 +60,7 @@ R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 
 
-void createLocalEMCalCalibFile(const string fname, int runNumber);
+void createLocalEMCalCalibFile(const std::string &fname, int runNumber);
 
 
 void Fun4All_EMCal(int nevents = 1e2, const std::string &fname = "inputdata.txt",int iter = 2, const std::string &calib_fname="base/local_calib_copy.root")
@@ -66,16 +72,16 @@ void Fun4All_EMCal(int nevents = 1e2, const std::string &fname = "inputdata.txt"
 
   recoConsts *rc = recoConsts::instance();
 
-  ifstream file(fname);
-  string first_file;
+  std::ifstream file(fname);
+  std::string first_file;
   getline(file, first_file);
 
   //===============
   // conditions DB flags
   //===============
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(first_file);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(first_file);
   int runnumber = runseg.first;
-  cout << "run number = " << runnumber << endl;
+  std::cout << "run number = " << runnumber << std::endl;
 
   rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
   rc->set_uint64Flag("TIMESTAMP",runnumber);// runnumber);
@@ -85,13 +91,13 @@ void Fun4All_EMCal(int nevents = 1e2, const std::string &fname = "inputdata.txt"
   se->registerInputManager(in);
 
   std::string filename = first_file.substr(first_file.find_last_of("/\\") + 1);
-  std::string OutFile = Form("OUTHIST_iter%d_%s",iter , filename.c_str());
+  std::string OutFile = std::format("OUTHIST_iter{}_{}",iter , filename);
 
 
   if (iter == 0)
   {
-    createLocalEMCalCalibFile(calib_fname.c_str(), runnumber);
-    cout << "creating " << calib_fname.c_str() << " and exiting" << endl;
+    createLocalEMCalCalibFile(calib_fname, runnumber);
+    std::cout << "creating " << calib_fname.c_str() << " and exiting" << std::endl;
     gSystem->Exit(0);
   }
 
@@ -126,7 +132,7 @@ void Fun4All_EMCal(int nevents = 1e2, const std::string &fname = "inputdata.txt"
 
   CaloTowerCalib *calibEMC = new CaloTowerCalib("CEMCCALIB");
   calibEMC->set_detector_type(CaloTowerDefs::CEMC);
-  calibEMC->set_directURL(calib_fname.c_str());
+  calibEMC->set_directURL(calib_fname);
   se->registerSubsystem(calibEMC);
 
 
@@ -145,7 +151,7 @@ void Fun4All_EMCal(int nevents = 1e2, const std::string &fname = "inputdata.txt"
   se->registerSubsystem(ClusterBuilder);
 
 /*
-  string clusternodename = "CLUSTERINFO_CEMC";
+  std::string clusternodename = "CLUSTERINFO_CEMC";
   // cluster new prob
   RawClusterLikelihoodProfile *ClusterProleBuilder = new RawClusterLikelihoodProfile("RawClusterLikelihoodProleGamma");
   ClusterProleBuilder->set_profile_filepath("/sphenix/user/jpark4/CDBfiles/EMCalProb/EMCal_ProfileLikelihoodD2_Thres70MeV.root"); // default set to single gamma
@@ -157,8 +163,8 @@ void Fun4All_EMCal(int nevents = 1e2, const std::string &fname = "inputdata.txt"
   
 
   pi0EtaByEta *ca = new pi0EtaByEta("calomodulename", OutFile);
-  const vector<int> triggerList = {10,12};
-  //const vector<int> triggerList = {24,25,26};
+  const std::vector<int> triggerList = {10,12};
+  //const std::vector<int> triggerList = {24,25,26};
   //ca->set_reqTrig(true,triggerList);
   ca->set_RunTowByTow(false); // to decide if we want to run tbt (default is true)
   ca->set_RunTBTCompactMode(true);
@@ -180,14 +186,14 @@ void Fun4All_EMCal(int nevents = 1e2, const std::string &fname = "inputdata.txt"
 
 
 
-void createLocalEMCalCalibFile(const string fname, int runNumber)
+void createLocalEMCalCalibFile(const std::string &fname, int runNumber)
 {
-  string default_time_independent_calib = "CEMC_calib_ADC_to_ETower_default";
-  //string m_calibName = "cemc_pi0_twrSlope_v1";
-  string m_calibName = "getdefault";
+  std::string default_time_independent_calib = "CEMC_calib_ADC_to_ETower_default";
+  //std::string m_calibName = "cemc_pi0_twrSlope_v1";
+  std::string m_calibName = "getdefault";
 
-  string calibdir = CDBInterface::instance()->getUrl(m_calibName);
-  string filePath;
+  std::string calibdir = CDBInterface::instance()->getUrl(m_calibName);
+  std::string filePath;
 
   if (!calibdir.empty())
   {

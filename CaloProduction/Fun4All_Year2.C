@@ -70,7 +70,7 @@ void Fun4All_Year2(int nEvents = 100,
 
   recoConsts *rc = recoConsts::instance();
 
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
   int runnumber = runseg.first;
 
   // conditions DB flags and timestamp

@@ -14,21 +14,28 @@
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
 
+#include <g4centrality/PHG4CentralityReco.h>
+
+#include <globalvertex/GlobalVertexReco.h>
+
+#include <jetbackground/BeamBackgroundFilterAndQA.h>
+
+#include <mbd/MbdReco.h>
+
+#include <zdcinfo/ZdcReco.h>
+
+#include <qautils/QAHistManagerDef.h>
+
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
+
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllUtils.h>
-#include <g4centrality/PHG4CentralityReco.h>
-#include <globalvertex/GlobalVertexReco.h>
-#include <jetbackground/BeamBackgroundFilterAndQA.h>
-#include <mbd/MbdReco.h>
 #include <phool/recoConsts.h>
-#include <qautils/QAHistManagerDef.h>
-#include <zdcinfo/ZdcReco.h>
 
 #include <fstream>
 #include <iostream>
@@ -121,12 +128,12 @@ void Fun4All_JetProductionYear2_AuAu(
   se -> Verbosity(1);
 
   // grab 1st file from input lists
-  ifstream    files(inlists.front());
-  std::string first("");
+  std::ifstream files(inlists.front());
+  std::string first;
   std::getline(files, first);
 
   // grab run and segment no.s
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(first);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(first);
   int runnumber = runseg.first;
 
   // set up reconstruction constants, DB tag, timestamp

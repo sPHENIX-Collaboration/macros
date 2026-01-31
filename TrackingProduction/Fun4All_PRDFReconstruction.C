@@ -19,8 +19,6 @@
 #include <trackreco/PHActsSiliconSeeding.h>
 #include <trackreco/PHSiliconSeedMerger.h>
 
-#include <cdbobjects/CDBTTree.h>
-
 #include <mvtxrawhitqa/MvtxRawHitQA.h>
 
 #include <inttrawhitqa/InttRawHitQA.h>
@@ -79,55 +77,55 @@ int getrunnumber(const std::string &listfile);
 
 void Fun4All_PRDFReconstruction(
     const int nEvents = 0,
-    const int runnumber_unused = 53756,
-    const std::string &dir = "/.",
+    const int /*runnumber_unused*/ = 53756,
+    const std::string & /*dir*/ = "/.",
     const std::string &outfilename = "output_tracks",
     const std::string &input_gl1file = "gl1daq.list",
-    const string &input_inttfile00 = "intt0.list",
-    const string &input_inttfile01 = "intt1.list",
-    const string &input_inttfile02 = "intt2.list",
-    const string &input_inttfile03 = "intt3.list",
-    const string &input_inttfile04 = "intt4.list",
-    const string &input_inttfile05 = "intt5.list",
-    const string &input_inttfile06 = "intt6.list",
-    const string &input_inttfile07 = "intt7.list",
-    const string &input_mvtxfile00 = "mvtx0.list",
-    const string &input_mvtxfile01 = "mvtx1.list",
-    const string &input_mvtxfile02 = "mvtx2.list",
-    const string &input_mvtxfile03 = "mvtx3.list",
-    const string &input_mvtxfile04 = "mvtx4.list",
-    const string &input_mvtxfile05 = "mvtx5.list",
-    const string &input_tpcfile00 = "tpc00_0.list",
-    const string &input_tpcfile01 = "tpc01_0.list",
-    const string &input_tpcfile02 = "tpc02_0.list",
-    const string &input_tpcfile03 = "tpc03_0.list",
-    const string &input_tpcfile04 = "tpc04_0.list",
-    const string &input_tpcfile05 = "tpc05_0.list",
-    const string &input_tpcfile06 = "tpc06_0.list",
-    const string &input_tpcfile07 = "tpc07_0.list",
-    const string &input_tpcfile08 = "tpc08_0.list",
-    const string &input_tpcfile09 = "tpc09_0.list",
-    const string &input_tpcfile10 = "tpc10_0.list",
-    const string &input_tpcfile11 = "tpc11_0.list",
-    const string &input_tpcfile12 = "tpc12_0.list",
-    const string &input_tpcfile13 = "tpc13_0.list",
-    const string &input_tpcfile14 = "tpc14_0.list",
-    const string &input_tpcfile15 = "tpc15_0.list",
-    const string &input_tpcfile16 = "tpc16_0.list",
-    const string &input_tpcfile17 = "tpc17_0.list",
-    const string &input_tpcfile18 = "tpc18_0.list",
-    const string &input_tpcfile19 = "tpc19_0.list",
-    const string &input_tpcfile20 = "tpc20_0.list",
-    const string &input_tpcfile21 = "tpc21_0.list",
-    const string &input_tpcfile22 = "tpc22_0.list",
-    const string &input_tpcfile23 = "tpc23_0.list",
-    const string &input_tpotfile = "tpot.list")
+    const std::string &input_inttfile00 = "intt0.list",
+    const std::string &input_inttfile01 = "intt1.list",
+    const std::string &input_inttfile02 = "intt2.list",
+    const std::string &input_inttfile03 = "intt3.list",
+    const std::string &input_inttfile04 = "intt4.list",
+    const std::string &input_inttfile05 = "intt5.list",
+    const std::string &input_inttfile06 = "intt6.list",
+    const std::string &input_inttfile07 = "intt7.list",
+    const std::string &input_mvtxfile00 = "mvtx0.list",
+    const std::string &input_mvtxfile01 = "mvtx1.list",
+    const std::string &input_mvtxfile02 = "mvtx2.list",
+    const std::string &input_mvtxfile03 = "mvtx3.list",
+    const std::string &input_mvtxfile04 = "mvtx4.list",
+    const std::string &input_mvtxfile05 = "mvtx5.list",
+    const std::string &input_tpcfile00 = "tpc00_0.list",
+    const std::string &input_tpcfile01 = "tpc01_0.list",
+    const std::string &input_tpcfile02 = "tpc02_0.list",
+    const std::string &input_tpcfile03 = "tpc03_0.list",
+    const std::string &input_tpcfile04 = "tpc04_0.list",
+    const std::string &input_tpcfile05 = "tpc05_0.list",
+    const std::string &input_tpcfile06 = "tpc06_0.list",
+    const std::string &input_tpcfile07 = "tpc07_0.list",
+    const std::string &input_tpcfile08 = "tpc08_0.list",
+    const std::string &input_tpcfile09 = "tpc09_0.list",
+    const std::string &input_tpcfile10 = "tpc10_0.list",
+    const std::string &input_tpcfile11 = "tpc11_0.list",
+    const std::string &input_tpcfile12 = "tpc12_0.list",
+    const std::string &input_tpcfile13 = "tpc13_0.list",
+    const std::string &input_tpcfile14 = "tpc14_0.list",
+    const std::string &input_tpcfile15 = "tpc15_0.list",
+    const std::string &input_tpcfile16 = "tpc16_0.list",
+    const std::string &input_tpcfile17 = "tpc17_0.list",
+    const std::string &input_tpcfile18 = "tpc18_0.list",
+    const std::string &input_tpcfile19 = "tpc19_0.list",
+    const std::string &input_tpcfile20 = "tpc20_0.list",
+    const std::string &input_tpcfile21 = "tpc21_0.list",
+    const std::string &input_tpcfile22 = "tpc22_0.list",
+    const std::string &input_tpcfile23 = "tpc23_0.list",
+    const std::string &input_tpotfile = "tpot.list")
 {
-  vector<string> gl1_infile;
+  std::vector<std::string> gl1_infile;
   gl1_infile.push_back(input_gl1file);
 
   // MVTX
-  vector<string> mvtx_infile;
+  std::vector<std::string> mvtx_infile;
   mvtx_infile.push_back(input_mvtxfile00);
   mvtx_infile.push_back(input_mvtxfile01);
   mvtx_infile.push_back(input_mvtxfile02);
@@ -136,7 +134,7 @@ void Fun4All_PRDFReconstruction(
   mvtx_infile.push_back(input_mvtxfile05);
 
   // INTT
-  vector<string> intt_infile;
+  std::vector<std::string> intt_infile;
   intt_infile.push_back(input_inttfile00);
   intt_infile.push_back(input_inttfile01);
   intt_infile.push_back(input_inttfile02);
@@ -146,7 +144,7 @@ void Fun4All_PRDFReconstruction(
   intt_infile.push_back(input_inttfile06);
   intt_infile.push_back(input_inttfile07);
 
-  vector<string> tpc_infile;
+  std::vector<std::string> tpc_infile;
   tpc_infile.push_back(input_tpcfile00);
   tpc_infile.push_back(input_tpcfile01);
   tpc_infile.push_back(input_tpcfile02);
@@ -173,7 +171,7 @@ void Fun4All_PRDFReconstruction(
   tpc_infile.push_back(input_tpcfile23);
 
   // TPOT
-  vector<string> tpot_infile;
+  std::vector<std::string> tpot_infile;
   tpot_infile.push_back(input_tpotfile);
 
   int runnumber = -99999;
@@ -204,9 +202,9 @@ void Fun4All_PRDFReconstruction(
     gSystem->Exit(1);
   }
 
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
@@ -245,8 +243,6 @@ void Fun4All_PRDFReconstruction(
   G4Init();
   G4Setup();
 
-  CDBInterface *cdb = CDBInterface::instance();
-
   // can use for zero field
   // double fieldstrength = 0.01;
   // G4MAGNET::magfield_tracking = "0.01";
@@ -265,11 +261,11 @@ void Fun4All_PRDFReconstruction(
   int NumInputs = 0;
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
 
-  for (auto iter : gl1_infile)
+  for (const auto &iter : gl1_infile)
   {
     if (isGood(iter))
     {
-      SingleGl1PoolInput *gl1_sngl = new SingleGl1PoolInput("GL1_" + to_string(i));
+      SingleGl1PoolInput *gl1_sngl = new SingleGl1PoolInput("GL1_" + std::to_string(i));
       //    gl1_sngl->Verbosity(3);
       gl1_sngl->AddListFile(iter);
       in->registerStreamingInput(gl1_sngl, InputManagerType::GL1);
@@ -279,11 +275,11 @@ void Fun4All_PRDFReconstruction(
   NumInputs += i;
 
   i = 0;
-  for (auto iter : intt_infile)
+  for (const auto &iter : intt_infile)
   {
     if (isGood(iter))
     {
-      SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + to_string(i));
+      SingleInttPoolInput *intt_sngl = new SingleInttPoolInput("INTT_" + std::to_string(i));
       intt_sngl->AddListFile(iter);
       in->registerStreamingInput(intt_sngl, InputManagerType::INTT);
       i++;
@@ -292,11 +288,11 @@ void Fun4All_PRDFReconstruction(
   NumInputs += i;
 
   i = 0;
-  for (auto iter : mvtx_infile)
+  for (const auto &iter : mvtx_infile)
   {
     if (isGood(iter))
     {
-      SingleMvtxPoolInput *mvtx_sngl = new SingleMvtxPoolInput("MVTX_" + to_string(i));
+      SingleMvtxPoolInput *mvtx_sngl = new SingleMvtxPoolInput("MVTX_" + std::to_string(i));
       //    mvtx_sngl->Verbosity(3);
       mvtx_sngl->AddListFile(iter);
       in->registerStreamingInput(mvtx_sngl, InputManagerType::MVTX);
@@ -307,11 +303,11 @@ void Fun4All_PRDFReconstruction(
 
   i = 0;
 
-  for (auto iter : tpc_infile)
+  for (const auto &iter : tpc_infile)
   {
     if (isGood(iter))
     {
-      SingleTpcTimeFrameInput *tpc_sngl = new SingleTpcTimeFrameInput("TPC_" + to_string(i));
+      SingleTpcTimeFrameInput *tpc_sngl = new SingleTpcTimeFrameInput("TPC_" + std::to_string(i));
       //    tpc_sngl->Verbosity(2);
       //   tpc_sngl->DryRun();
       tpc_sngl->setHitContainerName("TPCRAWHIT");
@@ -322,11 +318,11 @@ void Fun4All_PRDFReconstruction(
   }
   NumInputs += i;
   i = 0;
-  for (auto iter : tpot_infile)
+  for (const auto &iter : tpot_infile)
   {
     if (isGood(iter))
     {
-      SingleMicromegasPoolInput *mm_sngl = new SingleMicromegasPoolInput("MICROMEGAS_" + to_string(i));
+      SingleMicromegasPoolInput *mm_sngl = new SingleMicromegasPoolInput("MICROMEGAS_" + std::to_string(i));
       //   sngl->Verbosity(3);
       mm_sngl->SetBcoRange(10);
       mm_sngl->SetNegativeBco(2);
@@ -378,10 +374,9 @@ void Fun4All_PRDFReconstruction(
   // vertexing and propagation to vertex
   Tracking_Reco_Vertex_run2pp();
 
-  TString residoutfile = outfilename + "_resid.root";
-  std::string residstring(residoutfile.Data());
+  std::string residstring = outfilename + "_resid.root";
 
-  auto resid = new TrackResiduals("TrackResiduals");
+  auto *resid = new TrackResiduals("TrackResiduals");
   resid->Verbosity(0);
   resid->outfileName(residstring);
   resid->alignment(false);
@@ -418,8 +413,7 @@ void Fun4All_PRDFReconstruction(
 
   if (Enable::QA)
   {
-    TString qaname = outfilename + runnumber + "_qa.root";
-    std::string qaOutputFileName(qaname.Data());
+    std::string qaOutputFileName = outfilename + std::to_string(runnumber) + "_qa.root";
     QAHistManagerDef::saveQARootFile(qaOutputFileName);
   }
   CDBInterface::instance()->Print();
@@ -428,9 +422,9 @@ void Fun4All_PRDFReconstruction(
   gSystem->Exit(0);
 }
 
-bool isGood(const string &infile)
+bool isGood(const std::string &infile)
 {
-  ifstream intest;
+  std::ifstream intest;
   intest.open(infile);
   bool goodfile = false;
   if (intest.is_open())

@@ -14,21 +14,29 @@
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
 
+#include <g4centrality/PHG4CentralityReco.h>
+
+#include <globalvertex/GlobalVertexReco.h>
+
+#include <jetbackground/BeamBackgroundFilterAndQA.h>
+
+#include <mbd/MbdReco.h>
+
+#include <zdcinfo/ZdcReco.h>
+
+#include <qautils/QAHistManagerDef.h>
+
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
+
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllUtils.h>
-#include <g4centrality/PHG4CentralityReco.h>
-#include <globalvertex/GlobalVertexReco.h>
-#include <jetbackground/BeamBackgroundFilterAndQA.h>
-#include <mbd/MbdReco.h>
+
 #include <phool/recoConsts.h>
-#include <qautils/QAHistManagerDef.h>
-#include <zdcinfo/ZdcReco.h>
 
 #include <fstream>
 #include <iostream>
@@ -106,42 +114,42 @@ void Fun4All_CaloJetProductionYear3(
 
   // initialize F4A server
   Fun4AllServer* se = Fun4AllServer::instance();
-  se -> Verbosity(1);
+  se->Verbosity(1);
 
   // grab 1st file from input lists
-  ifstream    files(inlist);
-  std::string first("");
+  std::ifstream files(inlist);
+  std::string first;
   std::getline(files, first);
 
   // grab run and segment no.s
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(first);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(first);
   int runnumber = runseg.first;
 
   // set up reconstruction constants, DB tag, timestamp
   recoConsts* rc = recoConsts::instance();
-  rc -> set_StringFlag("CDB_GLOBALTAG", dbtag);
-  rc -> set_uint64Flag("TIMESTAMP", runnumber);
+  rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
 
   // connect to conditions database
   CDBInterface* cdb = CDBInterface::instance();
-  cdb -> Verbosity(1);
+  cdb->Verbosity(1);
 
   // set up flag handler
   FlagHandler* flag = new FlagHandler();
-  se -> registerSubsystem(flag);
+  se->registerSubsystem(flag);
 
   // read in input
   Fun4AllInputManager* indst = new Fun4AllDstInputManager("indst");
-  indst -> AddListFile(inlist);
-  se -> registerInputManager(indst);
+  indst->AddListFile(inlist);
+  se->registerInputManager(indst);
 
   // set up tracking
   if (JetQA::HasTracks)
   {
     // register tracking geometry
     Fun4AllRunNodeInputManager* ingeom = new Fun4AllRunNodeInputManager("ingeom");
-    ingeom -> AddFile(cdb -> getUrl("Tracking_Geometry"));
-    se -> registerInputManager(ingeom);
+    ingeom->AddFile(cdb->getUrl("Tracking_Geometry"));
+    se->registerInputManager(ingeom);
 
     // initialize tracking
     TpcReadoutInit(runnumber);
@@ -160,8 +168,8 @@ void Fun4All_CaloJetProductionYear3(
   // filter out beam-background events (use default parameters for
   // streak-sideband filter)
   BeamBackgroundFilterAndQA* filter = new BeamBackgroundFilterAndQA("BeamBackgroundFilterAndQA");
-  filter -> Verbosity(std::max(Enable::QA_VERBOSITY, Enable::JETQA_VERBOSITY));
-  filter -> SetConfig(
+  filter->Verbosity(std::max(Enable::QA_VERBOSITY, Enable::JETQA_VERBOSITY));
+  filter->SetConfig(
     {
       .debug          = false,
       .doQA           = Enable::QA,
@@ -169,7 +177,7 @@ void Fun4All_CaloJetProductionYear3(
       .filtersToApply = {"StreakSideband"}
     }
   );
-  se -> registerSubsystem(filter);
+  se->registerSubsystem(filter);
 
   // do jet reconstruction
   HIJetReco();  
@@ -185,19 +193,19 @@ void Fun4All_CaloJetProductionYear3(
   if (Enable::DSTOUT)
   {
     Fun4AllDstOutputManager* out = new Fun4AllDstOutputManager("DSTOUT", outfile);
-    out -> StripNode("CEMCPackets");
-    out -> StripNode("HCALPackets");
-    out -> StripNode("ZDCPackets");
-    out -> StripNode("SEPDPackets");
-    out -> StripNode("MBDPackets");
-    se -> registerOutputManager(out);
+    out->StripNode("CEMCPackets");
+    out->StripNode("HCALPackets");
+    out->StripNode("ZDCPackets");
+    out->StripNode("SEPDPackets");
+    out->StripNode("MBDPackets");
+    se->registerOutputManager(out);
   }
 
   // run & exit ---------------------------------------------------------------
 
   // run4all
-  se -> run(nEvents);
-  se -> End();
+  se->run(nEvents);
+  se->End();
 
   // if needed, save QA output
   if (Enable::QA)
@@ -206,13 +214,13 @@ void Fun4All_CaloJetProductionYear3(
   }
 
   // print used DB files, time elapsed and delete server
-  cdb -> Print();
-  se -> PrintTimer();
+  cdb->Print();
+  se->PrintTimer();
   delete se;
 
   // announce end and exit
   std::cout << "Jets are done!" << std::endl;
-  gSystem -> Exit(0);
+  gSystem->Exit(0);
 
 }
 

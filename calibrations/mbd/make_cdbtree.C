@@ -25,6 +25,14 @@ void make_cdbtree(const char *calibfname)
     std::cout << cdbfname << std::endl;
     cal->Write_CDB_SampMax( cdbfname.Data() );
   }
+  else if ( calfname.Contains("status") )
+  {
+    cal->Download_Status( calibfname );
+    TString cdbfname = calibfname;
+    cdbfname.ReplaceAll("mbd_status.calib","mbd_status.root");
+    std::cout << cdbfname << std::endl;
+    cal->Write_CDB_Status( cdbfname.Data() );
+  }
   else if ( calfname.Contains("tt_t0") )
   {
     cal->Download_TTT0( calibfname );
@@ -71,7 +79,7 @@ void make_cdbtree(const char *calibfname)
   {
     cal->Download_Shapes( calibfname );
     TString cdbfname = calibfname;
-    cdbfname.ReplaceAll("bbc_shape.calib","mbd_shape.root");
+    cdbfname.ReplaceAll("mbd_shape.calib","mbd_shape.root");
     std::cout << cdbfname << std::endl;
     //cdbfname = "mbd_shape.root";
     cal->Write_CDB_Shapes( cdbfname.Data() );

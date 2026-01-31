@@ -79,8 +79,8 @@ int getrunnumber(const std::string &listfile);
 
 void Fun4All_PRDFReconstruction(
     const int nEvents = 0,
-    const int runnumber_unused = 53756, // just kept to preserve the API
-    const std::string &dir = "/.",
+    const int  /*runnumber_unused*/ = 53756, // just kept to preserve the API
+    const std::string & /*dir*/ = "/.",
     const std::string &outfilename = "output_tracks",
     const std::string &input_gl1file = "gl1daq.list",
     const std::string &input_inttfile00 = "intt0.list",
@@ -251,9 +251,9 @@ void Fun4All_PRDFReconstruction(
 	 << std::endl;
     gSystem->Exit(1);
   }
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(2);
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
@@ -300,7 +300,7 @@ void Fun4All_PRDFReconstruction(
   int NumInputs = 0;
   Fun4AllStreamingInputManager *in = new Fun4AllStreamingInputManager("Comb");
 
-  for (auto iter : gl1_infile)
+  for (const auto& iter : gl1_infile)
   {
     if (isGood(iter))
     {
@@ -314,7 +314,7 @@ void Fun4All_PRDFReconstruction(
   NumInputs += i;
 
   i = 0;
-  for (auto iter : intt_infile)
+  for (const auto& iter : intt_infile)
   {
     if (isGood(iter))
     {
@@ -328,7 +328,7 @@ void Fun4All_PRDFReconstruction(
   NumInputs += i;
 
   i = 0;
-  for (auto iter : mvtx_infile)
+  for (const auto& iter : mvtx_infile)
   {
     if (isGood(iter))
     {
@@ -343,7 +343,7 @@ void Fun4All_PRDFReconstruction(
 
   i = 0;
 
-  for (auto iter : tpc_infile)
+  for (const auto& iter : tpc_infile)
   {
     if (isGood(iter))
     {
@@ -358,7 +358,7 @@ void Fun4All_PRDFReconstruction(
   }
   NumInputs += i;
   i = 0;
-  for (auto iter : tpot_infile)
+  for (const auto& iter : tpot_infile)
   {
     if (isGood(iter))
     {
@@ -404,7 +404,7 @@ void Fun4All_PRDFReconstruction(
 
   Tpc_LaserEventIdentifying();
 
-  auto tpcclusterizer = new TpcClusterizer;
+  auto *tpcclusterizer = new TpcClusterizer;
   tpcclusterizer->Verbosity(0);
   tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
   tpcclusterizer->set_rawdata_reco();
@@ -413,7 +413,7 @@ void Fun4All_PRDFReconstruction(
 
   Micromegas_Clustering();
 
-  auto silicon_Seeding = new PHActsSiliconSeeding;
+  auto *silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(0);
   // these get us to about 83% INTT > 1
   silicon_Seeding->setinttRPhiSearchWindow(0.4);
@@ -422,14 +422,14 @@ void Fun4All_PRDFReconstruction(
   silicon_Seeding->seedAnalysis(false);
   se->registerSubsystem(silicon_Seeding);
 
-  auto merger = new PHSiliconSeedMerger;
+  auto *merger = new PHSiliconSeedMerger;
   merger->Verbosity(0);
   se->registerSubsystem(merger);
 
   /*
    * Tpc Seeding
    */
-  auto seeder = new PHCASeeding("PHCASeeding");
+  auto *seeder = new PHCASeeding("PHCASeeding");
   if (ConstField)
   {
     seeder->useConstBField(true);
@@ -453,7 +453,7 @@ void Fun4All_PRDFReconstruction(
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
-  auto cprop = new PHSimpleKFProp("PHSimpleKFProp");
+  auto *cprop = new PHSimpleKFProp("PHSimpleKFProp");
   cprop->set_field_dir(G4MAGNET::magfield_rescale);
   if (ConstField)
   {
@@ -473,7 +473,7 @@ void Fun4All_PRDFReconstruction(
 
   // Always apply preliminary distortion corrections to TPC clusters before silicon matching
   // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
-  auto prelim_distcorr = new PrelimDistortionCorrection;
+  auto *prelim_distcorr = new PrelimDistortionCorrection;
   prelim_distcorr->set_pp_mode(true);
   prelim_distcorr->Verbosity(0);
   se->registerSubsystem(prelim_distcorr);
@@ -483,7 +483,7 @@ void Fun4All_PRDFReconstruction(
    */
   // The normal silicon association methods
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
-  auto silicon_match = new PHSiliconTpcTrackMatching;
+  auto *silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
   silicon_match->set_pp_mode(TRACKING::pp_mode);
   if (G4TPC::ENABLE_AVERAGE_CORRECTIONS)
@@ -519,7 +519,7 @@ void Fun4All_PRDFReconstruction(
   se->registerSubsystem(silicon_match);
 
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
-  auto mm_match = new PHMicromegasTpcTrackMatching;
+  auto *mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(0);
   mm_match->set_rphi_search_window_lyr1(3.);
   mm_match->set_rphi_search_window_lyr2(15.0);
@@ -540,7 +540,7 @@ void Fun4All_PRDFReconstruction(
    */
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
-    auto converter = new TrackSeedTrackMapConverter;
+    auto *converter = new TrackSeedTrackMapConverter;
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
     converter->setTrackSeedName("SvtxTrackSeedContainer");
@@ -550,12 +550,12 @@ void Fun4All_PRDFReconstruction(
   }
   else
   {
-    auto deltazcorr = new PHTpcDeltaZCorrection;
+    auto *deltazcorr = new PHTpcDeltaZCorrection;
     deltazcorr->Verbosity(0);
     se->registerSubsystem(deltazcorr);
 
     // perform final track fit with ACTS
-    auto actsFit = new PHActsTrkFitter;
+    auto *actsFit = new PHActsTrkFitter;
     actsFit->Verbosity(0);
     actsFit->commissioning(G4TRACKING::use_alignment);
     // in calibration mode, fit only Silicons and Micromegas hits
@@ -568,13 +568,13 @@ void Fun4All_PRDFReconstruction(
     actsFit->setFieldMap(G4MAGNET::magfield_tracking);
     se->registerSubsystem(actsFit);
 
-    auto cleaner = new PHTrackCleaner();
+    auto *cleaner = new PHTrackCleaner();
     cleaner->Verbosity(0);
     cleaner->set_pp_mode(TRACKING::pp_mode);
     // se->registerSubsystem(cleaner);
   }
 
-  auto finder = new PHSimpleVertexFinder;
+  auto *finder = new PHSimpleVertexFinder;
   finder->Verbosity(0);
   finder->setDcaCut(0.5);
   finder->setTrackPtCut(-99999.);
@@ -586,7 +586,7 @@ void Fun4All_PRDFReconstruction(
 
   std::string residstring = outfilename + "_resid.root";
 
-  auto resid = new TrackResiduals("TrackResiduals");
+  auto *resid = new TrackResiduals("TrackResiduals");
   resid->Verbosity(0);
   resid->outfileName(residstring);
   resid->alignment(false);

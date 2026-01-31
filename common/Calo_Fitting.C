@@ -62,7 +62,7 @@ void Process_Calo_Fitting()
   CaloTowerBuilder *caEPD = new CaloTowerBuilder("SEPDBUILDER");
   caEPD->set_detector_type(CaloTowerDefs::SEPD);
   caEPD->set_builder_type(buildertype);
-  caEPD->set_processing_type(CaloWaveformProcessing::FAST);
+  caEPD->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   caEPD->set_nsamples(12);
   caEPD->set_offlineflag();
   se->registerSubsystem(caEPD);

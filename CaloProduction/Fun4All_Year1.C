@@ -3,6 +3,12 @@
 
 #include <QA.C>
 
+#include <centrality/CentralityReco.h>
+
+#include <calotrigger/MinimumBiasClassifier.h>
+
+#include <calovalid/CaloValid.h>
+
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloTowerCalib.h>
 #include <caloreco/CaloTowerStatus.h>
@@ -34,10 +40,9 @@
 
 #include <phool/recoConsts.h>
 
-#include <centrality/CentralityReco.h>
-#include <calotrigger/MinimumBiasClassifier.h>
+#include <TSystem.h>
 
-#include <calovalid/CaloValid.h>
+#include <format>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -51,8 +56,8 @@ R__LOAD_LIBRARY(libcalovalid.so)
 
 void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commissioning/aligned_prdf/beam-00021774-0000.prdf", int nEvents = 10)
 {
-  bool enableMasking = 0;
-  bool addZeroSupCaloNodes = 1;
+  bool enableMasking = false;
+  bool addZeroSupCaloNodes = true;
   // v1 uncomment:
   // CaloTowerDefs::BuilderType buildertype = CaloTowerDefs:::kPRDFTowerv1;
   // v2 uncomment:
@@ -65,15 +70,11 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
 
   recoConsts *rc = recoConsts::instance();
 
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
   int runnumber = runseg.first;
   int segment = runseg.second;
-  char outfile[100];
-  char outfile_hist[100];
-  sprintf(outfile, "DST_CALOR-%08d-%04d.root", runnumber, segment);
-  sprintf(outfile_hist, "HIST_CALOR-%08d-%04d.root", runnumber, segment);
-  string fulloutfile = string("./") + outfile;
-  string fulloutfile_hist = string("./") + outfile_hist;
+  std::string fulloutfile = std::format("./DST_CALOR-{:08}-{:04}.root",runnumber, segment);
+  std::string fulloutfile_hist = std::string("./HIST_CALOR--{:08}-{:04}.root",runnumber, segment);
   //===============
   // conditions DB flags
   //===============
@@ -306,8 +307,7 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   se->run(nEvents);
   se->End();
 
-  TString qaname = fulloutfile_hist + "_qa.root";
-  std::string qaOutputFileName(qaname.Data());
+  std::string qaOutputFileName = fulloutfile_hist + "_qa.root";
   QAHistManagerDef::saveQARootFile(qaOutputFileName);
 
   CDBInterface::instance()->Print();  // print used DB files
