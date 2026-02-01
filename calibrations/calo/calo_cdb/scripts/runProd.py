@@ -23,9 +23,9 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-i'
                     , '--run-type', type=str
-                    , default='run3pp'
-                    , choices=['run2pp','run2auau','run3auau','run3pp']
-                    , help='Run Type. Default: run3pp')
+                    , default='run3oo'
+                    , choices=['run2pp','run2auau','run3auau','run3pp','run3oo']
+                    , help='Run Type. Default: run3oo')
 
 parser.add_argument('-f'
                     , '--bin-filter-datasets', type=str
@@ -76,7 +76,7 @@ def get_file_paths(engine, runtype='run3auau'):
     """
 
     # Identify run range from the run type
-    run_ranges = {'run2pp': (47286, 53880), 'run2auau': (54128, 54974), 'run3auau': (66457, 78954), 'run3pp': (79146, 200000)}
+    run_ranges = {'run2pp': (47286, 53880), 'run2auau': (54128, 54974), 'run3auau': (66457, 78954), 'run3pp': (79146, 81668), 'run3oo': (82374, 200000)}
     params = {'run_start': run_ranges[runtype][0], 'run_end': run_ranges[runtype][1]}
 
     query = """
