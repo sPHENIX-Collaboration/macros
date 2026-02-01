@@ -1,15 +1,11 @@
 // c++ includes --
 #include <string>
 #include <iostream>
-#include <memory>
 
 // root includes --
 #include <TSystem.h>
-#include <TROOT.h>
-#include <TF1.h>
 
 #include <mbd/MbdReco.h>
-#include <mbd/MbdEvent.h>
 #include <epd/EpdReco.h>
 #include <zdcinfo/ZdcReco.h>
 #include <globalvertex/GlobalVertexReco.h>

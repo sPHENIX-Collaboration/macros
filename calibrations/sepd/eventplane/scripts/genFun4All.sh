@@ -17,17 +17,20 @@ submitDir=${7}
 file=$(basename "$input")
 IFS='-' read -r p1 p2 p3 <<< "$file"
 run=$(echo "$p2" | sed 's/^0*//') # Remove leading zeros using sed
+if [[ -z "$run" || ! "$run" =~ ^[0-9]+$ ]]; then
+    echo "Failed to parse run number from input: $input" >&2
+    exit 1
+fi
 
-if [[ ! -z "$_CONDOR_SCRATCH_DIR" && -d $_CONDOR_SCRATCH_DIR ]]
+if [[ -n "$_CONDOR_SCRATCH_DIR" && -d "$_CONDOR_SCRATCH_DIR" ]]
 then
-    cd $_CONDOR_SCRATCH_DIR
-    getinputfiles.pl --filelist $input
-    test -e "$input_calib" && cp -v "$input_calib" .
+    cd "$_CONDOR_SCRATCH_DIR" || { echo "Failed to cd to $_CONDOR_SCRATCH_DIR" >&2; exit 1; }
+    getinputfiles.pl --filelist "$input"
     ls -lah
     ls DST*.root > test.list
 else
-    echo "condor scratch NOT set"
-    exit -1
+    echo "condor scratch NOT set" >&2
+    exit 1
 fi
 
 # print the environment - needed for debugging

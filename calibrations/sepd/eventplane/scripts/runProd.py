@@ -45,6 +45,7 @@ Date: 2026
 import argparse
 import logging
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -177,20 +178,30 @@ def setup_logging(log_file: Path, verbose: bool = False) -> None:
 
 
 def run_command_and_log(
-    command: str,
+    command: str | list[str],
     current_dir: Path | str = ".",
     do_logging: bool = True,
     description: str = "Executing command",
+    allow_shell: bool = False,
 ) -> bool:
     """
     Executes a shell command safely using subprocess and logs the output.
 
     Args:
-        command: The shell command string to execute.
+        command: The shell command string or list to execute.
         current_dir: The directory to execute the command in. Defaults to current directory.
         do_logging: If True, logs the command and its STDOUT/STDERR.
                     Set to False to keep logs clean during parallel execution.
         description: A brief label for the log entry describing the action.
+        allow_shell: If True, executes the command through the system shell (bash).
+                     WARNING: This is susceptible to shell injection attacks if
+                     user-supplied strings like {config.dst_tag} are interpolated
+                     without escaping.
+                     Only use this when shell-specific features like pipes (|),
+                     redirects (>), or globbing (*) are strictly necessary and the
+                     input is fully trusted.
+                     Defaults to False to ensure arguments are treated as literal
+                     text rather than executable code.
 
     Returns:
         bool: True if the command returned exit code 0, False otherwise.
@@ -199,11 +210,13 @@ def run_command_and_log(
         logger.info(f"{description}: '{command}'")
 
     try:
-        # Using shell=False is generally safer, but if you need pipes (|),
-        # keep shell=True or use python logic.
-        # Here we use shell=True because your split command uses pipes.
+        if isinstance(command, str):
+            cmd = ["bash", "-c", command] if allow_shell else shlex.split(command)
+        else:
+            cmd = command
+
         result = subprocess.run(
-            ["bash", "-c", command],
+            cmd,
             cwd=current_dir,
             capture_output=True,
             text=True,
@@ -285,8 +298,7 @@ def gen_dst_list(config: PipelineConfig, working_dir: Path) -> None:
         run_list_missing = config.output_dir / "runs.list"
         run_list_missing.write_text("\n".join(missing_runs) + "\n")
 
-        # Note: Ideally replace perl scripts with python if possible in future
-        command = f"CreateDstList.pl --tag {config.dst_tag} --list {run_list_missing} DST_CALOFITTING"
+        command = ["CreateDstList.pl", "--tag", config.dst_tag, "--list", str(run_list_missing), "DST_CALOFITTING"]
         run_command_and_log(command, config.dst_list_dir)
     else:
         logger.info("All runs have DST Lists.")
@@ -301,14 +313,25 @@ def gen_dst_list(config: PipelineConfig, working_dir: Path) -> None:
 
     for dst_list in dst_lists:
         stem = dst_list.stem
-        # Splitting large lists into chunks
-        command = f'head -n {config.segments} {dst_list} | split -l 1 -d -a 3 --additional-suffix=.list - "{stem}-"'
-        run_command_and_log(command, files_dir, False)
+        # 1. Read the DST list and take only the requested segments
+        try:
+            lines = dst_list.read_text().splitlines()[:config.segments]
+        except Exception as e:
+            logger.error(f"Failed to read {dst_list}: {e}")
+            continue
 
-    # Generate the master jobs list for Condor
-    command = f"readlink -f {files_dir}/* > jobs.list"
-    run_command_and_log(command, working_dir, False)
+        # 2. Create individual files (replaces 'split')
+        for i, line in enumerate(lines):
+            # Using a zero-padded suffix (000, 001)
+            split_file = files_dir / f"{stem}-{i:03d}.list"
+            split_file.write_text(line + "\n")
 
+    job_paths = [str(f.resolve()) for f in files_dir.glob("*.list")]
+
+    jobs_list_path = working_dir / "jobs.list"
+    jobs_list_path.write_text("\n".join(job_paths) + "\n")
+
+    logger.info(f"Generated jobs.list with {len(job_paths)} entries.")
 
 def generate_QVecCalib_job_list(dir_qa: Path, dir_ttree: Path, output_file: Path) -> None:
     """
@@ -373,7 +396,7 @@ def generate_QVecCalib_local_jobs_file(input_file: Path, output_file: Path, cali
                 idx = path_obj.parts.index("output")
                 run_num = path_obj.parts[idx + 1]
             except ValueError:
-                print(f"Skipping malformed path: {path_str}")
+                logger.warning(f"Skipping malformed path: {path_str}")
                 continue
 
         calib_arg = "none"
@@ -433,9 +456,15 @@ def run_parallel_hadd(
             logger.error(f"Missing output directory for run {run}: {job_dir}")
             continue
 
+        input_files = [str(f) for f in job_dir.glob("*.root")]
+
+        if not input_files:
+            logger.warning(f"No .root files found in {job_dir} for run {run}")
+            continue
+
         # Customizable output filename
         target_file = output_dir / f"{file_prefix}{run}.root"
-        command = f"hadd -f -n 11 {target_file} {job_dir}/*.root"
+        command = ["hadd", "-f", "-n", "11", str(target_file)] + input_files
         tasks.append((command, run))
 
     if not tasks:
@@ -476,6 +505,9 @@ def monitor_condor_logs(log_dir: Path, total_jobs: int) -> None:
     # Regex to find: "Normal termination (return value 0)"
     # This is standard HTCondor log format
     success_pattern = re.compile(r"Normal termination \(return value 0\)")
+    failure_pattern = re.compile(r"Abnormal termination")
+    start_time = time.time()
+    max_wait_sec = 2 * 60 * 60  # 1 hour
 
     # Track which jobs (files) have finished to avoid re-reading them constantly
     finished_files = set()
@@ -498,6 +530,10 @@ def monitor_condor_logs(log_dir: Path, total_jobs: int) -> None:
                 with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
                     content = f.read()
 
+                    # Check for failure
+                    if failure_pattern.search(content):
+                        logger.error(f"Job failed: {log_file}")
+                        sys.exit(1)
                     # Check for success
                     if success_pattern.search(content):
                         finished_files.add(log_file)
@@ -514,7 +550,10 @@ def monitor_condor_logs(log_dir: Path, total_jobs: int) -> None:
             logger.info("All jobs finished successfully.")
             break
 
-        time.sleep(15)  # Wait 15 seconds before next check
+        if time.time() - start_time > max_wait_sec:
+            logger.critical("Timeout while waiting for Condor jobs.")
+            sys.exit(1)
+        time.sleep(15) # Wait 15 seconds before next check
 
 
 def submit_and_monitor(config: PipelineConfig, submit_file: Path, input_source: str, job_dir: Path) -> None:
@@ -542,7 +581,7 @@ def submit_and_monitor(config: PipelineConfig, submit_file: Path, input_source: 
 
     # 3. Submit
     logger.info(f"Submitting {total_jobs} jobs from {submit_file.name}...")
-    command = f'condor_submit {submit_file.name} -queue "{input_source}"'
+    command = ["condor_submit", submit_file.name, "-queue", input_source]
 
     if not run_command_and_log(command, job_dir):
         logger.critical("Condor submission failed.")
@@ -734,7 +773,13 @@ def run_QVecCDB_stage(config: PipelineConfig) -> None:
             logger.warning(f"Skipping CDB gen for {run}: Missing input {input_file.name}")
             continue
 
-        command = f"{config.bin_QVecCDB} {input_file} {run} {cdb_dir} {config.dst_tag}"
+        command = [
+            str(config.bin_QVecCDB),
+            str(input_file),
+            str(run),
+            str(cdb_dir),
+            config.dst_tag
+        ]
         tasks.append((command, run))
 
     if not tasks:
@@ -813,6 +858,13 @@ def main():
     bin_QVecCalib = Path(args.bin_QVecCalib).resolve() if args.bin_QVecCalib else offline_main_bin / "GenQVecCalib"
     bin_QVecCDB = Path(args.bin_QVecCDB).resolve() if args.bin_QVecCDB else offline_main_bin / "GenQVecCDB"
 
+    # Dependency Checking
+    required_tools = ["CreateDstList.pl", "condor_submit", "hadd"]
+    for tool in required_tools:
+        if not shutil.which(tool):
+            logger.critical(f"Required tool not found in PATH: {tool}")
+            sys.exit(1)
+
     # Initialize the Configuration Dataclass
     config = PipelineConfig(
         run_list_file=Path(args.run_list_file).resolve(),
@@ -846,6 +898,7 @@ def main():
         config.run_list_file,
         config.f4a_macro,
         config.bin_QVecCalib,
+        config.bin_QVecCDB,
         config.f4a_script,
         config.QVecCalib_script,
     ]:
