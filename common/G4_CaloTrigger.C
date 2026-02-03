@@ -7,6 +7,8 @@
 
 #include <fun4all/Fun4AllServer.h>
 
+#include <Rtypes.h>  // resolves R__LOAD_LIBRARY for clang-tidy
+
 R__LOAD_LIBRARY(libcalotrigger.so)
 
 namespace Enable

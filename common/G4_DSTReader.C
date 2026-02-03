@@ -8,10 +8,9 @@
 #include <G4_EPD.C>
 #include <G4_HcalIn_ref.C>
 #include <G4_HcalOut_ref.C>
-#include <G4_Intt.C>
 #include <G4_Magnet.C>
-#include <G4_Mvtx.C>
-#include <G4_TPC.C>
+#include <G4_Mbd.C>
+#include <G4_TrkrVariables.C>
 
 #include <g4eval/PHG4DSTReader.h>
 
@@ -43,9 +42,9 @@ namespace G4DSTREADER
 
 void G4DSTreaderInit() {}
 
-void G4DSTreader(const string &outputFile = "G4sPHENIXCells.root")
+void G4DSTreader(const std::string &outputFile = "G4sPHENIXCells.root")
 {
-  int verbosity = max(Enable::VERBOSITY, Enable::DSTREADER_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::DSTREADER_VERBOSITY);
 
   // save a comprehensive  evaluation file
   PHG4DSTReader *ana = new PHG4DSTReader(outputFile);
@@ -70,10 +69,9 @@ void G4DSTreader(const string &outputFile = "G4sPHENIXCells.root")
     {
       ana->AddNode("TPC");
     }
-
-    if (Enable::BBC)
+    if (Enable::MBD)
     {
-      ana->AddNode("BBC");
+      ana->AddNode("MBD");
     }
 
     if (Enable::CEMC)

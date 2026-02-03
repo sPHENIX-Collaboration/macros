@@ -1,0 +1,403 @@
+// Make plots of the values of the gains
+#include <mbd/MbdCalib.h>
+
+#include <Rtypes.h> // defines R__LOAD_LIBRARY macro
+#include <TCanvas.h>
+#include <TF1.h>
+#include <TFile.h>
+#include <TGraphErrors.h>
+#include <TH1.h>
+
+#include <fstream>
+
+R__LOAD_LIBRARY(libmbd.so)
+R__LOAD_LIBRARY(libmbd_io.so)
+
+void read_calibgains(const char *flist);
+void plot_relwidth_onerun(int irun = 0);
+
+TFile *savefile {nullptr};
+
+const int MAX_RUNS = 2500;
+int nruns = 0;
+
+MbdCalib *bcal[MAX_RUNS];
+
+Double_t bqmean[128][MAX_RUNS];
+Double_t bqmeanerr[128][MAX_RUNS];
+Double_t bqwidth[128][MAX_RUNS];
+Double_t bqwidtherr[128][MAX_RUNS];
+Double_t bqrelwidth[128][MAX_RUNS];
+Double_t bqrelwidtherr[128][MAX_RUNS];
+Double_t listofruns[MAX_RUNS];
+Double_t runindex[MAX_RUNS];
+
+TGraphErrors *gainvals[128];
+TGraphErrors *g_relwidth[128];  // relative width
+TH1 *h_relwidth{nullptr};
+
+TCanvas *ac{nullptr};
+
+const int update_qfit = 1;    // whether to write update gain files
+const int write_plots = 1;    // whether to save plots to png
+  
+
+// flist is a list of run-seq or run number directories
+// where the calibrations are stored
+void read_calibgains(const char *flist)
+{
+  std::cout << "read_calibgains()" << std::endl;
+  std::ifstream inflist(flist);
+
+  std::ifstream cal_mip_file;
+
+  TString calrunseq;
+  TString calfile;
+  TString name;
+  while ( inflist >> calrunseq )
+  {
+    calfile = "results/" + calrunseq + "/mbd_qfit.calib";
+    std::cout << calfile << std::endl;
+    cal_mip_file.open( calfile );
+
+    TString runtext = calrunseq;
+    runtext.ReplaceAll("-0000","");
+    listofruns[nruns] = runtext.Atof();
+    std::cout << listofruns[nruns] << std::endl;
+
+    runindex[nruns] = nruns;
+
+    //bcal[nruns] = new MbdCalib();
+    //bcal[nruns]->Download_Gains( calfile.Data() );
+
+    int    temp_pmt;
+    double integ;
+    double best_peak;
+    double width;
+    double integerr;
+    double best_peakerr;
+    double widtherr;
+    double chi2ndf;
+
+//    double corrected_peak;
+
+    for (int ipmt=0; ipmt<128; ipmt++)
+    {
+      //float gain = bcal[nruns]->get_qgain(ipmt);
+      //float gainerr = bcal[nruns]->get_qgainerr(ipmt);
+
+      cal_mip_file >> temp_pmt >> integ >> best_peak >> width 
+        >> integerr >> best_peakerr >> widtherr >> chi2ndf;
+
+      if ( ipmt==0 ) { std::cout << temp_pmt << "\t" << integ << "\t" << best_peak << "\t" << width 
+        << "\t" << integerr << "\t" << best_peakerr << "\t" << widtherr << "\t" << chi2ndf << std::endl;
+}
+
+      bqmean[temp_pmt][nruns] = best_peak;
+      bqmeanerr[temp_pmt][nruns] = best_peakerr;
+      bqwidth[temp_pmt][nruns] = fabs(width);
+      bqwidtherr[temp_pmt][nruns] = widtherr;
+      
+      /*
+      if ( listofruns[nruns] == 21520 )
+      {
+        std::cout << "XXX " << calfile << "\t" << ipmt << "\t" << best_peakerr << "\t"
+          << best_peak << "\t" << bqmean[temp_pmt][nruns-1] << std::endl;
+      }
+      */
+
+      // check for bad fit
+      //if ( integ < 100. || bqmean[temp_pmt][nruns]<0. || chi2ndf>4.0 )
+      if ( integ < 100. || bqmean[temp_pmt][nruns]<0. || chi2ndf>10.0 )
+      {
+        std::cout << "BAD " << calfile << "\t" << ipmt << "\t" << best_peak
+          << "\t" << integ << "\t" << bqmean[temp_pmt][nruns] << "\t" << chi2ndf << std::endl;
+        bqmean[temp_pmt][nruns] = NAN;
+      }
+
+      if ( bqmeanerr[temp_pmt][nruns]>10. )
+      {
+        std::cout << "BADERR " << calfile << "\t" << ipmt << "\t" << best_peakerr << "\t"
+          << best_peak << "\t" << bqmean[temp_pmt][nruns-1] << std::endl;
+        bqmeanerr[temp_pmt][nruns] = NAN;
+      }
+    }
+
+    cal_mip_file.close();
+
+    nruns++;
+  }
+  inflist.close();
+}
+
+void plot_relwidth_onerun(int irun)
+{
+  if ( h_relwidth==nullptr )
+  {
+    h_relwidth = new TH1F("h_relwidth","relative width",100,0.1,0.36);
+  }
+  std::cout << "== Relative Widths ==" << std::endl;
+  for (int ipmt=0; ipmt<128; ipmt++)
+  {
+    double relwidth = bqwidth[ipmt][irun]/bqmean[ipmt][irun];
+    double frac_merr = bqmeanerr[ipmt][irun]/bqmean[ipmt][irun];
+    double frac_werr = bqwidtherr[ipmt][irun]/bqwidth[ipmt][irun];
+    double relwidtherr = frac_merr*frac_merr + frac_werr*frac_werr;
+    relwidtherr = relwidth*sqrt(relwidtherr);
+
+    std::cout << ipmt << "\t" << relwidth << "\t" << relwidtherr << std::endl;
+
+    h_relwidth->Fill( relwidth );
+  }
+  h_relwidth->Draw();
+}
+
+
+// Find any values that deviate greatly from prior run, and set to nan
+// Note that 1st run must be good
+//void CheckForLargeDeviation( const double max_deviation = 0.05 ) // 5% deviation
+void CheckForLargeDeviation( const double max_deviation = 0.10 ) // 10% deviation
+{
+  for (int ipmt=0; ipmt<128; ipmt++)
+  {
+    for (int irun=1; irun<nruns; irun++)
+    {
+      if ( std::isnan(bqmean[ipmt][irun]) ) { continue;  // skip ones already bad
+}
+
+      // search for prev good val
+      double prevgoodmean = NAN;
+      for (int prevrun=irun-1; prevrun>=0; prevrun--)
+      {
+        if ( !std::isnan( bqmean[ipmt][prevrun] ) )
+        {
+          prevgoodmean = bqmean[ipmt][prevrun];
+          break;
+        }
+      }
+
+      double deviation = fabs((bqmean[ipmt][irun] - prevgoodmean)/prevgoodmean);
+      if ( deviation > max_deviation )
+      {
+        std::cout << "BADDEV " << listofruns[irun] << "\t" << ipmt << "\t" << bqmean[ipmt][irun]
+          << "\t" << prevgoodmean << "\t" << deviation << std::endl;
+        bqmean[ipmt][irun] = NAN;
+      }
+    }
+  }
+
+}
+
+void plot_calibgains(const char *flist = "runs.list")
+{
+  // Read in all the calibrations from flist
+  read_calibgains(flist);
+
+  if ( write_plots )
+  {
+    savefile = new TFile("results/calibgains.root","RECREATE");
+  }
+
+  // sanity check that gains aren't bad
+  CheckForLargeDeviation();
+
+  TString pdfname = "gainvals.pdf";
+  if ( write_plots )
+  {
+    ac = new TCanvas("c_gainvals","gainvals",1100,850);
+    gPad->Print( pdfname + "[");
+  }
+
+  TString name;
+  TString title;
+  for (int ipmt=0; ipmt<128; ipmt++)
+  {
+    // do corrections
+    for (int irun=0; irun<nruns; irun++)
+    {
+
+      if ( std::isnan(bqmean[ipmt][irun]) )
+      {
+        std::cout << "FOUND BAD " << listofruns[irun] << " " << ipmt << " " << bqmean[ipmt][irun] << std::endl;
+        // search for next good val
+        double nextgood = NAN;
+        for (int nextrun=irun+1; nextrun<nruns; nextrun++)
+        {
+          if ( !std::isnan( bqmean[ipmt][nextrun] ) )
+          {
+            nextgood = bqmean[ipmt][nextrun];
+            break;
+          }
+        }
+
+
+        // search for prev good val
+        double prevgood = NAN;
+        for (int prevrun=irun-1; prevrun>=0; prevrun--)
+        {
+          if ( !std::isnan( bqmean[ipmt][prevrun] ) )
+          {
+            prevgood = bqmean[ipmt][prevrun];
+            break;
+          }
+        }
+
+        if ( !std::isnan(nextgood) && !std::isnan(prevgood) )
+        {
+          bqmean[ipmt][irun] = (nextgood+prevgood)/2.0;
+        }
+        else if ( !std::isnan(nextgood) )
+        {
+          bqmean[ipmt][irun] = nextgood;
+        }
+        else if ( !std::isnan(prevgood) )
+        {
+          bqmean[ipmt][irun] = prevgood;
+        }
+        else
+        {
+          std::cout << "ERROR, no good run to interpolate from" << std::endl;
+        }
+
+        std::cout << "NEW VALUE FOR BAD " << irun << " " << ipmt << " " << bqmean[ipmt][irun] << std::endl;
+      }
+
+      if ( std::isnan(bqmeanerr[ipmt][irun]) )
+      {
+        // search for next good val
+        double nextgood = NAN;
+        for (int nextrun=irun+1; nextrun<nruns; nextrun++)
+        {
+          if ( !std::isnan( bqmeanerr[ipmt][nextrun] ) )
+          {
+            nextgood = bqmeanerr[ipmt][nextrun];
+            break;
+          }
+        }
+
+
+        // search for prev good val
+        double prevgood = NAN;
+        for (int prevrun=irun-1; prevrun>=0; prevrun--)
+        {
+          if ( !std::isnan( bqmeanerr[ipmt][prevrun] ) )
+          {
+            prevgood = bqmeanerr[ipmt][prevrun];
+            break;
+          }
+        }
+
+        if ( irun==0 )
+        {
+          bqmeanerr[ipmt][irun] = nextgood;
+        }
+        else if ( irun==nruns-1 )
+        {
+          bqmeanerr[ipmt][irun] = prevgood;
+        }
+        else
+        {
+          bqmeanerr[ipmt][irun] = (nextgood+prevgood)/2.0;
+        }
+      }
+    }
+
+    name = "gainvals"; name += ipmt;
+    title = "gain, ch"; title += ipmt;
+    //gainvals[ipmt] = new TGraphErrors(nruns,runindex,bqmean[ipmt],0,bqmeanerr[ipmt]);
+    gainvals[ipmt] = new TGraphErrors(nruns,listofruns,bqmean[ipmt],nullptr,bqmeanerr[ipmt]);
+    gainvals[ipmt]->SetName( name );
+    gainvals[ipmt]->SetTitle( title );
+
+    gainvals[ipmt]->Draw("ap");
+    gPad->Modified();
+    gPad->Update();
+
+    if ( write_plots )
+    {
+      gPad->Print( pdfname, name );
+      gainvals[ipmt]->Write();
+    }
+  }
+
+  if ( write_plots )
+  {
+    gPad->Print( pdfname + "]");
+  }
+
+  // Get mean gain for each channel, and write out the values
+  TString meangainfname = "results/"; meangainfname += flist;
+  meangainfname.ReplaceAll(".list","_meangains.calib");
+  std::ofstream meangainfile( meangainfname );
+  TF1 *f_meangain[128] {nullptr};
+  Double_t grp_mean[128];
+  Double_t grp_meanerr[128];
+  for (int ipmt=0; ipmt<128; ipmt++)
+  {
+    name = "f_meangain"; name += ipmt;
+    f_meangain[ipmt] = new TF1(name,"pol0",0,1e9);
+    gainvals[ipmt]->Fit(f_meangain[ipmt]);
+    gPad->Update();
+    gPad->Modified();
+    grp_mean[ipmt] = f_meangain[ipmt]->GetParameter(0);
+    grp_meanerr[ipmt] = f_meangain[ipmt]->GetParError(0);
+
+    meangainfile << ipmt << "\t" << grp_mean[ipmt] << "\t" << grp_meanerr[ipmt] << std::endl;
+    std::cout << ipmt << "\t" << grp_mean[ipmt] << "\t" << grp_meanerr[ipmt] << std::endl;
+  }
+  meangainfile.close();
+
+  // generate new gains
+  std::ifstream inflist;
+  std::ifstream cal_mip_file;
+  TString calrunseq;
+  TString calfile;
+
+  if ( update_qfit )
+  {
+    inflist.open(flist);
+    std::ofstream newcal_mip_file;
+
+    int    temp_pmt;
+    double integ;
+    double best_peak;
+    double width;
+    double integerr;
+    double best_peakerr;
+    double widtherr;
+    double chi2ndf;
+
+    int irun = 0;
+    while ( inflist >> calrunseq )
+    {
+      calfile = "results/" + calrunseq + "/mbd_qfit.calib";
+      std::cout << calfile << std::endl;
+      cal_mip_file.open( calfile );
+
+      // create new gain corr file
+      calfile = "results/" + calrunseq + "/newgainvals_mbd_qfit.calib";
+      newcal_mip_file.open( calfile );
+
+      for (int ipmt=0; ipmt<128; ipmt++)
+      {
+
+        cal_mip_file >> temp_pmt >> integ >> best_peak >> width 
+          >> integerr >> best_peakerr >> widtherr >> chi2ndf;
+
+        newcal_mip_file << temp_pmt << "\t" << integ << "\t" << bqmean[ipmt][irun] << "\t" << width << "\t"
+          << integerr << "\t" << bqmeanerr[ipmt][irun] << "\t" << widtherr << "\t"
+          << chi2ndf << std::endl;
+      }
+
+      cal_mip_file.close();
+      newcal_mip_file.close();
+      irun++;
+    }
+  }
+
+  if ( write_plots )
+  {
+    savefile->Write();
+  }
+}
+

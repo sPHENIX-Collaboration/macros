@@ -1,0 +1,25 @@
+Setup:
+
+Please do not use the writing/reading to the cdb (the mycdb.jsan stuff), it's not needed right now - your job ends when you have created the file and read it back)
+
+The calibration files will be written and read to the local directory (./)
+
+set NOPAYLOADCLIENT_CONF to mycdb.json (you need to stay in this dir so the reading/writing work so you don't need the full path):
+
+setenv NOPAYLOADCLIENT_CONF mycdb.json
+or when using bash
+export NOPAYLOADCLIENT_CONF=mycdb.json
+
+TestCDBTTree.C creates a small CDBTTree object and writes it to test.root
+
+TestCDBHistos.C creates a few histograms and writes them to test.root
+
+Do not mix CDBTTree and CDBHistos, you can only save only one or the other (likely, have't tried that)
+
+
+TestCDBInsert.C inserts test.root into the cdb using your configuration. Modify this macro to use your own global tag. The macro will give errors when you run it multiple times because the global tag and the payload type exist now. Don't worry about those.
+
+TestCDBRead.C reads the file back from the cdb trying different time stamps. The limited validity range does not work yet
+
+CDBUtils.C gives you some utilities to interact with the CDB (create global tags and payloads, set global tags, list tags and payloads etc.)
+

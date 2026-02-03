@@ -1,17 +1,22 @@
 #ifndef MACRO_G4GLOBAL_C
 #define MACRO_G4GLOBAL_C
 
+#include <GlobalVariables.C>
+
 #include <g4vertex/GlobalVertexFastSimReco.h>
-#include <g4vertex/GlobalVertexReco.h>
+#include <globalvertex/GlobalVertexReco.h>
 
 #include <fun4all/Fun4AllServer.h>
 
-R__LOAD_LIBRARY(libg4vertex.so)
+#include <Rtypes.h>  // for R__LOAD_LIBRARY
 
+R__LOAD_LIBRARY(libg4vertex.so)
+R__LOAD_LIBRARY(libglobalvertex.so)
 namespace Enable
 {
   bool GLOBAL_RECO = false;
   bool GLOBAL_FASTSIM = false;
+  int GLOBAL_VERBOSITY = 0;
 }  // namespace Enable
 
 namespace G4GLOBAL
@@ -26,13 +31,12 @@ void GlobalInit() {}
 
 void Global_Reco()
 {
-  //---------------
-  // Fun4All server
-  //---------------
+  int verbosity = std::max(Enable::VERBOSITY, Enable::GLOBAL_VERBOSITY);
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
   GlobalVertexReco* gblvertex = new GlobalVertexReco();
+  gblvertex->Verbosity(verbosity);
   se->registerSubsystem(gblvertex);
 
   return;
@@ -40,9 +44,7 @@ void Global_Reco()
 
 void Global_FastSim()
 {
-  //---------------
-  // Fun4All server
-  //---------------
+  int verbosity = std::max(Enable::VERBOSITY, Enable::GLOBAL_VERBOSITY);
 
   Fun4AllServer* se = Fun4AllServer::instance();
 
@@ -51,6 +53,8 @@ void Global_FastSim()
   gblvertex->set_y_smearing(G4GLOBAL::y_smearing);
   gblvertex->set_z_smearing(G4GLOBAL::z_smearing);
   gblvertex->set_t_smearing(G4GLOBAL::t_smearing);
+  gblvertex->Verbosity(verbosity);
+
   se->registerSubsystem(gblvertex);
 
   return;

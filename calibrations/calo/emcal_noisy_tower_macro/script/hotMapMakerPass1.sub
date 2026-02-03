@@ -1,0 +1,9 @@
+executable = condorsubmitHotMapMakerPass1.csh
+arguments = $(filename) 2.5
+log  = /tmp/Finaljob-$(Process).log
+output  = Finaljob-$(Process).out
+error = Finaljob-$(Process).err
+request_memory = 4GB
+should_transfer_files  = NO
+
+queue filename from fileLists/singleFileRunnumberList.list

@@ -3,10 +3,11 @@
 
 #include <GlobalVariables.C>
 
-#include <phpythia6/PHPythia6.h>
+#include <G4_TrkrVariables.C>
 
 #include <phpythia8/PHPythia8.h>
 
+#include <g4main/CosmicSpray.h>
 #include <g4main/HepMCNodeReader.h>
 #include <g4main/PHG4IonGun.h>
 #include <g4main/PHG4ParticleGenerator.h>
@@ -14,17 +15,18 @@
 #include <g4main/PHG4ParticleGeneratorVectorMeson.h>
 #include <g4main/PHG4ParticleGun.h>
 #include <g4main/PHG4SimpleEventGenerator.h>
-#include <g4main/ReadEICFiles.h>
+// #include <g4main/ReadEICFiles.h>
 
 #include <fermimotionafterburner/FermimotionAfterburner.h>
+
+#include <hijingflipafterburner/HIJINGFlipAfterburner.h>
+
+#include <reactionplaneafterburner/ReactionPlaneAfterburner.h>
 
 #include <phhepmc/Fun4AllHepMCInputManager.h>
 #include <phhepmc/Fun4AllHepMCPileupInputManager.h>
 #include <phhepmc/HepMCFlowAfterBurner.h>
 #include <phhepmc/PHHepMCGenHelper.h>
-
-#include <phsartre/PHSartre.h>
-#include <phsartre/PHSartreParticleTrigger.h>
 
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDummyInputManager.h>
@@ -32,14 +34,16 @@
 #include <fun4all/Fun4AllNoSyncDstInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 
+#include <TSystem.h>  // for gSystem
+
 #include <set>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
-R__LOAD_LIBRARY(libPHPythia6.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
-R__LOAD_LIBRARY(libPHSartre.so)
 R__LOAD_LIBRARY(libFermimotionAfterburner.so)
+R__LOAD_LIBRARY(libHIJINGFlipAfterburner.so)
+R__LOAD_LIBRARY(libReactionPlaneAfterburner.so)
 
 namespace Input
 {
@@ -48,10 +52,9 @@ namespace Input
   int PYTHIA6_EmbedId = 0;
 
   bool PYTHIA8 = false;
-  int PYTHIA8_EmbedId = 0;
-
-  bool SARTRE = false;
-  int SARTRE_EmbedId = 0;
+  int PYTHIA8_NUMBER = 1;
+  int PYTHIA8_VERBOSITY = 0;
+  std::set<int> PYTHIA8_EmbedIds;
 
   // Single/multiple particle generators
   bool DZERO = false;
@@ -86,23 +89,110 @@ namespace Input
   bool READHITS = false;
   int VERBOSITY = 0;
   int EmbedId = 1;
+  int VertexEmbedId = 0;
 
-  //! apply sPHENIX nominal beam parameter with 2mrad crossing as defined in sPH-TRG-2020-001
-  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
-  void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen)
+  bool COSMIC = false;
+  double COSMIC_R = 650.;
+
+  double beam_crossing = -1.5;  // -1.5 mRad
+  //! apply reference sPHENIX nominal beam parameter with 1.5mrad crossing as used in 2024
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
+  //! \param[in] collision_type select the beam configuration with Input::BeamConfiguration
+  void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen, const Input::BeamConfiguration &beam_config)
   {
     if (HepMCGen == nullptr)
     {
       std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
       exit(1);
     }
-    HepMCGen->set_beam_direction_theta_phi(1e-3, 0, M_PI - 1e-3, 0);  //2mrad x-ing of sPHENIX per sPH-TRG-2020-001
+    double localbcross = Input::beam_crossing / 2. * 1e-3;
+    switch (beam_config)
+    {
+    case AA_COLLISION:
+    case mRad_10:
+      // heavy ion mode
+      Input::beam_crossing = 1.;  // +1 mRad for late 2024 with triggered readout for mvtx
+      //  Xing angle is split among both beams, means set to 0.5 mRad
+      localbcross = Input::beam_crossing / 2. * 1e-3;
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
+      HepMCGen->set_vertex_distribution_width(
+          100e-4,         // approximation from past STAR/Run16 AuAu data
+          100e-4,         // approximation from past STAR/Run16 AuAu data
+          13.5,           // measured 2024 with 1mRad beam Xing
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
-    HepMCGen->set_vertex_distribution_width(
-        100e-4,         // approximation from past RICH data
-        100e-4,         // approximation from past RICH data
-        7,              // sPH-TRG-2020-001. Fig 3.2
-        20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+      break;
+    case pA_COLLISION:
+
+      // pA mode
+
+      // 1.5mRad is split among both beams, means set to 0.75 mRad
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
+      HepMCGen->set_vertex_distribution_width(
+          100e-4,         // set to be similar to AA
+          100e-4,         // set to be similar to AA
+          8,              // sPH-TRG-2022-001. Fig B.4
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+    case pp_COLLISION:
+    case mRad_15:
+
+      // pp mode
+      // 1.5mRad is split among both beams, means set to 0.75 mRad
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
+      HepMCGen->set_vertex_distribution_width(
+          120e-4,         // approximation from past PHENIX data
+          120e-4,         // approximation from past PHENIX data
+          16,             // measured in 2024 for 1.5mrad Xing angle
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+    case pp_ZEROANGLE:
+    case mRad_00:
+
+      // pp mode
+
+      HepMCGen->set_vertex_distribution_width(
+          120e-4,         // approximation from past PHENIX data
+          120e-4,         // approximation from past PHENIX data
+          65,             // measured in 2024 for 0 Xing angle
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+
+    case ppg02:
+      Input::beam_crossing = 1.;  // +1 mRad for late 2024 with triggered readout for mvtx
+      localbcross = Input::beam_crossing / 2. * 1e-3;
+      //  Xing angle is split among both beams, means set to 0.5 mRad
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);  // 1.5mrad x-ing of sPHENIX
+      HepMCGen->set_vertex_distribution_mean(-0.022, 0.223, -4.03, 0.);
+      HepMCGen->set_vertex_distribution_width(
+          120e-4,         // approximation from past PHENIX data
+          120e-4,         // approximation from past PHENIX data
+          9.358,          // measured by intt
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+      break;
+
+    case mRad_05:
+      Input::beam_crossing = 0.5;
+      //0.5 mRad is split among both beams, means set to 0.25 mRad
+      localbcross = Input::beam_crossing / 2. * 1e-3;
+
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
+      HepMCGen->set_vertex_distribution_width(
+          120e-4,         // approximation from past PHENIX data
+          120e-4,         // approximation from past PHENIX data
+          24.5,             // estimate from Colorado
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+    default:
+      std::cout << "ApplysPHENIXBeamParameter: invalid beam_config = " << beam_config << std::endl;
+
+      exit(1);
+    }
+
     HepMCGen->set_vertex_distribution_function(
         PHHepMCGenHelper::Gaus,
         PHHepMCGenHelper::Gaus,
@@ -110,9 +200,25 @@ namespace Input
         PHHepMCGenHelper::Gaus);
   }
 
+  //! apply sPHENIX nominal beam parameter according to the beam collision setting of Input::IS_PP_COLLISION
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
+  void ApplysPHENIXBeamParameter(PHHepMCGenHelper *HepMCGen)
+  {
+    ApplysPHENIXBeamParameter(HepMCGen, Input::BEAM_CONFIGURATION);
+  }
+
+  void ApplysPHENIXBeamParameter(std::vector<PHPythia8 *> &HepMCGenVec)
+  {
+    PHHepMCGenHelper *gen = dynamic_cast<PHHepMCGenHelper *> (HepMCGenVec[0]);
+    if (gen)
+    {
+      ApplysPHENIXBeamParameter(gen, Input::BEAM_CONFIGURATION);
+    }
+  }
+
   //! apply EIC beam parameter to any HepMC generator following EIC CDR,
   //! including in-time collision's space time shift, beam crossing angle and angular divergence
-  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, PHSartre, ReadEICFiles
+  //! \param[in] HepMCGen any HepMC generator, e.g. Fun4AllHepMCInputManager, Fun4AllHepMCPileupInputManager, PHPythia8, PHPythia6, ReadEICFiles
   void ApplyEICBeamParameter(PHHepMCGenHelper *HepMCGen)
   {
     if (HepMCGen == nullptr)
@@ -121,7 +227,7 @@ namespace Input
       exit(1);
     }
 
-    //25mrad x-ing as in EIC CDR
+    // 25mrad x-ing as in EIC CDR
     const double EIC_hadron_crossing_angle = 25e-3;
 
     HepMCGen->set_beam_direction_theta_phi(
@@ -157,64 +263,69 @@ namespace Input
     const double collision_sigma_t = collision_sigma_z / 29.9792;  // speed of light in cm/ns
 
     HepMCGen->set_vertex_distribution_width(
-        sigma_p_h * sigma_e_h / sqrt(sigma_p_h * sigma_p_h + sigma_e_h * sigma_e_h),  //x
-        sigma_p_v * sigma_e_v / sqrt(sigma_p_v * sigma_p_v + sigma_e_v * sigma_e_v),  //y
-        collision_sigma_z,                                                            //z
-        collision_sigma_t);                                                           //t
+        sigma_p_h * sigma_e_h / sqrt(sigma_p_h * sigma_p_h + sigma_e_h * sigma_e_h),  // x
+        sigma_p_v * sigma_e_v / sqrt(sigma_p_v * sigma_p_v + sigma_e_v * sigma_e_v),  // y
+        collision_sigma_z,                                                            // z
+        collision_sigma_t);                                                           // t
     HepMCGen->set_vertex_distribution_function(
-        PHHepMCGenHelper::Gaus,   //x
-        PHHepMCGenHelper::Gaus,   //y
-        PHHepMCGenHelper::Gaus,   //z
-        PHHepMCGenHelper::Gaus);  //t
+        PHHepMCGenHelper::Gaus,   // x
+        PHHepMCGenHelper::Gaus,   // y
+        PHHepMCGenHelper::Gaus,   // z
+        PHHepMCGenHelper::Gaus);  // t
   }
 }  // namespace Input
 
 namespace INPUTHEPMC
 {
-  string filename;
-  string listfile;
+  std::string filename;
+  std::string listfile;
+  int EmbedId = 0;
   bool FLOW = false;
   int FLOW_VERBOSITY = 0;
+  bool FLOW_FLUCTUATIONS = false;
+  float FLOW_SCALING = 1.0;  // scaling factor for flow
   bool FERMIMOTION = false;
+  bool HIJINGFLIP = false;
+  bool REACTIONPLANERAND = false;
+  float HEPMC_STRANGENESS_FRACTION = -1.;
 
 }  // namespace INPUTHEPMC
 
 namespace INPUTREADEIC
 {
-  string filename;
+  std::string filename;
 }  // namespace INPUTREADEIC
 
 namespace INPUTREADHITS
 {
-  map<unsigned int, std::string> filename;
-  map<unsigned int, std::string> listfile;
+  std::map<unsigned int, std::string> filename;
+  std::map<unsigned int, std::string> listfile;
 }  // namespace INPUTREADHITS
 
 namespace INPUTEMBED
 {
-  map<unsigned int, std::string> filename;
-  map<unsigned int, std::string> listfile;
+  std::map<unsigned int, std::string> filename;
+  std::map<unsigned int, std::string> listfile;
+  bool REPEAT = true;
 }  // namespace INPUTEMBED
 
 namespace PYTHIA6
 {
-  string config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia6.cfg";
+  std::string config_file = std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia6.cfg";
 }
 
 namespace PYTHIA8
 {
-  string config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg";
-}
-
-namespace SARTRE
-{
-  string config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/sartre.cfg";
+  std::map<int, std::string> config_file =
+  {
+    {0, std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg"}
+  };
 }
 
 namespace PILEUP
 {
-  string pileupfile = "/sphenix/sim/sim01/sphnxpro/MDC1/sHijing_HepMC/data/sHijing_0_20fm-0000000001-00000.dat";
-  double TpcDriftVelocity = 8.0 / 1000.0;
+  std::string pileupfile = "/sphenix/sim/sim01/sphnxpro/MDC1/sHijing_HepMC/data/sHijing_0_20fm-0000000001-00000.dat";
+  double TpcDriftVelocity = G4TPC::tpc_drift_velocity_sim;
 }  // namespace PILEUP
 
 // collection of pointers to particle generators we can grab in the Fun4All macro
@@ -226,11 +337,10 @@ namespace INPUTGENERATOR
   std::vector<PHG4ParticleGeneratorVectorMeson *> VectorMesonGenerator;
   std::vector<PHG4SimpleEventGenerator *> SimpleEventGenerator;
   std::vector<PHG4ParticleGun *> Gun;
-  PHPythia6 *Pythia6 = nullptr;
-  PHPythia8 *Pythia8 = nullptr;
-  PHSartre *Sartre = nullptr;
-  PHSartreParticleTrigger *SartreTrigger = nullptr;
-  ReadEICFiles *EICFileReader = nullptr;
+  PHPythia8 *Pythia6 = nullptr;
+  std::vector<PHPythia8 *> Pythia8;
+  //  ReadEICFiles *EICFileReader = nullptr;
+  CosmicSpray *Cosmic = nullptr;
 }  // namespace INPUTGENERATOR
 
 namespace INPUTMANAGER
@@ -241,66 +351,78 @@ namespace INPUTMANAGER
 
 void InputInit()
 {
+  // for pileup sims embed id is 1, to distinguish particles
+  // which will be embedded (when Input::EMBED = true) into pileup sims
+  // we need to start at embedid = 2
+  if (Input::EMBED)
+  {
+    Input::EmbedId = 2;
+  }
   // first consistency checks - not all input generators play nice
   // with each other
   if (Input::READHITS && Input::EMBED)
   {
-    cout << "Reading Hits and Embedding into background at the same time is not supported" << endl;
+    std::cout << "Reading Hits and Embedding into background at the same time is not supported" << std::endl;
     gSystem->Exit(1);
   }
-  if (Input::READHITS && (Input::PYTHIA6 || Input::PYTHIA8 || Input::SARTRE || Input::SIMPLE || Input::GUN || Input::UPSILON || Input::HEPMC))
+  if (Input::READHITS && (Input::PYTHIA6 || Input::PYTHIA8 || Input::SIMPLE || Input::GUN || Input::UPSILON || Input::HEPMC))
   {
-    cout << "Reading Hits and running G4 simultanously is not supported" << endl;
+    std::cout << "Reading Hits and running G4 simultanously is not supported" << std::endl;
     gSystem->Exit(1);
   }
   if (Input::PYTHIA6 && Input::PYTHIA8)
   {
-    cout << "Pythia6 and Pythia8 cannot be run together - might be possible but needs R&D" << endl;
+    std::cout << "Pythia6 and Pythia8 cannot be run together - might be possible but needs R&D" << std::endl;
     gSystem->Exit(1);
   }
 
   if (INPUTHEPMC::FLOW && Input::PILEUPRATE > 0)
   {
-    cout << "Flow Afterburner and Pileup cannot be run simultanously" << endl;
+    std::cout << "Flow Afterburner and Pileup cannot be run simultanously" << std::endl;
     gSystem->Exit(1);
   }
   // done with consistency checks, create generators in no specific order
 
-  Fun4AllServer *se = Fun4AllServer::instance();
+  //  Fun4AllServer *se = Fun4AllServer::instance();
   if (Input::PYTHIA6)
   {
-    INPUTGENERATOR::Pythia6 = new PHPythia6();
-    INPUTGENERATOR::Pythia6->set_config_file(PYTHIA6::config_file);
+    std::cout << "Pythia6 not implemented" << std::endl;
+    gSystem->Exit(1);
+    // INPUTGENERATOR::Pythia6 = new PHPythia6();
+    // INPUTGENERATOR::Pythia6->set_config_file(PYTHIA6::config_file);
 
-    INPUTGENERATOR::Pythia6->set_embedding_id(Input::EmbedId);
-    Input::PYTHIA6_EmbedId = Input::EmbedId;
-    Input::EmbedId++;
+    // INPUTGENERATOR::Pythia6->set_embedding_id(Input::EmbedId);
+    // Input::PYTHIA6_EmbedId = Input::EmbedId;
+    // Input::EmbedId++;
   }
   if (Input::PYTHIA8)
   {
-    INPUTGENERATOR::Pythia8 = new PHPythia8();
-    // see coresoftware/generators/PHPythia8 for example config
-    INPUTGENERATOR::Pythia8->set_config_file(PYTHIA8::config_file);
+    for (int i = 0; i < Input::PYTHIA8_NUMBER; i++)
+    {
+      std::string name = "PYTHIA_" + std::to_string(i);
+      PHPythia8 *pythia8 = new PHPythia8(name);
+      INPUTGENERATOR::Pythia8.push_back(pythia8);
+      pythia8->set_embedding_id(Input::EmbedId);
+      // see coresoftware/generators/PHPythia8 for example config
+      if (PYTHIA8::config_file[i].empty())
+      {
+	std::cout << "No Pythia8 config file for pythia8 generator no " << i << std::endl;
+	gSystem->Exit(1);
+      }
+      pythia8->set_config_file(PYTHIA8::config_file[i]);
+      // luminosity makes no sense when running multiple pythia8 generators
+      if (Input::PYTHIA8_NUMBER > 1)
+      {
+	pythia8->save_integrated_luminosity(false);
+      }
 
-    INPUTGENERATOR::Pythia8->set_embedding_id(Input::EmbedId);
-    Input::PYTHIA8_EmbedId = Input::EmbedId;
-    Input::EmbedId++;
-  }
-  if (Input::SARTRE)
-  {
-    gSystem->Load("libPHSartre.so");
-    INPUTGENERATOR::Sartre = new PHSartre();
-    INPUTGENERATOR::Sartre->set_config_file(SARTRE::config_file);
-    // particle trigger to enhance forward J/Psi -> ee
-    INPUTGENERATOR::SartreTrigger = new PHSartreParticleTrigger("MySartreTrigger");
-    INPUTGENERATOR::SartreTrigger->AddParticles(-11);
-    //INPUTGENERATOR::SartreTrigger->SetEtaHighLow(4.0,1.4);
-    INPUTGENERATOR::SartreTrigger->SetEtaHighLow(1.0, -1.1);  // central arm
-    INPUTGENERATOR::SartreTrigger->PrintConfig();
-
-    INPUTGENERATOR::Sartre->set_embedding_id(Input::EmbedId);
-    Input::SARTRE_EmbedId = Input::EmbedId;
-    Input::EmbedId++;
+      Input::PYTHIA8_EmbedIds.insert(Input::EmbedId);
+      Input::EmbedId++;
+      if (Input::EMBED)
+      {
+	pythia8->set_reuse_vertex(Input::VertexEmbedId);
+      }
+    }
   }
   // single particle generators
   if (Input::DZERO)
@@ -380,6 +502,7 @@ void InputInit()
   if (Input::HEPMC)
   {
     INPUTMANAGER::HepMCInputManager = new Fun4AllHepMCInputManager("HEPMCin");
+    INPUTMANAGER::HepMCInputManager->set_embedding_id(INPUTHEPMC::EmbedId);
   }
   if (Input::PILEUPRATE > 0)
   {
@@ -390,96 +513,116 @@ void InputInit()
 void InputRegister()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
-  if (Input::PYTHIA6)
-  {
-    se->registerSubsystem(INPUTGENERATOR::Pythia6);
-  }
+  // if (Input::PYTHIA6)
+  // {
+  //   se->registerSubsystem(INPUTGENERATOR::Pythia6);
+  // }
   if (Input::PYTHIA8)
   {
-    se->registerSubsystem(INPUTGENERATOR::Pythia8);
-  }
-  if (Input::SARTRE)
-  {
-    INPUTGENERATOR::Sartre->register_trigger((PHSartreGenTrigger *) INPUTGENERATOR::SartreTrigger);
-    se->registerSubsystem(INPUTGENERATOR::Sartre);
+    int verbosity = std::max(Input::PYTHIA8_VERBOSITY, Input::VERBOSITY);
+    for (auto &generator : INPUTGENERATOR::Pythia8)
+    {
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
+    }
   }
   if (Input::DZERO)
   {
-    int verbosity = max(Input::DZERO_VERBOSITY, Input::VERBOSITY);
-    for (size_t icnt = 0; icnt < INPUTGENERATOR::DZeroMesonGenerator.size(); ++icnt)
+    int verbosity = std::max(Input::DZERO_VERBOSITY, Input::VERBOSITY);
+    for (auto &generator : INPUTGENERATOR::DZeroMesonGenerator)
     {
-      INPUTGENERATOR::DZeroMesonGenerator[icnt]->Verbosity(verbosity);
-      se->registerSubsystem(INPUTGENERATOR::DZeroMesonGenerator[icnt]);
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
     }
   }
   if (Input::GUN)
   {
-    int verbosity = max(Input::GUN_VERBOSITY, Input::VERBOSITY);
-    for (size_t icnt = 0; icnt < INPUTGENERATOR::Gun.size(); ++icnt)
+    int verbosity = std::max(Input::GUN_VERBOSITY, Input::VERBOSITY);
+    for (auto &generator : INPUTGENERATOR::Gun)
     {
-      INPUTGENERATOR::Gun[icnt]->Verbosity(verbosity);
-      se->registerSubsystem(INPUTGENERATOR::Gun[icnt]);
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
     }
   }
   if (Input::IONGUN)
   {
-    int verbosity = max(Input::IONGUN_VERBOSITY, Input::VERBOSITY);
-    for (size_t icnt = 0; icnt < INPUTGENERATOR::IonGun.size(); ++icnt)
+    int verbosity = std::max(Input::IONGUN_VERBOSITY, Input::VERBOSITY);
+    for (auto &generator : INPUTGENERATOR::IonGun)
     {
-      INPUTGENERATOR::IonGun[icnt]->Verbosity(verbosity);
-      se->registerSubsystem(INPUTGENERATOR::IonGun[icnt]);
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
     }
   }
   if (Input::PGEN)
   {
-    int verbosity = max(Input::PGEN_VERBOSITY, Input::VERBOSITY);
-    for (size_t icnt = 0; icnt < INPUTGENERATOR::ParticleGenerator.size(); ++icnt)
+    int verbosity = std::max(Input::PGEN_VERBOSITY, Input::VERBOSITY);
+    for (auto &generator : INPUTGENERATOR::ParticleGenerator)
     {
-      INPUTGENERATOR::ParticleGenerator[icnt]->Verbosity(verbosity);
-      se->registerSubsystem(INPUTGENERATOR::ParticleGenerator[icnt]);
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
     }
   }
   if (Input::SIMPLE)
   {
-    int verbosity = max(Input::SIMPLE_VERBOSITY, Input::VERBOSITY);
-    for (size_t icnt = 0; icnt < INPUTGENERATOR::SimpleEventGenerator.size(); ++icnt)
+    int verbosity = std::max(Input::SIMPLE_VERBOSITY, Input::VERBOSITY);
+    for (auto &generator : INPUTGENERATOR::SimpleEventGenerator)
     {
-      INPUTGENERATOR::SimpleEventGenerator[icnt]->Verbosity(verbosity);
-      se->registerSubsystem(INPUTGENERATOR::SimpleEventGenerator[icnt]);
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
     }
   }
   if (Input::UPSILON)
   {
-    for (size_t icnt = 0; icnt < INPUTGENERATOR::VectorMesonGenerator.size(); ++icnt)
+    for (auto &generator : INPUTGENERATOR::VectorMesonGenerator)
     {
-      int verbosity = max(Input::UPSILON_VERBOSITY, Input::VERBOSITY);
+      int verbosity = std::max(Input::UPSILON_VERBOSITY, Input::VERBOSITY);
       if (Input::HEPMC || Input::SIMPLE)
       {
-        INPUTGENERATOR::VectorMesonGenerator[icnt]->set_reuse_existing_vertex(true);
+        generator->set_reuse_existing_vertex(true);
       }
-      INPUTGENERATOR::VectorMesonGenerator[icnt]->Verbosity(verbosity);
-      se->registerSubsystem(INPUTGENERATOR::VectorMesonGenerator[icnt]);
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
     }
   }
   if (Input::READEIC)
   {
-    INPUTGENERATOR::EICFileReader = new ReadEICFiles();
-    INPUTGENERATOR::EICFileReader->OpenInputFile(INPUTREADEIC::filename);
-    INPUTGENERATOR::EICFileReader->Verbosity(Input::VERBOSITY);
-    se->registerSubsystem(INPUTGENERATOR::EICFileReader);
+    std::cout << "Eic File Reading disabled" << std::endl;
+    gSystem->Exit(1);
+    // INPUTGENERATOR::EICFileReader = new ReadEICFiles();
+    // INPUTGENERATOR::EICFileReader->OpenInputFile(INPUTREADEIC::filename);
+    // INPUTGENERATOR::EICFileReader->Verbosity(Input::VERBOSITY);
+    // se->registerSubsystem(INPUTGENERATOR::EICFileReader);
+  }
+  if (Input::COSMIC)
+  {
+    INPUTGENERATOR::Cosmic = new CosmicSpray("COSMIC", Input::COSMIC_R);
+    se->registerSubsystem(INPUTGENERATOR::Cosmic);
   }
   // here are the various utility modules which read particles and
   // put them onto the G4 particle stack
-  if (Input::HEPMC or Input::PYTHIA8 or Input::PYTHIA6 or Input::READEIC)
+  if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6 || Input::READEIC)
   {
     if (Input::HEPMC)
     {
+      if (INPUTHEPMC::REACTIONPLANERAND)
+      {
+        ReactionPlaneAfterburner *rp = new ReactionPlaneAfterburner();
+        se->registerSubsystem(rp);
+      }
+
+      if (INPUTHEPMC::HIJINGFLIP)
+      {
+        HIJINGFlipAfterburner *flip = new HIJINGFlipAfterburner();
+        se->registerSubsystem(flip);
+      }
       // these need to be applied before the HepMCNodeReader since they
       // work on the hepmc records
       if (INPUTHEPMC::FLOW)
       {
         HepMCFlowAfterBurner *burn = new HepMCFlowAfterBurner();
         burn->Verbosity(INPUTHEPMC::FLOW_VERBOSITY);
+        burn->enableFluctuations(INPUTHEPMC::FLOW_FLUCTUATIONS);
+        burn->scaleFlow(INPUTHEPMC::FLOW_SCALING);
         se->registerSubsystem(burn);
       }
       if (INPUTHEPMC::FERMIMOTION)
@@ -490,6 +633,10 @@ void InputRegister()
     }
     // copy HepMC records into G4
     HepMCNodeReader *hr = new HepMCNodeReader();
+    if (INPUTHEPMC::HEPMC_STRANGENESS_FRACTION >= 0)
+    {
+      hr->AddStrangeness(INPUTHEPMC::HEPMC_STRANGENESS_FRACTION);
+    }
     se->registerSubsystem(hr);
   }
 }
@@ -502,30 +649,36 @@ void InputManagers()
     gSystem->Load("libg4dst.so");
     if (!INPUTEMBED::filename.empty() && !INPUTEMBED::listfile.empty())
     {
-      cout << "only filenames or filelists are supported, not mixtures" << endl;
+      std::cout << "only filenames or filelists are supported, not mixtures" << std::endl;
       gSystem->Exit(1);
     }
     if (INPUTEMBED::filename.empty() && INPUTEMBED::listfile.empty())
     {
-      cout << "you need to give an input filenames or filelist" << endl;
+      std::cout << "you need to give an input filenames or filelist" << std::endl;
       gSystem->Exit(1);
     }
-    for (auto iter = INPUTEMBED::filename.begin(); iter != INPUTEMBED::filename.end(); ++iter)
+    for (auto &iter : INPUTEMBED::filename)
     {
-      string mgrname = "DSTin" + to_string(iter->first);
+      std::string mgrname = "DSTin" + std::to_string(iter.first);
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
-      hitsin->fileopen(iter->second);
+      hitsin->fileopen(iter.second);
       hitsin->Verbosity(Input::VERBOSITY);
-      hitsin->Repeat();
+      if (INPUTEMBED::REPEAT)
+      {
+        hitsin->Repeat();
+      }
       se->registerInputManager(hitsin);
     }
-    for (auto iter = INPUTEMBED::listfile.begin(); iter != INPUTEMBED::listfile.end(); ++iter)
+    for (auto &iter : INPUTEMBED::listfile)
     {
-      string mgrname = "DSTin" + to_string(iter->first);
+      std::string mgrname = "DSTin" + std::to_string(iter.first);
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
-      hitsin->AddListFile(iter->second);
+      hitsin->AddListFile(iter.second);
       hitsin->Verbosity(Input::VERBOSITY);
-      hitsin->Repeat();
+      if (INPUTEMBED::REPEAT)
+      {
+        hitsin->Repeat();
+      }
       se->registerInputManager(hitsin);
     }
   }
@@ -543,7 +696,7 @@ void InputManagers()
     }
     else
     {
-      cout << "no filename INPUTHEPMC::filename or listfile INPUTHEPMC::listfile given" << endl;
+      std::cout << "no filename INPUTHEPMC::filename or listfile INPUTHEPMC::listfile given" << std::endl;
       gSystem->Exit(1);
     }
   }
@@ -552,27 +705,27 @@ void InputManagers()
     gSystem->Load("libg4dst.so");
     if (!INPUTREADHITS::filename.empty() && !INPUTREADHITS::listfile.empty())
     {
-      cout << "only filenames or filelists are supported, not mixtures" << endl;
+      std::cout << "only filenames or filelists are supported, not mixtures" << std::endl;
       gSystem->Exit(1);
     }
     if (INPUTREADHITS::filename.empty() && INPUTREADHITS::listfile.empty())
     {
-      cout << "you need to give an input filenames or filelist" << endl;
+      std::cout << "you need to give an input filenames or filelist" << std::endl;
       gSystem->Exit(1);
     }
-    for (auto iter = INPUTREADHITS::filename.begin(); iter != INPUTREADHITS::filename.end(); ++iter)
+    for (auto &iter : INPUTREADHITS::filename)
     {
-      string mgrname = "DSTin" + to_string(iter->first);
+      std::string mgrname = "DSTin" + std::to_string(iter.first);
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
-      hitsin->fileopen(iter->second);
+      hitsin->fileopen(iter.second);
       hitsin->Verbosity(Input::VERBOSITY);
       se->registerInputManager(hitsin);
     }
-    for (auto iter = INPUTREADHITS::listfile.begin(); iter != INPUTREADHITS::listfile.end(); ++iter)
+    for (auto &iter : INPUTREADHITS::listfile)
     {
-      string mgrname = "DSTin" + to_string(iter->first);
+      std::string mgrname = "DSTin" + std::to_string(iter.first);
       Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname);
-      hitsin->AddListFile(iter->second);
+      hitsin->AddListFile(iter.second);
       hitsin->Verbosity(Input::VERBOSITY);
       se->registerInputManager(hitsin);
     }
@@ -589,8 +742,14 @@ void InputManagers()
     INPUTMANAGER::HepMCPileupInputManager->Verbosity(Input::VERBOSITY);
     INPUTMANAGER::HepMCPileupInputManager->AddFile(PILEUP::pileupfile);
     INPUTMANAGER::HepMCPileupInputManager->set_collision_rate(Input::PILEUPRATE);
-    double time_window = 105.5 / PILEUP::TpcDriftVelocity;
-    INPUTMANAGER::HepMCPileupInputManager->set_time_window(-time_window, time_window);
+    double time_window = G4TPC::maxDriftLength / PILEUP::TpcDriftVelocity;
+    double extended_readout_time = 0.0;
+    if (TRACKING::pp_mode)
+    {
+      extended_readout_time = TRACKING::pp_extended_readout_time;
+    }
+    INPUTMANAGER::HepMCPileupInputManager->set_time_window(-time_window, time_window + extended_readout_time);
+    std::cout << "Pileup window is from " << -time_window << " to " << time_window + extended_readout_time << std::endl;
     se->registerInputManager(INPUTMANAGER::HepMCPileupInputManager);
   }
 }

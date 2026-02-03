@@ -7,6 +7,8 @@
 
 #include <fun4all/Fun4AllServer.h>
 
+#include <Rtypes.h>  // resolves R__LOAD_LIBRARY for clang-tidy
+
 R__LOAD_LIBRARY(libcalo_reco.so)
 
 namespace Enable
@@ -17,7 +19,7 @@ namespace Enable
 
 void TopoClusterReco()
 {
-  int verbosity = max(Enable::VERBOSITY, Enable::TOPOCLUSTER_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TOPOCLUSTER_VERBOSITY);
 
   //---------------
   // Fun4All server
@@ -37,6 +39,8 @@ void TopoClusterReco()
   ClusterBuilder->set_do_split(true);
   ClusterBuilder->set_minE_local_max(1.0, 2.0, 0.5);
   ClusterBuilder->set_R_shower(0.025);
+  ClusterBuilder->set_use_only_good_towers(true);
+  ClusterBuilder->set_absE(true);
   se->registerSubsystem(ClusterBuilder);
 
   // topoClustering only in EMCal (needed for particle flow)
@@ -51,6 +55,8 @@ void TopoClusterReco()
   ClusterBuilder1->set_do_split(true);
   ClusterBuilder1->set_minE_local_max(1.0, 2.0, 0.5);
   ClusterBuilder1->set_R_shower(0.025);
+  ClusterBuilder1->set_use_only_good_towers(true);
+  ClusterBuilder1->set_absE(true);
   se->registerSubsystem(ClusterBuilder1);
 
   // topoClustering only in I+OHCal (needed for particle flow)
@@ -65,6 +71,8 @@ void TopoClusterReco()
   ClusterBuilder2->set_do_split(true);
   ClusterBuilder2->set_minE_local_max(1.0, 2.0, 0.5);
   ClusterBuilder2->set_R_shower(0.025);
+  ClusterBuilder2->set_use_only_good_towers(true);
+  ClusterBuilder2->set_absE(true);
   se->registerSubsystem(ClusterBuilder2);
 
   return;

@@ -2,7 +2,10 @@
 #define MACRO_G4CEMCSPACAL_C
 
 #include <GlobalVariables.C>
+
 #include <QA.C>
+
+#include <phparameter/PHParameterUtils.h>
 
 #include <g4detectors/PHG4CylinderCellReco.h>
 #include <g4detectors/PHG4CylinderGeom_Spacalv1.h>
@@ -18,25 +21,34 @@
 #include <g4main/PHG4Reco.h>
 #include <g4main/PHG4Utils.h>
 
+#include <calowaveformsim/CaloWaveformSim.h>
+
+#include <calobase/TowerInfoDefs.h>
+
+#include <caloreco/CaloTowerBuilder.h>
+#include <caloreco/CaloTowerCalib.h>
+#include <caloreco/CaloTowerStatus.h>
+#include <caloreco/CaloWaveformProcessing.h>
 #include <caloreco/RawClusterBuilderGraph.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawClusterPositionCorrection.h>
 #include <caloreco/RawTowerCalibration.h>
-#include <qa_modules/QAG4SimulationCalorimeter.h>
+
+#include <simqa_modules/QAG4SimulationCalorimeter.h>
 
 #include <fun4all/Fun4AllServer.h>
 
-double
-CEmc_1DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings);
-
-double
-CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings);
+#include <Rtypes.h>  // resolves R__LOAD_LIBRARY for clang-tidy
+#include <TSystem.h>
 
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libg4calo.so)
+R__LOAD_LIBRARY(libCaloWaveformSim.so)
 R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libg4eval.so)
-R__LOAD_LIBRARY(libqa_modules.so)
+R__LOAD_LIBRARY(libsimqa_modules.so)
+
+double CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, int crossings);
 
 namespace Enable
 {
@@ -48,6 +60,8 @@ namespace Enable
   bool CEMC_CLUSTER = false;
   bool CEMC_EVAL = false;
   bool CEMC_QA = false;
+  bool CEMC_G4Hit = true;
+  bool CEMC_TOWERINFO = false;
   int CEMC_VERBOSITY = 0;
 }  // namespace Enable
 
@@ -65,9 +79,6 @@ namespace G4CEMC
   // digitization with photon statistics on SiPM with an effective pixel N, ADC conversion and pedestal
   // kSiPM_photon_digitization
 
-  // set a default value for SPACAL configuration
-  //  // 1D azimuthal projective SPACAL (fast)
-  //int Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal;
   //   2D azimuthal projective SPACAL (slow)
   int Cemc_spacal_configuration = PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal;
 
@@ -81,7 +92,8 @@ namespace G4CEMC
   //! template clusterizer, RawClusterBuilderTemplate, as developed by Sasha Bazilevsky
   enu_Cemc_clusterizer Cemc_clusterizer = kCemcTemplateClusterizer;
   //! graph clusterizer, RawClusterBuilderGraph
-  //enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
+  // enu_Cemc_clusterizer Cemc_clusterizer = kCemcGraphClusterizer;
+  bool useTowerInfoV2 = true;
 
 }  // namespace G4CEMC
 
@@ -95,121 +107,27 @@ void CEmcInit(const int i = 0)
 double
 CEmc(PHG4Reco *g4Reco, double radius, const int crossings)
 {
-  if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal)
-  {
-    return CEmc_1DProjectiveSpacal(/*PHG4Reco**/ g4Reco, /*double*/ radius, /*const int */ crossings);
-  }
-  else if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal)
-  {
-    return CEmc_2DProjectiveSpacal(/*PHG4Reco**/ g4Reco, /*double*/ radius, /*const int */ crossings);
-  }
-  else
-  {
-    std::cout
-        << "G4_CEmc_Spacal.C::CEmc - Fatal Error - unrecognized SPACAL configuration #"
-        << G4CEMC::Cemc_spacal_configuration << ". Force exiting..." << std::endl;
-    exit(-1);
-    return 0;
-  }
-}
-
-//! EMCal setup macro - 1D azimuthal projective SPACAL
-double
-CEmc_1DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
-{
-  bool AbsorberActive = Enable::ABSORBER || Enable::CEMC_ABSORBER;
-  bool OverlapCheck = Enable::OVERLAPCHECK || Enable::CEMC_OVERLAPCHECK;
-
-  double emc_inner_radius = 95.;  // emc inner radius from engineering drawing
-  double cemcthickness = 12.7;
-  double emc_outer_radius = emc_inner_radius + cemcthickness;  // outer radius
-
-  if (radius > emc_inner_radius)
-  {
-    cout << "inconsistency: pstof outer radius: " << radius
-         << " larger than emc inner radius: " << emc_inner_radius
-         << endl;
-    gSystem->Exit(-1);
-  }
-
-  //  boundary check
-  if (radius > emc_inner_radius - 1.5 - no_overlapp)
-  {
-    cout << "G4_CEmc_Spacal.C::CEmc() - expect radius < " << emc_inner_radius - 1.5 - no_overlapp << " to install SPACAL" << endl;
-    exit(1);
-  }
-  radius = emc_inner_radius - 1.5 - no_overlapp;
-
-  // 1.5cm thick teflon as an approximation for EMCAl light collection + electronics (10% X0 total estimated)
-  PHG4CylinderSubsystem *cyl = new PHG4CylinderSubsystem("CEMC_ELECTRONICS", 0);
-  cyl->SuperDetector("CEMC_ELECTRONICS");
-  cyl->set_double_param("radius", radius);
-  cyl->set_string_param("material", "G4_TEFLON");
-  cyl->set_double_param("thickness", 1.5);
-  if (AbsorberActive) cyl->SetActive();
-  g4Reco->registerSubsystem(cyl);
-
-  radius += 1.5;
-  radius += no_overlapp;
-
-  int ilayer = G4CEMC::Min_cemc_layer;
-  PHG4SpacalSubsystem *cemc = new PHG4SpacalSubsystem("CEMC", ilayer);
-  cemc->set_double_param("radius", emc_inner_radius);
-  cemc->set_double_param("thickness", cemcthickness);
-
-  cemc->SetActive();
-  cemc->SuperDetector("CEMC");
-  if (AbsorberActive) cemc->SetAbsorberActive();
-  cemc->OverlapCheck(OverlapCheck);
-
-  g4Reco->registerSubsystem(cemc);
-
-  if (ilayer > G4CEMC::Max_cemc_layer)
-  {
-    cout << "layer discrepancy, current layer " << ilayer
-         << " max cemc layer: " << G4CEMC::Max_cemc_layer << endl;
-  }
-
-  radius += cemcthickness;
-  radius += no_overlapp;
-
-  // 0.5cm thick Stainless Steel as an approximation for EMCAl support system
-  cyl = new PHG4CylinderSubsystem("CEMC_SPT", 0);
-  cyl->SuperDetector("CEMC_SPT");
-  cyl->set_double_param("radius", radius);
-  cyl->set_string_param("material", "SS310");  // SS310 Stainless Steel
-  cyl->set_double_param("thickness", 0.5);
-  if (AbsorberActive) cyl->SetActive();
-  g4Reco->registerSubsystem(cyl);
-  radius += 0.5;
-  // this is the z extend and outer radius of the support structure and therefore the z extend
-  // and radius of the surrounding black holes
-  BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, 149.47);
-  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -149.47);
-  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, radius);
-  radius += no_overlapp;
-
-  return radius;
+  return CEmc_2DProjectiveSpacal(/*PHG4Reco**/ g4Reco, /*double*/ radius, /*const int */ crossings);
 }
 
 //! 2D full projective SPACAL
 double
-CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
+CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int /*crossings*/)
 {
   bool AbsorberActive = Enable::ABSORBER || Enable::CEMC_ABSORBER;
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::CEMC_OVERLAPCHECK;
 
   double emc_inner_radius = 92;  // emc inner radius from engineering drawing
-  double cemcthickness = 24.00000 - no_overlapp;
+  double cemcthickness = 22.50000 - no_overlapp;
 
-  //max radius is 116 cm;
+  // max radius is 116 cm;
   double emc_outer_radius = emc_inner_radius + cemcthickness;  // outer radius
   assert(emc_outer_radius < 116);
 
   if (radius > emc_inner_radius)
   {
-    cout << "inconsistency: preshower radius+thickness: " << radius
-         << " larger than emc inner radius: " << emc_inner_radius << endl;
+    std::cout << "inconsistency: preshower radius+thickness: " << radius
+              << " larger than emc inner radius: " << emc_inner_radius << std::endl;
     gSystem->Exit(-1);
   }
 
@@ -223,7 +141,10 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
   cyl->set_double_param("thickness", 1.5 - no_overlapp);
   cyl->SuperDetector("CEMC_ELECTRONICS");
   cyl->OverlapCheck(OverlapCheck);
-  if (AbsorberActive) cyl->SetActive();
+  if (AbsorberActive)
+  {
+    cyl->SetActive();
+  }
   g4Reco->registerSubsystem(cyl);
 
   radius += 1.5;
@@ -236,7 +157,10 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
   cyl->set_string_param("material", "SS310");  // SS310 Stainless Steel
   cyl->set_double_param("thickness", 0.5 - no_overlapp);
   cyl->OverlapCheck(OverlapCheck);
-  if (AbsorberActive) cyl->SetActive();
+  if (AbsorberActive)
+  {
+    cyl->SetActive();
+  }
   g4Reco->registerSubsystem(cyl);
 
   // this is the z extend and outer radius of the support structure and therefore the z extend
@@ -257,23 +181,29 @@ CEmc_2DProjectiveSpacal(PHG4Reco *g4Reco, double radius, const int crossings)
   cemc->set_int_param("azimuthal_seg_visible", 1);
   cemc->set_int_param("construction_verbose", 0);
   cemc->Verbosity(0);
-
   cemc->UseCalibFiles(PHG4DetectorSubsystem::xml);
-  cemc->SetCalibrationFileDir(string(getenv("CALIBRATIONROOT")) + string("/CEMC/Geometry_2018ProjTilted/"));
+  cemc->SetCalibrationFileDir(std::string(getenv("CALIBRATIONROOT")) + std::string("/CEMC/Geometry_2023ProjTilted/"));
   cemc->set_double_param("radius", radius);            // overwrite minimal radius
   cemc->set_double_param("thickness", cemcthickness);  // overwrite thickness
+  if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal)
+  {
+    cemc->set_int_param("saveg4hit", Enable::CEMC_G4Hit);
+  }
 
   cemc->SetActive();
   cemc->SuperDetector("CEMC");
-  if (AbsorberActive) cemc->SetAbsorberActive();
+  if (AbsorberActive)
+  {
+    cemc->SetAbsorberActive();
+  }
   cemc->OverlapCheck(OverlapCheck);
 
   g4Reco->registerSubsystem(cemc);
 
   if (ilayer > G4CEMC::Max_cemc_layer)
   {
-    cout << "layer discrepancy, current layer " << ilayer
-         << " max cemc layer: " << G4CEMC::Max_cemc_layer << endl;
+    std::cout << "layer discrepancy, current layer " << ilayer
+              << " max cemc layer: " << G4CEMC::Max_cemc_layer << std::endl;
   }
 
   radius += cemcthickness;
@@ -297,24 +227,28 @@ void CEMC_Cells()
     {
       //          cemc_cells->etaphisize(i, 0.024, 0.024);
       const double radius = 95;
-      cemc_cells->cellsize(i, 2 * TMath::Pi() / 256. * radius, 2 * TMath::Pi() / 256. * radius);
+      cemc_cells->cellsize(i, 2 * M_PI / 256. * radius, 2 * M_PI / 256. * radius);
     }
     se->registerSubsystem(cemc_cells);
   }
   else if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal)
   {
+    if (!Enable::CEMC_G4Hit)
+    {
+      return;
+    }
     PHG4FullProjSpacalCellReco *cemc_cells = new PHG4FullProjSpacalCellReco("CEMCCYLCELLRECO");
     cemc_cells->Detector("CEMC");
     cemc_cells->Verbosity(verbosity);
     cemc_cells->get_light_collection_model().load_data_file(
-        string(getenv("CALIBRATIONROOT")) + string("/CEMC/LightCollection/Prototype3Module.xml"),
+        std::string(getenv("CALIBRATIONROOT")) + std::string("/CEMC/LightCollection/Prototype3Module.xml"),
         "data_grid_light_guide_efficiency", "data_grid_fiber_trans");
     se->registerSubsystem(cemc_cells);
   }
   else
   {
-    cout << "G4_CEmc_Spacal.C::CEmc - Fatal Error - unrecognized SPACAL configuration #"
-         << G4CEMC::Cemc_spacal_configuration << ". Force exiting..." << endl;
+    std::cout << "G4_CEmc_Spacal.C::CEmc - Fatal Error - unrecognized SPACAL configuration #"
+              << G4CEMC::Cemc_spacal_configuration << ". Force exiting..." << std::endl;
     gSystem->Exit(-1);
     return;
   }
@@ -328,70 +262,57 @@ void CEMC_Towers()
 
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  RawTowerBuilder *TowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
-  TowerBuilder->Detector("CEMC");
-  TowerBuilder->set_sim_tower_node_prefix("SIM");
-  TowerBuilder->Verbosity(verbosity);
-  se->registerSubsystem(TowerBuilder);
-
-  double sampling_fraction = 1;
-  if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal)
+  if (!Enable::CEMC_TOWERINFO)
   {
-    sampling_fraction = 0.0234335;  //from production:/gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.3/single_particle/spacal1d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
-  }
-  else if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal)
-  {
+    if (Enable::CEMC_G4Hit)
+    {
+      RawTowerBuilder *TowerBuilder = new RawTowerBuilder("EmcRawTowerBuilder");
+      TowerBuilder->Detector("CEMC");
+      TowerBuilder->set_sim_tower_node_prefix("SIM");
+      TowerBuilder->Verbosity(verbosity);
+      se->registerSubsystem(TowerBuilder);
+    }
+    double sampling_fraction = 1;
     //      sampling_fraction = 0.02244; //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.3/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
     //    sampling_fraction = 2.36081e-02;  //from production: /gpfs02/phenix/prod/sPHENIX/preCDR/pro.1-beta.5/single_particle/spacal2d/zerofield/G4Hits_sPHENIX_e-_eta0_8GeV.root
     //    sampling_fraction = 1.90951e-02; // 2017 Tilt porjective SPACAL, 8 GeV photon, eta = 0.3 - 0.4
-    sampling_fraction = 2e-02;  // 2017 Tilt porjective SPACAL, tower-by-tower calibration
-  }
-  else
-  {
-    std::cout
-        << "G4_CEmc_Spacal.C::CEMC_Towers - Fatal Error - unrecognized SPACAL configuration #"
-        << G4CEMC::Cemc_spacal_configuration << ". Force exiting..." << std::endl;
-    exit(-1);
-    return;
-  }
+    sampling_fraction = 2e-02;                 // 2017 Tilt porjective SPACAL, tower-by-tower calibration
+    const double photoelectron_per_GeV = 500;  // 500 photon per total GeV deposition
 
-  const double photoelectron_per_GeV = 500;  //500 photon per total GeV deposition
-
-  RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
-  TowerDigitizer->Detector("CEMC");
-  TowerDigitizer->Verbosity(verbosity);
-  TowerDigitizer->set_digi_algorithm(G4CEMC::TowerDigi);
-  TowerDigitizer->set_variable_pedestal(true);  //read ped central and width from calibrations file comment next 2 lines if true
-                                                //  TowerDigitizer->set_pedstal_central_ADC(0);
-                                                //  TowerDigitizer->set_pedstal_width_ADC(8);  // eRD1 test beam setting
-  TowerDigitizer->set_photonelec_ADC(1);        //not simulating ADC discretization error
-  TowerDigitizer->set_photonelec_yield_visible_GeV(photoelectron_per_GeV / sampling_fraction);
-  TowerDigitizer->set_variable_zero_suppression(true);  //read zs values from calibrations file comment next line if true
-                                                        //  TowerDigitizer->set_zero_suppression_ADC(16);  // eRD1 test beam setting
-  TowerDigitizer->GetParameters().ReadFromFile("CEMC", "xml", 0, 0,
-                                               string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
-  se->registerSubsystem(TowerDigitizer);
-
-  RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
-  TowerCalibration->Detector("CEMC");
-  TowerCalibration->Verbosity(verbosity);
-
-  if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k1DProjectiveSpacal)
-  {
-    if (G4CEMC::TowerDigi == RawTowerDigitizer::kNo_digitization)
+    RawTowerDigitizer *TowerDigitizer = new RawTowerDigitizer("EmcRawTowerDigitizer");
+    TowerDigitizer->Detector("CEMC");
+    TowerDigitizer->Verbosity(verbosity);
+    TowerDigitizer->set_digi_algorithm(G4CEMC::TowerDigi);
+    TowerDigitizer->set_variable_pedestal(true);  // read ped central and width from calibrations file comment next 2 lines if true
+                                                  //   TowerDigitizer->set_pedstal_central_ADC(0);
+                                                  //   TowerDigitizer->set_pedstal_width_ADC(8);  // eRD1 test beam setting
+    TowerDigitizer->set_photonelec_ADC(1);        // not simulating ADC discretization error
+    TowerDigitizer->set_photonelec_yield_visible_GeV(photoelectron_per_GeV / sampling_fraction);
+    TowerDigitizer->set_variable_zero_suppression(true);  // read zs values from calibrations file comment next line if true
+                                                          //   TowerDigitizer->set_zero_suppression_ADC(16);  // eRD1 test beam setting
+    if (!Enable::CEMC_G4Hit)
     {
-      // just use sampling fraction set previously
-      TowerCalibration->set_calib_const_GeV_ADC(1.0 / sampling_fraction);
+      TowerDigitizer->set_towerinfo(RawTowerDigitizer::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    }
+    if (Enable::CDB)
+    {
+      PHParameterUtils::FillPHParametersFromCDB(TowerDigitizer->GetParameters(), "EMCTOWERCALIB");
     }
     else
     {
-      TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-      TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV);
-      TowerCalibration->set_pedstal_ADC(0);
+      TowerDigitizer->GetParameters().ReadFromFile("CEMC", "xml", 0, 0,
+                                                   std::string(getenv("CALIBRATIONROOT")) + std::string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
     }
-  }
-  else if (G4CEMC::Cemc_spacal_configuration == PHG4CylinderGeom_Spacalv1::k2DProjectiveSpacal)
-  {
+    se->registerSubsystem(TowerDigitizer);
+
+    RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
+    TowerCalibration->Detector("CEMC");
+    TowerCalibration->set_usetowerinfo_v2(G4CEMC::useTowerInfoV2);
+    TowerCalibration->Verbosity(verbosity);
+    if (!Enable::CEMC_G4Hit)
+    {
+      TowerCalibration->set_towerinfo(RawTowerCalibration::ProcessTowerType::kTowerInfoOnly);  // just use towerinfo
+    }
     if (G4CEMC::TowerDigi == RawTowerDigitizer::kNo_digitization)
     {
       // just use sampling fraction set previously
@@ -400,23 +321,68 @@ void CEMC_Towers()
     else
     {
       TowerCalibration->set_calib_algorithm(RawTowerCalibration::kTower_by_tower_calibration);
-      TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
-								string(getenv("CALIBRATIONROOT")) + string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
-      TowerCalibration->set_variable_GeV_ADC(true);                                                                                                   //read GeV per ADC from calibrations file comment next line if true
+      if (Enable::CDB)
+      {
+        PHParameterUtils::FillPHParametersFromCDB(TowerCalibration->GetCalibrationParameters(), "EMCTOWERCALIB");
+      }
+      else
+      {
+        TowerCalibration->GetCalibrationParameters().ReadFromFile("CEMC", "xml", 0, 0,
+                                                                  std::string(getenv("CALIBRATIONROOT")) + std::string("/CEMC/TowerCalibCombinedParams_2020/"));  // calibration database
+      }
+      TowerCalibration->set_variable_GeV_ADC(true);  // read GeV per ADC from calibrations file comment next line if true
       //    TowerCalibration->set_calib_const_GeV_ADC(1. / photoelectron_per_GeV / 0.9715);                                                             // overall energy scale based on 4-GeV photon simulations
-      TowerCalibration->set_variable_pedestal(true);                                                                                                  //read pedestals from calibrations file comment next line if true
+      TowerCalibration->set_variable_pedestal(true);  // read pedestals from calibrations file comment next line if true
       //    TowerCalibration->set_pedstal_ADC(0);
     }
+    se->registerSubsystem(TowerCalibration);
   }
   else
   {
-    cout << "G4_CEmc_Spacal.C::CEMC_Towers - Fatal Error - unrecognized SPACAL configuration #"
-         << G4CEMC::Cemc_spacal_configuration << ". Force exiting..." << endl;
-    gSystem->Exit(-1);
-    return;
-  }
-  se->registerSubsystem(TowerCalibration);
+    CaloWaveformSim *caloWaveformSim = new CaloWaveformSim();
+    caloWaveformSim->set_detector_type(CaloTowerDefs::CEMC);
+    caloWaveformSim->set_detector("CEMC");
+    caloWaveformSim->set_nsamples(12);
+    caloWaveformSim->set_pedestalsamples(12);
+    caloWaveformSim->set_timewidth(0.2);
+    caloWaveformSim->set_peakpos(6);
+    caloWaveformSim->get_light_collection_model().load_data_file(
+        std::string(getenv("CALIBRATIONROOT")) +
+            std::string("/CEMC/LightCollection/Prototype3Module.xml"),
+        "data_grid_light_guide_efficiency", "data_grid_fiber_trans");
+    // pedestal scale down for different beam configurations according to Blair
+    if (Input::BEAM_CONFIGURATION == Input::pp_ZEROANGLE)
+    {
+      caloWaveformSim->set_pedestal_scale(0.75);
+    }
+    if (Input::BEAM_CONFIGURATION == Input::pp_COLLISION)
+    {
+      caloWaveformSim->set_pedestal_scale(0.77);
+    }
+    // caloWaveformSim->Verbosity(2);
+    // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+    se->registerSubsystem(caloWaveformSim);
 
+    CaloTowerBuilder *ca2 = new CaloTowerBuilder();
+    ca2->set_detector_type(CaloTowerDefs::CEMC);
+    ca2->set_nsamples(12);
+    ca2->set_dataflag(false);
+    ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+    ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
+    // match our current ZS threshold ~60ADC for emcal
+    ca2->set_softwarezerosuppression(true, 60);
+    se->registerSubsystem(ca2);
+
+    CaloTowerStatus *statusEMC = new CaloTowerStatus("CEMCSTATUS");
+    statusEMC->set_detector_type(CaloTowerDefs::CEMC);
+    statusEMC->set_time_cut(1);
+    se->registerSubsystem(statusEMC);
+
+    CaloTowerCalib *calibEMC = new CaloTowerCalib("CEMCCALIB");
+    calibEMC->set_detector_type(CaloTowerDefs::CEMC);
+    calibEMC->set_outputNodePrefix("TOWERINFO_CALIB_");
+    se->registerSubsystem(calibEMC);
+  }
   return;
 }
 
@@ -435,6 +401,11 @@ void CEMC_Clusters()
     std::string emc_prof = getenv("CALIBRATIONROOT");
     emc_prof += "/EmcProfile/CEMCprof_Thresh30MeV.root";
     ClusterBuilder->LoadProfile(emc_prof);
+    if (!Enable::CEMC_G4Hit)
+    {
+      ClusterBuilder->set_UseTowerInfo(1);  // just use towerinfo
+    }
+    //    ClusterBuilder->set_UseTowerInfo(1); // to use towerinfo objects rather than old RawTower
     se->registerSubsystem(ClusterBuilder);
   }
   else if (G4CEMC::Cemc_clusterizer == G4CEMC::kCemcGraphClusterizer)
@@ -446,19 +417,31 @@ void CEMC_Clusters()
   }
   else
   {
-    cout << "CEMC_Clusters - unknown clusterizer setting!" << endl;
+    std::cout << "CEMC_Clusters - unknown clusterizer setting!" << std::endl;
     exit(1);
   }
 
   RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
+  if (!Enable::CEMC_G4Hit || Enable::CEMC_TOWERINFO)
+  {
+    clusterCorrection->set_UseTowerInfo(1);  // just use towerinfo
+  }
+  //    clusterCorrection->set_UseTowerInfo(1); // to use towerinfo objects rather than old RawTower
 
-  clusterCorrection->Get_eclus_CalibrationParameters().ReadFromFile("CEMC_RECALIB", "xml", 0, 0,
-                                                                    //raw location
-                                                                    string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
-
-  clusterCorrection->Get_ecore_CalibrationParameters().ReadFromFile("CEMC_ECORE_RECALIB", "xml", 0, 0,
-                                                                    //raw location
-                                                                    string(getenv("CALIBRATIONROOT")) + string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+  //  if (Enable::CDB)
+  //  {
+  //    clusterCorrection->Get_eclus_CalibrationParameters().ReadFromCDB("CEMCRECALIB");
+  //    clusterCorrection->Get_ecore_CalibrationParameters().ReadFromCDB("CEMC_ECORE_RECALIB");
+  //  }
+  //  else
+  //  {
+  //    clusterCorrection->Get_eclus_CalibrationParameters().ReadFromFile("CEMC_RECALIB", "xml", 0, 0,
+  //                                                                      // raw location
+  //                                                                      std::string(getenv("CALIBRATIONROOT")) + std::string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+  //    clusterCorrection->Get_ecore_CalibrationParameters().ReadFromFile("CEMC_ECORE_RECALIB", "xml", 0, 0,
+  //                                                                      // raw location
+  //                                                                      std::string(getenv("CALIBRATIONROOT")) + std::string("/CEMC/PositionRecalibration_EMCal_9deg_tilt/"));
+  //  }
 
   clusterCorrection->Verbosity(verbosity);
   se->registerSubsystem(clusterCorrection);
@@ -473,6 +456,7 @@ void CEMC_Eval(const std::string &outputfile)
 
   CaloEvaluator *eval = new CaloEvaluator("CEMCEVALUATOR", "CEMC", outputfile);
   eval->Verbosity(verbosity);
+  eval->set_use_towerinfo(Enable::CEMC_TOWERINFO);
   se->registerSubsystem(eval);
 
   return;
@@ -485,6 +469,10 @@ void CEMC_QA()
   Fun4AllServer *se = Fun4AllServer::instance();
   QAG4SimulationCalorimeter *qa = new QAG4SimulationCalorimeter("CEMC");
   qa->Verbosity(verbosity);
+  if (Enable::CEMC_TOWERINFO)
+  {
+    qa->set_flags(QAG4SimulationCalorimeter::kProcessTowerinfo);
+  }
   se->registerSubsystem(qa);
 
   return;

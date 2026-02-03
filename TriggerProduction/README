@@ -1,0 +1,10 @@
+# usage:
+create the needed list files (daqhost is sebXX) also creates list for the GL1
+
+CreateFileLists.pl <runnumber> <daqhost>
+
+then run the Fun4All_Prdf_Combiner.C macro
+
+root.exe -q -b Fun4All_Prdf_Combiner.C
+
+The output manager is commented out so it does not overflow your current workdir by accident. It will save files in 100k event chunks

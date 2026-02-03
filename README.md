@@ -21,15 +21,15 @@ Please follow [SPHENIX software day-1 checklist](https://wiki.bnl.gov/sPHENIX/in
 Download the newest macro repository from GitHub:
 
 ```
-[jinhuang@rcas2073 test]$ git clone https://github.com/sPHENIX-Collaboration/macros.git
+[jinhuang@sphnxuser01 test]$ git clone https://github.com/sPHENIX-Collaboration/macros.git
 Cloning into 'macros'...
 remote: Counting objects: 1125, done.
 remote: Total 1125 (delta 0), reused 0 (delta 0), pack-reused 1125
 Receiving objects: 100% (1125/1125), 181.75 KiB | 0 bytes/s, done.
 Resolving deltas: 100% (471/471), done.
 Checking connectivity... done.
-[jinhuang@rcas2073 test]$ cd macros/detectors
-[jinhuang@rcas2073 detectors]$ # here are all the subdirectories with macros to run sPHENIX, fsPHENIX and EIC detector simulations
+[jinhuang@sphnxuser01 test]$ cd macros/detectors
+[jinhuang@sphnxuser01 detectors]$ # here are all the subdirectories with macros to run sPHENIX, fsPHENIX and EIC detector simulations
 ```
 
 The default sPHENIX simulation + reconstruction macro is Fun4All_G4_sPHENIX.C, which is self-explanatory. It is not a black box!. You are welcome to open/edit it to work for your purpose of study.
@@ -38,9 +38,9 @@ The default sPHENIX simulation + reconstruction macro is Fun4All_G4_sPHENIX.C, w
 
 Then let's see what is implemented by firing up one event:
 ```
-[jinhuang@rcas2072 sPHENIX]$ source /opt/sphenix/core/bin/sphenix_setup.csh -n   # setup sPHENIX environment if not already done so
+[jinhuang@sphnxuser01 sPHENIX]$ source /opt/sphenix/core/bin/sphenix_setup.csh -n   # setup sPHENIX environment if not already done so
 # Note, for bash users, please use /opt/sphenix/core/bin/sphenix_setup.sh instead
-[jinhuang@rcas2072 sPHENIX]$ root
+[jinhuang@sphnxuser01 sPHENIX]$ root
 root [] .x Fun4All_G4_sPHENIX.C(-1) // here negative value in event number start an event display of one event
 root [] .L DisplayOn.C 
 root [] PHG4Reco* g4 = DisplayOn()
@@ -54,8 +54,8 @@ root [] displaycmd() # this one show more Geant4 command we can run from the ROO
 
 This is simpler, just run with first parameter as the intended number of event:
 ```
-[jinhuang@rcas2072 sPHENIX]$ source /opt/sphenix/core/bin/sphenix_setup.csh -n   # setup sPHENIX environment if not already done so
-[jinhuang@rcas2072 sPHENIX]$ root
+[jinhuang@sphnxuser01 sPHENIX]$ source /opt/sphenix/core/bin/sphenix_setup.csh -n   # setup sPHENIX environment if not already done so
+[jinhuang@sphnxuser01 sPHENIX]$ root
 root [] .x Fun4All_G4_sPHENIX.C(10) // run 10 events
 ```
 

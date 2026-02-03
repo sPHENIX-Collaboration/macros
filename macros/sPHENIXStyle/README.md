@@ -23,3 +23,10 @@ and you're good to go (even better, add this all into your ```.rootlogon.C``` fi
 * "MC" predictions should be filled, with distinguishable colors
 * Data or pseudodata should always be histograms or graphs with error bars
 * Elements should never overlap, with each other or with the axis
+
+# For sPHENIXplots.C (added May 30, 2023)
+
+This macros is simply a template that uses sPhenixStyle.C and sPhenixStyle.h to create a style recently requested after the first sPHENIX approval plots.
+The additions are:
+  1. Make a square canvas
+  2. Change the default tick spacing
