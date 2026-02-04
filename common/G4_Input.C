@@ -121,6 +121,7 @@ namespace Input
           13.5,           // measured 2024 with 1mRad beam Xing
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
+      HepMCGen->set_vertex_distribution_mean(-0.058,0.133,0); // rough position of actual beam spot. This can vary by a few hundred microns
       break;
     case pA_COLLISION:
 
@@ -146,7 +147,8 @@ namespace Input
           120e-4,         // approximation from past PHENIX data
           16,             // measured in 2024 for 1.5mrad Xing angle
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
-
+      HepMCGen->set_vertex_distribution_mean(-0.07,0.141,0); // rough position of actual beam spot. This can vary by a few hundred microns
+      
       break;
     case pp_ZEROANGLE:
     case mRad_00:
