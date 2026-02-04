@@ -1,52 +1,67 @@
-// c++ includes --
-#include <string>
-#include <iostream>
-
-// root includes --
-#include <TSystem.h>
+#include <sepd_eventplanecalib/sEPD_TreeGen.h>
 
 #include <mbd/MbdReco.h>
+
 #include <epd/EpdReco.h>
+
 #include <zdcinfo/ZdcReco.h>
+
 #include <globalvertex/GlobalVertexReco.h>
+
 #include <centrality/CentralityReco.h>
+
 #include <calotrigger/MinimumBiasClassifier.h>
 
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
 
-#include <fun4all/Fun4AllDstInputManager.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllBase.h>
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllUtils.h>
 
 #include <phool/recoConsts.h>
 
-#include <sepd_eventplanecalib/sEPD_TreeGen.h>
+// root includes --
+#include <TSystem.h>
+
+// c++ includes --
+#include <iostream>
+#include <string>
+
 
 R__LOAD_LIBRARY(libsepd_eventplanecalib.so)
 
-void Fun4All_sEPD(const std::string &fname,
-                  unsigned int runnumber,
-                  const std::string &output = "test.root",
-                  const std::string &output_tree = "tree.root",
-                  int nEvents = 0,
-                  const std::string &dbtag = "newcdbtag")
+void Fun4All_sEPD(int nEvents = 0,
+                  const std::string& flist = "files.list",
+                  const std::string& output = "test.root",
+                  const std::string& output_tree = "tree.root",
+                  const std::string& dbtag = "newcdbtag")
 {
   std::cout << "########################" << std::endl;
   std::cout << "Run Parameters" << std::endl;
-  std::cout << "input: " << fname << std::endl;
-  std::cout << "Run: " << runnumber << std::endl;
+  std::cout << "input list: " << flist << std::endl;
   std::cout << "output: " << output << std::endl;
   std::cout << "output tree: " << output_tree << std::endl;
   std::cout << "nEvents: " << nEvents << std::endl;
   std::cout << "dbtag: " << dbtag << std::endl;
   std::cout << "########################" << std::endl;
 
-  Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(Fun4AllBase::VERBOSITY_QUIET);
+  Fun4AllServer* se = Fun4AllServer::instance();
+  se->Verbosity(10);
 
-  recoConsts *rc = recoConsts::instance();
+  std::ifstream infile_stream;
+  infile_stream.open(flist, std::ios_base::in);
+  std::string filepath;
+  getline(infile_stream, filepath);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filepath);
+  int runnumber = runseg.first;
+  infile_stream.close();
+
+  recoConsts* rc = recoConsts::instance();
 
   // conditions DB flags and timestamp
   rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
@@ -91,8 +106,12 @@ void Fun4All_sEPD(const std::string &fname,
   se->registerSubsystem(sepd_gen);
 
   Fun4AllInputManager* In = new Fun4AllDstInputManager("in");
-  In->AddListFile(fname);
+  In->AddListFile(flist);
   se->registerInputManager(In);
+  std::string outfile = "DST_" + output;
+  Fun4AllOutputManager* out = new Fun4AllDstOutputManager("dstout", outfile);
+  out->AddNode("EventPlaneData");
+  se->registerOutputManager(out);
 
   se->Verbosity(Fun4AllBase::VERBOSITY_QUIET);
   se->run(nEvents);
