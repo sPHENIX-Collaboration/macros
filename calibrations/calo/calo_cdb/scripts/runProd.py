@@ -3,13 +3,14 @@
 This module generates a list of run / datasets given a run type and event threshold.
 """
 import argparse
-import datetime
+from datetime import datetime
 import logging
 import os
 import shutil
 import subprocess
 import sys
 import textwrap
+import time
 
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
@@ -22,9 +23,9 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-i'
                     , '--run-type', type=str
-                    , default='run3pp'
-                    , choices=['run2pp','run2auau','run3auau','run3pp']
-                    , help='Run Type. Default: run3pp')
+                    , default='run3oo'
+                    , choices=['run2pp','run2auau','run3auau','run3pp','run3oo']
+                    , help='Run Type. Default: run3oo')
 
 parser.add_argument('-f'
                     , '--bin-filter-datasets', type=str
@@ -45,6 +46,11 @@ parser.add_argument('-o'
                     , '--output', type=str
                     , default='test'
                     , help='Output directory for condor.')
+
+parser.add_argument('-o2'
+                    , '--output-calib-tags', type=str
+                    , default=''
+                    , help='Output directory for calibration tags.')
 
 parser.add_argument('-m'
                     , '--memory', type=float
@@ -70,7 +76,7 @@ def get_file_paths(engine, runtype='run3auau'):
     """
 
     # Identify run range from the run type
-    run_ranges = {'run2pp': (47286, 53880), 'run2auau': (54128, 54974), 'run3auau': (66457, 78954), 'run3pp': (79146, 200000)}
+    run_ranges = {'run2pp': (47286, 53880), 'run2auau': (54128, 54974), 'run3auau': (66457, 78954), 'run3pp': (79146, 81668), 'run3oo': (82374, 200000)}
     params = {'run_start': run_ranges[runtype][0], 'run_end': run_ranges[runtype][1]}
 
     query = """
@@ -296,15 +302,42 @@ def generate_run_list(reduced_process_df, output):
 
         group_df['full_file_path'].to_csv(filepath, index=False, header=False)
 
+def create_symlink(target_path, link_path):
+    """
+    Creates a symbolic link pointing to target_path named link_path.
+
+    Replicates the behavior of 'ln -sfn' by removing the destination 
+    if it already exists (including broken symlinks) before creating 
+    the new link.
+
+    Args:
+        target_path (str or Path): The existing file or directory to point to.
+        link_path (str or Path): The path where the symlink should be created.
+
+    Raises:
+        OSError: If the link_path exists as a real directory and cannot be unlinked, or if permission is denied.
+    """
+    target = Path(target_path)
+    link = Path(link_path)
+
+    # Check if the link destination already exists
+    if link.exists() or link.is_symlink():
+        # link.unlink() removes the symlink or file, but not the target directory
+        link.unlink()
+        print(f"Removed existing link/file at {link}")
+
+    # Create the new symlink
+    link.symlink_to(target)
+    print(f"Created symlink: {link} -> {target}")
+
 def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit):
     """
     Generate condor submission directory to generate the CDB files for the runs.
     """
-    # 9. Condor Submission
-    if os.path.exists(condor_log_dir):
-        shutil.rmtree(condor_log_dir)
-        logger.info(f"Directory '{condor_log_dir}' and its contents removed.")
+    condor_log_dir.mkdir(parents=True, exist_ok=True)
+    shutil.rmtree(condor_log_dir, ignore_errors=True)
 
+    # Setup Condor Log Dir
     condor_log_dir.mkdir(parents=True, exist_ok=True)
 
     shutil.copy(bin_genStatus, output)
@@ -312,9 +345,12 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
 
     dataset_dir = output / 'datasets'
     list_files = list(dataset_dir.glob('*.list'))
+
+    jobs = 0
     with open(output / 'jobs.list', 'w', encoding="utf-8") as f:
         for file_path in list_files:
             f.write(str(file_path.resolve()) + '\n')
+            jobs += 1
 
     # list of subdirectories to create
     subdirectories = ['stdout', 'error', 'output']
@@ -335,11 +371,26 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
     with open(output / 'genStatus.sub', mode="w", encoding="utf-8") as file:
         file.write(submit_file_content)
 
-    command = f'rm -rf {condor_log_dir} && mkdir {condor_log_dir} && cd {output} && condor_submit genStatus.sub -queue "input_run from jobs.list"'
+    command = f'condor_submit genStatus.sub -queue "input_run from jobs.list"'
 
     if do_condor_submit:
         run_command_and_log(command, output)
+
+        job_dir = output / 'output'
+
+        # Check Job Progress
+        while True:
+            finished_jobs = sum(1 for x in job_dir.iterdir() if x.is_dir())
+
+            if finished_jobs >= jobs:
+                logger.info(f"All Jobs Complete. {finished_jobs}/{jobs} Jobs.")
+                break
+
+            logger.info(f"Waiting for Jobs... {finished_jobs}/{jobs} done.")
+            time.sleep(15) # Check every 15 seconds
+
     else:
+        command = f'cd {output} && {command}'
         logger.info(f'\nSubmission Command: {command}')
 
 def main():
@@ -348,7 +399,7 @@ def main():
     """
     args = parser.parse_args()
     run_type   = args.run_type
-    CURRENT_DATE = str(datetime.date.today())
+    CURRENT_DATE = datetime.now().strftime("%m-%d-%y")
     output = Path(args.output).resolve()
     condor_memory = args.memory
     USER = os.environ.get('USER')
@@ -360,7 +411,11 @@ def main():
     # Append timestamp if the automated condor submission is enabled.
     # This will ensure the output directory is unique for each call of the cron job.
     if do_condor_submit:
-        output += '-' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        output = Path(f"{output}-{timestamp}")
+
+    # Save date tags of the calibration output
+    output_calib_tags = Path(args.output_calib_tags).resolve() if args.output_calib_tags else output / 'tags'
 
     log_file = output / f'log-{CURRENT_DATE}.txt'
 
@@ -374,6 +429,10 @@ def main():
     bin_genStatus       = Path(args.bin_genStatus).resolve() if args.bin_genStatus else OFFLINE_MAIN_BIN / 'CaloCDB-GenStatus'
 
     output.mkdir(parents=True, exist_ok=True)
+    output_calib_tags.mkdir(parents=True, exist_ok=True)
+
+    tag = output_calib_tags / CURRENT_DATE
+    create_symlink(output / 'output', tag)
 
     setup_logging(log_file, logging.DEBUG)
 
@@ -383,9 +442,10 @@ def main():
     logging.basicConfig()
 
     logger.info('#'*40)
-    logger.info(f'LOGGING: {str(datetime.datetime.now())}')
+    logger.info(f'LOGGING: {str(datetime.now())}')
     logger.info(f'Run Type: {run_type}')
     logger.info(f'Output Directory: {output}')
+    logger.info(f'Output Calib Tags: {output_calib_tags}')
     logger.info(f'Condor Memory: {condor_memory}')
     logger.info(f'Do Condor Submission: {do_condor_submit}')
     logger.info(f'Filter Datasets Bin: {bin_filter_datasets}')
