@@ -100,22 +100,22 @@ void Fun4All_sEPD(int nEvents = 0,
 
   // sEPD Tree Gen
   sEPD_TreeGen* sepd_gen = new sEPD_TreeGen();
-  sepd_gen->set_filename(output);
-  sepd_gen->set_tree_filename(output_tree);
-  sepd_gen->Verbosity(Fun4AllBase::VERBOSITY_MORE);
+  sepd_gen->Verbosity(1);
   se->registerSubsystem(sepd_gen);
 
   Fun4AllInputManager* In = new Fun4AllDstInputManager("in");
   In->AddListFile(flist);
   se->registerInputManager(In);
-  std::string outfile = "DST_" + output;
-  Fun4AllOutputManager* out = new Fun4AllDstOutputManager("dstout", outfile);
+
+  Fun4AllOutputManager* out = new Fun4AllDstOutputManager("dstout", output_tree);
   out->AddNode("EventPlaneData");
   se->registerOutputManager(out);
 
   se->Verbosity(Fun4AllBase::VERBOSITY_QUIET);
   se->run(nEvents);
   se->End();
+
+  se->dumpHistos(output);
 
   CDBInterface::instance()->Print();  // print used DB files
   se->PrintTimer();
