@@ -5,12 +5,13 @@ export HOME=/sphenix/u/${LOGNAME}
 
 source /opt/sphenix/core/bin/sphenix_setup.sh -n new
 
-QVecCalib_bin=${1}
+f4a_macro=${1}
 input=${2}
 QAhist=${3}
 QVecCalibHist=${4}
-QVecAna=${5}
-submitDir=${6}
+pass=${5}
+dst_tag=${6}
+submitDir=${7}
 
 # extract runnumber from file name
 run=$(echo "$input" | grep -oP 'output/\K\d+(?=/tree)')
@@ -19,14 +20,16 @@ if [[ -z "$run" ]]; then
     exit 1
 fi
 
-input_file=$(basename "$input")
 QAhist_file=$(basename "$QAhist")
 QVecCalibHist_file=$(basename "$QVecCalibHist")
 
 if [[ -n "$_CONDOR_SCRATCH_DIR" && -d "$_CONDOR_SCRATCH_DIR" ]]
 then
     cd "$_CONDOR_SCRATCH_DIR" || { echo "Failed to cd to $_CONDOR_SCRATCH_DIR" >&2; exit 1; }
-    cp -v "$input" .
+
+    cp -rv "$input" input
+    readlink -f input/* > input.list
+
     cp -v "$QAhist" .
     test -e "$QVecCalibHist" && cp -v "$QVecCalibHist" .
     ls -lah
@@ -38,11 +41,15 @@ fi
 # print the environment - needed for debugging
 printenv
 
-mkdir -p "$run"
+mkdir -p "output/hist"
 
-"$QVecCalib_bin" "$input_file" "$QAhist_file" "$QVecCalibHist_file" "$QVecAna" 0 "$run" || exit 1
+if [ "$pass" -eq 2 ]; then
+    mkdir -p "output/CDB/$run"
+fi
+
+root -b -l -q "$f4a_macro(\"input.list\", \"$QAhist_file\", \"$QVecCalibHist_file\", $pass, 0, \"output/hist/QVecCalib-$run.root\", \"$dst_tag\", \"output/CDB/$run\")"
 
 echo "All Done and Transferring Files Back"
-cp -rv "$run" "$submitDir"
+cp -rv output/* "$submitDir"
 
 echo "Finished"

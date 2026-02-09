@@ -38,7 +38,7 @@ printenv
 
 mkdir -p "$run/hist" "$run/tree"
 
-root -b -l -q "$f4a_macro(\"test.list\", $run, \"$run/hist/$output\", \"$run/tree/$output_tree\", $nEvents, \"$dbtag\")"
+root -b -l -q "$f4a_macro($nEvents, \"test.list\", \"$run/hist/$output\", \"$run/tree/$output_tree\", \"$dbtag\")"
 
 echo "All Done and Transferring Files Back"
 cp -rv "$run" "$submitDir"

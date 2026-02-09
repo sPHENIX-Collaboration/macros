@@ -3,40 +3,22 @@
 sEPD Q-Vector Calibration Pipeline
 ==================================
 This script automates the end-to-end multi-stage calibration process for the sPHENIX
-Event Plane Detector (sEPD). It manages a high-throughput workflow that interfaces
-with the HTCondor batch system and utilizes local parallel processing to handle
-large nuclear physics datasets.
+Event Plane Detector (sEPD). It orchestrates HTCondor job submission, parallel
+file merging, and iterative calibration passes.
 
-Scientific Context:
--------------------
-The pipeline performs a three-pass calibration followed by database payload generation
-to correct for detector anisotropies and acceptance effects:
-1. ComputeRecentering: Calculates the 1st-order <Q> vector offsets.
-2. ApplyRecentering: Applies offsets and calculates the 2nd-order
-   flattening/re-gain matrix (X-matrix).
-3. ApplyFlattening: Applies the full correction (re-centering + flattening)
-   and performs final validation.
-4. CDB Generation: Formats calibration constants and bad tower maps into
-   sPHENIX Calibration Database (CDB) payloads.
+Workflow Stages:
+----------------
+1. Stage-QA:
+   - Generates DST lists for requested runs.
+   - Submits Fun4All jobs to produce event-plane TTrees and QA histograms.
+   - Merges QA histograms per run in parallel.
 
-Workflow Architecture:
-----------------------
-- Stage-QA: Synchronizes DST lists and submits Fun4All jobs to produce initial
-  TTrees and QA histograms.
-- Stage-QVecCalib: Iteratively executes the three calibration passes, pairing
-  TTrees with previous calibration constants.
-- Stage-QVecCDB: Transforms final merged calibration results and QA maps into
-  CDB-formatted ROOT files.
-- Parallelization: Leverages Python's multiprocessing.Pool for simultaneous
-  'hadd' merging and concurrent CDB generation.
-- Monitoring: Implements a passive log-polling strategy to track HTCondor
-  job completion via .log files for improved reliability.
-
-Requirements:
--------------
-- Python 3.13+ (Utilizes modern type hinting and directory-level path handling).
-- sPHENIX Environment (OFFLINE_MAIN must be correctly set in the environment).
-- Access to CreateDstList.pl for automated DST list synchronization.
+2. Stage-QVecCalib (Iterative):
+   - Executes three sequential passes using the output of Stage-QA:
+     a. ComputeRecentering: Derives 1st-order <Q> offsets.
+     b. ApplyRecentering: Applies offsets, derives 2nd-order flattening matrix.
+     c. ApplyFlattening: Applies full corrections for final validation.
+   - Automatically chains the output CDB/Root files from pass N as input to pass N+1.
 
 Author: Apurva Narde
 Date: 2026
@@ -74,8 +56,7 @@ class PipelineConfig:
 
     run_list_file: Path
     f4a_macro: Path
-    bin_QVecCalib: Path
-    bin_QVecCDB: Path
+    f4a_QVecCalib: Path
     f4a_script: Path
     QVecCalib_script: Path
     output_dir: Path
@@ -110,8 +91,13 @@ class PipelineConfig:
 
     @property
     def QVecCalib_output_dir(self) -> Path:
-        """Path: Final destination for merged calibration results."""
+        """Path: Final destination for calibration QA."""
         return self.output_dir / "QVecCalib"
+
+    @property
+    def QVecCalib_CDB_dir(self) -> Path:
+        """Path: Final destination for CDB files."""
+        return self.output_dir / "CDB"
 
     @property
     def log_file(self) -> Path:
@@ -244,7 +230,6 @@ def run_command_and_log(
 # Helper Logic
 # -----------------------------------------------------------------------------
 
-
 def find_missing_runnumbers(dir_p: Path, input_p: Path) -> list[str]:
     """
     Identifies runs from a reference list that are missing in the target directory.
@@ -335,50 +320,55 @@ def gen_dst_list(config: PipelineConfig, working_dir: Path) -> None:
 
 def generate_QVecCalib_job_list(dir_qa: Path, dir_ttree: Path, output_file: Path) -> None:
     """
-    Generates the primary job list for QVecCalib by pairing TTree files with QA files.
+    Generates the master job list for the Q-Vector Calibration stage.
 
-    Iterates through run subdirectories in `dir_ttree`. If a corresponding QA file
-    exists in `dir_qa`, it adds the pair to the job list.
+    This function scans the output directory of the QA stage to pair the input
+    DST/Tree file with its corresponding merged QA histogram file. It assumes
+    a specific directory structure created by the QA stage:
+    `.../output/<RunNumber>/tree` (Input TTree/List)
+    `.../QA/QA-<RunNumber>.root` (Merged QA Histograms)
 
     Args:
-        dir_qa: Directory containing the QA root files (e.g., QA-12345.root).
-        dir_ttree: Directory containing subfolders of run trees.
-        output_file: The path where the generated jobs.list will be written.
+        dir_qa (Path): Directory containing the merged QA ROOT files
+                       (e.g., stage-QA/QA).
+        dir_ttree (Path): Parent directory containing run-specific subdirectories
+                          from the QA stage (e.g., stage-QA/output).
+        output_file (Path): The destination path for the generated jobs.list file.
+
+    Format:
+        The output file will contain comma-separated lines:
+        <Path/To/Tree/File>,<Path/To/QA/File.root>
     """
-    results = []
+    lines = [
+        f"{(run_dir / 'tree').resolve()},{(dir_qa / f'QA-{run_dir.name}.root').resolve()}"
+        for run_dir in dir_ttree.iterdir()
+        if run_dir.is_dir()
+    ]
 
-    for ttree_subdir in dir_ttree.iterdir():
-        if ttree_subdir.is_dir():
-            run = ttree_subdir.name
-
-            target_root_file = dir_qa / f"QA-{run}.root"
-
-            if target_root_file.exists():
-                tree_path = ttree_subdir / "tree"
-
-                if tree_path.exists() and tree_path.is_dir():
-                    for file_in_tree in tree_path.iterdir():
-                        if file_in_tree.is_file():
-                            abs_tree_file = file_in_tree.resolve()
-                            abs_root_file = target_root_file.resolve()
-
-                            results.append(f"{abs_tree_file},{abs_root_file}")
-
-    output_file.write_text("\n".join(results) + "\n")
+    output_file.write_text("\n".join(lines) + "\n")
 
 
 def generate_QVecCalib_local_jobs_file(input_file: Path, output_file: Path, calib_dir: Path | None) -> None:
     """
-    Generates a localized job list for a specific calibration pass.
+    Creates a pass-specific job list by appending the calibration file path.
 
-    Parses the run number from nested directory structures (e.g., .../output/68144/tree/...)
-    to correctly associate previous calibration constants with current jobs.
+    This function reads the master jobs list (Tree + QA) and appends the
+    path to the calibration file generated in the *previous* pass. This
+    enables the iterative correction workflow (Compute -> Apply -> Flatten).
 
     Args:
-        input_file: The base jobs list containing TTree and QA file paths.
-        output_file: The destination for the pass-specific job list.
-        calib_dir: Path to merged root files from a previous pass. If None, 'none'
-                   is passed as the calibration argument.
+        input_file (Path): Path to the master jobs.list generated by
+                           `generate_QVecCalib_job_list`.
+        output_file (Path): Path where the new, pass-specific list will be saved.
+        calib_dir (Path | None): Directory containing output from the previous
+                                 calibration pass.
+                                 - If `None` (first pass), the string "none" is
+                                   appended (macro must handle this).
+                                 - If `Path`, looks for `hist/QVecCalib-<Run>.root`.
+
+    Format:
+        The output file will contain comma-separated lines:
+        <Path/To/Tree>,<Path/To/QA>,<Path/To/Previous/Calib.root|none>
     """
     lines = input_file.read_text().splitlines()
     results = []
@@ -388,8 +378,7 @@ def generate_QVecCalib_local_jobs_file(input_file: Path, output_file: Path, cali
         path_obj = Path(path_str)
 
         try:
-            # Go up two levels: file -> tree -> RUN_NUMBER
-            run_num = path_obj.parents[1].name
+            run_num = path_obj.parents[0].name
         except IndexError:
             # Fallback if path structure is shallower than expected
             try:
@@ -401,7 +390,7 @@ def generate_QVecCalib_local_jobs_file(input_file: Path, output_file: Path, cali
 
         calib_arg = "none"
         if calib_dir:
-            calib_arg = calib_dir / f"test-{run_num}.root"
+            calib_arg = calib_dir / f"hist/QVecCalib-{run_num}.root"
 
         results.append(f"{line},{calib_arg}")
 
@@ -688,7 +677,7 @@ def run_QVecCalib_stage(config: PipelineConfig) -> None:
     generate_QVecCalib_job_list(config.qa_output_dir, config.stage_qa_dir / "output", jobs_file)
 
     # list of subdirectories to create
-    subdirectories = ["stdout", "error", "output", "merged"]
+    subdirectories = ["stdout", "error", "output"]
     calib_types = ["ComputeRecentering", "ApplyRecentering", "ApplyFlattening"]
 
     # Loop through the list and create each one
@@ -697,23 +686,20 @@ def run_QVecCalib_stage(config: PipelineConfig) -> None:
             (config.stage_QVecCalib_dir / calib / subdir).mkdir(parents=True, exist_ok=True)
 
     condor_script = shutil.copy(config.QVecCalib_script, config.stage_QVecCalib_dir)
-    runs = config.run_list_file.read_text().splitlines()
-
-    merge_output_dir = None
 
     for idx, calib in enumerate(calib_types):
-        logger.info(f">>> Starting Q Vector Calibration Stage: {calib}")
+        logger.info(f">>> Starting Q Vector Calibration Stage: {idx}, {calib}")
 
         job_dir = config.stage_QVecCalib_dir / calib
         condor_submit_file = job_dir / "genQVecCalib.sub"
         output = job_dir / "output"
-        calib_dir = config.stage_QVecCalib_dir / calib_types[idx - 1] / "merged" if idx != 0 else None
+        calib_dir = config.stage_QVecCalib_dir / calib_types[idx - 1] / "output" if idx != 0 else None
         local_jobs_file = job_dir / "jobs.list"
         generate_QVecCalib_local_jobs_file(jobs_file, local_jobs_file, calib_dir)
 
         QVecCalib_condor = textwrap.dedent(f"""\
             executable     = {condor_script}
-            arguments      = {config.bin_QVecCalib} $(input_tree) $(input_QA) $(input_calib) {calib} {output}
+            arguments      = {config.f4a_QVecCalib} $(input_dir) $(input_QA) $(input_calib) {idx} {config.dst_tag} {output}
             log            = {config.condor_log_dir}/job-$(ClusterId)-$(Process).log
             output         = stdout/job-$(ClusterId)-$(Process).out
             error          = error/job-$(ClusterId)-$(Process).err
@@ -725,92 +711,25 @@ def run_QVecCalib_stage(config: PipelineConfig) -> None:
         submit_and_monitor(
             config,
             condor_submit_file,
-            "input_tree,input_QA,input_calib from jobs.list",
-            job_dir,
+            "input_dir,input_QA,input_calib from jobs.list",
+            job_dir
         )
 
-        merge_output_dir = job_dir / "merged"
-
-        def input_finder(run_num: str, path: Path = output) -> Path:
-            """Helper to locate output directory for a specific run."""
-            return path / run_num
-
-        # Run parallel merge
-        run_parallel_hadd(
-            runs,
-            merge_output_dir,
-            input_finder,
-            file_prefix="test-",
-            n_cores=config.n_cores,
-        )
-
-    # Transfer merged output to final output directory
-    if merge_output_dir:
-        shutil.copytree(merge_output_dir, config.QVecCalib_output_dir, dirs_exist_ok=True)
-
-
-def run_QVecCDB_stage(config: PipelineConfig) -> None:
-    """
-    Create CDB files for sEPD Q Vector Calibrations and sEPD Bad Towers.
-    """
-    logger.info(">>> Starting CDB Generation Stage")
-
-    runs = config.run_list_file.read_text().splitlines()
-    cdb_dir = config.output_dir / "CDB"
-
-    cdb_dir.mkdir(parents=True, exist_ok=True)
-
-    tasks = []
-    for run in runs:
-        run = run.strip()
-        if not run:
-            continue
-
-        input_file = config.QVecCalib_output_dir / f"test-{run}.root"
-
-        # Check input exists to avoid launching doomed processes
-        if not input_file.exists():
-            logger.warning(f"Skipping CDB gen for {run}: Missing input {input_file.name}")
-            continue
-
-        command = [
-            str(config.bin_QVecCDB),
-            str(input_file),
-            str(run),
-            str(cdb_dir),
-            config.dst_tag
-        ]
-        tasks.append((command, run))
-
-    if not tasks:
-        logger.warning("No CDB generation tasks created.")
-        return
-
-    logger.info(f"Starting parallel CDB generation for {len(tasks)} runs...")
-
-    # Reuse the same generic worker
-    with Pool(config.n_cores) as p:
-        results = p.map(worker_exec_task, tasks)
-
-    failed = [r for r, success in results if not success]
-    if failed:
-        logger.error(f"Failed to generate CDB for runs: {failed}")
-    else:
-        logger.info("All CDB files generated successfully.")
+    shutil.copytree(job_dir / 'output/hist', config.QVecCalib_output_dir, dirs_exist_ok=True)
+    shutil.copytree(job_dir / 'output/CDB', config.QVecCalib_CDB_dir, dirs_exist_ok=True)
 
 
 # -----------------------------------------------------------------------------
 # Main Execution
 # -----------------------------------------------------------------------------
 
-
 def main():
     """
     The main entry point for the production script.
 
-    Handles command-line argument parsing, environment validation (checking
-    OFFLINE_MAIN), resolves absolute paths, and initializes the PipelineConfig.
-    Sequentially triggers the QA and Q-Vector calibration stages.
+    Handles command-line argument parsing resolves absolute paths,
+    and initializes the PipelineConfig. Sequentially triggers the
+    QA and Q-Vector calibration stages.
     """
     parser = argparse.ArgumentParser(description="Fun4All Production Pipeline")
 
@@ -820,9 +739,8 @@ def main():
 
     opt_grp = parser.add_argument_group("Optional")
     opt_grp.add_argument("-i2", "--f4a-macro", type=str, default="macros/Fun4All_sEPD.C")
-    opt_grp.add_argument("-i3", "--dst-list-dir", type=str, default="")
-    opt_grp.add_argument("-i4", "--bin-QVecCalib", type=str, default="")
-    opt_grp.add_argument("-i5", "--bin-QVecCDB", type=str, default="")
+    opt_grp.add_argument("-i3", "--f4a-QVecCalib", type=str, default="macros/Fun4All_QVecCalib.C")
+    opt_grp.add_argument("-i4", "--dst-list-dir", type=str, default="")
     opt_grp.add_argument("-n1", "--segments", type=int, default=15)
     opt_grp.add_argument("-n2", "--events", type=int, default=0)
     opt_grp.add_argument("-n3", "--n-cores", type=int, default=8)
@@ -848,16 +766,6 @@ def main():
     condor_log_default = Path(f"/tmp/{user_name}/dump")
     condor_log_dir = Path(args.condor_log_dir).resolve() if args.condor_log_dir else condor_log_default
 
-    offline_main = os.environ.get("OFFLINE_MAIN")
-    if not offline_main:
-        logger.critical("OFFLINE_MAIN environment variable not set, exiting.")
-        sys.exit(1)
-
-    offline_main_bin = Path(offline_main) / "bin"
-
-    bin_QVecCalib = Path(args.bin_QVecCalib).resolve() if args.bin_QVecCalib else offline_main_bin / "GenQVecCalib"
-    bin_QVecCDB = Path(args.bin_QVecCDB).resolve() if args.bin_QVecCDB else offline_main_bin / "GenQVecCDB"
-
     # Dependency Checking
     required_tools = ["CreateDstList.pl", "condor_submit", "hadd"]
     for tool in required_tools:
@@ -869,8 +777,7 @@ def main():
     config = PipelineConfig(
         run_list_file=Path(args.run_list_file).resolve(),
         f4a_macro=Path(args.f4a_macro).resolve(),
-        bin_QVecCalib=bin_QVecCalib,
-        bin_QVecCDB=bin_QVecCDB,
+        f4a_QVecCalib=Path(args.f4a_QVecCalib).resolve(),
         f4a_script=Path(args.f4a_script).resolve(),
         QVecCalib_script=Path(args.QVecCalib_script).resolve(),
         output_dir=output_dir,
@@ -897,8 +804,7 @@ def main():
     for f in [
         config.run_list_file,
         config.f4a_macro,
-        config.bin_QVecCalib,
-        config.bin_QVecCDB,
+        config.f4a_QVecCalib,
         config.f4a_script,
         config.QVecCalib_script,
     ]:
@@ -916,10 +822,6 @@ def main():
 
     # Run Q Vector Calibration Stage
     run_QVecCalib_stage(config)
-
-    # Run CDB Generation Stage
-    run_QVecCDB_stage(config)
-
 
 if __name__ == "__main__":
     main()
