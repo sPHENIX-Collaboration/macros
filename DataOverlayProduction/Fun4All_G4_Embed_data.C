@@ -236,19 +236,21 @@ int Fun4All_G4_Embed_data(
 
     if (jettrigger == "Jet10")
     {
-      p8_js_signal_trigger->SetMinJetPt(10); // require a 10 GeV minimum pT jet in the event
-      delete p8_photon_jet_trigger;
-      p8_photon_jet_trigger = nullptr;
+      p8_js_signal_trigger->SetMinJetPt(10);
     }
     else if (jettrigger == "Jet30")
     {
-      p8_js_signal_trigger->SetMinJetPt(30); // require a 30 GeV minimum pT jet in the event
-      delete p8_photon_jet_trigger;
-      p8_photon_jet_trigger = nullptr;
+      p8_js_signal_trigger->SetMinJetPt(30);
     }
     else if (jettrigger == "Jet40")
     {
-      p8_js_signal_trigger->SetMinJetPt(30); // require a 30 GeV minimum pT jet in the event
+      p8_js_signal_trigger->SetMinJetPt(40);
+    }
+    
+    if (jettrigger == "Jet10" ||
+        jettrigger == "Jet30" ||
+        jettrigger == "Jet40")
+    {
       delete p8_photon_jet_trigger;
       p8_photon_jet_trigger = nullptr;
     }
@@ -495,7 +497,8 @@ int Fun4All_G4_Embed_data(
   truthjets8->Verbosity(verbosity);
   se->registerSubsystem(truthjets8);
 
-   std::string test = CDBInterface::instance()->getUrl("CEMC_meanTime"); 
+   std::string test = CDBInterface::instance()->getUrl("CEMC_meanTime");// calling this line somehow prevents CDB bug when switching global tag 
+   std::cout << "line to avoid CDB bug " << test << endl;
 
   string save_globaltag = rc->get_StringFlag("CDB_GLOBALTAG");
   int save_timestamp    = rc->get_uint64Flag("TIMESTAMP");
