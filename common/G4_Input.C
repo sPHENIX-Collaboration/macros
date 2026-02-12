@@ -189,6 +189,19 @@ namespace Input
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
+    case mRad_075:
+      Input::beam_crossing = 0.75;
+      //0.75 mRad is split among both beams, means set to 0.375 mRad
+      localbcross = Input::beam_crossing / 2. * 1e-3;
+
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
+      HepMCGen->set_vertex_distribution_width(
+          120e-4,         // approximation from past PHENIX data
+          120e-4,         // approximation from past PHENIX data
+          19,             // mean of 0.5 and 1.0 needs to be measured
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
     default:
       std::cout << "ApplysPHENIXBeamParameter: invalid beam_config = " << beam_config << std::endl;
 
