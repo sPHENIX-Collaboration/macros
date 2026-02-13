@@ -7,9 +7,11 @@ All active GRLs can be found in the `grls/` directory. Each GRL is named accordi
 {dataset}_{tag}_{dsttype}_grl.list
 ```
 
+
 You will not need to run the generator yourself unless you want to create a custom GRL with different cuts. If you do want to generate your own GRL, see the instructions below. 
 
 **Note: The scripts in `scripts/` are pre-configured to produce the GRLs currently in `grls/`. They use extensive memory thorough psql queries. If something is wrong with a current GRL, let me know and I can fix the script and re-run it.**
+
 
 ## Current GRLs
 
@@ -20,6 +22,8 @@ You will not need to run the generator yourself unless you want to create a cust
 | `run3pp` | `new_newcdbtag_v008` | `DST_CALOFITTING` | 12 | 6,527,498,042 | 788 | `run3pp_new_newcdbtag_v008_dst_calofitting_grl.list` |
 | `run3auau` | `new_newcdbtag_v008` | `DST_CALOFITTING` | 12 | 10,979,359,411 | 1,086 | `run3auau_new_newcdbtag_v008_dst_calofitting_grl.list` | 
 | `run3oo` | `ana536_2025p010_v001` | `DST_CALOFITTING` | 12 | 2,574,888,458 | 119 | `run3oo_new_newcdbtag_v008_dst_calofitting_grl.list` |
+
+
 
 # sPHENIX Good Run List Generator
 
@@ -102,45 +106,6 @@ source setup.sh
 cd scripts && bash run3pp.sh
 ```
 
-### Summary
-
-| Script | MB Bit | Min Events | QA | Notes |
-|--------|--------|------------|-----|-------|
-| `run2pp.sh` | 10 | 1M | Auto GOLDEN | Uses `_auto` QA columns |
-| `run2auau.sh` | 10 | 100K | EMCAL GOLDEN | Less stringent |
-| `run3pp.sh` | 12 | 1M | All GOLDEN | Includes min scaler cut |
-| `run3auau.sh` | 12 | 100K | `<> BAD` | More permissive |
-| `run3oo.sh` | 12 | 100K | All GOLDEN | Includes sEPD |
-
-### run2pp.sh
-
-Run 2 pp. Uses MB bit 10, automatic QA (`emcal_auto`, etc.), 1M event threshold.
-
-### run2auau.sh
-
-Run 2 Au+Au. MB bit 10, only requires `emcal == GOLDEN`, 100K events.
-
-### run3pp.sh
-
-Run 3 pp. MB bit 12, requires all calos GOLDEN, adds `--min_scalers 12:S:100_000`.
-
-### run3auau.sh
-
-Run 3 Au+Au. MB bit 12, uses `<> BAD` (accepts GOOD or GOLDEN), 100K events.
-
-### run3oo.sh
-
-Run 3 O+O. Same as run3pp but includes sEPD subsystem and 100K event threshold.
-
-## Active GRLs
-
-In `grls/`:
-
-- `run2pp_ana509_2024p022_v001_dst_calofitting_grl.list`
-- `run2auau_ana509_2024p022_v001_dst_calofitting_grl.list`
-- `run3pp_new_newcdbtag_v008_dst_calofitting_grl.list`
-- `run3auau_new_newcdbtag_v008_dst_calofitting_grl.list`
-- `run3oo_new_newcdbtag_v008_dst_calofitting_grl.list`
 
 
 ## Output Files
