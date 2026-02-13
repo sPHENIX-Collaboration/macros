@@ -1,0 +1,132 @@
+{
+  "l0_cutflow": {
+    "initial": 2447,
+    "final": 930,
+    "eff_total": 0.380057212913772,
+    "mb_scaled_initial": [
+      9699420211
+    ],
+    "mb_scaled_final": [
+      7981637332
+    ],
+    "events_initial": 7472798199,
+    "events_final": 7099045947,
+    "steps": [
+      {
+        "cut": "runtype in physics",
+        "before": 2447,
+        "after": 1318,
+        "removed": 1129,
+        "eff": 0.5386187167960769,
+        "mb_scaled_before": [
+          9699420211
+        ],
+        "mb_scaled_after": [
+          8123993185
+        ],
+        "mb_scaled_removed": [
+          1575427026
+        ],
+        "events_before": 7472798199,
+        "events_after": 7468631485,
+        "events_removed": 4166714
+      },
+      {
+        "cut": "magnet_on && current>=4.5e7",
+        "before": 1318,
+        "after": 1316,
+        "removed": 2,
+        "eff": 0.9984825493171472,
+        "mb_scaled_before": [
+          8123993185
+        ],
+        "mb_scaled_after": [
+          8117539118
+        ],
+        "mb_scaled_removed": [
+          6454067
+        ],
+        "events_before": 7468631485,
+        "events_after": 7391839377,
+        "events_removed": 76792108
+      },
+      {
+        "cut": "run_length >= 300",
+        "before": 1316,
+        "after": 981,
+        "removed": 335,
+        "eff": 0.7454407294832827,
+        "mb_scaled_before": [
+          8117539118
+        ],
+        "mb_scaled_after": [
+          8020097288
+        ],
+        "mb_scaled_removed": [
+          97441830
+        ],
+        "events_before": 7391839377,
+        "events_after": 7391839377,
+        "events_removed": 0
+      },
+      {
+        "cut": "require_scaledown_bits != -1: [12, 12]",
+        "before": 981,
+        "after": 938,
+        "removed": 43,
+        "eff": 0.9561671763506626,
+        "mb_scaled_before": [
+          8020097288
+        ],
+        "mb_scaled_after": [
+          7994554584
+        ],
+        "mb_scaled_removed": [
+          25542704
+        ],
+        "events_before": 7391839377,
+        "events_after": 7118855628,
+        "events_removed": 272983749
+      },
+      {
+        "cut": "livetime(bit=12) >= 0.7",
+        "before": 938,
+        "after": 930,
+        "removed": 8,
+        "eff": 0.9914712153518124,
+        "mb_scaled_before": [
+          7994554584
+        ],
+        "mb_scaled_after": [
+          7981637332
+        ],
+        "mb_scaled_removed": [
+          12917252
+        ],
+        "events_before": 7118855628,
+        "events_after": 7099045947,
+        "events_removed": 19809681
+      }
+    ]
+  },
+  "post_l0_cutflow": [
+    {
+      "stage": "Merged: FC \u2229 DAQ(L0) \u2229 PROD",
+      "runs": 898,
+      "events": 7099045947,
+      "mb_scaled": 7659459472
+    },
+    {
+      "stage": "min_reco_events >= 1,000,000",
+      "runs": 888,
+      "events": 7089717031,
+      "mb_scaled": 7574538943
+    },
+    {
+      "stage": "offline status predicates",
+      "runs": 788,
+      "events": 6527498042,
+      "mb_scaled": 6795589032
+    }
+  ]
+}
