@@ -1,0 +1,170 @@
+{
+  "l0_cutflow": {
+    "initial": 2447,
+    "final": 914,
+    "eff_total": 0.37351859419697586,
+    "mb_scaled_initial": [
+      9699420211
+    ],
+    "mb_scaled_final": [
+      7974927551
+    ],
+    "events_initial": 7472798199,
+    "events_final": 7072090417,
+    "steps": [
+      {
+        "cut": "runtype in physics",
+        "before": 2447,
+        "after": 1318,
+        "removed": 1129,
+        "eff": 0.5386187167960769,
+        "mb_scaled_before": [
+          9699420211
+        ],
+        "mb_scaled_after": [
+          8123993185
+        ],
+        "mb_scaled_removed": [
+          1575427026
+        ],
+        "events_before": 7472798199,
+        "events_after": 7468631485,
+        "events_removed": 4166714
+      },
+      {
+        "cut": "require_vgtms_all: [5, 9, 10]",
+        "before": 1318,
+        "after": 1313,
+        "removed": 5,
+        "eff": 0.996206373292868,
+        "mb_scaled_before": [
+          8123993185
+        ],
+        "mb_scaled_after": [
+          8116914215
+        ],
+        "mb_scaled_removed": [
+          7078970
+        ],
+        "events_before": 7468631485,
+        "events_after": 7468631485,
+        "events_removed": 0
+      },
+      {
+        "cut": "magnet_on && current>=4.5e7",
+        "before": 1313,
+        "after": 1311,
+        "removed": 2,
+        "eff": 0.9984767707539984,
+        "mb_scaled_before": [
+          8116914215
+        ],
+        "mb_scaled_after": [
+          8110460148
+        ],
+        "mb_scaled_removed": [
+          6454067
+        ],
+        "events_before": 7468631485,
+        "events_after": 7391839377,
+        "events_removed": 76792108
+      },
+      {
+        "cut": "run_length >= 300",
+        "before": 1311,
+        "after": 980,
+        "removed": 331,
+        "eff": 0.7475209763539283,
+        "mb_scaled_before": [
+          8110460148
+        ],
+        "mb_scaled_after": [
+          8014464896
+        ],
+        "mb_scaled_removed": [
+          95995252
+        ],
+        "events_before": 7391839377,
+        "events_after": 7391839377,
+        "events_removed": 0
+      },
+      {
+        "cut": "require_scaledown_bits != -1: [12, 12]",
+        "before": 980,
+        "after": 937,
+        "removed": 43,
+        "eff": 0.9561224489795919,
+        "mb_scaled_before": [
+          8014464896
+        ],
+        "mb_scaled_after": [
+          7988922192
+        ],
+        "mb_scaled_removed": [
+          25542704
+        ],
+        "events_before": 7391839377,
+        "events_after": 7118855628,
+        "events_removed": 272983749
+      },
+      {
+        "cut": "livetime(bit=12) >= 0.7",
+        "before": 937,
+        "after": 929,
+        "removed": 8,
+        "eff": 0.991462113127001,
+        "mb_scaled_before": [
+          7988922192
+        ],
+        "mb_scaled_after": [
+          7976004940
+        ],
+        "mb_scaled_removed": [
+          12917252
+        ],
+        "events_before": 7118855628,
+        "events_after": 7099045947,
+        "events_removed": 19809681
+      },
+      {
+        "cut": "min_scalar_bits(bit=12) raw>=None live>=None scaled>=100000",
+        "before": 929,
+        "after": 914,
+        "removed": 15,
+        "eff": 0.9838536060279871,
+        "mb_scaled_before": [
+          7976004940
+        ],
+        "mb_scaled_after": [
+          7974927551
+        ],
+        "mb_scaled_removed": [
+          1077389
+        ],
+        "events_before": 7099045947,
+        "events_after": 7072090417,
+        "events_removed": 26955530
+      }
+    ]
+  },
+  "post_l0_cutflow": [
+    {
+      "stage": "Merged: FC \u2229 DAQ(L0) \u2229 PROD",
+      "runs": 885,
+      "events": 7072090417,
+      "mb_scaled": 7658552544
+    },
+    {
+      "stage": "min_reco_events >= 1,000,000",
+      "runs": 875,
+      "events": 7062761501,
+      "mb_scaled": 7573632015
+    },
+    {
+      "stage": "offline status predicates",
+      "runs": 776,
+      "events": 6502757177,
+      "mb_scaled": 6794770219
+    }
+  ]
+}
