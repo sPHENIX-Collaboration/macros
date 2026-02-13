@@ -1,8 +1,31 @@
+
+# Active Good Run Lists
+
+All active GRLs can be found in the `grls/` directory. Each GRL is named according to the pattern:
+
+```bash
+{dataset}_{tag}_{dsttype}_grl.list
+```
+
+You will not need to run the generator yourself unless you want to create a custom GRL with different cuts. If you do want to generate your own GRL, see the instructions below. 
+
+**Note: The scripts in `scripts/` are pre-configured to produce the GRLs currently in `grls/`. They use extensive memory thorough psql queries. If something is wrong with a current GRL, let me know and I can fix the script and re-run it.**
+
+## Current GRLs
+
+| Dataset | Tag | DST Type | MB Bit | Events | Runs | Name |
+|---------|-----|----------|--------|--------|------|-------|
+| `run2pp` | `ana509_2024p022_v001` | `DST_CALOFITTING` | 10 | 19,822,421,631 | 1,564 | `run2pp_ana509_2024p022_v001_dst_calofitting_grl.list` |
+| `run2auau` | `ana509_2024p022_v001` | `DST_CALOFITTING` | 10 | 759,481,790 | 110 | `run2auau_ana509_2024p022_v001_dst_calofitting_grl.list` |
+| `run3pp` | `new_newcdbtag_v008` | `DST_CALOFITTING` | 12 | 6,527,498,042 | 788 | `run3pp_new_newcdbtag_v008_dst_calofitting_grl.list` |
+| `run3auau` | `new_newcdbtag_v008` | `DST_CALOFITTING` | 12 | 10,979,359,411 | 1,086 | `run3auau_new_newcdbtag_v008_dst_calofitting_grl.list` | 
+| `run3oo` | `ana536_2025p010_v001` | `DST_CALOFITTING` | 12 | 2,574,888,458 | 119 | `run3oo_new_newcdbtag_v008_dst_calofitting_grl.list` |
+
 # sPHENIX Good Run List Generator
 
 Generates Good Run Lists (GRLs) by querying the DAQ, FileCatalog, and Production databases and applying quality cuts.
 
-## Quick Start
+## Quick Start (Expert only)
 
 ```bash
 source setup.sh

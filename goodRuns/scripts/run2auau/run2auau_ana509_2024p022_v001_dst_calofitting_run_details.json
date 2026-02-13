@@ -7,7 +7,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 452,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967636.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,1)\"}",
@@ -25,7 +25,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54266,
@@ -35,7 +37,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3604,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966424.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,1)\"}",
@@ -53,7 +55,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54268,
@@ -63,7 +67,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 729,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966844.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,1)\"}",
@@ -81,7 +85,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54269,
@@ -91,7 +97,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 373,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966952.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,1)\"}",
@@ -109,7 +115,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54360,
@@ -119,7 +127,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 305,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45970044.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -137,7 +145,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54361,
@@ -147,7 +157,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 693,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45969232.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -165,7 +175,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54362,
@@ -175,7 +187,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 508,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968528.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -193,7 +205,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54373,
@@ -203,7 +217,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 2944,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968500.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -221,7 +235,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54377,
@@ -231,7 +247,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 2964,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45969488.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -249,7 +265,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54379,
@@ -259,7 +277,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 2128,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968228.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -277,7 +295,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54404,
@@ -287,7 +307,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3602,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968480.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -305,7 +325,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54408,
@@ -315,7 +337,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 1479,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45965472.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -333,7 +355,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54412,
@@ -343,7 +367,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 363,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966780.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -361,7 +385,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54414,
@@ -371,7 +397,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3611,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45965928.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -389,7 +415,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54415,
@@ -399,7 +427,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 364,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45965584.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -417,7 +445,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54422,
@@ -427,7 +457,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3616,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967064.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -445,7 +475,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54424,
@@ -455,7 +487,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3608,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45965408.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -473,7 +505,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54425,
@@ -483,7 +517,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 799,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45965116.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -501,7 +535,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54433,
@@ -511,7 +547,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3609,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45965120.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -529,7 +565,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54437,
@@ -539,7 +577,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3602,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45963592.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -557,7 +595,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54451,
@@ -567,7 +607,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 2722,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45964720.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -585,7 +625,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54463,
@@ -595,7 +637,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 2198,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45962616.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,2)\"}",
@@ -613,35 +655,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
-  },
-  {
-    "runnumber": 54465,
-    "events_sum": 940703,
-    "firstevent_min": -1,
-    "lastevent_max": 940704,
-    "all_ok": true,
-    "runtype": "physics",
-    "run_length": 330,
-    "vgtm_list": "5,9,10",
-    "magnet_current": 45962600.0,
-    "magnet_on": true,
-    "scaledowns": "{\"(10,2)\"}",
-    "scalars": "{\"(10,2666746,2652610,884203)\"}",
-    "emcal_status": "GOLDEN",
-    "emcal_reason": "GoodRun",
-    "emcal_auto_status": "GOLDEN",
-    "emcal_auto_reason": "GoodRun",
-    "ohcal_status": "GOLDEN",
-    "ohcal_reason": "GoodRun",
-    "ohcal_auto_status": "GOLDEN",
-    "ohcal_auto_reason": "GoodRun",
-    "ihcal_status": "GOLDEN",
-    "ihcal_reason": "GoodRun",
-    "ihcal_auto_status": "GOLDEN",
-    "ihcal_auto_reason": "GoodRun",
-    "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54468,
@@ -651,7 +667,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 605,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45963408.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,4)\"}",
@@ -669,7 +685,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54469,
@@ -679,7 +697,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 602,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45964796.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,10)\"}",
@@ -697,7 +715,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54470,
@@ -707,7 +727,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 603,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45963360.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,40)\"}",
@@ -725,7 +745,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54471,
@@ -735,7 +757,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 479,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45963140.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,40)\"}",
@@ -753,7 +775,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54479,
@@ -763,7 +787,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 309,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968768.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,1)\"}",
@@ -781,7 +805,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54481,
@@ -791,7 +817,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3609,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968020.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,1)\"}",
@@ -809,7 +835,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54483,
@@ -819,7 +847,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 2704,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45965928.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,1)\"}",
@@ -837,7 +865,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54486,
@@ -847,7 +877,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3611,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967772.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,1)\"}",
@@ -865,7 +895,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54490,
@@ -875,7 +907,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3610,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968072.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,1)\"}",
@@ -893,7 +925,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54493,
@@ -903,7 +937,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3603,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966480.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,1)\"}",
@@ -921,7 +955,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54495,
@@ -931,7 +967,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3603,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966700.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,1)\"}",
@@ -949,7 +985,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54496,
@@ -959,7 +997,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3614,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45965492.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,1)\"}",
@@ -977,7 +1015,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54497,
@@ -987,7 +1027,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 2513,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45965044.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,1)\"}",
@@ -1005,7 +1045,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54532,
@@ -1015,7 +1057,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 2237,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45964452.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,85)\"}",
@@ -1033,7 +1075,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54533,
@@ -1043,7 +1087,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 488,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45963744.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,9)\"}",
@@ -1061,7 +1105,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54534,
@@ -1071,7 +1117,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3605,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45962600.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,71)\"}",
@@ -1089,7 +1135,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54543,
@@ -1099,7 +1147,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 647,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45964992.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,33)\"}",
@@ -1117,7 +1165,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54544,
@@ -1127,7 +1177,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3604,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45964908.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,33)\"}",
@@ -1145,7 +1195,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54546,
@@ -1155,7 +1207,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3610,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45964156.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,4)\"}",
@@ -1173,7 +1225,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54547,
@@ -1183,7 +1237,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3604,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45964624.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,17)\"}",
@@ -1201,7 +1255,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54549,
@@ -1211,7 +1267,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 2588,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45962848.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,8)\"}",
@@ -1229,7 +1285,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54584,
@@ -1239,7 +1297,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 669,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967388.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,150)\"}",
@@ -1257,7 +1315,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54587,
@@ -1267,7 +1327,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 1793,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967248.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,14)\"}",
@@ -1285,7 +1345,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54588,
@@ -1295,7 +1357,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 1800,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966352.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,8)\"}",
@@ -1313,7 +1375,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54591,
@@ -1323,7 +1387,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 997,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966824.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,163)\"}",
@@ -1341,7 +1405,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54592,
@@ -1351,7 +1417,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 835,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966228.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,163)\"}",
@@ -1369,7 +1435,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54593,
@@ -1379,7 +1447,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 768,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966968.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,9)\"}",
@@ -1397,7 +1465,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54594,
@@ -1407,7 +1477,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 742,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966552.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,4)\"}",
@@ -1425,7 +1495,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54595,
@@ -1435,7 +1507,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 1940,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967264.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,150)\"}",
@@ -1453,7 +1525,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54597,
@@ -1463,7 +1537,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3605,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966888.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,7)\"}",
@@ -1481,7 +1555,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54598,
@@ -1491,7 +1567,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3526,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967304.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,50)\"}",
@@ -1509,7 +1585,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54600,
@@ -1519,7 +1597,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3598,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968408.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,30)\"}",
@@ -1537,7 +1615,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54602,
@@ -1547,7 +1627,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3225,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968632.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,30)\"}",
@@ -1565,7 +1645,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54603,
@@ -1575,7 +1657,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3602,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967704.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,20)\"}",
@@ -1593,7 +1675,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54604,
@@ -1603,7 +1687,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3643,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968224.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,15)\"}",
@@ -1621,7 +1705,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54676,
@@ -1631,7 +1717,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 717,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968700.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -1649,7 +1735,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54682,
@@ -1659,7 +1747,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 1046,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967944.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -1677,7 +1765,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54739,
@@ -1687,7 +1777,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 309,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968048.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,180)\"}",
@@ -1705,7 +1795,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54747,
@@ -1715,7 +1807,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 1436,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967140.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,40)\"}",
@@ -1733,7 +1825,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54749,
@@ -1743,7 +1837,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 328,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966872.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -1761,7 +1855,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54754,
@@ -1771,7 +1867,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3838,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967136.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -1789,7 +1885,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54768,
@@ -1799,7 +1897,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3598,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968324.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -1817,7 +1915,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54794,
@@ -1827,7 +1927,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 823,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968624.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -1845,7 +1945,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54798,
@@ -1855,7 +1957,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 989,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968420.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -1873,7 +1975,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54803,
@@ -1883,7 +1987,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3617,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967172.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -1901,7 +2005,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54804,
@@ -1911,7 +2017,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3101,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968448.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -1929,35 +2035,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
-  },
-  {
-    "runnumber": 54849,
-    "events_sum": 562369,
-    "firstevent_min": -1,
-    "lastevent_max": 562370,
-    "all_ok": true,
-    "runtype": "physics",
-    "run_length": 561,
-    "vgtm_list": "5,9,10",
-    "magnet_current": 45968272.0,
-    "magnet_on": true,
-    "scaledowns": "{\"(10,10)\"}",
-    "scalars": "{\"(10,6135341,6124990,556817)\"}",
-    "emcal_status": "GOLDEN",
-    "emcal_reason": "GoodRun",
-    "emcal_auto_status": "GOLDEN",
-    "emcal_auto_reason": "GoodRun",
-    "ohcal_status": "BAD",
-    "ohcal_reason": "BadTowers",
-    "ohcal_auto_status": "BAD",
-    "ohcal_auto_reason": "BadTowers",
-    "ihcal_status": "BAD",
-    "ihcal_reason": "BadTowers",
-    "ihcal_auto_status": "BAD",
-    "ihcal_auto_reason": "BadTowers",
-    "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54850,
@@ -1967,7 +2047,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 599,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967720.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,106)\"}",
@@ -1985,7 +2065,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54853,
@@ -1995,7 +2077,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 600,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966704.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,106)\"}",
@@ -2013,7 +2095,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54858,
@@ -2023,7 +2107,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 597,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967676.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,106)\"}",
@@ -2041,7 +2125,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54859,
@@ -2051,7 +2137,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 602,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968336.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,106)\"}",
@@ -2069,7 +2155,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54860,
@@ -2079,7 +2167,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 596,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967752.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,106)\"}",
@@ -2097,7 +2185,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54865,
@@ -2107,7 +2197,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 2687,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968900.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,68)\"}",
@@ -2125,7 +2215,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54866,
@@ -2135,7 +2227,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3608,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967856.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,68)\"}",
@@ -2153,7 +2245,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54867,
@@ -2163,7 +2257,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 1297,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968752.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,63)\"}",
@@ -2181,7 +2275,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54870,
@@ -2191,7 +2287,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 566,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968604.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,138)\"}",
@@ -2209,7 +2305,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54871,
@@ -2219,7 +2317,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 694,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45969224.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,114)\"}",
@@ -2237,7 +2335,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54872,
@@ -2247,7 +2347,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3605,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967760.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,98)\"}",
@@ -2265,7 +2365,9 @@
     "ihcal_auto_status": "BAD",
     "ihcal_auto_reason": "BadTowers",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54873,
@@ -2275,7 +2377,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3768,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966660.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,77)\"}",
@@ -2293,7 +2395,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54897,
@@ -2303,7 +2407,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 1242,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968648.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,17)\"}",
@@ -2321,7 +2425,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54899,
@@ -2331,7 +2437,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 309,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968456.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,5)\"}",
@@ -2349,35 +2455,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
-  },
-  {
-    "runnumber": 54908,
-    "events_sum": 445756,
-    "firstevent_min": -1,
-    "lastevent_max": 445757,
-    "all_ok": true,
-    "runtype": "physics",
-    "run_length": 534,
-    "vgtm_list": "5,9,10",
-    "magnet_current": 45969400.0,
-    "magnet_on": true,
-    "scaledowns": "{\"(10,0)\"}",
-    "scalars": "{\"(10,236779,236360,236360)\"}",
-    "emcal_status": "GOLDEN",
-    "emcal_reason": "GoodRun",
-    "emcal_auto_status": "GOLDEN",
-    "emcal_auto_reason": "GoodRun",
-    "ohcal_status": "BAD",
-    "ohcal_reason": "BadTowers",
-    "ohcal_auto_status": "BAD",
-    "ohcal_auto_reason": "BadTowers",
-    "ihcal_status": "BAD",
-    "ihcal_reason": "BadTowers",
-    "ihcal_auto_status": "BAD",
-    "ihcal_auto_reason": "BadTowers",
-    "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54909,
@@ -2387,7 +2467,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3607,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45969540.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -2405,7 +2485,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54911,
@@ -2415,7 +2497,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3607,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45969728.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -2433,7 +2515,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54912,
@@ -2443,7 +2527,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3607,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45969392.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -2461,7 +2545,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54914,
@@ -2471,7 +2557,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3728,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45969584.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -2489,7 +2575,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54915,
@@ -2499,7 +2587,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3603,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45969076.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -2517,35 +2605,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
-  },
-  {
-    "runnumber": 54916,
-    "events_sum": 682764,
-    "firstevent_min": -1,
-    "lastevent_max": 682765,
-    "all_ok": true,
-    "runtype": "physics",
-    "run_length": 1332,
-    "vgtm_list": "5,9,10",
-    "magnet_current": 45969472.0,
-    "magnet_on": true,
-    "scaledowns": "{\"(10,0)\"}",
-    "scalars": "{\"(10,340827,337775,337775)\"}",
-    "emcal_status": "GOLDEN",
-    "emcal_reason": "GoodRun",
-    "emcal_auto_status": "GOLDEN",
-    "emcal_auto_reason": "GoodRun",
-    "ohcal_status": "GOLDEN",
-    "ohcal_reason": "GoodRun",
-    "ohcal_auto_status": "GOLDEN",
-    "ohcal_auto_reason": "GoodRun",
-    "ihcal_status": "GOLDEN",
-    "ihcal_reason": "GoodRun",
-    "ihcal_auto_status": "GOLDEN",
-    "ihcal_auto_reason": "GoodRun",
-    "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54918,
@@ -2555,7 +2617,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3581,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968304.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,0)\"}",
@@ -2573,147 +2635,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
-  },
-  {
-    "runnumber": 54919,
-    "events_sum": 888886,
-    "firstevent_min": -1,
-    "lastevent_max": 800001,
-    "all_ok": true,
-    "runtype": "physics",
-    "run_length": 1781,
-    "vgtm_list": "5,9,10",
-    "magnet_current": 45968660.0,
-    "magnet_on": true,
-    "scaledowns": "{\"(10,0)\"}",
-    "scalars": "{\"(10,440170,435753,435753)\"}",
-    "emcal_status": "GOLDEN",
-    "emcal_reason": "GoodRun",
-    "emcal_auto_status": "GOLDEN",
-    "emcal_auto_reason": "GoodRun",
-    "ohcal_status": "GOLDEN",
-    "ohcal_reason": "GoodRun",
-    "ohcal_auto_status": "GOLDEN",
-    "ohcal_auto_reason": "GoodRun",
-    "ihcal_status": "GOLDEN",
-    "ihcal_reason": "GoodRun",
-    "ihcal_auto_status": "GOLDEN",
-    "ihcal_auto_reason": "GoodRun",
-    "mbd_status": null,
-    "mbd_reason": null
-  },
-  {
-    "runnumber": 54920,
-    "events_sum": 906580,
-    "firstevent_min": -1,
-    "lastevent_max": 900001,
-    "all_ok": true,
-    "runtype": "physics",
-    "run_length": 1765,
-    "vgtm_list": "5,9,10",
-    "magnet_current": 45966272.0,
-    "magnet_on": true,
-    "scaledowns": "{\"(10,0)\"}",
-    "scalars": "{\"(10,450782,446171,446171)\"}",
-    "emcal_status": "GOLDEN",
-    "emcal_reason": "GoodRun",
-    "emcal_auto_status": "GOLDEN",
-    "emcal_auto_reason": "GoodRun",
-    "ohcal_status": "BAD",
-    "ohcal_reason": "BadTowers",
-    "ohcal_auto_status": "BAD",
-    "ohcal_auto_reason": "BadTowers",
-    "ihcal_status": "BAD",
-    "ihcal_reason": "BadTowers",
-    "ihcal_auto_status": "BAD",
-    "ihcal_auto_reason": "BadTowers",
-    "mbd_status": null,
-    "mbd_reason": null
-  },
-  {
-    "runnumber": 54921,
-    "events_sum": 944211,
-    "firstevent_min": -1,
-    "lastevent_max": 700001,
-    "all_ok": true,
-    "runtype": "physics",
-    "run_length": 1896,
-    "vgtm_list": "5,9,10",
-    "magnet_current": 45967140.0,
-    "magnet_on": true,
-    "scaledowns": "{\"(10,0)\"}",
-    "scalars": "{\"(10,467785,462961,462961)\"}",
-    "emcal_status": "GOLDEN",
-    "emcal_reason": "GoodRun",
-    "emcal_auto_status": "GOLDEN",
-    "emcal_auto_reason": "GoodRun",
-    "ohcal_status": "GOLDEN",
-    "ohcal_reason": "GoodRun",
-    "ohcal_auto_status": "GOLDEN",
-    "ohcal_auto_reason": "GoodRun",
-    "ihcal_status": "GOLDEN",
-    "ihcal_reason": "GoodRun",
-    "ihcal_auto_status": "GOLDEN",
-    "ihcal_auto_reason": "GoodRun",
-    "mbd_status": null,
-    "mbd_reason": null
-  },
-  {
-    "runnumber": 54929,
-    "events_sum": 900762,
-    "firstevent_min": -1,
-    "lastevent_max": 900763,
-    "all_ok": true,
-    "runtype": "physics",
-    "run_length": 312,
-    "vgtm_list": "5,9,10",
-    "magnet_current": 45968028.0,
-    "magnet_on": true,
-    "scaledowns": "{\"(10,138)\"}",
-    "scalars": "{\"(10,4019221,3707801,26674)\"}",
-    "emcal_status": "GOLDEN",
-    "emcal_reason": "GoodRun",
-    "emcal_auto_status": "GOLDEN",
-    "emcal_auto_reason": "GoodRun",
-    "ohcal_status": "GOLDEN",
-    "ohcal_reason": "GoodRun",
-    "ohcal_auto_status": "GOLDEN",
-    "ohcal_auto_reason": "GoodRun",
-    "ihcal_status": "GOLDEN",
-    "ihcal_reason": "GoodRun",
-    "ihcal_auto_status": "GOLDEN",
-    "ihcal_auto_reason": "GoodRun",
-    "mbd_status": null,
-    "mbd_reason": null
-  },
-  {
-    "runnumber": 54930,
-    "events_sum": 942105,
-    "firstevent_min": -1,
-    "lastevent_max": 942106,
-    "all_ok": true,
-    "runtype": "physics",
-    "run_length": 324,
-    "vgtm_list": "5,9,10",
-    "magnet_current": 45967832.0,
-    "magnet_on": true,
-    "scaledowns": "{\"(10,125)\"}",
-    "scalars": "{\"(10,3671943,3643844,28919)\"}",
-    "emcal_status": "GOLDEN",
-    "emcal_reason": "GoodRun",
-    "emcal_auto_status": "GOLDEN",
-    "emcal_auto_reason": "GoodRun",
-    "ohcal_status": "BAD",
-    "ohcal_reason": "BadTowers",
-    "ohcal_auto_status": "BAD",
-    "ohcal_auto_reason": "BadTowers",
-    "ihcal_status": "BAD",
-    "ihcal_reason": "BadTowers",
-    "ihcal_auto_status": "BAD",
-    "ihcal_auto_reason": "BadTowers",
-    "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54932,
@@ -2723,7 +2647,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 611,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968340.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,125)\"}",
@@ -2741,7 +2665,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54933,
@@ -2751,7 +2677,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 603,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968096.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,97)\"}",
@@ -2769,7 +2695,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54934,
@@ -2779,7 +2707,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 1026,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968012.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,97)\"}",
@@ -2797,7 +2725,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54936,
@@ -2807,7 +2737,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3595,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967696.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,84)\"}",
@@ -2825,7 +2755,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54937,
@@ -2835,7 +2767,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3597,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45969164.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,71)\"}",
@@ -2853,7 +2785,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54938,
@@ -2863,7 +2797,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3602,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45969260.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,66)\"}",
@@ -2881,7 +2815,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54944,
@@ -2891,7 +2827,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3602,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968048.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,5)\"}",
@@ -2909,7 +2845,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54945,
@@ -2919,7 +2857,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3404,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45969672.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,50)\"}",
@@ -2937,7 +2875,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": "BAD",
+    "sepd_reason": "low packet size "
   },
   {
     "runnumber": 54948,
@@ -2947,7 +2887,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3460,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968456.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,60)\"}",
@@ -2965,7 +2905,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54949,
@@ -2975,7 +2917,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 1579,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967120.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,60)\"}",
@@ -2993,7 +2935,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54951,
@@ -3003,7 +2947,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3339,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45964968.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,60)\"}",
@@ -3021,7 +2965,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54952,
@@ -3031,7 +2977,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3346,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45963952.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,60)\"}",
@@ -3049,7 +2995,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54953,
@@ -3059,7 +3007,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 1672,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45963236.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,60)\"}",
@@ -3077,35 +3025,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
-  },
-  {
-    "runnumber": 54963,
-    "events_sum": 862548,
-    "firstevent_min": -1,
-    "lastevent_max": 800001,
-    "all_ok": true,
-    "runtype": "physics",
-    "run_length": 313,
-    "vgtm_list": "5,9,10",
-    "magnet_current": 45966836.0,
-    "magnet_on": true,
-    "scaledowns": "{\"(10,126)\"}",
-    "scalars": "{\"(10,3436392,3417907,26912)\"}",
-    "emcal_status": "GOLDEN",
-    "emcal_reason": "GoodRun",
-    "emcal_auto_status": "GOLDEN",
-    "emcal_auto_reason": "GoodRun",
-    "ohcal_status": "GOLDEN",
-    "ohcal_reason": "GoodRun",
-    "ohcal_auto_status": "GOLDEN",
-    "ohcal_auto_reason": "GoodRun",
-    "ihcal_status": "GOLDEN",
-    "ihcal_reason": "GoodRun",
-    "ihcal_auto_status": "GOLDEN",
-    "ihcal_auto_reason": "GoodRun",
-    "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54965,
@@ -3115,7 +3037,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3602,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967236.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,126)\"}",
@@ -3133,7 +3055,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54966,
@@ -3143,7 +3067,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3601,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966360.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,126)\"}",
@@ -3161,7 +3085,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54967,
@@ -3171,7 +3097,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 2102,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967528.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,126)\"}",
@@ -3189,7 +3115,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54968,
@@ -3199,7 +3127,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3607,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966928.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,126)\"}",
@@ -3217,7 +3145,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54969,
@@ -3227,7 +3157,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3481,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45966616.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,126)\"}",
@@ -3245,7 +3175,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54971,
@@ -3255,7 +3187,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 2448,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968296.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,126)\"}",
@@ -3273,7 +3205,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54972,
@@ -3283,7 +3217,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3603,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45968248.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,126)\"}",
@@ -3301,7 +3235,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54973,
@@ -3311,7 +3247,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 3459,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967604.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,126)\"}",
@@ -3329,7 +3265,9 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   },
   {
     "runnumber": 54974,
@@ -3339,7 +3277,7 @@
     "all_ok": true,
     "runtype": "physics",
     "run_length": 1456,
-    "vgtm_list": "5,9,10",
+    "vgtm_list": "5,8,9,10",
     "magnet_current": 45967320.0,
     "magnet_on": true,
     "scaledowns": "{\"(10,126)\"}",
@@ -3357,6 +3295,8 @@
     "ihcal_auto_status": "GOLDEN",
     "ihcal_auto_reason": "GoodRun",
     "mbd_status": null,
-    "mbd_reason": null
+    "mbd_reason": null,
+    "sepd_status": null,
+    "sepd_reason": null
   }
 ]

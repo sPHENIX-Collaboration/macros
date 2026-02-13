@@ -8,16 +8,18 @@ fi
 output_dir="$(pwd)/run3oo/"
 mkdir -p "$output_dir"
 
+MB_TRIG_BIT=12
+
 "$RUNLISTGEN_EXE" --dataset run3oo \
-  --tag new_newcdbtag_v008 \
+  --tag ana536_2025p010_v001 \
   --dsttype DST_CALOFITTING \
   --subsystems hcal emcal mbd sepd\
-  --min_bias_triggers 12  \
+  --min_bias_triggers ${MB_TRIG_BIT}  \
   --runtype physics \
   --min_run_length 300 \
   --require_magnet_on True \
-  --livetime_threshold 12:0.7 \
-  --min_reco_events 100_000 \
+  --livetime_threshold ${MB_TRIG_BIT}:0.7 \
+  --min_reco_events 1_000_000 \
   --offline_status \
     "emcal == GOLDEN" \
     "ohcal == GOLDEN" \

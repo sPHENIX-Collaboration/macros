@@ -32,19 +32,19 @@
         "events_removed": 22811249
       },
       {
-        "cut": "require_vgtms_all: [5, 9, 10]",
+        "cut": "require_vgtms_all: [5, 8, 9, 10]",
         "before": 4302,
-        "after": 4269,
-        "removed": 33,
-        "eff": 0.9923291492329149,
+        "after": 4265,
+        "removed": 37,
+        "eff": 0.9913993491399349,
         "mb_scaled_before": [
           47507727157
         ],
         "mb_scaled_after": [
-          47425970919
+          47424842773
         ],
         "mb_scaled_removed": [
-          81756238
+          82884384
         ],
         "events_before": 22550397710,
         "events_after": 22550397710,
@@ -52,15 +52,15 @@
       },
       {
         "cut": "magnet_on && current>=4.5e7",
-        "before": 4269,
-        "after": 4241,
+        "before": 4265,
+        "after": 4237,
         "removed": 28,
-        "eff": 0.9934410869055985,
+        "eff": 0.9934349355216882,
         "mb_scaled_before": [
-          47425970919
+          47424842773
         ],
         "mb_scaled_after": [
-          47247748685
+          47246620539
         ],
         "mb_scaled_removed": [
           178222234
@@ -71,18 +71,18 @@
       },
       {
         "cut": "run_length >= 300",
-        "before": 4241,
-        "after": 3172,
-        "removed": 1069,
-        "eff": 0.7479368073567555,
+        "before": 4237,
+        "after": 3171,
+        "removed": 1066,
+        "eff": 0.7484068916686335,
         "mb_scaled_before": [
-          47247748685
+          47246620539
         ],
         "mb_scaled_after": [
           46182515242
         ],
         "mb_scaled_removed": [
-          1065233443
+          1064105297
         ],
         "events_before": 22550297711,
         "events_after": 22550297711,
@@ -90,10 +90,10 @@
       },
       {
         "cut": "require_scaledown_bits != -1: [12, 12]",
-        "before": 3172,
+        "before": 3171,
         "after": 3080,
-        "removed": 92,
-        "eff": 0.9709962168978562,
+        "removed": 91,
+        "eff": 0.9713024282560706,
         "mb_scaled_before": [
           46182515242
         ],
@@ -136,16 +136,16 @@
       "mb_scaled": 36028404214
     },
     {
-      "stage": "min_reco_events >= 100,000",
-      "runs": 2386,
-      "events": 21982824540,
-      "mb_scaled": 35730972525
+      "stage": "min_reco_events >= 1,000,000",
+      "runs": 2279,
+      "events": 21938917180,
+      "mb_scaled": 34193121830
     },
     {
       "stage": "offline status predicates",
-      "runs": 1232,
-      "events": 11745311352,
-      "mb_scaled": 19735470599
+      "runs": 1086,
+      "events": 10979359411,
+      "mb_scaled": 17563750105
     }
   ]
 }
