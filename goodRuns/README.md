@@ -20,7 +20,7 @@ bash scripts/run3pp.sh
 
 ## Setup
 
-Requires access to SDCC network (or VPN) and the sPHENIX environment.
+Requires being on SDCC network and the sPHENIX environment. Set up the environment:
 
 ```bash
 source setup.sh
@@ -37,6 +37,11 @@ This loads the sPHENIX environment and sets `RUNLISTGEN_EXE`.
 | `--dataset` | `run2pp`, `run2auau`, `run3pp`, `run3auau`, `run3oo` |
 | `--tag` | Production tag (e.g., `ana509_2024p022_v001`, `new_newcdbtag_v008`) |
 | `--dsttype` | DST type (e.g., `DST_CALOFITTING`) |
+
+If you need to get a specific production tag, use this command to get all tags of a given dataset:
+```bash
+CreateDstList.pl --dataset <run 2 the hills> --printtags
+```
 
 ### L0 Cuts (DAQ-level)
 
