@@ -15,7 +15,7 @@ source setup.sh
   --offline_status "emcal == GOLDEN" "ohcal == GOLDEN" "ihcal == GOLDEN"
 
 # Or use a pre-made script
-cd scripts && ./run3pp.sh
+bash scripts/run3pp.sh
 ```
 
 ## Setup
