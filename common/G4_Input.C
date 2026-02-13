@@ -198,7 +198,7 @@ namespace Input
       HepMCGen->set_vertex_distribution_width(
           120e-4,         // approximation from past PHENIX data
           120e-4,         // approximation from past PHENIX data
-          19,             // mean of 0.5 and 1.0 needs to be measured
+          20,             // from online monitoring mbd
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
