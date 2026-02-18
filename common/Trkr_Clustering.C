@@ -167,6 +167,8 @@ void TPC_Clustering_run2pp()
   tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
   tpcclusterizer->set_rawdata_reco();
   tpcclusterizer->set_reject_event(G4TPC::REJECT_LASER_EVENTS);
+  tpcclusterizer->SetDeadChannelMapName("TPC_DEADCHANNELMAP");
+  // tpcclusterizer->SetHotChannelMapName("TPC_HOTCHANNELMAP");
   se->registerSubsystem(tpcclusterizer);
 }
 void TPC_Clustering()
@@ -186,6 +188,8 @@ void TPC_Clustering()
   tpcclusterizer->Verbosity(verbosity);
   tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
   tpcclusterizer->set_min_err_squared(0.000001);
+  tpcclusterizer->SetDeadChannelMapName("TPC_DEADCHANNELMAP");
+  // tpcclusterizer->SetHotChannelMapName("TPC_HOTCHANNELMAP");
   se->registerSubsystem(tpcclusterizer);
 
   auto *tpcclustercleaner = new TpcClusterCleaner;
