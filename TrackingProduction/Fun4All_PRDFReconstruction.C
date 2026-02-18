@@ -402,7 +402,7 @@ void Fun4All_PRDFReconstruction(
     se->registerSubsystem(new TpcClusterQA);
     se->registerSubsystem(new MicromegasClusterQA);
 
-    auto converter = new TrackSeedTrackMapConverter("SiliconSeedConverter");
+    auto *converter = new TrackSeedTrackMapConverter("SiliconSeedConverter");
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
     converter->setTrackSeedName("SiliconTrackSeedContainer");
@@ -411,7 +411,7 @@ void Fun4All_PRDFReconstruction(
     converter->Verbosity(0);
     se->registerSubsystem(converter);
     
-    auto finder = new PHSimpleVertexFinder("SiliconVertexFinder");
+    auto *finder = new PHSimpleVertexFinder("SiliconVertexFinder");
     finder->Verbosity(0);
     finder->setDcaCut(0.1);
     finder->setTrackPtCut(0.1);
@@ -424,12 +424,12 @@ void Fun4All_PRDFReconstruction(
     finder->setVertexMapName("SiliconSvtxVertexMap");
     se->registerSubsystem(finder);
     
-    auto siliconqa = new SiliconSeedsQA;
+    auto *siliconqa = new SiliconSeedsQA;
     siliconqa->setTrackMapName("SiliconSvtxTrackMap");
     siliconqa->setVertexMapName("SiliconSvtxVertexMap");
     se->registerSubsystem(siliconqa);
 
-    auto convertertpc = new TrackSeedTrackMapConverter("TpcSeedConverter");
+    auto *convertertpc = new TrackSeedTrackMapConverter("TpcSeedConverter");
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
     convertertpc->setTrackSeedName("TpcTrackSeedContainer");
@@ -438,7 +438,7 @@ void Fun4All_PRDFReconstruction(
     convertertpc->Verbosity(0);
     se->registerSubsystem(convertertpc);
     
-    auto findertpc = new PHSimpleVertexFinder("TpcSimpleVertexFinder");
+    auto *findertpc = new PHSimpleVertexFinder("TpcSimpleVertexFinder");
     findertpc->Verbosity(0);
     findertpc->setDcaCut(1);
     findertpc->setTrackPtCut(0.2);
@@ -451,7 +451,7 @@ void Fun4All_PRDFReconstruction(
     findertpc->setVertexMapName("TpcSvtxVertexMap");
     se->registerSubsystem(findertpc);
 
-    auto tpcqa = new TpcSeedsQA;
+    auto *tpcqa = new TpcSeedsQA;
     tpcqa->setTrackMapName("TpcSvtxTrackMap");
     tpcqa->setVertexMapName("TpcSvtxVertexMap");
     tpcqa->setSegment(rc->get_IntFlag("RUNSEGMENT"));
