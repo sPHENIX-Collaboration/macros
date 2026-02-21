@@ -108,6 +108,7 @@ void Fun4All_sEPD(int nEvents = 0,
   se->registerInputManager(In);
 
   Fun4AllOutputManager* out = new Fun4AllDstOutputManager("dstout", output_tree);
+  out->SplitLevel(99); // so we can look at its content from the root prompt
   out->AddNode("EventPlaneData");
   se->registerOutputManager(out);
 
