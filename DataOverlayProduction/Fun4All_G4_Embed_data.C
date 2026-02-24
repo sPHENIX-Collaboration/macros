@@ -3,14 +3,15 @@
 
 #include <GlobalVariables.C>
 
-#include "G4Setup_sPHENIX.C"
+#include <G4Setup_sPHENIX.C>
 #include <G4_Input.C>
-// #include <G4_Mbd.C>
 #include <G4_Production.C>
-#include <globalvertex/GlobalVertexReco.h>
-#include <phpythia8/PHPy8ParticleTrigger.h>
 
+#include <globalvertex/GlobalVertexReco.h>
+
+#include <phpythia8/PHPy8ParticleTrigger.h>
 #include <phpythia8/PHPy8JetTrigger.h>
+
 #include <caloembedding/HepMCCollisionVertex.h>
 #include <caloembedding/caloTowerEmbed.h>
 #include <caloembedding/CopyIODataNodes.h>
@@ -33,6 +34,7 @@
 #include <g4jets/TruthJetInput.h>
 
 #include <centrality/CentralityInfov2.h>
+
 #include <calotrigger/MinimumBiasInfov1.h>
 
 #include <ffamodules/CDBInterface.h>
@@ -46,10 +48,12 @@
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllUtils.h>
 
-#include "TRandom3.h"
-
 #include <phool/PHRandomSeed.h>
 #include <phool/recoConsts.h>
+
+#include <TRandom3.h>
+
+#include <format>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
@@ -669,9 +673,8 @@ int Fun4All_G4_Embed_data(
   //  InputManagers();
 
   std::string outnameEnd2 =
-    Form("%s-%08d-", jettrigger.c_str(), runnumber) +
-    std::string(Form("%s-%08d-%05d.root",
-                     "data", dataRunNumber, dataSegment));
+    std::format("{}-{:08}-", jettrigger, runnumber) +
+    std::format("{}-{:08}-{:05}.root","data", dataRunNumber, dataSegment);
 
   std::string FullOutFile = outdir + "DST_TRUTH_G4HIT_" + outnameEnd2;
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("TRUTHOUT", FullOutFile);
