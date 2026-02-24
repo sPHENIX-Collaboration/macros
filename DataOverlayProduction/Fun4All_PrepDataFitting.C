@@ -209,7 +209,7 @@ void Fun4All_PrepDataFitting(int nEvents = 1e2,
   //////////////////
   // skim out non-MB events
   TriggerDSTSkimmer *tskim = new TriggerDSTSkimmer();
-  vector<int> triggers;
+  std::vector<int> triggers;
   triggers.push_back(10);
   tskim->SetTrigger(triggers);
   tskim->set_accept_max(nEvents);

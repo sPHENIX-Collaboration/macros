@@ -42,7 +42,7 @@ void G4Init()
   // Check on invalid combinations
   if (Enable::CEMC && Enable::CEMCALBEDO)
   {
-      cout << "Enable::CEMCALBEDO and Enable::CEMC cannot be set simultanously" << endl;
+      std::cout << "Enable::CEMCALBEDO and Enable::CEMC cannot be set simultanously" << std::endl;
       gSystem->Exit(1);
   }
   // load detector/material macros and execute Init() function

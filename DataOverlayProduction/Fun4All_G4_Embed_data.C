@@ -3,7 +3,7 @@
 
 #include <GlobalVariables.C>
 
-#include <G4Setup_sPHENIX.C>
+#include "G4Setup_sPHENIX.C"
 #include <G4_Input.C>
 // #include <G4_Mbd.C>
 #include <G4_Production.C>
@@ -46,6 +46,8 @@
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllUtils.h>
 
+#include "TRandom3.h"
+
 #include <phool/PHRandomSeed.h>
 #include <phool/recoConsts.h>
 
@@ -73,11 +75,11 @@ void AddCommonNodes(Fun4AllOutputManager *out);
 int Fun4All_G4_Embed_data(
     const int nEvents = 2,
     const int segment = 00000,
-    const string &embed_input_file0 = "DST_CALOFITTING-00054404-00002.root",
-    const string &outdir = "./",
-    const string &outnameEnd = "embed_test.root",
-    const string &jettrigger = "PhotonJet20",
-    const string &cdbtag = "MDC2")
+    const std::string &embed_input_file0 = "DST_CALOFITTING-00054404-00002.root",
+    const std::string &outdir = "./",
+    const std::string &/*outnameEnd*/ = "embed_test.root",
+    const std::string &jettrigger = "Jet10",
+    const std::string &cdbtag = "MDC2")
 {
 
   std::cout << "segment: " << segment << std::endl;
@@ -183,11 +185,11 @@ int Fun4All_G4_Embed_data(
   Input::PYTHIA8 = true;
   if (Input::PYTHIA8)
   {
-    std::string pythia8_config_file = string(getenv("CALIBRATIONROOT")) + "/Generators/JetStructure_TG/";
+    std::string pythia8_config_file = std::string(getenv("CALIBRATIONROOT")) + "/Generators/JetStructure_TG/";
     std::cout << "pythia config path: " << pythia8_config_file << std::endl;
     if (jettrigger == "Jet10")
     {
-      pythia8_config_file += "phpythia8_15GeV_JS_MDC2.cfg";
+      pythia8_config_file += "phpythia8_10GeV_JS_MDC2.cfg";
     }
     else if (jettrigger == "Jet30")
     {
@@ -203,7 +205,7 @@ int Fun4All_G4_Embed_data(
     }
     else
     {
-      cout << "invalid jettrigger: " << jettrigger << endl;
+      std::cout << "invalid jettrigger: " << jettrigger << std::endl;
       gSystem->Exit(1);
     }
     PYTHIA8::config_file[0] = pythia8_config_file;
@@ -258,11 +260,11 @@ int Fun4All_G4_Embed_data(
     {
       delete p8_js_signal_trigger;
       p8_js_signal_trigger = nullptr;
-      p8_photon_jet_trigger->SetPtLow(10);
+      p8_photon_jet_trigger->SetPtLow(20);
     }
     else
     {
-      cout << "invalid jettrigger: " << jettrigger << endl;
+      std::cout << "invalid jettrigger: " << jettrigger << std::endl;
       gSystem->Exit(1);
     }
 
@@ -498,9 +500,9 @@ int Fun4All_G4_Embed_data(
   se->registerSubsystem(truthjets8);
 
    std::string test = CDBInterface::instance()->getUrl("CEMC_meanTime");// calling this line somehow prevents CDB bug when switching global tag 
-   std::cout << "line to avoid CDB bug " << test << endl;
+   std::cout << "line to avoid CDB bug " << test << std::endl;
 
-  string save_globaltag = rc->get_StringFlag("CDB_GLOBALTAG");
+  std::string save_globaltag = rc->get_StringFlag("CDB_GLOBALTAG");
   int save_timestamp    = rc->get_uint64Flag("TIMESTAMP");
 
   rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
@@ -510,7 +512,7 @@ int Fun4All_G4_Embed_data(
   std::string ohcal_datacalib = CDBInterface::instance()->getUrl("HCALOUT_calib_ADC_to_ETower");
   std::string ihcal_datacalib = CDBInterface::instance()->getUrl("HCALIN_calib_ADC_to_ETower");
 
-  cout << "using data calibration" << endl << cemc_datacalib  << endl << ohcal_datacalib << endl << ihcal_datacalib  << endl;
+  std::cout << "using data calibration" << std::endl << cemc_datacalib  << std::endl << ohcal_datacalib << std::endl << ihcal_datacalib  << std::endl;
 
   rc->set_StringFlag("CDB_GLOBALTAG", save_globaltag);
   rc->set_uint64Flag("TIMESTAMP", save_timestamp);
@@ -612,7 +614,7 @@ int Fun4All_G4_Embed_data(
 
   ///////////////////////
   // EPD stuff
-  auto comb = new CombineTowerInfo("CombineHCAL");
+  CombineTowerInfo* comb = new CombineTowerInfo("CombineHCAL");
   comb->set_inputNodeA("TOWERINFO_CALIB_EPD");
   comb->set_inputNodeB("TOWERINFO_CALIB_SEPD_data");
   comb->set_outputNode("TOWERINFO_COMBINED_SEPD");
@@ -625,11 +627,11 @@ int Fun4All_G4_Embed_data(
   // Set up Input Managers
   //--------------
 
-  for (auto iter = INPUTEMBED::filename.begin(); iter != INPUTEMBED::filename.end(); ++iter)
+  for (auto &iter : INPUTEMBED::filename)
   {
-    string mgrname = "DSTin" + to_string(iter->first);
+    std::string mgrname = "DSTin" + std::to_string(iter.first);
     Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname, "DST", DataTopNode);
-    hitsin->fileopen(iter->second);
+    hitsin->fileopen(iter.second);
     hitsin->Verbosity(Input::VERBOSITY);
     if (INPUTEMBED::REPEAT)
     {
@@ -666,9 +668,12 @@ int Fun4All_G4_Embed_data(
 
   //  InputManagers();
 
-  std::string outnameEnd2 = std::format("{}-{:08}-",jettrigger,runnumber) +  std::format("{}-{:08}-{:05}.root","data", dataRunNumber,dataSegment);
+  std::string outnameEnd2 =
+    Form("%s-%08d-", jettrigger.c_str(), runnumber) +
+    std::string(Form("%s-%08d-%05d.root",
+                     "data", dataRunNumber, dataSegment));
 
-  string FullOutFile = outdir + "DST_TRUTH_G4HIT_" + outnameEnd2;
+  std::string FullOutFile = outdir + "DST_TRUTH_G4HIT_" + outnameEnd2;
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("TRUTHOUT", FullOutFile);
   AddCommonNodes(out);
   out->AddNode("G4TruthInfo");
@@ -745,8 +750,8 @@ int Fun4All_G4_Embed_data(
   // if we run the particle generator and use 0 it'll run forever
   if (nEvents == 0 && !Input::HEPMC && !Input::READHITS && INPUTEMBED::REPEAT)
   {
-    cout << "using 0 for number of events is a bad idea when using particle generators" << endl;
-    cout << "it will run forever, so I just return without running anything" << endl;
+    std::cout << "using 0 for number of events is a bad idea when using particle generators" << std::endl;
+    std::cout << "it will run forever, so I just return without running anything" << std::endl;
     return 0;
   }
 
