@@ -134,9 +134,13 @@ namespace G4TPC
   // average distortion corrections
   bool ENABLE_AVERAGE_CORRECTIONS = false;
   std::string average_correction_filename;
+  std::string CMStripePattern = "/sphenix/u/bkimelman/CMStripePattern_ideal.root";
   bool USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = true;
   bool average_correction_interpolate = true;
+  bool SaveAllLaminationHists = false;
+  bool BFieldOff = false;
 
+  
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
 
