@@ -95,23 +95,23 @@ void Fun4All_PrepDataFitting(
     {
       if (line[0] == '#')
       {
-	std::cout << "found commented out line " << line << std::endl;
-	continue;
+        std::cout << "found commented out line " << line << std::endl;
+        continue;
       }
       // extract run number from first not commented out file in list
       if (first)
       {
-	std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(line);
-	runnumber = runseg.first;
-	segment = runseg.second;
-	rc->set_uint64Flag("TIMESTAMP", runnumber);
-	first = false;
+        std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(line);
+        runnumber = runseg.first;
+        segment = runseg.second;
+        rc->set_uint64Flag("TIMESTAMP", runnumber);
+        first = false;
       }
       std::string magname = "DSTin_" + std::to_string(iman);
       In = new Fun4AllDstInputManager(magname);
       In->Verbosity(1);
-      In->AddFile(line);
       se->registerInputManager(In);
+      se->fileopen(magname, line);
       iman++;
     }
     infile.close();

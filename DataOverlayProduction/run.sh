@@ -2,7 +2,7 @@
 
 
 IDX="$1" # same as $(Process)
-NEVENT_GEN=100
+NEVENT_GEN=500
 DATARUNNUMBER=54404
 
 NEVENTS_PREPARED_DATA=$(( NEVENT_GEN * 2 )) #padding for possible skipping of events
@@ -35,7 +35,7 @@ echo "========================="
 psql FileCatalog -t -A -c  "select filename from datasets where segment=${SEGMENT} and filename like 'DST_TRIG%' and runnumber=${DATARUNNUMBER};" > test.list
 
 # add the next segment to the list in case we go over the number of events in the segment
-psql FileCatalog -t -A -c  "select filename from datasets where segment=$(( SEGMENT + 1 )) and filename like 'DST_TRIG%' and runnumber=${DATARUNNUMBER};" >> test.list
+#psql FileCatalog -t -A -c  "select filename from datasets where segment=$(( SEGMENT + 1 )) and filename like 'DST_TRIG%' and runnumber=${DATARUNNUMBER};" >> test.list
 
 root -l -b -q "Fun4All_PrepDataFitting.C(${NEVENT_GEN},${NEVENTS_PREPARED_DATA},${NEVENTS_SKIP},\"test.list\")"
 
@@ -44,4 +44,4 @@ FILE=$(cat prepData.txt)
 
 
 # Run the Fun4All_G4_Embed_data.C script with the provided parameters
-root -l -b -q "Fun4All_G4_Embed_data.C(${NEVENT_GEN},0,\"${FILE}\", \"./\" , \"embed_test.root\", \"Jet30\", \"MDC2\")"
+root -l -b -q "Fun4All_G4_Embed_data.C(${NEVENT_GEN},0,\"${FILE}\", \"./\" , \"embed_test.root\", \"Jet10\", \"MDC2\")"
