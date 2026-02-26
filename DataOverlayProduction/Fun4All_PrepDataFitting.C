@@ -54,7 +54,10 @@ R__LOAD_LIBRARY(libzdcinfo.so)
 R__LOAD_LIBRARY(libTriggerDSTSkimmer.so)
 
 // this pass containis the reco process that's stable wrt time stamps(raw tower building)
-void Fun4All_PrepDataFitting(int nEvents = 1e2,
+void Fun4All_PrepDataFitting(
+            int nEvents_gen = 2,
+            int nEvents_prepared_data = 4,
+            int nEvents_skip = 0,
 			   const std::string& inlist = "test.list",
                            const std::string &outfile = "DST_CALOFITTING",
                            const std::string &outfile_hist = "HIST_CALOFITTINGQA",
@@ -212,7 +215,7 @@ void Fun4All_PrepDataFitting(int nEvents = 1e2,
   std::vector<int> triggers;
   triggers.push_back(10);
   tskim->SetTrigger(triggers);
-  tskim->set_accept_max(nEvents);
+  tskim->set_accept_max(nEvents_gen);
   se->registerSubsystem(tskim);
 
   ///////////////////////////////////
@@ -232,12 +235,12 @@ void Fun4All_PrepDataFitting(int nEvents = 1e2,
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", dstoutfile);
   out->StripCompositeNode("Packets");
   se->registerOutputManager(out);
-  // se->Print();
-  if (nEvents < 0)
-  {
-    return;
-  }
-  se->run(nEvents*2);
+  se->Print();
+
+
+  se->skip(nEvents_skip);
+  se->run(nEvents_prepared_data);
+  
   se->End();
   dstoutfile = std::format("{}-{:08}-{:05}.root",outfile_hist, runnumber,segment);
   QAHistManagerDef::saveQARootFile(dstoutfile);

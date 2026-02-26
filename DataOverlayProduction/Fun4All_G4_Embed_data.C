@@ -619,8 +619,8 @@ int Fun4All_G4_Embed_data(
   ///////////////////////
   // EPD stuff
   CombineTowerInfo* comb = new CombineTowerInfo("CombineHCAL");
-  comb->set_inputNodeA("TOWERINFO_CALIB_EPD");
-  comb->set_inputNodeB("TOWERINFO_CALIB_SEPD_data");
+  comb->set_inputNodeA("TOWERINFO_CALIB_SEPD_data");
+  comb->set_inputNodeB("TOWERINFO_CALIB_EPD");
   comb->set_outputNode("TOWERINFO_COMBINED_SEPD");
   comb->set_detector("EPD");
   se->registerSubsystem(comb);
