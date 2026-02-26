@@ -6,6 +6,7 @@
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawClusterDeadHotMask.h>
 #include <caloreco/RawClusterPositionCorrection.h>
+#include <calostatusskimmer/CaloStatusSkimmer.h>
 
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
@@ -21,6 +22,7 @@
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libfun4allutils.so)
+R__LOAD_LIBRARY(libCaloStatusSkimmer.so)
 
 void Process_Calo_Calib()
 {
@@ -36,6 +38,13 @@ void Process_Calo_Calib()
     isSim = false;
   }
   std::cout << "Calo Calib uses runnumber " << rc->get_uint64Flag("TIMESTAMP") << std::endl;
+
+
+  ///////////////////////////////////////////////
+  // Remove incomplete events from event combiner
+  CaloStatusSkimmer *css = new CaloStatusSkimmer("CaloStatusSkimmer");
+  se->registerSubsystem(css);
+  
 
   //////////////////////
   // Input geometry node
@@ -126,11 +135,6 @@ void Process_Calo_Calib()
   ClusterBuilder->set_UseAltZVertex(1); // Use MBD Vertex for vertex-based corrections
   se->registerSubsystem(ClusterBuilder);
 
-  // currently NOT included!
-  // std::cout << "Applying Position Dependent Correction" << std::endl;
-  // RawClusterPositionCorrection *clusterCorrection = new RawClusterPositionCorrection("CEMC");
-  // clusterCorrection->set_UseTowerInfo(1);  // to use towerinfo objects rather than old RawTower
-  // se->registerSubsystem(clusterCorrection);
 }
 
 #endif
