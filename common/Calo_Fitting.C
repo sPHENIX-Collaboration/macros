@@ -21,7 +21,8 @@ void Process_Calo_Fitting()
   CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
   caZDC->set_detector_type(CaloTowerDefs::ZDC);
   caZDC->set_builder_type(buildertype);
-  caZDC->set_processing_type(CaloWaveformProcessing::FAST);
+  caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
+  caZDC->set_funcfit_type(2);
   caZDC->set_nsamples(16);
   caZDC->set_offlineflag();
   se->registerSubsystem(caZDC);
