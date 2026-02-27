@@ -305,7 +305,7 @@ void Tracking_Reco_SiTpcTrackMatching_run2pp(const std::string& clusterMapName =
   se->registerSubsystem(silicon_match);
 
 }
-void Tracking_Reco_TpcTpotTrackMatching_run2pp()
+void Tracking_Reco_TpcTpotTrackMatching_run2pp(const std::string& clustermapname = "TRKR_CLUSTER")
 {
   
   auto *se = Fun4AllServer::instance();
@@ -318,15 +318,16 @@ void Tracking_Reco_TpcTpotTrackMatching_run2pp()
   mm_match->set_rphi_search_window_lyr2(15.0);
   mm_match->set_z_search_window_lyr1(30.0);
   mm_match->set_z_search_window_lyr2(3.);
+  mm_match->set_clustermap_name(clustermapname);
 
   mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
   mm_match->set_test_windows_printout(false);  // used for tuning search windows only
   se->registerSubsystem(mm_match);
 }
-void Tracking_Reco_TrackMatching_run2pp()
+void Tracking_Reco_TrackMatching_run2pp(const std::string& clustermapname = "TRKR_CLUSTER")
 {
-  Tracking_Reco_SiTpcTrackMatching_run2pp();
-  //Tracking_Reco_TpcTpotTrackMatching_run2pp();
+  Tracking_Reco_SiTpcTrackMatching_run2pp(clustermapname);
+  //Tracking_Reco_TpcTpotTrackMatching_run2pp(clustermapname);
 
 }
 void Tracking_Reco_TrackSeed_ZeroField()
