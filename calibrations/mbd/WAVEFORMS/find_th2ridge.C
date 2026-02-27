@@ -93,7 +93,7 @@ TGraphErrors *find_th2ridge(const TH2* h2)
         prof->SetPoint(n,xmean,ymean);
         prof->SetPointError(n,0,ymeanerr);
 
-        cout << "fit failed, using means " << xmean << "\t" << ymean << endl;
+        std::cout << "fit failed, using means " << xmean << "\t" << ymean << std::endl;
       }
 
       if ( xmean < prev_xmean )
