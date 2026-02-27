@@ -43,9 +43,9 @@ if [[ $USER == "sphnxpro" ]]
 then
   pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0
   outbase=DST_MBD_CALIBRATION_run3pp
-  outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/new_2025pp/$(get_rundirname ${runno})/
+  outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/new_2025/$(get_rundirname ${runno})/
   logbase=DST_MBD_CALIBRATION_run3pp
-  logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2025pp/$(get_rundirname ${runno})/
+  logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2025/$(get_rundirname ${runno})/
   build=new
   dbtag=newcdbtag
 
@@ -82,6 +82,31 @@ then
     logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2025/$(get_rundirname ${runno})/
     build=new
     dbtag=newcdbtag
+  elif [[ $runno -le 81667 ]]
+  then
+    # 2025 Run3pp
+    echo "This is run3pp"
+    pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0
+    outbase=DST_MBD_CALIBRATION_run3pp
+    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/new_2025/$(get_rundirname ${runno})/
+    logbase=DST_MBD_CALIBRATION_run3pp
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2025/$(get_rundirname ${runno})/
+    build=new
+    dbtag=newcdbtag
+  elif [[ $runno -le 82703 ]]
+  then
+    # 2025 Run3oo
+    echo "This is run3oo"
+    pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0
+    outbase=DST_MBD_CALIBRATION_run3oo
+    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/new_2025/$(get_rundirname ${runno})/
+    logbase=DST_MBD_CALIBRATION_run3oo
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2025/$(get_rundirname ${runno})/
+    build=new
+    dbtag=newcdbtag
+  else
+    echo "ERROR, run $runno invalid, aborting"
+    exit 1
   fi
 
 else
@@ -112,6 +137,23 @@ else
     outdir=/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST
     logbase=DST_MBD_CALIBRATION_run3auau
     logdir=/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST/log
+  elif [[ $runno -le 81667 ]]
+  then
+    # 2025 Run3pp
+    outbase=DST_MBD_CALIBRATION_run3pp
+    outdir=/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST
+    logbase=DST_MBD_CALIBRATION_run3pp
+    logdir=/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST/log
+  elif [[ $runno -le 82703 ]]
+  then
+    # 2025 Run3oo
+    outbase=DST_MBD_CALIBRATION_run3oo
+    outdir=/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST
+    logbase=DST_MBD_CALIBRATION_run3oo
+    logdir=/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST/log
+  else
+    echo "ERROR, run $runno invalid, aborting"
+    exit 1
   fi
 fi
 
