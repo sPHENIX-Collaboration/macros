@@ -106,7 +106,7 @@ then
     dbtag=newcdbtag
   else
     echo "ERROR, run $runno invalid, aborting"
-    exit
+    exit 1
   fi
 
 else
@@ -151,6 +151,9 @@ else
     outdir=/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST
     logbase=DST_MBD_CALIBRATION_run3oo
     logdir=/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST/log
+  else
+    echo "ERROR, run $runno invalid, aborting"
+    exit 1
   fi
 fi
 
