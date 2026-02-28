@@ -196,7 +196,6 @@ void MakeHITowerJets()
   if (HIJETS::do_flow == 3)
   {
     EventPlaneReco *epreco = new EventPlaneReco();
-    epreco->set_sepd_epreco(true);
     se->registerSubsystem(epreco);
   }
 
