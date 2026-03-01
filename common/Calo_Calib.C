@@ -42,8 +42,11 @@ void Process_Calo_Calib()
 
   ///////////////////////////////////////////////
   // Remove incomplete events from event combiner
-  CaloStatusSkimmer *css = new CaloStatusSkimmer("CaloStatusSkimmer");
-  se->registerSubsystem(css);
+  if(!isSim)
+  {
+    CaloStatusSkimmer *css = new CaloStatusSkimmer("CaloStatusSkimmer");
+    se->registerSubsystem(css);
+  }
   
 
   //////////////////////
