@@ -458,6 +458,7 @@ void Fun4All_PRDFReconstruction(
     //findertpc->setNmvtxRequired(3);
     findertpc->setRequireMVTX(false);
     findertpc->setOutlierPairCut(0.1);
+    findertpc->set_pp_mode(false);
     findertpc->setTrackMapName("TpcSvtxTrackMap");
     findertpc->setVertexMapName("TpcSvtxVertexMap");
     se->registerSubsystem(findertpc);
