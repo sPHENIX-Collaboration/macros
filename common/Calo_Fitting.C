@@ -4,15 +4,24 @@
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloWaveformProcessing.h>
 
+#include <phool/recoConsts.h>
+
 #include <fun4all/Fun4AllServer.h>
+
+#include <phool/RunnumberRange.h>
 
 #include <Rtypes.h> // for R__LOAD_LIBRARY
 
 R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libphool.so)
+R__LOAD_LIBRARY(libffamodules.so)
 
 void Process_Calo_Fitting()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
+
+  recoConsts *rc = recoConsts::instance();
+  int runnumber = rc->get_uint64Flag("TIMESTAMP");
 
   CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv4;
 
@@ -21,8 +30,14 @@ void Process_Calo_Fitting()
   CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
   caZDC->set_detector_type(CaloTowerDefs::ZDC);
   caZDC->set_builder_type(buildertype);
-  caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
-  caZDC->set_funcfit_type(2);
+  if( (runnumber > RunnumberRange::RUN2PP_FIRST && runnumber < RunnumberRange::RUN2PP_LAST)
+     || (runnumber > RunnumberRange::RUN3PP_FIRST && runnumber < RunnumberRange::RUN3PP_LAST) ){
+    caZDC->set_processing_type(CaloWaveformProcessing::FAST);
+  }
+  else {
+    caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
+    caZDC->set_funcfit_type(2);
+  }
   caZDC->set_nsamples(16);
   caZDC->set_offlineflag();
   se->registerSubsystem(caZDC);
