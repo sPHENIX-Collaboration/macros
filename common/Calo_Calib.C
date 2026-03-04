@@ -1,11 +1,14 @@
 #ifndef CALO_CALIB_H
 #define CALO_CALIB_H
 
+#include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloTowerCalib.h>
 #include <caloreco/CaloTowerStatus.h>
+#include <caloreco/CaloWaveformProcessing.h>
 #include <caloreco/RawClusterBuilderTemplate.h>
 #include <caloreco/RawClusterDeadHotMask.h>
 #include <caloreco/RawClusterPositionCorrection.h>
+
 #include <calostatusskimmer/CaloStatusSkimmer.h>
 
 #include <ffamodules/CDBInterface.h>
@@ -15,6 +18,7 @@
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>  // for Fun4AllServer
 
+#include <phool/RunnumberRange.h>
 #include <phool/recoConsts.h>
 
 #include <TSystem.h>  // for gSystem
@@ -33,21 +37,20 @@ void Process_Calo_Calib()
   // set MC or data
   bool isSim = true;
   int data_sim_runnumber_thres = 1000;
+  int runnumber = rc->get_uint64Flag("TIMESTAMP");
   if (rc->get_uint64Flag("TIMESTAMP") > data_sim_runnumber_thres)
   {
     isSim = false;
   }
   std::cout << "Calo Calib uses runnumber " << rc->get_uint64Flag("TIMESTAMP") << std::endl;
 
-
   ///////////////////////////////////////////////
   // Remove incomplete events from event combiner
-  if(!isSim)
+  if (!isSim)
   {
     CaloStatusSkimmer *css = new CaloStatusSkimmer("CaloStatusSkimmer");
     se->registerSubsystem(css);
   }
-  
 
   //////////////////////
   // Input geometry node
@@ -57,13 +60,33 @@ void Process_Calo_Calib()
   ingeo->AddFile(geoLocation);
   se->registerInputManager(ingeo);
 
+  CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv4;
+
+  // build ZDC towers
+  CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
+  caZDC->set_detector_type(CaloTowerDefs::ZDC);
+  caZDC->set_builder_type(buildertype);
+  if ((runnumber > RunnumberRange::RUN2PP_FIRST && runnumber < RunnumberRange::RUN2PP_LAST) || (runnumber > RunnumberRange::RUN3PP_FIRST && runnumber < RunnumberRange::RUN3PP_LAST))
+  {
+    caZDC->set_processing_type(CaloWaveformProcessing::FAST);
+  }
+  else
+  {
+    caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
+    caZDC->set_funcfit_type(2);
+  }
+  caZDC->set_nsamples(16);
+  caZDC->set_offlineflag();
+  se->registerSubsystem(caZDC);
+
   //////////////////////////////
   // set statuses on raw towers
   std::cout << "status setters" << std::endl;
   CaloTowerStatus *statusEMC = new CaloTowerStatus("CEMCSTATUS");
   statusEMC->set_detector_type(CaloTowerDefs::CEMC);
   // MC Towers Status
-  if(isSim) {
+  if (isSim)
+  {
     // Uses threshold of 50% for towers be considered frequently bad.
     std::string calibName_hotMap = "CEMC_hotTowers_status";
     /* Systematic options (to be used as needed). */
@@ -105,7 +128,7 @@ void Process_Calo_Calib()
 
   ////////////////
   // MC Calibration
-  if (isSim && rc->get_uint64Flag("TIMESTAMP")<28) //in run28 and beyond we moved the MC calibration into the waveformsim module for data embedding
+  if (isSim && rc->get_uint64Flag("TIMESTAMP") < 28)  // in run28 and beyond we moved the MC calibration into the waveformsim module for data embedding
   {
     std::string MC_Calib = CDBInterface::instance()->getUrl("CEMC_MC_RECALIB");
     if (MC_Calib.empty())
@@ -131,10 +154,9 @@ void Process_Calo_Calib()
   std::string emc_prof = getenv("CALIBRATIONROOT");
   emc_prof += "/EmcProfile/CEMCprof_Thresh30MeV.root";
   ClusterBuilder->LoadProfile(emc_prof);
-  ClusterBuilder->set_UseTowerInfo(1);  // to use towerinfo objects rather than old RawTower
-  ClusterBuilder->set_UseAltZVertex(1); // Use MBD Vertex for vertex-based corrections
+  ClusterBuilder->set_UseTowerInfo(1);   // to use towerinfo objects rather than old RawTower
+  ClusterBuilder->set_UseAltZVertex(1);  // Use MBD Vertex for vertex-based corrections
   se->registerSubsystem(ClusterBuilder);
-
 }
 
 #endif
