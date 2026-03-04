@@ -4,43 +4,31 @@
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloWaveformProcessing.h>
 
-#include <phool/recoConsts.h>
+#include <mbd/MbdReco.h>
 
 #include <fun4all/Fun4AllServer.h>
 
-#include <phool/RunnumberRange.h>
+#include <phool/recoConsts.h>
 
 #include <Rtypes.h> // for R__LOAD_LIBRARY
 
 R__LOAD_LIBRARY(libcalo_reco.so)
-R__LOAD_LIBRARY(libphool.so)
 R__LOAD_LIBRARY(libffamodules.so)
+R__LOAD_LIBRARY(libmbd.so)
+R__LOAD_LIBRARY(libphool.so)
 
 void Process_Calo_Fitting()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  recoConsts *rc = recoConsts::instance();
-  int runnumber = rc->get_uint64Flag("TIMESTAMP");
+  // process MBD (wave formt fitting only)
+  MbdReco *mbd = new MbdReco();
+  mbd->DoOnlyFits();
+  se->registerSubsystem(mbd);
 
   CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv4;
 
   /////////////////
-  // build towers
-  CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
-  caZDC->set_detector_type(CaloTowerDefs::ZDC);
-  caZDC->set_builder_type(buildertype);
-  if( (runnumber > RunnumberRange::RUN2PP_FIRST && runnumber < RunnumberRange::RUN2PP_LAST)
-     || (runnumber > RunnumberRange::RUN3PP_FIRST && runnumber < RunnumberRange::RUN3PP_LAST) ){
-    caZDC->set_processing_type(CaloWaveformProcessing::FAST);
-  }
-  else {
-    caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
-    caZDC->set_funcfit_type(2);
-  }
-  caZDC->set_nsamples(16);
-  caZDC->set_offlineflag();
-  se->registerSubsystem(caZDC);
 
   CaloTowerBuilder *ctbEMCal = new CaloTowerBuilder("EMCalBUILDER");
   ctbEMCal->set_detector_type(CaloTowerDefs::CEMC);
