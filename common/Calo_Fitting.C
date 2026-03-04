@@ -21,8 +21,6 @@ void Process_Calo_Fitting()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  recoConsts *rc = recoConsts::instance();
-
   // process MBD (wave formt fitting only)
   MbdReco *mbd = new MbdReco();
   mbd->DoOnlyFits();
