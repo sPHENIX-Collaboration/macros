@@ -77,7 +77,7 @@ void RunSettings(int runnumber, const std::string & /*type*/ = "")
     Enable::MVTX_APPLYMISALIGNMENT = true;
     INPUTHEPMC::FLOW_FLUCTUATIONS = true;
     INPUTHEPMC::FLOW_SCALING = 1.14;
-    std::cout << "use ppg14 run33 settings" << std::endl;
+    std::cout << "use ppg14 run36 settings" << std::endl;
     break;
   
   default:
