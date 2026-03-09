@@ -313,22 +313,21 @@ def create_symlink(target_path, link_path):
     Args:
         target_path (str or Path): The existing file or directory to point to.
         link_path (str or Path): The path where the symlink should be created.
-
-    Raises:
-        OSError: If the link_path exists as a real directory and cannot be unlinked, or if permission is denied.
     """
     target = Path(target_path)
     link = Path(link_path)
 
     # Check if the link destination already exists
-    if link.exists() or link.is_symlink():
-        # link.unlink() removes the symlink or file, but not the target directory
+    if link.is_symlink() or link.is_file():
         link.unlink()
-        print(f"Removed existing link/file at {link}")
+    else:
+        shutil.rmtree(link)
+
+    logger.info(f"Removed existing link/file at {link}")
 
     # Create the new symlink
     link.symlink_to(target)
-    print(f"Created symlink: {link} -> {target}")
+    logger.info(f"Created symlink: {link} -> {target}")
 
 def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit):
     """
@@ -371,7 +370,7 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
     with open(output / 'genStatus.sub', mode="w", encoding="utf-8") as file:
         file.write(submit_file_content)
 
-    command = f'condor_submit genStatus.sub -queue "input_run from jobs.list"'
+    command = 'condor_submit genStatus.sub -queue "input_run from jobs.list"'
 
     if do_condor_submit:
         run_command_and_log(command, output)
