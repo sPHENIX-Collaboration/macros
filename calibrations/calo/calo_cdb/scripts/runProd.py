@@ -335,7 +335,6 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
     """
     Generate condor submission directory to generate the CDB files for the runs.
     """
-    condor_log_dir.mkdir(parents=True, exist_ok=True)
     shutil.rmtree(condor_log_dir, ignore_errors=True)
 
     # Setup Condor Log Dir
