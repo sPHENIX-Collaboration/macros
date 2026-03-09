@@ -76,7 +76,7 @@ def get_file_paths(engine, runtype='run3auau'):
     """
 
     # Identify run range from the run type
-    run_ranges = {'run2pp': (47286, 53880), 'run2auau': (54128, 54974), 'run3auau': (66457, 78954), 'run3pp': (79146, 81668), 'run3oo': (82374, 200000)}
+    run_ranges = {'run2pp': (47286, 53880), 'run2auau': (54128, 54974), 'run3auau': (66457, 78954), 'run3pp': (79146, 81668), 'run3oo': (82374, 82703)}
     params = {'run_start': run_ranges[runtype][0], 'run_end': run_ranges[runtype][1]}
 
     query = """
