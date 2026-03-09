@@ -377,6 +377,9 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
 
         job_dir = output / 'output'
 
+        max_wait_seconds = 3600 * 1  # 1 hour timeout
+        elapsed = 0
+
         # Check Job Progress
         while True:
             finished_jobs = sum(1 for x in job_dir.iterdir() if x.is_dir())
@@ -385,8 +388,13 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
                 logger.info(f"All Jobs Complete. {finished_jobs}/{jobs} Jobs.")
                 break
 
+            if elapsed >= max_wait_seconds:
+                logger.error(f"Timeout reached. Only {finished_jobs}/{jobs} jobs completed.")
+                break
+
             logger.info(f"Waiting for Jobs... {finished_jobs}/{jobs} done.")
             time.sleep(15) # Check every 15 seconds
+            elapsed += 15
 
     else:
         command = f'cd {output} && {command}'
