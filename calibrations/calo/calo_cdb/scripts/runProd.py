@@ -318,10 +318,12 @@ def create_symlink(target_path, link_path):
     link = Path(link_path)
 
     # Check if the link destination already exists
-    if link.is_symlink() or link.is_file():
-        link.unlink()
-    else:
-        shutil.rmtree(link)
+    if link.exists() or link.is_symlink():
+        if link.is_symlink() or link.is_file():
+            link.unlink()
+        else:
+            shutil.rmtree(link)
+            logger.info(f"Removed existing link/file at {link}")
 
     logger.info(f"Removed existing link/file at {link}")
 
