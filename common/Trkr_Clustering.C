@@ -82,16 +82,19 @@ void Intt_HitUnpacking(const std::string &server = "")
   int runnumber = rc->get_IntFlag("RUNNUMBER");
   InttOdbcQuery query;
   bool isStreaming = true;
+  std::vector<int> intt_dac_values(8,-1);
   if (runnumber != 0)
   {
     query.Query(runnumber);
     isStreaming = query.IsStreaming();
+    intt_dac_values = query.GetInttDACValues();
   }
   auto *inttunpacker = new InttCombinedRawDataDecoder("InttCombinedRawDataDecoder" + server);
   inttunpacker->Verbosity(verbosity);
   /// Only necessary to call the following method if using a non-default calibration
   inttunpacker->LoadBadChannelMap("INTT_HotMap");
   inttunpacker->set_triggeredMode(!isStreaming);
+  inttunpacker->set_DACValues(intt_dac_values);
   if (!server.empty())
   {
     inttunpacker->useRawHitNodeName("INTTRAWHIT_" + server);
