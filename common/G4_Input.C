@@ -224,10 +224,13 @@ namespace Input
 
   void ApplysPHENIXBeamParameter(std::vector<PHPythia8 *> &HepMCGenVec)
   {
-    PHHepMCGenHelper *gen = dynamic_cast<PHHepMCGenHelper *> (HepMCGenVec[0]);
-    if (gen)
+    for (auto *iter : HepMCGenVec)
     {
-      ApplysPHENIXBeamParameter(gen, Input::BEAM_CONFIGURATION);
+      PHHepMCGenHelper *gen = dynamic_cast<PHHepMCGenHelper *> (iter);
+      if (gen)
+      {
+	ApplysPHENIXBeamParameter(gen, Input::BEAM_CONFIGURATION);
+      }
     }
   }
 
