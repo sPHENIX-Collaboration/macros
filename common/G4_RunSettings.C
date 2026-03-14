@@ -79,6 +79,10 @@ void RunSettings(int runnumber, const std::string & /*type*/ = "")
     INPUTHEPMC::FLOW_SCALING = 1.14;
     std::cout << "use ppg14 run36 settings" << std::endl;
     break;
+  case 37:  // 0.75mRad xing angle, mvtx rotated, OO vertex from intt for dNdEta
+    Input::BEAM_CONFIGURATION = Input::OOdNdEta;
+    Enable::MVTX_APPLYMISALIGNMENT = true;
+    break;
   
   default:
     if (runnumber < 100)
