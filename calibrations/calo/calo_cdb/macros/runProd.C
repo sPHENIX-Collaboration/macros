@@ -1,5 +1,6 @@
-#include <calo_cdb/genStatus.h>
-#include <sphenixnpc/CDBUtils.h>
+#include <calo_cdb/GenStatus.h>
+#include <ffamodules/CDBInterface.h>
+#include <phool/recoConsts.h>
 
 #include <filesystem>
 #include <format>
@@ -11,8 +12,9 @@
 #include <regex>
 #include <map>
 
+R__LOAD_LIBRARY(libphool.so)
+R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libcalo_cdb.so)
-R__LOAD_LIBRARY(libsphenixnpc.so)
 
 class ProductionManager
 {
@@ -39,7 +41,6 @@ class ProductionManager
   std::string m_db_tag;
   std::string m_run;
   std::string m_dataset;
-  std::unique_ptr<CDBUtils> m_cdb_utils;
 };
 
 const std::array<std::string, 7> ProductionManager::CDB_NAMES = {
@@ -60,8 +61,9 @@ ProductionManager::ProductionManager(std::string input_list, std::string output_
 {
     validate_args();
     parse_run_info();
-    m_cdb_utils = std::make_unique<CDBUtils>();
-    m_cdb_utils->setGlobalTag(m_db_tag);
+
+    recoConsts *rc = recoConsts::instance();
+    rc->set_StringFlag("CDB_GLOBALTAG", m_db_tag);
 }
 
 void ProductionManager::run() {
@@ -129,9 +131,12 @@ void ProductionManager::parse_run_info()
 
 bool ProductionManager::check_cdb_status() const
 {
+  recoConsts *rc = recoConsts::instance();
+  rc->set_uint64Flag("TIMESTAMP", std::stoul(m_run));
+
   for (const auto &cdbName : CDB_NAMES)
   {
-    std::string cdb_url = m_cdb_utils->getUrl(cdbName, std::stoul(m_run));
+    std::string cdb_url = CDBInterface::instance()->getUrl(cdbName);
 
     std::string suffix;
 
