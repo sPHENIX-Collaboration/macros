@@ -1,4 +1,4 @@
-#include <calo_cdb/genStatus.h>
+#include <calo_cdb/GenStatus.h>
 #include <sphenixnpc/CDBUtils.h>
 
 #include <filesystem>
