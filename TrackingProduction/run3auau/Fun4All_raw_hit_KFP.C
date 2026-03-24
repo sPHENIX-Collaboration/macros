@@ -256,7 +256,6 @@ void Fun4All_raw_hit_KFP(
   // to turn on the average corrections derived from simulation, enable the three lines below
   // note: these are designed to be used only if static corrections are also applied
   // G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  // G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
   // G4TPC::average_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/average_minus_static_distortion_inverted_10-new.root";
 
   G4MAGNET::magfield_rescale = 1;

@@ -147,7 +147,7 @@ void Fun4All_raw_hit_KFP(
   int i = 0;
   int runnumber = std::numeric_limits<int>::quiet_NaN();
   int segment = std::numeric_limits<int>::quiet_NaN();
-  
+
 
   while (std::getline(ifs, filepath))
   {
@@ -161,7 +161,7 @@ void Fun4All_raw_hit_KFP(
       rc->set_IntFlag("RUNNUMBER", runnumber);
       rc->set_uint64Flag("TIMESTAMP", runnumber);
     }
-  
+
     std::string inputname = "InputManager" + std::to_string(i);
     auto *hitsin = new Fun4AllDstInputManager(inputname);
     hitsin->fileopen(filepath);
@@ -249,7 +249,6 @@ void Fun4All_raw_hit_KFP(
   // to turn on the average corrections derived from simulation, enable the three lines below
   // note: these are designed to be used only if static corrections are also applied
   // G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  // G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
   // G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
 
   G4MAGNET::magfield_rescale = 1;
@@ -301,7 +300,7 @@ void Fun4All_raw_hit_KFP(
   /*
    * Begin Track Seeding
    */
-  
+
   Tracking_Reco_TrackSeed_run2pp();
   Tracking_Reco_TrackMatching_run2pp();
   /*

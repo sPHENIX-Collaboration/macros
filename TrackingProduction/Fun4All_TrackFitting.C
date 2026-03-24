@@ -1,7 +1,7 @@
 /*
  * This macro shows a minimum working example of running track fitting over
- * the production cluster and track seed DSTs.. There are some analysis 
- * modules run at the end which package clusters, and clusters on tracks 
+ * the production cluster and track seed DSTs.. There are some analysis
+ * modules run at the end which package clusters, and clusters on tracks
  * into trees for analysis.
  */
 
@@ -77,7 +77,7 @@ void Fun4All_TrackFitting(
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
   TRACKING::pp_mode = true;
-  
+
   std::string theOutfile = outfilename + "_" + std::to_string(runnumber) + "-" + std::to_string(segment) + ".root";
 
   auto *se = Fun4AllServer::instance();
@@ -110,8 +110,6 @@ void Fun4All_TrackFitting(
   //to turn on the average corrections, enable the three lines below
   //note: these are designed to be used only if static corrections are also applied
   G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-   // to use a custom file instead of the database file:
   G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
@@ -125,10 +123,10 @@ void Fun4All_TrackFitting(
   se->registerInputManager(hitsinclus);
 
   Reject_Laser_Events();
-  
+
   Tracking_Reco_TrackMatching_run2pp();
-  
-  
+
+
   /*
    * Either converts seeds to tracks with a straight line/helix fit
    * or run the full Acts track kalman filter fit
@@ -184,7 +182,7 @@ void Fun4All_TrackFitting(
 
   std::cout << "CDB Files used:" << std::endl;
   CDBInterface::instance()->Print();
-  
+
   if (Enable::QA)
   {
     std::string qaOutputFileName = theOutfile + "_qa.root";

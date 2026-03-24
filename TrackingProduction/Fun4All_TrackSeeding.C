@@ -106,10 +106,10 @@ void Fun4All_TrackSeeding(
    */
   G4TRACKING::SC_CALIBMODE = false;
   TRACKING::pp_mode = true;
-  
+
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
-  
+
   std::string theOutfile = outfilename + "_" + std::to_string(runnumber) + "-" + std::to_string(segment) + ".root";
   auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
@@ -129,10 +129,8 @@ void Fun4All_TrackSeeding(
   //to turn on the average corrections, enable the three lines below
   //note: these are designed to be used only if static corrections are also applied
   G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-   // to use a custom file instead of the database file:
   G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
-   
+
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
@@ -146,10 +144,10 @@ void Fun4All_TrackSeeding(
   /*
    * Begin Track Seeding
    */
-  
+
   Tracking_Reco_TrackSeed_run2pp();
   Tracking_Reco_TrackMatching_run2pp();
-  
+
   /*
    * Either converts seeds to tracks with a straight line/helix fit
    * or run the full Acts track kalman filter fit

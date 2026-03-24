@@ -16,7 +16,7 @@ namespace Enable
   bool MVTX_SUPPORT = false;
   bool MVTX_APPLYMISALIGNMENT = true;
   bool MVTX_STREAMING = true;
-  
+
   int MVTX_VERBOSITY = 0;
 
   bool INTT = false;
@@ -134,8 +134,12 @@ namespace G4TPC
   // average distortion corrections
   bool ENABLE_AVERAGE_CORRECTIONS = false;
   std::string average_correction_filename;
-  bool USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
+  std::string CMStripePattern = "/sphenix/u/bkimelman/CMStripePattern_ideal.root";
+  bool USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = true;
   bool average_correction_interpolate = true;
+  bool SaveAllLaminationHists = false;
+  bool BFieldOff = false;
+
   
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
@@ -211,7 +215,7 @@ namespace G4TPC
   double CM_halfwidth = 0.28;  // cm
   double sampa_tzero_bias = -65.0; // ns, set for simulations/reco matching with new sampa response
   bool apply_tpc_tzero_correction = false;  // true to apply small correction to TPC time zero in alignment transforms
-  
+
 }  // namespace G4TPC
 
 namespace G4TRACKING
@@ -239,6 +243,7 @@ namespace G4TRACKING
   // Runs a converter from TrackSeed object to SvtxTrack object to enable
   // use of the various evaluation tools already available
   bool convert_seeds_to_svtxtracks = false;
+  std::string convertSeedsContainerName = "SvtxTrackSeedContainer";
 
   // Flag to run commissioning seeding workflow with tuned parameters for
   // misaligned + distorted tracks

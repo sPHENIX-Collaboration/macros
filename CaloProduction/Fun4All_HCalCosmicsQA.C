@@ -88,12 +88,10 @@ void Fun4All_HCalCosmicsQA(int nEvents = 100,
 
   CaloTowerStatus *statusHCalIn = new CaloTowerStatus("HCALINSTATUS");
   statusHCalIn->set_detector_type(CaloTowerDefs::HCALIN);
-  statusHCalIn->set_time_cut(10);
   se->registerSubsystem(statusHCalIn);
 
   CaloTowerStatus *statusHCALOUT = new CaloTowerStatus("HCALOUTSTATUS");
   statusHCALOUT->set_detector_type(CaloTowerDefs::HCALOUT);
-  statusHCALOUT->set_time_cut(10);
   se->registerSubsystem(statusHCALOUT);
 
   ////////////////////

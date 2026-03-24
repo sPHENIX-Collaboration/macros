@@ -3,23 +3,39 @@
 
 #include <GlobalVariables.C>
 
-#include "G4Setup_sPHENIX.C"
+#include <G4Setup_sPHENIX.C>
 #include <G4_Input.C>
 #include <G4_Production.C>
 
 #include <globalvertex/GlobalVertexReco.h>
 
+#include <phpythia8/PHPy8ParticleTrigger.h>
 #include <phpythia8/PHPy8JetTrigger.h>
 
 #include <caloembedding/HepMCCollisionVertex.h>
 #include <caloembedding/caloTowerEmbed.h>
 #include <caloembedding/CopyIODataNodes.h>
+#include <caloembedding/CombineTowerInfo.h>
+
+/*
+#include <eventselection/EventSelector.h>
+#include <eventselection/MinBiasCut.h>
+#include <eventselection/TowerChi2Cut.h>
+#include <eventselection/ZVertexCut.h>
+*/
 
 #include <jetbase/JetReco.h>
 #include <jetbase/TowerJetInput.h>
 #include <jetbase/FastJetAlgo.h>
 
+#include <jetbackground/FastJetAlgoSub.h>
+#include <jetbackground/RetowerCEMC.h>
+
 #include <g4jets/TruthJetInput.h>
+
+#include <centrality/CentralityInfov2.h>
+
+#include <calotrigger/MinimumBiasInfov1.h>
 
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
@@ -42,6 +58,7 @@
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libCaloEmbedding.so)
+// R__LOAD_LIBRARY( libeventselection.so )
 R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcentrality.so)
 R__LOAD_LIBRARY(libcalotrigger.so)
@@ -54,18 +71,18 @@ R__LOAD_LIBRARY(libg4jets.so)
 
 // namespace OUTPUTMANAGER
 //{
-// set<std::string> outfiles;
+// set<string> outfiles;
 // }
 
 void AddCommonNodes(Fun4AllOutputManager *out);
 
 int Fun4All_G4_Embed_data(
-    const int nEvents = 1000,
+    const int nEvents = 2,
     const int segment = 00000,
-    const std::string &embed_input_file0 = "/sphenix/u/bseidlitz/work/devMac/macros/CaloProduction/condor/test.root",
+    const std::string &embed_input_file0 = "DST_CALOFITTING-00054404-00002.root",
     const std::string &outdir = "./",
-    const std::string &outnameEnd = "embed_test.root",
-    const std::string &jettrigger = "Jet30",
+    const std::string &/*outnameEnd*/ = "embed_test.root",
+    const std::string &jettrigger = "Jet10",
     const std::string &cdbtag = "MDC2")
 {
 
@@ -77,6 +94,13 @@ int Fun4All_G4_Embed_data(
   se->Verbosity(1);
 
   int verbosity = 0;
+  CDBInterface::instance()->Verbosity(1);
+
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(embed_input_file0);
+  int dataRunNumber = runseg.first; 
+  int dataSegment   = runseg.second; 
+
+  int runnumber = 21;
 
   // Opt to print all random seed used for debugging reproducibility. Comment out to reduce stdout prints.
   PHRandomSeed::Verbosity(1);
@@ -93,16 +117,6 @@ int Fun4All_G4_Embed_data(
   // or set it to a fixed value so you can debug your code
   //  rc->set_IntFlag("RANDOMSEED", 12345);
 
-  //  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(embed_input_file0);
-  // int runnumber = runseg.first;
-  // int segment = runseg.second;
-  int runnumber = 54912;
-  if (runnumber != 0)
-  {
-    rc->set_IntFlag("RUNNUMBER", runnumber);
-    Fun4AllSyncManager *syncman = se->getSyncManager();
-    syncman->SegmentNumber(segment);
-  }
   //===============
   // conditions DB flags
   //===============
@@ -110,8 +124,18 @@ int Fun4All_G4_Embed_data(
   // tag
   rc->set_StringFlag("CDB_GLOBALTAG", cdbtag);
   // 64 bit timestamp
+  //rc->set_uint64Flag("TIMESTAMP", CDB::timestamp);
   rc->set_uint64Flag("TIMESTAMP", runnumber);
 
+  //  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(embed_input_file0);
+  // int runnumber = runseg.first;
+  // int segment = runseg.second;
+  if (runnumber != 0)
+  {
+    rc->set_IntFlag("RUNNUMBER", runnumber);
+    Fun4AllSyncManager *syncman = se->getSyncManager();
+    syncman->SegmentNumber(segment);
+  }
 
   // Sync Headers and Flags
   SyncReco *sync = new SyncReco();
@@ -146,7 +170,7 @@ int Fun4All_G4_Embed_data(
   // In case embedding into a production output, please double check your G4Setup_sPHENIX.C and G4_*.C consistent with those in the production macro folder
   // E.g. /sphenix/sim//sim01/production/2016-07-21/single_particle/spacal2d/
 
-  Input::EMBED = true;
+  Input::EMBED = false;
   INPUTEMBED::filename[0] = embed_input_file0;
   // no repeating of embedding background, stop processing when end of file reached
   INPUTEMBED::REPEAT = false;
@@ -169,7 +193,7 @@ int Fun4All_G4_Embed_data(
     std::cout << "pythia config path: " << pythia8_config_file << std::endl;
     if (jettrigger == "Jet10")
     {
-      pythia8_config_file += "phpythia8_15GeV_JS_MDC2.cfg";
+      pythia8_config_file += "phpythia8_10GeV_JS_MDC2.cfg";
     }
     else if (jettrigger == "Jet30")
     {
@@ -179,9 +203,9 @@ int Fun4All_G4_Embed_data(
     {
       pythia8_config_file += "phpythia8_40GeV_JS_MDC2.cfg";
     }
-    else if (jettrigger == "PhotonJet")
+    else if (jettrigger == "PhotonJet20")
     {
-      pythia8_config_file += "phpythia8_JS_GJ_MDC2.cfg";
+      pythia8_config_file += "phpythia8_15GeV_JS_MDC2.cfg";
     }
     else
     {
@@ -207,35 +231,59 @@ int Fun4All_G4_Embed_data(
     PHPy8JetTrigger *p8_js_signal_trigger = new PHPy8JetTrigger();
     p8_js_signal_trigger->SetEtaHighLow(1.5, -1.5); // Set eta acceptance for particles into the jet between +/- 1.5
     p8_js_signal_trigger->SetJetR(0.4);             // Set the radius for the trigger jet
+
+    PHPy8ParticleTrigger *p8_photon_jet_trigger = new PHPy8ParticleTrigger();
+    p8_photon_jet_trigger->SetStableParticleOnly(false);  // process unstable particles that include quarks
+    p8_photon_jet_trigger->AddParticles(22);
+    p8_photon_jet_trigger->SetEtaHighLow(1.5, -1.5);  // sample a rapidity range higher than the sPHENIX tracking pseudorapidity
+    std::vector<int> partentsId{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, -22, -21, -20, -19, -18, -17, -16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1};
+    p8_photon_jet_trigger->AddParents(partentsId);
+
+
     if (jettrigger == "Jet10")
     {
-      p8_js_signal_trigger->SetMinJetPt(10); // require a 10 GeV minimum pT jet in the event
+      p8_js_signal_trigger->SetMinJetPt(10);
     }
     else if (jettrigger == "Jet30")
     {
-      p8_js_signal_trigger->SetMinJetPt(30); // require a 30 GeV minimum pT jet in the event
+      p8_js_signal_trigger->SetMinJetPt(30);
     }
     else if (jettrigger == "Jet40")
     {
-      p8_js_signal_trigger->SetMinJetPt(40); // require a 40 GeV minimum pT jet in the event
+      p8_js_signal_trigger->SetMinJetPt(40);
     }
-    else if (jettrigger == "PhotonJet")
+    
+    if (jettrigger == "Jet10" ||
+        jettrigger == "Jet30" ||
+        jettrigger == "Jet40")
+    {
+      delete p8_photon_jet_trigger;
+      p8_photon_jet_trigger = nullptr;
+    }
+    else if (jettrigger == "PhotonJet20")
     {
       delete p8_js_signal_trigger;
       p8_js_signal_trigger = nullptr;
-      std::cout << "no cut for PhotonJet" << std::endl;
+      p8_photon_jet_trigger->SetPtLow(20);
     }
     else
     {
       std::cout << "invalid jettrigger: " << jettrigger << std::endl;
       gSystem->Exit(1);
     }
+
     if (p8_js_signal_trigger)
     {
       INPUTGENERATOR::Pythia8[0]->register_trigger(p8_js_signal_trigger);
       INPUTGENERATOR::Pythia8[0]->set_trigger_AND();
     }
-    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia8);
+    else if (p8_photon_jet_trigger)
+    {
+      INPUTGENERATOR::Pythia8[0]->register_trigger(p8_photon_jet_trigger);
+      INPUTGENERATOR::Pythia8[0]->set_trigger_AND();
+    }
+
+    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia8[0]);
   }
 
   //--------------
@@ -302,7 +350,8 @@ int Fun4All_G4_Embed_data(
   // Copy over RunHeader, EventHeader, centrality, globalvertex, and MinimumBiasInfo nodes
   //-----------------
   CopyIODataNodes *cp = new CopyIODataNodes();
-  cp->Verbosity(0);
+  cp->set_CopyTowerInfo("TOWERINFO_CALIB_SEPD","TOWERINFO_CALIB_SEPD_data");
+  cp->Verbosity(1);
   se->registerSubsystem(cp, DataTopNode);
 
   //======================
@@ -346,6 +395,7 @@ int Fun4All_G4_Embed_data(
   // Enable::HCALOUT_TOWER = Enable::HCALOUT_CELL && true;
 
   Enable::EPD = true;
+  Enable::EPD_TILE = Enable::EPD && true;
 
   // new settings using Enable namespace in GlobalVariables.C
   Enable::BLACKHOLE = true;
@@ -393,6 +443,8 @@ int Fun4All_G4_Embed_data(
 
   if (Enable::HCALOUT_TOWER)
     HCALOuter_Towers();
+
+  if (Enable::EPD_TILE) EPD_Tiles();
 
   //truth jets
   JetReco *truthjets2 = new JetReco("TRUTHJETRECO2");
@@ -451,6 +503,24 @@ int Fun4All_G4_Embed_data(
   truthjets8->Verbosity(verbosity);
   se->registerSubsystem(truthjets8);
 
+   std::string test = CDBInterface::instance()->getUrl("CEMC_meanTime");// calling this line somehow prevents CDB bug when switching global tag 
+   std::cout << "line to avoid CDB bug " << test << std::endl;
+
+  std::string save_globaltag = rc->get_StringFlag("CDB_GLOBALTAG");
+  int save_timestamp    = rc->get_uint64Flag("TIMESTAMP");
+
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_uint64Flag("TIMESTAMP", dataRunNumber);
+
+  std::string cemc_datacalib = CDBInterface::instance()->getUrl("CEMC_calib_ADC_to_ETower");
+  std::string ohcal_datacalib = CDBInterface::instance()->getUrl("HCALOUT_calib_ADC_to_ETower");
+  std::string ihcal_datacalib = CDBInterface::instance()->getUrl("HCALIN_calib_ADC_to_ETower");
+
+  std::cout << "using data calibration" << std::endl << cemc_datacalib  << std::endl << ohcal_datacalib << std::endl << ihcal_datacalib  << std::endl;
+
+  rc->set_StringFlag("CDB_GLOBALTAG", save_globaltag);
+  rc->set_uint64Flag("TIMESTAMP", save_timestamp);
+ 
   // waveform sim
   CaloWaveformSim *caloWaveformSim = new CaloWaveformSim();
   caloWaveformSim->set_detector_type(CaloTowerDefs::CEMC);
@@ -460,6 +530,7 @@ int Fun4All_G4_Embed_data(
   caloWaveformSim->set_timewidth(0.2);
   caloWaveformSim->set_peakpos(6);
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+  caloWaveformSim->set_directURL_calib(cemc_datacalib);
   se->registerSubsystem(caloWaveformSim);
 
   caloWaveformSim = new CaloWaveformSim();
@@ -470,6 +541,7 @@ int Fun4All_G4_Embed_data(
   caloWaveformSim->set_timewidth(0.2);
   caloWaveformSim->set_peakpos(6);
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+  caloWaveformSim->set_directURL_calib(ihcal_datacalib);
   se->registerSubsystem(caloWaveformSim);
 
   caloWaveformSim = new CaloWaveformSim();
@@ -480,6 +552,7 @@ int Fun4All_G4_Embed_data(
   caloWaveformSim->set_timewidth(0.2);
   caloWaveformSim->set_peakpos(6);
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+  caloWaveformSim->set_directURL_calib(ohcal_datacalib);
   se->registerSubsystem(caloWaveformSim);
 
   se->Print("NODETREE");
@@ -542,11 +615,23 @@ int Fun4All_G4_Embed_data(
   ca2->set_softwarezerosuppression(true, 30);
   se->registerSubsystem(ca2);
 
+
+  ///////////////////////
+  // EPD stuff
+  CombineTowerInfo* comb = new CombineTowerInfo("CombineHCAL");
+  comb->set_inputNodeA("TOWERINFO_CALIB_SEPD_data");
+  comb->set_inputNodeB("TOWERINFO_CALIB_EPD");
+  comb->set_outputNode("TOWERINFO_COMBINED_SEPD");
+  comb->set_detector("EPD");
+  se->registerSubsystem(comb);
+
+
+
   //--------------
   // Set up Input Managers
   //--------------
 
-  for (auto & iter : INPUTEMBED::filename)
+  for (auto &iter : INPUTEMBED::filename)
   {
     std::string mgrname = "DSTin" + std::to_string(iter.first);
     Fun4AllInputManager *hitsin = new Fun4AllDstInputManager(mgrname, "DST", DataTopNode);
@@ -566,7 +651,11 @@ int Fun4All_G4_Embed_data(
     randGen.SetSeed(seed);
     // a int from 0 to 3259
     int sequence = randGen.Integer(3260);
-    std::string pedestalname = std::format("pedestal-54256-{:05}.root",sequence);
+    // pad the name
+    std::ostringstream opedname;
+    opedname << "pedestal-54256-0" << std::setw(4) << std::setfill('0') << sequence << ".root";
+
+    std::string pedestalname = opedname.str();
 
     Fun4AllInputManager *hitsin = new Fun4AllNoSyncDstInputManager("DST2");
     hitsin->AddFile(pedestalname);
@@ -583,7 +672,11 @@ int Fun4All_G4_Embed_data(
 
   //  InputManagers();
 
-  std::string FullOutFile = outdir + "DST_TRUTH_G4HIT_" + outnameEnd;
+  std::string outnameEnd2 =
+    std::format("{}-{:08}-", jettrigger, runnumber) +
+    std::format("{}-{:08}-{:05}.root","data", dataRunNumber, dataSegment);
+
+  std::string FullOutFile = outdir + "DST_TRUTH_G4HIT_" + outnameEnd2;
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("TRUTHOUT", FullOutFile);
   AddCommonNodes(out);
   out->AddNode("G4TruthInfo");
@@ -594,7 +687,7 @@ int Fun4All_G4_Embed_data(
   // OUTPUTMANAGER::outfiles.insert(FullOutFile);
   se->registerOutputManager(out);
 
-  FullOutFile = outdir + "DST_TRUTH_JET_" + outnameEnd;
+  FullOutFile = outdir + "DST_TRUTH_JET_" + outnameEnd2;
   out = new Fun4AllDstOutputManager("JETOUT", FullOutFile);
   AddCommonNodes(out);
   out->AddNode("AntiKt_Truth_r02");
@@ -622,7 +715,7 @@ int Fun4All_G4_Embed_data(
   se->registerOutputManager(out);
   // OUTPUTMANAGER::outfiles.insert(FullOutFile);
 
-  FullOutFile = outdir + "DST_CALO_" + outnameEnd;
+  FullOutFile = outdir + "DST_CALO_" + outnameEnd2;
   out = new Fun4AllDstOutputManager("CALOPROCESSED", FullOutFile);
   AddCommonNodes(out);
   out->AddNode("TOWERS_CEMC");
@@ -632,13 +725,19 @@ int Fun4All_G4_Embed_data(
   se->registerOutputManager(out);
   // OUTPUTMANAGER::outfiles.insert(FullOutFile);
 
-  FullOutFile = outdir + "DST_GLOBAL_" + outnameEnd;
+  FullOutFile = outdir + "DST_GLOBAL_" + outnameEnd2;
   out = new Fun4AllDstOutputManager("GLOBALOUT", FullOutFile);
   AddCommonNodes(out);
   out->AddNode("GlobalVertexMap");
   out->AddNode("MinimumBiasInfo");
   out->AddNode("CentralityInfo");
   out->AddNode("MbdOut");
+  out->AddNode("MbdPmtContainer");
+  out->AddNode("MinimumBiasInfo");
+  out->AddNode("CentralityInfo");
+  out->AddNode("TOWERINFO_CALIB_SEPD_data");
+  out->AddNode("TOWERINFO_CALIB_EPD");
+  out->AddNode("TOWERINFO_COMBINED_SEPD");
   out->Verbosity(0);
   se->registerOutputManager(out);
   // OUTPUTMANAGER::outfiles.insert(FullOutFile);
@@ -660,6 +759,7 @@ int Fun4All_G4_Embed_data(
   }
 
   se->run(nEvents);
+  se->PrintTimer();
 
   //-----
   // Exit

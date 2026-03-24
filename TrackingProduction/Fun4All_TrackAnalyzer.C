@@ -105,8 +105,6 @@ void Fun4All_TrackAnalyzer(
   // to turn on the average corrections, enable the three lines below
   // note: these are designed to be used only if static corrections are also applied
   G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-  // to use a custom file instead of the database file:
   G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();

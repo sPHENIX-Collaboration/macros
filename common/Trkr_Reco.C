@@ -55,7 +55,7 @@ void convert_seeds()
   auto *converter = new TrackSeedTrackMapConverter;
   // Default set to full SvtxTrackSeeds. Can be set to
   // SiliconTrackSeedContainer or TpcTrackSeedContainer
-  converter->setTrackSeedName("SvtxTrackSeedContainer");
+  converter->setTrackSeedName(G4TRACKING::convertSeedsContainerName);
   converter->setFieldMap(G4MAGNET::magfield_tracking);
   converter->Verbosity(verbosity);
   se->registerSubsystem(converter);
@@ -208,6 +208,10 @@ void Tracking_Reco_SiliconSeed_run2pp()
   auto *silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
   silicon_Seeding->setIter1();
+  if(!CDB::is_data_reco)
+    {
+      silicon_Seeding->set_beamSpotXY(0,0);
+    }
   se->registerSubsystem(silicon_Seeding);
   
   TrackingIterationCounter* counter = new TrackingIterationCounter("TrkrIter1");
@@ -221,6 +225,10 @@ void Tracking_Reco_SiliconSeed_run2pp()
   auto *silicon_Seeding2 = new PHActsSiliconSeeding("ActsSeedingIt1");
   silicon_Seeding2->Verbosity(verbosity);
   silicon_Seeding2->setIter2();
+  if(!CDB::is_data_reco)
+    {
+      silicon_Seeding2->set_beamSpotXY(0,0);
+    }
   se->registerSubsystem(silicon_Seeding2);
   
   
@@ -237,6 +245,13 @@ void Tracking_Reco_SiliconSeed_run2pp()
   combiner->newContainerName("SiliconTrackSeedContainer");
   combiner->oldContainerName("SiliconTrackSeedContainerIt1");
   se->registerSubsystem(combiner);
+
+
+
+  PHSiliconSeedMerger *merger = new PHSiliconSeedMerger;
+  merger->Verbosity(verbosity);
+  se->registerSubsystem(merger);
+  
 }
 void Tracking_Reco_TrackSeed_run2pp()
 {
@@ -290,7 +305,7 @@ void Tracking_Reco_SiTpcTrackMatching_run2pp(const std::string& clusterMapName =
   se->registerSubsystem(silicon_match);
 
 }
-void Tracking_Reco_TpcTpotTrackMatching_run2pp()
+void Tracking_Reco_TpcTpotTrackMatching_run2pp(const std::string& clustermapname = "TRKR_CLUSTER")
 {
   
   auto *se = Fun4AllServer::instance();
@@ -303,15 +318,16 @@ void Tracking_Reco_TpcTpotTrackMatching_run2pp()
   mm_match->set_rphi_search_window_lyr2(15.0);
   mm_match->set_z_search_window_lyr1(30.0);
   mm_match->set_z_search_window_lyr2(3.);
+  mm_match->set_clustermap_name(clustermapname);
 
   mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
   mm_match->set_test_windows_printout(false);  // used for tuning search windows only
   se->registerSubsystem(mm_match);
 }
-void Tracking_Reco_TrackMatching_run2pp()
+void Tracking_Reco_TrackMatching_run2pp(const std::string& clustermapname = "TRKR_CLUSTER")
 {
-  Tracking_Reco_SiTpcTrackMatching_run2pp();
-  Tracking_Reco_TpcTpotTrackMatching_run2pp();
+  Tracking_Reco_SiTpcTrackMatching_run2pp(clustermapname);
+  //Tracking_Reco_TpcTpotTrackMatching_run2pp(clustermapname);
 
 }
 void Tracking_Reco_TrackSeed_ZeroField()
@@ -354,6 +370,7 @@ void Tracking_Reco_TrackSeed_ZeroField()
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
+  seeder->reject_zsize1_clusters(true);
 
   if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
   {
@@ -458,40 +475,7 @@ void Tracking_Reco_TrackSeed()
   // get fun4all server instance
   auto *se = Fun4AllServer::instance();
 
-  // Assemble silicon clusters into track stubs
-  auto *silicon_Seeding = new PHActsSiliconSeeding;
-  silicon_Seeding->Verbosity(verbosity);
-  silicon_Seeding->setIter1();
-  se->registerSubsystem(silicon_Seeding);
-  
-  TrackingIterationCounter* counter = new TrackingIterationCounter("TrkrIter1");
-  counter->Verbosity(verbosity);
-  counter->iteration(1);
-  counter->setTrackMapName("SiliconTrackSeedContainer");
-  counter->seedIterations();
-  se->registerSubsystem(counter);
-  
-  
-  auto *silicon_Seeding2 = new PHActsSiliconSeeding("ActsSeedingIt1");
-  silicon_Seeding2->Verbosity(verbosity);
-  silicon_Seeding2->setIter2();
-  se->registerSubsystem(silicon_Seeding2);
-  
-  
-  TrackingIterationCounter* counter2 = new TrackingIterationCounter("TrkrIter2");
-  counter2->Verbosity(verbosity);
-  /// Clusters already used are in the 1st iteration
-  counter2->iteration(2);
-  counter2->setTrackMapName("SiliconTrackSeedContainerIt1");
-  counter2->seedIterations();
-  se->registerSubsystem(counter2);
-  
-  TrackContainerCombiner* combiner = new TrackContainerCombiner;
-  combiner->Verbosity(verbosity);
-  combiner->newContainerName("SiliconTrackSeedContainer");
-  combiner->oldContainerName("SiliconTrackSeedContainerIt1");
-  combiner->Verbosity(verbosity);
-  se->registerSubsystem(combiner);
+  Tracking_Reco_SiliconSeed_run2pp();
 
   auto *seeder = new PHCASeeding("PHCASeeding");
   double fieldstrength = std::numeric_limits<double>::quiet_NaN();  // set by isConstantField if constant
@@ -513,7 +497,7 @@ void Tracking_Reco_TrackSeed()
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
-
+  seeder->reject_zsize1_clusters(true);
   if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
   {
     seeder->setNeonFraction(G4TPC::NeCF4_Ne_frac);
@@ -854,7 +838,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   seeder->SetMinClustersPerTrack(3);
   seeder->useConstBField(false);
   seeder->useFixedClusterError(true);
-
+  seeder->reject_zsize1_clusters(true);
   if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
   {
     seeder->setNeonFraction(G4TPC::NeCF4_Ne_frac);
@@ -904,6 +888,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   cprop->useConstBField(false);
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
+  cprop->set_max_seeds(5000);
   cprop->Verbosity(verbosity);
 
   if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
