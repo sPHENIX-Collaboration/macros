@@ -345,7 +345,7 @@ namespace JetQA
       {
 	return vecDefaultTrigsPP;
       }
-    else if (JetQA::DoOO)
+    if (JetQA::DoOO)
       {
 	return vecDefaultTrigsOO;
       }
