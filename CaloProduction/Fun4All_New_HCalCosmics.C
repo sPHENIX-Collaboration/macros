@@ -40,7 +40,7 @@ R__LOAD_LIBRARY(libcentrality.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libLiteCaloEvalTowSlope.so)
 
-void Fun4All_New_HCalCosmics(int nEvents = 100,
+void Fun4All_New_HCalCosmics(int nEvents = 1000,
                              const std::string& inlist = "files.list",
                              const std::string &outfile = "DST_CALOFITTING_run2auau_ana487_2024p018_v001",
                              const std::string &outfile_hist1 = "HIST_COSMIC_HCALOUT_run2auau_ana487_2024p018_v001",
@@ -60,54 +60,6 @@ void Fun4All_New_HCalCosmics(int nEvents = 100,
 
   recoConsts *rc = recoConsts::instance();
 
-  // conditions DB global tag
-  rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
-  CDBInterface::instance()->Verbosity(1);
-
-  FlagHandler *flag = new FlagHandler();
-  se->registerSubsystem(flag);
-
-  /////////////////
-  // build towers
-  CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
-  ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
-  ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  ctbIHCal->set_builder_type(buildertype);
-  ctbIHCal->set_nsamples(12);
-  if (useDSTRAW) ctbIHCal->set_offlineflag();
-  ctbIHCal->set_softwarezerosuppression(true, 200);
-  se->registerSubsystem(ctbIHCal);
-
-  CaloTowerBuilder *ctbOHCal = new CaloTowerBuilder("HCALOUTBUILDER");
-  ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
-  ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  ctbOHCal->set_builder_type(buildertype);
-  ctbOHCal->set_nsamples(12);
-  if (useDSTRAW) ctbOHCal->set_offlineflag();
-  ctbOHCal->set_softwarezerosuppression(true, 200);
-  se->registerSubsystem(ctbOHCal);
-
-  CaloTowerStatus *statusHCalIn = new CaloTowerStatus("HCALINSTATUS");
-  statusHCalIn->set_detector_type(CaloTowerDefs::HCALIN);
-  statusHCalIn->set_time_cut(10);
-  se->registerSubsystem(statusHCalIn);
-
-  CaloTowerStatus *statusHCALOUT = new CaloTowerStatus("HCALOUTSTATUS");
-  statusHCALOUT->set_detector_type(CaloTowerDefs::HCALOUT);
-  statusHCALOUT->set_time_cut(10);
-  se->registerSubsystem(statusHCALOUT);
-
-  ////////////////////
-  // Calibrate towers
-  std::cout << "Calibrating OHcal" << std::endl;
-  CaloTowerCalib *calibOHCal = new CaloTowerCalib("HCALOUT");
-  calibOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
-  se->registerSubsystem(calibOHCal);
-
-  std::cout << "Calibrating IHcal" << std::endl;
-  CaloTowerCalib *calibIHCal = new CaloTowerCalib("HCALIN");
-  calibIHCal->set_detector_type(CaloTowerDefs::HCALIN);
-  se->registerSubsystem(calibIHCal);
 
   // loop over all files in file list and create an input manager for each one
   Fun4AllInputManager *In = nullptr;
@@ -145,11 +97,69 @@ void Fun4All_New_HCalCosmics(int nEvents = 100,
     }
     infile.close();
   }
+
+
+
+  // conditions DB global tag
+  rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
+  CDBInterface::instance()->Verbosity(1);
+
+  FlagHandler *flag = new FlagHandler();
+  se->registerSubsystem(flag);
+
+
+
+
+
+  /////////////////
+  // build towers
+
   std::cout << "Adding Geometry file" << std::endl;
   Fun4AllInputManager *intrue2 = new Fun4AllRunNodeInputManager("DST_GEO");
   std::string geoLocation = CDBInterface::instance()->getUrl("calo_geo");
   intrue2->AddFile(geoLocation);
   se->registerInputManager(intrue2);
+
+
+  CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
+  ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
+  ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+  ctbIHCal->set_builder_type(buildertype);
+  ctbIHCal->set_nsamples(12);
+  if (useDSTRAW) ctbIHCal->set_offlineflag();
+  ctbIHCal->set_softwarezerosuppression(true, 200);
+  se->registerSubsystem(ctbIHCal);
+
+  CaloTowerBuilder *ctbOHCal = new CaloTowerBuilder("HCALOUTBUILDER");
+  ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
+  ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+  ctbOHCal->set_builder_type(buildertype);
+  ctbOHCal->set_nsamples(12);
+  if (useDSTRAW) ctbOHCal->set_offlineflag();
+  ctbOHCal->set_softwarezerosuppression(true, 200);
+  se->registerSubsystem(ctbOHCal);
+
+  CaloTowerStatus *statusHCalIn = new CaloTowerStatus("HCALINSTATUS");
+  statusHCalIn->set_detector_type(CaloTowerDefs::HCALIN);
+  se->registerSubsystem(statusHCalIn);
+
+  CaloTowerStatus *statusHCALOUT = new CaloTowerStatus("HCALOUTSTATUS");
+  statusHCALOUT->set_detector_type(CaloTowerDefs::HCALOUT);
+  se->registerSubsystem(statusHCALOUT);
+
+  ////////////////////
+  // Calibrate towers
+  std::cout << "Calibrating OHcal" << std::endl;
+  CaloTowerCalib *calibOHCal = new CaloTowerCalib("HCALOUT");
+  calibOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
+  se->registerSubsystem(calibOHCal);
+
+  std::cout << "Calibrating IHcal" << std::endl;
+  CaloTowerCalib *calibIHCal = new CaloTowerCalib("HCALIN");
+  calibIHCal->set_detector_type(CaloTowerDefs::HCALIN);
+  se->registerSubsystem(calibIHCal);
+
 
   ///////////////////////////////////////////
   // Cosmics histMaker
