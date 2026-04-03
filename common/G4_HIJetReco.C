@@ -68,8 +68,6 @@ void HIJetReco()
   if(G4HIJETS::do_flow == 3)
   {
       EventPlaneReco *epreco = new EventPlaneReco();
-      epreco->set_sepd_epreco(true);
-      epreco->set_isSim(true);
       se->registerSubsystem(epreco);
   }
 

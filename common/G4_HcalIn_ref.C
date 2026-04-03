@@ -366,7 +366,6 @@ void HCALInner_Towers()
 
     CaloTowerStatus *statusHCALIN = new CaloTowerStatus("HCALINSTATUS");
     statusHCALIN->set_detector_type(CaloTowerDefs::HCALIN);
-    statusHCALIN->set_time_cut(2);
     se->registerSubsystem(statusHCALIN);
 
     CaloTowerCalib *calibIHCal = new CaloTowerCalib("HCALINCALIB");

@@ -202,6 +202,20 @@ namespace Input
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
+    case OOdNdEta:
+      Input::beam_crossing = 0.75;
+      //0.75 mRad is split among both beams, means set to 0.375 mRad
+      localbcross = Input::beam_crossing / 2. * 1e-3;
+
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
+      HepMCGen->set_vertex_distribution_mean(-0.0538, 0.137, 6.49, 0.);
+      HepMCGen->set_vertex_distribution_width(
+          100e-4,         // approximation from past PHENIX data
+          100e-4,         // approximation from past PHENIX data
+          11.44,          // from intt
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
     default:
       std::cout << "ApplysPHENIXBeamParameter: invalid beam_config = " << beam_config << std::endl;
 
@@ -224,10 +238,13 @@ namespace Input
 
   void ApplysPHENIXBeamParameter(std::vector<PHPythia8 *> &HepMCGenVec)
   {
-    PHHepMCGenHelper *gen = dynamic_cast<PHHepMCGenHelper *> (HepMCGenVec[0]);
-    if (gen)
+    for (auto *iter : HepMCGenVec)
     {
-      ApplysPHENIXBeamParameter(gen, Input::BEAM_CONFIGURATION);
+      PHHepMCGenHelper *gen = dynamic_cast<PHHepMCGenHelper *> (iter);
+      if (gen)
+      {
+	ApplysPHENIXBeamParameter(gen, Input::BEAM_CONFIGURATION);
+      }
     }
   }
 

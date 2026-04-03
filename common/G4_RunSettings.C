@@ -72,6 +72,18 @@ void RunSettings(int runnumber, const std::string & /*type*/ = "")
     Input::BEAM_CONFIGURATION = Input::mRad_075;
     Enable::MVTX_APPLYMISALIGNMENT = true;
     break;
+  case 36:  // run 36- ppg14, AuAu 1mRad xing angle, mvtx rotated, flow flucuations enabled, scale factor sqrt(1.3)
+    Input::BEAM_CONFIGURATION = Input::AA_COLLISION;
+    Enable::MVTX_APPLYMISALIGNMENT = true;
+    INPUTHEPMC::FLOW_FLUCTUATIONS = true;
+    INPUTHEPMC::FLOW_SCALING = 1.14;
+    std::cout << "use ppg14 run36 settings" << std::endl;
+    break;
+  case 37:  // 0.75mRad xing angle, mvtx rotated, OO vertex from intt for dNdEta
+    Input::BEAM_CONFIGURATION = Input::OOdNdEta;
+    Enable::MVTX_APPLYMISALIGNMENT = true;
+    break;
+  
   default:
     if (runnumber < 100)
     {
