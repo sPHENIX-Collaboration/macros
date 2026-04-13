@@ -40,7 +40,7 @@ R__LOAD_LIBRARY(libcentrality.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libLiteCaloEvalTowSlope.so)
 
-void Fun4All_New_HCalCosmics(int nEvents = 100,
+void Fun4All_New_HCalCosmics(int nEvents = 1000,
                              const std::string& inlist = "files.list",
                              const std::string &outfile = "DST_CALOFITTING_run2auau_ana487_2024p018_v001",
                              const std::string &outfile_hist1 = "HIST_COSMIC_HCALOUT_run2auau_ana487_2024p018_v001",
@@ -60,15 +60,68 @@ void Fun4All_New_HCalCosmics(int nEvents = 100,
 
   recoConsts *rc = recoConsts::instance();
 
+
+  // loop over all files in file list and create an input manager for each one
+  Fun4AllInputManager *In = nullptr;
+  std::ifstream infile;
+  infile.open(inlist);
+  int iman = 0;
+  std::string line;
+  bool first{true};
+  int runnumber = 0;
+  int segment = 99999;
+  if (infile.is_open())
+  {
+    while (std::getline(infile, line))
+    {
+      if (line[0] == '#')
+      {
+        std::cout << "found commented out line " << line << std::endl;
+        continue;
+      }
+      // extract run number from first not commented out file in list
+      if (first)
+      {
+	std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(line);
+        runnumber = runseg.first;
+        segment = runseg.second;
+        rc->set_uint64Flag("TIMESTAMP", runnumber);
+        first = false;
+      }
+      std::string magname = "DSTin_" + std::to_string(iman);
+      In = new Fun4AllDstInputManager(magname);
+      In->Verbosity(1);
+      In->AddFile(line);
+      se->registerInputManager(In);
+      iman++;
+    }
+    infile.close();
+  }
+
+
+
   // conditions DB global tag
   rc->set_StringFlag("CDB_GLOBALTAG", dbtag);
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
   CDBInterface::instance()->Verbosity(1);
 
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
 
+
+
+
+
   /////////////////
   // build towers
+
+  std::cout << "Adding Geometry file" << std::endl;
+  Fun4AllInputManager *intrue2 = new Fun4AllRunNodeInputManager("DST_GEO");
+  std::string geoLocation = CDBInterface::instance()->getUrl("calo_geo");
+  intrue2->AddFile(geoLocation);
+  se->registerInputManager(intrue2);
+
+
   CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
   ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
@@ -107,47 +160,6 @@ void Fun4All_New_HCalCosmics(int nEvents = 100,
   calibIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   se->registerSubsystem(calibIHCal);
 
-  // loop over all files in file list and create an input manager for each one
-  Fun4AllInputManager *In = nullptr;
-  std::ifstream infile;
-  infile.open(inlist);
-  int iman = 0;
-  std::string line;
-  bool first{true};
-  int runnumber = 0;
-  int segment = 99999;
-  if (infile.is_open())
-  {
-    while (std::getline(infile, line))
-    {
-      if (line[0] == '#')
-      {
-        std::cout << "found commented out line " << line << std::endl;
-        continue;
-      }
-      // extract run number from first not commented out file in list
-      if (first)
-      {
-	std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(line);
-        runnumber = runseg.first;
-        segment = runseg.second;
-        rc->set_uint64Flag("TIMESTAMP", runnumber);
-        first = false;
-      }
-      std::string magname = "DSTin_" + std::to_string(iman);
-      In = new Fun4AllDstInputManager(magname);
-      In->Verbosity(1);
-      In->AddFile(line);
-      se->registerInputManager(In);
-      iman++;
-    }
-    infile.close();
-  }
-  std::cout << "Adding Geometry file" << std::endl;
-  Fun4AllInputManager *intrue2 = new Fun4AllRunNodeInputManager("DST_GEO");
-  std::string geoLocation = CDBInterface::instance()->getUrl("calo_geo");
-  intrue2->AddFile(geoLocation);
-  se->registerInputManager(intrue2);
 
   ///////////////////////////////////////////
   // Cosmics histMaker
