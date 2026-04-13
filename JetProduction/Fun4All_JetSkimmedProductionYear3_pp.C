@@ -38,41 +38,6 @@
 #include <TString.h>
 #include <TSystem.h>
 
-std::string ResolveInputFile(const std::string &baseDir, const std::string &fname)
-{
-  if (fname.find('/') != std::string::npos)
-  {
-    return fname;
-  }
-
-  std::string candidate = baseDir + "/" + fname;
-  if (!gSystem->AccessPathName(candidate.c_str()))  // returns kFALSE if file exists
-    {
-    return candidate;
-  }
-  std::string pattern = baseDir + "/run_*/" + fname;
-
-  // build the shell command
-  std::string cmd = "ls " + pattern + " 2>/dev/null | head -n1";
-
-  // GetFromPipe returns a TString
-  TString t = gSystem->GetFromPipe(cmd.c_str());
-  std::string result = std::string(t.Data());
-
-  // strip trailing newline(s)
-  while (!result.empty() && (result.back() == '\n' || result.back() == '\r'))
-  {
-    result.pop_back();
-  }
-  if (!result.empty())
-  {
-    return result;  // found a match
-  }
-  std::cerr << "ResolveInputFile: could not find " << fname
-            << " under " << baseDir << std::endl;
-  return fname;
-}
-
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -86,28 +51,14 @@ R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libjetbackground.so)
 R__LOAD_LIBRARY(libJetDSTSkimmer.so)
 
-void Fun4All_JetSkimmedProductionYear3(
+void Fun4All_JetSkimmedProductionYear3_pp(
                                        int nEvents = 1000,
                                        const std::string &fname =
-                                       //"DST_CALOFITTING_run3auau_new_newcdbtag_v008-00075142-00000.root",
-                                       "DST_CALOFITTING_run3pp_new_newcdbtag_v008-00079151-00010.root",
+                                       "DST_CALOFITTING_run3pp_new_newcdbtag_v008-00081000-00000.root",
                                        const std::string &outfile_low  = "DST_JETCALO-00000000-000000.root",
                                        const std::string &outfile_high = "DST_Jet-00000000-000000.root",
                                        const std::string &outfile_hist = "HIST_JETQA-00000000-000000.root",
-                                       const std::string &dbtag        = "newcdbtag",
-                                       const std::string &basedir =
-                                       //"/sphenix/lustre01/sphnxpro/production2/run3auau/physics/calofitting/new_newcdbtag_v008")
-                                       "/sphenix/lustre01/sphnxpro/production2/run3pp/physics/calofitting/new_newcdbtag_v008")
-/*
-void Fun4All_JetSkimmedProductionYear3(
-				       int nEvents = 1000,
-				       const std::string &fname =
-				       "DST_CALOFITTING_run3auau_new_newcdbtag_v008-00075142-00000.root",
-				       const std::string &outfile_low  = "DST_JETCALO-00000000-000000.root",
-				       const std::string &outfile_high = "DST_Jet-00000000-000000.root",
-				       const std::string &outfile_hist = "HIST_JETQA-00000000-000000.root",
-				       const std::string &dbtag        = "newcdbtag")
-*/
+                                       const std::string &dbtag        = "newcdbtag")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
   recoConsts::instance()->set_IntFlag("PHOOL_VERBOSITY", 0);
@@ -142,9 +93,11 @@ void Fun4All_JetSkimmedProductionYear3(
   // Jet reco related flags
   Enable::QA = true;
   
-  // Au+Au mode
+  // is Au+Au mode?
   HIJETS::is_pp = true;
-  
+
+  //is Au+Au mode or o+o (true)?
+  HIJETS::is_oo = false;
   // QA options
   JetQA::HasTracks        = false;
   JetQA::DoInclusive      = true;
@@ -152,6 +105,7 @@ void Fun4All_JetSkimmedProductionYear3(
   JetQA::RestrictPtToTrig = false;
   JetQA::RestrictEtaByR   = true;
   JetQA::DoPP             = HIJETS::is_pp;
+  JetQA::DoOO             = HIJETS::is_oo;
   JetQA::UseBkgdSub       = true;
   JetQA::HasCalos         = true;
   
@@ -209,16 +163,8 @@ void Fun4All_JetSkimmedProductionYear3(
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
   In->Verbosity(1);
 
-    const std::string inFile = ResolveInputFile(basedir, fname);
-  std::cout << ">>> Input file resolved to: " << inFile << std::endl;
 
-  if (gSystem->AccessPathName(inFile.c_str()))
-  {
-    std::cerr << "FATAL: cannot access input file: " << inFile << std::endl;
-    gSystem->Exit(1);
-  }
-
-  In->AddFile(inFile);
+  In->AddFile(fname);
   se->registerInputManager(In);
   
   Fun4AllDstOutputManager *outlower =

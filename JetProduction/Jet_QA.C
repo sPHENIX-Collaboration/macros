@@ -60,6 +60,9 @@ namespace JetQA
   ///! Set to true to use pp-specific options (otherwise assumes AuAU)
   bool DoPP = false;
 
+  ///! Set to true to use oo-specific options (otherwise assumes AuAU)
+  bool DoOO = false;
+  
   ///! Set to true to restrict minimum jet pt to trigger threshold
   bool RestrictPtToTrig = false;
 
@@ -327,15 +330,29 @@ namespace JetQA
         JetQADefs::GL1::MBDNS2Vtx10,
         JetQADefs::GL1::MBDNS2Vtx150};
 
+    std::vector<uint32_t> vecDefaultTrigsOO = {
+      JetQADefs::GL1::MBDNS1,
+      JetQADefs::GL1::MBDNSJet1,
+      JetQADefs::GL1::MBDNSJet2,
+      JetQADefs::GL1::MBDNSJet3,
+      JetQADefs::GL1::MBDNSJet4,
+      JetQADefs::GL1::Jet1,
+      JetQADefs::GL1::Jet2,
+      JetQADefs::GL1::Jet3,
+      JetQADefs::GL1::Jet4};
+    
     if (JetQA::DoPP)
-    {
-      return vecDefaultTrigsPP;
-    }
-
+      {
+	return vecDefaultTrigsPP;
+      }
+    if (JetQA::DoOO)
+      {
+	return vecDefaultTrigsOO;
+      }
+    
     return vecDefaultTrigsAA;
-
+    
   }  // end 'GetDefaultTriggerList()'
-
   // --------------------------------------------------------------------------
   //! Get list of jets to analyze
   // --------------------------------------------------------------------------
@@ -541,7 +558,6 @@ void JetsWithTracksQA(std::optional<uint32_t> trg = std::nullopt)
   {
     evtRhoQA->setTrgToSelect(trg.value());
   }
-  evtRhoQA->setPPMode(JetQA::DoPP);
   se->registerSubsystem(evtRhoQA);
 
   // create modules that take single R values ---------------------------------
@@ -625,34 +641,19 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   // get list of jet nodes to analyze
   std::vector<uint32_t> vecJetsToQA = JetQA::GetJetsToQA(JetQA::Source::Calos);
 
-  /*
   // initialize and register emcluster jet kinematic QA
   EMClusterKinematics* emclusterJetsQA = new EMClusterKinematics(
       "EMClusterKinematics" + trig_tag,
       "CLUSTERINFO_CEMC",
       "");
-  emclusterJetsQA->SetDoOptHist(false);
+  emclusterJetsQA->SetDoOptHist(true);
   if (trg.has_value())
   {
     emclusterJetsQA->SetTrgToSelect(trg.value());
   }
-  emclusterJetsQA->Verbosity(verbosity);
+  emclusterJetsQA->Verbosity(0);
   se->registerSubsystem(emclusterJetsQA);
-  */
-  EMClusterKinematics* em = new EMClusterKinematics(
-						    "EMClusterKinematics" + trig_tag,
-						    "CLUSTERINFO_CEMC",
-						    "");
-  
-  // make the output name explicit
-  em->SetHistTag(JetQA::GetTriggerTag(trg));   // or just JetQA::GL1Tag[trg.value()] when trg has value
-  
-  // for debugging: disable trigger selection entirely
-  if (trg.has_value()) em->SetTrgToSelect(trg.value());
-  
-  em->SetDoOptHist(false);
-  se->registerSubsystem(em);
-  
+
   // initialize and register event-wise rho check
   RhosinEvent* evtRhoQA = new RhosinEvent("EventWiseCaloRho" + trig_tag, "");
   evtRhoQA->Verbosity(verbosity);
@@ -662,7 +663,6 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   {
     evtRhoQA->setTrgToSelect(trg.value());
   }
-  evtRhoQA->setPPMode(JetQA::DoPP);
   se->registerSubsystem(evtRhoQA);
 
   // initialize and register jet seed counter qa module
@@ -687,7 +687,7 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   }
 
   // register underlying event module
-  if (!JetQA::DoPP)
+  if (!JetQA::DoPP && JetQA::DoOO)
   {
     UEvsEtaCentrality* UEvsEtaCentralityQA = new UEvsEtaCentrality("UEvsEtaCent" + trig_tag);
     UEvsEtaCentralityQA->SetConfig(
@@ -705,7 +705,6 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
     }
     se->registerSubsystem(UEvsEtaCentralityQA);
   }
-
   // create modules that take single R values ---------------------------------
 
   // loop over resolution parameters
@@ -758,11 +757,10 @@ void Jet_QA(const std::vector<uint32_t>& vecTrigsToUse = JetQA::GetDefaultTrigge
     caloStatusQA->SetConfig(
         {
             .debug = false,
-            .doNorm = false,       // do NOT try to normalize histograms
-            .doOptHist = false,    // turn off extra histograms
+            .doNorm = false,     // do NOT try to normalize histograms
+            .doOptHist = false,  // turn off extra histograms
             .histTag = "",
-            .doTrgSelect = false,  // n.b. differential in trigger not useful here
-            .inPPMode = JetQA::DoPP
+            .doTrgSelect = false  // n.b. differential in trigger not useful here
         });
 
     se->Verbosity(verbosity);
