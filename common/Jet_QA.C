@@ -6,6 +6,7 @@
 #include <jetqa/CaloStatusMapper.h>
 #include <jetqa/ConstituentsinJets.h>
 #include <jetqa/DijetQA.h>
+#include <jetqa/EMCalShowerShapes.h>
 #include <jetqa/EMClusterKinematics.h>
 #include <jetqa/JetKinematicCheck.h>
 #include <jetqa/JetQADefs.h>
@@ -637,6 +638,18 @@ void JetsWithCaloQA(std::optional<uint32_t> trg = std::nullopt)
   }
   emclusterJetsQA->Verbosity(verbosity);
   se->registerSubsystem(emclusterJetsQA);
+
+  // initialize and register emcal shower shape QA
+  EMCalShowerShapes* emcalShowerShapesQA = new EMCalShowerShapes(
+      "EMCalShowerShapes" + trig_tag,
+      "CLUSTERINFO_CEMC",
+      "");
+  if (trg.has_value())
+  {
+    emcalShowerShapesQA->SetTrgToSelect(trg.value());
+  }
+  emcalShowerShapesQA->Verbosity(verbosity);
+  se->registerSubsystem(emcalShowerShapesQA);
 
   // initialize and register event-wise rho check
   RhosinEvent* evtRhoQA = new RhosinEvent("EventWiseCaloRho" + trig_tag, "");
