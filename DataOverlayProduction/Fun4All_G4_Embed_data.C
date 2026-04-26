@@ -502,7 +502,7 @@ int Fun4All_G4_Embed_data(
   truthjets8->set_input_node("TRUTH");
   truthjets8->Verbosity(verbosity);
   se->registerSubsystem(truthjets8);
-
+// looking at this - this statement is based on a misconception how the cdb works not a bug
    std::string test = CDBInterface::instance()->getUrl("CEMC_meanTime");// calling this line somehow prevents CDB bug when switching global tag 
    std::cout << "line to avoid CDB bug " << test << std::endl;
 
