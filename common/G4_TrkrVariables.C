@@ -128,7 +128,7 @@ namespace G4TPC
 
   // static distortion corrections
   bool ENABLE_STATIC_CORRECTIONS = false;
-  std::string static_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
+  std::string static_correction_filename;
   bool USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
 
   // average distortion corrections
@@ -140,7 +140,6 @@ namespace G4TPC
   bool SaveAllLaminationHists = false;
   bool BFieldOff = false;
 
-  
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
 
