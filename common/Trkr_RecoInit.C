@@ -52,7 +52,7 @@ void TrackingInit()
 
   // initialize static distortion correction
   if( G4TPC::static_correction_filename.empty() )
-  { G4TPC::module_edge_correction_filename = CDBInterface::instance()->getUrl("TPC_STATIC_CORRECTION_MODEL"); }
+  { G4TPC::static_correction_filename = CDBInterface::instance()->getUrl("TPC_STATIC_CORRECTION_MODEL"); }
 
   // space charge correction
   if (G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS || G4TPC::ENABLE_STATIC_CORRECTIONS || G4TPC::ENABLE_AVERAGE_CORRECTIONS)
