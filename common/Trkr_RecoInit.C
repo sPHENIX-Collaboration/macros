@@ -24,7 +24,7 @@ void TrackingInit()
 {
    // server
   auto *se = Fun4AllServer::instance();
-  
+
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
@@ -41,11 +41,18 @@ void TrackingInit()
       std::cout << "Setting reconstruction for data with CDB tag " << rc->get_StringFlag("CDB_GLOBALTAG") << std::endl;
       CDB::is_data_reco = true;
     }
-  
+
   TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
 
   ACTSGEOM::ActsGeomInit();
-  G4TPC::module_edge_correction_filename = CDBInterface::instance()->getUrl("TPC_Module_Edge");
+
+  // initialize module edge correction
+  if( G4TPC::module_edge_correction_filename.empty() )
+  { G4TPC::module_edge_correction_filename = CDBInterface::instance()->getUrl("TPC_Module_Edge"); }
+
+  // initialize static distortion correction
+  if( G4TPC::static_correction_filename.empty() )
+  { G4TPC::static_correction_filename = CDBInterface::instance()->getUrl("TPC_STATIC_CORRECTION_MODEL"); }
 
   // space charge correction
   if (G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS || G4TPC::ENABLE_STATIC_CORRECTIONS || G4TPC::ENABLE_AVERAGE_CORRECTIONS)
