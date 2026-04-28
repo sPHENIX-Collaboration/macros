@@ -1,4 +1,4 @@
-#include "G4Setup_sPHENIX.C"
+#include <G4Setup_sPHENIX.C>
 
 #include <G4_TrkrVariables.C>
 #include <G4_ActsGeom.C>
@@ -105,9 +105,7 @@ void Fun4All_Intt_Combiner(int nEvents = 0,
     myDecoder->runInttStandalone(true);
     myDecoder->writeInttEventHeader(true);
     if (applyHotChannel) myDecoder->LoadHotChannelMapRemote("INTT_HotMap");
-    std::string DACmap = (applyADCConversion) ? "INTT_DACMAP" : "";
     std::string BCOmap = (applyBCOCut) ? "INTT_BCOMAP" : "";
-    myDecoder->SetCalibDAC(DACmap);
     myDecoder->SetCalibBCO(BCOmap);
     se->registerSubsystem(myDecoder);
   }
