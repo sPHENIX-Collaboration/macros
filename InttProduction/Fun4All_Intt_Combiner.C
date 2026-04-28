@@ -1,4 +1,4 @@
-#include "G4Setup_sPHENIX.C"
+#include <G4Setup_sPHENIX.C>
 
 #include <G4_TrkrVariables.C>
 #include <G4_ActsGeom.C>
