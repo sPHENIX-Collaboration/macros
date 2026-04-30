@@ -218,18 +218,14 @@ void Fun4All_PRDFReconstruction(
   TRACKING::pp_mode = true;
   G4TRACKING::convert_seeds_to_svtxtracks = false;
   G4TPC::REJECT_LASER_EVENTS = true;
-  
+
   // to turn on the default static corrections, enable the two lines below
   G4TPC::ENABLE_STATIC_CORRECTIONS = true;
-  G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
 
   //to turn on the average corrections, enable the three lines below
   //note: these are designed to be used only if static corrections are also applied
   G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = true;
-   // to use a custom file instead of the database file:
-  G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
-  
+
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
   TpcReadoutInit(runnumber);
@@ -421,7 +417,7 @@ void Fun4All_PRDFReconstruction(
     converter->setFieldMap(G4MAGNET::magfield_tracking);
     converter->Verbosity(0);
     se->registerSubsystem(converter);
-    
+
     auto *finder = new PHSimpleVertexFinder("SiliconVertexFinder");
     finder->Verbosity(0);
     finder->setDcaCut(0.1);
@@ -434,7 +430,7 @@ void Fun4All_PRDFReconstruction(
     finder->setTrackMapName("SiliconSvtxTrackMap");
     finder->setVertexMapName("SiliconSvtxVertexMap");
     se->registerSubsystem(finder);
-    
+
     auto *siliconqa = new SiliconSeedsQA;
     siliconqa->setTrackMapName("SiliconSvtxTrackMap");
     siliconqa->setVertexMapName("SiliconSvtxVertexMap");
@@ -448,7 +444,7 @@ void Fun4All_PRDFReconstruction(
     convertertpc->setFieldMap(G4MAGNET::magfield_tracking);
     convertertpc->Verbosity(0);
     se->registerSubsystem(convertertpc);
-    
+
     auto *findertpc = new PHSimpleVertexFinder("TpcSimpleVertexFinder");
     findertpc->Verbosity(0);
     findertpc->setDcaCut(1);
@@ -469,7 +465,7 @@ void Fun4All_PRDFReconstruction(
     tpcqa->setSegment(rc->get_IntFlag("RUNSEGMENT"));
     se->registerSubsystem(tpcqa);
 
-    
+
     se->registerSubsystem(new TpcSiliconQA);
     se->registerSubsystem(new TrackFittingQA);
   }
