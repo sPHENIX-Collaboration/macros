@@ -112,12 +112,11 @@ namespace G4TPC
 
   // apply static distortions in simulations
   bool ENABLE_STATIC_DISTORTIONS = false;
-
-  std::string static_distortion_filename = "TPC_STATIC_DISTORTION";
+  std::string static_distortion_filename;
 
   // apply time-ordered distortion fluctuations in simulation
   bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
-  std::string time_ordered_distortion_filename = "TPC_TIMEORDERED_DISTORTION";
+  std::string time_ordered_distortion_filename;
 
   // allow distortions to remove electrons that
   bool ENABLE_REACHES_READOUT = true;
@@ -134,8 +133,9 @@ namespace G4TPC
   // average distortion corrections
   bool ENABLE_AVERAGE_CORRECTIONS = false;
   std::string average_correction_filename;
-  std::string CMStripePattern = "/sphenix/u/bkimelman/CMStripePattern_ideal.root";
   bool USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = true;
+
+  std::string CMStripePattern = "/sphenix/u/bkimelman/CMStripePattern_ideal.root";
   bool average_correction_interpolate = true;
   bool SaveAllLaminationHists = false;
   bool BFieldOff = false;

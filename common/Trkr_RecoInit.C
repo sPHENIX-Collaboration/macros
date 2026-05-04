@@ -47,12 +47,16 @@ void TrackingInit()
   ACTSGEOM::ActsGeomInit();
 
   // initialize module edge correction
-  if( G4TPC::module_edge_correction_filename.empty() )
+  if( G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS && G4TPC::module_edge_correction_filename.empty() )
   { G4TPC::module_edge_correction_filename = CDBInterface::instance()->getUrl("TPC_Module_Edge"); }
 
   // initialize static distortion correction
-  if( G4TPC::static_correction_filename.empty() )
+  if( G4TPC::ENABLE_STATIC_CORRECTIONS && G4TPC::static_correction_filename.empty() )
   { G4TPC::static_correction_filename = CDBInterface::instance()->getUrl("TPC_STATIC_CORRECTION_MODEL"); }
+
+  // initialize time average distortion correction
+  if( G4TPC::ENABLE_AVERAGE_CORRECTIONS && G4TPC::average_correction_filename.empty() )
+  { G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION"); }
 
   // space charge correction
   if (G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS || G4TPC::ENABLE_STATIC_CORRECTIONS || G4TPC::ENABLE_AVERAGE_CORRECTIONS)
