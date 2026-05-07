@@ -173,7 +173,7 @@ then
     getinputfiles.pl $inputs
   elif [[ "$inputs" =~ list$ ]]
   then
-    head -2 ${inputs} > tempfile.list
+    head -30 ${inputs} > tempfile.list
     getinputfiles.pl --verbose --cp --filelist tempfile.list
     inputs=${_CONDOR_SCRATCH_DIR}/tempfile.list
   fi
