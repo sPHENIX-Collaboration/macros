@@ -5,7 +5,7 @@
 if [[ $# -lt 1 ]]
 then
   echo Error, need to specify input file
-  exit -1
+  exit 1
 fi
 
 #generate the run_xxx_yyy string
