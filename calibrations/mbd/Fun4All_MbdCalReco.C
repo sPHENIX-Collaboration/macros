@@ -3,8 +3,8 @@
 
 #include <globalvertex/GlobalVertexReco.h>
 
-#include "mbd/MbdReco.h"
-#include "mbd/MbdCalibReco.h"
+#include <mbd/MbdReco.h>
+#include <mbd/MbdCalibReco.h>
 
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
@@ -64,7 +64,7 @@ void Fun4All_MbdCalReco(const char *input = "DST_CALOFITTING_run3oo_pro001_pcdb0
 
   std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(first_line);
   int runnumber = runseg.first;
-  int segment = runseg.second;
+//  int segment = runseg.second;
   std::cout << "run number = " << runnumber << std::endl;
 
   recoConsts *rc = recoConsts::instance();

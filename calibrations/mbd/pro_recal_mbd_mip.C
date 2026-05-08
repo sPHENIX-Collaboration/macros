@@ -444,6 +444,7 @@ void pro_recal_mbd_mip(const int runnumber, const int pass = 3)
   //int runnumber = runseg.first;
   int type = get_runtype( runnumber );
   int method = 1;
+  // NOLINTBEGIN(bugprone-branch-clone)
   if ( type == MBDRUNTYPE::AUAU200 )
   {
     method = 0;
@@ -459,6 +460,7 @@ void pro_recal_mbd_mip(const int runnumber, const int pass = 3)
   {
     method = 0;
   }
+  // NOLINTEND(bugprone-branch-clone)
   std::cout << "pro_recal_mbd_mip(), type method " << type << " " << method << std::endl;
 
   // make results directory
