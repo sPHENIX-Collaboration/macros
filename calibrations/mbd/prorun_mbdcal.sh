@@ -236,7 +236,7 @@ mv results/${runno}/mbd_qfit.root results/${runno}/mbd_qfit-${runno}.root
 
 echo "###############################################################################################################"
 echo "Running pass2.4 calibration"
-echo root.exe -q calib_t0mean.C\(\"results/${runno}/calmbdpass2.3_q_${runno}.root\"\)
+echo root.exe -q calib_t0mean.C\(\"results/${runno}/calmbdpass2.3_q-${runno}.root\"\)
 root.exe -q calib_t0mean.C\(\"results/${runno}/calmbdpass2.3_q-${runno}.root\"\)
 mv results/${runno}/mbd_t0corr.root results/${runno}/mbd_t0corr-${runno}.root
 
