@@ -186,7 +186,7 @@ then
   #done
 fi
 
-build="none"
+#build="none"
 
 ./prorun_mbdcal.sh --outbase "$outbase" \
   --outdir  "$outdir" \
