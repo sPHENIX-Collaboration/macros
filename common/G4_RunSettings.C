@@ -83,6 +83,10 @@ void RunSettings(int runnumber, const std::string & /*type*/ = "")
     Input::BEAM_CONFIGURATION = Input::OOdNdEta;
     Enable::MVTX_APPLYMISALIGNMENT = true;
     break;
+  case 38:  // Nominal sPHENIX OO collision settings, 0.75mRad xing angle, mvtx rotated
+    Input::BEAM_CONFIGURATION = Input::OO_COLLISION;
+    Enable::MVTX_APPLYMISALIGNMENT = true;
+    break;
   
   default:
     if (runnumber < 100)
