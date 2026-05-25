@@ -35,7 +35,8 @@ namespace Input
     mRad_10 = 7,
     mRad_15 = 8,
     mRad_075 = 9,
-    OOdNdEta = 10
+    OOdNdEta = 10,
+    OO_COLLISION = 11
   };
 
   BeamConfiguration BEAM_CONFIGURATION = AA_COLLISION;
