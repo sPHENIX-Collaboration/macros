@@ -4,17 +4,18 @@
 
 #include <TFile.h>
 #include <TProfile2D.h>
-#include <TH1D.h>
+#include <TH1.h>
 #include <TGraph.h>
 #include <TCanvas.h>
 #include <TLegend.h>
 #include <TStyle.h>
 
 #include <fstream>
-#include <sstream>
-#include <vector>
-#include <string>
+#include <format>
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 void makeAvgTempVsRun(
   const char* dir = "/sphenix/user/anjsmenon/work_2025/macros/calibrations/calo/final_24_hcalcalib/makeTemp/temp_ihcal_pp_2024",
@@ -36,10 +37,11 @@ void makeAvgTempVsRun(
 
   TH1D* h_avg_vs_idx = new TH1D("h_avg_vs_idx","iHCal Avg Temperature per Run;run index;avg T [^{o}C]",
                                 runs.size(), 0.5, runs.size()+0.5);
-  for (size_t i=0;i<runs.size();++i) h_avg_vs_idx->GetXaxis()->SetBinLabel(i+1, Form("%d", runs[i]));
+  for (size_t i=0;i<runs.size();++i) h_avg_vs_idx->GetXaxis()->SetBinLabel(i+1, std::format("{}", runs[i]).c_str());
   h_avg_vs_idx->SetMarkerStyle(20);
 
-  std::vector<double> x_run(runs.size()), y_avg(runs.size());
+  std::vector<double> x_run(runs.size());
+  std::vector<double> y_avg(runs.size());
 
   std::ofstream csv(outcsv);
   csv << "run,avg_temp_C,ntowers_used\n";
@@ -47,14 +49,14 @@ void makeAvgTempVsRun(
   size_t idx = 0;
   for (int run : runs)
   {
-    std::string fname = Form("%s/HCALIN_temp_%d.root", dir, run);
+    std::string fname = std::format("{}/HCALIN_temp_{}.root", dir, run);
     TFile f(fname.c_str(), "READ");
     if (f.IsZombie()) { 
       std::cerr << "[skip] cannot open " << fname << "\n";
       ++idx; continue;
     }
 
-    auto prof = dynamic_cast<TProfile2D*>(f.Get("h_HCALIN_temp"));
+    auto *prof = dynamic_cast<TProfile2D*>(f.Get("h_HCALIN_temp"));
     if (!prof) {
       std::cerr << "[skip] missing h_HCALIN_temp in " << fname << "\n";
       ++idx; continue;
@@ -89,7 +91,7 @@ void makeAvgTempVsRun(
   }
   csv.close();
 
-  auto gr = new TGraph((int)runs.size(), x_run.data(), y_avg.data());
+  auto *gr = new TGraph((int)runs.size(), x_run.data(), y_avg.data());
   gr->SetName("g_avg_vs_run");
   gr->SetTitle("IHCal Avg Temperature per Run;run number;avg T [^{o}C]");
   gr->SetMarkerStyle(20);
@@ -100,7 +102,8 @@ void makeAvgTempVsRun(
   c1->SetBottomMargin(0.20); 
   //c1->SaveAs("avgTemp_vs_runIndex_ihcal.png");
 
-  TCanvas* c2 = new TCanvas("c_avg_run","Avg T vs run number",900,600);
+  // as long as the canvas is not referenced - we do not need to assign a variable to it
+  new TCanvas("c_avg_run","Avg T vs run number",900,600);
   gr->Draw("AP");
   //c2->SaveAs("avgTemp_vs_runNumber_ihcal.png");
 
