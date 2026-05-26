@@ -216,7 +216,7 @@ namespace Input
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
-    case OO_COLLISION:
+    case OO_COLLISION_NOMINAL:
       Input::beam_crossing = 0.75;
       //0.75 mRad is split among both beams, means set to 0.375 mRad
       localbcross = Input::beam_crossing / 2. * 1e-3;
@@ -226,7 +226,7 @@ namespace Input
       HepMCGen->set_vertex_distribution_width(
           92.4e-4,         // measured from silicon vertices in OO data
           74.1e-4,         // measured from silicon vertices in OO data
-          7.15,          // measured from MBD vertex distribution in OO data, with all trigger included
+          12.1,          // measured from MBD vertex distribution in OO data, with trigger bit 14 (MBD S&N > 1 && |vtx| < 150 cm, least biased)
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
