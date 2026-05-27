@@ -108,6 +108,7 @@ namespace Input
     double localbcross = Input::beam_crossing / 2. * 1e-3;
     switch (beam_config)
     {
+    case AuAu_COLLISION:
     case AA_COLLISION:
     case mRad_10:
       // heavy ion mode
@@ -202,7 +203,7 @@ namespace Input
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
-    case OOdNdEta:
+    case OOdNdEta: // special for Cheng-Wei's intt based dNdEta analysis
       Input::beam_crossing = 0.75;
       //0.75 mRad is split among both beams, means set to 0.375 mRad
       localbcross = Input::beam_crossing / 2. * 1e-3;
@@ -216,7 +217,7 @@ namespace Input
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
-    case OO_COLLISION_NOMINAL:
+    case OO_COLLISION:
       Input::beam_crossing = 0.75;
       //0.75 mRad is split among both beams, means set to 0.375 mRad
       localbcross = Input::beam_crossing / 2. * 1e-3;
