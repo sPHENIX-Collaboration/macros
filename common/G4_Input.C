@@ -109,7 +109,6 @@ namespace Input
     switch (beam_config)
     {
     case AuAu_COLLISION:
-    case AA_COLLISION:
     case mRad_10:
       // heavy ion mode
       Input::beam_crossing = 1.;  // +1 mRad for late 2024 with triggered readout for mvtx

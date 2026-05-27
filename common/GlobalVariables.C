@@ -25,8 +25,8 @@ namespace Input
   //! nominal beam parameter configuration choices for BEAM_CONFIGURATION
   enum BeamConfiguration
   {
-    AA_COLLISION = 0,
     AuAu_COLLISION = 0,
+    AA_COLLISION = AuAu_COLLISION,
     pA_COLLISION = 1,
     pp_COLLISION = 2,
     pp_ZEROANGLE = 3,
