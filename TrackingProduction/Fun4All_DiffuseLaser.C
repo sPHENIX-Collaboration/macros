@@ -6,30 +6,31 @@
  */
 
 #include <GlobalVariables.C>
-#include <fun4all/Fun4AllUtils.h>
+
 #include <G4_ActsGeom.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_LaserClustering.C>
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
 
+#include <tpc/DiffuseLaserEventSelector.h>
+#include <tpc/LaserEventIdentifier.h>
+
 #include <ffamodules/CDBInterface.h>
+
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllUtils.h>
 
 
 #include <phool/recoConsts.h>
 
-#include <tpc/LaserEventIdentifier.h>
+#include <format>
 
-#include <tpc/DiffuseLaserEventSelector.h>
-
-
-#include <cstdio>
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libtpc.so)
@@ -126,8 +127,8 @@ void Fun4All_DiffuseLaser(
   se->registerSubsystem( new DiffuseLaserEventSelector());
 
 
-  std::cout<< "Output DST "<<Form("%s/%s_%d_%d.root",outdir.c_str(), outfilename.c_str(), runnumber, segment)  << std::endl;
-  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", Form("%s/%s_%d_%d.root",outdir.c_str(), outfilename.c_str(), runnumber, segment));
+  std::cout<< "Output DST "<<std::format("{}/{}_{}_{}.root",outdir, outfilename, runnumber, segment)  << std::endl;
+  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", std::format("{}/{}_{}_{}.root",outdir, outfilename, runnumber, segment));
   out->AddEventSelector("DiffuseLaserEventSelector");
   out->AddNode("Sync");
   out->AddNode("EventHeader");
