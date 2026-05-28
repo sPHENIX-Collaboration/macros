@@ -44,7 +44,7 @@ void Fun4All_HCalCosmicsQA(int nEvents = 100,
                              const std::string& inlist = "files.list",
                              const std::string &outfile_hist1 = "HIST_COSMIC_HCALOUT_run2auau_ana487_2024p018_v001",
                              const std::string &outfile_hist2 = "HIST_COSMIC_HCALIN_run2auau_ana487_2024p018_v001",
-                             const std::string &dbtag = "ProdA_2024")
+                             const std::string &dbtag = "newcdbtag")
 {
   bool useDSTRAW = true;
   // v1 uncomment:

@@ -54,7 +54,7 @@ void Fun4All_WaveformFit(const std::string &fname = "/sphenix/lustre01/sphnxpro/
   //===============
   // ENABLE::CDB = true;
   // global tag
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   // // 64 bit timestamp
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   CDBInterface::instance()->Verbosity(1);
