@@ -29,7 +29,7 @@
 #include <tpc/DiffuseLaserEventSelector.h>
 
 
-#include <stdio.h>
+#include <cstdio>
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libtpc.so)
@@ -39,16 +39,16 @@ R__LOAD_LIBRARY(libtpccalib.so)
 
 void Fun4All_DiffuseLaser(
     const int nEvents = 100,
-    const std::string filelist = "filelist.list",
-    const std::string outdir = "./",
-    const std::string outfilename = "diffuse_laser")
+    const std::string& filelist = "filelist.list",
+    const std::string& outdir = "./",
+    const std::string& outfilename = "diffuse_laser")
 {
 
   gSystem->Load("libg4dst.so");
   
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(0);
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
   CDBInterface::instance()->Verbosity(1);
   
   rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
