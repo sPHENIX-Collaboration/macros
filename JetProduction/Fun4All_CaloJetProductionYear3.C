@@ -74,7 +74,7 @@ void Fun4All_CaloJetProductionYear3(
   const std::string& inlist =  "./input/dsts_calo_run2pp-00053877.goldenTrkCaloRun_allSeg.list",
   const std::string& outfile = "DST_JET-00053877-0000.root",
   const std::string& outfile_hist = "HIST_JETQA-00053877-0000.year2aa_tracktest.root",
-  const std::string& dbtag = "ProdA_2024"
+  const std::string& dbtag = "newcdbtag"
 ) {
 
   // set options --------------------------------------------------------------

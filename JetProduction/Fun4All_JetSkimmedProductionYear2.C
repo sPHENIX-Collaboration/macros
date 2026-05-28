@@ -53,7 +53,7 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents=1000,
                         const std::string& outfile_low= "DST_JETCALO_run2pp_ana509_2024p022_v001-00047289-00000.root",
                         const std::string& outfile_high= "DST_Jet_run2pp_ana509_2024p022_v001-00047289-00000.root",
                         const std::string& outfile_hist= "HIST_JETQA_run2pp_ana509_2024p022_v001-00047289-00000.root",
-                        const std::string& dbtag= "ProdA_2024"
+                        const std::string& dbtag= "newcdbtag"
   )
 {
 

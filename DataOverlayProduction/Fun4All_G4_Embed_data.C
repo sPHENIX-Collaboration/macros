@@ -509,7 +509,7 @@ int Fun4All_G4_Embed_data(
   std::string save_globaltag = rc->get_StringFlag("CDB_GLOBALTAG");
   int save_timestamp    = rc->get_uint64Flag("TIMESTAMP");
 
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", dataRunNumber);
 
   std::string cemc_datacalib = CDBInterface::instance()->getUrl("CEMC_calib_ADC_to_ETower");
