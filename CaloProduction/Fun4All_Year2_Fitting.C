@@ -39,9 +39,10 @@ R__LOAD_LIBRARY(libCaloPacketSkimmer.so)
 // this pass containis the reco process that's stable wrt time stamps(raw tower building)
 void Fun4All_Year2_Fitting(int nEvents = 100,
                            const std::string &inlist = "files.list",
-                           const std::string &outfile1 = "DST_CALOFITTING_run3oo_pro1_newcdbtag_v008-00082703-00000.root",
-                           const std::string &outfile2 = "DST_ZDC_RAW_run3oo_pro1_newcdbtag_v008-00082703-00000.root",
-                           const std::string &outfile_hist = "HIST_CALOFITTINGQA_run3auau_new_newcdbtag_v008-00082703-00000.root",
+                           const std::string &outfile1 = "DST_CALOFITTING_run3oo_pro001_pcdb001_v001-00082703-00000.root",
+                           const std::string &outfile2 = "DST_SEPD_RAW_run3oo_pro001_pcdb001_v001-00082703-00000.root",
+                           const std::string &outfile3 = "DST_ZDC_RAW_run3oo_pro001_pcdb001_v001-00082703-00000.root",
+                           const std::string &outfile_hist = "HIST_CALOFITTINGQA_run3auau_new_pcdb001_v001-00082703-00000.root",
                            const std::string &dbtag = "newcdbtag")
 {
   gSystem->Load("libg4dst.so");
@@ -118,8 +119,19 @@ void Fun4All_Year2_Fitting(int nEvents = 100,
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfile1);
   out->StripCompositeNode("Packets");
   out->StripNode("12001");
+  out->StripCompositeNode("SEPD");
   se->registerOutputManager(out);
-  out = new Fun4AllDstOutputManager("DSTOUTzdc", outfile2);
+
+  out = new Fun4AllDstOutputManager("DSTOUTsepd", outfile2);
+  out->AddNode("EventHeader");
+  out->AddNode("Sync");
+  for (int i=9001; i<=9006;i++)
+  {
+    out->AddNode(std::to_string(i));
+  }
+  se->registerOutputManager(out);
+
+  out = new Fun4AllDstOutputManager("DSTOUTzdc", outfile3);
   out->AddNode("EventHeader");
   out->AddNode("Sync");
   out->AddNode("12001");
