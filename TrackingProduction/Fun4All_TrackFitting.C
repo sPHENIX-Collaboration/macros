@@ -1,22 +1,31 @@
 /*
  * This macro shows a minimum working example of running track fitting over
- * the production cluster and track seed DSTs.. There are some analysis
- * modules run at the end which package clusters, and clusters on tracks
+ * the production cluster and track seed DSTs.. There are some analysis 
+ * modules run at the end which package clusters, and clusters on tracks 
  * into trees for analysis.
  */
 
-// leave the GlobalVariables.C at the beginning, an empty line afterwards
-// protects its position against reshuffling by clang-format
-#include <GlobalVariables.C>
-
+#include <fun4all/Fun4AllUtils.h>
 #include <G4_ActsGeom.C>
 #include <G4_Global.C>
 #include <G4_Magnet.C>
+#include <GlobalVariables.C>
 #include <QA.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco.C>
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
+
+#include <ffamodules/CDBInterface.h>
+
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllRunNodeInputManager.h>
+#include <fun4all/Fun4AllServer.h>
+
+#include <phool/recoConsts.h>
 
 #include <cdbobjects/CDBTTree.h>
 
@@ -29,17 +38,7 @@
 #include <trackingdiagnostics/TrackResiduals.h>
 #include <trackingdiagnostics/TrkrNtuplizer.h>
 
-#include <ffamodules/CDBInterface.h>
-
-#include <fun4all/Fun4AllDstInputManager.h>
-#include <fun4all/Fun4AllDstOutputManager.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllOutputManager.h>
-#include <fun4all/Fun4AllRunNodeInputManager.h>
-#include <fun4all/Fun4AllServer.h>
-#include <fun4all/Fun4AllUtils.h>
-
-#include <phool/recoConsts.h>
+#include <stdio.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
@@ -49,9 +48,8 @@ R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
 void Fun4All_TrackFitting(
     const int nEvents = 10,
-    const std::string& seedfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana494_2024p021_v001/DST_TRKR_SEED/run_00053800_00053900/dst/DST_TRKR_SEED_run2pp_ana494_2024p021_v001-00053877-00000.root",
-    const std::string& clusterfilename = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana494_2024p021_v001/DST_TRKR_CLUSTER/run_00053800_00053900/dst/DST_TRKR_CLUSTER_run2pp_ana494_2024p021_v001-00053877-00000.root",
-    const std::string& outfilename = "clusters_seeds",
+    const std::string seedfilename = "/sphenix/lustre01/sphnxpro/production/run3pp/physics/ana538_2025p011_v001/DST_TRKR_SEED/run_00079500_00079600/DST_TRKR_SEED_run3pp_ana538_2025p011_v001-00079516-00009.root",
+    const std::string outfilename = "clusters_seeds",
     const bool convertSeeds = false)
 {
 
@@ -77,13 +75,15 @@ void Fun4All_TrackFitting(
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
   TRACKING::pp_mode = true;
+  
+  TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
 
-  std::string theOutfile = outfilename + "_" + std::to_string(runnumber) + "-" + std::to_string(segment) + ".root";
+  std::string theOutfile = outfile.Data();
 
-  auto *se = Fun4AllServer::instance();
+  auto se = Fun4AllServer::instance();
   se->Verbosity(1);
 
-  auto *rc = recoConsts::instance();
+  auto rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
@@ -109,30 +109,29 @@ void Fun4All_TrackFitting(
   //to turn on the average corrections, enable the three lines below
   //note: these are designed to be used only if static corrections are also applied
   G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
+  G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
+   // to use a custom file instead of the database file:
+  G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
 
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
-  auto *hitsinseed = new Fun4AllDstInputManager("SeedInputManager");
+  auto hitsinseed = new Fun4AllDstInputManager("SeedInputManager");
   hitsinseed->fileopen(seedfilename);
   se->registerInputManager(hitsinseed);
 
-  auto *hitsinclus = new Fun4AllDstInputManager("ClusterInputManager");
-  hitsinclus->fileopen(clusterfilename);
-  se->registerInputManager(hitsinclus);
-
   Reject_Laser_Events();
-
-  Tracking_Reco_TrackMatching_run2pp();
-
-
+  
+  Tracking_Reco_TrackMatching_run2pp("TRKR_CLUSTER_SEED");
+  
+  
   /*
    * Either converts seeds to tracks with a straight line/helix fit
    * or run the full Acts track kalman filter fit
    */
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
-    auto *converter = new TrackSeedTrackMapConverter;
+    auto converter = new TrackSeedTrackMapConverter;
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
     converter->setTrackSeedName("SvtxTrackSeedContainer");
@@ -142,18 +141,20 @@ void Fun4All_TrackFitting(
   }
   else
   {
-    Tracking_Reco_TrackFit_run2pp(theOutfile);
+    Tracking_Reco_TrackFit_run2pp(theOutfile,"TRKR_CLUSTER_SEED");
   }
 
   //vertexing and propagation to vertex
-  Tracking_Reco_Vertex_run2pp();
+  Tracking_Reco_Vertex_run2pp("TRKR_CLUSTER_SEED");
 
-  std::string residstring = theOutfile + "_resid.root";
+  TString residoutfile = "/sphenix/tg/tg01/hf/jdosbo/HP26/" + theOutfile + "_resid.root";
+  std::string residstring(residoutfile.Data());
 
-  auto *resid = new TrackResiduals("TrackResiduals");
+  auto resid = new TrackResiduals("TrackResiduals");
   resid->outfileName(residstring);
   resid->alignment(false);
-
+  std::string contname = "TRKR_CLUSTER_SEED";
+  resid->setTrkrClusterContainerName(contname);
   // adjust track map name
   if (G4TRACKING::SC_CALIBMODE && !G4TRACKING::convert_seeds_to_svtxtracks)
   {
@@ -164,7 +165,7 @@ void Fun4All_TrackFitting(
     }
   }
 
-  resid->clusterTree();
+  //resid->clusterTree();
   resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
   resid->Verbosity(0);
   se->registerSubsystem(resid);
@@ -181,10 +182,11 @@ void Fun4All_TrackFitting(
 
   std::cout << "CDB Files used:" << std::endl;
   CDBInterface::instance()->Print();
-
+  
   if (Enable::QA)
   {
-    std::string qaOutputFileName = theOutfile + "_qa.root";
+    TString qaname = theOutfile + "_qa.root";
+    std::string qaOutputFileName(qaname.Data());
     QAHistManagerDef::saveQARootFile(qaOutputFileName);
   }
 
