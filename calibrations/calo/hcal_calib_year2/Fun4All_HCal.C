@@ -86,7 +86,7 @@ void Fun4All_HCal(int nevents = 1e3, const std::string &fname = "inputdata.txt")
   int runnumber = runseg.first;
   std::cout << "run number = " << runnumber << std::endl;
 
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
 
   Fun4AllInputManager *in = new Fun4AllDstInputManager("DST_TOWERS");

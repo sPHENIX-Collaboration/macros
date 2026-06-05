@@ -502,14 +502,14 @@ int Fun4All_G4_Embed_data(
   truthjets8->set_input_node("TRUTH");
   truthjets8->Verbosity(verbosity);
   se->registerSubsystem(truthjets8);
-
+// looking at this - this statement is based on a misconception how the cdb works not a bug
    std::string test = CDBInterface::instance()->getUrl("CEMC_meanTime");// calling this line somehow prevents CDB bug when switching global tag 
    std::cout << "line to avoid CDB bug " << test << std::endl;
 
   std::string save_globaltag = rc->get_StringFlag("CDB_GLOBALTAG");
   int save_timestamp    = rc->get_uint64Flag("TIMESTAMP");
 
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", dataRunNumber);
 
   std::string cemc_datacalib = CDBInterface::instance()->getUrl("CEMC_calib_ADC_to_ETower");

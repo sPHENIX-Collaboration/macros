@@ -42,7 +42,7 @@ void Fun4All_HCalCosmics(int nEvents = 100,
                    const std::string &outfile = "DST_CALOFITTING-00000000-000000.root",
                    const std::string& outfile_hist1= "HIST_HCALOUT-00000000-000000.root",
                    const std::string& outfile_hist2= "HIST_HCALIN-00000000-000000.root",                   
-                   const std::string &dbtag = "ProdA_2024")
+                   const std::string &dbtag = "newcdbtag")
 {
   bool useDSTRAW = true;
   // v1 uncomment:

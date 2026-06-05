@@ -52,7 +52,7 @@ void Fun4All_TrkrHitSet_Unpacker(
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   
   TpcReadoutInit( runnumber );

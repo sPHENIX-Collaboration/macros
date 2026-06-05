@@ -40,6 +40,7 @@ echo "Queue" | condor_submit \
     -a "Error=$PWD/${logdir}/${log}.err" \
     -a "Initialdir=$PWD" \
     -a "request_memory=4096MB" \
+    -a "request_disk=120GB" \
     -a "PeriodicHold=(NumJobStarts>=1 && JobStatus == 1)" \
     -a "GetEnv=True"
 

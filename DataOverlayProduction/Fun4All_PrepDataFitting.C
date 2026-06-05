@@ -61,7 +61,7 @@ void Fun4All_PrepDataFitting(
 			   const std::string& inlist = "test.list",
                            const std::string &outfile = "DST_CALOFITTING",
                            const std::string &outfile_hist = "HIST_CALOFITTINGQA",
-                           const std::string &dbtag = "ProdA_2024")
+                           const std::string &dbtag = "newcdbtag")
 {
 
   gSystem->Load("libg4dst.so");

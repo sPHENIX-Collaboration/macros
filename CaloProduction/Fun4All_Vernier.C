@@ -1,16 +1,11 @@
-#ifndef FUN4ALL_YEAR2_FITTING_C
-#define FUN4ALL_YEAR2_FITTING_C
-
-#include <Calo_Fitting.C>
-#include <QA.C>
-
-#include <calotrigger/TriggerRunInfoReco.h>
-
-#include <calovalid/CaloFittingQA.h>
-
-#include <calopacketskimmer/CaloPacketSkimmer.h>
+#ifndef FUN4ALL_VERNIER_C
+#define FUN4ALL_VERNIER_C
 
 #include <mbd/MbdReco.h>
+
+#include <caloreco/CaloTowerBuilder.h>
+
+#include <calotrigger/TriggerRunInfoReco.h>
 
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
@@ -20,7 +15,6 @@
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllUtils.h>
 #include <fun4all/SubsysReco.h>
@@ -31,19 +25,14 @@
 
 #include <fstream>
 
-R__LOAD_LIBRARY(libfun4allraw.so)
-R__LOAD_LIBRARY(libcalovalid.so)
+R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libcalotrigger.so)
-R__LOAD_LIBRARY(libCaloPacketSkimmer.so)
 
 // this pass containis the reco process that's stable wrt time stamps(raw tower building)
-void Fun4All_Year2_Fitting(int nEvents = 100,
-                           const std::string &inlist = "files.list",
-                           const std::string &outfile1 = "DST_CALOFITTING_run3oo_pro001_pcdb001_v001-00082703-00000.root",
-                           const std::string &outfile2 = "DST_SEPD_RAW_run3oo_pro001_pcdb001_v001-00082703-00000.root",
-                           const std::string &outfile3 = "DST_ZDC_RAW_run3oo_pro001_pcdb001_v001-00082703-00000.root",
-                           const std::string &outfile_hist = "HIST_CALOFITTINGQA_run3auau_new_pcdb001_v001-00082703-00000.root",
-                           const std::string &dbtag = "newcdbtag")
+void Fun4All_Vernier(int nEvents = 100,
+                     const std::string &inlist = "files.list",
+                     const std::string &outfile1 = "DST_Vernier_run3auau_pro001_pcdb001_v001-00054733-00000.root",
+                     const std::string &dbtag = "newcdbtag")
 {
   gSystem->Load("libg4dst.so");
 
@@ -65,20 +54,23 @@ void Fun4All_Year2_Fitting(int nEvents = 100,
   TriggerRunInfoReco *triggerinfo = new TriggerRunInfoReco();
   se->registerSubsystem(triggerinfo);
 
-  CaloPacketSkimmer *calopacket = new CaloPacketSkimmer();
-  se->registerSubsystem(calopacket);
+  MbdReco *mbd = new MbdReco();
+  mbd->DoOnlyFits();
+  se->registerSubsystem(mbd);
 
-  Process_Calo_Fitting();
+  CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv4;
 
-  ///////////////////////////////////
-  // Validation
-  CaloFittingQA *ca = new CaloFittingQA("CaloFittingQA");
-  se->registerSubsystem(ca);
+  // build ZDC towers
+  CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
+  caZDC->set_detector_type(CaloTowerDefs::ZDC);
+  caZDC->set_builder_type(buildertype);
+  caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
+  caZDC->set_funcfit_type(2);
+  caZDC->set_nsamples(16);
+  caZDC->set_offlineflag();
+  se->registerSubsystem(caZDC);
 
-  // Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
-  // In->AddFile(fname);
-  // se->registerInputManager(In);
-  Fun4AllInputManager *In = nullptr;
+  Fun4AllInputManager *In{nullptr};
   std::ifstream infile;
   infile.open(inlist);
   int iman = 0;
@@ -117,25 +109,12 @@ void Fun4All_Year2_Fitting(int nEvents = 100,
     gSystem->Exit(1);
   }
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfile1);
-  out->StripCompositeNode("Packets");
-  out->StripNode("12001");
-  out->StripCompositeNode("SEPD");
-  se->registerOutputManager(out);
-
-  out = new Fun4AllDstOutputManager("DSTOUTsepd", outfile2);
   out->AddNode("EventHeader");
   out->AddNode("Sync");
-  for (int i=9001; i<=9006;i++)
-  {
-    out->AddNode(std::to_string(i));
-  }
+  out->AddNode("MbdRawContainer");
+  out->AddNode("TOWERS_ZDC");
   se->registerOutputManager(out);
 
-  out = new Fun4AllDstOutputManager("DSTOUTzdc", outfile3);
-  out->AddNode("EventHeader");
-  out->AddNode("Sync");
-  out->AddNode("12001");
-  se->registerOutputManager(out);
   // se->Print();
   if (nEvents < 0)
   {
@@ -143,8 +122,6 @@ void Fun4All_Year2_Fitting(int nEvents = 100,
   }
   se->run(nEvents);
   se->End();
-
-  QAHistManagerDef::saveQARootFile(outfile_hist);
 
   CDBInterface::instance()->Print();  // print used DB files
   se->PrintTimer();

@@ -56,7 +56,7 @@ void Fun4All_Year2_Calib(int nEvents = 100,
                          const std::string &outfile = "DST_CALO_run2pp_ana487_2024p018_v004-00047289-00000.root",
                          const std::string &outfile_hist = "HIST_CALOQA_run2pp_ana487_2024p018_v004-00047289-00000.root",
                          const std::string & /*outfile_tree*/ = "TREE_CALOQA_run2pp_ana487_2024p018_v004-00047289-00000.root",
-                         const std::string &dbtag = "ProdA_2024")
+                         const std::string &dbtag = "newcdbtag")
 {
   // towerinfov1=kPRDFTowerv1, v2=:kWaveformTowerv2, v3=kPRDFWaveform, v4=kPRDFTowerv4
   //CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv4;
