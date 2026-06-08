@@ -44,6 +44,7 @@ echo psql -c \"$pcmd\" FileCatalog
 psql -c "$pcmd" FileCatalog > $tmpfile
 grep DST_TRIGGERED_EVENT_seb18_run3auau $tmpfile | sed 's/^ //' | sort > ${all_files}
 grep DST_TRIGGERED_EVENT_seb18_run3pp $tmpfile | sed 's/^ //' | sort >> ${all_files}
+grep DST_TRIGGERED_EVENT_seb18_run3oo $tmpfile | sed 's/^ //' | sort >> ${all_files}
 
 # If $all_files is not empty, then the psql flist worked
 if [[ -s ${all_files} ]]
