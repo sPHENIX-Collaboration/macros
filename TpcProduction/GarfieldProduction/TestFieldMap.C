@@ -27,9 +27,17 @@
 #include <fun4allraw/SingleTpcPoolInput.h>
 #include <fun4allraw/SingleTpcTimeFrameInput.h>
 
+#include <phgarfield/PHGarfield.h>
+
+#include <TPolyLine.h>
+#include <TPolyLine3D.h>
+#include <TCanvas.h>
+#include <TGeoTube.h>
+#include <TBox.h>
 #include <phool/recoConsts.h>
 #include <GlobalVariables.C>
 
+#include <format>
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allutils.so)
 R__LOAD_LIBRARY(libffamodules.so)
@@ -61,7 +69,7 @@ void TestFieldMap()
   rc->set_StringFlag("CDB_GLOBALTAG","FieldMapTest");
   rc->set_uint64Flag("TIMESTAMP",1);
 
-  auto cdb = CDBInterface::instance();
+  auto *cdb = CDBInterface::instance();
   std::string url = cdb->getUrl("FIELDMAP_TRACKING");
   std::cout << "Field map URL:\n" << url << std::endl;
 
@@ -72,17 +80,17 @@ void TestFieldMap()
   
   // Register a whole slew of input managers...
   // NOTE:  This depends upon the requested files being in frog.  Ribbit.
-  char nextinput[500];
-  char nextfile[500];
+
   Fun4AllInputManager* in[Nebdc]; 
   for (unsigned int ebdc=0; ebdc<24; ebdc++)
     {
       for (unsigned int server=0; server<2; server++)
 	{
-	  sprintf(nextinput,"ebdc%02d_%01d",ebdc,server);
+	  auto nextinput = std::format("ebdc{:02d}_{:1d}", ebdc, server);
 	  //sprintf(nextfile,"DST_STREAMING_EVENT_ebdc%02d_%01d_run3line_laser_ana540_nocdbtag_v001-00064890-00000.root",ebdc,server);  // Line Laser
-	  sprintf(nextfile,"DST_STREAMING_EVENT_ebdc%02d_%01d_run3auau_ana514_nocdbtag_v001-00075570-00000.root",ebdc,server);          // AuAu Zero Field
-	  std::cout << nextfile << " " << nextinput << endl;
+	  std::string nextfile = std::format(
+	     "DST_STREAMING_EVENT_ebdc{:02}_{:1}_run3auau_ana514_nocdbtag_v001-00075570-00000.root", ebdc, server);
+	  std::cout << nextfile << " " << nextinput << std::endl;
 	  in[ebdc] = new Fun4AllDstInputManager(nextinput);
 	  in[ebdc]->fileopen(nextfile);
 	  se->registerInputManager(in[ebdc]);
