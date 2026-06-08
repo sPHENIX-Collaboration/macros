@@ -53,63 +53,63 @@ then
   then
     # 2024 Run2pp
     echo "This is run2pp"
-    pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/2024_PASS0
-    outbase=DST_MBD_CALIBRATION_run2pp
-    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/new_2024/$(get_rundirname ${runno})/
-    logbase=DST_MBD_CALIBRATION_run2pp
-    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2024/$(get_rundirname ${runno})/
-    build=new
+    build=ana.554
     dbtag=newcdbtag
+    pass0dir=""
+    outbase=DST_MBD_CALIBRATION_run2pp
+    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/Run2pp/${build}/$(get_rundirname ${runno})/
+    logbase=DST_MBD_CALIBRATION_run2pp
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/${build}/$(get_rundirname ${runno})/
   elif [[ $runno -le 54962 ]]
   then
     # 2024 Run2auau
     echo "This is run2auau"
-    pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/2024_PASS0  # need to check this
-    outbase=DST_MBD_CALIBRATION_run2auau
-    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/new_2024/$(get_rundirname ${runno})/
-    logbase=DST_MBD_CALIBRATION_run2auau
-    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2024/$(get_rundirname ${runno})/
-    build=new
+    build=ana.554
     dbtag=newcdbtag
+    pass0dir=""
+    outbase=DST_MBD_CALIBRATION_run2auau
+    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/Run2AuAu/${build}/$(get_rundirname ${runno})/
+    logbase=DST_MBD_CALIBRATION_run2auau
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/${build}/$(get_rundirname ${runno})/
   elif [[ $runno -le 78954 ]]
   then
     # 2025 Run3auau
     echo "This is run3auau"
-    pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0
-    outbase=DST_MBD_CALIBRATION_run3auau
-    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/new_2025/$(get_rundirname ${runno})/
-    logbase=DST_MBD_CALIBRATION_run3auau
-    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2025/$(get_rundirname ${runno})/
-    build=new
+    build=pro.001
     dbtag=newcdbtag
+    pass0dir=""
+    outbase=DST_MBD_CALIBRATION_run3auau
+    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/${build}/$(get_rundirname ${runno})/
+    logbase=DST_MBD_CALIBRATION_run3auau
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/${build}/$(get_rundirname ${runno})/
   elif [[ $runno -le 81667 ]]
   then
     # 2025 Run3pp
     echo "This is run3pp"
-    pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0
-    outbase=DST_MBD_CALIBRATION_run3pp
-    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/new_2025/$(get_rundirname ${runno})/
-    logbase=DST_MBD_CALIBRATION_run3pp
-    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/new_2025/$(get_rundirname ${runno})/
-    build=new
+    build=ana.554
     dbtag=newcdbtag
+    pass0dir=""
+    outbase=DST_MBD_CALIBRATION_run3pp
+    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/Run3pp/${build}/$(get_rundirname ${runno})/
+    logbase=DST_MBD_CALIBRATION_run3pp
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/${build}/$(get_rundirname ${runno})/
   elif [[ $runno -le 82703 ]]
   then
     # 2025 Run3oo
     echo "This is run3oo"
+    build=pro.001
+    dbtag=newcdbtag
     pass0dir=""
     outbase=DST_MBD_CALIBRATION_run3oo
     outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/pro.001/$(get_rundirname ${runno})/
     logbase=DST_MBD_CALIBRATION_run3oo
     logdir=/sphenix/data/data02/sphnxpro/mbdcalib/pro.001/$(get_rundirname ${runno})/
-    build=pro.001
-    dbtag=newcdbtag
   else
     echo "ERROR, run $runno invalid, aborting"
     exit 1
   fi
 
-else
+else  # setup for local tests
   pass0dir=/sphenix/user/chiu/sphenix_bbc/CDB/PASS0
   outbase=DST_MBD_CALIBRATION_run3pp
   outdir=/sphenix/user/chiu/sphenix_bbc/run2025/CALIBPRODUCTION/TEST
@@ -174,7 +174,7 @@ then
   elif [[ "$inputs" =~ list$ ]]
   then
     head -30 ${inputs} > tempfile.list
-    getinputfiles.pl --verbose --cp --filelist tempfile.list
+    time getinputfiles.pl --verbose --cp --filelist tempfile.list
     inputs=${_CONDOR_SCRATCH_DIR}/tempfile.list
   fi
 
@@ -187,6 +187,8 @@ then
 fi
 
 #build="none"
+echo source /opt/sphenix/core/bin/sphenix_setup.sh -n $build
+source /opt/sphenix/core/bin/sphenix_setup.sh -n $build
 
 ./prorun_mbdcal.sh --outbase "$outbase" \
   --outdir  "$outdir" \
