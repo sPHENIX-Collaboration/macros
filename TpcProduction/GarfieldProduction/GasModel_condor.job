@@ -1,5 +1,4 @@
 Universe           = vanilla
-getenv             = True
 Initialdir         = /direct/phenix+u/workarea/hemmick/code.sphenix/tkh/gas
 Executable         = $(Initialdir)/StartScript.sh
 Output             = $(Initialdir)/out/hitset_AuAu_$(process).out
