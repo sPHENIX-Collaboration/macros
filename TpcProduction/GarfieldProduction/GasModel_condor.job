@@ -9,4 +9,4 @@ request_memory     = 4GB
 Priority           = 20
 job_lease_duration = 3600
 Arguments          = $(process)
-Queue 50
+Queue 2500
