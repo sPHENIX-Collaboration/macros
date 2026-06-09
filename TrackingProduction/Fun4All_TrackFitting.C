@@ -38,7 +38,7 @@
 #include <trackingdiagnostics/TrackResiduals.h>
 #include <trackingdiagnostics/TrkrNtuplizer.h>
 
-#include <stdio.h>
+#include <cstdio>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
@@ -48,8 +48,8 @@ R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrackingqa.so)
 void Fun4All_TrackFitting(
     const int nEvents = 10,
-    const std::string seedfilename = "/sphenix/lustre01/sphnxpro/production/run3pp/physics/ana538_2025p011_v001/DST_TRKR_SEED/run_00079500_00079600/DST_TRKR_SEED_run3pp_ana538_2025p011_v001-00079516-00009.root",
-    const std::string outfilename = "clusters_seeds",
+    const std::string& seedfilename = "/sphenix/lustre01/sphnxpro/production/run3pp/physics/ana538_2025p011_v001/DST_TRKR_SEED/run_00079500_00079600/DST_TRKR_SEED_run3pp_ana538_2025p011_v001-00079516-00009.root",
+    const std::string& outfilename = "clusters_seeds",
     const bool convertSeeds = false)
 {
 
@@ -80,10 +80,10 @@ void Fun4All_TrackFitting(
 
   std::string theOutfile = outfile.Data();
 
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
 
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
@@ -116,7 +116,7 @@ void Fun4All_TrackFitting(
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
-  auto hitsinseed = new Fun4AllDstInputManager("SeedInputManager");
+  auto *hitsinseed = new Fun4AllDstInputManager("SeedInputManager");
   hitsinseed->fileopen(seedfilename);
   se->registerInputManager(hitsinseed);
 
@@ -131,7 +131,7 @@ void Fun4All_TrackFitting(
    */
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
-    auto converter = new TrackSeedTrackMapConverter;
+    auto *converter = new TrackSeedTrackMapConverter;
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
     converter->setTrackSeedName("SvtxTrackSeedContainer");
@@ -150,7 +150,7 @@ void Fun4All_TrackFitting(
   TString residoutfile = "/sphenix/tg/tg01/hf/jdosbo/HP26/" + theOutfile + "_resid.root";
   std::string residstring(residoutfile.Data());
 
-  auto resid = new TrackResiduals("TrackResiduals");
+  auto *resid = new TrackResiduals("TrackResiduals");
   resid->outfileName(residstring);
   resid->alignment(false);
   std::string contname = "TRKR_CLUSTER_SEED";
