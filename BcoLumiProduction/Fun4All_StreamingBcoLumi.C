@@ -16,6 +16,7 @@
 
 #include <Rtypes.h> // defines R__LOAD_LIBRARY macro for clang-tidy
 #include <TSystem.h>
+#include <fstream>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libbcolumicount.so)
