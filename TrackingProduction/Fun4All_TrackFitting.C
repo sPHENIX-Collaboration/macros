@@ -136,6 +136,7 @@ void Fun4All_TrackFitting(
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
     converter->setTrackSeedName("SvtxTrackSeedContainer");
     converter->setFieldMap(G4MAGNET::magfield_tracking);
+    converter->setClusterMapName("TRKR_CLUSTER_SEED");
     converter->Verbosity(0);
     se->registerSubsystem(converter);
   }
