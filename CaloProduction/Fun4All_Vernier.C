@@ -111,6 +111,7 @@ void Fun4All_Vernier(int nEvents = 100,
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfile1);
   out->AddNode("EventHeader");
   out->AddNode("Sync");
+  out->AddNode("14001");
   out->AddNode("MbdRawContainer");
   out->AddNode("TOWERS_ZDC");
   se->registerOutputManager(out);
