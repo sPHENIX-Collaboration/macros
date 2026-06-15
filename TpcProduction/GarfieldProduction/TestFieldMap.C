@@ -1,3 +1,7 @@
+// GlobalVariables.C has to be included first, leave next line empty
+// so running clang-format will not reorganize order
+#include <GlobalVariables.C>
+
 #include <QA.C>
 
 #include <inttcalib/InttCalib.h>
@@ -35,7 +39,6 @@
 #include <TGeoTube.h>
 #include <TBox.h>
 #include <phool/recoConsts.h>
-#include <GlobalVariables.C>
 
 #include <format>
 R__LOAD_LIBRARY(libfun4all.so)
@@ -125,7 +128,7 @@ void TestFieldMap()
   for (int i=0; i<48; i++)
     {
       canny->cd();
-      npoly3[i] = phg->ReverseDrift(0,phg->radii[i],102);
+      npoly3[i] = phg->ReverseDrift(0,phg->GetRadius(i),102);
       npoly3[i]->SetLineColor(kRed);
       npoly3[i]->SetLineWidth(3);
       npoly3[i]->Draw("same");
@@ -158,7 +161,7 @@ void TestFieldMap()
   for (int i=0; i<48; i++)
     {
       canny->cd();
-      spoly3[i] = phg->ReverseDrift(0,phg->radii[i],-102);
+      spoly3[i] = phg->ReverseDrift(0,phg->GetRadius(i),-102);
       spoly3[i]->SetLineColor(kCyan);
       spoly3[i]->SetLineWidth(3);
       spoly3[i]->Draw("same");
