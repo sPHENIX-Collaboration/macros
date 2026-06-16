@@ -24,13 +24,7 @@ void TrackingInit()
 {
    // server
   auto *se = Fun4AllServer::instance();
-
-  std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
-
-  Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
-  ingeo->AddFile(geofile);
-  se->registerInputManager(ingeo);
-
+ 
   auto *rc = recoConsts::instance();
   if(rc->get_StringFlag("CDB_GLOBALTAG").find("MDC") != std::string::npos)
     {
@@ -42,6 +36,17 @@ void TrackingInit()
       CDB::is_data_reco = true;
     }
 
+  // check that we are not building the geometry from scratch, i.e. that
+  // G4Setup() was not run
+  if(Input::READHITS || CDB::is_data_reco)
+    {
+      std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
+      
+      Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
+      ingeo->AddFile(geofile);
+      se->registerInputManager(ingeo);
+    }
+ 
   TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
 
   ACTSGEOM::ActsGeomInit();
