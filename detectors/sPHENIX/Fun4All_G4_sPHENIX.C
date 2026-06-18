@@ -486,6 +486,10 @@ int Fun4All_G4_sPHENIX(
   {
     G4Setup();
   }
+  else
+  {
+    LoadTrackingCDBGeometry();
+  }
 
   //------------------
   // Detector Division
