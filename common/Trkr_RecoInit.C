@@ -38,7 +38,7 @@ void TrackingInit()
 
   // check that we are not building the geometry from scratch, i.e. that
   // G4Setup() was not run
-  if(Input::READHITS || CDB::is_data_reco)
+  if(CDB::is_data_reco)
     {
       std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
       
