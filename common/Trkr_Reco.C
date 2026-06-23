@@ -327,7 +327,7 @@ void Tracking_Reco_TpcTpotTrackMatching_run2pp(const std::string& clustermapname
 void Tracking_Reco_TrackMatching_run2pp(const std::string& clustermapname = "TRKR_CLUSTER")
 {
   Tracking_Reco_SiTpcTrackMatching_run2pp(clustermapname);
-  //Tracking_Reco_TpcTpotTrackMatching_run2pp(clustermapname);
+  Tracking_Reco_TpcTpotTrackMatching_run2pp(clustermapname);
 
 }
 void Tracking_Reco_TrackSeed_ZeroField()
