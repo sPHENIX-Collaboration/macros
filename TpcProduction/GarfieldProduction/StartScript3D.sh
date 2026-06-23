@@ -2,17 +2,20 @@
 
 set -euo pipefail
 
+# Electric field grid
 emin=360
 emax=440
-ne=50
+ne=20
 
+# Magnetic field grid
 bmin=1.15
 bmax=1.45
-nb=50
+nb=20
 
+# E-B angle grid
 amin=0.0
 amax=0.2
-na=50
+na=20
 
 jobid="$1"
 
@@ -33,6 +36,7 @@ enow=$(awk -v emin="$emin" \
    else print emin + (emax - emin) * i / (ne - 1);
 }')
 
+
 bnow=$(awk -v bmin="$bmin" \
              -v bmax="$bmax" \
              -v nb="$nb" \
@@ -52,9 +56,8 @@ if [[ ! -d "${script_dir}/gasfiles" ]]; then
   exit 1
 fi
 
-output="${script_dir}/gasfiles/PART_${jobid}.gas"
-
-echo "$output"
+efile=$(printf "E%03d_B%03d.gas" "$ie" "$ib")
+output="${script_dir}/gasfiles/${efile}"
 
 echo GasModel "$enow" "$enow" 1 "$bnow" "$bnow" 1 "$amin" "$amax" "$na" "$output"
 GasModel "$enow" "$enow" 1 "$bnow" "$bnow" 1 "$amin" "$amax" "$na" "$output"
