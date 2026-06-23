@@ -75,7 +75,7 @@ void Tracking_Reco_Vertex_run2pp(const std::string& clusterMapName="TRKR_CLUSTER
   finder->setTrackQualityCut(300);
   finder->setNmvtxRequired(3);
   finder->setOutlierPairCut(0.10);
-
+  finder->set_pp_mode(TRACKING::pp_mode);
   se->registerSubsystem(finder);
 
   if (!G4TRACKING::convert_seeds_to_svtxtracks)
@@ -689,6 +689,7 @@ void vertexing()
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
   auto *vtxfinder = new PHSimpleVertexFinder;
+  vtxfinder->set_pp_mode(TRACKING::pp_mode);
   vtxfinder->Verbosity(verbosity);
   se->registerSubsystem(vtxfinder);
 }
