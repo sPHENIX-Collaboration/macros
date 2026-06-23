@@ -792,7 +792,7 @@ void InputManagers()
     double extended_readout_time = 0.0;
     if (TRACKING::streaming_mode)
     {
-      extended_readout_time = TRACKING::pp_extended_readout_time;
+      extended_readout_time = TRACKING::extended_readout_time;
     }
     INPUTMANAGER::HepMCPileupInputManager->set_time_window(-time_window, time_window + extended_readout_time);
     std::cout << "Pileup window is from " << -time_window << " to " << time_window + extended_readout_time << std::endl;

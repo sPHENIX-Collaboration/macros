@@ -83,7 +83,7 @@ namespace TRACKING
 {
   std::string TrackNodeName = "SvtxTrackMap";
   bool streaming_mode = false;
-  double pp_extended_readout_time = 24900.0;  // ns
+  double extended_readout_time = 24900.0;  // ns
   bool reco_tpc_is_configured = false;
   int reco_tpc_maxtime_sample = 425;
   int reco_tpc_time_presample = 40;  // 120 - 80
