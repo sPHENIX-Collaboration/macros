@@ -76,7 +76,7 @@ void Fun4All_ZFAllTrackers(
   G4TRACKING::SC_CALIBMODE = false;
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
-  TRACKING::pp_mode = true;
+  TRACKING::streaming_mode = true;
 
   auto *rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
@@ -145,13 +145,13 @@ void Fun4All_ZFAllTrackers(
   silicon_match->window_deta.set_QoverpT_maxabs({0.06,0,0});
   silicon_match->window_dphi.set_QoverpT_maxabs({0.11,0,0});
   silicon_match->set_test_windows_printout(false);
-  silicon_match->set_pp_mode(TRACKING::pp_mode);
+  silicon_match->set_pp_mode(TRACKING::streaming_mode);
   silicon_match->zeroField(true);
   se->registerSubsystem(silicon_match);
 
   auto *mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(0);
-  mm_match->set_pp_mode(TRACKING::pp_mode);
+  mm_match->set_pp_mode(TRACKING::streaming_mode);
 
   mm_match->set_rphi_search_window_lyr1(3.);
   mm_match->set_rphi_search_window_lyr2(15.0);
@@ -188,7 +188,7 @@ void Fun4All_ZFAllTrackers(
     // in calibration mode, fit only Silicons and Micromegas hits
     actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
     actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-    actsFit->set_pp_mode(TRACKING::pp_mode);
+    actsFit->set_pp_mode(TRACKING::streaming_mode);
     actsFit->set_use_clustermover(true);  // default is true for now
     actsFit->useActsEvaluator(false);
     actsFit->useOutlierFinder(false);

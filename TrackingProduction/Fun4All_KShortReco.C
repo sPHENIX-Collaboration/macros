@@ -117,7 +117,7 @@ void Fun4All_KShortReco(
   G4TRACKING::SC_CALIBMODE = false;
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
-  TRACKING::pp_mode = true;
+  TRACKING::streaming_mode = true;
 
   auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
