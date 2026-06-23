@@ -790,7 +790,7 @@ void InputManagers()
     INPUTMANAGER::HepMCPileupInputManager->set_collision_rate(Input::PILEUPRATE);
     double time_window = G4TPC::maxDriftLength / PILEUP::TpcDriftVelocity;
     double extended_readout_time = 0.0;
-    if (TRACKING::pp_mode)
+    if (TRACKING::streaming_mode)
     {
       extended_readout_time = TRACKING::pp_extended_readout_time;
     }
