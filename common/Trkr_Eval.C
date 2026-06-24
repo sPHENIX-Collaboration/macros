@@ -44,10 +44,10 @@ void Tracking_Eval(const std::string& outputfile)
   eval->do_track_match(true);
   eval->set_use_initial_vertex(G4TRACKING::g4eval_use_initial_vertex);
   bool embed_scan = true;
-  if (TRACKING::pp_mode) embed_scan = false;
+  if (TRACKING::streaming_mode) embed_scan = false;
   eval->scan_for_embedded(embed_scan);   // take all tracks if false - take only embedded tracks if true
   eval->scan_for_primaries(embed_scan);  // defaults to only thrown particles for ntp_gtrack
-  std::cout << "SvtxEvaluator: pp_mode set to " << TRACKING::pp_mode << " and scan_for_embedded set to " << embed_scan << std::endl;
+  std::cout << "SvtxEvaluator: streaming_mode set to " << TRACKING::streaming_mode << " and scan_for_embedded set to " << embed_scan << std::endl;
   eval->Verbosity(verbosity);
 
   se->registerSubsystem(eval);

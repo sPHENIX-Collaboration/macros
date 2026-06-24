@@ -135,7 +135,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   G4TRACKING::convert_seeds_to_svtxtracks = convertSeeds;
   std::cout << "Converting to seeds : " << G4TRACKING::convert_seeds_to_svtxtracks << std::endl;
 
-  TRACKING::pp_mode = false;
+  TRACKING::streaming_mode = false;
 
   TrackingInit();
   if(doTpcOnlyTracking)
@@ -206,7 +206,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   seeder->SetMinHitsPerCluster(0);
   seeder->SetMinClustersPerTrack(3);
   seeder->useFixedClusterError(true);
-  seeder->set_pp_mode(TRACKING::pp_mode);
+  seeder->set_pp_mode(TRACKING::streaming_mode);
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
@@ -225,7 +225,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   cprop->useFixedClusterError(true);
   cprop->set_max_window(5.);
   cprop->Verbosity(verbosity);
-  cprop->set_pp_mode(TRACKING::pp_mode);
+  cprop->set_pp_mode(TRACKING::streaming_mode);
   se->registerSubsystem(cprop);
 
   /*
@@ -247,7 +247,7 @@ void Fun4All_FieldOnAllTrackersCalos(
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
   auto *mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(verbosity);
-  mm_match->set_pp_mode(TRACKING::pp_mode);
+  mm_match->set_pp_mode(TRACKING::streaming_mode);
   mm_match->set_rphi_search_window_lyr1(3.);
   mm_match->set_rphi_search_window_lyr2(15.0);
   mm_match->set_z_search_window_lyr1(30.0);
@@ -298,7 +298,7 @@ void Fun4All_FieldOnAllTrackersCalos(
       actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
       actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
     }
-    actsFit->set_pp_mode(TRACKING::pp_mode);
+    actsFit->set_pp_mode(TRACKING::streaming_mode);
     actsFit->set_use_clustermover(true);  // default is true for now
     actsFit->useActsEvaluator(false);
     actsFit->useOutlierFinder(false);
