@@ -1,5 +1,5 @@
 
-#include <bcolumicount/StreamingBcoLumiReco.h>
+#include <bcolumicount/StreamingLumiReco.h>
 
 #include <ffamodules/SyncReco.h>
 
@@ -22,13 +22,12 @@ R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libbcolumicount.so)
 R__LOAD_LIBRARY(libffamodules.so)
 
-void Fun4All_StreamingBcoLumi(const int nEvents = 0,
+void Fun4All_StreamingLumi(const int nEvents = 0,
 		      const std::string &inlist = "gl1daq.list")
 {
 
   std::string bcodst = "DST_BCOINFO-";
-  std::string outfile = "DST_STREAMINGLUMI_BCOINFO-";
-  std::string histfile = "bco_histos-";
+  std::string outfile = "DST_STREAMING_LUMIINFO-";
   std::ifstream file("gl1daq.list");  // open the file
   if (!file.is_open()) {
     std::cerr << "Failed to open file\n";
@@ -42,8 +41,6 @@ void Fun4All_StreamingBcoLumi(const int nEvents = 0,
       outfile += ".root";
       bcodst += run_segments;
       bcodst += ".root";
-      histfile += run_segments;
-      histfile += ".root";
   } else {
       std::cout << "File is empty or read failed\n";
   }
@@ -51,10 +48,10 @@ void Fun4All_StreamingBcoLumi(const int nEvents = 0,
   Fun4AllServer *se = Fun4AllServer::instance();
   //se->Verbosity(1);
 
-  StreamingBcoLumiReco *lumi = new StreamingBcoLumiReco();
-  //lumi->Verbosity(2);
+  StreamingLumiReco *streaming_lumi = new StreamingLumiReco();
+  //streaming_lumi->Verbosity(2);
 
-  se->registerSubsystem(lumi);
+  se->registerSubsystem(streaming_lumi);
   Fun4AllPrdfInputManager *in_prdf = new Fun4AllPrdfInputManager("PRDFin");
   //in->Verbosity(10);
   in_prdf->AddListFile(inlist);
@@ -69,7 +66,6 @@ void Fun4All_StreamingBcoLumi(const int nEvents = 0,
 
   se->run(nEvents);
 
-  se->dumpHistos(histfile);
   se->End();
   delete se;
   gSystem->Exit(0);
