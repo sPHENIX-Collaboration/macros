@@ -26,7 +26,7 @@ void Fun4All_StreamingLumi(const int nEvents = 0,
 		      const std::string &inlist = "gl1daq.list")
 {
 
-  std::string bcodst = "DST_BCOINFO-";
+  std::string streaming_bcodst = "DST_STREAMING_BCOINFO-";
   std::string outfile = "DST_STREAMING_LUMIINFO-";
   std::ifstream file("gl1daq.list");  // open the file
   if (!file.is_open()) {
@@ -39,8 +39,8 @@ void Fun4All_StreamingLumi(const int nEvents = 0,
       std::string run_segments = infilename.substr(infilename.size() - 17, 8);
       outfile += run_segments;
       outfile += ".root";
-      bcodst += run_segments;
-      bcodst += ".root";
+      streaming_bcodst += run_segments;
+      streaming_bcodst += ".root";
   } else {
       std::cout << "File is empty or read failed\n";
   }
@@ -58,7 +58,7 @@ void Fun4All_StreamingLumi(const int nEvents = 0,
   se->registerInputManager(in_prdf);
 
   Fun4AllInputManager *in_dst = new Fun4AllDstInputManager("DSTin");
-  in_dst->AddFile(bcodst);
+  in_dst->AddFile(streaming_bcodst);
   se->registerInputManager(in_dst);
 
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out",outfile);
