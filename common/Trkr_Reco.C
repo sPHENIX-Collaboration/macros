@@ -104,7 +104,7 @@ void Tracking_Reco_TrackFit_run2pp(const std::string &outfile = "run2pptrackfit.
   actsFit->setTrkrClusterContainerName(clusterMapName);
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-  actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
+  actsFit->setUseMicromegas(false);
   actsFit->set_pp_mode(TRACKING::pp_mode);
   actsFit->set_use_clustermover(true);  // default is true for now
   actsFit->useActsEvaluator(false);
