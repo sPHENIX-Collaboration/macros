@@ -5,19 +5,19 @@ set -euo pipefail
 # Electric field grid
 emin=360
 emax=440
-ne=20
+ne=21
 
 # Magnetic field grid
 bmin=1.15
 bmax=1.45
-nb=20
+nb=16
 
 # E-B angle grid
 amin=0.0
 amax=0.2
 na=20
 
-jobid="$1"
+jobid=$1
 
 ie=$(( jobid / nb ))
 ib=$(( jobid % nb ))
@@ -27,24 +27,25 @@ if (( jobid < 0 || jobid >= ne * nb )); then
   exit 1
 fi
 
-enow=$(awk -v emin="$emin" \
-             -v emax="$emax" \
-             -v ne="$ne" \
-             -v i="$ie" \
-'BEGIN {
-   if (ne == 1) print emin;
-   else print emin + (emax - emin) * i / (ne - 1);
-}')
+enow=$(( emin + 4 * ie ))
+#enow=$(awk -v emin="$emin" \
+#             -v emax="$emax" \
+#             -v ne="$ne" \
+#             -v i="$ie" \
+#'BEGIN {
+#   if (ne == 1) print emin;
+#   else print emin + (emax - emin) * i / (ne - 1);
+#}')
 
-
-bnow=$(awk -v bmin="$bmin" \
-             -v bmax="$bmax" \
-             -v nb="$nb" \
-             -v i="$ib" \
-'BEGIN {
-   if (nb == 1) print bmin;
-   else print bmin + (bmax - bmin) * i / (nb - 1);
-}')
+bnow=$(awk -v ib="$ib" 'BEGIN { printf "%.2f", 1.15 + 0.02 * ib }')
+#bnow=$(awk -v bmin="$bmin" \
+#             -v bmax="$bmax" \
+#             -v nb="$nb" \
+#             -v i="$ib" \
+#'BEGIN {
+#   if (nb == 1) print bmin;
+#   else print bmin + (bmax - bmin) * i / (nb - 1);
+#}')
 
 echo "jobid=$jobid ie=$ie ib=$ib enow=$enow bnow=$bnow"
 

@@ -6,8 +6,10 @@ Output             = $(Initialdir)/out/GasModel_$(process).out
 Error              = $(Initialdir)/err/GasModel_$(process).err
 Log                = $(Initialdir)/log/GasModel_$(process).log
 PeriodicHold       = (NumJobStarts>=1 && JobStatus == 1)
-request_memory     = 4GB
+Requirements       = (CPU_Speed >= 3)
+Rank		   = CPU_Speed
+request_memory     = 8GB
 Priority           = 20
 job_lease_duration = 3600
 Arguments          = $(process)
-Queue 400
+Queue 336
