@@ -1,5 +1,6 @@
 Universe           = vanilla
-Initialdir         = /direct/phenix+u/workarea/hemmick/code.sphenix/tkh/gas
+getenv             = True
+Initialdir         = /direct/phenix+u/workarea/hemmick/code.GITFIXED/macros/TpcProduction/GarfieldProduction
 Executable         = $(Initialdir)/StartScript.sh
 Output             = $(Initialdir)/out/hitset_AuAu_$(process).out
 Error              = $(Initialdir)/err/hitset_AuAu_$(process).err

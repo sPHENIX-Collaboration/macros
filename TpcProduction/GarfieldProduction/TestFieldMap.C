@@ -69,7 +69,8 @@ void TestFieldMap()
 {
   recoConsts* rc = recoConsts::instance();
 
-  rc->set_StringFlag("CDB_GLOBALTAG","FieldMapTest");
+  rc->set_StringFlag("CDB_GLOBALTAG","FieldMapTest");   // Weird offset field map
+  //rc->set_StringFlag("CDB_GLOBALTAG","newcdbtag");      //sPHENIX default
   rc->set_uint64Flag("TIMESTAMP",1);
 
   auto *cdb = CDBInterface::instance();
