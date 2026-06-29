@@ -87,8 +87,13 @@ void TPC_LaminationFitting()
     
     TpcLaminationFitting *laminations = new TpcLaminationFitting;
     laminations->Verbosity(verbosity);
-    laminations->set_nLayerCut(2);
+    laminations->set_nLayerCut(1);
+    laminations->set_phiHistInRad(G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS);
     laminations->set_ppMode(TRACKING::pp_mode);
+    laminations->set_fieldOff(G4TPC::BFieldOff);
+    laminations->set_stripePatternFile("/sphenix/u/bkimelman/CMStripePattern_Feb6_2026.root");
+    //laminations->set_stripePatternFile("/sphenix/u/bkimelman/CMStripePattern_ideal.root");
+    laminations->set_saveAllLaminationHistograms(true);
     laminations->setOutputfile(G4TPC::LaminationOutputName);
     if(G4TPC::LaminationQAName != "")
     {
