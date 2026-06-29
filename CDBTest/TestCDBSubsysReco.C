@@ -12,6 +12,9 @@
 
 #include <phool/recoConsts.h>
 
+#include <Rtypes.h>
+#include <TSystem.h>
+
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libphool.so)
 
@@ -25,22 +28,22 @@ void TestCDBSubsysReco()
   se->Verbosity(1);
 
   CDBInterface *cdb = CDBInterface::instance();
-  cout << "using insert timestamp to retrieve" << endl;
+  std::cout << "using insert timestamp to retrieve" << std::endl;
   rc->set_uint64Flag("TIMESTAMP",10);
-  cout << cdb->getUrl("TestBeginValidity") << endl;
-  cout << "using larger timestamp to retrieve" << endl;
+  std::cout << cdb->getUrl("TestBeginValidity") << std::endl;
+  std::cout << "using larger timestamp to retrieve" << std::endl;
   rc->set_uint64Flag("TIMESTAMP",100);
-  cout << cdb->getUrl("TestBeginValidity") << endl;
-  cout << "using smaller timestamp to retrieve" << endl;
+  std::cout << cdb->getUrl("TestBeginValidity") << std::endl;
+  std::cout << "using smaller timestamp to retrieve" << std::endl;
   rc->set_uint64Flag("TIMESTAMP",1);
-  cout << cdb->getUrl("TestBeginValidity") << endl;
+  std::cout << cdb->getUrl("TestBeginValidity") << std::endl;
 
-  cout << "using timestamp in range to retrieve calibration" << endl;
+  std::cout << "using timestamp in range to retrieve calibration" << std::endl;
   rc->set_uint64Flag("TIMESTAMP",15);
-  cout << cdb->getUrl("TestBeginEndValidity") << endl;
-  cout << "using timestamp outside range to retrieve calibration" << endl;
+  std::cout << cdb->getUrl("TestBeginEndValidity") << std::endl;
+  std::cout << "using timestamp outside range to retrieve calibration" << std::endl;
   rc->set_uint64Flag("TIMESTAMP",25);
-  cout << cdb->getUrl("TestBeginEndValidity") << endl;
+  std::cout << cdb->getUrl("TestBeginEndValidity") << std::endl;
 
   Fun4AllInputManager *in = new Fun4AllDummyInputManager("JADE");
   in->Verbosity(1);

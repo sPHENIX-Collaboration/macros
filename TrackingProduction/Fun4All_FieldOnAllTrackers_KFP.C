@@ -5,44 +5,43 @@
  * hits, clusters, and clusters on tracks into trees for analysis.
  */
 
-#include <fun4all/Fun4AllUtils.h>
+#include <GlobalVariables.C>
+
 #include <G4_ActsGeom.C>
 #include <G4_Global.C>
 #include <G4_Magnet.C>
 #include <G4_Mbd.C>
-#include <GlobalVariables.C>
 #include <QA.C>
 #include <Trkr_TpcReadoutInit.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_LaserClustering.C>
 #include <Trkr_Reco.C>
 
+#include <eventdisplay/TrackerEventDisplay.h>
+
+#include <cdbobjects/CDBTTree.h>
+
+#include <trackingqa/InttClusterQA.h>
+#include <trackingqa/MicromegasClusterQA.h>
+#include <trackingqa/MvtxClusterQA.h>
+#include <trackingqa/TpcClusterQA.h>
+
+#include <trackingdiagnostics/TrackResiduals.h>
+#include <trackingdiagnostics/TrkrNtuplizer.h>
+
+#include <trackreco/AzimuthalSeeder.h>
+
 #include <ffamodules/CDBInterface.h>
+
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllUtils.h>
 
-#include <eventdisplay/TrackerEventDisplay.h>
 #include <phool/recoConsts.h>
-
-#include <cdbobjects/CDBTTree.h>
-
-#include <trackingqa/InttClusterQA.h>
-
-#include <trackingqa/MicromegasClusterQA.h>
-
-#include <trackingqa/MvtxClusterQA.h>
-
-#include <trackingdiagnostics/TrackResiduals.h>
-#include <trackingdiagnostics/TrkrNtuplizer.h>
-#include <trackingqa/TpcClusterQA.h>
-#include <trackreco/AzimuthalSeeder.h>
-
-#include <stdio.h>
-#include <float.h>
 
 #pragma GCC diagnostic push
 
@@ -68,9 +67,9 @@ R__LOAD_LIBRARY(libEventDisplay.so)
 
 void Fun4All_FieldOnAllTrackers_KFP(
     const int nEvents = 0,
-    const std::string tpcfilename = "DST_BEAM_run2pp_new_2023p013-00041989-0000.root",
-    const std::string tpcdir = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpcbeam/run_00041900_00042000/",
-    const std::string outfilename = "clusters_seeds",
+    const std::string& tpcfilename = "DST_BEAM_run2pp_new_2023p013-00041989-0000.root",
+    const std::string& tpcdir = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpcbeam/run_00041900_00042000/",
+    const std::string&  /*outfilename*/ = "clusters_seeds",
     const bool convertSeeds = false)
 {
 
@@ -87,28 +86,26 @@ void Fun4All_FieldOnAllTrackers_KFP(
 	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
 	   << std::endl;
 
-  string outDir = "myKShortReco/";
-  string outputFileName = "outputFile_" + to_string(runnumber) + "_" + to_string(segment) + ".root";
+  std::string outDir = "myKShortReco/";
+  std::string outputFileName = "outputFile_" + std::to_string(runnumber) + "_" + std::to_string(segment) + ".root";
 
-  string outputRecoDir = outDir + "inReconstruction/";
-  string makeDirectory = "mkdir -p " + outputRecoDir;
+  std::string outputRecoDir = outDir + "inReconstruction/";
+  std::string makeDirectory = "mkdir -p " + outputRecoDir;
   system(makeDirectory.c_str());
-  string outputRecoFile = outputRecoDir + outputFileName;
+  std::string outputRecoFile = outputRecoDir + outputFileName;
 
   std::string inputtpcRawHitFile = tpcdir + tpcfilename;
   ACTSGEOM::mvtxMisalignment = 100;
   ACTSGEOM::inttMisalignment = 100.;
   ACTSGEOM::tpotMisalignment = 100.;
-  TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
-  std::string theOutfile = outfile.Data();
 
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
 
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
@@ -133,7 +130,7 @@ void Fun4All_FieldOnAllTrackers_KFP(
   G4MAGNET::magfield_rescale = 1;
   ACTSGEOM::ActsGeomInit();
 
-  auto hitsin = new Fun4AllDstInputManager("InputManager");
+  auto *hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->fileopen(inputtpcRawHitFile);
   se->registerInputManager(hitsin);
 
@@ -145,7 +142,7 @@ void Fun4All_FieldOnAllTrackers_KFP(
   //Mvtx_Clustering();
   //Intt_Clustering();
 
-  auto tpcclusterizer = new TpcClusterizer;
+  auto *tpcclusterizer = new TpcClusterizer;
   tpcclusterizer->Verbosity(0);
   tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
   tpcclusterizer->set_rawdata_reco();
@@ -159,7 +156,7 @@ void Fun4All_FieldOnAllTrackers_KFP(
 
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
-    auto converter = new TrackSeedTrackMapConverter;
+    auto *converter = new TrackSeedTrackMapConverter;
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
     converter->setTrackSeedName("TpcTrackSeedContainer");
@@ -169,12 +166,12 @@ void Fun4All_FieldOnAllTrackers_KFP(
   }
   else
   {
-    auto deltazcorr = new PHTpcDeltaZCorrection;
+    auto *deltazcorr = new PHTpcDeltaZCorrection;
     deltazcorr->Verbosity(0);
     se->registerSubsystem(deltazcorr);
 
     // perform final track fit with ACTS
-    auto actsFit = new PHActsTrkFitter;
+    auto *actsFit = new PHActsTrkFitter;
     actsFit->Verbosity(0);
     actsFit->commissioning(G4TRACKING::use_alignment);
     // in calibration mode, fit only Silicons and Micromegas hits
@@ -199,7 +196,7 @@ void Fun4All_FieldOnAllTrackers_KFP(
   se->registerSubsystem(finder);
 
   // Propagate track positions to the vertex position
-  auto vtxProp = new PHActsVertexPropagator;
+  auto *vtxProp = new PHActsVertexPropagator;
   vtxProp->Verbosity(0);
   vtxProp->fieldMap(G4MAGNET::magfield_tracking);
   se->registerSubsystem(vtxProp);
@@ -248,10 +245,10 @@ void Fun4All_FieldOnAllTrackers_KFP(
   se->run(nEvents);
   se->End();
 
-  ifstream file(outputRecoFile.c_str());
+  std::ifstream file(outputRecoFile);
   if (file.good())
   {
-    string moveOutput = "mv " + outputRecoFile + " " + outDir;
+    std::string moveOutput = "mv " + outputRecoFile + " " + outDir;
     system(moveOutput.c_str());
   }
 

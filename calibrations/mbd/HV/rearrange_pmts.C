@@ -1,8 +1,16 @@
 // Make plots of the values of the gains
 // Use this to figure out which PMTs to swap around to normalize gains
-#include "mbd/MbdCalib.h"
-#include "mbd/MbdGeomV2.h"
-//#include "get_runstr.h"
+#include <mbd/MbdCalib.h>
+#include <mbd/MbdGeomV2.h>
+
+
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TGraph.h>
+#include <TGraphErrors.h>
+#include <TH1.h>
+#include <TPad.h>
+#include <TString.h>
 
 R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libmbd_io.so)
@@ -63,16 +71,16 @@ void rearrange_pmts(const char *fname = "results/54935/mbd_qfit.calib")
 
 
   int npmts = 0;
-  std::array<double,16> gmin;
-  std::array<double,16> gmax;
-  std::array<int,16> minpmt;
-  std::array<int,16> maxpmt;
+  std::array<double,16> gmin{};
+  std::array<double,16> gmax{};
+  std::array<int,16> minpmt{};
+  std::array<int,16> maxpmt{};
   gmin.fill(1e9);      // the gain settings that were used for run analyzed
   gmax.fill(0);
   minpmt.fill(-1);
   maxpmt.fill(-1);
   std::multimap hvmap = mbdgeom->get_hvmap();
-  cout << "\thvmod\tpmt\tgain\tr" << endl;
+  std::cout << "\thvmod\tpmt\tgain\tr" << std::endl;
   for ( auto hv : hvmap )
   {
     int hvmod = hv.first;
@@ -107,7 +115,7 @@ void rearrange_pmts(const char *fname = "results/54935/mbd_qfit.calib")
   double& overall_gmax = *std::max_element(gmax.begin(), gmax.end());
 
   // Draw the gains by HVMOD
-  TCanvas *ac = new TCanvas("c_gainsbyhvmod","Gains by HV Mod",1250,600);
+//  TCanvas *ac = new TCanvas("c_gainsbyhvmod","Gains by HV Mod",1250,600);
   g_gainsbyhv[0]->Draw("ap");
   g_gainsbyhv[0]->GetXaxis()->SetLimits(0,128);
   g_gainsbyhv[0]->SetMaximum( overall_gmax*1.1 );
@@ -126,7 +134,7 @@ void rearrange_pmts(const char *fname = "results/54935/mbd_qfit.calib")
   std::array<double,16> means;
   means.fill(0.);
   
-  cout << "means in each hv group" << endl;
+  std::cout << "means in each hv group" << std::endl;
   std::array<double,16> new_gmin;
   std::array<double,16> new_gmax;
   std::array<double,16> newscale;
@@ -140,7 +148,7 @@ void rearrange_pmts(const char *fname = "results/54935/mbd_qfit.calib")
     newscale[ihv] = means[0]/means[ihv];
     new_gmin[ihv] = gmin[ihv]*newscale[ihv];
     new_gmax[ihv] = gmax[ihv]*newscale[ihv];
-    cout << ihv << "\t" << means[ihv] << "\t" << newscale[ihv] << "\t" << new_gmin[ihv] << endl;
+    std::cout << ihv << "\t" << means[ihv] << "\t" << newscale[ihv] << "\t" << new_gmin[ihv] << std::endl;
 
     if ( new_gmax[ihv]>overall_newgmax )
     {
@@ -167,19 +175,20 @@ void rearrange_pmts(const char *fname = "results/54935/mbd_qfit.calib")
       0.738386, 0.726954, 0.779238, 0.725638, 0.797808, 0.70735, 0.786134, 0.763983    // north
   };
 
-  std::array<double,16> hv_setting;
+  std::array<double,16> hv_setting{};
 
-  cout << "HV SETTING" << endl;
+  std::cout << "HV SETTING" << std::endl;
   for (int imod=0; imod<orig_hv.size(); imod++)
   {
     hv_setting[imod] = orig_hv[imod]*ref_hvsetting[imod];
-    cout << hv_setting[imod] << "\t";
-    if ( imod%8==7 ) cout << endl;
+    std::cout << hv_setting[imod] << "\t";
+    if ( imod%8==7 ) { std::cout << std::endl;
+}
   }
   
   // Plot the gain curves by hvmod
   //TCanvas *bc = new TCanvas("c_gaincurvesbyhvmod","Gain curves by hvmod",1200,1200,.0001,.0001);
-  TCanvas *bc = new TCanvas("c_gaincurvesbyhvmod","Gain curves by hvmod",1200,1200);
+//  TCanvas *bc = new TCanvas("c_gaincurvesbyhvmod","Gain curves by hvmod",1200,1200);
   //bc->Divide(4,4);
   TFile *gcurvefile = new TFile("SCAN/mbdlaser_202405151654.root");
   TGraphErrors *g_norm_laserscan[128]{nullptr};
@@ -190,11 +199,11 @@ void rearrange_pmts(const char *fname = "results/54935/mbd_qfit.calib")
     g_norm_laserscan[ipmt] = (TGraphErrors*)gcurvefile->Get( name );
   }
 
-  std::array<double,16> sumsetting;
+  std::array<double,16> sumsetting{};
   sumsetting.fill(0.);
-  std::array<int,16> npmts_in_hvmod;
+  std::array<int,16> npmts_in_hvmod{};
   npmts_in_hvmod.fill(0.);
-  std::array<double,16> newsetting;
+  std::array<double,16> newsetting{};
   newsetting.fill(0.);
 
   int flag = 0;
@@ -234,103 +243,103 @@ void rearrange_pmts(const char *fname = "results/54935/mbd_qfit.calib")
     double gain = mcal->get_qgain( pmt );
     if ( pmt==17 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1503. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1503. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1356. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
     if ( pmt==26 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1491. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1491. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1356. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
     if ( pmt==36 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1622. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1622. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1653. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
     if ( pmt==51 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1514. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1514. );
       //float new_hv = g_norm_laserscan[pmt]->Eval( 1566. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1622. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
     if ( pmt==70 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1366. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1366. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1519. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
     if ( pmt==79 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1574. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1574. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1611. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
     if ( pmt==85 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1574. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1574. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1662. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
     if ( pmt==87 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1774. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1774. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1662. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
     if ( pmt==89 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1519. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1519. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1366. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
     if ( pmt==91 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1774. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1774. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1662. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
     if ( pmt==107 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1611. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1611. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1662. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
     if ( pmt==113 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1383. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1383. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1286. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
     if ( pmt==116 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1611. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1611. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1574. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
     if ( pmt==121 )
     {
-      float orig_hv = g_norm_laserscan[pmt]->Eval( 1611. );
+      float orig_hv_loc = g_norm_laserscan[pmt]->Eval( 1611. );
       //float new_hv = g_norm_laserscan[pmt]->Eval( 1519. );
       float new_hv = g_norm_laserscan[pmt]->Eval( 1574. );
-      float new_gain = (new_hv/orig_hv)*gain;
-      cout << "PMT " << pmt << "\t" << orig_hv << "\t" << new_hv << "\t" << new_hv/orig_hv << "\t" << new_gain << endl;
+      float new_gain = (new_hv/orig_hv_loc)*gain;
+      std::cout << "PMT " << pmt << "\t" << orig_hv_loc << "\t" << new_hv << "\t" << new_hv/orig_hv_loc << "\t" << new_gain << std::endl;
     }
 
   }

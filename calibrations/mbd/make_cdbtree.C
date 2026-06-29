@@ -1,11 +1,14 @@
-#include <TString.h>
-//#include "BbcCDB.C"
-#include "mbd/MbdCalib.h"
+#ifndef MACRO_MAKE_CDBTREE_C
+#define MACRO_MAKE_CDBTREE_C
 
-#if defined(__CLING__)
+#include <mbd/MbdCalib.h>
+
+#include <Rtypes.h> // defines R__LOAD_LIBRARY macro
+#include <TString.h>
+
 R__LOAD_LIBRARY(libmbd_io.so)
 R__LOAD_LIBRARY(libmbd.so)
-#endif
+
 
 void make_cdbtree(const char *calibfname)
 {
@@ -19,15 +22,31 @@ void make_cdbtree(const char *calibfname)
     cal->Download_SampMax( calibfname );
     TString cdbfname = calibfname;
     cdbfname.ReplaceAll("mbd_sampmax.calib","mbd_sampmax.root");
-    cout << cdbfname << endl;
+    std::cout << cdbfname << std::endl;
     cal->Write_CDB_SampMax( cdbfname.Data() );
+  }
+  else if ( calfname.Contains("ped") )
+  {
+    cal->Download_Ped( calibfname );
+    TString cdbfname = calibfname;
+    cdbfname.ReplaceAll("mbd_ped.calib","mbd_ped.root");
+    std::cout << cdbfname << std::endl;
+    cal->Write_CDB_Ped( cdbfname.Data() );
+  }
+  else if ( calfname.Contains("status") )
+  {
+    cal->Download_Status( calibfname );
+    TString cdbfname = calibfname;
+    cdbfname.ReplaceAll("mbd_status.calib","mbd_status.root");
+    std::cout << cdbfname << std::endl;
+    cal->Write_CDB_Status( cdbfname.Data() );
   }
   else if ( calfname.Contains("tt_t0") )
   {
     cal->Download_TTT0( calibfname );
     TString cdbfname = calibfname;
     cdbfname.ReplaceAll("mbd_tt_t0.calib","mbd_tt_t0.root");
-    cout << cdbfname << endl;
+    std::cout << cdbfname << std::endl;
     cal->Write_CDB_TTT0( cdbfname.Data() );
   }
   else if ( calfname.Contains("tq_t0") )
@@ -35,7 +54,7 @@ void make_cdbtree(const char *calibfname)
     cal->Download_TQT0( calibfname );
     TString cdbfname = calibfname;
     cdbfname.ReplaceAll("mbd_tq_t0.calib","mbd_tq_t0.root");
-    cout << cdbfname << endl;
+    std::cout << cdbfname << std::endl;
     cal->Write_CDB_TQT0( cdbfname.Data() );
   }
   else if ( calfname.Contains("timecorr") )
@@ -43,7 +62,7 @@ void make_cdbtree(const char *calibfname)
     cal->Download_TimeCorr( calibfname );
     TString cdbfname = calibfname;
     cdbfname.ReplaceAll("mbd_timecorr.calib","mbd_timecorr.root");
-    cout << cdbfname << endl;
+    std::cout << cdbfname << std::endl;
     cal->Write_CDB_TimeCorr( cdbfname.Data() );
   }
   else if ( calfname.Contains("slewcorr") )
@@ -51,7 +70,7 @@ void make_cdbtree(const char *calibfname)
     cal->Download_SlewCorr( calibfname );
     TString cdbfname = calibfname;
     cdbfname.ReplaceAll("mbd_slewcorr.calib","mbd_slewcorr.root");
-    cout << cdbfname << endl;
+    std::cout << cdbfname << std::endl;
     cal->Write_CDB_SlewCorr( cdbfname.Data() );
   }
   else if ( calfname.Contains("qfit") )
@@ -60,7 +79,7 @@ void make_cdbtree(const char *calibfname)
     TString cdbfname = calibfname;
     cdbfname.ReplaceAll("mbd_qfit.calib","mbd_qfit.root");
     //cdbfname.ReplaceAll(".root",".calib");
-    cout << cdbfname << endl;
+    std::cout << cdbfname << std::endl;
     cal->Write_CDB_Gains( cdbfname.Data() );
     //cal->Write_Gains( cdbfname.Data() );
   }
@@ -68,8 +87,8 @@ void make_cdbtree(const char *calibfname)
   {
     cal->Download_Shapes( calibfname );
     TString cdbfname = calibfname;
-    cdbfname.ReplaceAll("bbc_shape.calib","mbd_shape.root");
-    cout << cdbfname << endl;
+    cdbfname.ReplaceAll("mbd_shape.calib","mbd_shape.root");
+    std::cout << cdbfname << std::endl;
     //cdbfname = "mbd_shape.root";
     cal->Write_CDB_Shapes( cdbfname.Data() );
   }
@@ -78,7 +97,7 @@ void make_cdbtree(const char *calibfname)
     cal->Download_T0Corr( calibfname );
     TString cdbfname = calibfname;
     cdbfname.ReplaceAll("mbd_t0corr.calib","mbd_t0corr.root");
-    cout << cdbfname << endl;
+    std::cout << cdbfname << std::endl;
     //cdbfname = "mbd_t0corr.root";
     cal->Write_CDB_T0Corr( cdbfname.Data() );
   }
@@ -87,10 +106,10 @@ void make_cdbtree(const char *calibfname)
     cal->Download_Pileup( calibfname );
     TString cdbfname = calibfname;
     cdbfname.ReplaceAll("mbd_pileup.calib","mbd_pileup.root");
-    cout << cdbfname << endl;
+    std::cout << cdbfname << std::endl;
     //cdbfname = "mbd_pileup.root";
     cal->Write_CDB_Pileup( cdbfname.Data() );
   }
 
 }
-
+#endif

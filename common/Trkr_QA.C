@@ -2,18 +2,21 @@
 #define MACRO_TRKRQA_C
 
 #include <GlobalVariables.C>
+
 #include <G4_TrkrVariables.C>
-#include <Trkr_TruthTables.C>
 #include <QA.C>
-#include <fun4all/Fun4AllServer.h>
-#include <simqa_modules/QAG4SimulationMvtx.h>
+#include <Trkr_TruthTables.C>
+
+#include <simqa_modules/QAG4SimulationDistortions.h>
 #include <simqa_modules/QAG4SimulationIntt.h>
-#include <simqa_modules/QAG4SimulationTpc.h>
 #include <simqa_modules/QAG4SimulationMicromegas.h>
+#include <simqa_modules/QAG4SimulationMvtx.h>
+#include <simqa_modules/QAG4SimulationTpc.h>
 #include <simqa_modules/QAG4SimulationTracking.h>
 #include <simqa_modules/QAG4SimulationUpsilon.h>
 #include <simqa_modules/QAG4SimulationVertex.h>
-#include <simqa_modules/QAG4SimulationDistortions.h>
+
+#include <fun4all/Fun4AllServer.h>
 
 R__LOAD_LIBRARY(libsimqa_modules.so)
 
@@ -42,19 +45,18 @@ void TPC_QA()
   int verbosity = std::max(Enable::QA_VERBOSITY, Enable::TPC_VERBOSITY);
 
   Fun4AllServer* se = Fun4AllServer::instance();
-  QAG4SimulationTpc * qa =  new QAG4SimulationTpc;
+  QAG4SimulationTpc* qa = new QAG4SimulationTpc;
   qa->Verbosity(verbosity);
   se->registerSubsystem(qa);
 }
 
 void Micromegas_QA()
 {
-  auto se = Fun4AllServer::instance();
-  auto qa_mm = new QAG4SimulationMicromegas;
+  auto* se = Fun4AllServer::instance();
+  auto* qa_mm = new QAG4SimulationMicromegas;
   qa_mm->Verbosity(Enable::QA_VERBOSITY);
   se->registerSubsystem(qa_mm);
 }
-
 
 void Tracking_QA()
 {
@@ -88,27 +90,27 @@ void Tracking_QA()
 
   if (Input::UPSILON)
   {
-    QAG4SimulationUpsilon* qa = new QAG4SimulationUpsilon();
+    QAG4SimulationUpsilon* qau = new QAG4SimulationUpsilon();
 
     for (int id : Input::UPSILON_EmbedIds)
     {
-      qa->addEmbeddingID(id);
+      qau->addEmbeddingID(id);
     }
-    se->registerSubsystem(qa);
+    se->registerSubsystem(qau);
   }
 }
 
 void Distortions_QA()
 {
-   int verbosity = std::max(Enable::QA_VERBOSITY, Enable::TRACKING_VERBOSITY);
+  int verbosity = std::max(Enable::QA_VERBOSITY, Enable::TRACKING_VERBOSITY);
 
   //---------------
   // Fun4All server
   //---------------
 
   Fun4AllServer* se = Fun4AllServer::instance();
-  
-  auto qa = new QAG4SimulationDistortions();
+
+  auto* qa = new QAG4SimulationDistortions();
   qa->Verbosity(verbosity);
   se->registerSubsystem(qa);
 }

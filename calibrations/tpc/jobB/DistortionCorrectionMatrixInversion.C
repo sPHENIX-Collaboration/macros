@@ -1,19 +1,27 @@
-#include <ffamodules/CDBInterface.h>
-#include <fun4all/Fun4AllRunNodeInputManager.h>
-#include <fun4all/Fun4AllServer.h>
-
-#include <micromegas/MicromegasDefs.h>
-
-#include <phool/getClass.h>
-#include <phool/recoConsts.h>
+#include <g4detectors/PHG4CylinderGeomContainer.h>
+#include <g4detectors/PHG4CylinderGeom.h>
 
 #include <tpccalib/TpcSpaceChargeMatrixInversion.h>
 #include <tpccalib/TpcSpaceChargeReconstructionHelper.h>
 
+#include <micromegas/CylinderGeomMicromegas.h>
+#include <micromegas/MicromegasDefs.h>
+
 #include <trackreco/MakeActsGeometry.h>
+
+#include <ffamodules/CDBInterface.h>
+
+#include <fun4all/Fun4AllRunNodeInputManager.h>
+#include <fun4all/Fun4AllServer.h>
+
+#include <phool/getClass.h>
+#include <phool/recoConsts.h>
+
+#include <TString.h>
 
 #include <cstdio>
 #include <sstream>
+#include <string>
 
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libfun4all.so)
@@ -27,7 +35,7 @@ namespace
   template<class T> class range_adaptor
   {
     public:
-    range_adaptor( const T& range ):m_range(range){}
+    explicit range_adaptor( const T& range ):m_range(range){}
     const typename T::first_type& begin() {return m_range.first;}
     const typename T::second_type& end() {return m_range.second;}
     private:
@@ -57,7 +65,6 @@ namespace
     out << "}";
     return out;
   }
-
 }
 
 //_______________________________________________
@@ -66,9 +73,9 @@ void load_tpot_geometry( int runnumber )
 {
 
   // initialization
-  auto rc = recoConsts::instance();
-  auto se = Fun4AllServer::instance();
-  auto topNode = se->topNode();
+  auto *rc = recoConsts::instance();
+  auto *se = Fun4AllServer::instance();
+  auto *topNode = se->topNode();
 
   rc->set_IntFlag("RUNNUMBER", runnumber);
   rc->set_IntFlag("RUNSEGMENT", 0);
@@ -77,22 +84,22 @@ void load_tpot_geometry( int runnumber )
 
   // load geometry file
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
-  std::cout << "Geometry - geofile: " << geofile << std::endl;
-  auto ingeo = new Fun4AllRunNodeInputManager("GeoIn");
+  std::cout << "Geometry - geofile: " <<  geofile.c_str() << std::endl;
+  auto *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
   ingeo->AddFile(geofile);
   ingeo->run(0);
 
   // acts geometry initialization
-  auto geom = new MakeActsGeometry;
+  auto *geom = new MakeActsGeometry;
   geom->set_mvtx_applymisalign(true);
   geom->InitRun( topNode );
 
   // get relevant nodes
   // micromegas geometry
-  auto m_micromegas_geomcontainer = findNode::getClass<PHG4CylinderGeomContainer>(topNode, "CYLINDERGEOM_MICROMEGAS_FULL");
+  auto *m_micromegas_geomcontainer = findNode::getClass<PHG4CylinderGeomContainer>(topNode, "CYLINDERGEOM_MICROMEGAS_FULL");
 
   // ACTS geometry
-  auto m_tGeometry = findNode::getClass<ActsGeometry>(topNode, "ActsGeometry");
+  auto *m_tGeometry = findNode::getClass<ActsGeometry>(topNode, "ActsGeometry");
 
   using range_list_t = std::vector<CylinderGeomMicromegas::range_t>;
   range_list_t theta_range_list;
@@ -104,7 +111,7 @@ void load_tpot_geometry( int runnumber )
     // sanity
     assert(layer == layergeom->get_layer());
 
-    auto micromegas_layergeom = static_cast<CylinderGeomMicromegas*>(layergeom);
+    auto *micromegas_layergeom = static_cast<CylinderGeomMicromegas*>(layergeom);
 
     // tiles
     const unsigned int tile_count = micromegas_layergeom->get_tiles_count();
@@ -128,7 +135,7 @@ void load_tpot_geometry( int runnumber )
   }
 
   // calculate inner phi range for each sector
-  auto get_phi_range = [phi_range_list]( std::vector<int> indexes )
+  auto get_phi_range = [phi_range_list]( const std::vector<int>& indexes )
   {
     CylinderGeomMicromegas::range_t out{0,0};
     for(const auto& i:indexes)
@@ -183,11 +190,11 @@ std::vector<std::string> list_files( const std::string& selection )
 {
   std::vector<std::string> out;
 
-  std::cout << "list_files - selection: " << selection << std::endl;
+  std::cout << "list_files - selection: " << selection.c_str() << std::endl;
   if( selection.empty() ) return out;
 
   const std::string command = std::string("ls -1 ") + selection;
-  auto tmp = popen( command.c_str(), "r" );
+  auto *tmp = popen( command.c_str(), "r" );
   char line[512];
   while( fgets( line, 512, tmp ) )
   {
@@ -215,8 +222,8 @@ void DistortionCorrectionMatrixInversion()
    * that needs to be inverted, to get track-based, beam-induced distortions inside
    * TPOT acceptance
    */
-  const TString tag = "_flat_genfit_truth_notpc_distorted-new";
-  const TString inputFile = Form( "DST/CONDOR%s/TpcSpaceChargeMatrices%s_*.root", tag.Data(), tag.Data() );
+  std::string tag = "_flat_genfit_truth_notpc_distorted-new";
+  std::string inputFile = "DST/CONDOR" + tag + "/TpcSpaceChargeMatrices" + tag + std::string("_*.root");
 
   // Central membrane distortion corrections
   /*
@@ -227,13 +234,13 @@ void DistortionCorrectionMatrixInversion()
   const std::string inputfile_cm = "distortion_maps/average_minus_static_distortion_cm.root";
 
   // output file
-  const TString outputFile = Form( "Rootfiles/Distortions_full%s_mm.root", tag.Data() );
+  std::string outputFile = "Rootfiles/Distortions_full" + tag + "_mm.root";
 
-  std::cout << "DistortionCorrectionMatrixInversion - inputFile: " << inputFile << std::endl;
-  std::cout << "DistortionCorrectionMatrixInversion - inputfile_cm: " << inputfile_cm << std::endl;
-  std::cout << "DistortionCorrectionMatrixInversion - outputFile: " << outputFile << std::endl;
+  std::cout << "DistortionCorrectionMatrixInversion - inputFile: " << inputFile.c_str() << std::endl;
+  std::cout << "DistortionCorrectionMatrixInversion - inputfile_cm: " << inputfile_cm.c_str() << std::endl;
+  std::cout << "DistortionCorrectionMatrixInversion - outputFile: " << outputFile .c_str()<< std::endl;
 
-  auto filenames = list_files( inputFile.Data() );
+  auto filenames = list_files( inputFile );
   std::cout << "SpaceChargeMatrixInversion - loaded " << filenames.size() << " files" << std::endl;
 
   // update TPOT phi range, needed for the interpolation
@@ -255,7 +262,7 @@ void DistortionCorrectionMatrixInversion()
   spaceChargeMatrixInversion.extrapolate_distortion_corrections();
 
   // write to output
-  spaceChargeMatrixInversion.save_distortion_corrections( outputFile.Data() );
+  spaceChargeMatrixInversion.save_distortion_corrections( outputFile );
 
   std::cout << "DistortionCorrectionMatrixInversion - all done." << std::endl;
 }

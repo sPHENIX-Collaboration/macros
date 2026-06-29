@@ -7,6 +7,8 @@
 
 #include <fun4all/Fun4AllServer.h>
 
+#include <Rtypes.h>  // resolves R__LOAD_LIBRARY for clang-tidy
+
 R__LOAD_LIBRARY(libcalo_reco.so)
 
 namespace Enable
@@ -17,7 +19,7 @@ namespace Enable
 
 void TopoClusterReco()
 {
-  int verbosity = max(Enable::VERBOSITY, Enable::TOPOCLUSTER_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TOPOCLUSTER_VERBOSITY);
 
   //---------------
   // Fun4All server

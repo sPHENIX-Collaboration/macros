@@ -1,0 +1,79 @@
+#+title: README
+
+* Overview
+
+This project provides a complete, high-throughput pipeline for the Q Vector calibration of the *sPHENIX Event Plane Detector (sEPD)*. It automates the multi-pass procedure required to correct detector acceptance effects and gain non-uniformities, ultimately generating Calibration Database (CDB) payloads.
+
+* Scientific Context
+
+The pipeline corrects sEPD Q-vectors through a three-pass calibration sequence:
+
+1. *Re-centering*: Calculates first-order Q-vector offsets to center the distribution.
+2. *Flattening*: Applies re-centering and calculates a whitening matrix to transform elliptical distributions into isotropic unit circles.
+3. *Validation & CDB*: Applies the full correction (re-centering + flattening) to verify the final event plane resolution and generates the final CDB payloads.
+
+** Workflow Architecture
+
+The pipeline is managed by ~runProd.py~, which orchestrates the following stages:
+
+*** 1. Stage-QA (Data Preparation)
+- *Process*: Uses ~Fun4All_sEPD.C~ and ~sEPD_TreeGen~ to process DSTs.
+- *Output*: Generates DSTs for fast iteration and QA histograms to identify "bad" towers.
+- *Condor*: Submits batch jobs to the HTCondor system for high-throughput processing.
+
+*** 2. Stage-QVecCalib (Iterative Calibration)
+- *Process*: Iteratively executes the three calibration passes using the ~Fun4All_QVecCalib.C~ macro.
+- *Logic*: Pairs TTrees with calibration constants derived from previous passes.
+- *Parallelization*: Utilizes Python's ~multiprocessing~ to perform simultaneous ~hadd~ merges of run-by-run results.
+- *CDB Generation*: The final pass (Pass 2) automatically produces the ~SEPD_EventPlaneCalib~ and ~SEPD_HotMap~ payloads.
+
+** Core Components
+
+*** Python Pipeline (~runProd.py~)
+- *Requirements*: Python 3.13+.
+- *Monitoring*: Implements a passive log-polling strategy that tracks job completion via ~.log~ files rather than polling the schedd, increasing reliability.
+
+***  C++ Classes (C++20)
+- *sEPD_TreeGen*: A ~SubsysReco~ module that extracts event-level and tower-level info into DSTs.
+- *QVecCalib*: A ~SubsysReco~ module that orchestrates the physics logic for the three calibration passes and CDB writing.
+- *QVecShared*: Provides centralized definitions (harmonics, centrality bins) and naming helpers to ensure consistency across the pipeline.
+
+** Requirements & Build
+- *External Tools*: Requires ~CreateDstList.pl~ for DST synchronization.
+
+** Execution
+
+To run the full production pipeline, execute the primary Python script with your specific run list:
+
+#+begin_src bash
+python3 runProd.py -i runs.list --output /path/to/output --cdb-tag my_tag
+#+end_src
+
+*** Required Arguments
+- -i, --run-list-file: Path to a text file containing the list of run numbers to be processed, with each run on a new line.
+
+*** Data & Path Configuration
+- -o, --output: Base directory for all stage outputs, logs, and final results. Defaults to ~test~.
+- -i4, --dst-list-dir: Directory containing existing DST lists. If not provided, it defaults to a ~dst-lists~ folder within the output directory.
+- -l, --condor-log-dir: Directory where HTCondor will write .log files. If empty, it defaults to ~/tmp/[USER]/dump~.
+
+*** Physics & Macro Parameters
+- -i2, --f4a-macro: Path to the Fun4All ROOT macro used for initial TTree generation. Defaults to ~macros/Fun4All_sEPD.C~.
+- -i3, --f4a-QVecCalib: Path to the Fun4All ROOT macro used for calibration passes. Defaults to ~macros/Fun4All_QVecCalib.C~.
+- -n2, --events: Total number of events to process per job. Setting this to 0 (default) processes all available events in the DST.
+- -t1, --dst-tag: The specific sPHENIX DST production tag used for input list generation. Defaults to ~new_newcdbtag_v008~.
+- -t2, --cdb-tag: The tag associated with the Calibration Database for both reading existing conditions and writing final payloads. Defaults to ~newcdbtag~.
+
+*** Parallelization & Performance
+- -n3, --n-cores: Number of CPU cores to utilize for parallel tasks, including hadd merging of ROOT files and concurrent CDB generation. Defaults to 8.
+- -n1, --segments: Number of DST files to process per individual Condor job. Defaults to 15.
+- -m1, --f4a-memory: Memory (in GB) requested for Fun4All Condor jobs. Defaults to 3.0.
+- -m2, --QVecCalib-memory: Memory (in GB) requested for Q-Vector Calibration Condor jobs. Defaults to 0.5.
+
+*** Binary & Script Locations
+- -e1, --f4a-script: The shell script wrapper for executing Fun4All on Condor. Defaults to ~scripts/genFun4All.sh~.
+- -e2, --QVecCalib-script: The shell script wrapper for executing the Calibration binary on Condor. Defaults to ~scripts/genQVecCalib.sh~.
+
+*** Debugging
+- -v, --verbose: Enables detailed debug logging in the main log.txt file, providing granular information on command execution and Condor status.
+  

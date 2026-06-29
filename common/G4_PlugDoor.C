@@ -7,6 +7,8 @@
 
 #include <g4main/PHG4Reco.h>
 
+#include <TSystem.h>
+
 R__LOAD_LIBRARY(libg4detectors.so)
 
 void common_color(PHG4CylinderSubsystem *subsys);
@@ -30,7 +32,7 @@ namespace G4PLUGDOOR
   // define via four corners in the engineering drawing
   double z_1 = 330.81;
   double z_2 = 360.81;
-  double r_1 = (12./2.)*2.54; // 12 inches diameter
+  double r_1 = (12. / 2.) * 2.54;  // 12 inches diameter
   double r_2 = 263.5;
 
   double length = z_2 - z_1;
@@ -51,12 +53,11 @@ namespace G4ABSORBER
   double z_3 = z_2 + l_2;
   double z_4 = z_3 + l_3;
   double r_in = 6.34;
-  double r_out_1 = 55.8/2.;
-  double r_out_2 = 27.93/2.;
+  double r_out_1 = 55.8 / 2.;
+  double r_out_2 = 27.93 / 2.;
   double r_out_3 = r_out_1;
-  double r_out_4 = 35.55/2.;
-}  // namespace G4PLUGDOOR
-
+  double r_out_4 = 35.55 / 2.;
+}  // namespace G4ABSORBER
 
 void PlugDoorInit()
 {
@@ -67,9 +68,9 @@ void PlugDoorInit()
   {
     if (G4PLUGDOOR::thickness >= G4PLUGDOOR::z_2 - G4PLUGDOOR::z_1)
     {
-      cout << "G4_PlugDoor::PlugDoorInit(): thickness " << G4PLUGDOOR::thickness
-           << " exceeds door thickness " << G4PLUGDOOR::z_2 - G4PLUGDOOR::z_1
-           << endl;
+      std::cout << "G4_PlugDoor::PlugDoorInit(): thickness " << G4PLUGDOOR::thickness
+                << " exceeds door thickness " << G4PLUGDOOR::z_2 - G4PLUGDOOR::z_1
+                << std::endl;
       gSystem->Exit(1);
     }
   }
@@ -79,10 +80,10 @@ void PlugDoor(PHG4Reco *g4Reco)
   bool OverlapCheck = Enable::OVERLAPCHECK || Enable::PLUGDOOR_OVERLAPCHECK;
   bool flux_door_active = Enable::ABSORBER || Enable::PLUGDOOR_ABSORBER;
 
-  const string material("Steel_1006");
+  const std::string material("Steel_1006");
 
-  const string absorber_material("G4_STAINLESS-STEEL");
-  
+  const std::string absorber_material("G4_STAINLESS-STEEL");
+
   if (Enable::PLUGDOOR_BLACKHOLE)
   {
     double place_z_plate = G4PLUGDOOR::z_1 + G4PLUGDOOR::thickness / 2.;
@@ -191,7 +192,7 @@ void PlugDoor(PHG4Reco *g4Reco)
     common_color(flux_return_minus);
     g4Reco->registerSubsystem(flux_return_minus);
   }
-  
+
   if (Enable::BEAMPIPE_ABSORBER)
   {
     double lengths[] = {G4ABSORBER::l_1, G4ABSORBER::l_2, G4ABSORBER::l_3, G4ABSORBER::l_4};
@@ -225,11 +226,9 @@ void PlugDoor(PHG4Reco *g4Reco)
       absorber->BlackHole(Enable::BEAMPIPE_ABSORBER_BLACKHOLE);
       common_color(absorber);
       g4Reco->registerSubsystem(absorber);
-
     }
-    BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z,    G4ABSORBER::z_4 + G4ABSORBER::l_4);
-    BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z,  -(G4ABSORBER::z_4 + G4ABSORBER::l_4));
-
+    BlackHoleGeometry::max_z = std::max(BlackHoleGeometry::max_z, G4ABSORBER::z_4 + G4ABSORBER::l_4);
+    BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -(G4ABSORBER::z_4 + G4ABSORBER::l_4));
   }
 
   return;

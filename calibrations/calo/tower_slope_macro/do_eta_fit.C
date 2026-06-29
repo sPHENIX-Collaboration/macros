@@ -3,13 +3,18 @@
 //TGraph * grff = 0;
 #include <GlobalVariables.C>
 
-#include "LiteCaloEval.h"
+#include <litecaloeval/LiteCaloEval.h>
+
+#include <Rtypes.h>
+#include <TSystem.h>
+
 R__LOAD_LIBRARY(libLiteCaloEvalTowSlope.so)
 
-void do_eta_fit(const char * reffile, const char * modfile)
+void do_eta_fit(const std::string &reffile, const std::string &modfile)
 {
   gSystem->Load("libLiteCaloEvalTowSlope.so");
-  LiteCaloEval reflce, modlce;
+  LiteCaloEval reflce;
+  LiteCaloEval modlce;
   reflce.CaloType(LiteCaloEval::HCALOUT);
   modlce.CaloType(LiteCaloEval::HCALOUT);
   reflce.Get_Histos(reffile);

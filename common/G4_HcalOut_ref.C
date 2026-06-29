@@ -402,7 +402,6 @@ void HCALOuter_Towers()
 
     CaloTowerStatus *statusHCALOUT = new CaloTowerStatus("HCALOUTSTATUS");
     statusHCALOUT->set_detector_type(CaloTowerDefs::HCALOUT);
-    statusHCALOUT->set_time_cut(2);
     se->registerSubsystem(statusHCALOUT);
 
     CaloTowerCalib *calibOHCal = new CaloTowerCalib("HCALOUTCALIB");

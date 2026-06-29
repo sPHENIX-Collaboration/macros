@@ -4,6 +4,12 @@
 #include "sPhenixStyle.h"
 #include "sPhenixStyle.C"
 
+#include <TCanvas.h>
+#include <TH2.h>
+#include <TLatex.h>
+#include <TLegend.h>
+#include <TPad.h>
+
 void sPHENIXplots()
 {
   SetsPhenixStyle();
@@ -17,7 +23,7 @@ void sPHENIXplots()
   leg->AddEntry("","#it{#bf{sPHENIX}} Preliminary","");
   leg->AddEntry("","Au+Au #sqrt{s_{NN}} = 200 GeV","");
 
-  TH2D *h = new TH2D("", "", 100, 0, 1, 100, 0, 1);
+  TH2 *h = new TH2D("", "", 100, 0, 1, 100, 0, 1);
   h->GetYaxis()->SetNdivisions(405);
   h->GetXaxis()->SetNdivisions(405);
   h->SetXTitle("x-axis title [arb. units]");

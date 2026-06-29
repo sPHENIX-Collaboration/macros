@@ -164,7 +164,8 @@ void MakeNSTowerJets()
   RetowerCEMC* rcemc = new RetowerCEMC();
   rcemc->Verbosity(verbosity);
   rcemc->set_towerinfo(true);
-  rcemc->set_frac_cut(0.5);  // fraction of retower that must be masked to mask the full retower
+  rcemc->set_frac_cut(1);  // fraction of retower that must be masked to mask the full retower. 1=do not apply extra masking
+  rcemc->set_do_rescale(false); // scale the retowered towers up to account for dead area? DONT turn this on in p+p
   rcemc->set_towerNodePrefix(NSJETS::tower_prefix);
   se->registerSubsystem(rcemc);
 

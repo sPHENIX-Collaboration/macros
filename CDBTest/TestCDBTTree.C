@@ -1,5 +1,10 @@
 #include <cdbobjects/CDBTTree.h>
 
+#include <TSystem.h>
+
+#include <cmath>
+#include <iostream>
+
 R__LOAD_LIBRARY(libcdbobjects.so)
 
 void TestCDBTTree(const std::string &fname = "test.root")
@@ -10,7 +15,7 @@ void TestCDBTTree(const std::string &fname = "test.root")
   cdbttree->SetSingleFloatValue("Test3",23);
   cdbttree->SetSingleFloatValue("Test4",24);
   cdbttree->SetSingleIntValue("Tes2",24);
-  cdbttree->SetSingleDoubleValue("Tes2",TMath::Pi());
+  cdbttree->SetSingleDoubleValue("Tes2",M_PI);
   cdbttree->SetSingleUInt64Value("Tes2",12486346984672562);
   cdbttree->CommitSingle();
   cdbttree->SetFloatValue(2,"Tst",25);
@@ -25,7 +30,7 @@ void TestCDBTTree(const std::string &fname = "test.root")
   cdbttree->SetUInt64Value(10,"blatr",28);
   for (int i=0; i<10; i++)
   {
-    string varname = "dvar" + to_string(i);
+    std::string varname = "dvar" + std::to_string(i);
     cdbttree->SetDoubleValue(23,varname,28875342.867);
   }
   cdbttree->Commit();
@@ -43,7 +48,7 @@ CDBTTree *TestWrite(const std::string &fname = "test.root")
   cdbttree->SetSingleFloatValue("Test3",23);
   cdbttree->SetSingleFloatValue("Test4",24);
   cdbttree->SetSingleIntValue("Tes2",24);
-  cdbttree->SetSingleDoubleValue("Tes2",TMath::Pi());
+  cdbttree->SetSingleDoubleValue("Tes2",M_PI);
   cdbttree->SetSingleUInt64Value("Tes2",12486346984672562);
   cdbttree->CommitSingle();
   cdbttree->SetFloatValue(2,"Tst",25);
@@ -58,10 +63,10 @@ CDBTTree *TestWrite(const std::string &fname = "test.root")
   cdbttree->SetUInt64Value(10,"blatr",28);
   for (int i=0; i<100; i++)
   {
-    string varname = "dvar";
-    string varname2 = "dvar2";
-    string varname3 = "dvar3";
-    string varname4 = "dvar4";
+    std::string varname = "dvar";
+    std::string varname2 = "dvar2";
+    std::string varname3 = "dvar3";
+    std::string varname4 = "dvar4";
     for (int j=0; j<25; j++)
     {
       cdbttree->SetDoubleValue(j,varname,28875342.867*j);
@@ -77,12 +82,12 @@ void Read(const std::string &fname = "test.root")
 {
   CDBTTree *cdbttree = new CDBTTree(fname);
   cdbttree->LoadCalibrations();
-  cout << "Test2: " << cdbttree->GetSingleFloatValue("Test2") << endl;
-  cout << "Tt2(2): " << cdbttree->GetFloatValue(2,"Tt2") << endl;
-  cout << "Tt2(4): " << cdbttree->GetFloatValue(4,"Tt2") << endl;
-  cout << "blar: " << cdbttree->GetIntValue(10,"blar") << endl;
-  cout << "int Tt2(4): " << cdbttree->GetIntValue(4,"Tt2") << endl;
-  cout << "dvar5: " << cdbttree->GetDoubleValue(23,"dvar5");
+  std::cout << "Test2: " << cdbttree->GetSingleFloatValue("Test2") << std::endl;
+  std::cout << "Tt2(2): " << cdbttree->GetFloatValue(2,"Tt2") << std::endl;
+  std::cout << "Tt2(4): " << cdbttree->GetFloatValue(4,"Tt2") << std::endl;
+  std::cout << "blar: " << cdbttree->GetIntValue(10,"blar") << std::endl;
+  std::cout << "int Tt2(4): " << cdbttree->GetIntValue(4,"Tt2") << std::endl;
+  std::cout << "dvar5: " << cdbttree->GetDoubleValue(23,"dvar5");
   cdbttree->Print();
   delete cdbttree;
   gSystem->Exit(0);

@@ -1,10 +1,15 @@
-TH2F* DivideColumnsByAverage(TH2F* hist) {
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TH2.h>
+#include <TStyle.h>
+
+TH2* DivideColumnsByAverage(TH2* hist) {
     // Get the number of bins along x and y axes
     int numBinsX = hist->GetNbinsX();
     int numBinsY = hist->GetNbinsY();
 
     // Create a new TH2F histogram for storing the result
-    TH2F* dividedHistogram = new TH2F("dividedHistogram", "Histogram with Columns Divided by Average",
+    TH2* dividedHistogram = new TH2F("dividedHistogram", "Histogram with Columns Divided by Average",
                                       numBinsX, hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax(),
                                       numBinsY, hist->GetYaxis()->GetXmin(), hist->GetYaxis()->GetXmax());
 
@@ -32,23 +37,28 @@ TH2F* DivideColumnsByAverage(TH2F* hist) {
 void quickPlot(){
 
   TFile* fin = new TFile("combine_out/out_23727.root");
-  TH2F* h_ohcal_hit = (TH2F*) fin->Get("h_ohcal_etaphi_wQA");
-  TH2F* h_ihcal_hit = (TH2F*) fin->Get("h_ihcal_etaphi_wQA");
-  //TH2F* h_ihcal_hit = (TH2F*) fin->Get("h_ihcal_etaphi_wQA");
+  TH2* h_ohcal_hit {nullptr};
+  fin->GetObject("h_ohcal_etaphi_wQA",h_ohcal_hit);
+  TH2* h_ihcal_hit {nullptr};
+  fin->GetObject("h_ihcal_etaphi_wQA",h_ihcal_hit);
+  //TH2* h_ihcal_hit {nullptr};
+  //fin->GetObject("h_ihcal_etaphi_wQA",h_ihcal_hit);
   
 
-  TH2F*  h_ohcal_hit_avg = DivideColumnsByAverage(h_ohcal_hit);
-  TH2F*  h_ihcal_hit_avg = DivideColumnsByAverage(h_ihcal_hit);
+  TH2*  h_ohcal_hit_avg = DivideColumnsByAverage(h_ohcal_hit);
+  TH2*  h_ihcal_hit_avg = DivideColumnsByAverage(h_ihcal_hit);
 
   TCanvas* c1 = new TCanvas("c1","c1",600,600);
   h_ohcal_hit_avg->Draw("COLZ");
   h_ohcal_hit_avg->SetXTitle("ohcal ieta");
   h_ohcal_hit_avg->SetYTitle("ohcal iphi");
-
+  c1->Update();
+  
   TCanvas* c2 = new TCanvas("c2","c2",600,600);
   h_ihcal_hit_avg->Draw("COLZ");
   h_ihcal_hit_avg->SetXTitle("ihcal ieta");
   h_ihcal_hit_avg->SetYTitle("ihcal iphi");
+  c2->Update();
   
 
   TFile* fout = new TFile("quickPlotSave.root","recreate");
@@ -59,6 +69,6 @@ void quickPlot(){
 
   h_ohcal_hit->Write();
   h_ihcal_hit->Write();
-
+  fout->Close();
 
 }

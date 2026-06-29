@@ -12,6 +12,9 @@
 
 #include <phool/recoConsts.h>
 
+#include <Rtypes.h>  // resolves R__LOAD_LIBRARY for clang-tidy
+#include <TSystem.h>
+
 R__LOAD_LIBRARY(libinttcalib.so)
 R__LOAD_LIBRARY(libintt.so)
 
@@ -22,8 +25,8 @@ R__LOAD_LIBRARY(libffarawmodules.so)
 
 void Fun4All_Intt_Calib(
     int num_evt = 400000,
-    int run_num,
-    const string &input_dst_list = "intt.list",
+    int run_num = 0,
+    const std::string &input_dst_list = "intt.list",
     const std::string &hotmap_cdb_file = "hotmap.root",
     const std::string &hotmap_png_file = "hotmap.png",
     const std::string &bcomap_cdb_file = "bcomap.root",
@@ -66,6 +69,6 @@ void Fun4All_Intt_Calib(
 
   se->End();
   delete se;
-  cout << "all done" << endl;
+  std::cout << "all done" << std::endl;
   gSystem->Exit(0);
 }

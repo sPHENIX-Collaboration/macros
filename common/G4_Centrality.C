@@ -21,7 +21,7 @@ namespace Enable
 
 void Centrality()
 {
-  int verbosity = max(Enable::VERBOSITY, Enable::CENTRALITY_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::CENTRALITY_VERBOSITY);
   //---------------
   // Fun4All server
   //---------------
@@ -32,14 +32,14 @@ void Centrality()
   cent->Verbosity(verbosity);
   if (Enable::CDB)
   {
-    PHParameterUtils::FillPHParametersFromCDB(cent->GetCalibrationParameters(),"CENTRALITY");
+    PHParameterUtils::FillPHParametersFromCDB(cent->GetCalibrationParameters(), "CENTRALITY");
   }
   else
   {
-    cent->GetCalibrationParameters().ReadFromFile("centrality", "xml", 0, 0, string(getenv("CALIBRATIONROOT")) + string("/Centrality/"));
+    cent->GetCalibrationParameters().ReadFromFile("centrality", "xml", 0, 0, std::string(getenv("CALIBRATIONROOT")) + std::string("/Centrality/"));
   }
-  se->registerSubsystem( cent );
-  
+  se->registerSubsystem(cent);
+
   return;
 }
 #endif

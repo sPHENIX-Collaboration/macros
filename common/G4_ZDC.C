@@ -62,8 +62,6 @@ void ZDCSetup(PHG4Reco *g4Reco, const int absorberactive = 0)
 
   bool SupportActive = Enable::SUPPORT || Enable::ZDC_SUPPORT;
 
-  Fun4AllServer *se = Fun4AllServer::instance();
-
   PHG4ZDCSubsystem *zdc = new PHG4ZDCSubsystem("ZDC", PHG4ZDCDefs::NORTH);
   // place zdc in beam enclosure
   zdc->set_double_param("place_z", G4ZDC::ZDCPlaceZ - G4BEAMLINE::enclosure_center);
@@ -137,7 +135,7 @@ void ZDC_Towers()
   se->registerSubsystem(TowerCalibration1);
 }
 
-void ZDC_Eval(std::string outputfile)
+void ZDC_Eval(const std::string &outputfile)
 {
   int verbosity = std::max(Enable::VERBOSITY, Enable::ZDC_VERBOSITY);
   Fun4AllServer *se = Fun4AllServer::instance();

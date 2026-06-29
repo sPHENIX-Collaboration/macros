@@ -1,5 +1,11 @@
 #include <cdbobjects/CDBHistos.h>
 
+#include <Rtypes.h>
+#include <TH1.h>
+#include <TH2.h>
+#include <TH3.h>
+#include <TProfile.h>
+
 R__LOAD_LIBRARY(libcdbobjects.so)
 
 void TestCDBHistos(const std::string &fname = "testhistos.root")

@@ -130,15 +130,6 @@ echo pass0dir: ${pass0dir}
 echo nevents: ${nevents}
 
 
-if [[ $runno -le 53880 ]]
-then
-  runtype=1  # pp200
-else
-  runtype=0  # auau200
-fi
-
-echo runtype $runtype
-
 export USER="$(id -u -n)"
 export LOGNAME=${USER}
 export HOME=/sphenix/u/${USER}
@@ -229,8 +220,8 @@ echo "##########################################################################
 echo "Running pass2.3 calibration"
 #./cups.py -r ${runnumber} -s ${segment} -d ${outbase} message "Running PASS 2.3 calibration"
 pass=3
-echo root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents},${runtype}\)
-root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents},${runtype},\"${dbtag}\"\)
+echo root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents},\"${dbtag}\"\)
+root.exe -q -b cal_mbd.C\(\"${fname}\",${pass},${nevents},\"${dbtag}\"\)
 mv results/${runno}/mbd_qfit.root results/${runno}/mbd_qfit-${runno}.root
 
 echo "###############################################################################################################"
@@ -245,7 +236,7 @@ mv results/${runno}/mbd_t0corr.root results/${runno}/mbd_t0corr-${runno}.root
 
 # Copy out files
 mkdir -p ${outdir}/${runno}
-#cp -p ${fname} ${outdir}/${runno}/   # dst_uncal root file
+
 for r in ${caldir}/*
 do
     # skip linked files

@@ -1,4 +1,11 @@
 //
+#include <TCanvas.h>
+#include <TF2.h>
+#include <TH1.h>
+#include <TLegend.h>
+#include <TRandom.h>
+
+void test_style()
 {
   TCanvas c;
   TH1F h1("h1","H1;Mass [GeV];Counts [/ GeV];",20,0,20);

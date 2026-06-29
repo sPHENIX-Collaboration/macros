@@ -2,6 +2,7 @@
 #define MACRO_G4TRKRVARIABLES_C
 
 #include <g4intt/PHG4InttDefs.h>
+
 #include <g4mvtx/PHG4MvtxDefs.h>
 
 namespace Enable
@@ -15,7 +16,7 @@ namespace Enable
   bool MVTX_SUPPORT = false;
   bool MVTX_APPLYMISALIGNMENT = true;
   bool MVTX_STREAMING = true;
-  
+
   int MVTX_VERBOSITY = 0;
 
   bool INTT = false;
@@ -111,31 +112,34 @@ namespace G4TPC
 
   // apply static distortions in simulations
   bool ENABLE_STATIC_DISTORTIONS = false;
-
-  std::string static_distortion_filename = "TPC_STATIC_DISTORTION";
+  std::string static_distortion_filename;
 
   // apply time-ordered distortion fluctuations in simulation
   bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
-  std::string time_ordered_distortion_filename = "TPC_TIMEORDERED_DISTORTION";
+  std::string time_ordered_distortion_filename;
 
   // allow distortions to remove electrons that
   bool ENABLE_REACHES_READOUT = true;
 
   // module edge distortion corrections
   bool ENABLE_MODULE_EDGE_CORRECTIONS = false;
-  std::string module_edge_correction_filename = "";
+  std::string module_edge_correction_filename;
 
   // static distortion corrections
   bool ENABLE_STATIC_CORRECTIONS = false;
-  std::string static_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
+  std::string static_correction_filename;
   bool USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
 
   // average distortion corrections
   bool ENABLE_AVERAGE_CORRECTIONS = false;
   std::string average_correction_filename;
-  bool USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
+  bool USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = true;
+
+  std::string CMStripePattern = "/sphenix/u/bkimelman/CMStripePattern_ideal.root";
   bool average_correction_interpolate = true;
-  
+  bool SaveAllLaminationHists = false;
+  bool BFieldOff = false;
+
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
 
@@ -146,11 +150,10 @@ namespace G4TPC
   float laser_adc_threshold = 100.0;
 
   bool REJECT_LASER_EVENTS = false;
-  std::string laser_event_debug_filename = "";
-  std::string LaminationOutputName = "";
-  std::string LaminationQAName = "";
-  bool BFieldOff = false;
-  
+  std::string laser_event_debug_filename;
+  std::string LaminationOutputName;
+  std::string LaminationQAName;
+
   // enable direct laser g4hits generation
   bool ENABLE_DIRECT_LASER_HITS = false;
 
@@ -211,7 +214,7 @@ namespace G4TPC
   double CM_halfwidth = 0.28;  // cm
   double sampa_tzero_bias = -65.0; // ns, set for simulations/reco matching with new sampa response
   bool apply_tpc_tzero_correction = false;  // true to apply small correction to TPC time zero in alignment transforms
-  
+
 }  // namespace G4TPC
 
 namespace G4TRACKING
@@ -239,9 +242,7 @@ namespace G4TRACKING
   // Runs a converter from TrackSeed object to SvtxTrack object to enable
   // use of the various evaluation tools already available
   bool convert_seeds_to_svtxtracks = false;
-
-  // Runs a second pass of seeding to pick up missed seeds in the first pass
-  bool iterative_seeding = false;
+  std::string convertSeedsContainerName = "SvtxTrackSeedContainer";
 
   // Flag to run commissioning seeding workflow with tuned parameters for
   // misaligned + distorted tracks

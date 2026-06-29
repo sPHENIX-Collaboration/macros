@@ -6,6 +6,8 @@
 #include <g4detectors/PHG4CylinderSubsystem.h>
 #include <g4main/PHG4Reco.h>
 
+#include <algorithm>
+
 R__LOAD_LIBRARY(libg4detectors.so)
 
 namespace Enable
@@ -20,10 +22,7 @@ void BlackHoleInit() {}
 void BlackHole(PHG4Reco *g4Reco, double radius)
 {
   // swallow all particles coming out of our detector
-  if (radius < BlackHoleGeometry::max_radius)
-  {
-    radius = BlackHoleGeometry::max_radius;
-  }
+  radius = std::max(radius, BlackHoleGeometry::max_radius);
   double blackhole_length = (BlackHoleGeometry::max_z - BlackHoleGeometry::min_z) + 2 * BlackHoleGeometry::gap;
   double blackhole_zpos = BlackHoleGeometry::min_z - BlackHoleGeometry::gap + blackhole_length / 2.;
   double blackhole_radius = radius + BlackHoleGeometry::gap;  // make the black hole slightly larger than the radius

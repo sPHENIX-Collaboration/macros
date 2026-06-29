@@ -1,5 +1,16 @@
+#include <sPhenixStyle.C>
 
-#include "sPhenixStyle.C"
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TGraph.h>
+#include <TH1.h>
+#include <TH2.h>
+#include <TLatex.h>
+#include <TPad.h>
+#include <TProfile2D.h>
+
+#include <format>
+#include <fstream>
 
 void myText(Double_t x,Double_t y,Color_t color, const char *text, Double_t tsize=0.04) {
 
@@ -9,12 +20,12 @@ void myText(Double_t x,Double_t y,Color_t color, const char *text, Double_t tsiz
   l.DrawLatex(x,y,text);
 }
 
-TH1F* proj(TH2F* h2);
+TH1* proj(TH2* h2);
 
-TH1F* FBratio(TH1F* h){
+TH1* FBratio(TH1* h){
 
    const int Nbin =  h->GetXaxis()->GetNbins();
-   TH1F* hfb = new TH1F("temp32","",Nbin/2,0,Nbin/2);
+   TH1* hfb = new TH1F("temp32","",Nbin/2,0,Nbin/2.);
 
    for(int i=0; i<Nbin/2; i++){
      int b1 = i+1;
@@ -37,7 +48,7 @@ void figmaker(){
   int totalEvents = 0;
 
   std::ifstream infile("../condor/runList.txt");
-  if (!infile) { std::cerr << "Error: Unable to open the file\n"; return 1;}
+  if (!infile) { std::cerr << "Error: Unable to open the file\n"; return;}
   std::vector<int> runList;
   int num;
   while (infile >> num)  runList.push_back(num);
@@ -48,28 +59,28 @@ void figmaker(){
 
     int run = runList[ir];
 
-    TFile* fin = new TFile(Form("../condor/combine_out/out_%d.root",run));
+    TFile* fin = new TFile(std::format("../condor/combine_out/out_{}.root",run).c_str());
 
-    TH2F* h_emcal_mbd_correlation  = (TH2F*) fin->Get("h_emcal_mbd_correlation" );
-    TH2F* h_ihcal_mbd_correlation  = (TH2F*) fin->Get("h_ihcal_mbd_correlation" );
-    TH2F* h_ohcal_mbd_correlation  = (TH2F*) fin->Get("h_ohcal_mbd_correlation" );
-    TH2F* h_emcal_hcal_correlation = (TH2F*) fin->Get("h_emcal_hcal_correlation");
-    TH1F* h_InvMass                = (TH1F*) fin->Get("h_InvMass"               );
-    TH2F* h_cemc_etaphi            = (TH2F*) fin->Get("h_cemc_etaphi_wQA"           );
-    TH2F* h_ihcal_etaphi           = (TH2F*) fin->Get("h_ihcal_etaphi_wQA"          );
-    TH2F* h_ohcal_etaphi           = (TH2F*) fin->Get("h_ohcal_etaphi_wQA"          );
-    TH2F* h_zdc_emcal_correlation  = (TH2F*) fin->Get("h_zdc_emcal_correlation");
-    TH1F* hzdcNorthcalib           = (TH1F*) fin->Get("hzdcNorthcalib");
-    TH1F* hzdcSouthcalib           = (TH1F*) fin->Get("hzdcSouthcalib");
-    TH2F* h_etaphi_clus            = (TH2F*) fin->Get("h_etaphi_clus"           );
-    TH1F* hvtx_z_raw               = (TH1F*) fin->Get("hvtx_z_raw");
+    TH2* h_emcal_mbd_correlation  = (TH2*) fin->Get("h_emcal_mbd_correlation" );
+    TH2* h_ihcal_mbd_correlation  = (TH2*) fin->Get("h_ihcal_mbd_correlation" );
+    TH2* h_ohcal_mbd_correlation  = (TH2*) fin->Get("h_ohcal_mbd_correlation" );
+    TH2* h_emcal_hcal_correlation = (TH2*) fin->Get("h_emcal_hcal_correlation");
+    TH1* h_InvMass                = (TH1*) fin->Get("h_InvMass"               );
+    TH2* h_cemc_etaphi            = (TH2*) fin->Get("h_cemc_etaphi_wQA"           );
+    TH2* h_ihcal_etaphi           = (TH2*) fin->Get("h_ihcal_etaphi_wQA"          );
+    TH2* h_ohcal_etaphi           = (TH2*) fin->Get("h_ohcal_etaphi_wQA"          );
+    TH2* h_zdc_emcal_correlation  = (TH2*) fin->Get("h_zdc_emcal_correlation");
+    TH1* hzdcNorthcalib           = (TH1*) fin->Get("hzdcNorthcalib");
+    TH1* hzdcSouthcalib           = (TH1*) fin->Get("hzdcSouthcalib");
+    TH2* h_etaphi_clus            = (TH2*) fin->Get("h_etaphi_clus"           );
+    TH1* hvtx_z_raw               = (TH1*) fin->Get("hvtx_z_raw");
     TProfile2D* h_cemc_etaphi_time = (TProfile2D*) fin->Get("h_cemc_etaphi_time");
     TProfile2D* h_ihcal_etaphi_time = (TProfile2D*) fin->Get("h_ihcal_etaphi_time");
     TProfile2D* h_ohcal_etaphi_time = (TProfile2D*) fin->Get("h_ohcal_etaphi_time");
 
-   TH2F* h_cemc_e_chi2 = (TH2F*) fin->Get("h_cemc_e_chi2");
-   TH2F* h_ohcal_e_chi2 = (TH2F*) fin->Get("h_ohcal_e_chi2");
-   TH2F* h_ihcal_e_chi2 = (TH2F*) fin->Get("h_ihcal_e_chi2");
+   TH2* h_cemc_e_chi2 = (TH2*) fin->Get("h_cemc_e_chi2");
+   TH2* h_ohcal_e_chi2 = (TH2*) fin->Get("h_ohcal_e_chi2");
+   TH2* h_ihcal_e_chi2 = (TH2*) fin->Get("h_ihcal_e_chi2");
 
     TCanvas* c1 = new TCanvas("c1", "c1", 400, 400);
     h_emcal_mbd_correlation ->Draw("COLZ");
@@ -77,11 +88,11 @@ void figmaker(){
     h_emcal_mbd_correlation ->SetYTitle("#Sigma #it{E}^{MBD} [Arb]");
     h_emcal_mbd_correlation->GetXaxis()->SetNdivisions(505);
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     gPad->SetRightMargin(0.15);
     gPad->SetLogz();
 
-    c1->SaveAs(Form("../plots/emcal_mbd_correlation_%d.pdf",run));
+    c1->SaveAs(std::format("../plots/emcal_mbd_correlation_{}.pdf",run).c_str());
 
 
     TCanvas* c2 = new TCanvas("c2", "c2", 400, 400);
@@ -90,11 +101,11 @@ void figmaker(){
     h_ihcal_mbd_correlation ->SetYTitle("#Sigma #it{E}^{MBD} [Arb]");
     h_ihcal_mbd_correlation->GetXaxis()->SetNdivisions(505);
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     gPad->SetRightMargin(0.15);
     gPad->SetLogz();
 
-    c2->SaveAs(Form("../plots/ihcal_mbd_correlation_%d.pdf",run));
+    c2->SaveAs(std::format("../plots/ihcal_mbd_correlation_{}.pdf",run).c_str());
 
     TCanvas* c3 = new TCanvas("c3", "c3", 400, 400);
     h_ohcal_mbd_correlation ->Draw("COLZ");
@@ -102,11 +113,11 @@ void figmaker(){
     h_ohcal_mbd_correlation ->SetYTitle("#Sigma #it{E}^{MBD} [Arb]");
     h_ohcal_mbd_correlation->GetXaxis()->SetNdivisions(505);
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     gPad->SetRightMargin(0.15);
     gPad->SetLogz();
 
-    c3->SaveAs(Form("../plots/ohcal_mbd_correlation_%d.pdf",run));
+    c3->SaveAs(std::format("../plots/ohcal_mbd_correlation_{}.pdf",run).c_str());
 
 
     TCanvas* c4 = new TCanvas("c4", "c4", 400, 400);
@@ -115,11 +126,11 @@ void figmaker(){
     h_emcal_hcal_correlation->SetYTitle("#Sigma #it{E}^{HCal} [Arb]");
     h_emcal_hcal_correlation->GetXaxis()->SetNdivisions(505);
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     gPad->SetRightMargin(0.15);
     gPad->SetLogz();
 
-    c4->SaveAs(Form("../plots/emcal_hcal_correlation_%d.pdf",run));
+    c4->SaveAs(std::format("../plots/emcal_hcal_correlation_{}.pdf",run).c_str());
 
 
     TCanvas* c5 = new TCanvas("c5", "c5", 400, 400);
@@ -127,9 +138,9 @@ void figmaker(){
     h_InvMass               ->SetXTitle("#it{M}_{#gamma#gamma}");
     h_InvMass               ->SetYTitle("counts");
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
 
-    c5->SaveAs(Form("../plots/InvMass_%d.pdf",run));
+    c5->SaveAs(std::format("../plots/InvMass_{}.pdf",run).c_str());
 
 
     TCanvas* c6 = new TCanvas("c6", "c6", 400, 400);
@@ -137,11 +148,11 @@ void figmaker(){
     h_cemc_etaphi           ->SetXTitle("#it{#eta}_{i} EMCal");
     h_cemc_etaphi           ->SetYTitle("#it{#phi}_{i} EMCal");
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.22, 0.80,1,"EMCal");
     gPad->SetRightMargin(0.15);
 
-    c6->SaveAs(Form("../plots/cemc_etaphi_%d.pdf",run));
+    c6->SaveAs(std::format("../plots/cemc_etaphi_{}.pdf",run).c_str());
 
 
 
@@ -151,11 +162,11 @@ void figmaker(){
     h_ihcal_etaphi          ->SetXTitle("#it{#eta}_{i} iHcal");
     h_ihcal_etaphi          ->SetYTitle("#it{#phi}_{i} iHcal");
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.22, 0.80,1,"iHCal");
     gPad->SetRightMargin(0.15);
 
-    c7->SaveAs(Form("../plots/ihcal_etaphi_%d.pdf",run));
+    c7->SaveAs(std::format("../plots/ihcal_etaphi_{}.pdf",run).c_str());
 
 
     TCanvas* c8 = new TCanvas("c8", "c8", 400, 400);
@@ -163,27 +174,27 @@ void figmaker(){
     h_ohcal_etaphi          ->SetXTitle("#it{#eta}_{i} oHcal");
     h_ohcal_etaphi          ->SetYTitle("#it{#phi}_{i} oHcal");
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.22, 0.80,1,"oHCal");
     gPad->SetRightMargin(0.15);
 
-    c8->SaveAs(Form("../plots/ohcal_etaphi_%d.pdf",run));
+    c8->SaveAs(std::format("../plots/ohcal_etaphi_{}.pdf",run).c_str());
 
 
-    TH1F* h_emcal_proj = (TH1F*) proj(h_cemc_etaphi)->Clone("h_emcal_proj");
+    TH1* h_emcal_proj = (TH1*) proj(h_cemc_etaphi)->Clone("h_emcal_proj");
 
     TCanvas* c9 = new TCanvas("c9", "c9", 400, 400);
     h_emcal_proj->Draw("hist");
     h_emcal_proj->SetYTitle("N^{twr}(E_{T} > 1 GeV)");
 
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.22, 0.80,1,"EMCal");
     
-    c9->SaveAs(Form("../plots/cemc_proj_%d.pdf",run));
+    c9->SaveAs(std::format("../plots/cemc_proj_{}.pdf",run).c_str());
 
 
-    TH1F* h_ohcal_proj = (TH1F*) proj(h_ohcal_etaphi)->Clone("h_ohcal_proj");
+    TH1* h_ohcal_proj = (TH1*) proj(h_ohcal_etaphi)->Clone("h_ohcal_proj");
 
     TCanvas* c10 = new TCanvas("c10", "c10", 400, 400);
     h_ohcal_proj->Draw("hist");
@@ -191,13 +202,13 @@ void figmaker(){
     h_ohcal_proj->GetYaxis()->SetRangeUser(0, h_ohcal_proj->GetMaximum()*1.05);
 
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.22, 0.80,1,"oHCal");
     
-    c10->SaveAs(Form("../plots/ohcal_proj_%d.pdf",run));
+    c10->SaveAs(std::format("../plots/ohcal_proj_{}.pdf",run).c_str());
 
 
-    TH1F* h_ihcal_proj = (TH1F*) proj(h_ihcal_etaphi)->Clone("h_ihcal_proj");
+    TH1* h_ihcal_proj = (TH1*) proj(h_ihcal_etaphi)->Clone("h_ihcal_proj");
 
     TCanvas* c11 = new TCanvas("c11", "c10", 400, 400);
     h_ihcal_proj->Draw("hist");
@@ -205,15 +216,15 @@ void figmaker(){
     h_ihcal_proj->SetXTitle("#eta_{i}");
 
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.22, 0.80,1,"iHCal");
     
-    c11->SaveAs(Form("../plots/ihcal_proj_%d.pdf",run));
+    c11->SaveAs(std::format("../plots/ihcal_proj_{}.pdf",run).c_str());
 
 
-    TH1F* h_fb_ratio_emcal = FBratio(h_emcal_proj);
-    TH1F* h_fb_ratio_ihcal = FBratio(h_ihcal_proj);
-    TH1F* h_fb_ratio_ohcal = FBratio(h_ohcal_proj);
+    TH1* h_fb_ratio_emcal = FBratio(h_emcal_proj);
+    TH1* h_fb_ratio_ihcal = FBratio(h_ihcal_proj);
+    TH1* h_fb_ratio_ohcal = FBratio(h_ohcal_proj);
 
     TCanvas* c12 = new TCanvas("c12", "c12", 400, 400);
     h_fb_ratio_emcal->Draw("ex0");
@@ -232,12 +243,12 @@ void figmaker(){
     h_fb_ratio_ihcal->SetMarkerStyle(33);
 
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.22, 0.80,1,"EMCal");
     myText(0.32,0.80,kBlue,"oHCal");
     myText(0.42,0.80,kRed,"iHCal");
     
-    c12->SaveAs(Form("../plots/h_fb_ratio_emcal_%d.pdf",run));
+    c12->SaveAs(std::format("../plots/h_fb_ratio_emcal_{}.pdf",run).c_str());
 
 
     TCanvas* c13 = new TCanvas("c13", "c13", 400, 400);
@@ -246,11 +257,11 @@ void figmaker(){
     h_zdc_emcal_correlation->SetYTitle("#Sigma #it{E}^{ZDC} [Arb]");
     h_zdc_emcal_correlation->GetXaxis()->SetNdivisions(505);
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     gPad->SetRightMargin(0.15);
     gPad->SetLogz();
 
-    c13->SaveAs(Form("../plots/zdc_emcal_correlation_%d.pdf",run));
+    c13->SaveAs(std::format("../plots/zdc_emcal_correlation_{}.pdf",run).c_str());
 
 
     TCanvas* c14 = new TCanvas("c14", "c14", 400, 400);
@@ -266,11 +277,11 @@ void figmaker(){
     gPad->SetLogy();
 
     myText(0.7, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.7, 0.85, 1, Form("run %d", run));
+    myText(0.7, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.75, 0.80, kBlue,"North");
     myText(0.65, 0.80, kRed,"South");
 
-    c14->SaveAs(Form("../plots/zdc_e_northSouth_%d.pdf",run));
+    c14->SaveAs(std::format("../plots/zdc_e_northSouth_{}.pdf",run).c_str());
 
 
 
@@ -280,10 +291,10 @@ void figmaker(){
     h_etaphi_clus          ->SetXTitle("#it{#eta}_{i} EMCal Clusters");
     h_etaphi_clus          ->SetYTitle("#it{#phi}_{i} EMCal Clusters");
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     gPad->SetRightMargin(0.15);
 
-    c15->SaveAs(Form("../plots/etaphi_clus_%d.pdf",run));
+    c15->SaveAs(std::format("../plots/etaphi_clus_{}.pdf",run).c_str());
 
     totalEvents += hvtx_z_raw->GetEntries();
     int events =  hvtx_z_raw->GetEntries();
@@ -293,10 +304,10 @@ void figmaker(){
     hvtx_z_raw          ->SetXTitle("MBD Vertex #it{z} [cm]");
     hvtx_z_raw          ->SetYTitle("Events");
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
-    myText(0.22, 0.80, 1, Form("events %d", events));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
+    myText(0.22, 0.80, 1, std::format("events {}", events).c_str());
 
-    c16->SaveAs(Form("../plots/vtx_z_%d.pdf",run));
+    c16->SaveAs(std::format("../plots/vtx_z_{}.pdf",run).c_str());
 
 
     TCanvas* c17 = new TCanvas("c17", "c17", 400, 400);
@@ -317,11 +328,11 @@ void figmaker(){
     gPad->SetLogy();
 
     myText(0.7, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.7, 0.85, 1, Form("run %d", run));
+    myText(0.7, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.75, 0.80, kBlue,"North");
     myText(0.65, 0.80, kRed,"South");
 
-    c17->SaveAs(Form("../plots/zdc_e_northSouth_1n_%d.pdf",run));
+    c17->SaveAs(std::format("../plots/zdc_e_northSouth_1n_{}.pdf",run).c_str());
 
 
     TCanvas* c18 = new TCanvas("c18", "c18", 400, 400);
@@ -331,11 +342,11 @@ void figmaker(){
     h_cemc_etaphi_time->GetXaxis()->SetNdivisions(505);
 
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.22, 0.80, 1, "mean hit peak time EMCal");
     gPad->SetRightMargin(0.15);
 
-    c18->SaveAs(Form("../plots/cemc_etaphi_time%d.pdf",run));
+    c18->SaveAs(std::format("../plots/cemc_etaphi_time{}.pdf",run).c_str());
 
     TCanvas* c19 = new TCanvas("c19", "c19", 400, 400);
     h_ohcal_etaphi_time->Draw("COLZ");
@@ -344,11 +355,11 @@ void figmaker(){
     h_ohcal_etaphi_time->GetXaxis()->SetNdivisions(505);
 
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.22, 0.80, 1, "mean hit peak time Outter HCal");
     gPad->SetRightMargin(0.15);
 
-    c19->SaveAs(Form("../plots/ohcal_etaphi_time%d.pdf",run));
+    c19->SaveAs(std::format("../plots/ohcal_etaphi_time{}.pdf",run).c_str());
 
 
     TCanvas* c20 = new TCanvas("c20", "c20", 400, 400);
@@ -358,11 +369,11 @@ void figmaker(){
     h_ihcal_etaphi_time->GetXaxis()->SetNdivisions(505);
 
     myText(0.22, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.22, 0.85, 1, Form("run %d", run));
+    myText(0.22, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.22, 0.80, 1, "mean hit peak time Inner HCal");
     gPad->SetRightMargin(0.15);
 
-    c20->SaveAs(Form("../plots/ihcal_etaphi_time%d.pdf",run));
+    c20->SaveAs(std::format("../plots/ihcal_etaphi_time{}.pdf",run).c_str());
 
     TCanvas* c21 = new TCanvas("c21", "c21", 400, 400);
     h_ihcal_e_chi2->Draw("COLZ");
@@ -374,11 +385,11 @@ void figmaker(){
     gPad->SetLogz();
 
     myText(0.52, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.52, 0.85, 1, Form("run %d", run));
+    myText(0.52, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.52, 0.80, 1, "Inner HCal");
     gPad->SetRightMargin(0.15);
 
-    c21->SaveAs(Form("../plots/ihcal_e_chi2%d.pdf",run));
+    c21->SaveAs(std::format("../plots/ihcal_e_chi2{}.pdf",run).c_str());
 
 
     TCanvas* c22 = new TCanvas("c22", "c22", 400, 400);
@@ -391,11 +402,11 @@ void figmaker(){
     gPad->SetLogz();
 
     myText(0.52, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.52, 0.85, 1, Form("run %d", run));
+    myText(0.52, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.52, 0.80, 1, "Outer HCal");
     gPad->SetRightMargin(0.15);
 
-    c22->SaveAs(Form("../plots/ohcal_e_chi2%d.pdf",run));
+    c22->SaveAs(std::format("../plots/ohcal_e_chi2{}.pdf",run).c_str());
 
 
     TCanvas* c23 = new TCanvas("c23", "c23", 400, 400);
@@ -408,20 +419,20 @@ void figmaker(){
     gPad->SetLogz();
 
     myText(0.52, 0.9, 1, "#it{#bf{sPHENIX}} Internal");
-    myText(0.52, 0.85, 1, Form("run %d", run));
+    myText(0.52, 0.85, 1, std::format("run {}", run).c_str());
     myText(0.52, 0.80, 1, "EMCal");
     gPad->SetRightMargin(0.15);
 
-    c23->SaveAs(Form("../plots/cemc_e_chi2%d.pdf",run));
+    c23->SaveAs(std::format("../plots/cemc_e_chi2{}.pdf",run).c_str());
 
   }
 
   for (int ir=0; ir<Nruns; ir++){
-    cout << runList[ir] << ",";
+    std::cout << runList[ir] << ",";
   }
-  cout << endl;
-  cout << "total events=" << totalEvents <<endl;
-  cout << endl;
+  std::cout << std::endl;
+  std::cout << "total events=" << totalEvents <<std::endl;
+  std::cout << std::endl;
 
 }
 
@@ -430,11 +441,11 @@ void figmaker(){
 
 
 
-TH1F* proj(TH2F* h2){
+TH1* proj(TH2* h2){
 
   int x = h2->GetXaxis()->GetNbins();
   int y = h2->GetYaxis()->GetNbins();
-  TH1F* h = (TH1F*) h2->ProjectionX("temp");
+  TH1* h = (TH1*) h2->ProjectionX("temp");
   h->Reset();
   for (int ix=1; ix<x+1; ix++){
     float sum = 0;
@@ -447,7 +458,7 @@ TH1F* proj(TH2F* h2){
     if (cc==y) continue;
     float sum_cor = sum*y/(y-cc);
     h->SetBinContent(ix,sum_cor);
-    h->SetBinError(ix,sqrt(sum_cor));
+    h->SetBinError(ix,std::sqrt(sum_cor));
   }
 
 

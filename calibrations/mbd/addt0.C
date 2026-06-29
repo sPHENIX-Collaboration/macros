@@ -3,22 +3,21 @@
 #include <mbd/MbdGeomV1.h>
 #include <mbd/MbdDefs.h>
 
+#include <Rtypes.h> // defines R__LOAD_LIBRARY macro for clang-tidy
+#include <TString.h>
+
 #include <filesystem>
 
-
-#if defined(__CLING__)
 R__LOAD_LIBRARY(libmbd.so)
-#endif
 
-
-const int NPOINTS = 16000; // number of points in correction LUT
-const int MINADC = 0;       // subtracted adc
-const int MAXADC = 15999;
+// const int NPOINTS = 16000; // number of points in correction LUT
+// const int MINADC = 0;       // subtracted adc
+// const int MAXADC = 15999;
 
 void addt0(const char *calfile1 = "results/0/mbd_tt_t0.calib",
     const char *calfile2 = "results/0/pass1_mbd_tt_t0.calib")
 {
-  MbdGeom *mbdgeom = new MbdGeomV1();
+//  MbdGeom *mbdgeom = new MbdGeomV1();
 
   MbdCalib *mcal1 = new MbdCalib();
   mcal1->Download_TTT0( calfile1 );
@@ -56,12 +55,11 @@ void addt0(const char *calfile1 = "results/0/mbd_tt_t0.calib",
   // Write out new t0's to temp calib files
   const std::string dir = std::filesystem::path{ calfile1 }.parent_path().string();
   const std::string& ttt0_fname = dir + "/add_mbd_tt_t0.calib";
-  cout << ttt0_fname << endl;
+  std::cout << ttt0_fname << std::endl;
   mcal1->Write_TTT0( ttt0_fname );
 
   const std::string& tqt0_fname = dir + "/add_mbd_tq_t0.calib";
-  cout << tqt0_fname << endl;
+  std::cout << tqt0_fname << std::endl;
   mcaltq1->Write_TQT0( tqt0_fname );
 
 }
-

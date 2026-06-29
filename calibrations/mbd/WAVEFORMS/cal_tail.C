@@ -17,11 +17,18 @@
 //    4. fit_time_pileupcorr() : find slope of s8 vs s0 in time channels, write out mbd_pileup.calib file
 //                               this is already done at end of calc_residuals
 //
+#include "find_th2ridge.C"
+
 #include <TGraphErrors.h>
 #include <TF1.h>
+#include <TFile.h>
+#include <TPad.h>
+#include <TTree.h>
 
-#include "/phenix/u/chiu/macros/find_th2ridge.C"
-
+#include <fstream>
+#include <iostream>
+#include <set>
+#include <string>
 
 const int NFEECH = 256;
 //const int NFEECH = 10;
@@ -35,16 +42,16 @@ TF1 *fit[NFEECH] = {nullptr};
 TF1 *fit_s8s0[NFEECH] = {nullptr};
 
 // Tree variables
-TTree *_tfit_tree{nullptr};
-Short_t _tch{-1};
-Float_t _tchi2ndf{-1.};
-Float_t _tfitpar[10]{0.};
-TTree *_qfit_tree{nullptr};
-Short_t _qch{-1};
-Float_t _qchi2ndf{-1.};
-Float_t _qfitpar[10]{0.};
+TTree *tfit_tree{nullptr};
+Short_t tch{-1};
+Float_t tchi2ndf{-1.};
+Float_t tfitpar[10]{0.};
+TTree *qfit_tree{nullptr};
+Short_t qch{-1};
+Float_t qchi2ndf{-1.};
+Float_t qfitpar[10]{0.};
 
-Double_t powerlaw(Double_t *x, Double_t *par)
+Double_t powerlaw(Double_t *x, Double_t *par) // NOLINT(readability-non-const-parameter)
 {
   Float_t xx =x[0];
 
@@ -65,7 +72,7 @@ void fit_test(const int feech = 8, const std::string &fname = "mbdsig_tails.root
 
   if ( tfile == nullptr )
   {
-    cout << "Opening " << fname << endl;
+    std::cout << "Opening " << fname << std::endl;
     tfile = new TFile(fname.c_str(),"READ");
   }
 
@@ -145,7 +152,7 @@ void fit_tail(TGraph *g, const int feech)
       gPad->SetLogy(1);
       Double_t chi2 = fit[feech]->GetChisquare();
       Double_t ndf = fit[feech]->GetNDF();
-      cout << "chi2 ndf " << chi2 << "\t" << ndf << endl;
+      std::cout << "chi2 ndf " << chi2 << "\t" << ndf << std::endl;
     }
     else
     {
@@ -153,23 +160,23 @@ void fit_tail(TGraph *g, const int feech)
       g->Fit(fit[feech],"RNQ");
 
       // save to tree
-      _tch = feech;
+      tch = feech;
       for (int ipar=0; ipar<6; ipar++)
       {
-        _tfitpar[ipar] = static_cast<Float_t>( fit[feech]->GetParameter(ipar) );
+        tfitpar[ipar] = static_cast<Float_t>( fit[feech]->GetParameter(ipar) );
       }
 
       // copy samp 0 and samp 8 values. samp 8 should be timing maxsamp
-      _tfitpar[7] = static_cast<Float_t>( g->GetPointY(0) );
-      _tfitpar[8] = static_cast<Float_t>( g->GetPointY(1) );
-      _tfitpar[9] = static_cast<Float_t>( g->GetPointY(8) );
+      tfitpar[7] = static_cast<Float_t>( g->GetPointY(0) );
+      tfitpar[8] = static_cast<Float_t>( g->GetPointY(1) );
+      tfitpar[9] = static_cast<Float_t>( g->GetPointY(8) );
 
       h2_s8s0[feech]->Fill( g->GetPointY(0), g->GetPointY(8) );
 
       Double_t chi2 = fit[feech]->GetChisquare();
       Double_t ndf = fit[feech]->GetNDF();
-      _tchi2ndf = chi2/ndf;
-      _tfit_tree->Fill();
+      tchi2ndf = chi2/ndf;
+      tfit_tree->Fill();
     }
 
     if ( verbose )
@@ -196,7 +203,7 @@ void fit_tail(TGraph *g, const int feech)
 
       Double_t chi2 = fit[feech]->GetChisquare();
       Double_t ndf = fit[feech]->GetNDF();
-      cout << "chi2 ndf " << chi2 << "\t" << ndf << endl;
+      std::cout << "chi2 ndf " << chi2 << "\t" << ndf << std::endl;
 
     }
     else
@@ -207,16 +214,16 @@ void fit_tail(TGraph *g, const int feech)
       g->Fit(fit[feech],"RNQ");
 
       // save to tree
-      _qch = feech;
+      qch = feech;
       for (int ipar=0; ipar<3; ipar++)
       {
-        _qfitpar[ipar] = static_cast<Float_t>( fit[feech]->GetParameter(ipar) );
+        qfitpar[ipar] = static_cast<Float_t>( fit[feech]->GetParameter(ipar) );
       }
       Double_t chi2 = fit[feech]->GetChisquare();
       Double_t ndf = fit[feech]->GetNDF();
-      _qchi2ndf = chi2/ndf;
+      qchi2ndf = chi2/ndf;
 
-      _qfit_tree->Fill();
+      qfit_tree->Fill();
 
     }
 
@@ -236,8 +243,8 @@ void fit_tail(TGraph *g, const int feech)
   
     gPad->Modified();
     gPad->Update();
-    string junk;
-    cin >> junk;
+    std::string junk;
+    std::cin >> junk;
   }
 }
 
@@ -247,7 +254,7 @@ void fit_tail(TGraph *g, const int feech)
 //
 void get_tails()
 {
-  ifstream infile;
+  std::ifstream infile;
 
   TString name;
 
@@ -269,7 +276,8 @@ void get_tails()
   }
 
 
-  string junk1, junk2;
+  std::string junk1;
+  std::string junk2;
   int ch;
   double mean;
   double pedsigma = 4.0;
@@ -283,12 +291,12 @@ void get_tails()
     {
       if ( evt%1000 == 1 )
       {
-        cout << "evt " << evt << endl;
+        std::cout << "evt " << evt << std::endl;
       }
 
-      for (int isamp=0; isamp<NSAMPLES; isamp++)
+      for (double & isamp : yval)
       {
-        infile >> yval[isamp];
+        infile >> isamp;
       }
 
       // find those tail only events with high enough amplitude
@@ -307,7 +315,7 @@ void get_tails()
         g_subpulse->Draw("ap");
         gPad->Modified();
         gPad->Update();
-        cin >> junk2;
+        std::cin >> junk2;
       }
       */
 
@@ -335,8 +343,8 @@ void get_tails()
     gPad->Modified();
     gPad->Update();
     /*
-    string junk;
-    cin >> junk;
+    std::string junk;
+    std::cin >> junk;
     */
 
     g_tail[ifeech]->Write();
@@ -350,8 +358,8 @@ void get_tails()
 // then writes out mbd_pileup.calib file
 //
 void fit_time_pileupcorr()
-{
-  ofstream calibfile("mbd_pileup.calib");
+{ 
+  std::ofstream calibfile("mbd_pileup.calib");
 
   TString name;
 
@@ -394,7 +402,7 @@ void fit_time_pileupcorr()
 //
 void calc_residuals()
 {
-  ifstream infile;
+  std::ifstream infile;
 
   TString name;
 
@@ -413,25 +421,25 @@ void calc_residuals()
     h2_s8s0[ifeech]->SetYTitle("s8");
   }
 
-  _tfit_tree = new TTree("tfit","time ch fits");
-  _tfit_tree->Branch("ch",&_tch,"ch/S");
-  _tfit_tree->Branch("chi2ndf",&_tchi2ndf,"chi2ndf/F");
-  _tfit_tree->Branch("ampl",&_tfitpar[0],"ampl/F");
-  _tfit_tree->Branch("mean",&_tfitpar[1],"mean/F");
-  _tfit_tree->Branch("sig",&_tfitpar[2],"sig/F");
-  _tfit_tree->Branch("p0",&_tfitpar[3],"p0/F");
-  _tfit_tree->Branch("p1",&_tfitpar[4],"p1/F");
-  _tfit_tree->Branch("p2",&_tfitpar[5],"p2/F");
-  _tfit_tree->Branch("s0",&_tfitpar[7],"s0/F");   // samp0
-  _tfit_tree->Branch("s1",&_tfitpar[8],"s1/F");   // samp1
-  _tfit_tree->Branch("s8",&_tfitpar[9],"s8/F");   // samp8 (used for timing)
+  tfit_tree = new TTree("tfit","time ch fits");
+  tfit_tree->Branch("ch",&tch,"ch/S");
+  tfit_tree->Branch("chi2ndf",&tchi2ndf,"chi2ndf/F");
+  tfit_tree->Branch("ampl",&tfitpar[0],"ampl/F");
+  tfit_tree->Branch("mean",&tfitpar[1],"mean/F");
+  tfit_tree->Branch("sig",&tfitpar[2],"sig/F");
+  tfit_tree->Branch("p0",&tfitpar[3],"p0/F");
+  tfit_tree->Branch("p1",&tfitpar[4],"p1/F");
+  tfit_tree->Branch("p2",&tfitpar[5],"p2/F");
+  tfit_tree->Branch("s0",&tfitpar[7],"s0/F");   // samp0
+  tfit_tree->Branch("s1",&tfitpar[8],"s1/F");   // samp1
+  tfit_tree->Branch("s8",&tfitpar[9],"s8/F");   // samp8 (used for timing)
 
-  _qfit_tree = new TTree("qfit","charge ch fits");
-  _qfit_tree->Branch("ch",&_qch,"ch/S");
-  _qfit_tree->Branch("chi2ndf",&_qchi2ndf,"chi2ndf/F");
-  _qfit_tree->Branch("ampl",&_qfitpar[0],"ampl/F");
-  _qfit_tree->Branch("mean",&_qfitpar[1],"mean/F");
-  _qfit_tree->Branch("sig",&_qfitpar[2],"sig/F");
+  qfit_tree = new TTree("qfit","charge ch fits");
+  qfit_tree->Branch("ch",&qch,"ch/S");
+  qfit_tree->Branch("chi2ndf",&qchi2ndf,"chi2ndf/F");
+  qfit_tree->Branch("ampl",&qfitpar[0],"ampl/F");
+  qfit_tree->Branch("mean",&qfitpar[1],"mean/F");
+  qfit_tree->Branch("sig",&qfitpar[2],"sig/F");
 
   TGraphErrors *g_subpulse = new TGraphErrors(NSAMPLES);
 
@@ -443,7 +451,8 @@ void calc_residuals()
     xsamp[isamp] = isamp;
   }
 
-  string junk1, junk2;
+  std::string junk1;
+  std::string junk2;
   int ch;
   double mean;
   double pedsigma = 4.0;
@@ -451,14 +460,14 @@ void calc_residuals()
   for (int ifeech=0; ifeech<NFEECH; ifeech++)
   {
     name = "mbdsig"; name += ifeech; name += ".txt";
-    cout << "Processing " << name << endl;
+    std::cout << "Processing " << name << std::endl;
     infile.open( name.Data() );
     int evt = 1;
     while ( infile >> junk1 >> ch >> junk2 >> mean )
     {
       if ( evt%1000 == 1 )
       {
-        cout << "evt " << evt << "\tch " << ifeech << endl;
+        std::cout << "evt " << evt << "\tch " << ifeech << std::endl;
       }
 
       for (int isamp=0; isamp<NSAMPLES; isamp++)
@@ -480,7 +489,7 @@ void calc_residuals()
           /*
           if ( fabs((yval[isamp]-mean) - fit[ifeech]->Eval(isamp)) > 100 )
           {
-            cout << "xxx " << isamp << "\t" << yval[isamp]-mean << "\t" << fit[ifeech]->Eval(isamp) << endl;
+            std::cout << "xxx " << isamp << "\t" << yval[isamp]-mean << "\t" << fit[ifeech]->Eval(isamp) << std::endl;
             isbad = 1;
           }
           */

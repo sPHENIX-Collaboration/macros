@@ -20,7 +20,8 @@
 
 #include <phool/recoConsts.h>
 
-
+#include <Rtypes.h>
+#include <TSystem.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -40,26 +41,26 @@ void Fun4All_CaloProduction(const std::string &fname = "/sphenix/user/trinn/comb
   rc->set_uint64Flag("TIMESTAMP",6);
 
   CaloTowerBuilder *ca = new CaloTowerBuilder();
-  ca->set_detector_type(CaloTowerBuilder::CEMC);
+  ca->set_detector_type(CaloTowerDefs::CEMC);
   ca->set_nsamples(31);
   ca->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   se->registerSubsystem(ca);
 
   CaloTowerBuilder *ca1 = new CaloTowerBuilder();
-  ca1->set_detector_type(CaloTowerBuilder::HCALIN);
+  ca1->set_detector_type(CaloTowerDefs::HCALIN);
   ca1->set_nsamples(31);
   ca1->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   se->registerSubsystem(ca1);
 
   CaloTowerBuilder *ca2 = new CaloTowerBuilder();
-  ca2->set_detector_type(CaloTowerBuilder::HCALOUT);
+  ca2->set_detector_type(CaloTowerDefs::HCALOUT);
   ca2->set_nsamples(31);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   se->registerSubsystem(ca2);
 
   //default is FAST
   CaloTowerBuilder *ca3 = new CaloTowerBuilder();
-  ca3->set_detector_type(CaloTowerBuilder::ZDC);
+  ca3->set_detector_type(CaloTowerDefs::ZDC);
   ca3->set_nsamples(31);
   se->registerSubsystem(ca3);
 

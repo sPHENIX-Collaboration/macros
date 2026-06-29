@@ -2,6 +2,7 @@
 #define MACRO_G4PSTOF_C
 
 #include <g4detectors/PHG4PSTOFSubsystem.h>
+
 #include <g4main/PHG4Reco.h>
 
 R__LOAD_LIBRARY(libg4detectors.so)
@@ -24,7 +25,7 @@ void PSTOFInit()
 {
 }
 
-double PSTOF(PHG4Reco* g4Reco, double radius)
+double PSTOF(PHG4Reco* g4Reco, double /*radius*/)
 {
   PHG4PSTOFSubsystem* pstof = new PHG4PSTOFSubsystem("PSTOF");
   pstof->SuperDetector("PSTOF");

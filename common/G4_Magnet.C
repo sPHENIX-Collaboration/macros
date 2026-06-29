@@ -81,7 +81,6 @@ double Magnet(PHG4Reco* g4Reco, double radius)
     double magnet_inner_cryostat_wall_thickness = 1;
     double magnet_coil_radius = 150.8;
     double magnet_coil_thickness = 9.38;
-    double magnet_length = 379.;
     double coil_length = 361.5;
     if (radius > magnet_inner_cryostat_wall_radius)
     {

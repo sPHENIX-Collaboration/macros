@@ -24,17 +24,23 @@
 
 #include <phool/recoConsts.h>
 
+#include <TSystem.h>
+
+#include <format>
+#include <fstream>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libffarawmodules.so)
 R__LOAD_LIBRARY(libintt.so)
+
 bool isGood(const std::string &infile);
 int getrunnumber(const std::string &listfile);
 
 void Fun4All_SingleStream_Combiner(int nEvents = 0,
-                                   const int runnumber_unused = 30117,
-                                   const std::string &outdir = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpccosmics/",
+                                   const int  /*runnumber_unused*/ = 30117,
+                                   const std::string & /*outdir*/ = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpccosmics/",
                                    const std::string &type = "streaming",
                                    const std::string &input_gl1file = "gl1daq.list",
                                    const std::string &input_tpcfile00 = "tpc00.list",
@@ -99,9 +105,9 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
   // create and register input managers
   int i = 0;
 
-  std::string readoutNumber = "";
+  std::string readoutNumber;
 
-  for (auto iter : gl1_infile)
+  for (const auto& iter : gl1_infile)
   {
     if (isGood(iter))
     {
@@ -114,7 +120,7 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
   }
   i = 0;
 
-  for (auto iter : intt_infile)
+  for (const auto& iter : intt_infile)
   {
     if (isGood(iter))
     {
@@ -131,12 +137,13 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
     }
   }
   i = 0;
-  for (auto iter : mvtx_infile)
+  for (const auto& iter : mvtx_infile)
   {
     if (isGood(iter))
     {
       /// find the ebdc number from the filename
-      std::string filepath, felix;
+      std::string filepath;
+      std::string felix;
       std::ifstream ifs(iter);
       while (std::getline(ifs, filepath))
       {
@@ -156,12 +163,13 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
     }
   }
   i = 0;
-  for (auto iter : tpc_infile)
+  for (const auto& iter : tpc_infile)
   {
     if (isGood(iter))
     {
       /// find the ebdc number from the filename
-      std::string filepath, ebdc;
+      std::string filepath;
+      std::string ebdc;
       std::ifstream ifs(iter);
       while (std::getline(ifs, filepath))
       {
@@ -183,7 +191,7 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
   }
   i = 0;
 
-  for (auto iter : tpot_infile)
+  for (const auto& iter : tpot_infile)
   {
     if (isGood(iter))
     {
@@ -217,8 +225,7 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
 
-  char outfile[500];
-  sprintf(outfile, "./%s-%s.root", type.c_str(), readoutNumber.c_str());
+  std::string outfile = "./" + type + "-" + readoutNumber;
 
   Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out", outfile);
   se->registerOutputManager(out);
@@ -231,12 +238,11 @@ void Fun4All_SingleStream_Combiner(int nEvents = 0,
 
   se->End();
 
-  char histoutfile[500];
-  sprintf(histoutfile, "./HIST_%s-%s-%08i-%05i.root", type.c_str(), readoutNumber.c_str(), runnumber, 0);
+  std::string histoutfile = std::format("./HIST_{}-{}-{:08}-{:05}",type,readoutNumber, runnumber, 0) ;
   QAHistManagerDef::saveQARootFile(histoutfile);
 
   delete se;
-  cout << "all done" << endl;
+  std::cout << "all done" << std::endl;
   gSystem->Exit(0);
 }
 

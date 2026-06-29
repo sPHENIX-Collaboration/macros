@@ -5,10 +5,11 @@
 //
 #include <mbd/MbdCalib.h>
 
-#if defined(__CLING__)
+#include <Rtypes.h> // defines R__LOAD_LIBRARY macro
+#include <TString.h>
+
 R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libmbd_io.so)
-#endif
 
 
 void update_t0constants(const char *calib_fname, const float dz, const float dt = 0.)
@@ -33,7 +34,7 @@ void update_t0constants(const char *calib_fname, const float dz, const float dt 
   }
   else
   {
-    cerr << "File " << calib_fname << " is not a valid t0 calibration file" << endl;
+    std::cerr << "File " << calib_fname << " is not a valid t0 calibration file" << std::endl;
   }
 
 }

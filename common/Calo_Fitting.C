@@ -1,28 +1,34 @@
-#ifndef CALO_FITTING_H
-#define CALO_FITTING_H
+#ifndef MACRO_CALO_FITTING_C
+#define MACRO_CALO_FITTING_C
 
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloWaveformProcessing.h>
 
+#include <mbd/MbdReco.h>
+
 #include <fun4all/Fun4AllServer.h>
 
+#include <phool/recoConsts.h>
+
+#include <Rtypes.h> // for R__LOAD_LIBRARY
+
 R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libffamodules.so)
+R__LOAD_LIBRARY(libmbd.so)
+R__LOAD_LIBRARY(libphool.so)
 
 void Process_Calo_Fitting()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
 
+  // process MBD (wave formt fitting only)
+  MbdReco *mbd = new MbdReco();
+  mbd->DoOnlyFits();
+  se->registerSubsystem(mbd);
+
   CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv4;
 
   /////////////////
-  // build towers
-  CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
-  caZDC->set_detector_type(CaloTowerDefs::ZDC);
-  caZDC->set_builder_type(buildertype);
-  caZDC->set_processing_type(CaloWaveformProcessing::FAST);
-  caZDC->set_nsamples(16);
-  caZDC->set_offlineflag();
-  se->registerSubsystem(caZDC);
 
   CaloTowerBuilder *ctbEMCal = new CaloTowerBuilder("EMCalBUILDER");
   ctbEMCal->set_detector_type(CaloTowerDefs::CEMC);
@@ -60,7 +66,7 @@ void Process_Calo_Fitting()
   CaloTowerBuilder *caEPD = new CaloTowerBuilder("SEPDBUILDER");
   caEPD->set_detector_type(CaloTowerDefs::SEPD);
   caEPD->set_builder_type(buildertype);
-  caEPD->set_processing_type(CaloWaveformProcessing::FAST);
+  caEPD->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   caEPD->set_nsamples(12);
   caEPD->set_offlineflag();
   se->registerSubsystem(caEPD);
