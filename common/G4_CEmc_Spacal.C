@@ -339,11 +339,10 @@ void CEMC_Towers()
   }
   else
   {
-    CaloWaveformSim *caloWaveformSim = new CaloWaveformSim();
+    CaloWaveformSim *caloWaveformSim = new CaloWaveformSim("CEMCCaloWaveformSim");
     caloWaveformSim->set_detector_type(CaloTowerDefs::CEMC);
     caloWaveformSim->set_detector("CEMC");
     caloWaveformSim->set_nsamples(12);
-    caloWaveformSim->set_pedestalsamples(12);
     caloWaveformSim->set_timewidth(0.2);
     caloWaveformSim->set_peakpos(6);
     caloWaveformSim->get_light_collection_model().load_data_file(
@@ -361,9 +360,17 @@ void CEMC_Towers()
     }
     // caloWaveformSim->Verbosity(2);
     // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+
+    // calibration overrides:
+    // caloWaveformSim->set_calibName("CEMC_calib_ADC_to_ETower");
+    // caloWaveformSim->set_fieldname("CEMC_calib_ADC_to_ETower");
+    // caloWaveformSim->set_directURL_calib("CEMC_MC_calib_default.root");
+    // caloWaveformSim->set_MC_calibName("CEMC_MC_RECALIB");
+    // caloWaveformSim->set_MC_fieldname("CEMC_calib_ADC_to_ETower");
+    // caloWaveformSim->set_directURL_MCcalib("CEMC_MC_calib_default_v3.root");
     se->registerSubsystem(caloWaveformSim);
 
-    CaloTowerBuilder *ca2 = new CaloTowerBuilder();
+    CaloTowerBuilder *ca2 = new CaloTowerBuilder("CEMCCaloTowerBuilder");
     ca2->set_detector_type(CaloTowerDefs::CEMC);
     ca2->set_nsamples(12);
     ca2->set_dataflag(false);
