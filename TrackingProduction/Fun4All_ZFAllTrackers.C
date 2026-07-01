@@ -197,7 +197,7 @@ void Fun4All_ZFAllTrackers(
   }
   else
   {
-    auto weightedFitter = new WeightedFitter;
+    auto *weightedFitter = new WeightedFitter;
     weightedFitter->set_track_map_node_name( "SvtxTrackMap" );
 
     if( !G4TRACKING::SC_USE_MICROMEGAS )
