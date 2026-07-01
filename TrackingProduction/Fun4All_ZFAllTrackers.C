@@ -1,4 +1,4 @@
- /*
+/*
  * This macro shows a minimum working example of running the tracking
  * hit unpackers with some basic seeding algorithms to try to put together
  * tracks. There are some analysis modules run at the end which package
@@ -14,9 +14,9 @@
 #include <G4_Magnet.C>
 #include <G4_Mbd.C>
 #include <QA.C>
-#include <Trkr_RecoInit.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco.C>
+#include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
 
 #include <eventdisplay/TrackerEventDisplay.h>
@@ -45,7 +45,6 @@
 
 #include <phool/recoConsts.h>
 
-
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libphool.so)
@@ -59,24 +58,23 @@ R__LOAD_LIBRARY(libtrackingqa.so)
 R__LOAD_LIBRARY(libEventDisplay.so)
 void Fun4All_ZFAllTrackers(
     const int nEvents = 0,
-    const std::string& filelist = "filelist.list",
-    const std::string& outfilename = "clusters_seeds",
+    const std::string &filelist = "filelist.list",
+    const std::string &outfilename = "clusters_seeds",
     const bool convertSeeds = true)
 {
   G4TRACKING::convert_seeds_to_svtxtracks = convertSeeds;
   std::cout << "Converting to seeds : " << G4TRACKING::convert_seeds_to_svtxtracks << std::endl;
-  
+
   auto *rc = recoConsts::instance();
   auto *se = Fun4AllServer::instance();
-  
-    // input manager for QM production raw hit DST file
+
+  // input manager for QM production raw hit DST file
   std::ifstream ifs(filelist);
   std::string filepath;
 
   int i = 0;
   int runnumber = std::numeric_limits<int>::quiet_NaN();
   int segment = std::numeric_limits<int>::quiet_NaN();
-
 
   while (std::getline(ifs, filepath))
   {
@@ -111,13 +109,12 @@ void Fun4All_ZFAllTrackers(
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
-  TpcReadoutInit( runnumber );
-  std::cout<< " run: " << runnumber
-	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
-	   << " pre: " << TRACKING::reco_tpc_time_presample
-	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
-	   << std::endl;
-
+  TpcReadoutInit(runnumber);
+  std::cout << " run: " << runnumber
+            << " samples: " << TRACKING::reco_tpc_maxtime_sample
+            << " pre: " << TRACKING::reco_tpc_time_presample
+            << " vdrift: " << G4TPC::tpc_drift_velocity_reco
+            << std::endl;
 
   std::string theOutfile = outfilename + "_" + std::to_string(runnumber) + "-" + std::to_string(segment) + ".root";
   se->Verbosity(1);
@@ -131,8 +128,6 @@ void Fun4All_ZFAllTrackers(
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
-
-  
   for (int felix = 0; felix < 6; felix++)
   {
     Mvtx_HitUnpacking(std::to_string(felix));
@@ -145,15 +140,15 @@ void Fun4All_ZFAllTrackers(
   for (int ebdc = 0; ebdc < 24; ebdc++)
   {
     for (int endpoint = 0; endpoint < 2; endpoint++)
+    {
+      ebdcname.str("");
+      if (ebdc < 10)
       {
-        ebdcname.str("");
-        if (ebdc < 10)
-	  {
-	    ebdcname << "0";
-	  }
-        ebdcname << ebdc << "_" << endpoint;
-        Tpc_HitUnpacking(ebdcname.str());
+        ebdcname << "0";
       }
+      ebdcname << ebdc << "_" << endpoint;
+      Tpc_HitUnpacking(ebdcname.str());
+    }
   }
 
   Micromegas_HitUnpacking();
@@ -162,7 +157,6 @@ void Fun4All_ZFAllTrackers(
   Intt_Clustering();
   TPC_Clustering_run2pp();
   Micromegas_Clustering();
-  
 
   // this now does Si and TPC seeding only
   Tracking_Reco_TrackSeed_ZeroField();
@@ -185,7 +179,6 @@ void Fun4All_ZFAllTrackers(
 
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
-
     auto *converter = new TrackSeedTrackMapConverter;
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
@@ -198,9 +191,9 @@ void Fun4All_ZFAllTrackers(
   else
   {
     auto *weightedFitter = new WeightedFitter;
-    weightedFitter->set_track_map_node_name( "SvtxTrackMap" );
+    weightedFitter->set_track_map_node_name("SvtxTrackMap");
 
-    if( !G4TRACKING::SC_USE_MICROMEGAS )
+    if (!G4TRACKING::SC_USE_MICROMEGAS)
     {
       // exclude TPOT from fit
       weightedFitter->exclude_layer_in_fit(55);
@@ -209,8 +202,6 @@ void Fun4All_ZFAllTrackers(
 
     se->registerSubsystem(weightedFitter);
   }
-
-
 
   PHSimpleVertexFinder *finder = new PHSimpleVertexFinder;
   finder->zeroField(true);
@@ -229,7 +220,7 @@ void Fun4All_ZFAllTrackers(
   resid->outfileName(residstring);
   resid->alignment(false);
   resid->clusterTree();
-  //resid->hitTree();
+  // resid->hitTree();
   resid->zeroField();
   resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
   resid->Verbosity(0);
