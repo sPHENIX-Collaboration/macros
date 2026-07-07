@@ -102,7 +102,7 @@ void Fun4All_ZFAllTrackers(
   G4TRACKING::SC_CALIBMODE = false;
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
-  TRACKING::pp_mode = true;
+  TRACKING::streaming_mode = true;
 
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
@@ -165,7 +165,7 @@ void Fun4All_ZFAllTrackers(
 
   auto *mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(0);
-  mm_match->set_pp_mode(TRACKING::pp_mode);
+  mm_match->set_pp_mode(TRACKING::streaming_mode);
 
   mm_match->set_rphi_search_window_lyr1(3.);
   mm_match->set_rphi_search_window_lyr2(15.0);

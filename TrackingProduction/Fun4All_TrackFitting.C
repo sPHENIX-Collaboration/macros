@@ -74,7 +74,7 @@ void Fun4All_TrackFitting(
   G4TRACKING::SC_CALIBMODE = false;
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
-  TRACKING::pp_mode = true;
+  TRACKING::streaming_mode = true;
   
   TString outfile = outfilename + "_" + runnumber + "-" + segment + ".root";
 

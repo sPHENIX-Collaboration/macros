@@ -105,7 +105,7 @@ void Fun4All_TrackSeeding(
    * TPC clusters not participating to the ACTS track fit
    */
   G4TRACKING::SC_CALIBMODE = false;
-  TRACKING::pp_mode = true;
+  TRACKING::streaming_mode = true;
 
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;

@@ -75,7 +75,7 @@ void Tracking_Reco_Vertex_run2pp(const std::string& clusterMapName="TRKR_CLUSTER
   finder->setTrackQualityCut(300);
   finder->setNmvtxRequired(3);
   finder->setOutlierPairCut(0.10);
-  finder->set_pp_mode(TRACKING::pp_mode);
+  finder->set_pp_mode(TRACKING::streaming_mode);
   se->registerSubsystem(finder);
 
   if (!G4TRACKING::convert_seeds_to_svtxtracks)
@@ -104,8 +104,8 @@ void Tracking_Reco_TrackFit_run2pp(const std::string &outfile = "run2pptrackfit.
   actsFit->setTrkrClusterContainerName(clusterMapName);
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
+  actsFit->set_pp_mode(TRACKING::streaming_mode);
   actsFit->setUseMicromegas(false);
-  actsFit->set_pp_mode(TRACKING::pp_mode);
   actsFit->set_use_clustermover(true);  // default is true for now
   actsFit->useActsEvaluator(false);
   actsFit->useOutlierFinder(false);
@@ -114,7 +114,7 @@ void Tracking_Reco_TrackFit_run2pp(const std::string &outfile = "run2pptrackfit.
 
   auto *cleaner = new PHTrackCleaner();
   cleaner->Verbosity(0);
-  cleaner->set_pp_mode(TRACKING::pp_mode);
+  cleaner->set_pp_mode(TRACKING::streaming_mode);
   se->registerSubsystem(cleaner);
 
   if (G4TRACKING::SC_CALIBMODE)
@@ -270,7 +270,7 @@ void Tracking_Reco_SiTpcTrackMatching_run2pp(const std::string& clusterMapName =
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
   auto *silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(verbosity);
-  silicon_match->set_pp_mode(TRACKING::pp_mode);
+  silicon_match->set_pp_mode(TRACKING::streaming_mode);
   silicon_match->set_cluster_map_name(clusterMapName);
   if (G4TPC::ENABLE_AVERAGE_CORRECTIONS)
   {
@@ -313,7 +313,7 @@ void Tracking_Reco_TpcTpotTrackMatching_run2pp(const std::string& clustermapname
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
   auto *mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(verbosity);
-  mm_match->set_pp_mode(TRACKING::pp_mode);
+  mm_match->set_pp_mode(TRACKING::streaming_mode);
   mm_match->set_rphi_search_window_lyr1(3.);
   mm_match->set_rphi_search_window_lyr2(15.0);
   mm_match->set_z_search_window_lyr1(30.0);
@@ -532,7 +532,7 @@ void Tracking_Reco_TrackSeed()
   {
   }
 
-  seeder->set_pp_mode(TRACKING::pp_mode);
+  seeder->set_pp_mode(TRACKING::streaming_mode);
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
@@ -588,15 +588,15 @@ void Tracking_Reco_TrackSeed()
   {
   }
 
-  cprop->set_pp_mode(TRACKING::pp_mode);
+  cprop->set_pp_mode(TRACKING::streaming_mode);
   se->registerSubsystem(cprop);
 
-  if (TRACKING::pp_mode)
+  if (TRACKING::streaming_mode)
   {
     // for pp mode, apply preliminary distortion corrections to TPC clusters before crossing is known
     // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
     auto *prelim_distcorr = new PrelimDistortionCorrection;
-    prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
+    prelim_distcorr->set_pp_mode(TRACKING::streaming_mode);
     prelim_distcorr->Verbosity(verbosity);
 
     if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
@@ -643,8 +643,8 @@ void Tracking_Reco_TrackSeed()
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
   auto *silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(verbosity);
-  silicon_match->set_pp_mode(TRACKING::pp_mode);
-  std::cout << "PHSiliconTpcTrackMatching pp_mode set to " << TRACKING::pp_mode << std::endl;
+  silicon_match->set_pp_mode(TRACKING::streaming_mode);
+  std::cout << "PHSiliconTpcTrackMatching streaming_mode set to " << TRACKING::streaming_mode << std::endl;
   if (G4TRACKING::SC_CALIBMODE)
   {
     // search windows for initial matching with distortions
@@ -669,7 +669,7 @@ void Tracking_Reco_TrackSeed()
     // Match TPC track stubs from CA seeder to clusters in the micromegas layers
     auto *mm_match = new PHMicromegasTpcTrackMatching;
     mm_match->Verbosity(verbosity);
-    mm_match->set_pp_mode(TRACKING::pp_mode);
+    mm_match->set_pp_mode(TRACKING::streaming_mode);
     mm_match->set_rphi_search_window_lyr1(0.2);
     mm_match->set_rphi_search_window_lyr2(13.0);
     mm_match->set_z_search_window_lyr1(26.0);
@@ -687,7 +687,7 @@ void vertexing()
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
 
   auto *vtxfinder = new PHSimpleVertexFinder;
-  vtxfinder->set_pp_mode(TRACKING::pp_mode);
+  vtxfinder->set_pp_mode(TRACKING::streaming_mode);
   vtxfinder->Verbosity(verbosity);
   se->registerSubsystem(vtxfinder);
 }
@@ -737,7 +737,7 @@ void Tracking_Reco_TrackFit()
     // in calibration mode, fit only Silicons and Micromegas hits
     actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
     actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-    actsFit->set_pp_mode(TRACKING::pp_mode);
+    actsFit->set_pp_mode(TRACKING::streaming_mode);
     actsFit->set_use_clustermover(true);  // default is true for now
     actsFit->useActsEvaluator(false);
     actsFit->useOutlierFinder(false);
@@ -874,7 +874,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   {
   }
 
-  seeder->set_pp_mode(TRACKING::pp_mode);
+  seeder->set_pp_mode(TRACKING::streaming_mode);
   se->registerSubsystem(seeder);
 
   // expand stubs in the TPC using simple kalman filter
@@ -926,15 +926,15 @@ void Tracking_Reco_CommissioningTrackSeed()
   {
   }
 
-  cprop->set_pp_mode(TRACKING::pp_mode);
+  cprop->set_pp_mode(TRACKING::streaming_mode);
   se->registerSubsystem(cprop);
 
-  if (TRACKING::pp_mode)
+  if (TRACKING::streaming_mode)
   {
     // for pp mode, apply preliminary distortion corrections to TPC clusters before crossing is known
     // and refit the trackseeds. Replace KFProp fits with the new fit parameters in the TPC seeds.
     auto *prelim_distcorr = new PrelimDistortionCorrection;
-    prelim_distcorr->set_pp_mode(TRACKING::pp_mode);
+    prelim_distcorr->set_pp_mode(TRACKING::streaming_mode);
     prelim_distcorr->Verbosity(verbosity);
 
     if (G4TPC::TPC_GAS_MIXTURE == "NeCF4")
@@ -982,7 +982,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
   auto *silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(verbosity);
-  silicon_match->set_pp_mode(TRACKING::pp_mode);
+  silicon_match->set_pp_mode(TRACKING::streaming_mode);
 
   silicon_match->set_phi_search_window(0.2);
   silicon_match->set_eta_search_window(0.015);

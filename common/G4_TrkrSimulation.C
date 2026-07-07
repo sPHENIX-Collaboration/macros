@@ -112,7 +112,7 @@ void Mvtx_Cells()
 
   double maps_readout_window = 9900.0;  // ns
   double extended_readout_time = 0.0;
-  if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+  if (TRACKING::streaming_mode) extended_readout_time = TRACKING::extended_readout_time;
   // override the default timing window - default is +/- 5000 ns
   maps_hits->set_double_param("mvtx_tmin", -maps_readout_window);
   maps_hits->set_double_param("mvtx_tmax", maps_readout_window + extended_readout_time);
@@ -218,7 +218,7 @@ void Intt_Cells()
 
   // The timing window defaults are set in the INTT ladder model, they can be overridden here
   double extended_readout_time = 0.0;
-  if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+  if (TRACKING::streaming_mode) extended_readout_time = TRACKING::extended_readout_time;
   reco->set_double_param("tmax", 80.0 + extended_readout_time);
   reco->set_double_param("tmin", -20.0);
   std::cout << "INTT readout window is set to -20 to " << 80.0 + extended_readout_time << std::endl;
@@ -376,9 +376,9 @@ double TPC(PHG4Reco* g4Reco,
   }
 
   double extended_readout_time = 0.0;
-  if (TRACKING::pp_mode)
+  if (TRACKING::streaming_mode)
   {
-    extended_readout_time = TRACKING::pp_extended_readout_time;
+    extended_readout_time = TRACKING::extended_readout_time;
   }
 
   tpc->set_double_param("extended_readout_time", extended_readout_time);
@@ -427,7 +427,7 @@ double TPC(PHG4Reco* g4Reco,
   std::cout << "    drift_velocity_sim " << drift_vel << std::endl;
   std::cout << "    max_driftlength " << G4TPC::maxDriftLength << std::endl;
   std::cout << "    CM_halfwidth " << G4TPC::CM_halfwidth << std::endl;
-  std::cout << "    pp_extended_readout_time " << TRACKING::pp_extended_readout_time << std::endl;
+  std::cout << "    extended_readout_time " << TRACKING::extended_readout_time << std::endl;
 
   g4Reco->registerSubsystem(tpc);
 
@@ -667,7 +667,7 @@ void Micromegas_Cells()
   auto* reco = new PHG4MicromegasHitReco;
   reco->Verbosity(verbosity);
   double extended_readout_time = 0.0;
-  if (TRACKING::pp_mode) extended_readout_time = TRACKING::pp_extended_readout_time;
+  if (TRACKING::streaming_mode) extended_readout_time = TRACKING::extended_readout_time;
 
   reco->set_double_param("micromegas_tmax", 800.0 + extended_readout_time);
   se->registerSubsystem(reco);
