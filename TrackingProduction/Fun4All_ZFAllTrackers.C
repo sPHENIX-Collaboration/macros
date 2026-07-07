@@ -1,4 +1,4 @@
- /*
+/*
  * This macro shows a minimum working example of running the tracking
  * hit unpackers with some basic seeding algorithms to try to put together
  * tracks. There are some analysis modules run at the end which package
@@ -14,9 +14,9 @@
 #include <G4_Magnet.C>
 #include <G4_Mbd.C>
 #include <QA.C>
-#include <Trkr_RecoInit.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_Reco.C>
+#include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
 
 #include <eventdisplay/TrackerEventDisplay.h>
@@ -31,7 +31,7 @@
 #include <trackingdiagnostics/TrackResiduals.h>
 #include <trackingdiagnostics/TrkrNtuplizer.h>
 
-#include <trackreco/AzimuthalSeeder.h>
+#include <trackreco/WeightedFitter.h>
 
 #include <ffamodules/CDBInterface.h>
 
@@ -44,7 +44,6 @@
 #include <fun4all/Fun4AllUtils.h>
 
 #include <phool/recoConsts.h>
-
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
@@ -59,42 +58,65 @@ R__LOAD_LIBRARY(libtrackingqa.so)
 R__LOAD_LIBRARY(libEventDisplay.so)
 void Fun4All_ZFAllTrackers(
     const int nEvents = 0,
-    const std::string& tpcfilename = "DST_TRKR_CLUSTER_run2pp_ana466_2024p012_v001-00052077-00000.root",
-    const std::string& tpcdir = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana466_2024p012_v001/DST_TRKR_CLUSTER/run_00052000_00052100/dst/",
-    const std::string& outfilename = "clusters_seeds",
+    const std::string &filelist = "filelist.list",
+    const std::string &outfilename = "clusters_seeds",
     const bool convertSeeds = true)
 {
-  std::string inputtpcRawHitFile = tpcdir + tpcfilename;
-
   G4TRACKING::convert_seeds_to_svtxtracks = convertSeeds;
   std::cout << "Converting to seeds : " << G4TRACKING::convert_seeds_to_svtxtracks << std::endl;
-  std::pair<int, int>
-      runseg = Fun4AllUtils::GetRunSegment(tpcfilename);
-  int runnumber = runseg.first;
-  int segment = runseg.second;
+
+  auto *rc = recoConsts::instance();
+  auto *se = Fun4AllServer::instance();
+
+  // input manager for QM production raw hit DST file
+  std::ifstream ifs(filelist);
+  std::string filepath;
+
+  int i = 0;
+  int runnumber = std::numeric_limits<int>::quiet_NaN();
+  int segment = std::numeric_limits<int>::quiet_NaN();
+
+  while (std::getline(ifs, filepath))
+  {
+    std::cout << "Adding DST with filepath: " << filepath << std::endl;
+    if (i == 0)
+    {
+      std::pair<int, int>
+          runseg = Fun4AllUtils::GetRunSegment(filepath);
+      runnumber = runseg.first;
+      segment = runseg.second;
+      rc->set_IntFlag("RUNNUMBER", runnumber);
+      rc->set_uint64Flag("TIMESTAMP", runnumber);
+    }
+
+    std::string inputname = "InputManager" + std::to_string(i);
+    auto *hitsin = new Fun4AllDstInputManager(inputname);
+    hitsin->fileopen(filepath);
+    se->registerInputManager(hitsin);
+    i++;
+  }
+
+  rc->set_IntFlag("RUNNUMBER", runnumber);
+  rc->set_IntFlag("RUNSEGMENT", segment);
 
   G4TRACKING::SC_CALIBMODE = false;
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
   TRACKING::streaming_mode = true;
 
-  auto *rc = recoConsts::instance();
-  rc->set_IntFlag("RUNNUMBER", runnumber);
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
-  TpcReadoutInit( runnumber );
-  std::cout<< " run: " << runnumber
-	   << " samples: " << TRACKING::reco_tpc_maxtime_sample
-	   << " pre: " << TRACKING::reco_tpc_time_presample
-	   << " vdrift: " << G4TPC::tpc_drift_velocity_reco
-	   << std::endl;
-
+  TpcReadoutInit(runnumber);
+  std::cout << " run: " << runnumber
+            << " samples: " << TRACKING::reco_tpc_maxtime_sample
+            << " pre: " << TRACKING::reco_tpc_time_presample
+            << " vdrift: " << G4TPC::tpc_drift_velocity_reco
+            << std::endl;
 
   std::string theOutfile = outfilename + "_" + std::to_string(runnumber) + "-" + std::to_string(segment) + ".root";
-  auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
 
   Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
@@ -106,48 +128,40 @@ void Fun4All_ZFAllTrackers(
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
-  auto *hitsin = new Fun4AllDstInputManager("InputManager");
-  hitsin->fileopen(inputtpcRawHitFile);
-  // hitsin->AddFile(inputMbd);
-  se->registerInputManager(hitsin);
+  for (int felix = 0; felix < 6; felix++)
+  {
+    Mvtx_HitUnpacking(std::to_string(felix));
+  }
+  for (int server = 0; server < 8; server++)
+  {
+    Intt_HitUnpacking(std::to_string(server));
+  }
+  std::ostringstream ebdcname;
+  for (int ebdc = 0; ebdc < 24; ebdc++)
+  {
+    for (int endpoint = 0; endpoint < 2; endpoint++)
+    {
+      ebdcname.str("");
+      if (ebdc < 10)
+      {
+        ebdcname << "0";
+      }
+      ebdcname << ebdc << "_" << endpoint;
+      Tpc_HitUnpacking(ebdcname.str());
+    }
+  }
 
-  TRACKING::tpc_zero_supp = true;
-  /*
-  Mvtx_HitUnpacking();
-  Intt_HitUnpacking();
-  Tpc_HitUnpacking();
   Micromegas_HitUnpacking();
 
   Mvtx_Clustering();
   Intt_Clustering();
-
-  auto tpcclusterizer = new TpcClusterizer;
-  tpcclusterizer->Verbosity(0);
-  tpcclusterizer->set_do_hit_association(G4TPC::DO_HIT_ASSOCIATION);
-  tpcclusterizer->set_rawdata_reco();
-  se->registerSubsystem(tpcclusterizer);
-
+  TPC_Clustering_run2pp();
   Micromegas_Clustering();
-  */
 
   // this now does Si and TPC seeding only
   Tracking_Reco_TrackSeed_ZeroField();
 
-  auto *silicon_match = new PHSiliconTpcTrackMatching;
-  silicon_match->Verbosity(0);
-  // set search windows matching Silicon to TPC seeds
-  // Selected for tracks with ntpc>34,|z_Si-z_TPC|<30,crossing==0
-  // see https://indico.bnl.gov/event/26202/attachments/59703/102575/2025_01_31_ZeroField.pdf
-  // Will probably be narrowed from improved alignment soon.
-  silicon_match->window_dx.set_QoverpT_maxabs({2.6,0,0});
-  silicon_match->window_dy.set_QoverpT_maxabs({2.3,0,0});
-  silicon_match->window_dz.set_QoverpT_range({-2.9,0,0},{4.2,0,0});
-  silicon_match->window_deta.set_QoverpT_maxabs({0.06,0,0});
-  silicon_match->window_dphi.set_QoverpT_maxabs({0.11,0,0});
-  silicon_match->set_test_windows_printout(false);
-  silicon_match->set_pp_mode(TRACKING::streaming_mode);
-  silicon_match->zeroField(true);
-  se->registerSubsystem(silicon_match);
+  Tracking_Reco_SiTpcTrackMatching_run2pp();
 
   auto *mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(0);
@@ -165,7 +179,6 @@ void Fun4All_ZFAllTrackers(
 
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
-
     auto *converter = new TrackSeedTrackMapConverter;
     // Default set to full SvtxTrackSeeds. Can be set to
     // SiliconTrackSeedContainer or TpcTrackSeedContainer
@@ -177,26 +190,18 @@ void Fun4All_ZFAllTrackers(
   }
   else
   {
-    auto *deltazcorr = new PHTpcDeltaZCorrection;
-    deltazcorr->Verbosity(0);
-    se->registerSubsystem(deltazcorr);
+    auto *weightedFitter = new WeightedFitter;
+    weightedFitter->set_track_map_node_name("SvtxTrackMap");
 
-    // perform final track fit with ACTS
-    auto *actsFit = new PHActsTrkFitter;
-    actsFit->Verbosity(0);
-    actsFit->commissioning(G4TRACKING::use_alignment);
-    // in calibration mode, fit only Silicons and Micromegas hits
-    actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-    actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-    actsFit->set_pp_mode(TRACKING::streaming_mode);
-    actsFit->set_use_clustermover(true);  // default is true for now
-    actsFit->useActsEvaluator(false);
-    actsFit->useOutlierFinder(false);
-    actsFit->setFieldMap(G4MAGNET::magfield_tracking);
-    se->registerSubsystem(actsFit);
+    if (!G4TRACKING::SC_USE_MICROMEGAS)
+    {
+      // exclude TPOT from fit
+      weightedFitter->exclude_layer_in_fit(55);
+      weightedFitter->exclude_layer_in_fit(56);
+    }
+
+    se->registerSubsystem(weightedFitter);
   }
-
-
 
   PHSimpleVertexFinder *finder = new PHSimpleVertexFinder;
   finder->zeroField(true);
@@ -215,7 +220,7 @@ void Fun4All_ZFAllTrackers(
   resid->outfileName(residstring);
   resid->alignment(false);
   resid->clusterTree();
-  resid->hitTree();
+  // resid->hitTree();
   resid->zeroField();
   resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
   resid->Verbosity(0);

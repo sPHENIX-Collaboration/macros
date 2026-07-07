@@ -104,8 +104,8 @@ void Tracking_Reco_TrackFit_run2pp(const std::string &outfile = "run2pptrackfit.
   actsFit->setTrkrClusterContainerName(clusterMapName);
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-  actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
   actsFit->set_pp_mode(TRACKING::streaming_mode);
+  actsFit->setUseMicromegas(false);
   actsFit->set_use_clustermover(true);  // default is true for now
   actsFit->useActsEvaluator(false);
   actsFit->useOutlierFinder(false);
@@ -327,7 +327,7 @@ void Tracking_Reco_TpcTpotTrackMatching_run2pp(const std::string& clustermapname
 void Tracking_Reco_TrackMatching_run2pp(const std::string& clustermapname = "TRKR_CLUSTER")
 {
   Tracking_Reco_SiTpcTrackMatching_run2pp(clustermapname);
-  //Tracking_Reco_TpcTpotTrackMatching_run2pp(clustermapname);
+  Tracking_Reco_TpcTpotTrackMatching_run2pp(clustermapname);
 
 }
 void Tracking_Reco_TrackSeed_ZeroField()
@@ -340,10 +340,8 @@ void Tracking_Reco_TrackSeed_ZeroField()
 
   auto *silicon_Seeding = new PHActsSiliconSeeding;
   silicon_Seeding->Verbosity(verbosity);
-  silicon_Seeding->setStrobeRange(-5, 5);
-  silicon_Seeding->isStreaming();
-  // these get us to about 83% INTT > 1
-  silicon_Seeding->setinttRPhiSearchWindow(0.2);
+  silicon_Seeding->setIter1();
+  silicon_Seeding->zeroField();
   se->registerSubsystem(silicon_Seeding);
 
   auto *merger = new PHSiliconSeedMerger;

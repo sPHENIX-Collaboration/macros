@@ -344,18 +344,18 @@ void HCALInner_Towers()
   }
   else
   {
-    CaloWaveformSim *caloWaveformSim = new CaloWaveformSim();
+    CaloWaveformSim *caloWaveformSim = new CaloWaveformSim("HCALINCaloWaveformSim");
     caloWaveformSim->set_detector_type(CaloTowerDefs::HCALIN);
     caloWaveformSim->set_detector("HCALIN");
     caloWaveformSim->set_nsamples(12);
-    caloWaveformSim->set_pedestalsamples(12);
     caloWaveformSim->set_timewidth(0.2);
     caloWaveformSim->set_peakpos(6);
     // caloWaveformSim->Verbosity(2);
     // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+    //caloWaveformSim->set_calibName("HCALIN_calib_ADC_to_ETower");
     se->registerSubsystem(caloWaveformSim);
 
-    CaloTowerBuilder *ca2 = new CaloTowerBuilder();
+    CaloTowerBuilder *ca2 = new CaloTowerBuilder("HCALINCaloTowerBuilder");
     ca2->set_detector_type(CaloTowerDefs::HCALIN);
     ca2->set_nsamples(12);
     ca2->set_dataflag(false);

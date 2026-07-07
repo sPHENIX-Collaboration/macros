@@ -316,6 +316,13 @@ void TPC_Endcaps(PHG4Reco* g4Reco)
 
   //  tpc_endcap->set_int_param("construction_verbosity", 2);
 
+  // set the TPC tilt in sPHENIX
+  tpc_endcap->set_double_param("rot_x", G4TPC::rot_x);
+  tpc_endcap->set_double_param("rot_y", G4TPC::rot_y);
+  tpc_endcap->set_double_param("rot_z", G4TPC::rot_z);
+  std::cout << "G4_TrkrSimulation: Setting TPC endcap tilt angles to rot_x = " << G4TPC::rot_x
+	    << " roty = " << G4TPC::rot_y << " rot_z = " << G4TPC::rot_z << std::endl;
+  
   g4Reco->registerSubsystem(tpc_endcap);
 
   return;
@@ -353,6 +360,12 @@ double TPC(PHG4Reco* g4Reco,
   tpc->set_double_param("tpc_length", G4TPC::maxDriftLength * 2 + G4TPC::CM_halfwidth * 2);
   tpc->set_double_param("maxdriftlength", G4TPC::maxDriftLength);
   tpc->set_double_param("CM_halfwidth", G4TPC::CM_halfwidth);
+  // set the TPC tilt in sPHENIX
+  tpc->set_double_param("rot_x", G4TPC::rot_x);
+  tpc->set_double_param("rot_y", G4TPC::rot_y);
+  tpc->set_double_param("rot_z", G4TPC::rot_z);
+  std::cout << "G4_TrkrSimulation: Setting TPC tilt angles to rot_x = " << G4TPC::rot_x
+	    << " roty = " << G4TPC::rot_y << " rot_z = " << G4TPC::rot_z << std::endl;
   tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
   tpc->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
   tpc->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
