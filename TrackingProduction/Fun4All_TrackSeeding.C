@@ -16,7 +16,7 @@
 #include <Trkr_Reco.C>
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
-
+#include <G4Setup_sPHENIX.C>
 
 #include <tpccalib/PHTpcResiduals.h>
 
@@ -57,7 +57,8 @@ void Fun4All_TrackSeeding(
     const std::string &dir = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana517_2024p024_v001/DST_TRKR_CLUSTER/run_00053800_00053900/dst/",
     const std::string &outfilename = "clusters_seeds",
     const bool convertSeeds = false,
-    const bool doKFParticle = false)
+    const bool doKFParticle = false,
+    const int nskip = 0)
 {
   //std::string inputseedRawHitFile = dir + seedfilename;
   std::string inputclusterRawHitFile = dir + clusterfilename;
@@ -70,12 +71,28 @@ void Fun4All_TrackSeeding(
 
   auto *rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
+  rc->set_IntFlag("RUNSEGMENT", segment);
 
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
-  std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
+
+  bool rebuild_tracking_geometry = false;
+  if(rebuild_tracking_geometry)
+    {
+      // To make simulation geometry before running reconstruction
+      
+      Enable::MVTX = true;
+      Enable::INTT = true;
+      Enable::TPC = true;
+      Enable::MICROMEGAS = true;
+      
+      G4TPC::tpc_survey_position = true; // to use TPC survey position, set to true
+      G4Init();
+      G4Setup();
+    }
+  
   TpcReadoutInit(runnumber);
  // these lines show how to override the drift velocity and time offset values set in TpcReadoutInit
   // G4TPC::tpc_drift_velocity_reco = 0.0073844; // cm/ns
@@ -114,11 +131,14 @@ void Fun4All_TrackSeeding(
   auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
 
-
-  Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
-  ingeo->AddFile(geofile);
-  se->registerInputManager(ingeo);
-
+  if(!rebuild_tracking_geometry)
+    {
+      std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
+      Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
+      ingeo->AddFile(geofile);
+      se->registerInputManager(ingeo);
+    }
+  
   G4TPC::REJECT_LASER_EVENTS=true;
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
 
@@ -246,7 +266,8 @@ void Fun4All_TrackSeeding(
     se->registerSubsystem(new TpcSeedsQA);
     se->registerSubsystem(new TpcSiliconQA);
   }
-  se->run(nEvents);
+ se->skip(nskip);
+ se->run(nEvents);
   se->End();
   se->PrintTimer();
   CDBInterface::instance()->Print();
