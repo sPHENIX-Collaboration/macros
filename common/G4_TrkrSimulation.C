@@ -322,6 +322,12 @@ void TPC_Endcaps(PHG4Reco* g4Reco)
   tpc_endcap->set_double_param("rot_z", G4TPC::rot_z);
   std::cout << "G4_TrkrSimulation: Setting TPC endcap tilt angles to rot_x = " << G4TPC::rot_x
 	    << " roty = " << G4TPC::rot_y << " rot_z = " << G4TPC::rot_z << std::endl;
+  // set the TPC center position in sPHENIX
+  tpc_endcap->set_double_param("place_x", G4TPC::place_x);
+  tpc_endcap->set_double_param("place_y", G4TPC::place_y);
+  tpc_endcap->set_double_param("place_z", G4TPC::place_z);
+  std::cout << "G4_TrkrSimulation: Setting TPC center position to place_x = " << G4TPC::place_x
+	    << " place_y = " << G4TPC::place_y << " place_z = " << G4TPC::place_z << std::endl;
   
   g4Reco->registerSubsystem(tpc_endcap);
 
@@ -352,6 +358,25 @@ double TPC(PHG4Reco* g4Reco,
     drift_vel = G4TPC::ArCF4Isobutane_drift_velocity;
   }
 
+  if(G4TPC::tpc_survey_position)
+    {
+      // if this flag is set, place the TPC in the survey position
+      // This affects the positioning of the TPC envelope volume and the endcap volume
+
+      // set TPC tilt angles
+      G4TPC::rot_x = -0.00029817; // radians
+      G4TPC::rot_y = 0.0014833;
+      G4TPC::rot_z = 0.0;
+      // set TPC center
+      G4TPC::place_x = -1.6775/10.0; // convert mm to cm
+      G4TPC::place_y = -0.336/10.0;
+      G4TPC::place_z = -7.1365/10.0;
+    }
+  else
+    {
+      std::cout << "Not using TPC survey geometry" << std::endl;
+    }
+
   PHG4TpcSubsystem* tpc = new PHG4TpcSubsystem("TPC");
   tpc->SetActive();
   tpc->SuperDetector("TPC");
@@ -366,6 +391,12 @@ double TPC(PHG4Reco* g4Reco,
   tpc->set_double_param("rot_z", G4TPC::rot_z);
   std::cout << "G4_TrkrSimulation: Setting TPC tilt angles to rot_x = " << G4TPC::rot_x
 	    << " roty = " << G4TPC::rot_y << " rot_z = " << G4TPC::rot_z << std::endl;
+  // set the TPC center position in sPHENIX
+  tpc->set_double_param("place_x", G4TPC::place_x);
+  tpc->set_double_param("place_y", G4TPC::place_y);
+  tpc->set_double_param("place_z", G4TPC::place_z);
+  std::cout << "G4_TrkrSimulation: Setting TPC center position to place_x = " << G4TPC::place_x
+	    << " place_y = " << G4TPC::place_y << " place_z = " << G4TPC::place_z << std::endl;
   tpc->set_int_param("tpc_minlayer_inner", G4MVTX::n_maps_layer + G4INTT::n_intt_layer);
   tpc->set_int_param("ntpc_layers_inner", G4TPC::n_tpc_layer_inner);
   tpc->set_int_param("ntpc_phibins_inner", G4TPC::tpc_layer_rphi_count_inner);
