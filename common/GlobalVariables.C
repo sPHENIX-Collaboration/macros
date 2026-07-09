@@ -91,6 +91,9 @@ namespace TRACKING
   bool tpc_zero_supp = false;
   bool tpc_baseline_corr = true;
 
+  // alignment parameter
+  std::string alignmentParamsFile = "./localAlignmentParamsFile.txt";
+
 }  // namespace TRACKING
 
 namespace G4MAGNET
