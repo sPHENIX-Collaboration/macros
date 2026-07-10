@@ -212,9 +212,15 @@ namespace G4TPC
 
   double maxDriftLength = 102.325;  // new value, CM face to top of GEM stack
   double CM_halfwidth = 0.28;  // cm
-   double rot_x = 0.0;  // tpc default tilt angles (for tpc envelope and endcap)
+
+  bool tpc_survey_position = false;
+  double rot_x = 0.0;  // tpc default tilt angles (for tpc envelope and endcap)
   double rot_y = 0.0;
   double rot_z = 0.0;
+  double place_x = 0.0;  // tpc default center position (for tpc envelope and endcap)
+  double place_y = 0.0;
+  double place_z = 0.0;
+
   double sampa_tzero_bias = -65.0; // ns, set for simulations/reco matching with new sampa response
   bool apply_tpc_tzero_correction = false;  // true to apply small correction to TPC time zero in alignment transforms
 
