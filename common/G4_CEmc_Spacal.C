@@ -342,7 +342,7 @@ void CEMC_Towers()
     CaloWaveformSim *caloWaveformSim = new CaloWaveformSim("CEMCCaloWaveformSim");
     caloWaveformSim->set_detector_type(CaloTowerDefs::CEMC);
     caloWaveformSim->set_detector("CEMC");
-    caloWaveformSim->set_nsamples(12);
+    //  caloWaveformSim->set_nsamples(12); // default is 12 like in real data - if we ever want a different number of samples
     caloWaveformSim->set_timewidth(0.2);
     caloWaveformSim->set_peakpos(6);
     caloWaveformSim->get_light_collection_model().load_data_file(
