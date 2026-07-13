@@ -383,7 +383,7 @@ void HCALOuter_Towers()
     CaloWaveformSim *caloWaveformSim = new CaloWaveformSim("HCALOUTCaloWaveformSim");
     caloWaveformSim->set_detector_type(CaloTowerDefs::HCALOUT);
     caloWaveformSim->set_detector("HCALOUT");
-    caloWaveformSim->set_nsamples(12);
+    // caloWaveformSim->set_nsamples(12);// default is 12 like in real data - if we ever want a different number of samples
     caloWaveformSim->set_timewidth(0.2);
     caloWaveformSim->set_peakpos(6);
     // caloWaveformSim->Verbosity(2);
