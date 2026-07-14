@@ -22,7 +22,7 @@ R__LOAD_LIBRARY(libbcolumicount.so)
 R__LOAD_LIBRARY(libffamodules.so)
 
 void Fun4All_Test_StreamingBco(const int nEvents = 0,
-          const std::string &bcodst = "DST_STREAMING_BCOINFO-00052050.root")
+          const std::string &bcodst = "DST_STREAMING_BCOINFO-00081100.root")
 {
   gSystem->Load("libg4dst.so");
   Fun4AllServer *se = Fun4AllServer::instance();
