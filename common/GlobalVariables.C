@@ -22,7 +22,7 @@ namespace Input
   bool UPSILON = false;
   std::set<int> UPSILON_EmbedIds;
 
-  //! nominal beam parameter configuration choices for BEAM_CONFIGURATION
+  //! nominal beam parameter configuration choices for BEAM_CONFIGURATION (xing angle and vertex)
   enum BeamConfiguration
   {
     AuAu_COLLISION = 0,
@@ -37,7 +37,8 @@ namespace Input
     mRad_15 = 8,
     mRad_075 = 9,
     OOdNdEta = 10,
-    OO_COLLISION = 11
+    OO_COLLISION = 11,
+    WIDE_VERTEX = 12
   };
 
   BeamConfiguration BEAM_CONFIGURATION = AA_COLLISION;

@@ -105,6 +105,13 @@ namespace Input
       std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
       exit(1);
     }
+// default is gaussian vertex (and timing) distributions
+    HepMCGen->set_vertex_distribution_function(
+      PHHepMCGenHelper::Gaus,
+      PHHepMCGenHelper::Gaus,
+      PHHepMCGenHelper::Gaus,
+      PHHepMCGenHelper::Gaus);
+
     double localbcross = Input::beam_crossing / 2. * 1e-3;
     switch (beam_config)
     {
@@ -230,17 +237,24 @@ namespace Input
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
+    case WIDE_VERTEX:
+      HepMCGen->set_vertex_distribution_width(
+	120e-4,         // approximation from past PHENIX data
+	120e-4,         // approximation from past PHENIX data
+	200,             // +-200 cm 
+	20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+       HepMCGen->set_vertex_distribution_function(
+       	PHHepMCGenHelper::Gaus,
+       	PHHepMCGenHelper::Gaus,
+       	PHHepMCGenHelper::Uniform, // uniform in z
+       	PHHepMCGenHelper::Gaus);
+      break;
     default:
       std::cout << "ApplysPHENIXBeamParameter: invalid beam_config = " << beam_config << std::endl;
 
       exit(1);
     }
 
-    HepMCGen->set_vertex_distribution_function(
-        PHHepMCGenHelper::Gaus,
-        PHHepMCGenHelper::Gaus,
-        PHHepMCGenHelper::Gaus,
-        PHHepMCGenHelper::Gaus);
   }
 
   //! apply sPHENIX nominal beam parameter according to the beam collision setting of Input::IS_PP_COLLISION
