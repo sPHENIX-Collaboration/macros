@@ -84,7 +84,7 @@ void RunSettings(int runnumber, const std::string & /*type*/ = "")
     Input::BEAM_CONFIGURATION = Input::OOdNdEta;
     Enable::MVTX_APPLYMISALIGNMENT = true;
     break;
-  case 38: // flat wide z-distribution for calo studies, 0 degxing angle
+  case 38:  // flat wide z-distribution for calo studies, 0 degxing angle
     Input::BEAM_CONFIGURATION = Input::WIDE_VERTEX;
     break;
   default:
@@ -95,7 +95,7 @@ void RunSettings(int runnumber, const std::string & /*type*/ = "")
     }
     break;
   }
-// tests use runnumber >= 100, just that we can run them without having to change this macro
+  // tests use runnumber >= 100, just that we can run them without having to change this macro
   if (runnumber >= 100)
   {
     Input::BEAM_CONFIGURATION = Input::mRad_00;

@@ -105,12 +105,12 @@ namespace Input
       std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
       exit(1);
     }
-// default is gaussian vertex (and timing) distributions
+    // default is gaussian vertex (and timing) distributions
     HepMCGen->set_vertex_distribution_function(
-      PHHepMCGenHelper::Gaus,
-      PHHepMCGenHelper::Gaus,
-      PHHepMCGenHelper::Gaus,
-      PHHepMCGenHelper::Gaus);
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus);
 
     double localbcross = Input::beam_crossing / 2. * 1e-3;
     switch (beam_config)
@@ -128,7 +128,7 @@ namespace Input
           13.5,           // measured 2024 with 1mRad beam Xing
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
-      HepMCGen->set_vertex_distribution_mean(-0.058,0.133,0,0); // rough position of actual beam spot. This can vary by a few hundred microns
+      HepMCGen->set_vertex_distribution_mean(-0.058, 0.133, 0, 0);  // rough position of actual beam spot. This can vary by a few hundred microns
       break;
     case pA_COLLISION:
 
@@ -150,12 +150,12 @@ namespace Input
       // 1.5mRad is split among both beams, means set to 0.75 mRad
       HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
       HepMCGen->set_vertex_distribution_width(
-          120e-4,         // approximation from past PHENIX data
-          120e-4,         // approximation from past PHENIX data
-          16,             // measured in 2024 for 1.5mrad Xing angle
-          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
-      HepMCGen->set_vertex_distribution_mean(-0.07,0.141,0,0); // rough position of actual beam spot. This can vary by a few hundred microns
-      
+          120e-4,                                                  // approximation from past PHENIX data
+          120e-4,                                                  // approximation from past PHENIX data
+          16,                                                      // measured in 2024 for 1.5mrad Xing angle
+          20 / 29.9792);                                           // 20cm collision length / speed of light in cm/ns
+      HepMCGen->set_vertex_distribution_mean(-0.07, 0.141, 0, 0);  // rough position of actual beam spot. This can vary by a few hundred microns
+
       break;
     case pp_ZEROANGLE:
     case mRad_00:
@@ -185,20 +185,20 @@ namespace Input
 
     case mRad_05:
       Input::beam_crossing = 0.5;
-      //0.5 mRad is split among both beams, means set to 0.25 mRad
+      // 0.5 mRad is split among both beams, means set to 0.25 mRad
       localbcross = Input::beam_crossing / 2. * 1e-3;
 
       HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
       HepMCGen->set_vertex_distribution_width(
           120e-4,         // approximation from past PHENIX data
           120e-4,         // approximation from past PHENIX data
-          24.5,             // estimate from Colorado
+          24.5,           // estimate from Colorado
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
     case mRad_075:
       Input::beam_crossing = 0.75;
-      //0.75 mRad is split among both beams, means set to 0.375 mRad
+      // 0.75 mRad is split among both beams, means set to 0.375 mRad
       localbcross = Input::beam_crossing / 2. * 1e-3;
 
       HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
@@ -209,9 +209,9 @@ namespace Input
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
-    case OOdNdEta: // special for Cheng-Wei's intt based dNdEta analysis
+    case OOdNdEta:  // special for Cheng-Wei's intt based dNdEta analysis
       Input::beam_crossing = 0.75;
-      //0.75 mRad is split among both beams, means set to 0.375 mRad
+      // 0.75 mRad is split among both beams, means set to 0.375 mRad
       localbcross = Input::beam_crossing / 2. * 1e-3;
 
       HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
@@ -225,36 +225,35 @@ namespace Input
       break;
     case OO_COLLISION:
       Input::beam_crossing = 0.75;
-      //0.75 mRad is split among both beams, means set to 0.375 mRad
+      // 0.75 mRad is split among both beams, means set to 0.375 mRad
       localbcross = Input::beam_crossing / 2. * 1e-3;
 
       HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
       HepMCGen->set_vertex_distribution_mean(-0.0365, 0.137, 0.0, 0.);
       HepMCGen->set_vertex_distribution_width(
-          92.4e-4,         // measured from silicon vertices in OO data
-          74.1e-4,         // measured from silicon vertices in OO data
-          12.1,          // measured from MBD vertex distribution in OO data, with trigger bit 14 (MBD S&N > 1 && |vtx| < 150 cm, least biased)
+          92.4e-4,        // measured from silicon vertices in OO data
+          74.1e-4,        // measured from silicon vertices in OO data
+          12.1,           // measured from MBD vertex distribution in OO data, with trigger bit 14 (MBD S&N > 1 && |vtx| < 150 cm, least biased)
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
       break;
     case WIDE_VERTEX:
       HepMCGen->set_vertex_distribution_width(
-	120e-4,         // approximation from past PHENIX data
-	120e-4,         // approximation from past PHENIX data
-	200,             // +-200 cm 
-	20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
-       HepMCGen->set_vertex_distribution_function(
-       	PHHepMCGenHelper::Gaus,
-       	PHHepMCGenHelper::Gaus,
-       	PHHepMCGenHelper::Uniform, // uniform in z
-       	PHHepMCGenHelper::Gaus);
+          120e-4,         // approximation from past PHENIX data
+          120e-4,         // approximation from past PHENIX data
+          200,            // +-200 cm
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+      HepMCGen->set_vertex_distribution_function(
+          PHHepMCGenHelper::Gaus,
+          PHHepMCGenHelper::Gaus,
+          PHHepMCGenHelper::Uniform,  // uniform in z
+          PHHepMCGenHelper::Gaus);
       break;
     default:
       std::cout << "ApplysPHENIXBeamParameter: invalid beam_config = " << beam_config << std::endl;
 
       exit(1);
     }
-
   }
 
   //! apply sPHENIX nominal beam parameter according to the beam collision setting of Input::IS_PP_COLLISION
@@ -268,10 +267,10 @@ namespace Input
   {
     for (auto *iter : HepMCGenVec)
     {
-      PHHepMCGenHelper *gen = dynamic_cast<PHHepMCGenHelper *> (iter);
+      PHHepMCGenHelper *gen = dynamic_cast<PHHepMCGenHelper *>(iter);
       if (gen)
       {
-	ApplysPHENIXBeamParameter(gen, Input::BEAM_CONFIGURATION);
+        ApplysPHENIXBeamParameter(gen, Input::BEAM_CONFIGURATION);
       }
     }
   }
@@ -377,9 +376,8 @@ namespace PYTHIA6
 namespace PYTHIA8
 {
   std::map<int, std::string> config_file =
-  {
-    {0, std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg"}
-  };
+      {
+          {0, std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg"}};
 }
 
 namespace PILEUP
@@ -466,21 +464,21 @@ void InputInit()
       // see coresoftware/generators/PHPythia8 for example config
       if (PYTHIA8::config_file[i].empty())
       {
-	std::cout << "No Pythia8 config file for pythia8 generator no " << i << std::endl;
-	gSystem->Exit(1);
+        std::cout << "No Pythia8 config file for pythia8 generator no " << i << std::endl;
+        gSystem->Exit(1);
       }
       pythia8->set_config_file(PYTHIA8::config_file[i]);
       // luminosity makes no sense when running multiple pythia8 generators
       if (Input::PYTHIA8_NUMBER > 1)
       {
-	pythia8->save_integrated_luminosity(false);
+        pythia8->save_integrated_luminosity(false);
       }
 
       Input::PYTHIA8_EmbedIds.insert(Input::EmbedId);
       Input::EmbedId++;
       if (Input::EMBED)
       {
-	pythia8->set_reuse_vertex(Input::VertexEmbedId);
+        pythia8->set_reuse_vertex(Input::VertexEmbedId);
       }
     }
   }
