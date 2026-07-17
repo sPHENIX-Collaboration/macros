@@ -54,10 +54,11 @@ void checkCos(TH2* h){
   
   for (int ie=0; ie<24; ie++)
     for (int ip=0; ip<64; ip++)
-      if (h->GetBinContent(ie+1,ip+1) < 0.01*avg || h->GetBinContent(ie+1,ip+1) > 10*avg)
-	std::cout << "Rescaling the calib. factor to a global average. Be cautious!" << endl; 
+	double v = h->GetBinContent(ie+1,ip+1);
+        if (v < 0.01*avg || v > 10*avg){
+	std::cout << "Rescaling the calib. factor in bin (" << ie << "," << ip<< ") to a global average. Be cautious!" << endl;	
         h->SetBinContent(ie+1,ip+1,avg);
-
+     }
 }
 
 
