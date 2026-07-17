@@ -9,9 +9,9 @@ void checkCos(TH2* h);
 
 void tsc_cos_merge(const std::string &tsc_file, const std::string &cos_cdb_file,const std::string &output_name, int isIHcal){
   
-  // get 2024 cosmics calibration
-  std::string fieldName_in = "ohcal_cosmic_calibration";
-  if (isIHcal ==1) fieldName_in = "ihcal_cosmic_calibration";
+  // get cosmics calibration
+  std::string fieldName_in = "HCALOUT_calib_ADC_to_ETower";
+  if (isIHcal ==1) fieldName_in = "HCALIN_calib_ADC_to_ETower";
   TH2* h_ohcal = CaloCDBTreeToHist(cos_cdb_file,fieldName_in,1);
   
   // get/apply tsc fine tunning for calibration
@@ -54,9 +54,11 @@ void checkCos(TH2* h){
   
   for (int ie=0; ie<24; ie++)
     for (int ip=0; ip<64; ip++)
-      if (h->GetBinContent(ie+1,ip+1) < 0.3*avg || h->GetBinContent(ie+1,ip+1) > 2.3*avg) 
+	double v = h->GetBinContent(ie+1,ip+1);
+        if (v < 0.01*avg || v > 10*avg){
+	std::cout << "Rescaling the calib. factor in bin (" << ie << "," << ip<< ") to a global average. Be cautious!" << endl;	
         h->SetBinContent(ie+1,ip+1,avg);
-
+     }
 }
 
 
@@ -113,9 +115,9 @@ void rescaleTSC(TH2* h_tsc,TH2* h_cos){
 
 void genCdbCorr_HH(float corr, const std::string &cos_cdb_file,const std::string &output_name, int isIHcal,std::vector<std::vector<float>> halfhighs){
   
-  // get 2024 cosmics calibration
-  std::string fieldName_in = "ohcal_abscalib_mip";
-  if (isIHcal ==1) fieldName_in = "ihcal_cosmic_calibration";
+  // get cosmics calibration
+  std::string fieldName_in = "HCALOUT_calib_ADC_to_ETower";
+  if (isIHcal ==1) fieldName_in = "HCALIN_calib_ADC_to_ETower";
   TH2* h_ohcal = CaloCDBTreeToHist(cos_cdb_file,fieldName_in,1);
 
   if (!h_ohcal){
