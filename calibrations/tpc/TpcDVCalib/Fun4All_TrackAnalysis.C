@@ -170,7 +170,7 @@ void Fun4All_TrackAnalysis(
       actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
       actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
     }
-    actsFit->set_pp_mode(TRACKING::pp_mode);
+    actsFit->set_pp_mode(TRACKING::streaming_mode);
     actsFit->set_use_clustermover(true);  // default is true for now
     actsFit->useActsEvaluator(false);
     actsFit->useOutlierFinder(false);

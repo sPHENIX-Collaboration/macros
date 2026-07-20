@@ -104,7 +104,7 @@ void Fun4All_DiffuseLaser(
 
   G4TPC::ENABLE_AVERAGE_CORRECTIONS = false;
 
-  TRACKING::pp_mode = true;
+  TRACKING::streaming_mode = true;
   
   TrackingInit();
 

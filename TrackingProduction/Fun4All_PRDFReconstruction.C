@@ -215,7 +215,7 @@ void Fun4All_PRDFReconstruction(
   //! flags to set
   Enable::QA = true;
   TRACKING::tpc_zero_supp = true;
-  TRACKING::pp_mode = true;
+  TRACKING::streaming_mode = true;
   G4TRACKING::convert_seeds_to_svtxtracks = false;
   G4TPC::REJECT_LASER_EVENTS = true;
 
@@ -426,7 +426,7 @@ void Fun4All_PRDFReconstruction(
     finder->setTrackQualityCut(1000000000);
     finder->setNmvtxRequired(3);
     finder->setOutlierPairCut(0.1);
-    finder->set_pp_mode(TRACKING::pp_mode);
+    finder->set_pp_mode(TRACKING::streaming_mode);
     finder->setTrackMapName("SiliconSvtxTrackMap");
     finder->setVertexMapName("SiliconSvtxVertexMap");
     se->registerSubsystem(finder);

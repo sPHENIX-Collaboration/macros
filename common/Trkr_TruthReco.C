@@ -227,8 +227,8 @@ void Tracking_Reco_TrackSeed()
       // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
       auto *silicon_match = new PHSiliconTpcTrackMatching;
       silicon_match->Verbosity(verbosity);
-      silicon_match->set_pp_mode(TRACKING::pp_mode);
-      std::cout << "PHSiliconTpcTrackMatching pp_mode set to " << TRACKING::pp_mode << std::endl;
+      silicon_match->set_pp_mode(TRACKING::streaming_mode);
+      std::cout << "PHSiliconTpcTrackMatching streaming_mode set to " << TRACKING::streaming_mode << std::endl;
       if (G4TRACKING::SC_CALIBMODE)
       {
         // search windows for initial matching with distortions
@@ -354,7 +354,7 @@ void Tracking_Reco_TrackFit()
     // in calibration mode, fit only Silicons and Micromegas hits
     actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
     actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-    actsFit->set_pp_mode(TRACKING::pp_mode);
+    actsFit->set_pp_mode(TRACKING::streaming_mode);
     actsFit->set_use_clustermover(true);
     actsFit->useActsEvaluator(false);
     actsFit->useOutlierFinder(false);
@@ -547,7 +547,7 @@ void Tracking_Reco_CommissioningTrackSeed()
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
   auto *silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(verbosity);
-  silicon_match->set_pp_mode(TRACKING::pp_mode);
+  silicon_match->set_pp_mode(TRACKING::streaming_mode);
 
   silicon_match->set_phi_search_window(0.2);
   silicon_match->set_eta_search_window(0.015);

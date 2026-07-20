@@ -18,6 +18,7 @@ void RunSettings(int runnumber, const std::string & /*type*/ = "")
   case 29:  // 1.5mRad xing angle, mvtx rotated
     Input::BEAM_CONFIGURATION = Input::pp_COLLISION;
     Enable::MVTX_APPLYMISALIGNMENT = true;
+    TRACKING::streaming_mode = true;
     break;
   case 23:  // AuAu 1mRad xing angle, mvtx rotated
   case 30:  // AuAu 1mRad xing angle, mvtx rotated
@@ -83,7 +84,9 @@ void RunSettings(int runnumber, const std::string & /*type*/ = "")
     Input::BEAM_CONFIGURATION = Input::OOdNdEta;
     Enable::MVTX_APPLYMISALIGNMENT = true;
     break;
-  
+  case 38:  // flat wide z-distribution for calo studies, 0 degxing angle
+    Input::BEAM_CONFIGURATION = Input::WIDE_VERTEX;
+    break;
   default:
     if (runnumber < 100)
     {
@@ -92,7 +95,7 @@ void RunSettings(int runnumber, const std::string & /*type*/ = "")
     }
     break;
   }
-// tests use runnumber >= 100, just that we can run them without having to change this macro
+  // tests use runnumber >= 100, just that we can run them without having to change this macro
   if (runnumber >= 100)
   {
     Input::BEAM_CONFIGURATION = Input::mRad_00;

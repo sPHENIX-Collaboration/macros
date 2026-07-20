@@ -107,7 +107,7 @@ void Fun4All_CaloJetProductionYear2(
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
   Enable::MVTX_APPLYMISALIGNMENT        = true;
   ACTSGEOM::mvtx_applymisalignment      = Enable::MVTX_APPLYMISALIGNMENT;
-  TRACKING::pp_mode                     = NSJETS::is_pp;
+  TRACKING::streaming_mode                     = NSJETS::is_pp;
 
   // initialize interfaces, register inputs -----------------------------------
 

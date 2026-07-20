@@ -51,7 +51,10 @@ void TrackingInit()
   // G4Setup() was not run
   if(CDB::is_data_reco)
     {
-      LoadTrackingCDBGeometry();
+      if(!Enable::MVTX || !Enable::INTT || !Enable::TPC || !Enable::MICROMEGAS)
+	{
+	  LoadTrackingCDBGeometry();
+	}
     }
  
   TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;

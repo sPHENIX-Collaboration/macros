@@ -78,7 +78,7 @@ void TPC_LaminationFitting()
     laminations->Verbosity(verbosity);
     laminations->set_phiHistInRad(G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS);
     laminations->set_nLayerCut(1);
-    laminations->set_ppMode(TRACKING::pp_mode);
+    laminations->set_ppMode(TRACKING::streaming_mode);
     laminations->set_fieldOff(G4TPC::BFieldOff);
     laminations->setOutputfile(G4TPC::LaminationOutputName);
     laminations->set_stripePatternFile(G4TPC::CMStripePattern);

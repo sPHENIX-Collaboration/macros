@@ -213,7 +213,7 @@ void Fun4All_raw_hit_KFP(
             << " vdrift: " << G4TPC::tpc_drift_velocity_reco
             << std::endl;
 
-  TRACKING::pp_mode = true;
+  TRACKING::streaming_mode = true;
 
   // distortion calibration mode
   /*
