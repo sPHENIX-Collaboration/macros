@@ -31,6 +31,7 @@ namespace ACTSGEOM
 
   bool mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
   bool inttsurvey = Enable::INTT_USEG4SURVEYGEOM;
+  bool useActsMaterialMap = true;
 
   void ActsGeomInit()
   {
@@ -54,6 +55,7 @@ namespace ACTSGEOM
 
     // Geometry must be built before any Acts modules
     MakeActsGeometry *geom = new MakeActsGeometry();
+    geom->setUseActsMaterialMap(ACTSGEOM::useActsMaterialMap);
     geom->set_alignmentParamsFile( TRACKING::alignmentParamsFile );
     geom->set_drift_velocity(G4TPC::tpc_drift_velocity_reco);
     geom->set_apply_tpc_tzero_correction(G4TPC::apply_tpc_tzero_correction);  // set true to apply tpc tzero correction
