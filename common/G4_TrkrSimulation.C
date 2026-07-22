@@ -709,33 +709,10 @@ void Micromegas_Cells()
 
 void GeantinoIonization()
 {
+  int verbosity = Enable::VERBOSITY;
   Fun4AllServer* se = Fun4AllServer::instance();
-
   auto* geantinoIonization = new PHG4GeantinoIonization("PHG4GeantinoIonization");
-
-  // Silicon defaults already match the normal detector digitization.
-  // Only call these setters if you intentionally want different values.
-  //
-  // geantinoIonization->set_mvtx_mip_dedx(0.00384);  // GeV/cm
-  // geantinoIonization->set_intt_mip_dedx(0.00387);  // GeV/cm
-
-  // Ne / Ar / CF4 / N2 / isobutane
-  geantinoIonization->set_tpc_gas_fractions(
-      0.00,
-      0.75,
-      0.20,
-      0.00,
-      0.05);
-
-  // TPOT: Ar/isobutane = 90/10
-  geantinoIonization->set_tpot_gas_fractions(
-      0.00,
-      0.90,
-      0.00,
-      0.00,
-      0.10);
-
-  geantinoIonization->Verbosity(0);
+  geantinoIonization->Verbosity(verbosity);
   se->registerSubsystem(geantinoIonization);
 }
 
