@@ -206,7 +206,7 @@ void Fun4All_TrackSeeding(
   kfparticle->getDetectorInfo(true);
 
   kfparticle->constrainToPrimaryVertex(true);
-  kfparticle->setMotherIPchi2(FLT_MAX);
+  kfparticle->setMotherPV_DCA_StdDev(FLT_MAX);
   kfparticle->setFlightDistancechi2(-1.);
   kfparticle->setMinDIRA(-1.1);
   kfparticle->setDecayLengthRange(0., FLT_MAX);
@@ -218,8 +218,8 @@ void Fun4All_TrackSeeding(
   kfparticle->setMinTPChits(20);
   kfparticle->setMinimumTrackPT(-1.);
   kfparticle->setMaximumTrackPTchi2(FLT_MAX);
-  kfparticle->setMinimumTrackIPchi2(-1.);
-  kfparticle->setMinimumTrackIP(-1.);
+  kfparticle->setMinimumTrackPV_DCA_StdDev(-1.);
+  kfparticle->setMinimumTrackPV_DCA(-1.);
   //kfparticle->setMaximumTrackchi2nDOF(20.);
   kfparticle->setMaximumTrackchi2nDOF(300.);
 
