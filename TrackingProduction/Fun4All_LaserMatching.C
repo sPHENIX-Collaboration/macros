@@ -33,6 +33,7 @@
 
 #include <fstream>
 #include <cstdio>
+#include <format>
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libtpc.so)
@@ -152,9 +153,17 @@ void Fun4All_LaserMatching(
   centralMembraneMatcher->set_doHadd(true);
   centralMembraneMatcher->set_averageMode(true);
   centralMembraneMatcher->set_event_sequence(segment);
-  centralMembraneMatcher->setHistogramOutputfile(Form("%s/PHTpcCentralMembraneMatcher-%08d-all.root",outdir.c_str(),runnumber));
-  centralMembraneMatcher->setOutputfile(Form("%s/CMDistortionCorrections-%08d-all.root",outdir.c_str(),runnumber));
-  centralMembraneMatcher->setDebugOutputFile(Form("%s/CMMatching-%08d-all.root",outdir.c_str(),runnumber));
+  centralMembraneMatcher->setHistogramOutputfile(
+    std::format("{}/PHTpcCentralMembraneMatcher-{:08d}-all.root",
+                outdir, runnumber));
+
+  centralMembraneMatcher->setOutputfile(
+    std::format("{}/CMDistortionCorrections-{:08d}-all.root",
+                outdir, runnumber));
+
+  centralMembraneMatcher->setDebugOutputFile(
+    std::format("{}/CMMatching-{:08d}-all.root",
+                outdir, runnumber));
   centralMembraneMatcher->set_grid_dimensions(500,500);
   se->registerSubsystem(centralMembraneMatcher);
 

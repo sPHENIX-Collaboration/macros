@@ -30,6 +30,7 @@
 
 #include <tpc/LaserEventIdentifier.h>
 
+#include <format>
 #include <fstream>
 #include <cstdio>
 
@@ -104,7 +105,9 @@ void Fun4All_LaserClustering(
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
   
   
-  TString out_DST = Form("%s/DST_LASER_CLUSTER_%s_%s-%08d-%05d.root",outdir.c_str(), type.c_str(), prod.c_str(), runnumber, segment);
+  TString out_DST = std::format(
+    "{}/DST_LASER_CLUSTER_{}_{}-{:08d}-{:05d}.root",
+    outdir, type, prod, runnumber, segment);
   std::string theOutDST = out_DST.Data();
   
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
@@ -164,8 +167,9 @@ void Fun4All_LaserClustering(
   }
 
 
-  G4TPC::laser_event_debug_filename = Form("%s/laserEventQA-%08d-%05d.root",outdir.c_str(),runnumber,segment);
-
+  G4TPC::laser_event_debug_filename =
+    std::format("{}/laserEventQA-{:08d}-{:05d}.root",
+                outdir, runnumber, segment);
   Tpc_LaserEventIdentifying();
 
   G4TPC::ENABLE_CENTRAL_MEMBRANE_CLUSTERING = true; 

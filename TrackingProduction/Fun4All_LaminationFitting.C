@@ -30,6 +30,7 @@
 
 #include <tpccalib/TpcLaminationFitting.h>
 
+#include <format>
 #include <fstream>
 #include <cstdio>
 R__LOAD_LIBRARY(libfun4all.so)
@@ -128,9 +129,14 @@ void Fun4All_LaminationFitting(
   
   TrackingInit();
 
+  G4TPC::LaminationOutputName =
+    std::format("{}/Laminations_{}_{}-{:08d}.root",
+                outdir, type, prod, runnumber);
 
-  G4TPC::LaminationOutputName = Form("%s/Laminations_%s_%s-%08d.root",outdir.c_str(),type.c_str(),prod.c_str(),runnumber);
-  G4TPC::LaminationQAName = Form("%s/LaminationQA_%s_%s-%08d.pdf",outdir.c_str(),type.c_str(),prod.c_str(),runnumber);
+  G4TPC::LaminationQAName =
+    std::format("{}/LaminationQA_{}_{}-{:08d}.pdf",
+                outdir, type, prod, runnumber);
+
   TPC_LaminationFitting();
   
   se->run(nEvents);
