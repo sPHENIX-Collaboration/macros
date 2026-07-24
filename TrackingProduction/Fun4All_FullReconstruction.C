@@ -99,7 +99,7 @@ void Fun4All_FullReconstruction(
             << " vdrift: " << G4TPC::tpc_drift_velocity_reco
             << std::endl;
 
-  TRACKING::pp_mode = true;
+  TRACKING::streaming_mode = true;
 
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
@@ -263,7 +263,7 @@ void Fun4All_FullReconstruction(
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
   auto *silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
-  silicon_match->set_pp_mode(TRACKING::pp_mode);
+  silicon_match->set_pp_mode(TRACKING::streaming_mode);
   if (G4TPC::ENABLE_AVERAGE_CORRECTIONS)
   {
     // for general tracking
@@ -299,7 +299,7 @@ void Fun4All_FullReconstruction(
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
   auto *mm_match = new PHMicromegasTpcTrackMatching;
   mm_match->Verbosity(0);
-  mm_match->set_pp_mode(TRACKING::pp_mode);
+  mm_match->set_pp_mode(TRACKING::streaming_mode);
   mm_match->set_rphi_search_window_lyr1(3.);
   mm_match->set_rphi_search_window_lyr2(15.0);
   mm_match->set_z_search_window_lyr1(30.0);
@@ -340,7 +340,7 @@ void Fun4All_FullReconstruction(
     // in calibration mode, fit only Silicons and Micromegas hits
     actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
     actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-    actsFit->set_pp_mode(TRACKING::pp_mode);
+    actsFit->set_pp_mode(TRACKING::streaming_mode);
     actsFit->set_use_clustermover(true);  // default is true for now
     actsFit->useActsEvaluator(false);
     actsFit->useOutlierFinder(false);
@@ -349,7 +349,7 @@ void Fun4All_FullReconstruction(
 
     auto *cleaner = new PHTrackCleaner();
     cleaner->Verbosity(0);
-    cleaner->set_pp_mode(TRACKING::pp_mode);
+    cleaner->set_pp_mode(TRACKING::streaming_mode);
     se->registerSubsystem(cleaner);
 
     if (G4TRACKING::SC_CALIBMODE)

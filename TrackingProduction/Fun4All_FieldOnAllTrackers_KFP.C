@@ -177,7 +177,7 @@ void Fun4All_FieldOnAllTrackers_KFP(
     // in calibration mode, fit only Silicons and Micromegas hits
     actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
     actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-    actsFit->set_pp_mode(TRACKING::pp_mode);
+    actsFit->set_pp_mode(TRACKING::streaming_mode);
     actsFit->set_use_clustermover(true);  // default is true for now
     actsFit->useActsEvaluator(false);
     actsFit->useOutlierFinder(false);
@@ -213,7 +213,7 @@ void Fun4All_FieldOnAllTrackers_KFP(
   kfparticle->useFakePrimaryVertex(); // true
 
   kfparticle->constrainToPrimaryVertex(false);
-  kfparticle->setMotherIPchi2(FLT_MAX);
+  kfparticle->setMotherPV_DCA_StdDev(FLT_MAX);
   kfparticle->setFlightDistancechi2(-1.);
   kfparticle->setMinDIRA(-1.1);
   kfparticle->setDecayLengthRange(0., FLT_MAX);
@@ -224,8 +224,8 @@ void Fun4All_FieldOnAllTrackers_KFP(
   kfparticle->setMinTPChits(20);
   kfparticle->setMinimumTrackPT(-1.);
   kfparticle->setMaximumTrackPTchi2(FLT_MAX);
-  kfparticle->setMinimumTrackIPchi2(-1.);
-  kfparticle->setMinimumTrackIP(-1.);
+  kfparticle->setMinimumTrackPV_DCA_StdDev(-1.);
+  kfparticle->setMinimumTrackPV_DCA(-1.);
   kfparticle->setMaximumTrackchi2nDOF(20.);
 
   //Vertex parameters

@@ -219,7 +219,7 @@ void Fun4All_raw_hit_KFP(
             << " vdrift: " << G4TPC::tpc_drift_velocity_reco
             << std::endl;
 
-  TRACKING::pp_mode = false;
+  TRACKING::streaming_mode = false;
 
   // distortion calibration mode
   /*
@@ -393,7 +393,7 @@ void Fun4All_raw_hit_KFP(
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
   auto *silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
-  silicon_match->set_pp_mode(TRACKING::pp_mode);
+  silicon_match->set_pp_mode(TRACKING::streaming_mode);
   if (G4TPC::ENABLE_AVERAGE_CORRECTIONS)
   {
     // for general tracking
@@ -469,7 +469,7 @@ void Fun4All_raw_hit_KFP(
     // in calibration mode, fit only Silicons and Micromegas hits
     actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
     actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-    actsFit->set_pp_mode(TRACKING::pp_mode);
+    actsFit->set_pp_mode(TRACKING::streaming_mode);
     actsFit->set_use_clustermover(true);  // default is true for now
     actsFit->useActsEvaluator(false);
     actsFit->useOutlierFinder(false);
@@ -478,7 +478,7 @@ void Fun4All_raw_hit_KFP(
 
     auto *cleaner = new PHTrackCleaner();
     cleaner->Verbosity(0);
-    cleaner->set_pp_mode(TRACKING::pp_mode);
+    cleaner->set_pp_mode(TRACKING::streaming_mode);
     se->registerSubsystem(cleaner);
 
     if (G4TRACKING::SC_CALIBMODE)
@@ -657,7 +657,7 @@ void Fun4All_raw_hit_KFP(
 
     // PV to SV cuts
     kfparticle->constrainToPrimaryVertex(HeavyFlavorReco::constrain_to_primary_vertex);
-    kfparticle->setMotherIPchi2(100);
+    kfparticle->setMotherPV_DCA_StdDev(100);
     kfparticle->setFlightDistancechi2(-1.);
     kfparticle->setMinDIRA(0.88);                    // was .95
     kfparticle->setDecayLengthRange(-0.1, FLT_MAX);  // was 0.1 min
@@ -672,8 +672,8 @@ void Fun4All_raw_hit_KFP(
 
     // Track parameters
     kfparticle->setMinimumTrackPT(0.0);
-    kfparticle->setMinimumTrackIPchi2(-1.);
-    kfparticle->setMinimumTrackIP(-1.);
+    kfparticle->setMinimumTrackPV_DCA_StdDev(-1.);
+    kfparticle->setMinimumTrackPV_DCA(-1.);
     kfparticle->setMaximumTrackchi2nDOF(100.);
     kfparticle->setMinINTThits(0);
     kfparticle->setMinMVTXhits(0);
@@ -713,15 +713,15 @@ void Fun4All_raw_hit_KFP(
 
     // PV to SV cuts
     kfparticle->constrainToPrimaryVertex(HeavyFlavorReco::constrain_to_primary_vertex);
-    kfparticle->setMotherIPchi2(100);
+    kfparticle->setMotherPV_DCA_StdDev(100);
     kfparticle->setFlightDistancechi2(-1.);
     kfparticle->setMinDIRA(0.88);
     kfparticle->setDecayLengthRange(0.2, FLT_MAX);
 
     // Track parameters
     kfparticle->setMinimumTrackPT(0.1);
-    kfparticle->setMinimumTrackIPchi2(-1.);
-    kfparticle->setMinimumTrackIP(-1.);
+    kfparticle->setMinimumTrackPV_DCA_StdDev(-1.);
+    kfparticle->setMinimumTrackPV_DCA(-1.);
     kfparticle->setMaximumTrackchi2nDOF(100.);
     kfparticle->setMinTPChits(25);
 

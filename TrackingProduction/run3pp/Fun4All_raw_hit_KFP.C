@@ -213,7 +213,7 @@ void Fun4All_raw_hit_KFP(
             << " vdrift: " << G4TPC::tpc_drift_velocity_reco
             << std::endl;
 
-  TRACKING::pp_mode = true;
+  TRACKING::streaming_mode = true;
 
   // distortion calibration mode
   /*
@@ -455,7 +455,7 @@ void Fun4All_raw_hit_KFP(
 
     // PV to SV cuts
     kfparticle->constrainToPrimaryVertex(HeavyFlavorReco::constrain_to_primary_vertex);
-    kfparticle->setMotherIPchi2(100);
+    kfparticle->setMotherPV_DCA_StdDev(100);
     kfparticle->setFlightDistancechi2(-1.);
     kfparticle->setMinDIRA(0.88);                    // was .95
     kfparticle->setDecayLengthRange(-0.1, FLT_MAX);  // was 0.1 min
@@ -470,8 +470,8 @@ void Fun4All_raw_hit_KFP(
 
     // Track parameters
     kfparticle->setMinimumTrackPT(0.0);
-    kfparticle->setMinimumTrackIPchi2(-1.);
-    kfparticle->setMinimumTrackIP(-1.);
+    kfparticle->setMinimumTrackPV_DCA_StdDev(-1.);
+    kfparticle->setMinimumTrackPV_DCA(-1.);
     kfparticle->setMaximumTrackchi2nDOF(100.);
     kfparticle->setMinINTThits(0);
     kfparticle->setMinMVTXhits(0);
@@ -511,15 +511,15 @@ void Fun4All_raw_hit_KFP(
 
     // PV to SV cuts
     kfparticle->constrainToPrimaryVertex(HeavyFlavorReco::constrain_to_primary_vertex);
-    kfparticle->setMotherIPchi2(100);
+    kfparticle->setMotherPV_DCA_StdDev(100);
     kfparticle->setFlightDistancechi2(-1.);
     kfparticle->setMinDIRA(0.88);
     kfparticle->setDecayLengthRange(0.2, FLT_MAX);
 
     // Track parameters
     kfparticle->setMinimumTrackPT(0.1);
-    kfparticle->setMinimumTrackIPchi2(-1.);
-    kfparticle->setMinimumTrackIP(-1.);
+    kfparticle->setMinimumTrackPV_DCA_StdDev(-1.);
+    kfparticle->setMinimumTrackPV_DCA(-1.);
     kfparticle->setMaximumTrackchi2nDOF(100.);
     kfparticle->setMinTPChits(25);
 
