@@ -135,7 +135,6 @@ void Fun4All_FullReconstruction(
   // to turn on the average corrections, enable the three lines below
   // note: these are designed to be used only if static corrections are also applied
   G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
