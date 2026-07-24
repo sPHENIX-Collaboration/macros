@@ -68,21 +68,20 @@ void Fun4All_TPC_Analysis(
     const int nEvents = 2,
     const int runnumber = 79513,
     const int segment = 0,
-    const std::string outdir = ".",
-    const std::string indir = ".",
-    const int nSkip = 0,
-    const std::string collision = "run3pp",
-    const std::string production = "ana532_nocdbtag_v001",
+    const std::string&  /*outdir*/ = ".",
+    const std::string& indir = ".",
+    const int  /*nSkip*/ = 0,
+    const std::string& collision = "run3pp",
+    const std::string& production = "ana532_nocdbtag_v001",
     const std::string& outfilename = "HITS_ppFieldOn")
 {
-  const bool convertSeeds = true;
   auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
   auto *rc = recoConsts::instance();
 
 
   const std::string dsttype = "TPC";
-   std::string filename = indir+"/DST_"+dsttype+"_"+collision+"_"+production+"-"+to_string(runnumber)+"-"+to_string(segment)+".root";
+  std::string filename = indir+"/DST_"+dsttype+"_"+collision+"_"+production+"-"+std::to_string(runnumber)+"-"+std::to_string(segment)+".root";
 
   auto *hitsinclus = new Fun4AllDstInputManager("TpcInputManager");
   hitsinclus->fileopen(filename);
@@ -115,7 +114,7 @@ void Fun4All_TPC_Analysis(
 
 
   //For the module tracks display uncomment following line
-  se->registerSubsystem(new Tpc_ModuleTrackDisplay("Tpc_ModuleTrackDisplay", "tpc_moduletrack_display_" + outfilename + "_" + to_string(runnumber) + ".root"));
+  se->registerSubsystem(new Tpc_ModuleTrackDisplay("Tpc_ModuleTrackDisplay", "tpc_moduletrack_display_" + outfilename + "_" + std::to_string(runnumber) + ".root"));
   
   //For the assembled tracks display uncomment following line
   //se->registerSubsystem(new Tpc_AssembledTrackDisplay("Tpc_AssembledTrackDisplay", "tpc_assembledtrack_display_" + outfilename + "_" + to_string(runnumber) + ".root"));
