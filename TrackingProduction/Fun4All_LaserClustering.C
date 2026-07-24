@@ -30,25 +30,26 @@
 
 #include <tpc/LaserEventIdentifier.h>
 
-#include <stdio.h>
+#include <fstream>
+#include <cstdio>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libtpc.so)
 void Fun4All_LaserClustering(
     const int nEvents = 10,
-    const std::string filelist = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpcbeam/run_00041900_00042000/",
-    const std::string outdir = "/sphenig/tg/tg01/jets/bkimelman/",
-    const std::string prod = "ana441_2024p007",
-    const std::string type = "run2pp")
+    const std::string& filelist = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpcbeam/run_00041900_00042000/",
+    const std::string& outdir = "/sphenig/tg/tg01/jets/bkimelman/",
+    const std::string& prod = "ana441_2024p007",
+    const std::string& type = "run2pp")
 
 {
   gSystem->Load("libg4dst.so");
 
   
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
   CDBInterface::instance()->Verbosity(1);
   Enable::CDB = true;
   
@@ -82,7 +83,7 @@ void Fun4All_LaserClustering(
     if(filepath.find("ebdc") != std::string::npos)
     {
       //if(filepath.find("ebdc39") == std::string::npos)
-      if(filepath.find("_0_") != std::string::npos or filepath.find("_1_") != std::string::npos)
+      if(filepath.find("_0_") != std::string::npos || filepath.find("_1_") != std::string::npos)
       {
 	//nTpcFiles++;
 	process_endpoints = true;
@@ -90,13 +91,13 @@ void Fun4All_LaserClustering(
     }
     
     std::string inputname = "InputManager" + std::to_string(i);
-    auto hitsin = new Fun4AllDstInputManager(inputname);
+    auto *hitsin = new Fun4AllDstInputManager(inputname);
     hitsin->fileopen(filepath);
     se->registerInputManager(hitsin);
     i++;
   }
 
-  TRACKING::pp_mode = false;
+  TRACKING::streaming_mode = false;
   TRACKING::tpc_zero_supp = true;
   G4TPC::ENABLE_CENTRAL_MEMBRANE_CLUSTERING = true;
   Enable::MVTX_APPLYMISALIGNMENT = true;
@@ -129,7 +130,7 @@ void Fun4All_LaserClustering(
   TrackingInit();
 
 
-  ostringstream ebdcname;
+  std::ostringstream ebdcname;
   for(int ebdc = 0; ebdc < 24; ebdc++)
   {
     if(!process_endpoints)

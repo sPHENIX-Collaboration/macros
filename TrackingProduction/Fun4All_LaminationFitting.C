@@ -30,21 +30,22 @@
 
 #include <tpccalib/TpcLaminationFitting.h>
 
-#include <stdio.h>
+#include <fstream>
+#include <cstdio>
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 void Fun4All_LaminationFitting(
     const int nEvents = 10,
-    const std::string filelist = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpcbeam/run_00041900_00042000/",
-    const std::string outdir = "/sphenig/tg/tg01/jets/bkimelman/",
-    const std::string prod = "ana441_2024p007",
-    const std::string type = "run2pp")
+    const std::string& filelist = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpcbeam/run_00041900_00042000/",
+    const std::string& outdir = "/sphenig/tg/tg01/jets/bkimelman/",
+    const std::string& prod = "ana441_2024p007",
+    const std::string& type = "run2pp")
 
 {
 
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(2);
 
 
@@ -56,7 +57,7 @@ void Fun4All_LaminationFitting(
   std::ifstream ifs(filelist);
   std::string filepath;
 
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
 
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
@@ -74,6 +75,7 @@ void Fun4All_LaminationFitting(
       segment = runseg.second;
       rc->set_IntFlag("RUNNUMBER",runnumber);
       rc->set_uint64Flag("TIMESTAMP",runnumber);
+      rc->set_IntFlag("RUNSEGMENT",segment);
     }
 
     //std::string inputname = "InputManager" + std::to_string(i);
@@ -84,7 +86,7 @@ void Fun4All_LaminationFitting(
     i++;
   }
 
-  auto hitsin = new Fun4AllDstInputManager("InputManager");
+  auto *hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->AddListFile(filelist);
   se->registerInputManager(hitsin);
 
@@ -119,8 +121,8 @@ void Fun4All_LaminationFitting(
   G4TPC::laser_adc_threshold = 100;
 
   //set to false if you want AuAu or true for pp
-  if(type.find("pp") != std::string::npos) TRACKING::pp_mode = true;
-  else TRACKING::pp_mode = false;
+  if(type.find("pp") != std::string::npos) TRACKING::streaming_mode = true;
+  else TRACKING::streaming_mode = false;
 
 
   
