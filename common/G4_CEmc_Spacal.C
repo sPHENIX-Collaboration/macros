@@ -358,6 +358,15 @@ void CEMC_Towers()
     {
       caloWaveformSim->set_pedestal_scale(0.77);
     }
+    // flat, collision-system dependent CEMC energy scale-up (placeholder, tune later)
+    if (Input::BEAM_CONFIGURATION == Input::OO_COLLISION)
+    {
+      caloWaveformSim->set_energy_scale(1.0);  // TODO: O+O HIJING CEMC scale factor
+    }
+    else if (Input::BEAM_CONFIGURATION == Input::AA_COLLISION)  // AuAu_COLLISION
+    {
+      caloWaveformSim->set_energy_scale(1.0);  // TODO: Au+Au HIJING CEMC scale factor
+    }
     // caloWaveformSim->Verbosity(2);
     // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
 

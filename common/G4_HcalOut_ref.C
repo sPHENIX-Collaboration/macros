@@ -386,6 +386,15 @@ void HCALOuter_Towers()
     // caloWaveformSim->set_nsamples(12);// default is 12 like in real data - if we ever want a different number of samples
     caloWaveformSim->set_timewidth(0.2);
     caloWaveformSim->set_peakpos(6);
+    // flat, collision-system dependent OHCal energy scale-up (placeholder, tune later)
+    if (Input::BEAM_CONFIGURATION == Input::OO_COLLISION)
+    {
+      caloWaveformSim->set_energy_scale(1.0);  // TODO: O+O HIJING OHCal scale factor
+    }
+    else if (Input::BEAM_CONFIGURATION == Input::AA_COLLISION)  // AuAu_COLLISION
+    {
+      caloWaveformSim->set_energy_scale(1.0);  // TODO: Au+Au HIJING OHCal scale factor
+    }
     // caloWaveformSim->Verbosity(2);
     // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
     caloWaveformSim->set_calibName("HCALOUT_calib_ADC_to_ETower");
