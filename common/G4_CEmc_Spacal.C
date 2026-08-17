@@ -360,7 +360,7 @@ void CEMC_Towers()
     }
     else if (Input::BEAM_CONFIGURATION == Input::OO_COLLISION)
     {
-      caloWaveformSim->set_pedestal_scale(0.73);
+      caloWaveformSim->set_pedestal_scale(0.40);
     }
 
     // caloWaveformSim->Verbosity(2);
