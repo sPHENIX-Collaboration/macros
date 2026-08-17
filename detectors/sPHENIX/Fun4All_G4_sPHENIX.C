@@ -772,7 +772,6 @@ int Fun4All_G4_sPHENIX(
   se->End();
     
   se->PrintTimer();
-  Fun4AllServer::PrintMemoryTracker();
     
   std::cout << "All done" << std::endl;
   delete se;
