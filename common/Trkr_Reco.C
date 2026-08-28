@@ -105,11 +105,8 @@ void Tracking_Reco_TrackFit_run2pp(const std::string &outfile = "run2pptrackfit.
 
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-  actsFit->set_pp_mode(TRACKING::streaming_mode);
-
-  // always disable micromegas from fit
   actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-
+  actsFit->set_pp_mode(TRACKING::streaming_mode);
   actsFit->set_use_clustermover(true);  // default is true for now
   actsFit->useActsEvaluator(false);
   actsFit->useOutlierFinder(false);
@@ -712,6 +709,7 @@ void Tracking_Reco_TrackFit()
     auto *genfitFit = new PHGenFitTrkFitter;
     genfitFit->Verbosity(verbosity);
     genfitFit->set_fit_silicon_mms(G4TRACKING::SC_CALIBMODE);
+    genfitFit->set_use_micromegas(G4TRACKING::SC_USE_MICROMEGAS);
     se->registerSubsystem(genfitFit);
 
     if (G4TRACKING::SC_CALIBMODE)
