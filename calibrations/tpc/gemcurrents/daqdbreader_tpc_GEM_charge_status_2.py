@@ -7,6 +7,7 @@ from collections import defaultdict
 from sqlalchemy import create_engine, MetaData, Table, text
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
+from environment_history import EnvironmentHistory
 
 variable_names = ['sphenix_tpc_hv_caen_IMon']
 output_folder = 'tpc_GEM_current_status'
@@ -19,7 +20,7 @@ def to_bco(ts):
     return int((ts - S) * 56299000 // 6)
 
 
-def process_run_data(runnumber):
+def process_run_data(runnumber, history):
 
     # ---------------------------
     # DB query run time
@@ -46,14 +47,21 @@ def process_run_data(runnumber):
     begin_run = int(result.begin_run)
     end_run = int(result.end_run)
 
-    print("Begin:", begin_run)
-    print("End:", end_run)
+    MONITORING_PADDING = 120
+    query_begin = begin_run - MONITORING_PADDING
+    query_end = end_run + MONITORING_PADDING
+
+    print("Run Begin:", begin_run)
+    print("Run End:", end_run)
+    print("Query Begin:", query_begin)
+    print("Query End:", query_end)
 
     # ---------------------------
     # storage
     # ---------------------------
     bco_table = defaultdict(list)
-
+    bco_to_time = {}
+    
     # ---------------------------
     # Prometheus query
     # ---------------------------
@@ -61,8 +69,8 @@ def process_run_data(runnumber):
 
         params = {
             'query': variable_name,
-            'start': begin_run,
-            'end': end_run,
+            'start': query_begin,
+            'end': query_end,
             'step': '1m'
         }
 
@@ -95,13 +103,17 @@ def process_run_data(runnumber):
             sector = labels.get('sector', '-1')
             R_Module = labels.get('R_Module', 'unknown')
 
-            key = (side, sector, R_Module, HV_Layer)
+            #key = (side, sector, R_Module, HV_Layer)
+            key = side + "_" + sector + "_" + R_Module + "_" + HV_Layer + "_IMon"
 
-            values = [
-                (to_bco(v[0]), float(v[1]))
-                for v in metric['values']
-            ]
+            values = []
 
+            for v in metric['values']:
+                timestamp = float(v[0])
+                bco = to_bco(timestamp)
+                bco_to_time[bco] = timestamp
+                values.append((bco, float(v[1])))
+                
             values.sort(key=lambda x: x[0])
 
             bco_table[key].extend(values)
@@ -140,14 +152,24 @@ def process_run_data(runnumber):
         for bco in sorted_bcos:
             f.write(f"bco {bco}\n")
 
+            # lead with the environment and trip status...
+            timestamp = bco_to_time[bco]
+            temperature, pressure = history.get(timestamp)
+            f.write(f"gas_temperature {temperature}\n")
+            f.write(f"gas_pressure {pressure}\n")
+            f.write(f"tripped 0\n")
+            
+            # Add in the individual GEM currents.
             for channel in sorted_channels:
                 current = channel_values[channel].get(bco)
                 if current == "" or current is None:
                     continue
 
-                label = "".join(channel)
-                f.write(f"{label} {current}\n")
-
+                #label = "".join(channel)
+                #f.write(f"{label} {current}\n")
+                f.write(f"{channel} {current}\n")
+                
+                
     print("Wrote:", out_file)
 
 
@@ -156,5 +178,8 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python3 script.py <runnumber>")
         sys.exit(1)
-
-    process_run_data(int(sys.argv[1]))
+        
+    print("Loading Temperature and Pressure History.  Please exercise patience...")
+    history = EnvironmentHistory("/sphenix/user/hemmick/TemperatureAndPressure/tpc_gas_history.tsv")
+    print("Temperature and Pressure Loaded")
+    process_run_data(int(sys.argv[1]), history)
