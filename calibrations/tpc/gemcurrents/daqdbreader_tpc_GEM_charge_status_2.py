@@ -11,7 +11,7 @@ from environment_history import EnvironmentHistory
 from trip_history import TripHistory
 
 variable_names = ['sphenix_tpc_hv_caen_IMon']
-output_folder = 'tpc_GEM_current_status'
+output_folder = 'ConditionsCSVFiles'
 
 # BCO conversion constant
 S = 1672549200
