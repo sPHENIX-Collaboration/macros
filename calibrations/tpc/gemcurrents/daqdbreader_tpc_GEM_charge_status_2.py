@@ -8,6 +8,7 @@ from sqlalchemy import create_engine, MetaData, Table, text
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from environment_history import EnvironmentHistory
+from trip_history import TripHistory
 
 variable_names = ['sphenix_tpc_hv_caen_IMon']
 output_folder = 'tpc_GEM_current_status'
@@ -20,7 +21,7 @@ def to_bco(ts):
     return int((ts - S) * 56299000 // 6)
 
 
-def process_run_data(runnumber, history):
+def process_run_data(runnumber, environment_history):
 
     # ---------------------------
     # DB query run time
@@ -55,6 +56,9 @@ def process_run_data(runnumber, history):
     print("Run End:", end_run)
     print("Query Begin:", query_begin)
     print("Query End:", query_end)
+
+    trip_history = TripHistory(query_begin, query_end)
+    
 
     # ---------------------------
     # storage
@@ -154,10 +158,12 @@ def process_run_data(runnumber, history):
 
             # lead with the environment and trip status...
             timestamp = bco_to_time[bco]
-            temperature, pressure = history.get(timestamp)
+            temperature, pressure = environment_history.get(timestamp)
             f.write(f"gas_temperature {temperature}\n")
             f.write(f"gas_pressure {pressure}\n")
-            f.write(f"tripped 0\n")
+            FieldOK, GainOK = trip_history.get(timestamp)
+            f.write(f"FieldOK {FieldOK}\n")
+            f.write(f"GainOK {GainOK}\n")
             
             # Add in the individual GEM currents.
             for channel in sorted_channels:
@@ -180,6 +186,7 @@ if __name__ == "__main__":
         sys.exit(1)
         
     print("Loading Temperature and Pressure History.  Please exercise patience...")
-    history = EnvironmentHistory("/sphenix/user/hemmick/TemperatureAndPressure/tpc_gas_history.tsv")
+    environment_history = EnvironmentHistory("/sphenix/user/hemmick/TemperatureAndPressure/tpc_gas_history.tsv")
     print("Temperature and Pressure Loaded")
-    process_run_data(int(sys.argv[1]), history)
+    
+    process_run_data(int(sys.argv[1]), environment_history)
