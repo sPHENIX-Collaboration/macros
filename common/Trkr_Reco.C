@@ -102,10 +102,11 @@ void Tracking_Reco_TrackFit_run2pp(const std::string &outfile = "run2pptrackfit.
   actsFit->Verbosity(0);
   actsFit->commissioning(G4TRACKING::use_alignment);
   actsFit->setTrkrClusterContainerName(clusterMapName);
+
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
+  actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
   actsFit->set_pp_mode(TRACKING::streaming_mode);
-  actsFit->setUseMicromegas(false);
   actsFit->set_use_clustermover(true);  // default is true for now
   actsFit->useActsEvaluator(false);
   actsFit->useOutlierFinder(false);
@@ -213,15 +214,15 @@ void Tracking_Reco_SiliconSeed_run2pp()
       silicon_Seeding->set_beamSpotXY(0,0);
     }
   se->registerSubsystem(silicon_Seeding);
-  
+
   TrackingIterationCounter* counter = new TrackingIterationCounter("TrkrIter1");
   counter->Verbosity(verbosity);
   counter->iteration(1);
   counter->setTrackMapName("SiliconTrackSeedContainer");
   counter->seedIterations();
   se->registerSubsystem(counter);
-      
-      
+
+
   auto *silicon_Seeding2 = new PHActsSiliconSeeding("ActsSeedingIt1");
   silicon_Seeding2->Verbosity(verbosity);
   silicon_Seeding2->setIter2();
@@ -230,8 +231,8 @@ void Tracking_Reco_SiliconSeed_run2pp()
       silicon_Seeding2->set_beamSpotXY(0,0);
     }
   se->registerSubsystem(silicon_Seeding2);
-  
-  
+
+
   TrackingIterationCounter* counter2 = new TrackingIterationCounter("TrkrIter2");
   counter2->Verbosity(verbosity);
   /// Clusters already used are in the 0th iteration
@@ -239,7 +240,7 @@ void Tracking_Reco_SiliconSeed_run2pp()
   counter2->setTrackMapName("SiliconTrackSeedContainerIt1");
   counter2->seedIterations();
   se->registerSubsystem(counter2);
-  
+
   TrackContainerCombiner* combiner = new TrackContainerCombiner;
   combiner->Verbosity(verbosity);
   combiner->newContainerName("SiliconTrackSeedContainer");
@@ -251,7 +252,7 @@ void Tracking_Reco_SiliconSeed_run2pp()
   PHSiliconSeedMerger *merger = new PHSiliconSeedMerger;
   merger->Verbosity(verbosity);
   se->registerSubsystem(merger);
-  
+
 }
 void Tracking_Reco_TrackSeed_run2pp()
 {
@@ -260,7 +261,7 @@ void Tracking_Reco_TrackSeed_run2pp()
 }
 void Tracking_Reco_SiTpcTrackMatching_run2pp(const std::string& clusterMapName = "TRKR_CLUSTER")
 {
-  
+
   auto *se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   /*
@@ -307,7 +308,7 @@ void Tracking_Reco_SiTpcTrackMatching_run2pp(const std::string& clusterMapName =
 }
 void Tracking_Reco_TpcTpotTrackMatching_run2pp(const std::string& clustermapname = "TRKR_CLUSTER")
 {
-  
+
   auto *se = Fun4AllServer::instance();
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
   // Match TPC track stubs from CA seeder to clusters in the micromegas layers
@@ -708,6 +709,7 @@ void Tracking_Reco_TrackFit()
     auto *genfitFit = new PHGenFitTrkFitter;
     genfitFit->Verbosity(verbosity);
     genfitFit->set_fit_silicon_mms(G4TRACKING::SC_CALIBMODE);
+    genfitFit->set_use_micromegas(G4TRACKING::SC_USE_MICROMEGAS);
     se->registerSubsystem(genfitFit);
 
     if (G4TRACKING::SC_CALIBMODE)

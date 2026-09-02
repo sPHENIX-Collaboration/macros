@@ -342,11 +342,14 @@ void Fun4All_raw_hit_TPC_Matched_reco(
   silicon_match->set_crossing_deltaz_max(10);
   silicon_match->set_crossing_deltaz_min(0);
   silicon_match->set_test_windows_printout(false);
-  silicon_match->set_max_crossing_diff(10); // good for poly seeding case  
+  silicon_match->set_max_crossing_diff(10); // good for poly seeding case
   // these are for testing. and default to false. The seed matcher will choose the crossing that works best
   //  silicon_match->set_use_tpc_crossing_only(false);  // use crossing information from TPC SA seed
   //  silicon_match->set_use_silicon_crossing_only(false);  // use crossing information from silicon seed
   se->registerSubsystem(silicon_match);
+
+  // TPOT matching
+  Tracking_Reco_TpcTpotTrackMatching_run2pp();
 
   auto *deltazcorr = new PHTpcDeltaZCorrection;
   deltazcorr->Verbosity(0);
@@ -358,9 +361,9 @@ void Fun4All_raw_hit_TPC_Matched_reco(
   actsFit->setTrkrClusterContainerName("TRKR_CLUSTER");
   // in calibration mode, fit only Silicons and Micromegas hits
   actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
+  actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
   actsFit->set_pp_mode(TRACKING::streaming_mode);
-  actsFit->setUseMicromegas(false);
-  actsFit->set_use_clustermover(false);  // default is true for now
+  actsFit->set_use_clustermover(false);
   actsFit->useActsEvaluator(false);
   actsFit->useOutlierFinder(false);
   actsFit->setFieldMap(G4MAGNET::magfield_tracking);
