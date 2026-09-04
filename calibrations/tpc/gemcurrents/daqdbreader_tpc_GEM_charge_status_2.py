@@ -118,8 +118,7 @@ def process_run_data(runnumber, environment_history):
     print("Query Begin:", query_begin)
     print("Query End:", query_end)
 
-    trip_history = TripHistory(query_begin, query_end)
-    
+    trip_history = TripHistory(query_begin, query_end, runnumber)
 
     # ---------------------------
     # storage

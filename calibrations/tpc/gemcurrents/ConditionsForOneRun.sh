@@ -2,7 +2,7 @@
 
 PROCESS=$1
 LINE=$((PROCESS + 1))
-RUNNUMBER=$(sed -n "${LINE}p" alltpc_runlist.txt)
+RUNNUMBER=$(sed -n "${LINE}p" alltpc_runlist_PRUNED.txt)
 
 echo "Process: ${PROCESS}"
 echo "Run: ${RUNNUMBER}"
