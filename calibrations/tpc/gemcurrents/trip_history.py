@@ -1,4 +1,5 @@
 import requests
+import statistics
 
 class TripHistory:
 
@@ -14,6 +15,8 @@ class TripHistory:
 
     RESTORE_SAMPLES = 6
 
+    mskON = 0b000000000001
+    
     # ==============================================================
     # Trip onset
     #
@@ -80,6 +83,7 @@ class TripHistory:
         # Raw Prometheus data
         self.v0set_metrics = []
         self.vmon_metrics = []
+        self.status_metrics = []
 
         # Time-indexed lookup tables:
         #
@@ -88,6 +92,7 @@ class TripHistory:
         #
         self.v0set_by_time = {}
         self.vmon_by_time = {}
+        self.status_by_time = {}
 
         # ----------------------------------------------------------
         # Intervals during which the corresponding condition is bad.
@@ -101,6 +106,8 @@ class TripHistory:
 
         self._load_voltage_history()
         self._build_time_tables()
+        self._fill_voltage_gaps()
+        self._build_startup_gain_targets()
         self._find_bad_intervals()
 
     # ==============================================================
@@ -188,8 +195,13 @@ class TripHistory:
             "sphenix_tpc_hv_caen_VMon"
         )
 
+        self.status_metrics = self._query_prometheus(
+            "sphenix_tpc_hv_caen_Status"
+        )
+
         print("V0Set series:", len(self.v0set_metrics))
         print("VMon series:", len(self.vmon_metrics))
+        print("Status series:", len(self.status_metrics))
 
     # ==============================================================
     # Convert Prometheus output into time-indexed dictionaries
@@ -223,6 +235,238 @@ class TripHistory:
 
                 self.vmon_by_time[timestamp][channel] = float(value)
 
+        for metric in self.status_metrics:
+
+            channel = metric["metric"].get("ch_name", "unknown")
+
+            for timestamp, value in metric["values"]:
+
+                timestamp = float(timestamp)
+
+                if timestamp not in self.status_by_time:
+                    self.status_by_time[timestamp] = {}
+                self.status_by_time[timestamp][channel] = int(float(value))
+
+    # ==============================================================
+    # Fill gaps in the Prometheus 10-second history
+    #
+    # Missing monitoring samples are replaced by the immediately
+    # preceding complete voltage state.  This prevents a monitoring
+    # gap from being interpreted as a physical change in the TPC.
+    #
+    # Every contiguous gap is reported so that long gaps can be
+    # identified and inspected afterward.
+    # ==============================================================
+
+    def _fill_voltage_gaps(self):
+
+        timestamps = sorted(
+            set(self.v0set_by_time.keys()) &
+            set(self.vmon_by_time.keys()) &
+            set(self.status_by_time.keys())
+        )
+
+        # Hmmm...
+        if len(timestamps) < 2:
+            return
+
+        # Prometheus is requested on a 10-second grid.
+        step = 10
+
+        gap_number = 0
+
+        for previous_time, next_time in zip(
+            timestamps[:-1],
+            timestamps[1:]
+        ):
+
+            gap_width = (
+                int(round((next_time - previous_time) / step)) - 1
+            )
+
+            if gap_width <= 0:
+                continue
+
+            gap_number += 1
+
+            print(
+                "TPC_PROM_GAP",
+                "gap=",
+                gap_number,
+                "width=",
+                gap_width,
+                "begin=",
+                previous_time,
+                "end=",
+                next_time
+            )
+
+            # ------------------------------------------------------
+            # Carry the last observed complete state forward through
+            # every missing 10-second sample.
+            # ------------------------------------------------------
+
+            for i in range(1, gap_width + 1):
+
+                timestamp = previous_time + i * step
+
+                self.v0set_by_time[timestamp] = (
+                    self.v0set_by_time[previous_time].copy()
+                )
+
+                self.vmon_by_time[timestamp] = (
+                    self.vmon_by_time[previous_time].copy()
+                )
+
+                self.status_by_time[timestamp] = (
+                    self.status_by_time[previous_time].copy()
+                )
+
+    # ==============================================================
+    # Build fallback gain targets for runs that begin with a trip
+    #
+    # Normally gain restoration is judged against the V0Set values
+    # immediately preceding the trip.  If the Prometheus history
+    # begins with a channel already tripped, that reference does not
+    # exist.
+    #
+    # Healthy peer channels provide fallback targets:
+    #
+    #   G1       all healthy G1 channels
+    #   G3       all healthy G3 channels
+    #   G4 R1    all healthy R1.G4 channels
+    #   G4 R2    all healthy R2.G4 channels
+    #   G4 R3    all healthy R3.G4 channels
+    #
+    # No fallback target is defined for G2 because its operating
+    # voltage is deliberately module dependent.
+    # ==============================================================
+
+    def _build_startup_gain_targets(self):
+
+        self.startup_gain_targets = {}
+
+        timestamps = sorted(
+            set(self.v0set_by_time.keys()) &
+            set(self.vmon_by_time.keys()) &
+            set(self.status_by_time.keys())
+        )
+
+        if not timestamps:
+            return
+
+        # Use the first complete Prometheus snapshot.
+        timestamp = timestamps[0]
+
+        v0set = self.v0set_by_time[timestamp]
+        status = self.status_by_time[timestamp]
+
+        g1_values = []
+        g3_values = []
+        g4_values = {
+            "R1": [],
+            "R2": [],
+            "R3": []
+        }
+
+        for channel, value in v0set.items():
+
+            if not self._is_real_tpc_channel(channel):
+                continue
+
+            fields = channel.split(".")
+
+            if len(fields) != 4:
+                continue
+
+            side, sector, radial, layer = fields
+
+            # Ignore anyone who is already tripped.
+            if channel not in status:
+                continue
+
+            if (status[channel] & self.mskON) == 0:
+                continue
+
+            if layer == "G1":
+                g1_values.append(value)
+
+            elif layer == "G3":
+                g3_values.append(value)
+
+            elif layer == "G4" and radial in g4_values:
+                g4_values[radial].append(value)
+
+        if g1_values:
+            self.startup_gain_targets["G1"] = (
+                statistics.median(g1_values)
+            )
+
+        if g3_values:
+            self.startup_gain_targets["G3"] = (
+                statistics.median(g3_values)
+            )
+
+        for radial in ("R1", "R2", "R3"):
+
+            if g4_values[radial]:
+
+                self.startup_gain_targets[
+                    "G4_" + radial
+                ] = statistics.median(
+                    g4_values[radial]
+                )
+
+        print(
+            "TPC_STARTUP_GAIN_TARGETS",
+            self.startup_gain_targets
+        )
+
+
+    def _repair_startup_gain_reference(self, reference_v0set):
+
+        for channel in reference_v0set:
+
+            fields = channel.split(".")
+
+            if len(fields) != 4:
+                continue
+
+            side, sector, radial, layer = fields
+
+            if layer == "G1":
+                target = self.startup_gain_targets.get("G1")
+
+            elif layer == "G3":
+                target = self.startup_gain_targets.get("G3")
+
+            elif layer == "G4":
+                target = self.startup_gain_targets.get(
+                    "G4_" + radial
+                )
+
+            else:
+                continue
+
+            if target is None:
+                continue
+
+            # A large disagreement means the saved "pre-trip"
+            # state was already part of the trip/recovery.
+            if abs(reference_v0set[channel] - target) > 10.0:
+
+                print(
+                    "TPC_STARTUP_GAIN_REFERENCE",
+                    "channel=",
+                    channel,
+                    "old=",
+                    reference_v0set[channel],
+                    "target=",
+                    target
+                )
+
+                reference_v0set[channel] = target
+        
     # ==============================================================
     # Channel identification
     # ==============================================================
@@ -263,9 +507,11 @@ class TripHistory:
     def _trip_condition(self, timestamp):
 
         values = self.vmon_by_time[timestamp]
+        statii = self.status_by_time[timestamp]
 
         trip_found = False
 
+        #  First check for a low voltage value
         for channel, value in values.items():
 
             # Ignore unused CAEN channels such as CHANNEL10.
@@ -283,6 +529,23 @@ class TripHistory:
 
                 trip_found = True
 
+        # Trip onset
+        for channel, value in statii.items():
+        
+            if not self._is_real_tpc_channel(channel):
+                continue
+        
+            if (value & self.mskON) == 0:
+        
+                print(
+                    "TRIP candidate:",
+                    timestamp,
+                    channel,
+                    value
+                )
+        
+
+                trip_found = True
         return trip_found
 
     # ==============================================================
@@ -446,9 +709,11 @@ class TripHistory:
 
         reference_v0set = {}
         reference_vmon = {}
+        reference_status = {}
 
         v0set = self.v0set_by_time[timestamp]
         vmon = self.vmon_by_time[timestamp]
+        status = self.status_by_time[timestamp]
 
         for channel, value in v0set.items():
 
@@ -458,10 +723,14 @@ class TripHistory:
             if channel not in vmon:
                 continue
 
+            if channel not in status:
+                continue
+
             reference_v0set[channel] = value
             reference_vmon[channel] = vmon[channel]
+            reference_status[channel] = status[channel]
 
-        return reference_v0set, reference_vmon
+        return reference_v0set, reference_vmon, reference_status
 
     # ==============================================================
     # Gain restoration
@@ -471,11 +740,13 @@ class TripHistory:
         self,
         timestamp,
         reference_v0set,
-        reference_vmon
+        reference_vmon,
+        reference_status
     ):
 
         current_v0set = self.v0set_by_time[timestamp]
         current_vmon = self.vmon_by_time[timestamp]
+        current_status = self.status_by_time[timestamp]
 
         # ----------------------------------------------------------
         # Compare EVERY real TPC channel against the entire
@@ -501,15 +772,17 @@ class TripHistory:
                 )
                 >= self.GAIN_V0SET_TOLERANCE
             ):
+                print("GAIN_FAIL", timestamp, channel, "V0Set", reference_v0set[channel], "->", current_v0set[channel], "delta=", current_v0set[channel] - reference_v0set[channel])
                 return False
 
             if (
                 abs(
                     current_vmon[channel] -
-                    reference_vmon[channel]
+                    reference_v0set[channel]
                 )
                 >= self.GAIN_VMON_TOLERANCE
             ):
+                print("GAIN_FAIL", timestamp, channel, "VMon", reference_vmon[channel], "->", current_vmon[channel], "delta=", current_vmon[channel] - reference_vmon[channel])
                 return False
 
         return True
@@ -522,7 +795,8 @@ class TripHistory:
 
         timestamps = sorted(
             set(self.v0set_by_time.keys()) &
-            set(self.vmon_by_time.keys())
+            set(self.vmon_by_time.keys()) &
+            set(self.status_by_time.keys())
         )
 
         if not timestamps:
@@ -543,6 +817,7 @@ class TripHistory:
         # Frozen full-TPC state immediately before trip onset.
         reference_v0set = None
         reference_vmon = None
+        reference_status = None
 
         # ----------------------------------------------------------
         # Field restoration state
@@ -594,11 +869,15 @@ class TripHistory:
 
                         (
                             reference_v0set,
-                            reference_vmon
+                            reference_vmon,
+                            reference_status
                         ) = self._capture_last_good_state(
                             previous_timestamp
                         )
-
+                        
+                        self._repair_startup_gain_reference(
+                            reference_v0set
+                        )
                     else:
 
                         # Query began already bad.
@@ -607,6 +886,7 @@ class TripHistory:
                         # establish gain reference conditions.
                         reference_v0set = None
                         reference_vmon = None
+                        reference_status = None
 
                     print(
                         "TPC_TRIP_ONSET",
@@ -684,7 +964,8 @@ class TripHistory:
                         self._gain_restoration_condition(
                             timestamp,
                             reference_v0set,
-                            reference_vmon
+                            reference_vmon,
+                            reference_status
                         )
                     )
 
@@ -769,6 +1050,7 @@ class TripHistory:
 
                         reference_v0set = None
                         reference_vmon = None
+                        reference_status = None
 
                         field_restored = False
 

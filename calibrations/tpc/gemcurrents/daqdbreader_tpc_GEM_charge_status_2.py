@@ -20,6 +20,67 @@ S = 1672549200
 def to_bco(ts):
     return int((ts - S) * 56299000 // 6)
 
+def fill_current_gaps(bco_table, bco_to_time, step=60):
+    """
+    Fill missing Prometheus current samples by carrying the previous
+    measured current forward.
+
+    A missing Prometheus record means that the current was not measured;
+    it does NOT mean that the physical GEM current dropped to zero.
+    Filling the gap preserves the last known physical state until a new
+    measurement becomes available.
+    """
+
+    for channel, series in bco_table.items():
+
+        # Work in timestamp space because Prometheus sampling is defined
+        # in seconds, while BCO is only the final CDB coordinate.
+        time_values = []
+
+        for bco, current in series:
+            time_values.append(
+                (bco_to_time[bco], current)
+            )
+
+        time_values.sort(key=lambda x: x[0])
+
+        filled_values = []
+
+        for i in range(len(time_values) - 1):
+
+            timestamp, current = time_values[i]
+            next_timestamp, next_current = time_values[i + 1]
+
+            filled_values.append(
+                (to_bco(timestamp), current)
+            )
+
+            gap_width = (
+                int(round(
+                    (next_timestamp - timestamp) / step
+                )) - 1
+            )
+
+            for j in range(1, gap_width + 1):
+
+                fill_time = timestamp + j * step
+                fill_bco = to_bco(fill_time)
+
+                filled_values.append(
+                    (fill_bco, current)
+                )
+
+                bco_to_time[fill_bco] = fill_time
+
+        # Don't forget the final real measurement.
+        if time_values:
+            timestamp, current = time_values[-1]
+
+            filled_values.append(
+                (to_bco(timestamp), current)
+            )
+
+        bco_table[channel] = filled_values
 
 def process_run_data(runnumber, environment_history):
 
@@ -122,6 +183,20 @@ def process_run_data(runnumber, environment_history):
 
             bco_table[key].extend(values)
 
+    # ----------------------------------------------------------
+    # Fill missing current measurements before constructing the
+    # CDB history.
+    #
+    # A monitoring gap means "no measurement", not zero current.
+    # Carry the previous measured value forward so that downstream
+    # space-charge corrections do not interpret missing telemetry
+    # as a physical disappearance of the GEM current.
+    # ----------------------------------------------------------
+    fill_current_gaps(
+        bco_table,
+        bco_to_time
+    )
+    
     # ---------------------------
     # build BCO axis and channel lookup
     # ---------------------------
@@ -170,11 +245,7 @@ def process_run_data(runnumber, environment_history):
                 current = channel_values[channel].get(bco)
                 if current == "" or current is None:
                     continue
-
-                #label = "".join(channel)
-                #f.write(f"{label} {current}\n")
                 f.write(f"{channel} {current}\n")
-                
                 
     print("Wrote:", out_file)
 

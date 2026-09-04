@@ -6,10 +6,9 @@ Output             = $(Initialdir)/out/Conditions_$(process).out
 Error              = $(Initialdir)/err/Conditions_$(process).err
 Log                = $(Initialdir)/log/Conditions_$(process).log
 PeriodicHold       = (NumJobStarts>=1 && JobStatus == 1)
-Requirements       = (CPU_Speed >= 3)
-Rank		   = CPU_Speed
-request_memory     = 8GB
+request_cpus       = 1
+request_memory     = 512MB
 Priority           = 20
 job_lease_duration = 3600
 Arguments          = $(process)
-Queue 152
+Queue 3413
