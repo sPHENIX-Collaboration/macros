@@ -229,8 +229,8 @@ namespace G4TPC
 namespace G4TRACKING
 {
   // Space Charge calibration flag
-  bool SC_CALIBMODE = false;  // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
-  bool SC_USE_MICROMEGAS = true;
+  bool SC_CALIBMODE = false;
+  bool SC_USE_MICROMEGAS = false;
   double SC_COLLISIONRATE = 50e3;                                      // leave at 50 KHz for now, scaling of distortion map not implemented yet
   std::string SC_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";  // space charge calibration output file
 

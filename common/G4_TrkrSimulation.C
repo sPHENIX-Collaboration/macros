@@ -7,6 +7,7 @@
 #include <G4_TrkrVariables.C>
 
 #include <g4detectors/PHG4CylinderSubsystem.h>
+#include <g4detectors/PHG4GeantinoIonization.h>
 
 #include <g4mvtx/PHG4MvtxDefs.h>
 #include <g4mvtx/PHG4MvtxDigitizer.h>
@@ -704,6 +705,15 @@ void Micromegas_Cells()
   se->registerSubsystem(reco);
 
   se->registerSubsystem(new PHG4MicromegasDigitizer);
+}
+
+void GeantinoIonization()
+{
+  int verbosity = Enable::VERBOSITY;
+  Fun4AllServer* se = Fun4AllServer::instance();
+  auto* geantinoIonization = new PHG4GeantinoIonization("PHG4GeantinoIonization");
+  geantinoIonization->Verbosity(verbosity);
+  se->registerSubsystem(geantinoIonization);
 }
 
 #endif

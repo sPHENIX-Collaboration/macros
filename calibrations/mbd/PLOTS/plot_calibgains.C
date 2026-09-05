@@ -54,9 +54,9 @@ void read_calibgains(const char *flist)
   TString calrunseq;
   TString calfile;
   TString name;
-  while ( inflist >> calrunseq )
+  while ( inflist >> calrunseq >> calfile )
   {
-    calfile = "results/" + calrunseq + "/mbd_qfit.calib";
+    //calfile = "results/" + calrunseq + "/mbd_qfit.calib";
     std::cout << calfile << std::endl;
     cal_mip_file.open( calfile );
 
@@ -112,14 +112,14 @@ void read_calibgains(const char *flist)
       {
         std::cout << "BAD " << calfile << "\t" << ipmt << "\t" << best_peak
           << "\t" << integ << "\t" << bqmean[temp_pmt][nruns] << "\t" << chi2ndf << std::endl;
-        bqmean[temp_pmt][nruns] = NAN;
+        //bqmean[temp_pmt][nruns] = NAN;
       }
 
       if ( bqmeanerr[temp_pmt][nruns]>10. )
       {
         std::cout << "BADERR " << calfile << "\t" << ipmt << "\t" << best_peakerr << "\t"
           << best_peak << "\t" << bqmean[temp_pmt][nruns-1] << std::endl;
-        bqmeanerr[temp_pmt][nruns] = NAN;
+        //bqmeanerr[temp_pmt][nruns] = NAN;
       }
     }
 
@@ -181,7 +181,7 @@ void CheckForLargeDeviation( const double max_deviation = 0.10 ) // 10% deviatio
       {
         std::cout << "BADDEV " << listofruns[irun] << "\t" << ipmt << "\t" << bqmean[ipmt][irun]
           << "\t" << prevgoodmean << "\t" << deviation << std::endl;
-        bqmean[ipmt][irun] = NAN;
+        //bqmean[ipmt][irun] = NAN;
       }
     }
   }

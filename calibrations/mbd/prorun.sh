@@ -23,6 +23,7 @@ runno=${inputs##*/}
 runno=${runno#*-}
 runno=${runno%-*}
 runno=${runno%.list}
+runno=${runno%_trim}
 runno=${runno%.root}
 runno=${runno%.prdf}
 runno=$((10#${runno}))  # convert to decimal number
@@ -35,9 +36,6 @@ then
 fi
 echo Processing $nevents events
 
-build=none          # use current environment
-dbtag=newcdbtag
-#dbtag=""
 
 if [[ $USER == "sphnxpro" ]]
 then
@@ -53,57 +51,57 @@ then
   then
     # 2024 Run2pp
     echo "This is run2pp"
-    build=ana.554
+    build=ana.558
     dbtag=newcdbtag
     pass0dir=""
     outbase=DST_MBD_CALIBRATION_run2pp
     outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/Run2pp/${build}/$(get_rundirname ${runno})/
     logbase=DST_MBD_CALIBRATION_run2pp
-    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/${build}/$(get_rundirname ${runno})/
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/Run2pp/${build}/$(get_rundirname ${runno})/
   elif [[ $runno -le 54962 ]]
   then
     # 2024 Run2auau
     echo "This is run2auau"
-    build=ana.554
+    build=ana.558
     dbtag=newcdbtag
     pass0dir=""
     outbase=DST_MBD_CALIBRATION_run2auau
     outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/Run2AuAu/${build}/$(get_rundirname ${runno})/
     logbase=DST_MBD_CALIBRATION_run2auau
-    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/${build}/$(get_rundirname ${runno})/
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/Run2AuAu/${build}/$(get_rundirname ${runno})/
   elif [[ $runno -le 78954 ]]
   then
     # 2025 Run3auau
     echo "This is run3auau"
-    build=pro.001
+    build=ana.558
     dbtag=newcdbtag
     pass0dir=""
     outbase=DST_MBD_CALIBRATION_run3auau
-    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/${build}/$(get_rundirname ${runno})/
+    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/Run3AuAu/${build}/$(get_rundirname ${runno})/
     logbase=DST_MBD_CALIBRATION_run3auau
-    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/${build}/$(get_rundirname ${runno})/
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/Run3AuAu/${build}/$(get_rundirname ${runno})/
   elif [[ $runno -le 81667 ]]
   then
     # 2025 Run3pp
     echo "This is run3pp"
-    build=ana.554
+    build=ana.558
     dbtag=newcdbtag
     pass0dir=""
     outbase=DST_MBD_CALIBRATION_run3pp
     outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/Run3pp/${build}/$(get_rundirname ${runno})/
     logbase=DST_MBD_CALIBRATION_run3pp
-    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/${build}/$(get_rundirname ${runno})/
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/Run3pp/${build}/$(get_rundirname ${runno})/
   elif [[ $runno -le 82703 ]]
   then
     # 2025 Run3oo
     echo "This is run3oo"
-    build=pro.001
+    build=ana.558
     dbtag=newcdbtag
     pass0dir=""
     outbase=DST_MBD_CALIBRATION_run3oo
-    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/pro.001/$(get_rundirname ${runno})/
+    outdir=/sphenix/lustre01/sphnxpro/physics/mbdcalib/Run3OO/${build}/$(get_rundirname ${runno})/
     logbase=DST_MBD_CALIBRATION_run3oo
-    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/pro.001/$(get_rundirname ${runno})/
+    logdir=/sphenix/data/data02/sphnxpro/mbdcalib/Run3OO/${build}/$(get_rundirname ${runno})/
   else
     echo "ERROR, run $runno invalid, aborting"
     exit 1
@@ -157,6 +155,16 @@ else  # setup for local tests
   fi
 fi
 
+#build="none"                 # use current environment
+#dbtag=""                     # uncomment dbtag and pass0dir to use local text files
+#pass0dir=results/${runno}    # if pass0dir is an absolute path, copy files, otherwise
+                              # download from cdb and modify as needed.
+if [[ "$build" != "none" ]]
+then
+  echo source /opt/sphenix/core/bin/sphenix_setup.sh -n $build
+  source /opt/sphenix/core/bin/sphenix_setup.sh -n $build
+fi
+
 ORIG_DIR=${PWD}
 
 if [[ ! -z "${_CONDOR_SCRATCH_DIR}" ]]
@@ -186,18 +194,15 @@ then
   #done
 fi
 
-#build="none"
-echo source /opt/sphenix/core/bin/sphenix_setup.sh -n $build
-source /opt/sphenix/core/bin/sphenix_setup.sh -n $build
-
 ./prorun_mbdcal.sh --outbase "$outbase" \
-  --outdir  "$outdir" \
-  --logbase "$logbase" \
-  --logdir  "$logdir" \
-  --build    $build \
-  --run      $runno \
+  --outdir   "$outdir" \
+  --logbase  "$logbase" \
+  --logdir   "$logdir" \
+  --build    "$build" \
+  --pass0dir "$pass0dir" \
+  --run      "$runno" \
   --dbtag    "$dbtag" \
-  --nevents  $nevents \
+  --nevents  "$nevents" \
   $inputs
 
 

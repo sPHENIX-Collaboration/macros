@@ -349,15 +349,20 @@ void CEMC_Towers()
         std::string(getenv("CALIBRATIONROOT")) +
             std::string("/CEMC/LightCollection/Prototype3Module.xml"),
         "data_grid_light_guide_efficiency", "data_grid_fiber_trans");
-    // pedestal scale down for different beam configurations according to Blair
+    
     if (Input::BEAM_CONFIGURATION == Input::pp_ZEROANGLE)
     {
       caloWaveformSim->set_pedestal_scale(0.75);
     }
-    if (Input::BEAM_CONFIGURATION == Input::pp_COLLISION)
+    else if (Input::BEAM_CONFIGURATION == Input::pp_COLLISION)
     {
       caloWaveformSim->set_pedestal_scale(0.77);
     }
+    else if (Input::BEAM_CONFIGURATION == Input::OO_COLLISION)
+    {
+      caloWaveformSim->set_pedestal_scale(0.40);
+    }
+
     // caloWaveformSim->Verbosity(2);
     // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
 

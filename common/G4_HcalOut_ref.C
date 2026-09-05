@@ -386,6 +386,12 @@ void HCALOuter_Towers()
     // caloWaveformSim->set_nsamples(12);// default is 12 like in real data - if we ever want a different number of samples
     caloWaveformSim->set_timewidth(0.2);
     caloWaveformSim->set_peakpos(6);
+    
+    if (Input::BEAM_CONFIGURATION == Input::OO_COLLISION)
+    {
+      caloWaveformSim->set_pedestal_scale(0.73);
+    }
+
     // caloWaveformSim->Verbosity(2);
     // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
     caloWaveformSim->set_calibName("HCALOUT_calib_ADC_to_ETower");

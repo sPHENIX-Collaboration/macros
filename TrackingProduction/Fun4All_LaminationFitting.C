@@ -30,17 +30,19 @@
 
 #include <tpccalib/TpcLaminationFitting.h>
 
-#include <stdio.h>
+#include <format>
+#include <fstream>
+#include <cstdio>
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 void Fun4All_LaminationFitting(
     const int nEvents = 10,
-    const std::string filelist = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpcbeam/run_00041900_00042000/",
-    const std::string outdir = "/sphenig/tg/tg01/jets/bkimelman/",
-    const std::string prod = "ana441_2024p007",
-    const std::string type = "run2pp")
+    const std::string& filelist = "/sphenix/lustre01/sphnxpro/commissioning/slurp/tpcbeam/run_00041900_00042000/",
+    const std::string& outdir = "/sphenig/tg/tg01/jets/bkimelman/",
+    const std::string& prod = "ana441_2024p007",
+    const std::string& type = "run2pp")
 
 {
 
@@ -50,7 +52,6 @@ void Fun4All_LaminationFitting(
   auto se = Fun4AllServer::instance();
   se->Verbosity(verbosity);
 
-
   TRACKING::tpc_zero_supp = true;
   G4TPC::ENABLE_CENTRAL_MEMBRANE_CLUSTERING = true;
   Enable::MVTX_APPLYMISALIGNMENT = true;
@@ -59,7 +60,7 @@ void Fun4All_LaminationFitting(
   std::ifstream ifs(filelist);
   std::string filepath;
 
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
 
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
@@ -77,6 +78,7 @@ void Fun4All_LaminationFitting(
       segment = runseg.second;
       rc->set_IntFlag("RUNNUMBER",runnumber);
       rc->set_uint64Flag("TIMESTAMP",runnumber);
+      rc->set_IntFlag("RUNSEGMENT",segment);
     }
 
     //std::string inputname = "InputManager" + std::to_string(i);
@@ -87,7 +89,7 @@ void Fun4All_LaminationFitting(
     i++;
   }
 
-  auto hitsin = new Fun4AllDstInputManager("InputManager");
+  auto *hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->AddListFile(filelist);
   se->registerInputManager(hitsin);
 
@@ -129,6 +131,13 @@ void Fun4All_LaminationFitting(
   
   TrackingInit();
 
+  G4TPC::LaminationOutputName =
+    std::format("{}/Laminations_{}_{}-{:08d}.root",
+                outdir, type, prod, runnumber);
+
+  G4TPC::LaminationQAName =
+    std::format("{}/LaminationQA_{}_{}-{:08d}.pdf",
+                outdir, type, prod, runnumber);
 
   G4TPC::LaminationOutputName = Form("%s/Laminations_%s_%s-%08d.root",outdir.c_str(),type.c_str(),prod.c_str(),runnumber);
   G4TPC::LaminationQAName = Form("%s/LaminationQA_%s_%s-%08d.pdf",outdir.c_str(),type.c_str(),prod.c_str(),runnumber);

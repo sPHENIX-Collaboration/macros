@@ -156,15 +156,15 @@ void Fun4All_KShortReco(
 
   // PV to SV cuts
   kfparticle->constrainToPrimaryVertex(true);
-  kfparticle->setMotherIPchi2(100);
+  kfparticle->setMotherPV_DCA_StdDev(100);
   kfparticle->setFlightDistancechi2(-1.);
   kfparticle->setMinDIRA(0.999);
   kfparticle->setDecayLengthRange(0.1, FLT_MAX);
 
   // Track parameters
   kfparticle->setMinimumTrackPT(0.0);
-  kfparticle->setMinimumTrackIPchi2(-1.);
-  kfparticle->setMinimumTrackIP(-1.);
+  kfparticle->setMinimumTrackPV_DCA_StdDev(-1.);
+  kfparticle->setMinimumTrackPV_DCA(-1.);
   kfparticle->setMaximumTrackchi2nDOF(100.);
   kfparticle->setMinTPChits(25);
 

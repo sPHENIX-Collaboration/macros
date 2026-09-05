@@ -14,7 +14,6 @@ build="new"
 #dbtag="newcdbtag"
 #pass0dir=""      # only set if using local private pass0 calibs, otherwise use CDB
 dbtag=""
-#pass0dir="/sphenix/user/chiu/sphenix_bbc/CDB/PASS0"      # only set if using local private pass0 calibs, otherwise use CDB
 nevents=0        # by default process all events
 
 #echo $@ 
@@ -162,15 +161,14 @@ mkdir -p ${caldir}
 
 ################################################
 # If using local files, stage PASS0 calibrations
-#if [[ ! -z ${pass0dir} ]]
-#then
-#  ./cups.py -r ${runno} -s ${segment} -d ${outbase} message "Stage in pass0 from ${pass0dir}"
-#  for calib in mbd_shape.calib mbd_sherr.calib mbd_timecorr.calib mbd_slewcorr.calib mbd_tt_t0.calib mbd_tq_t0.calib mbd_pileup.calib
-#  do
-#    echo Stagein ${pass0dir}/${calib} to ${caldir}
-#    cp -p ${pass0dir}/${calib} ${caldir}/
-#  done
-#fi
+if [[ ! -z ${pass0dir} ]]
+then
+  #./cups.py -r ${runno} -s ${segment} -d ${outbase} message "Stage in pass0 from ${pass0dir}"
+  root.exe -b -q DumpMbdCalibs.C\(${runno}\)
+  mkdir -p results/${runno}
+  mv *.calib results/${runno}/
+  cp -p /sphenix/user/chiu/sphenix_bbc/CDB/latest_proRun3OO/results/default/mbd_timecorr.calib results/${runno}/
+fi
 
 # Flag as started
 #./cups.py -r ${runno} -s ${segment} -d ${outbase} running

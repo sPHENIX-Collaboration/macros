@@ -31,7 +31,9 @@
 #include <tpccalib/TpcCentralMembraneMatching.h>
 //#include <lasermatchingqa/laserMatchingQApp.h>
 
-#include <stdio.h>
+#include <fstream>
+#include <cstdio>
+#include <format>
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libtpc.so)
@@ -39,12 +41,12 @@ R__LOAD_LIBRARY(libtpccalib.so)
 //R__LOAD_LIBRARY(libLaserMatchingQA.so)
 void Fun4All_LaserMatching(
     const int nEvents = 10,
-    const std::string filelist = "",
-    const std::string distortionCorrection = "",
-    const std::string outdir = "/sphenig/tg/tg01/jets/bkimelman/")
+    const std::string& filelist = "",
+    const std::string& distortionCorrection = "",
+    const std::string& outdir = "/sphenig/tg/tg01/jets/bkimelman/")
 {
 
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(2);
 
   //std::string inputFile = tpcdir + tpcfilename;
@@ -54,7 +56,7 @@ void Fun4All_LaserMatching(
   //int runnumber = runseg.first;
   //int segment = runseg.second;
   
-  auto rc = recoConsts::instance();
+  auto *rc = recoConsts::instance();
 
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
@@ -88,7 +90,7 @@ void Fun4All_LaserMatching(
   }
 
 
-  auto hitsin = new Fun4AllDstInputManager("InputManager");
+  auto *hitsin = new Fun4AllDstInputManager("InputManager");
   hitsin->AddListFile(filelist);
   se->registerInputManager(hitsin);
   
@@ -122,11 +124,11 @@ void Fun4All_LaserMatching(
     G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS=false;
   }
 
-  if (distortionCorrection != "")
+  if (!distortionCorrection.empty())
   {    
     G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
     
-    G4TPC::average_correction_filename = distortionCorrection.c_str();
+    G4TPC::average_correction_filename = distortionCorrection;
     G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS=false;
     G4TPC::average_correction_interpolate = false;
   }
@@ -143,7 +145,7 @@ void Fun4All_LaserMatching(
   TrackingInit();
 
 
-  auto centralMembraneMatcher = new TpcCentralMembraneMatching;
+  auto *centralMembraneMatcher = new TpcCentralMembraneMatching;
   centralMembraneMatcher->setSavehistograms( true );
   centralMembraneMatcher->Verbosity( 1 );
   centralMembraneMatcher->set_fieldOn(true);
@@ -151,9 +153,17 @@ void Fun4All_LaserMatching(
   centralMembraneMatcher->set_doHadd(true);
   centralMembraneMatcher->set_averageMode(true);
   centralMembraneMatcher->set_event_sequence(segment);
-  centralMembraneMatcher->setHistogramOutputfile(Form("%s/PHTpcCentralMembraneMatcher-%08d-all.root",outdir.c_str(),runnumber));
-  centralMembraneMatcher->setOutputfile(Form("%s/CMDistortionCorrections-%08d-all.root",outdir.c_str(),runnumber));
-  centralMembraneMatcher->setDebugOutputFile(Form("%s/CMMatching-%08d-all.root",outdir.c_str(),runnumber));
+  centralMembraneMatcher->setHistogramOutputfile(
+    std::format("{}/PHTpcCentralMembraneMatcher-{:08d}-all.root",
+                outdir, runnumber));
+
+  centralMembraneMatcher->setOutputfile(
+    std::format("{}/CMDistortionCorrections-{:08d}-all.root",
+                outdir, runnumber));
+
+  centralMembraneMatcher->setDebugOutputFile(
+    std::format("{}/CMMatching-{:08d}-all.root",
+                outdir, runnumber));
   centralMembraneMatcher->set_grid_dimensions(500,500);
   se->registerSubsystem(centralMembraneMatcher);
 

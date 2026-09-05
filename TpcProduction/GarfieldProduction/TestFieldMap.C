@@ -69,14 +69,14 @@ void TestFieldMap()
 {
   recoConsts* rc = recoConsts::instance();
 
-  rc->set_StringFlag("CDB_GLOBALTAG","FieldMapTest");   // Weird offset field map
-  //rc->set_StringFlag("CDB_GLOBALTAG","newcdbtag");      //sPHENIX default
-  rc->set_uint64Flag("TIMESTAMP",1);
+  //rc->set_StringFlag("CDB_GLOBALTAG","FieldMapTest");   // Weird offset field map
+  rc->set_StringFlag("CDB_GLOBALTAG","newcdbtag");      //sPHENIX default
+  rc->set_uint64Flag("TIMESTAMP",6);
 
   auto *cdb = CDBInterface::instance();
+  std::cout << cdb->getUrl("PHGARFIELD_GAS") << std::endl;
   std::string url = cdb->getUrl("FIELDMAP_TRACKING");
   std::cout << "Field map URL:\n" << url << std::endl;
-
   Fun4AllServer *se = Fun4AllServer::instance();
 
   Enable::QA  = false;

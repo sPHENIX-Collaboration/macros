@@ -10,6 +10,7 @@
 
 #include <TF1.h>
 #include <TFile.h>
+#include <TGraph.h>
 #include <TGraphErrors.h>
 #include <TPad.h>
 #include <TSystem.h>
@@ -29,6 +30,7 @@ Double_t maxtdc[MbdDefs::MBD_N_FEECH];
 Double_t mintime[MbdDefs::MBD_N_FEECH];  // min time in range
 Double_t maxtime[MbdDefs::MBD_N_FEECH];  // max time in range
 Double_t timecorr[MbdDefs::MBD_N_FEECH][NPOINTS];
+TGraph *g_interp[MbdDefs::MBD_N_FEECH];
 
 /*
 void gpr_interpolate_timecorr( const int ifeech, TGraphErrors *g )
@@ -129,8 +131,6 @@ void interpolate_timecorr(const int ifeech, TGraphErrors *g, TF1 *f)
   g->Fit(f, "R");
 
   g->Draw("ap");
-  gPad->Modified();
-  gPad->Update();
 
   float mintimelocal = TMath::MinElement(n, y);
   float maxtimelocal = TMath::MaxElement(n, y);
@@ -155,8 +155,16 @@ void interpolate_timecorr(const int ifeech, TGraphErrors *g, TF1 *f)
   double tdc = 0;
   for (int istep = 0; istep < NPOINTS; istep++)
   {
-    // timecorr[ifeech][istep] = f->Eval(tdc) - mintimelocal;
-    timecorr[ifeech][istep] = g->Eval(tdc) - mintimelocal;
+    if ( tdc<maxtdclocal )
+    {
+      timecorr[ifeech][istep] = g->Eval(tdc) - mintimelocal;  // use root's spline fit
+    }
+    else
+    {
+      timecorr[ifeech][istep] = f->Eval(tdc) - mintimelocal;
+    }
+
+    g_interp[ifeech]->AddPoint( tdc, timecorr[ifeech][istep]+mintimelocal );
 
     if (istep == 0 || istep == NPOINTS - 1)
     {
@@ -165,6 +173,10 @@ void interpolate_timecorr(const int ifeech, TGraphErrors *g, TF1 *f)
 
     tdc += dstep;
   }
+
+  g_interp[ifeech]->Draw("lp");
+  gPad->Modified();
+  gPad->Update();
 }
 
 void make_timecorr(const char *rootfname = "calib_seb18-00029705-0000_mbdtimecalib.root")
@@ -208,10 +220,13 @@ void make_timecorr(const char *rootfname = "calib_seb18-00029705-0000_mbdtimecal
       g_delaytime[ifeech]->Fit(fpoly, "R");
     }
 
-    // if ( ifeech!=118)
-    //{
+    // create interpolation graph
+    g_interp[ifeech] = new TGraph();
+    name = "interp_"; name += g_delaytime[ifeech]->GetName();
+    g_interp[ifeech]->SetName( name );
+    g_interp[ifeech]->SetMarkerColor( 2 );
+    g_interp[ifeech]->SetMarkerSize( 0.2 );
     interpolate_timecorr(ifeech, g_delaytime[ifeech], fpoly);
-    //}
 
     // if ( ifeech>4 ) break;
   }

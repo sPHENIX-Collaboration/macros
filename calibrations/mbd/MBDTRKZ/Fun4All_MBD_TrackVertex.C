@@ -1,0 +1,190 @@
+/*
+ * This macro shows a minimum working example of running over the production track and calo DSTs.
+ * You can add some analysis modules at the end which package tracks and calo clusters into trees for analysis.
+ */
+
+// leave the GlobalVariables.C at the beginning, an empty line afterwards
+// protects its position against reshuffling by clang-format
+#include <GlobalVariables.C>
+
+#include <G4_ActsGeom.C>
+#include <G4_Global.C>
+#include <G4_Magnet.C>
+#include <Trkr_Clustering.C>
+#include <Trkr_Reco.C>
+#include <Trkr_RecoInit.C>
+#include <Trkr_TpcReadoutInit.C>
+#include <QA.C>
+
+#include <trackreco/PHActsTrackProjection.h>
+
+#include <trackbase_historic/SvtxTrack.h>
+
+#include <ffamodules/CDBInterface.h>
+
+#include <fun4all/Fun4AllDstInputManager.h>
+#include <fun4all/Fun4AllDstOutputManager.h>
+#include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/Fun4AllUtils.h>
+#include <fun4all/Fun4AllOutputManager.h>
+#include <fun4all/Fun4AllRunNodeInputManager.h>
+#include <fun4all/Fun4AllServer.h>
+
+#include <phool/recoConsts.h>
+
+#include <iostream>
+#include <filesystem>
+
+#include <mbd/MbdReco.h>
+#include <mbdcalib/MbdTrackVertex.h>
+
+R__LOAD_LIBRARY(libfun4all.so)
+R__LOAD_LIBRARY(libffamodules.so)
+R__LOAD_LIBRARY(libphool.so)
+R__LOAD_LIBRARY(libcdbobjects.so)
+R__LOAD_LIBRARY(libtrack_reco.so)
+R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libcalotrigger.so)
+R__LOAD_LIBRARY(libcentrality.so)
+R__LOAD_LIBRARY(libmbd.so)
+R__LOAD_LIBRARY(libepd.so)
+R__LOAD_LIBRARY(libzdcinfo.so)
+R__LOAD_LIBRARY(libmbd.so)
+R__LOAD_LIBRARY(libmbdcalib.so)
+
+void Fun4All_MBD_TrackVertex(
+    const int nEvents = 10,
+    const std::string& trackfilename = "DST_TRKR_TRACKS_run2pp_ana475_2024p017_v001-00053877-00000.root",
+    const std::string& calofilename = "DST_CALO_run2pp_ana468_2024p012_v001-00053877-00000.root",
+    const std::string& outfilename = "mbd_trkvtx",
+    const std::string& outdir = "./")
+{
+  const std::string& inputTrackFile = trackfilename;
+  const std::string& inputCaloFile = calofilename;
+
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(trackfilename);
+  int runnumber = runseg.first;
+  int segment = runseg.second;
+
+  std::string theOutfileheader = outdir + outfilename + "_" + std::to_string(runnumber) + "-" + std::to_string(segment);
+
+  Enable::MVTX_APPLYMISALIGNMENT = true;
+  ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
+  TRACKING::streaming_mode = true;
+
+  auto *se = Fun4AllServer::instance();
+  se->Verbosity(1);
+
+  auto *rc = recoConsts::instance();
+  rc->set_IntFlag("RUNNUMBER", runnumber);
+  rc->set_IntFlag("RUNSEGMENT", segment);
+
+  Enable::CDB = true;
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
+  rc->set_uint64Flag("TIMESTAMP", runnumber);
+  std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
+
+  Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
+  ingeo->AddFile(geofile);
+  se->registerInputManager(ingeo);
+
+  TpcReadoutInit( runnumber );
+  std::cout << " run: " << runnumber
+            << " samples: " << TRACKING::reco_tpc_maxtime_sample
+            << " pre: " << TRACKING::reco_tpc_time_presample
+            << " vdrift: " << G4TPC::tpc_drift_velocity_reco
+            << std::endl;
+
+  G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
+
+  // to turn on the default static corrections, enable the two lines below
+  G4TPC::ENABLE_STATIC_CORRECTIONS = true;
+
+  //to turn on the average corrections, enable the three lines below
+  //note: these are designed to be used only if static corrections are also applied
+  G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
+
+  G4MAGNET::magfield_rescale = 1;
+  TrackingInit();
+
+  auto *trackin = new Fun4AllDstInputManager("TrackInManager");
+  trackin->fileopen(inputTrackFile);
+  //trackin->AddListFile(inputTrackFile);
+  se->registerInputManager(trackin);
+
+  auto *caloin = new Fun4AllDstInputManager("CaloInManager");
+  caloin->fileopen(inputCaloFile);
+  //caloin->AddListFile(inputCaloFile);
+  se->registerInputManager(caloin);
+
+  /*
+  auto *projection = new PHActsTrackProjection("CaloProjection");
+  float new_cemc_rad = 99; // from DetailedCalorimeterGeometry, project to inner surface
+  bool doEMcalRadiusCorr = true;
+  if (doEMcalRadiusCorr)
+  {
+    projection->setLayerRadius(SvtxTrack::CEMC, new_cemc_rad);
+  }
+  se->registerSubsystem(projection);
+  */
+
+  // MBD/BBC Reconstruction
+  MbdReco *mbdreco = new MbdReco();
+  //const int calpass = 2;  // if we want to use local calibs
+  //mbdreco->SetCalPass(calpass);
+  rc->set_StringFlag("MBD_TT_T0", "mbd_tt_t0.calib");
+  rc->set_StringFlag("MBD_TQ_T0", "mbd_tq_t0.calib");
+  se->registerSubsystem(mbdreco);
+
+  Global_Reco();
+
+  MbdTrackVertex *mbdtrkvtx = new MbdTrackVertex();
+  se->registerSubsystem( mbdtrkvtx );
+
+  if (Enable::DSTOUT)
+  {
+    std::string dstOutputFileName= theOutfileheader + "_dst.root";
+    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", dstOutputFileName);
+    out->AddNode("Sync");
+    out->AddNode("EventHeader");
+    out->AddNode("SvtxTrackMap");
+    out->AddNode("GlobalVertexMap");
+    out->AddNode("CLUSTERINFO_CEMC");
+    se->registerOutputManager(out);
+  }
+
+  se->run(nEvents);
+  se->End();
+  se->PrintTimer();
+
+  if(Enable::QA)
+  {
+    std::string qaOutputFileName = theOutfileheader + "_qa.root";
+    QAHistManagerDef::saveQARootFile(qaOutputFileName);
+  }
+
+  CDBInterface::instance()->Print();
+  delete se;
+  std::cout << "Finished" << std::endl;
+  gSystem->Exit(0);
+
+  return;
+}
+
+std::string GetFirstLine(const std::string& listname)
+{
+  std::ifstream file(listname);
+
+  std::string firstLine;
+  if (file.is_open()) {
+      if (std::getline(file, firstLine)) {
+          std::cout << "First Line: " << firstLine << std::endl;
+      } else {
+          std::cerr << "Unable to read first line of file" << std::endl;
+      }
+      file.close();
+  } else {
+      std::cerr << "Unable to open file" << std::endl;
+  }
+  return firstLine;
+}
