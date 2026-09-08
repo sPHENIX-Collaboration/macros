@@ -3,7 +3,7 @@
 
 if [[ $USER == "sphnxpro" ]]
 then
-  BUILD=pro.001
+  BUILD=ana.565
   source /opt/sphenix/core/bin/sphenix_setup.sh -n $BUILD
   TOPDIR=${PWD}
   # work area for this sub-production
