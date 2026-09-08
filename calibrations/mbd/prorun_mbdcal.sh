@@ -114,6 +114,8 @@ echo $inputs
 outbase=${outbase}_${build}_${dbtag}_$(printf "%08d" ${runno})
 logbase=${logbase}_${build}_${dbtag}_$(printf "%08d" ${runno})
 
+echo outbase=${outbase}_${build}_${dbtag}_$(printf "%08d" ${runno})
+echo logbase=${logbase}_${build}_${dbtag}_$(printf "%08d" ${runno})
 
 {
 
@@ -163,13 +165,22 @@ mkdir -p ${caldir}
 # If using local files, stage PASS0 calibrations
 if [[ ! -z ${pass0dir} ]]
 then
+  echo USING calibs from $pass0dir
   #./cups.py -r ${runno} -s ${segment} -d ${outbase} message "Stage in pass0 from ${pass0dir}"
   root.exe -b -q DumpMbdCalibs.C\(${runno}\)
   mkdir -p results/${runno}
   mv *.calib results/${runno}/
   cp -p /sphenix/user/chiu/sphenix_bbc/CDB/latest_proRun3OO/results/default/mbd_timecorr.calib results/${runno}/
+  ls -l results/${runno}
 fi
 
+}  > ${logbase}.out 2> ${logbase}.err 
+
+mkdir -p $logdir
+[[ "${logdir%/}" != "." ]] && cp -p ${logbase}.out  ${logdir}
+[[ "${logdir%/}" != "." ]] && cp -p ${logbase}.err  ${logdir}
+
+#{
 # Flag as started
 #./cups.py -r ${runno} -s ${segment} -d ${outbase} running
 
@@ -184,6 +195,12 @@ fi
 #echo "Pass 1 calibration done"
 #ls -la *.root
 
+#}  >> ${logbase}.out 2>> ${logbase}.err 
+#mkdir -p $logdir
+#[[ "${logdir%/}" != "." ]] && cp -p ${logbase}.out  ${logdir}
+#[[ "${logdir%/}" != "." ]] && cp -p ${logbase}.err  ${logdir}
+
+{
 ################################################
 # Pass 2 calibrations waveforms
 #./cups.py -r ${runnumber} -s ${segment} -d ${outbase} message "Running PASS 2 calibration, process waveforms"
@@ -219,6 +236,11 @@ cp -p results/${runno}/pass0_mbd_tq_t0.calib results/${runno}/mbd_tq_t0.calib
 #mv results/${runno}/pass0_mbd_tt_t0.root results/${runno}/mbd_tt_t0-${runno}.root
 #mv results/${runno}/pass0_mbd_tq_t0.root results/${runno}/mbd_tq_t0-${runno}.root
 
+}  >> ${logbase}.out 2>>${logbase}.err 
+[[ "${logdir%/}" != "." ]] && cp -p ${logbase}.out  ${logdir}
+[[ "${logdir%/}" != "." ]] && cp -p ${logbase}.err  ${logdir}
+
+{
 echo "###############################################################################################################"
 echo "Running pass2.3 calibration"
 #./cups.py -r ${runnumber} -s ${segment} -d ${outbase} message "Running PASS 2.3 calibration"
@@ -232,6 +254,11 @@ root.exe -q -b pro_cal_mbd.C\(${runno},${pass}\)
 
 mv results/${runno}/mbd_qfit.root results/${runno}/mbd_qfit-${runno}.root
 
+}  >> ${logbase}.out 2>>${logbase}.err 
+[[ "${logdir%/}" != "." ]] && cp -p ${logbase}.out  ${logdir}
+[[ "${logdir%/}" != "." ]] && cp -p ${logbase}.err  ${logdir}
+
+{
 echo "###############################################################################################################"
 echo "Running pass2.4 calibration"
 echo root.exe -q calib_t0mean.C\(\"results/${runno}/calmbdpass2.3_q-${runno}.root\"\)
@@ -242,6 +269,11 @@ mv results/${runno}/mbd_t0corr.root results/${runno}/mbd_t0corr-${runno}.root
 #./cups.py -r ${runno} -s ${segment} -d ${outbase} message "Done"
 #./cups.py -r ${runno} -s ${segment} -d ${outbase} finished -e 0
 
+}  >> ${logbase}.out 2>>${logbase}.err 
+[[ "${logdir%/}" != "." ]] && cp -p ${logbase}.out  ${logdir}
+[[ "${logdir%/}" != "." ]] && cp -p ${logbase}.err  ${logdir}
+
+{
 # Copy out files
 mkdir -p ${outdir}/${runno}
 
@@ -264,9 +296,7 @@ done
 #     ./cups.py -v -r ${runno} -s ${segment} -d ${outbase} finished -e 0 --nevents 0 --inc 
 
 
-}  > ${logbase}.out 2>${logbase}.err 
-
-mkdir -p $logdir
+}  >> ${logbase}.out 2>>${logbase}.err 
 [[ "${logdir%/}" != "." ]] && cp -p ${logbase}.out  ${logdir}
 [[ "${logdir%/}" != "." ]] && cp -p ${logbase}.err  ${logdir}
 
