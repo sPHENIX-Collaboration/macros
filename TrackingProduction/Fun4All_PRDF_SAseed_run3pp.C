@@ -276,7 +276,7 @@ void Fun4All_PRDF_SAseed_run3pp(
 
   
   auto *se = Fun4AllServer::instance();
-  se->Verbosity(2);
+  se->Verbosity(1);
   auto *rc = recoConsts::instance();
 
   Enable::QA = true;
