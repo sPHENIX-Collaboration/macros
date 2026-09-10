@@ -553,8 +553,27 @@ Successful jobs are moved to:
 output/CAMPAIGN/completed/
 ```
 
-The ROOT macro validates that both mandatory trees exist before the worker
-moves a file into `completed/`.
+The ROOT macro checks input-open and skip results and records the number of
+processed events from Fun4All. Event chunks require exactly their requested
+count; file campaigns allow normal end-of-input below their event cap. An
+unreadable file encountered in a list is a failure, even if Fun4All continues
+with another entry. Failed jobs do not receive a `.complete` marker.
+
+The macro records `tpc_v0_processed_events` in the ROOT file so retries can
+check the event count without requiring a newer coresoftware `eventTree` API.
+The worker holds a per-job lock while processing and publishing a single
+canonical output. A retry validates its trees and processed count before
+reusing it. If an existing output is invalid or lacks the count metadata, the
+worker stops and asks you to inspect it and move it aside, or use a new campaign
+name. Always use a new campaign name when changing inputs or reconstruction
+settings.
+
+Retries no longer create `__dup_*.root` files. Duplicates left by older scripts
+must still be excluded from existing merge lists.
+
+For direct macro calls, the final optional `requireExactEvents` argument selects
+exact-count validation (default `false`). A positive `nSkip` requires a single
+DST input; skipping with a `.list` is rejected because list inputs span files.
 
 `trackTree` contains one row per successfully built/fitted track before V0 pair
 preselection. It includes fitted kinematics, DCA, fit quality, cluster counts,

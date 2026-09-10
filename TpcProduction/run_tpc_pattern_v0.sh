@@ -151,8 +151,17 @@ fi
 
 padded_id=$(printf "%05d" "${process_id}")
 job_outdir="${output_base_dir}/${campaign_tag}"
-mkdir -p "${job_outdir}" "${completed_dir}"
+mkdir -p "${job_outdir}" "${completed_dir}" "${completed_dir}/.locks"
+# Hold the job lock before writing its chunk list or ROOT output, including
+# while validating an existing result. Concurrent retries share this lock.
+if ! command -v flock >/dev/null 2>&1; then
+  echo "Error: flock is required for idempotent V0 output publication" >&2
+  exit 3
+fi
+exec {output_lock_fd}> "${completed_dir}/.locks/${padded_id}.lock"
+flock "${output_lock_fd}"
 
+require_exact_events=false
 event_skip=0
 file_start=0
 if [[ -n "${event_chunk_manifest}" ]]; then
@@ -176,6 +185,9 @@ if [[ -n "${event_chunk_manifest}" ]]; then
     echo "Error: malformed event chunk row: ${manifest_row}" >&2
     exit 2
   fi
+  event_skip=$((10#${event_skip}))
+  file_start=$((10#${file_start}))
+  require_exact_events=true
   nfiles=1
   chunk_list="${job_outdir}/dst_chunk_${padded_id}_fidx${file_start}_eskip${event_skip}_nev${nevents}.list"
   printf '%s\n' "${input_file}" > "${chunk_list}"
@@ -247,6 +259,22 @@ if [[ -n "${event_chunk_manifest}" ]]; then
 else
   outroot="${job_outdir}/tpc_pattern_v0_${padded_id}_fskip${file_start}_nfiles${nfiles}.root"
 fi
+macro_call="Fun4All_TpcPatternRecoV0.C(${nevents}, \"${macro_input}\", \"${outroot}\", ${pre_track_pt_min}, ${pre_track_dca_xy_min}, ${pre_pair_dca_max}, ${pre_lproj_min}, ${pre_cos_theta_min}, ${use_final_track_helix}, \"${point_order}\", \"${fit_method}\", ${kalman_sigma_rphi_cm}, ${kalman_sigma_r_cm}, ${kalman_sigma_z_cm}, ${write_same_sign_pairs}, ${write_cluster_residual_tree}, ${use_kalman_field_map}, \"${kalman_field_map}\", ${kalman_rk_max_step_cm}, ${kalman_rk_step_tolerance}, ${kalman_rk_max_step_trials}, ${kalman_rk_max_total_steps}, ${kalman_fast_field_jacobian}, ${kalman_fast_field_pca}, ${kalman_field_pca_refine_iterations}, ${coarse_steps}, ${pca_candidates}, ${print_timing}, ${event_skip}, ${kalman_analytic_uniform}, ${pre_track_quality_max}, ${pre_track_npoints_min}, ${pair_pca_z_max}, ${pair_pca_dz_max}, ${pair_decay_radius_min}, ${pair_alpha_abs_max}, ${pair_dca_max}, ${pair_dira_min}, ${final_track_helix_max_upstream_cm}, ${final_track_helix_downstream_margin_cm}, ${write_kalman_innovation_diagnostics}, ${primary_vertex_x}, ${primary_vertex_y}, ${primary_vertex_z}, ${reconstruct_pairs}, ${required_crossing_value}, ${require_same_crossing}, ${max_crossing_tier}, \"${crossing_decision_node}\", ${require_exact_events})"
+canonical_output="${completed_dir}/$(basename "${outroot}")"
+validate_output()
+{
+  root.exe -l -b -q -e '.L Fun4All_TpcPatternRecoV0.C' \
+    -e "gSystem->Exit(TpcPatternV0Output::validate(\"$1\", ${nevents}, ${require_exact_events}) ? 0 : 3);"
+}
+if [[ -e "${canonical_output}" ]]; then
+  if validate_output "${canonical_output}"; then
+    echo "Validated completed output already exists; nothing to do: ${canonical_output}"
+    exit 0
+  fi
+  echo "Error: existing output failed validation: ${canonical_output}" >&2
+  echo "Inspect it and move it aside before retrying, or use a new campaign name." >&2
+  exit 3
+fi
 completion_marker="${outroot}.complete"
 rm -f "${completion_marker}"
 
@@ -287,20 +315,12 @@ echo "  write_same_sign_pairs=${write_same_sign_pairs}"
 echo "  write_cluster_residual_tree=${write_cluster_residual_tree}"
 echo "  write_kalman_innovation_diagnostics=${write_kalman_innovation_diagnostics}"
 
-root.exe -l -b -q "Fun4All_TpcPatternRecoV0.C(${nevents}, \"${macro_input}\", \"${outroot}\", ${pre_track_pt_min}, ${pre_track_dca_xy_min}, ${pre_pair_dca_max}, ${pre_lproj_min}, ${pre_cos_theta_min}, ${use_final_track_helix}, \"${point_order}\", \"${fit_method}\", ${kalman_sigma_rphi_cm}, ${kalman_sigma_r_cm}, ${kalman_sigma_z_cm}, ${write_same_sign_pairs}, ${write_cluster_residual_tree}, ${use_kalman_field_map}, \"${kalman_field_map}\", ${kalman_rk_max_step_cm}, ${kalman_rk_step_tolerance}, ${kalman_rk_max_step_trials}, ${kalman_rk_max_total_steps}, ${kalman_fast_field_jacobian}, ${kalman_fast_field_pca}, ${kalman_field_pca_refine_iterations}, ${coarse_steps}, ${pca_candidates}, ${print_timing}, ${event_skip}, ${kalman_analytic_uniform}, ${pre_track_quality_max}, ${pre_track_npoints_min}, ${pair_pca_z_max}, ${pair_pca_dz_max}, ${pair_decay_radius_min}, ${pair_alpha_abs_max}, ${pair_dca_max}, ${pair_dira_min}, ${final_track_helix_max_upstream_cm}, ${final_track_helix_downstream_margin_cm}, ${write_kalman_innovation_diagnostics}, ${primary_vertex_x}, ${primary_vertex_y}, ${primary_vertex_z}, ${reconstruct_pairs}, ${required_crossing_value}, ${require_same_crossing}, ${max_crossing_tier}, \"${crossing_decision_node}\")"
+root.exe -l -b -q "${macro_call}"
 
 if [[ -f "${outroot}" && -f "${completion_marker}" ]]; then
-  base="$(basename "${outroot}")"
-  dst="${completed_dir}/${base}"
-  if [[ -e "${dst}" ]]; then
-    stem="${base%.*}"
-    ext="${base##*.}"
-    dst="${completed_dir}/${stem}__dup_$(date +%s)_${process_id}.${ext}"
-    echo "Warning: output already exists, moving as ${dst}"
-  fi
-  mv -f "${outroot}" "${dst}"
+  mv -- "${outroot}" "${canonical_output}"
   rm -f "${completion_marker}"
-  echo "Moved completed file to ${dst}"
+  echo "Moved completed file to ${canonical_output}"
 else
   echo "Error: run did not produce both ${outroot} and its completion marker" >&2
   exit 3

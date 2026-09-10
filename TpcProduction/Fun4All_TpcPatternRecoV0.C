@@ -3,6 +3,7 @@
 
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllInputManager.h>
+#include <fun4all/InputFileHandlerReturnCodes.h>
 #include <fun4all/Fun4AllReturnCodes.h>
 #include <fun4all/Fun4AllServer.h>
 
@@ -14,12 +15,63 @@
 #include <phfield/PHFieldUtility.h>
 
 #include <TFile.h>
+#include <TParameter.h>
 #include <TSystem.h>
 #include <TTree.h>
 
 #include <fstream>
 #include <iostream>
 #include <string>
+
+namespace TpcPatternV0Output
+{
+  inline bool validate(const std::string &filename, const int requestedEvents,
+                       const bool requireExactEvents)
+  {
+    TFile file(filename.c_str(), "READ");
+    if (file.IsZombie() || file.TestBit(TFile::kRecovered))
+    {
+      std::cerr << "Invalid or recovered V0 output: " << filename << std::endl;
+      return false;
+    }
+    auto *pairs = dynamic_cast<TTree *>(file.Get("pairTree"));
+    auto *tracks = dynamic_cast<TTree *>(file.Get("trackTree"));
+    auto *processed = dynamic_cast<TParameter<int> *>(file.Get("tpc_v0_processed_events"));
+    if (!pairs || !tracks || !processed ||
+        pairs->GetEntries() < 0 || tracks->GetEntries() < 0 ||
+        processed->GetVal() < 0 ||
+        (requestedEvents > 0 && processed->GetVal() > requestedEvents) ||
+        (requireExactEvents && processed->GetVal() != requestedEvents))
+    {
+      std::cerr << "V0 output has missing trees or an invalid processed event count: "
+                << filename << std::endl;
+      return false;
+    }
+    std::cout << "Validated V0 output: processed=" << processed->GetVal()
+              << ", requested=" << requestedEvents
+              << ", exact=" << requireExactEvents << std::endl;
+    return true;
+  }
+}
+
+
+namespace TpcPatternV0Input
+{
+  // OpenNextFile can skip an unreadable list entry and continue with another file.
+  // Keep that failure visible even if the eventual run status is normal EOF.
+  class CheckedInputManager : public Fun4AllDstInputManager
+  {
+   public:
+    CheckedInputManager() : Fun4AllDstInputManager("TPCPatternRecoInput") {}
+    int fileopen(const std::string &filename) override
+    {
+      const int status = Fun4AllDstInputManager::fileopen(filename);
+      failed = failed || status != 0;
+      return status;
+    }
+    bool failed = false;
+  };
+}
 
 int Fun4All_TpcPatternRecoV0(
     const int nEvents = 10,
@@ -70,8 +122,19 @@ int Fun4All_TpcPatternRecoV0(
     const int requiredCrossing = TpcV0CandidateTree::NoCrossingSelection,
     const bool requireSameCrossing = false,
     const int maxCrossingTier = -1,
-    const std::string &crossingDecisionNode = "TPC_CROSSING_DECISIONS")
+    const std::string &crossingDecisionNode = "TPC_CROSSING_DECISIONS",
+    const bool requireExactEvents = false)
 {
+  gSystem->Unlink((outputFile + ".complete").c_str());
+  const bool inputIsList = inputDst.size() >= 5 && inputDst.substr(inputDst.size() - 5) == ".list";
+  if (nEvents < 0 || nSkip < 0 || (requireExactEvents && nEvents == 0) ||
+      (inputIsList && nSkip > 0))
+  {
+    std::cerr << "Invalid event range: counts must be nonnegative, exact chunks must be "
+              << "nonempty, and skipping requires a single DST rather than a list" << std::endl;
+    gSystem->Exit(2);
+    return 2;
+  }
   const int load_tpc_reco = gSystem->Load("libtpctrackreco.so");
   if (load_tpc_reco < 0)
   {
@@ -201,86 +264,92 @@ int Fun4All_TpcPatternRecoV0(
   v0->Verbosity(1);
   se->registerSubsystem(v0);
 
-  auto *input = new Fun4AllDstInputManager("TPCPatternRecoInput");
+  auto *input = new TpcPatternV0Input::CheckedInputManager();
   // V0 reconstruction consumes fitted pattern tracks and cluster centroids,
   // not the much larger raw-hit container.
   input->BranchSelect("DST#TRKR#TRKR_HITSET", 0);
-  if (inputDst.size() >= 5 && inputDst.substr(inputDst.size() - 5) == ".list")
+  int openStatus = 0;
+  if (inputIsList)
   {
-    input->AddListFile(inputDst);
+    openStatus = input->AddListFile(inputDst);
+    if (openStatus == 0)
+    {
+      openStatus = input->OpenNextFile() == InputFileHandlerReturnCodes::SUCCESS ? 0 : -1;
+    }
   }
   else
   {
-    input->fileopen(inputDst);
+    openStatus = input->fileopen(inputDst);
   }
   se->registerInputManager(input);
-
-  if (nSkip > 0)
+  if (openStatus != 0 || input->failed)
   {
-    std::cout << "Skipping " << nSkip << " input events" << std::endl;
-    se->skip(nSkip);
-  }
-  const int runStatus = se->run(nEvents);
-  se->End();
-  se->PrintTimer();
-  delete se;
-
-  if (runStatus == Fun4AllReturnCodes::ABORTRUN ||
-      runStatus == Fun4AllReturnCodes::ABORTPROCESSING)
-  {
-    gSystem->Unlink((outputFile + ".complete").c_str());
-    std::cerr << "Fun4All processing failed with status " << runStatus
-              << "; not creating a completion marker" << std::endl;
+    std::cerr << "Failed to open V0 input: " << inputDst << std::endl;
     gSystem->Exit(4);
     return 4;
   }
 
-  bool outputIsValid = false;
-  Long64_t pairEntries = -1;
-  Long64_t trackEntries = -1;
+  if (nSkip > 0)
   {
-    TFile outputCheck(outputFile.c_str(), "READ");
-    if (outputCheck.IsZombie())
+    std::cout << "Skipping " << nSkip << " input events" << std::endl;
+    if (se->skip(nSkip) != 0)
     {
-      std::cerr << "Output validation failed: ROOT file is a zombie: " << outputFile << std::endl;
-    }
-    else if (outputCheck.TestBit(TFile::kRecovered))
-    {
-      std::cerr << "Output validation failed: ROOT recovered an incompletely written file: "
-                << outputFile << std::endl;
-    }
-    else
-    {
-      auto *pairTree = dynamic_cast<TTree *>(outputCheck.Get("pairTree"));
-      auto *trackTree = dynamic_cast<TTree *>(outputCheck.Get("trackTree"));
-      if (!pairTree || !trackTree)
-      {
-        std::cerr << "Output validation failed: pairTree or trackTree is missing from "
-                  << outputFile << std::endl;
-      }
-      else
-      {
-        pairEntries = pairTree->GetEntries();
-        trackEntries = trackTree->GetEntries();
-        outputIsValid = pairEntries >= 0 && trackEntries >= 0;
-      }
+      std::cerr << "Failed to skip the requested input events" << std::endl;
+      gSystem->Exit(4);
+      return 4;
     }
   }
+  const int eventsBefore = se->DstEvents();
+  const int runStatus = se->run(nEvents);
+  const int processedEvents = se->DstEvents() - eventsBefore;
+  const bool inputFailed = input->failed;
+  const int endStatus = se->End();
+  se->PrintTimer();
+  delete se;
 
-  if (!outputIsValid)
+  // With this single DST input manager, -1 is EOF. File campaigns permit
+  // exhaustion below their cap; event chunks must deliver the exact count.
+  if ((runStatus != 0 && runStatus != -1) || endStatus != 0 || inputFailed ||
+      (requireExactEvents && processedEvents != nEvents))
   {
-    gSystem->Unlink((outputFile + ".complete").c_str());
+    std::cerr << "V0 processing failed: run=" << runStatus << ", end=" << endStatus
+              << ", input_failed=" << inputFailed << ", processed=" << processedEvents
+              << ", requested=" << nEvents << std::endl;
+    gSystem->Exit(4);
+    return 4;
+  }
+
+  // Persist accounting independently of the coresoftware output schema so that
+  // retries can validate even releases without an eventTree.
+  bool metadataWritten = false;
+  {
+    TFile output(outputFile.c_str(), "UPDATE");
+    if (!output.IsZombie() && !output.TestBit(TFile::kRecovered))
+    {
+      TParameter<int> processed("tpc_v0_processed_events", processedEvents);
+      metadataWritten = processed.Write() > 0;
+      output.Close();
+      metadataWritten = metadataWritten && !output.TestBit(TFile::kWriteError);
+    }
+  }
+  if (!metadataWritten || !TpcPatternV0Output::validate(outputFile, nEvents, requireExactEvents))
+  {
     std::cerr << "Not creating completion marker for invalid output " << outputFile << std::endl;
     gSystem->Exit(3);
     return 3;
   }
 
-  std::cout << "Validated output trees: pairTree=" << pairEntries
-            << " trackTree=" << trackEntries << std::endl;
   std::cout << "Finished TPC pattern-reco V0 candidate tree: " << outputFile << std::endl;
   std::ofstream completion_marker(outputFile + ".complete");
   completion_marker << "complete\n";
   completion_marker.close();
+  if (!completion_marker)
+  {
+    gSystem->Unlink((outputFile + ".complete").c_str());
+    std::cerr << "Failed to write completion marker" << std::endl;
+    gSystem->Exit(3);
+    return 3;
+  }
   gSystem->Exit(0);
   return 0;
 }
