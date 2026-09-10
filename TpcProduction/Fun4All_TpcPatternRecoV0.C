@@ -199,14 +199,7 @@ int Fun4All_TpcPatternRecoV0(
     return 1;
   }
   v0->set_kalman_measurement_sigmas(kalmanSigmaRphiCm, kalmanSigmaRCm, kalmanSigmaZCm);
-  const char *innovation_diagnostics_env =
-      gSystem->Getenv("V0_WRITE_KALMAN_INNOVATION_DIAGNOSTICS");
-  const std::string innovation_diagnostics_value =
-      innovation_diagnostics_env != nullptr ? innovation_diagnostics_env : "";
-  const bool enable_innovation_diagnostics =
-      writeKalmanInnovationDiagnostics || innovation_diagnostics_value == "true" ||
-      innovation_diagnostics_value == "TRUE" || innovation_diagnostics_value == "1";
-  v0->set_write_kalman_innovation_diagnostics(enable_innovation_diagnostics);
+  v0->set_write_kalman_innovation_diagnostics(writeKalmanInnovationDiagnostics);
   v0->set_kalman_analytic_uniform_propagation(kalmanAnalyticUniformPropagation);
   v0->use_kalman_field_map(useKalmanFieldMap);
   v0->set_kalman_rkn4(kalmanRkMaxStepCm, kalmanRkStepTolerance,

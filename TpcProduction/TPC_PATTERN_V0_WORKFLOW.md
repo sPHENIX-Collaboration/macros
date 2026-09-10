@@ -40,7 +40,7 @@ Condor jobs. It does not change the track fitter, V0 algorithm, or cuts.
 |---|---|
 | `submit_tpc_pattern_v0_campaign.sh` | Splits work by input files and submits Condor jobs. |
 | `submit_tpc_pattern_v0_event_campaign.sh` | Builds exact event ranges, then invokes the file submitter in manifest mode. |
-| `make_tpc_v0_event_chunks.py` | Reads the `T` tree entry count with uproot and writes non-overlapping event chunks. |
+| `make_tpc_v0_event_chunks.py` | Reads the `T` tree entry count with PyROOT and writes non-overlapping event chunks. |
 | `tpc_pattern_v0.job` | Condor resource request, environment, log paths, and queue definition. |
 | `run_tpc_pattern_v0.sh` | Sets up sPHENIX, selects a file or event chunk, runs ROOT, and moves validated output to `completed/`. |
 | `Fun4All_TpcPatternRecoV0.C` | Loads libraries, configures `TpcV0CandidateTree`, registers the DST input manager, and runs Fun4All. |
@@ -207,7 +207,7 @@ Example:
 
 The event submitter starts the selected sPHENIX software environment, resolves
 catalog logical names with the same Fun4All `DBInterface`/FROG service used at
-runtime, reads the `T` entry count with uproot, and writes:
+runtime, reads the `T` entry count with PyROOT, and writes:
 
 ```text
 output/CAMPAIGN/event_chunks.tsv

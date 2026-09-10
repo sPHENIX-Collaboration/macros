@@ -47,7 +47,6 @@ reconstruct_pairs=${V0_RECONSTRUCT_PAIRS:-true}
 write_same_sign_pairs=${V0_WRITE_SAME_SIGN_PAIRS:-false}
 write_cluster_residual_tree=${V0_WRITE_CLUSTER_RESIDUAL_TREE:-false}
 write_kalman_innovation_diagnostics=${5:-${V0_WRITE_KALMAN_INNOVATION_DIAGNOSTICS:-false}}
-export V0_WRITE_KALMAN_INNOVATION_DIAGNOSTICS="${write_kalman_innovation_diagnostics}"
 use_kalman_field_map=${V0_USE_KALMAN_FIELD_MAP:-true}
 kalman_field_map=${V0_KALMAN_FIELD_MAP:-none}
 kalman_uniform_propagator=${V0_KALMAN_UNIFORM_PROPAGATOR:-rk}

@@ -8,7 +8,6 @@ from pathlib import Path
 import sys
 
 import ROOT
-import uproot
 
 
 def parse_args() -> argparse.Namespace:
@@ -74,10 +73,16 @@ def read_input_names(input_list: Path) -> list[str]:
 def count_events(input_name: str) -> int:
     """Resolve one input through FROG and return the number of DST events."""
     resolved_name = str(ROOT.tpc_v0_event_chunks.resolve_input(input_name))
-    with uproot.open(resolved_name) as root_file:
-        if "T" not in root_file:
+    root_file = ROOT.TFile.Open(resolved_name, "READ")
+    if not root_file or root_file.IsZombie():
+        raise OSError(f"cannot open ROOT file: {resolved_name}")
+    try:
+        tree = root_file.Get("T")
+        if not tree or not tree.InheritsFrom("TTree"):
             raise KeyError(f"TTree 'T' is missing from: {resolved_name}")
-        return int(root_file["T"].num_entries)
+        return int(tree.GetEntries())
+    finally:
+        root_file.Close()
 
 
 def job_count(entries_by_file: list[int], events_per_job: int) -> int:
@@ -119,11 +124,9 @@ def main() -> int:
         print(f"Error: {error}", file=sys.stderr)
         return 2
 
-    rows: list[tuple[int, str, int, int]] = []
     failures: list[tuple[str, str]] = []
     entries_by_file: list[int] = []
-    total_events = 0
-    for file_index, input_name in enumerate(input_names):
+    for input_name in input_names:
         try:
             entries = count_events(input_name)
         except Exception as error:
@@ -132,10 +135,6 @@ def main() -> int:
             continue
 
         entries_by_file.append(entries)
-        total_events += entries
-        for event_skip in range(0, entries, args.events_per_job):
-            nevents = min(args.events_per_job, entries - event_skip)
-            rows.append((file_index, input_name, event_skip, nevents))
 
     if failures:
         print(
@@ -147,16 +146,18 @@ def main() -> int:
             print(f"  {input_name}: {reason}", file=sys.stderr)
         return 2
 
-    if not rows:
+    total_events = sum(entries_by_file)
+    n_jobs = job_count(entries_by_file, args.events_per_job)
+    if n_jobs == 0:
         print("Error: the input files contain no events; no manifest was written.", file=sys.stderr)
         return 2
 
-    if len(rows) > args.max_jobs:
+    if n_jobs > args.max_jobs:
         minimum = minimum_events_per_job(entries_by_file, args.max_jobs)
         if minimum is None:
             nonempty_files = sum(entries > 0 for entries in entries_by_file)
             print(
-                f"Error: {len(rows)} jobs exceeds max-jobs={args.max_jobs}, and the "
+                f"Error: {n_jobs} jobs exceeds max-jobs={args.max_jobs}, and the "
                 f"sample has {nonempty_files} nonempty files. At least one job per file "
                 "is required, so increasing --events-per-job cannot satisfy this limit.",
                 file=sys.stderr,
@@ -164,7 +165,7 @@ def main() -> int:
         else:
             suggested_jobs = job_count(entries_by_file, minimum)
             print(
-                f"Error: {len(rows)} jobs exceeds max-jobs={args.max_jobs}. "
+                f"Error: {n_jobs} jobs exceeds max-jobs={args.max_jobs}. "
                 f"Use --events-per-job {minimum} or larger "
                 f"({suggested_jobs} jobs at {minimum}).",
                 file=sys.stderr,
@@ -173,14 +174,16 @@ def main() -> int:
 
     args.output_manifest.parent.mkdir(parents=True, exist_ok=True)
     with args.output_manifest.open("w") as output:
-        for file_index, input_name, event_skip, nevents in rows:
-            output.write(f"{file_index}\t{input_name}\t{event_skip}\t{nevents}\n")
+        for file_index, (input_name, entries) in enumerate(zip(input_names, entries_by_file)):
+            for event_skip in range(0, entries, args.events_per_job):
+                nevents = min(args.events_per_job, entries - event_skip)
+                output.write(f"{file_index}\t{input_name}\t{event_skip}\t{nevents}\n")
 
     print(f"[event-chunks] input files: {len(input_names)}")
     print(f"[event-chunks] usable files: {len(input_names)}")
     print(f"[event-chunks] total events: {total_events}")
     print(f"[event-chunks] events/job: {args.events_per_job}")
-    print(f"[event-chunks] jobs: {len(rows)}")
+    print(f"[event-chunks] jobs: {n_jobs}")
     print(f"[event-chunks] manifest: {args.output_manifest.resolve()}")
     return 0
 
