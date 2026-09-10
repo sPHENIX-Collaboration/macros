@@ -122,21 +122,40 @@ eligibility and do not filter rows from `trackTree`.
 
 ## Prepare an Input List
 
-Use absolute paths and sort deterministically:
+For cataloged production DSTs, generate a list of logical filenames with the
+sPHENIX file-catalog utility. For example:
 
 ```bash
+source /opt/sphenix/core/bin/sphenix_setup.sh -n new
 cd /path/to/macros/TpcProduction
 
-find /path/to/output_DST \
-  -maxdepth 1 -type f -name '*.root' | LC_ALL=C sort \
-  > output/dst_my_sample.list
+CreateDstList.pl --run RUNNUMBER --tag PRODUCTION_TAG DST_TYPE
+mv dst_type-RUNNUMBER.list output/dst_my_sample.list
 
 wc -l output/dst_my_sample.list
 head output/dst_my_sample.list
 ```
 
-Regenerate the list if files may have been added, removed, or replaced by the
-upstream producer.
+Use the actual catalog `DST_TYPE`, generated lowercase filename, run number,
+and production tag for the sample. `CreateDstList.pl --printtags`,
+`--printdatasets`, and `--printdsttypes` can be used to inspect catalog choices.
+The list contains logical names without directory components. Fun4All resolves
+each name through `DBInterface`/FROG when the file is opened.
+
+For private DSTs that are not registered in the catalog, explicit absolute
+paths or supported storage URIs are also accepted:
+
+```bash
+find /absolute/path/to/output_DST \
+  -maxdepth 1 -type f -name '*.root' | LC_ALL=C sort \
+  > output/dst_my_private_sample.list
+```
+
+Do not put relative paths containing directory components in an input list.
+The campaign deliberately does not prepend a user-selected directory: an entry
+must be either a catalog logical name or an explicit absolute path/URI. Blank
+lines and lines beginning with `#` are ignored. Regenerate catalog or private
+lists when their upstream production changes.
 
 ## Choose a Campaign Splitter
 
@@ -186,21 +205,29 @@ Example:
   10000
 ```
 
-The event submitter opens every usable DST, reads `T->GetEntries()` through
-uproot, and writes:
+The event submitter starts the selected sPHENIX software environment, resolves
+catalog logical names with the same Fun4All `DBInterface`/FROG service used at
+runtime, reads the `T` entry count with uproot, and writes:
 
 ```text
 output/CAMPAIGN/event_chunks.tsv
 ```
 
-Each manifest row contains one input file, an event offset, and an exact event
-count. Several jobs can therefore process non-overlapping ranges of the same
-large DST. The last range in a file can be shorter than `EVENTS_PER_JOB`.
+Each manifest row contains four tab-separated fields in this exact order:
+`file_index`, `input_name`, `event_skip`, and `nevents`. `file_index` is
+zero-based. `input_name` remains the original catalog logical name or explicit
+location; the temporary physical location returned while counting events is
+not written into the manifest. Several jobs can therefore process
+non-overlapping ranges of the same large DST. The last range in a file can be
+shorter than `EVENTS_PER_JOB`.
 
 `MAX_JOBS` is a safety ceiling. It is not the requested number of jobs and does
 not truncate the sample. If the complete sample requires more jobs, submission
-stops and reports a larger suggested `EVENTS_PER_JOB` value. Unreadable files or
-files without a `T` tree are reported and omitted from the manifest.
+stops and computes a sufficient `EVENTS_PER_JOB` value while respecting file
+boundaries. If the number of nonempty files already exceeds `MAX_JOBS`, at
+least one job per file is required and the tool reports that no event-chunk
+size can satisfy the limit. Unresolvable or unreadable files and files without
+a `T` tree are fatal errors; no partial manifest is submitted.
 
 Use event mode when complete event coverage matters and files are large or
 uneven. Use file mode when the natural one-file-per-job split is already
@@ -497,9 +524,11 @@ like-sign entries can be used for background studies.
 | `V0_MAX_CROSSING_TIER` | Maximum accepted crossing-confidence tier; `-1` disables. | `-1` |
 | `V0_CROSSING_DECISION_NODE` | Input crossing-decision container. | `TPC_CROSSING_DECISIONS` |
 | `V0_SOFTWARE_RELEASE` | sPHENIX software release used by the worker. It must match any local build. | `new` |
-| `V0_LOCAL_INSTALL` | Optional local install prefix containing compatible development libraries. | `none` |
+| `V0_LOCAL_INSTALL` | Optional local install prefix containing compatible development libraries. `setup_local.sh` configures its complete ROOT include and library paths. | `none` |
 | `V0_OUTPUT_BASE_DIR` | Base directory for campaign output and completion files. | `TpcProduction/output` |
-| `V0_INPUT_PATH_BASE` | Base directory prepended to relative paths in an input list. | `TpcProduction` |
+| `V0_REQUEST_MEMORY_MB` | Initial Condor memory request [MB]. | `2048` |
+| `V0_RETRY_MEMORY_INCREASE_MB` | Memory added by each SDCC memory retry [MB]. | `2048` |
+| `V0_RETRY_MEMORY_MAX_MB` | Maximum retry memory request [MB]. | `8192` |
 | `V0_PRIMARY_VERTEX_X/Y/Z` | Fixed fallback primary vertex [cm]. | `0,0,0` |
 | `V0_POINT_ORDER` | `auto`, `radius`, `theta-z`, `path`, or `input`. | `auto` |
 | `V0_COARSE_STEPS` | Coarse samples per trajectory in pair-PCA candidate search. | `64` |
@@ -507,6 +536,14 @@ like-sign entries can be used for background studies.
 | `V0_WRITE_CLUSTER_RESIDUAL_TREE` | Write one additional row per cluster. Cluster residual vectors remain in `trackTree` even when this is false. | `false` |
 | `V0_WRITE_KALMAN_INNOVATION_DIAGNOSTICS` | Write detailed per-measurement Kalman innovation vectors. | `false` |
 | `V0_PRINT_TIMING` | Print per-stage and Kalman propagation timing. | `false` |
+
+The memory defaults are based on completed development campaigns: a
+representative 1000-job pp Kalman campaign had a 0.58 GB median and 0.62 GB
+maximum, while a sampled 170-job AuAu Kalman campaign had a 1.15 GB median and
+1.68 GB maximum. The initial 2 GB request therefore covers those samples, and
+the SDCC retry settings raise the request for unusually large jobs without
+reserving 4 GB for every slot. Recheck `MemoryUsage` when changing occupancy,
+event splitting, or output content substantially.
 
 ## Output Trees
 
@@ -603,7 +640,8 @@ use loose campaign cuts and apply tighter selections afterward.
 
 ## Common Failure Checks
 
-1. Confirm every input path in the list still exists.
+1. Confirm catalog logical names still resolve through FROG, or that every
+   explicit absolute input path still exists.
 2. Confirm the DST contains `T`, `TPC_POLYCLUSTERS`, and `TPC_POLYTRACKS`.
 3. Confirm the runtime installation contains compatible
    `libtpctrackreco.so` and `libTrackingDiagnostics.so`.
@@ -611,5 +649,5 @@ use loose campaign cuts and apply tighter selections afterward.
    final output validation.
 5. Read the matching `.err` and Condor `.log` files for crashes, holds, memory
    eviction, or disk failures.
-6. For event mode, inspect `event_chunks.tsv` and the skipped-file report shown
-   at submission.
+6. For event mode, inspect `event_chunks.tsv`. Manifest generation fails rather
+   than submitting a partial sample when any listed input cannot be inspected.

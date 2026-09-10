@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 import argparse
-import math
 from pathlib import Path
 import sys
 
+import ROOT
 import uproot
 
 
@@ -20,6 +20,90 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def initialize_file_catalog() -> None:
+    """Expose the Fun4All file-catalog resolver to PyROOT."""
+    if ROOT.gSystem.Load("libfun4all.so") < 0:
+        raise RuntimeError("failed to load libfun4all.so")
+
+    declaration_ok = ROOT.gInterpreter.Declare(
+        r"""
+#include <fun4all/DBInterface.h>
+
+#include <string>
+
+namespace tpc_v0_event_chunks
+{
+  std::string resolve_input(const std::string& logical_name)
+  {
+    return DBInterface::instance()->location(logical_name);
+  }
+}
+"""
+    )
+    if not declaration_ok:
+        raise RuntimeError("failed to initialize the Fun4All file-catalog resolver")
+
+
+def read_input_names(input_list: Path) -> list[str]:
+    """Read catalog logical names or explicit locations without rewriting them."""
+    if not input_list.is_file():
+        raise FileNotFoundError(f"input list does not exist: {input_list}")
+
+    input_names: list[str] = []
+    for line_number, raw in enumerate(input_list.read_text().splitlines(), start=1):
+        input_name = raw.strip()
+        if not input_name or input_name.startswith("#"):
+            continue
+        if "\t" in input_name:
+            raise ValueError(
+                f"input list line {line_number} contains a tab, which is reserved "
+                "for the manifest schema"
+            )
+        if "/" in input_name and not input_name.startswith("/") and "://" not in input_name:
+            raise ValueError(
+                f"input list line {line_number} is an ambiguous relative path: "
+                f"{input_name}. Use a catalog logical name or an explicit absolute path/URI."
+            )
+        input_names.append(input_name)
+
+    if not input_names:
+        raise ValueError(f"input list contains no usable entries: {input_list}")
+    return input_names
+
+
+def count_events(input_name: str) -> int:
+    """Resolve one input through FROG and return the number of DST events."""
+    resolved_name = str(ROOT.tpc_v0_event_chunks.resolve_input(input_name))
+    with uproot.open(resolved_name) as root_file:
+        if "T" not in root_file:
+            raise KeyError(f"TTree 'T' is missing from: {resolved_name}")
+        return int(root_file["T"].num_entries)
+
+
+def job_count(entries_by_file: list[int], events_per_job: int) -> int:
+    return sum(
+        (entries + events_per_job - 1) // events_per_job
+        for entries in entries_by_file
+        if entries > 0
+    )
+
+
+def minimum_events_per_job(entries_by_file: list[int], max_jobs: int) -> int | None:
+    nonempty_files = sum(entries > 0 for entries in entries_by_file)
+    if nonempty_files > max_jobs:
+        return None
+
+    low = 1
+    high = max(entries_by_file, default=1)
+    while low < high:
+        candidate = (low + high) // 2
+        if job_count(entries_by_file, candidate) <= max_jobs:
+            high = candidate
+        else:
+            low = candidate + 1
+    return low
+
+
 def main() -> int:
     args = parse_args()
     if args.events_per_job <= 0:
@@ -28,54 +112,76 @@ def main() -> int:
         raise ValueError("max-jobs must be positive")
 
     input_list = args.input_list.resolve()
-    base = Path.cwd()
-    paths: list[Path] = []
-    for raw in input_list.read_text().splitlines():
-        raw = raw.strip()
-        if not raw or raw.startswith("#"):
-            continue
-        path = Path(raw).expanduser()
-        paths.append(path if path.is_absolute() else (base / path).resolve())
+    try:
+        input_names = read_input_names(input_list)
+        initialize_file_catalog()
+    except (FileNotFoundError, RuntimeError, ValueError) as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 2
 
-    rows: list[tuple[int, Path, int, int]] = []
-    skipped: list[tuple[Path, str]] = []
+    rows: list[tuple[int, str, int, int]] = []
+    failures: list[tuple[str, str]] = []
+    entries_by_file: list[int] = []
     total_events = 0
-    for file_index, path in enumerate(paths):
+    for file_index, input_name in enumerate(input_names):
         try:
-            with uproot.open(path) as root_file:
-                entries = int(root_file["T"].num_entries)
+            entries = count_events(input_name)
         except Exception as error:
-            skipped.append((path, str(error).splitlines()[0]))
+            failures.append((input_name, str(error).splitlines()[0]))
+            entries_by_file.append(0)
             continue
 
+        entries_by_file.append(entries)
         total_events += entries
         for event_skip in range(0, entries, args.events_per_job):
             nevents = min(args.events_per_job, entries - event_skip)
-            rows.append((file_index, path, event_skip, nevents))
+            rows.append((file_index, input_name, event_skip, nevents))
 
-    if len(rows) > args.max_jobs:
-        minimum = math.ceil(total_events / args.max_jobs)
+    if failures:
         print(
-            f"Error: {len(rows)} jobs exceeds max-jobs={args.max_jobs}. "
-            f"Try --events-per-job {minimum} or larger.",
+            f"Error: failed to inspect {len(failures)} of {len(input_names)} input files; "
+            "no manifest was written.",
             file=sys.stderr,
         )
+        for input_name, reason in failures:
+            print(f"  {input_name}: {reason}", file=sys.stderr)
+        return 2
+
+    if not rows:
+        print("Error: the input files contain no events; no manifest was written.", file=sys.stderr)
+        return 2
+
+    if len(rows) > args.max_jobs:
+        minimum = minimum_events_per_job(entries_by_file, args.max_jobs)
+        if minimum is None:
+            nonempty_files = sum(entries > 0 for entries in entries_by_file)
+            print(
+                f"Error: {len(rows)} jobs exceeds max-jobs={args.max_jobs}, and the "
+                f"sample has {nonempty_files} nonempty files. At least one job per file "
+                "is required, so increasing --events-per-job cannot satisfy this limit.",
+                file=sys.stderr,
+            )
+        else:
+            suggested_jobs = job_count(entries_by_file, minimum)
+            print(
+                f"Error: {len(rows)} jobs exceeds max-jobs={args.max_jobs}. "
+                f"Use --events-per-job {minimum} or larger "
+                f"({suggested_jobs} jobs at {minimum}).",
+                file=sys.stderr,
+            )
         return 2
 
     args.output_manifest.parent.mkdir(parents=True, exist_ok=True)
     with args.output_manifest.open("w") as output:
-        for file_index, path, event_skip, nevents in rows:
-            output.write(f"{file_index}\t{path}\t{event_skip}\t{nevents}\n")
+        for file_index, input_name, event_skip, nevents in rows:
+            output.write(f"{file_index}\t{input_name}\t{event_skip}\t{nevents}\n")
 
-    print(f"[event-chunks] input files: {len(paths)}")
-    print(f"[event-chunks] usable files: {len(paths) - len(skipped)}")
-    print(f"[event-chunks] skipped files: {len(skipped)}")
+    print(f"[event-chunks] input files: {len(input_names)}")
+    print(f"[event-chunks] usable files: {len(input_names)}")
     print(f"[event-chunks] total events: {total_events}")
     print(f"[event-chunks] events/job: {args.events_per_job}")
     print(f"[event-chunks] jobs: {len(rows)}")
     print(f"[event-chunks] manifest: {args.output_manifest.resolve()}")
-    for path, reason in skipped:
-        print(f"[event-chunks] skipped {path}: {reason}")
     return 0
 
 

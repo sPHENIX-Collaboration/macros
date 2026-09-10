@@ -24,7 +24,6 @@ campaign_tag=${CAMPAIGN_TAG:-tpc_pattern_v0}
 output_base_dir=${OUTPUT_BASE_DIR:-${SCRIPT_DIR}/output}
 input_dst_filelist=${INPUT_DST_FILELIST:?Error: INPUT_DST_FILELIST is not set}
 completed_dir=${COMPLETED_OUTPUT_DIR:-${output_base_dir}/${campaign_tag}/completed}
-input_path_base=${INPUT_DST_PATH_BASE:-$(dirname "${output_base_dir}")}
 pre_track_pt_min=${V0_PRE_TRACK_PT_MIN:-0.05}
 pre_track_dca_xy_min=${V0_PRE_TRACK_DCA_XY_MIN:--1.0}
 pre_pair_dca_max=${V0_PRE_PAIR_DCA_MAX:-10.0}
@@ -113,9 +112,6 @@ campaign_tag="${campaign_tag%%;*}"
 
 cd "${SCRIPT_DIR}"
 
-export ROOT_INCLUDE_PATH=${local_install}/include:${ROOT_INCLUDE_PATH:-}
-export LD_LIBRARY_PATH=${local_install}/lib:${LD_LIBRARY_PATH:-}
-
 if [[ "${files_per_job}" -le 0 ]]; then
   echo "Error: files_per_job must be positive, got ${files_per_job}" >&2
   exit 2
@@ -142,25 +138,31 @@ if [[ -n "${event_chunk_manifest}" ]]; then
     echo "Error: event chunk manifest not found: ${event_chunk_manifest}" >&2
     exit 2
   fi
-  manifest_row=$(sed -n "$((process_id + 1))p" "${event_chunk_manifest}")
+  manifest_row=$(awk -v wanted="$((process_id + 1))" '
+    /^[[:space:]]*($|#)/ { next }
+    { ++row }
+    row == wanted { print; exit }
+  ' "${event_chunk_manifest}")
   if [[ -z "${manifest_row}" ]]; then
     echo "Nothing to do: process=${process_id} is outside ${event_chunk_manifest}"
     exit 0
   fi
-  IFS=$'\t' read -r file_start input_file event_skip nevents <<< "${manifest_row}"
-  if [[ -z "${input_file}" || -z "${event_skip}" || -z "${nevents}" ]]; then
+  IFS=$'\t' read -r file_start input_file event_skip nevents extra_field <<< "${manifest_row}"
+  if [[ -z "${input_file}" || -z "${event_skip}" || -z "${nevents}" || -n "${extra_field}" ||
+        ! "${file_start}" =~ ^[0-9]+$ || ! "${event_skip}" =~ ^[0-9]+$ ||
+        ! "${nevents}" =~ ^[1-9][0-9]*$ ]]; then
     echo "Error: malformed event chunk row: ${manifest_row}" >&2
     exit 2
   fi
   nfiles=1
   chunk_list="${job_outdir}/dst_chunk_${padded_id}_fidx${file_start}_eskip${event_skip}_nev${nevents}.list"
-  if [[ "${input_file}" == /* ]]; then
-    printf '%s\n' "${input_file}" > "${chunk_list}"
-  else
-    printf '%s/%s\n' "${input_path_base}" "${input_file}" > "${chunk_list}"
-  fi
+  printf '%s\n' "${input_file}" > "${chunk_list}"
 else
-  available_files=$(grep -cv '^[[:space:]]*$' "${input_dst_filelist}")
+  available_files=$(awk '
+    /^[[:space:]]*($|#)/ { next }
+    { ++count }
+    END { print count + 0 }
+  ' "${input_dst_filelist}")
   if [[ "${total_files}" -le 0 || "${total_files}" -gt "${available_files}" ]]; then
     total_files=${available_files}
   fi
@@ -178,9 +180,16 @@ else
   fi
   nevents=$((nfiles * events_per_input_file))
   chunk_list="${job_outdir}/dst_chunk_${padded_id}_fskip${file_start}_nfiles${nfiles}.list"
-  grep -v '^[[:space:]]*$' "${input_dst_filelist}" | \
-    sed -n "$((file_start + 1)),$((file_start + nfiles))p" | \
-    awk -v base="${input_path_base}" '{ if ($0 ~ /^\//) { print $0 } else { print base "/" $0 } }' > "${chunk_list}"
+  awk -v first="$((file_start + 1))" -v last="$((file_start + nfiles))" '
+    /^[[:space:]]*($|#)/ { next }
+    {
+      sub(/^[[:space:]]+/, "")
+      sub(/[[:space:]]+$/, "")
+      ++entry
+    }
+    entry >= first && entry <= last { print }
+    entry > last { exit }
+  ' "${input_dst_filelist}" > "${chunk_list}"
 fi
 
 if [[ "$(wc -l < "${chunk_list}")" -ne "${nfiles}" ]]; then
@@ -197,8 +206,12 @@ fi
 
 missing=0
 while IFS= read -r dst_file; do
-  if [[ ! -f "${dst_file}" ]]; then
+  if [[ "${dst_file}" == /* && ! -f "${dst_file}" ]]; then
     echo "Error: missing DST input file: ${dst_file}" >&2
+    missing=$((missing + 1))
+  elif [[ "${dst_file}" != /* && "${dst_file}" != *://* && "${dst_file}" == */* ]]; then
+    echo "Error: ambiguous relative DST path: ${dst_file}" >&2
+    echo "Use a file-catalog logical name or an explicit absolute path/URI." >&2
     missing=$((missing + 1))
   fi
 done < "${chunk_list}"
@@ -219,7 +232,6 @@ echo "Running TPC pattern-reco V0 candidate tree:"
 echo "  campaign=${campaign_tag}"
 echo "  job=${process_id}"
 echo "  input_dst_filelist=${input_dst_filelist}"
-echo "  input_path_base=${input_path_base}"
 echo "  chunk_list=${chunk_list}"
 echo "  macro_input=${macro_input}"
 echo "  file_start=${file_start}"

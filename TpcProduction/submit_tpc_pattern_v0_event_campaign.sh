@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eo pipefail
 
 # See TPC_PATTERN_V0_WORKFLOW.md for inputs, fitting modes, cuts, and outputs.
 
@@ -17,6 +17,14 @@ max_jobs="${4:-10000}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
+software_release=${V0_SOFTWARE_RELEASE:-new}
+source /opt/sphenix/core/bin/sphenix_setup.sh -n "${software_release}"
+local_install=${V0_LOCAL_INSTALL:-none}
+if [[ "${local_install}" != "none" && "${local_install}" != "NONE" ]]; then
+  source /opt/sphenix/core/bin/setup_local.sh "${local_install}"
+fi
+set -u
+
 if [[ "${dst_filelist}" != /* ]]; then
   dst_filelist="${SCRIPT_DIR}/${dst_filelist}"
 fi
@@ -25,8 +33,9 @@ if [[ ! -f "${dst_filelist}" ]]; then
   exit 2
 fi
 
-manifest="${SCRIPT_DIR}/output/${campaign}/event_chunks.tsv"
-python "${SCRIPT_DIR}/make_tpc_v0_event_chunks.py" \
+output_base_dir="${V0_OUTPUT_BASE_DIR:-${SCRIPT_DIR}/output}"
+manifest="${output_base_dir}/${campaign}/event_chunks.tsv"
+python3 "${SCRIPT_DIR}/make_tpc_v0_event_chunks.py" \
   "${dst_filelist}" \
   "${manifest}" \
   --events-per-job "${events_per_job}" \

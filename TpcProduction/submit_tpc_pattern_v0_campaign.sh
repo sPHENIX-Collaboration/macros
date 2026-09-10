@@ -37,7 +37,11 @@ if [[ "${events_per_input_file}" -le 0 ]]; then
   exit 2
 fi
 
-available_files=$(grep -cv '^[[:space:]]*$' "${dst_filelist}")
+available_files=$(awk '
+  /^[[:space:]]*($|#)/ { next }
+  { ++count }
+  END { print count + 0 }
+' "${dst_filelist}")
 if [[ "${total_files}" -le 0 || "${total_files}" -gt "${available_files}" ]]; then
   total_files=${available_files}
 fi
@@ -47,19 +51,53 @@ if [[ "${total_files}" -le 0 ]]; then
   exit 2
 fi
 
+invalid_inputs=0
+while IFS= read -r input_name; do
+  if [[ "${input_name}" == /* && ! -f "${input_name}" ]]; then
+    echo "Error: explicit DST path does not exist: ${input_name}" >&2
+    invalid_inputs=$((invalid_inputs + 1))
+  elif [[ "${input_name}" != /* && "${input_name}" != *://* && "${input_name}" == */* ]]; then
+    echo "Error: ambiguous relative DST path: ${input_name}" >&2
+    echo "Use a file-catalog logical name or an explicit absolute path/URI." >&2
+    invalid_inputs=$((invalid_inputs + 1))
+  fi
+done < <(awk -v limit="${total_files}" '
+  /^[[:space:]]*($|#)/ { next }
+  {
+    sub(/^[[:space:]]+/, "")
+    sub(/[[:space:]]+$/, "")
+    print
+    if (++count >= limit) { exit }
+  }
+' "${dst_filelist}")
+if [[ "${invalid_inputs}" -ne 0 ]]; then
+  echo "Error: ${invalid_inputs} invalid DST entries in ${dst_filelist}" >&2
+  exit 2
+fi
+
 event_chunk_manifest="${V0_EVENT_CHUNK_MANIFEST:-none}"
 if [[ "${event_chunk_manifest}" != "none" && "${event_chunk_manifest}" != "NONE" ]]; then
+  if [[ "${event_chunk_manifest}" != /* ]]; then
+    event_chunk_manifest="${SCRIPT_DIR}/${event_chunk_manifest}"
+  fi
   if [[ ! -f "${event_chunk_manifest}" ]]; then
     echo "Error: event chunk manifest not found: ${event_chunk_manifest}" >&2
     exit 2
   fi
-  n_jobs=$(grep -cv '^[[:space:]]*$' "${event_chunk_manifest}")
+  n_jobs=$(awk '
+    /^[[:space:]]*($|#)/ { next }
+    { ++count }
+    END { print count + 0 }
+  ' "${event_chunk_manifest}")
+  if [[ "${n_jobs}" -le 0 ]]; then
+    echo "Error: event chunk manifest is empty: ${event_chunk_manifest}" >&2
+    exit 2
+  fi
 else
   event_chunk_manifest="none"
   n_jobs=$(((total_files + files_per_job - 1) / files_per_job))
 fi
 output_base_dir="${V0_OUTPUT_BASE_DIR:-${SCRIPT_DIR}/output}"
-input_path_base="${V0_INPUT_PATH_BASE:-${SCRIPT_DIR}}"
 pre_track_pt_min="${V0_PRE_TRACK_PT_MIN:-0.05}"
 pre_track_dca_xy_min="${V0_PRE_TRACK_DCA_XY_MIN:--1.0}"
 pre_pair_dca_max="${V0_PRE_PAIR_DCA_MAX:-10.0}"
@@ -107,6 +145,20 @@ required_crossing="${V0_REQUIRED_CROSSING:-any}"
 require_same_crossing="${V0_REQUIRE_SAME_CROSSING:-false}"
 max_crossing_tier="${V0_MAX_CROSSING_TIER:--1}"
 crossing_decision_node="${V0_CROSSING_DECISION_NODE:-TPC_CROSSING_DECISIONS}"
+request_memory_mb="${V0_REQUEST_MEMORY_MB:-2048}"
+retry_memory_increase_mb="${V0_RETRY_MEMORY_INCREASE_MB:-2048}"
+retry_memory_max_mb="${V0_RETRY_MEMORY_MAX_MB:-8192}"
+
+for memory_value in "${request_memory_mb}" "${retry_memory_increase_mb}" "${retry_memory_max_mb}"; do
+  if [[ ! "${memory_value}" =~ ^[1-9][0-9]*$ ]]; then
+    echo "Error: Condor memory settings must be positive integer MB values, got '${memory_value}'" >&2
+    exit 2
+  fi
+done
+if [[ "${retry_memory_max_mb}" -lt "${request_memory_mb}" ]]; then
+  echo "Error: V0_RETRY_MEMORY_MAX_MB must be at least V0_REQUEST_MEMORY_MB" >&2
+  exit 2
+fi
 
 case "${kalman_uniform_propagator}" in
   analytic|ANALYTIC|rk|RK)
@@ -144,6 +196,7 @@ echo "  files/job=${files_per_job}"
 echo "  events/input file=${events_per_input_file}"
 echo "  event_chunk_manifest=${event_chunk_manifest}"
 echo "  n_jobs=${n_jobs}"
+echo "  memory=${request_memory_mb} MB, retry +${retry_memory_increase_mb} MB up to ${retry_memory_max_mb} MB"
 echo "  output=${output_base_dir}/${campaign}/completed"
 echo "  preselection: pt>${pre_track_pt_min}, dca_xy_min=${pre_track_dca_xy_min}, pairDCA<${pre_pair_dca_max}, Lproj>${pre_lproj_min}, cosTheta>${pre_cos_theta_min}"
 echo "  track selection: quality<${pre_track_quality_max}, npoints>=${pre_track_npoints_min}"
@@ -179,7 +232,9 @@ condor_submit \
   -append "total_files = ${total_files}" \
   -append "n_jobs = ${n_jobs}" \
   -append "output_base_dir = ${output_base_dir}" \
-  -append "input_path_base = ${input_path_base}" \
+  -append "memory_initial_mb = ${request_memory_mb}" \
+  -append "memory_retry_increment_mb = ${retry_memory_increase_mb}" \
+  -append "memory_retry_max_mb = ${retry_memory_max_mb}" \
   -append "pre_track_pt_min = ${pre_track_pt_min}" \
   -append "pre_track_dca_xy_min = ${pre_track_dca_xy_min}" \
   -append "pre_pair_dca_max = ${pre_pair_dca_max}" \
