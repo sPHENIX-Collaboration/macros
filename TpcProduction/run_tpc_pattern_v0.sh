@@ -112,15 +112,37 @@ campaign_tag="${campaign_tag%%;*}"
 
 cd "${SCRIPT_DIR}"
 
-if [[ "${files_per_job}" -le 0 ]]; then
+if [[ ! "${process_id}" =~ ^[0-9]+$ ]]; then
+  echo "Error: process ID must be a decimal integer, got ${process_id}" >&2
+  exit 2
+fi
+process_id=$((10#${process_id}))
+
+if [[ ! "${files_per_job}" =~ ^[0-9]+$ ]]; then
+  echo "Error: files_per_job must be a decimal integer, got ${files_per_job}" >&2
+  exit 2
+fi
+files_per_job=$((10#${files_per_job}))
+if ((files_per_job <= 0)); then
   echo "Error: files_per_job must be positive, got ${files_per_job}" >&2
   exit 2
 fi
 
-if [[ "${events_per_input_file}" -le 0 ]]; then
+if [[ ! "${events_per_input_file}" =~ ^[0-9]+$ ]]; then
+  echo "Error: events_per_input_file must be a decimal integer, got ${events_per_input_file}" >&2
+  exit 2
+fi
+events_per_input_file=$((10#${events_per_input_file}))
+if ((events_per_input_file <= 0)); then
   echo "Error: events_per_input_file must be positive, got ${events_per_input_file}" >&2
   exit 2
 fi
+
+if [[ ! "${total_files}" =~ ^[0-9]+$ ]]; then
+  echo "Error: total_files must be a decimal integer, got ${total_files}" >&2
+  exit 2
+fi
+total_files=$((10#${total_files}))
 
 if [[ ! -f "${input_dst_filelist}" ]]; then
   echo "Error: DST file list not found: ${input_dst_filelist}" >&2
@@ -163,7 +185,7 @@ else
     { ++count }
     END { print count + 0 }
   ' "${input_dst_filelist}")
-  if [[ "${total_files}" -le 0 || "${total_files}" -gt "${available_files}" ]]; then
+  if ((total_files <= 0 || total_files > available_files)); then
     total_files=${available_files}
   fi
 

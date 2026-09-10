@@ -27,26 +27,42 @@ if [[ ! -f "${dst_filelist}" ]]; then
   exit 2
 fi
 
-if [[ "${files_per_job}" -le 0 ]]; then
+if [[ ! "${files_per_job}" =~ ^[0-9]+$ ]]; then
+  echo "Error: files_per_job must be a decimal integer, got ${files_per_job}" >&2
+  exit 2
+fi
+files_per_job=$((10#${files_per_job}))
+if ((files_per_job <= 0)); then
   echo "Error: files_per_job must be positive, got ${files_per_job}" >&2
   exit 2
 fi
 
-if [[ "${events_per_input_file}" -le 0 ]]; then
+if [[ ! "${events_per_input_file}" =~ ^[0-9]+$ ]]; then
+  echo "Error: events_per_input_file must be a decimal integer, got ${events_per_input_file}" >&2
+  exit 2
+fi
+events_per_input_file=$((10#${events_per_input_file}))
+if ((events_per_input_file <= 0)); then
   echo "Error: events_per_input_file must be positive, got ${events_per_input_file}" >&2
   exit 2
 fi
+
+if [[ ! "${total_files}" =~ ^[0-9]+$ ]]; then
+  echo "Error: total_files must be a decimal integer, got ${total_files}" >&2
+  exit 2
+fi
+total_files=$((10#${total_files}))
 
 available_files=$(awk '
   /^[[:space:]]*($|#)/ { next }
   { ++count }
   END { print count + 0 }
 ' "${dst_filelist}")
-if [[ "${total_files}" -le 0 || "${total_files}" -gt "${available_files}" ]]; then
+if ((total_files <= 0 || total_files > available_files)); then
   total_files=${available_files}
 fi
 
-if [[ "${total_files}" -le 0 ]]; then
+if ((total_files <= 0)); then
   echo "Error: no files to process in ${dst_filelist}" >&2
   exit 2
 fi

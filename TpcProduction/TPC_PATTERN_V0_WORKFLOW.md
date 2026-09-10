@@ -608,15 +608,17 @@ find "output/${campaign}/completed" \
   -maxdepth 1 -type f -name '*.root' | LC_ALL=C sort > "${list}"
 
 wc -l "${list}"
-hadd -f -k -j 8 "${merged}" @"${list}"
+hadd -f -j 8 "${merged}" @"${list}"
 ```
 
 Run this in an sPHENIX environment where ROOT is set up. Check the list count
 against the expected file-job count or event manifest count before merging.
 
-ROOT cannot write a single TTree larger than its configured maximum file size.
-For very large productions, keep several merged shards or analyze the completed
-files with a `TChain` instead of forcing one monolithic file:
+`TTree::SetMaxTreeSize` controls the maximum size of each physical output file.
+When a writable tree reaches that threshold, ROOT can continue it in numbered
+companion files that together form one logical dataset. For large productions,
+keep deliberate merged shards or analyze the completed files with a `TChain`
+instead of forcing one monolithic physical file:
 
 ```cpp
 TChain pairTree("pairTree");
