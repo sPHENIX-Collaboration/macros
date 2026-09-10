@@ -66,10 +66,13 @@ namespace TpcPatternV0Input
     int fileopen(const std::string &filename) override
     {
       const int status = Fun4AllDstInputManager::fileopen(filename);
-      failed = failed || status != 0;
+      m_failed = m_failed || status != 0;
       return status;
     }
-    bool failed = false;
+    bool hasFailed() const { return m_failed; }
+
+   private:
+    bool m_failed = false;
   };
 }
 
@@ -275,7 +278,7 @@ int Fun4All_TpcPatternRecoV0(
     openStatus = input->fileopen(inputDst);
   }
   se->registerInputManager(input);
-  if (openStatus != 0 || input->failed)
+  if (openStatus != 0 || input->hasFailed())
   {
     std::cerr << "Failed to open V0 input: " << inputDst << std::endl;
     gSystem->Exit(4);
@@ -295,7 +298,7 @@ int Fun4All_TpcPatternRecoV0(
   const int eventsBefore = se->DstEvents();
   const int runStatus = se->run(nEvents);
   const int processedEvents = se->DstEvents() - eventsBefore;
-  const bool inputFailed = input->failed;
+  const bool inputFailed = input->hasFailed();
   const int endStatus = se->End();
   se->PrintTimer();
   delete se;

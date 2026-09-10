@@ -516,6 +516,11 @@ like-sign entries can be used for background studies.
 
 ## Other Important Settings
 
+Numeric reconstruction settings accept decimal literals (scientific notation is
+allowed for floating-point values), not C++ expressions. Integer settings must
+fit in a signed 32-bit integer and have no leading zeros. Boolean settings accept
+`true`, `false` (case-insensitive), `1`, or `0`.
+
 | Variable | Meaning | Default |
 |---|---|---:|
 | `V0_RECONSTRUCT_PAIRS` | Run the two-track V0 pair loop. Set false for track fitting and `trackTree` output only. | `true` |

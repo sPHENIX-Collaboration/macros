@@ -258,12 +258,69 @@ if [[ -n "${event_chunk_manifest}" ]]; then
 else
   outroot="${job_outdir}/tpc_pattern_v0_${padded_id}_fskip${file_start}_nfiles${nfiles}.root"
 fi
-macro_call="Fun4All_TpcPatternRecoV0.C(${nevents}, \"${macro_input}\", \"${outroot}\", ${pre_track_pt_min}, ${pre_track_dca_xy_min}, ${pre_pair_dca_max}, ${pre_lproj_min}, ${pre_cos_theta_min}, ${use_final_track_helix}, \"${point_order}\", \"${fit_method}\", ${kalman_sigma_rphi_cm}, ${kalman_sigma_r_cm}, ${kalman_sigma_z_cm}, ${write_same_sign_pairs}, ${write_cluster_residual_tree}, ${use_kalman_field_map}, \"${kalman_field_map}\", ${kalman_rk_max_step_cm}, ${kalman_rk_step_tolerance}, ${kalman_rk_max_step_trials}, ${kalman_rk_max_total_steps}, ${kalman_fast_field_jacobian}, ${kalman_fast_field_pca}, ${kalman_field_pca_refine_iterations}, ${coarse_steps}, ${pca_candidates}, ${print_timing}, ${event_skip}, ${kalman_analytic_uniform}, ${pre_track_quality_max}, ${pre_track_npoints_min}, ${pair_pca_z_max}, ${pair_pca_dz_max}, ${pair_decay_radius_min}, ${pair_alpha_abs_max}, ${pair_dca_max}, ${pair_dira_min}, ${final_track_helix_max_upstream_cm}, ${final_track_helix_downstream_margin_cm}, ${write_kalman_innovation_diagnostics}, ${primary_vertex_x}, ${primary_vertex_y}, ${primary_vertex_z}, ${reconstruct_pairs}, ${required_crossing_value}, ${require_same_crossing}, ${max_crossing_tier}, \"${crossing_decision_node}\", ${require_exact_events})"
+# ROOT evaluates C++, so shell quoting alone is not sufficient. Accept only
+# scalar literals and encode strings before building either ROOT expression.
+float_pattern='^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?$'
+for name in pre_track_pt_min pre_track_dca_xy_min pre_pair_dca_max pre_lproj_min \
+  pre_cos_theta_min pre_track_quality_max pair_pca_z_max pair_pca_dz_max \
+  pair_decay_radius_min pair_alpha_abs_max pair_dca_max pair_dira_min \
+  kalman_sigma_rphi_cm kalman_sigma_r_cm kalman_sigma_z_cm kalman_rk_max_step_cm \
+  kalman_rk_step_tolerance final_track_helix_max_upstream_cm \
+  final_track_helix_downstream_margin_cm primary_vertex_x primary_vertex_y primary_vertex_z
+do
+  value=${!name}
+  if [[ ! "${value}" =~ ${float_pattern} ]]; then
+    echo "Error: ${name} must be a numeric literal, got '${value}'" >&2
+    exit 2
+  fi
+  # Ensure e.g. 08 is a decimal floating-point literal, not a C++ octal integer.
+  if [[ "${value}" != *[.eE]* ]]; then
+    printf -v "${name}" '%s.0' "${value}"
+  fi
+done
+for name in nevents event_skip pre_track_npoints_min kalman_rk_max_step_trials \
+  kalman_rk_max_total_steps kalman_field_pca_refine_iterations coarse_steps \
+  pca_candidates required_crossing_value max_crossing_tier
+do
+  value=${!name}
+  if [[ ! "${value}" =~ ^[+-]?(0|[1-9][0-9]*)$ || ${#value} -gt 11 ]]; then
+    echo "Error: ${name} must be a decimal integer without leading zeros, got '${value}'" >&2
+    exit 2
+  fi
+  if ((value < -2147483648 || value > 2147483647)); then
+    echo "Error: ${name} is outside the C++ int range: ${value}" >&2
+    exit 2
+  fi
+done
+for name in use_final_track_helix reconstruct_pairs write_same_sign_pairs \
+  write_cluster_residual_tree write_kalman_innovation_diagnostics use_kalman_field_map \
+  kalman_fast_field_jacobian kalman_fast_field_pca print_timing require_same_crossing \
+  kalman_analytic_uniform require_exact_events
+do
+  value=${!name}
+  case "${value,,}" in
+    true|1) printf -v "${name}" '%s' true ;;
+    false|0) printf -v "${name}" '%s' false ;;
+    *) echo "Error: ${name} must be true, false, 1, or 0, got '${value}'" >&2; exit 2 ;;
+  esac
+done
+cpp_string()
+{
+  local value=$1
+  value=${value//\\/\\\\}
+  value=${value//\"/\\\"}
+  value=${value//$'\n'/\\n}
+  value=${value//$'\r'/\\r}
+  value=${value//$'\t'/\\t}
+  printf '"%s"' "${value}"
+}
+
+macro_call="Fun4All_TpcPatternRecoV0(${nevents}, $(cpp_string "${macro_input}"), $(cpp_string "${outroot}"), ${pre_track_pt_min}, ${pre_track_dca_xy_min}, ${pre_pair_dca_max}, ${pre_lproj_min}, ${pre_cos_theta_min}, ${use_final_track_helix}, $(cpp_string "${point_order}"), $(cpp_string "${fit_method}"), ${kalman_sigma_rphi_cm}, ${kalman_sigma_r_cm}, ${kalman_sigma_z_cm}, ${write_same_sign_pairs}, ${write_cluster_residual_tree}, ${use_kalman_field_map}, $(cpp_string "${kalman_field_map}"), ${kalman_rk_max_step_cm}, ${kalman_rk_step_tolerance}, ${kalman_rk_max_step_trials}, ${kalman_rk_max_total_steps}, ${kalman_fast_field_jacobian}, ${kalman_fast_field_pca}, ${kalman_field_pca_refine_iterations}, ${coarse_steps}, ${pca_candidates}, ${print_timing}, ${event_skip}, ${kalman_analytic_uniform}, ${pre_track_quality_max}, ${pre_track_npoints_min}, ${pair_pca_z_max}, ${pair_pca_dz_max}, ${pair_decay_radius_min}, ${pair_alpha_abs_max}, ${pair_dca_max}, ${pair_dira_min}, ${final_track_helix_max_upstream_cm}, ${final_track_helix_downstream_margin_cm}, ${write_kalman_innovation_diagnostics}, ${primary_vertex_x}, ${primary_vertex_y}, ${primary_vertex_z}, ${reconstruct_pairs}, ${required_crossing_value}, ${require_same_crossing}, ${max_crossing_tier}, $(cpp_string "${crossing_decision_node}"), ${require_exact_events})"
 canonical_output="${completed_dir}/$(basename "${outroot}")"
 validate_output()
 {
   root.exe -l -b -q -e '.L Fun4All_TpcPatternRecoV0.C' \
-    -e "gSystem->Exit(TpcPatternV0Output::validate(\"$1\", ${nevents}, ${require_exact_events}) ? 0 : 3);"
+    -e "gSystem->Exit(TpcPatternV0Output::validate($(cpp_string "$1"), ${nevents}, ${require_exact_events}) ? 0 : 3);"
 }
 if [[ -e "${canonical_output}" ]]; then
   if validate_output "${canonical_output}"; then
@@ -314,7 +371,8 @@ echo "  write_same_sign_pairs=${write_same_sign_pairs}"
 echo "  write_cluster_residual_tree=${write_cluster_residual_tree}"
 echo "  write_kalman_innovation_diagnostics=${write_kalman_innovation_diagnostics}"
 
-root.exe -l -b -q "${macro_call}"
+# Load separately so ROOT's macro filename parser never sees argument strings.
+root.exe -l -b -q -e '.L Fun4All_TpcPatternRecoV0.C' -e "${macro_call};"
 
 if [[ -f "${outroot}" && -f "${completion_marker}" ]]; then
   mv -- "${outroot}" "${canonical_output}"
