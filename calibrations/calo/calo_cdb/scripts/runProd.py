@@ -6,6 +6,7 @@ import argparse
 from datetime import datetime
 import logging
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -167,6 +168,7 @@ def get_file_paths(engine, runtype=None, runs=None):
                 AND d.dsttype NOT LIKE 'HIST_CALOQASKIMMED%'
                 AND d.tag IS NOT NULL AND d.tag != ''
                 AND {run_condition}
+                AND d.segment < 9999
             GROUP BY
                 d.runnumber, d.tag, dsttype_group
         ) AS RankedTags
@@ -234,32 +236,39 @@ def setup_logging(log_file, log_level):
 def run_command_and_log(command, current_dir = '.', description="Executing command"):
     """
     Runs an external command using subprocess and logs its stdout, stderr, and return code.
+    If command is a list or tuple, runs directly without shell.
+    If command is a string, runs via bash -c.
     """
-    logger.info(f"{description}: '{command}'")
+    cmd_log = " ".join(shlex.quote(str(x)) for x in command) if isinstance(command, (list, tuple)) else str(command)
+    logger.info(f"{description}: '{cmd_log}'")
 
     try:
         # capture_output=True: captures stdout and stderr
         # text=True: decodes output as text (usually UTF-8)
         # check=False: do NOT raise an exception for non-zero exit codes immediately.
         #              We want to log stderr even on failure before deciding to raise.
-        result = subprocess.run(['bash','-c',command], cwd=current_dir, capture_output=True, text=True, check=False)
+        if isinstance(command, (list, tuple)):
+            cmd_args = [str(x) for x in command]
+            result = subprocess.run(cmd_args, cwd=current_dir, capture_output=True, text=True, check=False)
+        else:
+            result = subprocess.run(['bash', '-c', command], cwd=current_dir, capture_output=True, text=True, check=False)
 
         # Log stdout if any
         if result.stdout:
             # Using logger.debug allows capturing even verbose outputs
-            logger.debug(f"  STDOUT from '{command}':\n{result.stdout.strip()}")
+            logger.debug(f"  STDOUT from '{cmd_log}':\n{result.stdout.strip()}")
 
         # Log stderr if any
         if result.stderr:
             # Using logger.error for stderr, as it often indicates problems
-            logger.error(f"  STDERR from '{command}':\n{result.stderr.strip()}")
+            logger.error(f"  STDERR from '{cmd_log}':\n{result.stderr.strip()}")
 
         # Log the return code
         logger.info(f"  Command exited with code: {result.returncode}")
 
         # You can choose to raise an exception here if the command failed
         if result.returncode != 0:
-            logger.error(f"Command failed: '{command}' exited with non-zero code {result.returncode}")
+            logger.error(f"Command failed: '{cmd_log}' exited with non-zero code {result.returncode}")
             # Optionally, raise an error to stop execution
             # raise subprocess.CalledProcessError(result.returncode, command, output=result.stdout, stderr=result.stderr)
             return False
@@ -267,11 +276,11 @@ def run_command_and_log(command, current_dir = '.', description="Executing comma
 
     # Catch specific OS-related errors
     except OSError as e:
-        logger.critical(f"An unexpected error occurred while running '{command}': {e}")
+        logger.critical(f"An unexpected error occurred while running '{cmd_log}': {e}")
         return False
 
     except Exception as e:
-        logger.critical(f"An unexpected error occurred while running '{command}': {e}")
+        logger.critical(f"An unexpected error occurred while running '{cmd_log}': {e}")
         return False
 
 def check_file_validity(path):
@@ -306,7 +315,7 @@ def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
     df[['runnumber', 'tag', 'dsttype_group']].drop_duplicates().sort_values(by='runnumber').to_csv(output / f'{run_type}.csv', index=False, header=True)
 
     ## DEBUG
-    command = f'{bin_filter_datasets} {output / f"{run_type}.csv"} {output}'
+    command = [bin_filter_datasets, output / f"{run_type}.csv", output]
     run_command_and_log(command)
 
     processed_df = pd.read_csv(output / f'{run_type}-process.csv')
@@ -375,7 +384,7 @@ def generate_run_list(reduced_process_df, output):
         tags = "_".join(sorted(group_df['tag'].unique()))
         logger.info(f'Processing: {run},{tags},{group}')
 
-        filepath = dataset_dir / f'{run}_{tags}.list'
+        filepath = dataset_dir / f'{run}_{group}_{tags}.list'
 
         group_df['full_file_path'].to_csv(filepath, index=False, header=False)
 

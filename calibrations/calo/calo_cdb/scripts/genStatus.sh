@@ -52,7 +52,7 @@ done
 if [ $success -eq 0 ]; then
     echo "Error: cp failed permanently after $max_retries attempts at $(date)." >&2
     mkdir -p "$submitDir/failures"
-    echo "CP transfer failure for $file on $(hostname) at $(date)" >> "$submitDir/failures/failure-log.txt"
+    echo "CP transfer failure for $input on $(hostname) at $(date)" >> "$submitDir/failures/failure-log.txt"
     exit 1
 fi
 
