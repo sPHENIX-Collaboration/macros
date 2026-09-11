@@ -8,6 +8,7 @@ source /opt/sphenix/core/bin/sphenix_setup.sh -n new
 exe=${1}
 input=${2}
 submitDir=${3}
+failureDir="$(dirname "$submitDir")/failures"
 
 if [[ -n "$_CONDOR_SCRATCH_DIR" && -d "$_CONDOR_SCRATCH_DIR" ]]
 then
@@ -28,8 +29,8 @@ $exe "$input"
 root_exit=$?
 if [ $root_exit -ne 0 ]; then
     echo "Error: program failed with exit code $root_exit at $(date) on $(hostname)! Aborting transfer." >&2
-    mkdir -p "$submitDir/failures"
-    echo "ROOT failure (exit code $root_exit) for $input on $(hostname) at $(date)" >> "$submitDir/failures/failure-log.txt"
+    mkdir -p "$failureDir"
+    echo "ROOT failure (exit code $root_exit) for $input on $(hostname) at $(date)" >> "$failureDir/failure-log.txt"
     exit $root_exit
 fi
 
@@ -51,8 +52,8 @@ done
 
 if [ $success -eq 0 ]; then
     echo "Error: cp failed permanently after $max_retries attempts at $(date)." >&2
-    mkdir -p "$submitDir/failures"
-    echo "CP transfer failure for $input on $(hostname) at $(date)" >> "$submitDir/failures/failure-log.txt"
+    mkdir -p "$failureDir"
+    echo "CP transfer failure for $input on $(hostname) at $(date)" >> "$failureDir/failure-log.txt"
     exit 1
 fi
 

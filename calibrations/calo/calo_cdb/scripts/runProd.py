@@ -469,7 +469,7 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
 
         # Check Job Progress
         while True:
-            finished_jobs = sum(1 for x in job_dir.iterdir() if x.is_dir())
+            finished_jobs = sum(1 for x in job_dir.iterdir() if x.is_dir() and x.name != 'failures')
 
             if finished_jobs >= jobs:
                 logger.info(f"All Jobs Complete. {finished_jobs}/{jobs} Jobs.")
@@ -482,6 +482,13 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
             logger.info(f"Waiting for Jobs... {finished_jobs}/{jobs} done.")
             time.sleep(15) # Check every 15 seconds
             elapsed += 15
+
+        failure_log = output / 'failures' / 'failure-log.txt'
+        legacy_failure_log = job_dir / 'failures' / 'failure-log.txt'
+        if failure_log.exists():
+            logger.warning(f"Job failures detected in {failure_log}")
+        elif legacy_failure_log.exists():
+            logger.warning(f"Job failures detected in {legacy_failure_log}")
 
     else:
         command = f'cd {output} && {command}'
