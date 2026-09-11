@@ -463,6 +463,8 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
         run_command_and_log(command, output)
 
         job_dir = output / 'output'
+        failure_dir = output / 'failures'
+        failure_log = failure_dir / 'failure-log.txt'
 
         max_wait_seconds = 3600 * 1  # 1 hour timeout
         elapsed = 0
@@ -471,24 +473,38 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
         while True:
             finished_jobs = sum(1 for x in job_dir.iterdir() if x.is_dir() and x.name != 'failures')
 
-            if finished_jobs >= jobs:
-                logger.info(f"All Jobs Complete. {finished_jobs}/{jobs} Jobs.")
+            # Count failed jobs from marker files or failure log lines
+            failed_markers = len(list(failure_dir.glob('*.failed'))) if failure_dir.exists() else 0
+            failed_log_count = 0
+            if failure_log.exists():
+                try:
+                    with open(failure_log, 'r', encoding='utf-8') as f:
+                        failed_log_count = sum(1 for line in f if line.strip())
+                except OSError:
+                    pass
+            failed_jobs = max(failed_markers, failed_log_count)
+
+            if finished_jobs + failed_jobs >= jobs:
+                if failed_jobs > 0:
+                    logger.warning(f"All Jobs Finished: {finished_jobs}/{jobs} succeeded, {failed_jobs} failed.")
+                else:
+                    logger.info(f"All Jobs Complete. {finished_jobs}/{jobs} Jobs.")
                 break
 
             if elapsed >= max_wait_seconds:
-                logger.error(f"Timeout reached. Only {finished_jobs}/{jobs} jobs completed.")
+                logger.error(f"Timeout reached. Only {finished_jobs}/{jobs} jobs completed ({failed_jobs} failed).")
                 break
 
-            logger.info(f"Waiting for Jobs... {finished_jobs}/{jobs} done.")
+            if failed_jobs > 0:
+                logger.info(f"Waiting for Jobs... {finished_jobs} done, {failed_jobs} failed out of {jobs}.")
+            else:
+                logger.info(f"Waiting for Jobs... {finished_jobs}/{jobs} done.")
+
             time.sleep(15) # Check every 15 seconds
             elapsed += 15
 
-        failure_log = output / 'failures' / 'failure-log.txt'
-        legacy_failure_log = job_dir / 'failures' / 'failure-log.txt'
         if failure_log.exists():
             logger.warning(f"Job failures detected in {failure_log}")
-        elif legacy_failure_log.exists():
-            logger.warning(f"Job failures detected in {legacy_failure_log}")
 
     else:
         command = f'cd {output} && {command}'

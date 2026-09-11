@@ -31,6 +31,7 @@ if [ $root_exit -ne 0 ]; then
     echo "Error: program failed with exit code $root_exit at $(date) on $(hostname)! Aborting transfer." >&2
     mkdir -p "$failureDir"
     echo "ROOT failure (exit code $root_exit) for $input on $(hostname) at $(date)" >> "$failureDir/failure-log.txt"
+    touch "$failureDir/$(basename "$input").failed"
     exit $root_exit
 fi
 
@@ -54,6 +55,7 @@ if [ $success -eq 0 ]; then
     echo "Error: cp failed permanently after $max_retries attempts at $(date)." >&2
     mkdir -p "$failureDir"
     echo "CP transfer failure for $input on $(hostname) at $(date)" >> "$failureDir/failure-log.txt"
+    touch "$failureDir/$(basename "$input").failed"
     exit 1
 fi
 
