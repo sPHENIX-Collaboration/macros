@@ -4,6 +4,8 @@
 // for CDBTTree
 #include <cdbobjects/CDBTTree.h>
 
+#include <Rtypes.h>
+
 // -- c++ includes
 #include <algorithm>
 #include <cctype>
@@ -15,17 +17,21 @@
 #include <string>
 #include <vector>
 
+#if defined(__CLING__)
 R__LOAD_LIBRARY(libcalo_io.so)
 R__LOAD_LIBRARY(libcdbobjects.so)
+#endif
 
 // -----------------------------------------------------------------------------
 // Helper structure to represent a calibration field definition
 // -----------------------------------------------------------------------------
 struct CalibField
 {
+  // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
   std::string name;
   double value{0.0};
   std::string type{"float"};  // "int", "float", or "double"
+  // NOLINTEND(misc-non-private-member-variables-in-classes)
 
   CalibField(const std::string &n, int val)
     : name(n)
@@ -54,9 +60,11 @@ struct CalibField
 // -----------------------------------------------------------------------------
 struct DetectorConfig
 {
+  // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
   std::string name;
   int nChannels{0};
   std::function<unsigned int(unsigned int)> encodeFunc;
+  // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
 inline void printSupportedDetectors()
@@ -82,37 +90,37 @@ inline bool getDetectorConfig(const std::string &detector, DetectorConfig &cfg)
     cfg = {"CEMC", 24576, [](unsigned int ch) { return TowerInfoDefs::encode_emcal(ch); }};
     return true;
   }
-  else if (det == "HCALIN" || det == "IHCAL" || det == "INNER_HCAL" || det == "IH")
+  if (det == "HCALIN" || det == "IHCAL" || det == "INNER_HCAL" || det == "IH")
   {
     cfg = {"HCALIN", 1536, [](unsigned int ch) { return TowerInfoDefs::encode_hcal(ch); }};
     return true;
   }
-  else if (det == "HCALOUT" || det == "OHCAL" || det == "OUTER_HCAL" || det == "OH")
+  if (det == "HCALOUT" || det == "OHCAL" || det == "OUTER_HCAL" || det == "OH")
   {
     cfg = {"HCALOUT", 1536, [](unsigned int ch) { return TowerInfoDefs::encode_hcal(ch); }};
     return true;
   }
-  else if (det == "HCAL")
+  if (det == "HCAL")
   {
     cfg = {"HCAL", 1536, [](unsigned int ch) { return TowerInfoDefs::encode_hcal(ch); }};
     return true;
   }
-  else if (det == "SEPD" || det == "EPD")
+  if (det == "SEPD" || det == "EPD")
   {
     cfg = {"SEPD", 744, [](unsigned int ch) { return TowerInfoDefs::encode_epd(ch); }};
     return true;
   }
-  else if (det == "MBD" || det == "BBC")
+  if (det == "MBD" || det == "BBC")
   {
     cfg = {"MBD", 256, [](unsigned int ch) { return TowerInfoDefs::encode_mbd(ch); }};
     return true;
   }
-  else if (det == "ZDC")
+  if (det == "ZDC")
   {
     cfg = {"ZDC", 52, [](unsigned int ch) { return TowerInfoDefs::encode_zdc(ch); }};
     return true;
   }
-  else if (det == "RAW")
+  if (det == "RAW")
   {
     cfg = {"RAW", 1536, [](unsigned int ch) { return ch; }};
     return true;
@@ -269,8 +277,8 @@ void CreateDefaultHCalMapsGen(const std::string &outputDir = ".")
   std::string hcalin_hotmap = std::format("{}/HCALIN_HotMap_default.root", outputDir);
   std::string hcalout_hotmap = std::format("{}/HCALOUT_HotMap_default.root", outputDir);
 
-  CreateDefaultCalib({CalibField("status", 0), CalibField("HCALIN_sigma", 0.0f)}, "HCALIN", hcalin_hotmap);
-  CreateDefaultCalib({CalibField("status", 0), CalibField("HCALOUT_sigma", 0.0f)}, "HCALOUT", hcalout_hotmap);
+  CreateDefaultCalib({CalibField("status", 0), CalibField("HCALIN_sigma", 0.0F)}, "HCALIN", hcalin_hotmap);
+  CreateDefaultCalib({CalibField("status", 0), CalibField("HCALOUT_sigma", 0.0F)}, "HCALOUT", hcalout_hotmap);
 }
 
 // -----------------------------------------------------------------------------
@@ -290,6 +298,6 @@ void CreateDefaultCalib()
             << "  CreateDefaultCalib(\"status\", 0, \"CEMC\", \"CEMC_status_default.root\")\n"
             << "  CreateDefaultCalib(\"time\", 0.0, \"HCALIN\", \"HCALIN_time_default.root\")\n"
             << "  CreateDefaultCalib(\"calib\", 1.0, \"HCALOUT\", \"HCALOUT_calib_default.root\")\n"
-            << "  CreateDefaultCalib({{\"status\", 0}, {\"HCALIN_sigma\", 0.0f}}, \"HCALIN\", \"HCALIN_HotMap_default.root\")\n\n";
+            << "  CreateDefaultCalib({{\"status\", 0}, {\"HCALIN_sigma\", 0.0F}}, \"HCALIN\", \"HCALIN_HotMap_default.root\")\n\n";
   printSupportedDetectors();
 }
