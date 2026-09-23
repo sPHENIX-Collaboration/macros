@@ -1,0 +1,87 @@
+run_dir = .
+log_dir = $(run_dir)/log
+
+Universe = vanilla
+Executable = $(run_dir)/run_tpc_pattern_v0.sh
+
+# submit_tpc_pattern_v0_campaign.sh overrides these with condor_submit -append.
+campaign = tpc_pattern_v0_test
+input_dst_filelist = input_dst_files.list
+files_per_job = 1
+events_per_input_file = 500
+total_files = 183
+n_jobs = 183
+output_base_dir = $(run_dir)/output
+pre_track_pt_min = 0.05
+pre_track_dca_xy_min = -1.0
+pre_pair_dca_max = 10.0
+pre_lproj_min = -1.0
+pre_cos_theta_min = -2.0
+pre_track_quality_max = -1.0
+pre_track_npoints_min = 0
+pair_pca_z_max = -1.0
+pair_pca_dz_max = -1.0
+pair_decay_radius_min = -1.0
+pair_alpha_abs_max = -1.0
+pair_dca_max = -1.0
+pair_dira_min = -2.0
+use_final_track_helix = false
+point_order = auto
+fit_method = helix
+kalman_sigma_rphi_cm = 0.03
+kalman_sigma_r_cm = 0.03
+kalman_sigma_z_cm = 0.05
+use_kalman_field_map = true
+kalman_field_map = none
+kalman_uniform_propagator = rk
+kalman_rk_max_step_cm = 5.0
+kalman_rk_step_tolerance = 1.0e-4
+kalman_rk_max_step_trials = 12
+kalman_rk_max_total_steps = 2000
+kalman_fast_field_jacobian = true
+kalman_fast_field_pca = true
+kalman_field_pca_refine_iterations = 6
+coarse_steps = 64
+pca_candidates = 32
+final_track_helix_max_upstream_cm = 80.0
+final_track_helix_downstream_margin_cm = 5.0
+print_timing = false
+primary_vertex_x = 0.0
+primary_vertex_y = 0.0
+primary_vertex_z = 0.0
+software_release = new
+local_install = none
+required_crossing = any
+require_same_crossing = false
+max_crossing_tier = -1
+crossing_decision_node = TPC_CROSSING_DECISIONS
+event_chunk_manifest = none
+reconstruct_pairs = true
+write_same_sign_pairs = false
+write_cluster_residual_tree = false
+write_kalman_innovation_diagnostics = false
+memory_initial_mb = 2048
+memory_retry_increment_mb = 2048
+memory_retry_max_mb = 8192
+
+Arguments = $(Process) $(files_per_job) $(events_per_input_file) $(total_files) $(write_kalman_innovation_diagnostics)
+
+Output = $(log_dir)/$(campaign)/pattern_v0_$(Process).out
+Error  = $(log_dir)/$(campaign)/pattern_v0_$(Process).err
+Log    = $(log_dir)/tmp/$(campaign)/pattern_v0_$(Process).log
+
+Initialdir = $(run_dir)
+
+environment = "CAMPAIGN_TAG=$(campaign) OUTPUT_BASE_DIR=$(output_base_dir) COMPLETED_OUTPUT_DIR=$(output_base_dir)/$(campaign)/completed INPUT_DST_FILELIST=$(input_dst_filelist) V0_EVENT_CHUNK_MANIFEST=$(event_chunk_manifest) V0_PRE_TRACK_PT_MIN=$(pre_track_pt_min) V0_PRE_TRACK_DCA_XY_MIN=$(pre_track_dca_xy_min) V0_PRE_PAIR_DCA_MAX=$(pre_pair_dca_max) V0_PRE_LPROJ_MIN=$(pre_lproj_min) V0_PRE_COS_THETA_MIN=$(pre_cos_theta_min) V0_PRE_TRACK_QUALITY_MAX=$(pre_track_quality_max) V0_PRE_TRACK_NPOINTS_MIN=$(pre_track_npoints_min) V0_PAIR_PCA_Z_MAX=$(pair_pca_z_max) V0_PAIR_PCA_DZ_MAX=$(pair_pca_dz_max) V0_PAIR_DECAY_RADIUS_MIN=$(pair_decay_radius_min) V0_PAIR_ALPHA_ABS_MAX=$(pair_alpha_abs_max) V0_PAIR_DCA_MAX=$(pair_dca_max) V0_PAIR_DIRA_MIN=$(pair_dira_min) V0_USE_FINAL_TRACK_HELIX=$(use_final_track_helix) V0_POINT_ORDER=$(point_order) V0_FIT_METHOD=$(fit_method) V0_KALMAN_SIGMA_RPHI_CM=$(kalman_sigma_rphi_cm) V0_KALMAN_SIGMA_R_CM=$(kalman_sigma_r_cm) V0_KALMAN_SIGMA_Z_CM=$(kalman_sigma_z_cm) V0_USE_KALMAN_FIELD_MAP=$(use_kalman_field_map) V0_KALMAN_FIELD_MAP=$(kalman_field_map) V0_KALMAN_UNIFORM_PROPAGATOR=$(kalman_uniform_propagator) V0_KALMAN_RK_MAX_STEP_CM=$(kalman_rk_max_step_cm) V0_KALMAN_RK_STEP_TOLERANCE=$(kalman_rk_step_tolerance) V0_KALMAN_RK_MAX_STEP_TRIALS=$(kalman_rk_max_step_trials) V0_KALMAN_RK_MAX_TOTAL_STEPS=$(kalman_rk_max_total_steps) V0_KALMAN_FAST_FIELD_JACOBIAN=$(kalman_fast_field_jacobian) V0_KALMAN_FAST_FIELD_PCA=$(kalman_fast_field_pca) V0_KALMAN_FIELD_PCA_REFINE_ITERATIONS=$(kalman_field_pca_refine_iterations) V0_COARSE_STEPS=$(coarse_steps) V0_PCA_CANDIDATES=$(pca_candidates) V0_FINAL_TRACK_HELIX_MAX_UPSTREAM_CM=$(final_track_helix_max_upstream_cm) V0_FINAL_TRACK_HELIX_DOWNSTREAM_MARGIN_CM=$(final_track_helix_downstream_margin_cm) V0_PRINT_TIMING=$(print_timing) V0_PRIMARY_VERTEX_X=$(primary_vertex_x) V0_PRIMARY_VERTEX_Y=$(primary_vertex_y) V0_PRIMARY_VERTEX_Z=$(primary_vertex_z) V0_SOFTWARE_RELEASE=$(software_release) V0_LOCAL_INSTALL=$(local_install) V0_REQUIRED_CROSSING=$(required_crossing) V0_REQUIRE_SAME_CROSSING=$(require_same_crossing) V0_MAX_CROSSING_TIER=$(max_crossing_tier) V0_CROSSING_DECISION_NODE=$(crossing_decision_node) V0_RECONSTRUCT_PAIRS=$(reconstruct_pairs) V0_WRITE_SAME_SIGN_PAIRS=$(write_same_sign_pairs) V0_WRITE_CLUSTER_RESIDUAL_TREE=$(write_cluster_residual_tree)"
+
+# Completed V0 campaigns used 0.6 GB at the pp median and remained below
+# 1.7 GB in the sampled AuAu jobs. Start at 2 GB and let the SDCC retry policy
+# increase the request for unusually large events instead of reserving 4 GB for all jobs.
+RequestMemory = $(memory_initial_mb)MB
+retry_request_memory_increase = $(memory_retry_increment_mb)MB
+retry_request_memory_max = $(memory_retry_max_mb)MB
+RequestDisk   = 200000
+
+PeriodicHold = (NumJobStarts>=2 && JobStatus == 1 && !(ON_EVICT_CHECK_RequestMemory_REQUIREMENTS))
+
+Queue $(n_jobs)
