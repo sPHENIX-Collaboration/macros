@@ -150,6 +150,62 @@ void CreateDefaultCalib(const std::vector<CalibField> &fields,
     return;
   }
 
+
+  enum class FieldType
+  {
+    Int,
+    Float,
+    Double
+  };
+
+  struct NormalizedField
+  {
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+    std::string name;
+    double value{0.0};
+    FieldType type{FieldType::Float};
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
+  };
+
+  std::vector<NormalizedField> normFields;
+  normFields.reserve(fields.size());
+
+  for (const auto &f : fields)
+  {
+    if (f.name.empty())
+    {
+      std::cerr << "Error: Field name cannot be empty.\n";
+      return;
+    }
+
+    std::string t = f.type;
+    std::transform(t.begin(), t.end(), t.begin(), ::tolower);
+
+    FieldType ft = FieldType::Float;
+    if (t == "int" || t == "integer" || t == "i")
+    {
+      ft = FieldType::Int;
+    }
+    else if (t == "float" || t == "f")
+    {
+      ft = FieldType::Float;
+    }
+    else if (t == "double" || t == "d")
+    {
+      ft = FieldType::Double;
+    }
+    else
+    {
+      std::cerr << std::format("Error: Unsupported storage type '{}' for field '{}'.\n"
+                               "Supported types are: \"float\", \"int\", \"double\".\n",
+                               f.type, f.name);
+      return;
+    }
+
+    normFields.push_back({f.name, f.value, ft});
+  }
+
+
   std::string outFile = outputFileName;
   if (outFile.empty())
   {
@@ -189,23 +245,19 @@ void CreateDefaultCalib(const std::vector<CalibField> &fields,
   {
     unsigned int key = cfg.encodeFunc(channel);
 
-    for (const auto &f : fields)
+    for (const auto &nf : normFields)
     {
-      std::string t = f.type;
-      std::transform(t.begin(), t.end(), t.begin(), ::tolower);
-
-      if (t == "int" || t == "integer" || t == "i")
+      switch (nf.type)
       {
-        cdbttree->SetIntValue(static_cast<int>(key), f.name, static_cast<int>(f.value));
-      }
-      else if (t == "double" || t == "d")
-      {
-        cdbttree->SetDoubleValue(static_cast<int>(key), f.name, f.value);
-      }
-      else
-      {
-        // Default to float for calorimeter calibrations
-        cdbttree->SetFloatValue(static_cast<int>(key), f.name, static_cast<float>(f.value));
+        case FieldType::Int:
+          cdbttree->SetIntValue(static_cast<int>(key), nf.name, static_cast<int>(nf.value));
+          break;
+        case FieldType::Double:
+          cdbttree->SetDoubleValue(static_cast<int>(key), nf.name, nf.value);
+          break;
+        case FieldType::Float:
+          cdbttree->SetFloatValue(static_cast<int>(key), nf.name, static_cast<float>(nf.value));
+          break;
       }
     }
   }
@@ -256,16 +308,73 @@ void CreateDefaultCalib(const std::string &fieldName,
                         const std::string &outputFileName = "",
                         const std::string &valType = "")
 {
-  if (valType == "int" || (valType.empty() && defaultValueStr.find('.') == std::string::npos))
+  std::string t = valType;
+  std::transform(t.begin(), t.end(), t.begin(), ::tolower);
+
+  try
   {
-    int val = std::stoi(defaultValueStr);
-    CreateDefaultCalib({CalibField(fieldName, val)}, detector, outputFileName);
+    size_t pos = 0;
+
+    // Explicit type requested
+    if (t == "int" || t == "integer" || t == "i")
+    {
+      double dval = std::stod(defaultValueStr, &pos);
+      if (pos != defaultValueStr.size())
+      {
+        std::cerr << std::format("Error: Trailing characters in integer value '{}'.\n", defaultValueStr);
+        return;
+      }
+      int val = static_cast<int>(dval);
+      CreateDefaultCalib({CalibField(fieldName, val)}, detector, outputFileName);
+      return;
+    }
+    if (t == "double" || t == "d" || t == "float" || t == "f")
+    {
+      double val = std::stod(defaultValueStr, &pos);
+      if (pos != defaultValueStr.size())
+      {
+        std::cerr << std::format("Error: Trailing characters in floating-point value '{}'.\n", defaultValueStr);
+        return;
+      }
+      CreateDefaultCalib({CalibField(fieldName, val, t)}, detector, outputFileName);
+      return;
+    }
+    if (!t.empty())
+    {
+      std::cerr << std::format("Error: Unsupported storage type '{}'. Supported types: \"float\", \"int\", \"double\".\n", valType);
+      return;
+    }
+
+    // Auto-detect type: check for floating-point indicators ('.', 'e', 'E')
+    bool isFloat = (defaultValueStr.find('.') != std::string::npos ||
+                    defaultValueStr.find('e') != std::string::npos ||
+                    defaultValueStr.find('E') != std::string::npos);
+
+    if (isFloat)
+    {
+      double val = std::stod(defaultValueStr, &pos);
+      if (pos != defaultValueStr.size())
+      {
+        std::cerr << std::format("Error: Trailing characters in floating-point value '{}'.\n", defaultValueStr);
+        return;
+      }
+      CreateDefaultCalib({CalibField(fieldName, val, "float")}, detector, outputFileName);
+    }
+    else
+    {
+      double dval = std::stod(defaultValueStr, &pos);
+      if (pos != defaultValueStr.size())
+      {
+        std::cerr << std::format("Error: Trailing characters in integer value '{}'.\n", defaultValueStr);
+        return;
+      }
+      int val = static_cast<int>(dval);
+      CreateDefaultCalib({CalibField(fieldName, val)}, detector, outputFileName);
+    }
   }
-  else
+  catch (const std::exception &e)
   {
-    double val = std::stod(defaultValueStr);
-    std::string t = valType.empty() ? "float" : valType;
-    CreateDefaultCalib({CalibField(fieldName, val, t)}, detector, outputFileName);
+    std::cerr << std::format("Error: Failed to parse '{}' as a valid number: {}\n", defaultValueStr, e.what());
   }
 }
 
