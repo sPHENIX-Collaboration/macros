@@ -54,6 +54,7 @@
 
 #include <phool/recoConsts.h>
 
+#include <tpcconditions/TpcConditionsReco.h>
 #include <tpctrackreco/TpcCrossingFinder.h>
 #include <tpctrackreco/TpcPolyClusterTrkrClusterConverter.h>
 #include <tpctrackreco/TpcPolyTrackSeedConverter.h>
@@ -86,6 +87,7 @@ R__LOAD_LIBRARY(libmvtx.so)
 R__LOAD_LIBRARY(libintt.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libmicromegas.so)
+R__LOAD_LIBRARY(libTpcConditions.so)
 R__LOAD_LIBRARY(libPHGarfield.so)
 R__LOAD_LIBRARY(libtpctrackreco.so)
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
@@ -507,6 +509,7 @@ void Fun4All_PRDF_SAseed_run3pp(
   se->registerSubsystem(finder_svx);
 
   //==============================================================
+  se->registerSubsystem(new TpcConditionsReco());
 
   se->registerSubsystem(new Tpc_ModuleTrackReco());     // makes TPC_MODULETRACKS
   se->registerSubsystem(new Tpc_AssembledTrackReco());  // makes TPC_ASSEMBLEDTRACKS
@@ -519,9 +522,6 @@ void Fun4All_PRDF_SAseed_run3pp(
   se->registerSubsystem(crossingFinder);
 
   auto *cluster = new Tpc_PolyClusterizer();  // makes TPC_POLYCLUSTERS
-  cluster->setUseSurveyGeometry(false);
-  cluster->setKEffSide0(1.00);  // OO 82626 - 4.5, AuAu 6x6 76905 -0, pp 79513 - 1.0, 75391 5.8 75405 4.8
-  cluster->setKEffSide1(1.60);  // OO 82626 - 5.0, AuAu 6x6 76905 -0, pp 79513 - 1.6, 75391 5.6 75408 4.8
   se->registerSubsystem(cluster);
 
   se->registerSubsystem(new Tpc_PolyTrackReco());      // makes TPC_POLYTRACKS
