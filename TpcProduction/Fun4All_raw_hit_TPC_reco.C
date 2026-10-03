@@ -18,6 +18,8 @@
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
 
+#include <tpcconditions/TpcConditionsReco.h>
+#include <tpctrackreco/TpcCrossingFinder.h>
 #include <tpctrackreco/Tpc_ModuleTrackReco.h>
 #include <tpctrackreco/Tpc_AssembledTrackReco.h>
 #include <tpctrackreco/Tpc_PolyTrackReco.h>
@@ -165,7 +167,7 @@ if(collision!="run3line_laser"&&collision!="run3cosmics")
 
   for (auto &stream : streams)
   {
-    std::string filename = std::format("DST_{}_{}_{}_{}_{:08d}-{:05d}.root", dsttype, stream, collision, production,  runnumber, segment);
+    std::string filename = std::format("DST_{}_{}_{}_{}-{:08d}-{:05d}.root", dsttype, stream, collision, production,  runnumber, segment);
     std::string filepath = std::format("/sphenix/lustre01/sphnxpro/production/{}/{}/{}/DST_{}_{}/run_{}_{}/{}",collision, datatype, production, dsttype, stream,  nice_rounded_down.str(), nice_rounded_up.str(),filename);
     std::cout << "Adding DST: " << filepath << std::endl;
     if (i == 0)
@@ -246,24 +248,45 @@ if(collision!="run3line_laser"&&collision!="run3cosmics")
 
 
   Micromegas_HitUnpacking();
-  Micromegas_Clustering();
+ 
+  Mvtx_Clustering();
   Intt_Clustering();
+  Micromegas_Clustering();
 
   Tpc_LaserEventIdentifying();
 
   Reject_Laser_Events();
 
+  //==============================================================
 
+  Tracking_Reco_SiliconSeed_run2pp();
+  auto *converter = new TrackSeedTrackMapConverter("SiliconSeedToSvtxTrackMap");
+  converter->setTrackSeedName("SiliconTrackSeedContainer");
+  converter->setTrackMapName("SiliconSvtxTrackMap");
+  converter->setClusterMapName("TRKR_CLUSTER");
+  se->registerSubsystem(converter);
+
+  auto *finder_svx = new PHSimpleVertexFinder("SiliconVertexFinder");
+  finder_svx->Verbosity(0);
+  finder_svx->setDcaCut(0.1);
+  finder_svx->setTrackPtCut(0.2);
+  finder_svx->setBeamLineCut(1);
+  finder_svx->setTrackQualityCut(500);
+  finder_svx->setNmvtxRequired(3);
+  finder_svx->setOutlierPairCut(0.1);
+  finder_svx->setTrackMapName("SiliconSvtxTrackMap");
+  finder_svx->setVertexMapName("SvtxVertexMap");
+  se->registerSubsystem(finder_svx);
+
+
+  se->registerSubsystem(new TpcConditionsReco());
 
   se->registerSubsystem(new Tpc_ModuleTrackReco()); // makes TPC_MODULETRACKS
   se->registerSubsystem(new Tpc_AssembledTrackReco()); // makes TPC_ASSEMBLEDTRACKS
  
-  auto *cluster = new Tpc_PolyClusterizer(); // makes TPC_POLYCLUSTERS
- 
-  cluster->setKEffSide0(1.0);//OO 82626 - 4.5, AuAu 6x6 76905 -0, pp 79513 - 1.0, 75391 5.8 75405 4.8
-  cluster->setKEffSide1(1.6);//OO 82626 - 5.0, AuAu 6x6 76905 -0, pp 79513 - 1.6, 75391 5.6 75408 4.8
+ se->registerSubsystem(new TpcCrossingFinder());
 
-  se->registerSubsystem(cluster);
+  se->registerSubsystem(new Tpc_PolyClusterizer());
 
   se->registerSubsystem(new Tpc_PolyTrackReco());      // makes TPC_POLYTRACKS
   se->registerSubsystem(new Tpc_PolyTrackVertexer());  // makes TPC_POLYTRACKVERTICES
@@ -275,7 +298,7 @@ if(collision!="run3line_laser"&&collision!="run3cosmics")
   //se->registerSubsystem(new Tpc_AssembledTrackDisplay("Tpc_AssembledTrackDisplay", "tpc_assembledtrack_display_" + outfilename + "_" + to_string(runnumber) + ".root"));
   
   //For the  cluster and TPC SA tracks display uncomment following line
-  se->registerSubsystem(new Tpc_PolyClusterDisplay("Tpc_PolyClusterDisplay", "tpc_poly_cluster_display_" + outfilename + "_" + std::to_string(runnumber) + ".root"));
+  //se->registerSubsystem(new Tpc_PolyClusterDisplay("Tpc_PolyClusterDisplay", "tpc_poly_cluster_display_" + outfilename + "_" + std::to_string(runnumber) + ".root"));
   
   //For the  residual tree output uncomment following block (options to put cuts on minimum pT and minimum number of clusters in TPC SA are available)
   auto *resid = new Tpc_PolyClusterResiduals("Tpc_PolyClusterResiduals",
