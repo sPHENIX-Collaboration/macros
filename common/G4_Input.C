@@ -713,7 +713,7 @@ void InputRegister()
   }
   // here are the various utility modules which read particles and
   // put them onto the G4 particle stack
-  if (Input::HEPMC || Input::PYTHIA8 || Input::HERWIG7 || Input::PYTHIA6 || Input::READEIC)
+  if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6 || Input::READEIC)
   {
     if (Input::HEPMC)
     {
