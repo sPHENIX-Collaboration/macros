@@ -6,6 +6,7 @@
 #include <G4_TrkrVariables.C>
 
 #include <phpythia8/PHPythia8.h>
+#include <phherwig7/PHHerwig7.h>
 
 #include <g4main/CosmicSpray.h>
 #include <g4main/HepMCNodeReader.h>
@@ -41,6 +42,7 @@
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
+R__LOAD_LIBRARY(libPHHerwig7.so)
 R__LOAD_LIBRARY(libFermimotionAfterburner.so)
 R__LOAD_LIBRARY(libHIJINGFlipAfterburner.so)
 R__LOAD_LIBRARY(libReactionPlaneAfterburner.so)
@@ -55,6 +57,11 @@ namespace Input
   int PYTHIA8_NUMBER = 1;
   int PYTHIA8_VERBOSITY = 0;
   std::set<int> PYTHIA8_EmbedIds;
+
+  bool HERWIG7 = false;
+  int HERWIG7_NUMBER = 1;
+  int HERWIG7_VERBOSITY = 0;
+  std::set<int> HERWIG7_EmbedIds;
 
   // Single/multiple particle generators
   bool DZERO = false;
@@ -263,7 +270,8 @@ namespace Input
     ApplysPHENIXBeamParameter(HepMCGen, Input::BEAM_CONFIGURATION);
   }
 
-  void ApplysPHENIXBeamParameter(std::vector<PHPythia8 *> &HepMCGenVec)
+  template <class T> // make it template so it works for both phpythia8 and phherwig7
+  void ApplysPHENIXBeamParameter(std::vector<T *> &HepMCGenVec)
   {
     for (auto *iter : HepMCGenVec)
     {
@@ -380,6 +388,11 @@ namespace PYTHIA8
           {0, std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg"}};
 }
 
+namespace HERWIG7
+{
+  std::map<int, std::string> run_file = {{0, std::string(getenv("CALIBRATIONROOT")) + "/Generators/Herwig7/run/mb200_sphenix_s1.run"}};
+}
+
 namespace PILEUP
 {
   std::string pileupfile = "/sphenix/sim/sim01/sphnxpro/MDC1/sHijing_HepMC/data/sHijing_0_20fm-0000000001-00000.dat";
@@ -397,6 +410,7 @@ namespace INPUTGENERATOR
   std::vector<PHG4ParticleGun *> Gun;
   PHPythia8 *Pythia6 = nullptr;
   std::vector<PHPythia8 *> Pythia8;
+  std::vector<PHHerwig7 *> Herwig7;
   //  ReadEICFiles *EICFileReader = nullptr;
   CosmicSpray *Cosmic = nullptr;
 }  // namespace INPUTGENERATOR
@@ -423,7 +437,7 @@ void InputInit()
     std::cout << "Reading Hits and Embedding into background at the same time is not supported" << std::endl;
     gSystem->Exit(1);
   }
-  if (Input::READHITS && (Input::PYTHIA6 || Input::PYTHIA8 || Input::SIMPLE || Input::GUN || Input::UPSILON || Input::HEPMC))
+  if (Input::READHITS && (Input::PYTHIA6 || Input::PYTHIA8 || Input::HERWIG7 || Input::SIMPLE || Input::GUN || Input::UPSILON || Input::HEPMC))
   {
     std::cout << "Reading Hits and running G4 simultanously is not supported" << std::endl;
     gSystem->Exit(1);
@@ -479,6 +493,38 @@ void InputInit()
       if (Input::EMBED)
       {
         pythia8->set_reuse_vertex(Input::VertexEmbedId);
+      }
+    }
+  }
+  // Herwig7
+  if (Input::HERWIG7)
+  {
+    for (int i = 0; i < Input::HERWIG7_NUMBER; i++)
+    {
+      std::string name = "HERWIG7_" + std::to_string(i);
+      PHHerwig7 *herwig7 = new PHHerwig7(name);
+      INPUTGENERATOR::Herwig7.push_back(herwig7);
+      herwig7->set_embedding_id(Input::EmbedId);
+
+      if (HERWIG7::run_file[i].empty())
+      {
+        std::cout << "No Herwig7 run file for herwig7 generator no " << i << std::endl;
+        gSystem->Exit(1);
+      }
+
+      herwig7->set_run_file(HERWIG7::run_file[i]);
+
+      // luminosity makes no sense when running multiple herwig7 generators, or running together with pythia8
+      if (Input::HERWIG7_NUMBER > 1 || Input::PYTHIA8)
+      {
+        herwig7->save_integrated_luminosity(false);
+      }
+
+      Input::HERWIG7_EmbedIds.insert(Input::EmbedId);
+      Input::EmbedId++;
+      if (Input::EMBED)
+      {
+        herwig7->set_reuse_vertex(Input::VertexEmbedId);
       }
     }
   }
@@ -584,6 +630,15 @@ void InputRegister()
       se->registerSubsystem(generator);
     }
   }
+  if (Input::HERWIG7)
+  {
+    int verbosity = std::max(Input::HERWIG7_VERBOSITY, Input::VERBOSITY);
+    for (auto &generator : INPUTGENERATOR::Herwig7)
+    {
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
+    }
+  }
   if (Input::DZERO)
   {
     int verbosity = std::max(Input::DZERO_VERBOSITY, Input::VERBOSITY);
@@ -658,7 +713,7 @@ void InputRegister()
   }
   // here are the various utility modules which read particles and
   // put them onto the G4 particle stack
-  if (Input::HEPMC || Input::PYTHIA8 || Input::PYTHIA6 || Input::READEIC)
+  if (Input::HEPMC || Input::PYTHIA8 || Input::HERWIG7 || Input::PYTHIA6 || Input::READEIC)
   {
     if (Input::HEPMC)
     {
