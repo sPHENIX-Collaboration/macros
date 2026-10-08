@@ -115,6 +115,10 @@ int Fun4All_G4_sPHENIX(
 
   // Input::PYTHIA8 = true;
 
+  // Input::HERWIG7 = true;
+  // NOTE: Herwig7 cannot currently run with GEANT in the same Fun4All job. Herwig defaults to initialize EvtGen itself, and F4A will crash when later PHG4Reco initializes EvtGen again
+  // With Input::HERWIG7 this macro therefore writes a generator-level DST and returns before the GEANT4 setup. Run GEANT4 on that DST in a second pass or different pass
+
   //  Input::GUN = true;
   //  Input::GUN_NUMBER = 3; // if you need 3 of them
   // Input::GUN_VERBOSITY = 1;
@@ -224,6 +228,12 @@ int Fun4All_G4_sPHENIX(
     //! Nominal collision geometry is selected by Input::BEAM_CONFIGURATION
     Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia8);
   }
+  // herwig7
+  if (Input::HERWIG7)
+  {
+    //! Nominal collision geometry is selected by Input::BEAM_CONFIGURATION
+    Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Herwig7);
+  }
 
   //--------------
   // Set Input Manager specific options
@@ -291,6 +301,26 @@ int Fun4All_G4_sPHENIX(
 
   //Option to convert DST to human command readable TTree for quick poke around the outputs
   //  Enable::DSTREADER = true;
+
+  //======================
+  // Herwig7 cannot currently run with GEANT in the same Fun4All pass, so stop here and produce a generator-level DST
+  //======================
+  if (Input::HERWIG7)
+  {
+    std::string FullOutFile = DstOut::OutputDir + "/" + DstOut::OutputFile;
+    Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", FullOutFile);
+    out->AddNode("Sync");
+    out->AddNode("EventHeader");
+    out->AddNode("PHHepMCGenEventMap");
+    se->registerOutputManager(out);
+
+    se->run(nEvents);
+    se->End();
+    std::cout << "All done" << std::endl;
+    delete se;
+    gSystem->Exit(0);
+    return 0;
+  }
 
   // turn the display on (default off)
    //Enable::DISPLAY = true;
