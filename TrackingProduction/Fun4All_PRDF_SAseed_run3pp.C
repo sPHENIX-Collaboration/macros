@@ -54,6 +54,7 @@
 
 #include <phool/recoConsts.h>
 
+#include <phgarfield/PHGarfield.h>
 #include <tpcconditions/TpcConditionsReco.h>
 #include <tpctrackreco/TpcCrossingFinder.h>
 #include <tpctrackreco/TpcPolyClusterTrkrClusterConverter.h>
@@ -510,6 +511,11 @@ void Fun4All_PRDF_SAseed_run3pp(
 
   //==============================================================
   se->registerSubsystem(new TpcConditionsReco());
+
+  // Configure the shared drift model before the crossing finder and clusterizer.
+  auto *garfield = new PHGarfield();
+  garfield->SetUseSurveyGeometry(true);
+  se->registerSubsystem(garfield);
 
   se->registerSubsystem(new Tpc_ModuleTrackReco());     // makes TPC_MODULETRACKS
   se->registerSubsystem(new Tpc_AssembledTrackReco());  // makes TPC_ASSEMBLEDTRACKS

@@ -36,6 +36,7 @@
 
 #include <phool/recoConsts.h>
 
+#include <phgarfield/PHGarfield.h>
 #include <tpcconditions/TpcConditionsReco.h>
 #include <tpctrackreco/TpcCrossingFinder.h>
 #include <tpctrackreco/TpcPolyClusterTrkrClusterConverter.h>
@@ -306,6 +307,11 @@ void Fun4All_raw_hit_TPC_Matched_reco(
   //==============================================================
   se->registerSubsystem(new TpcConditionsReco());
 
+  // Configure the shared drift model before the crossing finder and clusterizer.
+  auto *garfield = new PHGarfield();
+  garfield->SetUseSurveyGeometry(true);
+  se->registerSubsystem(garfield);
+
   se->registerSubsystem(new Tpc_ModuleTrackReco());     // makes TPC_MODULETRACKS
   se->registerSubsystem(new Tpc_AssembledTrackReco());  // makes TPC_ASSEMBLEDTRACKS
 
@@ -317,7 +323,6 @@ void Fun4All_raw_hit_TPC_Matched_reco(
   se->registerSubsystem(crossingFinder);
 
   auto *cluster = new Tpc_PolyClusterizer();  // makes TPC_POLYCLUSTERS
-  cluster->setUseSurveyGeometry(true);
   cluster->setMaxAcceptedTier(2); 
   se->registerSubsystem(cluster);
 

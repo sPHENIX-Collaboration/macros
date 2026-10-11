@@ -18,6 +18,7 @@
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
 
+#include <phgarfield/PHGarfield.h>
 #include <tpcconditions/TpcConditionsReco.h>
 #include <tpctrackreco/TpcCrossingFinder.h>
 #include <tpctrackreco/Tpc_ModuleTrackReco.h>
@@ -280,6 +281,11 @@ if(collision!="run3line_laser"&&collision!="run3cosmics")
 
 
   se->registerSubsystem(new TpcConditionsReco());
+
+  // Configure the shared drift model before the crossing finder and clusterizer.
+  auto *garfield = new PHGarfield();
+  garfield->SetUseSurveyGeometry(true);
+  se->registerSubsystem(garfield);
 
   se->registerSubsystem(new Tpc_ModuleTrackReco()); // makes TPC_MODULETRACKS
   se->registerSubsystem(new Tpc_AssembledTrackReco()); // makes TPC_ASSEMBLEDTRACKS
