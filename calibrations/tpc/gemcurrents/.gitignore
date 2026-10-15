@@ -1,0 +1,15 @@
+# Generated conditions payloads
+ConditionsCSVFiles
+ConditionsRootFiles
+
+# Python generated files
+__pycache__/
+*.pyc
+
+# HTCondor output
+out
+err
+log
+
+# Local run selection
+runlist.txt

@@ -213,7 +213,7 @@ namespace G4TPC
   double maxDriftLength = 102.325;  // new value, CM face to top of GEM stack
   double CM_halfwidth = 0.28;  // cm
 
-  bool tpc_survey_position = false;
+  bool tpc_survey_position = true;
   double rot_x = 0.0;  // tpc default tilt angles (for tpc envelope and endcap)
   double rot_y = 0.0;
   double rot_z = 0.0;

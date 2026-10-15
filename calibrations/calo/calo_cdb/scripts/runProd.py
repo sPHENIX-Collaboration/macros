@@ -6,6 +6,7 @@ import argparse
 from datetime import datetime
 import logging
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -23,9 +24,13 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-i'
                     , '--run-type', type=str
-                    , default='run3oo'
-                    , choices=['run2pp','run2auau','run3auau','run3pp','run3oo']
-                    , help='Run Type. Default: run3oo')
+                    , default=''
+                    , help='Run Type (run2pp, run2auau, run3auau, run3pp, run3oo) or path to a run list file. Default: run3oo')
+
+parser.add_argument('-r'
+                    , '--run-list', type=str
+                    , default=''
+                    , help='Path to run list file (one run per line). If specified, only runs from this list are considered.')
 
 parser.add_argument('-f'
                     , '--bin-filter-datasets', type=str
@@ -70,28 +75,88 @@ parser.add_argument('-v'
                     , '--verbose', action='store_true'
                     , help='Verbose.')
 
-def get_file_paths(engine, runtype='run3auau'):
-    """
-    Generate file paths from given minimum events and run type.
-    """
+RUN_RANGES = {
+    'run2pp': (47286, 53880),
+    'run2auau': (54128, 54974),
+    'run3auau': (66457, 78954),
+    'run3pp': (79146, 81668),
+    'run3oo': (82374, 82703),
+}
 
-    # Identify run range from the run type
-    run_ranges = {'run2pp': (47286, 53880), 'run2auau': (54128, 54974), 'run3auau': (66457, 78954), 'run3pp': (79146, 81668), 'run3oo': (82374, 82703)}
-    params = {'run_start': run_ranges[runtype][0], 'run_end': run_ranges[runtype][1]}
+def load_run_list(filepath):
+    """
+    Load run numbers from a file with one run per line.
+    Ignores blank lines, comments (#), and common headers (e.g. 'runnumber').
+    """
+    path = Path(filepath)
+    if not path.is_file():
+        logger.critical(f"Run list file does not exist: {filepath}")
+        sys.exit(1)
 
-    query = """
-    -- Use a Common Table Expression (CTE) to find the winning tag for each runnumber
+    runs = []
+    with open(path, 'r', encoding='utf-8') as f:
+        for line_num, line in enumerate(f, 1):
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            if line.lower() in ('runnumber', 'run', 'run_number'):
+                continue
+            tokens = [t for t in line.replace(',', ' ').split() if t]
+            for token in tokens:
+                try:
+                    runs.append(int(token))
+                except ValueError:
+                    logger.warning(f"Skipping non-integer value '{token}' on line {line_num} in {filepath}")
+
+    unique_runs = sorted(list(set(runs)))
+    if not unique_runs:
+        logger.critical(f"No valid run numbers found in {filepath}!")
+        sys.exit(1)
+
+    return unique_runs
+
+def get_file_paths(engine, runtype=None, runs=None):
+    """
+    Generate file paths from given run type or list of runs.
+    """
+    params = {}
+    if runs:
+        run_condition = "d.runnumber = ANY(:runs)"
+        params['runs'] = runs
+    elif runtype:
+        if runtype not in RUN_RANGES:
+            raise ValueError(f"Unknown runtype: {runtype}. Expected one of {list(RUN_RANGES.keys())}")
+        params = {'run_start': RUN_RANGES[runtype][0], 'run_end': RUN_RANGES[runtype][1]}
+        run_condition = "d.runnumber >= :run_start AND d.runnumber <= :run_end"
+    else:
+        raise ValueError("Either runtype or runs must be specified.")
+
+    query = f"""
+    -- Use a Common Table Expression (CTE) to find the winning tag for each runnumber and dsttype group
     WITH WinningTags AS (
         SELECT
             runnumber,
-            tag
+            tag,
+            dsttype_group
         FROM (
-            -- This inner query ranks the tags within each runnumber group
+            -- This inner query ranks the tags within each runnumber and dsttype_group
             SELECT
                 d.runnumber,
                 d.tag,
+                CASE
+                    WHEN d.dsttype LIKE 'HIST_JETQA%' THEN 'HIST_JETQA'
+                    WHEN d.dsttype LIKE 'HIST_CALOFITTINGQA%' THEN 'HIST_CALOFITTINGQA'
+                END as dsttype_group,
                 -- The tag with the latest max timestamp gets rank '1'
-                ROW_NUMBER() OVER (PARTITION BY d.runnumber ORDER BY MAX(f.time) DESC) as rn
+                ROW_NUMBER() OVER (
+                    PARTITION BY
+                        d.runnumber,
+                        CASE
+                            WHEN d.dsttype LIKE 'HIST_JETQA%' THEN 'HIST_JETQA'
+                            WHEN d.dsttype LIKE 'HIST_CALOFITTINGQA%' THEN 'HIST_CALOFITTINGQA'
+                        END
+                    ORDER BY MAX(f.time) DESC
+                ) as rn
             FROM
                 datasets d
             JOIN
@@ -99,19 +164,20 @@ def get_file_paths(engine, runtype='run3auau'):
             ON
                 d.filename = f.lfn
             WHERE
-                d.dsttype LIKE 'HIST_CALOQA%'
+                (d.dsttype LIKE 'HIST_JETQA%' OR d.dsttype LIKE 'HIST_CALOFITTINGQA%')
                 AND d.dsttype NOT LIKE 'HIST_CALOQASKIMMED%'
                 AND d.tag IS NOT NULL AND d.tag != ''
-                AND d.runnumber >= :run_start AND d.runnumber <= :run_end
+                AND {run_condition}
+                AND d.segment < 9999
             GROUP BY
-                d.runnumber, d.tag
+                d.runnumber, d.tag, dsttype_group
         ) AS RankedTags
         WHERE
             rn = 1
     )
     -- Now, join the original table with the list of winning tags
     SELECT
-        d.tag, d.runnumber, f.full_file_path
+        d.tag, d.runnumber, f.full_file_path, wt.dsttype_group
     FROM
         datasets d
     JOIN
@@ -121,11 +187,19 @@ def get_file_paths(engine, runtype='run3auau'):
     JOIN
         WinningTags wt
     ON
-        d.runnumber = wt.runnumber AND d.tag = wt.tag
+        d.runnumber = wt.runnumber
+        AND d.tag = wt.tag
+        AND (
+            CASE
+                WHEN d.dsttype LIKE 'HIST_JETQA%' THEN 'HIST_JETQA'
+                WHEN d.dsttype LIKE 'HIST_CALOFITTINGQA%' THEN 'HIST_CALOFITTINGQA'
+            END
+        ) = wt.dsttype_group
     WHERE
-        (d.dsttype LIKE 'HIST_CALOQA%' OR d.dsttype LIKE 'HIST_CALOFITTINGQA%')
+        (d.dsttype LIKE 'HIST_JETQA%' OR d.dsttype LIKE 'HIST_CALOFITTINGQA%')
         AND d.dsttype NOT LIKE 'HIST_CALOQASKIMMED%'
-        AND d.segment != 9999;
+        AND {run_condition}
+        AND d.segment < 9999;
     """
 
     df = pd.DataFrame()
@@ -162,32 +236,39 @@ def setup_logging(log_file, log_level):
 def run_command_and_log(command, current_dir = '.', description="Executing command"):
     """
     Runs an external command using subprocess and logs its stdout, stderr, and return code.
+    If command is a list or tuple, runs directly without shell.
+    If command is a string, runs via bash -c.
     """
-    logger.info(f"{description}: '{command}'")
+    cmd_log = " ".join(shlex.quote(str(x)) for x in command) if isinstance(command, (list, tuple)) else str(command)
+    logger.info(f"{description}: '{cmd_log}'")
 
     try:
         # capture_output=True: captures stdout and stderr
         # text=True: decodes output as text (usually UTF-8)
         # check=False: do NOT raise an exception for non-zero exit codes immediately.
         #              We want to log stderr even on failure before deciding to raise.
-        result = subprocess.run(['bash','-c',command], cwd=current_dir, capture_output=True, text=True, check=False)
+        if isinstance(command, (list, tuple)):
+            cmd_args = [str(x) for x in command]
+            result = subprocess.run(cmd_args, cwd=current_dir, capture_output=True, text=True, check=False)
+        else:
+            result = subprocess.run(['bash', '-c', command], cwd=current_dir, capture_output=True, text=True, check=False)
 
         # Log stdout if any
         if result.stdout:
             # Using logger.debug allows capturing even verbose outputs
-            logger.debug(f"  STDOUT from '{command}':\n{result.stdout.strip()}")
+            logger.debug(f"  STDOUT from '{cmd_log}':\n{result.stdout.strip()}")
 
         # Log stderr if any
         if result.stderr:
             # Using logger.error for stderr, as it often indicates problems
-            logger.error(f"  STDERR from '{command}':\n{result.stderr.strip()}")
+            logger.error(f"  STDERR from '{cmd_log}':\n{result.stderr.strip()}")
 
         # Log the return code
         logger.info(f"  Command exited with code: {result.returncode}")
 
         # You can choose to raise an exception here if the command failed
         if result.returncode != 0:
-            logger.error(f"Command failed: '{command}' exited with non-zero code {result.returncode}")
+            logger.error(f"Command failed: '{cmd_log}' exited with non-zero code {result.returncode}")
             # Optionally, raise an error to stop execution
             # raise subprocess.CalledProcessError(result.returncode, command, output=result.stdout, stderr=result.stderr)
             return False
@@ -195,11 +276,11 @@ def run_command_and_log(command, current_dir = '.', description="Executing comma
 
     # Catch specific OS-related errors
     except OSError as e:
-        logger.critical(f"An unexpected error occurred while running '{command}': {e}")
+        logger.critical(f"An unexpected error occurred while running '{cmd_log}': {e}")
         return False
 
     except Exception as e:
-        logger.critical(f"An unexpected error occurred while running '{command}': {e}")
+        logger.critical(f"An unexpected error occurred while running '{cmd_log}': {e}")
         return False
 
 def check_file_validity(path):
@@ -230,11 +311,11 @@ def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
         logger.info(f'Runs: {df['runnumber'].nunique()}')
         logger.info("\n" + "="*70 + "\n")
 
-    # Save CSV of unique run and tag pairs
-    df[['runnumber', 'tag']].drop_duplicates().sort_values(by='runnumber').to_csv(output / f'{run_type}.csv', index=False, header=True)
+    # Save CSV of unique run and tag pairs with their dsttype_group
+    df[['runnumber', 'tag', 'dsttype_group']].drop_duplicates().sort_values(by='runnumber').to_csv(output / f'{run_type}.csv', index=False, header=True)
 
     ## DEBUG
-    command = f'{bin_filter_datasets} {output / f"{run_type}.csv"} {output}'
+    command = [bin_filter_datasets, output / f"{run_type}.csv", output]
     run_command_and_log(command)
 
     processed_df = pd.read_csv(output / f'{run_type}-process.csv')
@@ -247,6 +328,9 @@ def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
     if len(processed_df) > 20000:
         logger.critical(f'ERROR: Too many Runs: {len(processed_df)}. Quitting.')
         sys.exit()
+
+    # Drop duplicate run numbers that might be output by the filter script when multiple tags exist
+    processed_df = processed_df.drop_duplicates()
 
     reduced_process_df = df.merge(processed_df)
 
@@ -290,15 +374,17 @@ def generate_run_list(reduced_process_df, output):
     dataset_dir = output / 'datasets'
     dataset_dir.mkdir(parents=True, exist_ok=True)
 
-    # 7. Group by 'runnumber' and 'dataset'
+    # 7. Group by 'runnumber' and 'dsttype_group'
     # Iterating over this grouped object is efficient.
-    grouped = reduced_process_df.groupby(['runnumber', 'tag'])
+    grouped = reduced_process_df.groupby(['runnumber', 'dsttype_group'])
 
     # 8. Loop through each unique group
-    for (run, tag), group_df in grouped:
-        logger.info(f'Processing: {run},{tag}')
+    for (run, group), group_df in grouped:
+        # Join multiple tags if they exist
+        tags = "_".join(sorted(group_df['tag'].unique()))
+        logger.info(f'Processing: {run},{tags},{group}')
 
-        filepath = dataset_dir / f'{run}_{tag}.list'
+        filepath = dataset_dir / f'{run}_{group}_{tags}.list'
 
         group_df['full_file_path'].to_csv(filepath, index=False, header=False)
 
@@ -306,8 +392,8 @@ def create_symlink(target_path, link_path):
     """
     Creates a symbolic link pointing to target_path named link_path.
 
-    Replicates the behavior of 'ln -sfn' by removing the destination 
-    if it already exists (including broken symlinks) before creating 
+    Replicates the behavior of 'ln -sfn' by removing the destination
+    if it already exists (including broken symlinks) before creating
     the new link.
 
     Args:
@@ -377,25 +463,48 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
         run_command_and_log(command, output)
 
         job_dir = output / 'output'
+        failure_dir = output / 'failures'
+        failure_log = failure_dir / 'failure-log.txt'
 
         max_wait_seconds = 3600 * 1  # 1 hour timeout
         elapsed = 0
 
         # Check Job Progress
         while True:
-            finished_jobs = sum(1 for x in job_dir.iterdir() if x.is_dir())
+            finished_jobs = sum(1 for x in job_dir.iterdir() if x.is_dir() and x.name != 'failures')
 
-            if finished_jobs >= jobs:
-                logger.info(f"All Jobs Complete. {finished_jobs}/{jobs} Jobs.")
+            # Count failed jobs from marker files or failure log lines
+            failed_markers = len(list(failure_dir.glob('*.failed'))) if failure_dir.exists() else 0
+            failed_log_count = 0
+            if failure_log.exists():
+                try:
+                    with open(failure_log, 'r', encoding='utf-8') as f:
+                        failed_log_count = sum(1 for line in f if line.strip())
+                except OSError:
+                    pass
+            failed_jobs = max(failed_markers, failed_log_count)
+
+            if finished_jobs + failed_jobs >= jobs:
+                if failed_jobs > 0:
+                    logger.warning(f"All Jobs Finished: {finished_jobs}/{jobs} succeeded, {failed_jobs} failed.")
+                else:
+                    logger.info(f"All Jobs Complete. {finished_jobs}/{jobs} Jobs.")
                 break
 
             if elapsed >= max_wait_seconds:
-                logger.error(f"Timeout reached. Only {finished_jobs}/{jobs} jobs completed.")
+                logger.error(f"Timeout reached. Only {finished_jobs}/{jobs} jobs completed ({failed_jobs} failed).")
                 break
 
-            logger.info(f"Waiting for Jobs... {finished_jobs}/{jobs} done.")
+            if failed_jobs > 0:
+                logger.info(f"Waiting for Jobs... {finished_jobs} done, {failed_jobs} failed out of {jobs}.")
+            else:
+                logger.info(f"Waiting for Jobs... {finished_jobs}/{jobs} done.")
+
             time.sleep(15) # Check every 15 seconds
             elapsed += 15
+
+        if failure_log.exists():
+            logger.warning(f"Job failures detected in {failure_log}")
 
     else:
         command = f'cd {output} && {command}'
@@ -406,7 +515,33 @@ def main():
     Main Function
     """
     args = parser.parse_args()
-    run_type   = args.run_type
+
+    # Determine whether a run list or a run type was provided
+    run_list_file = None
+    runs = None
+    run_type = None
+    run_identifier = None
+
+    if args.run_list:
+        run_list_file = args.run_list
+        runs = load_run_list(run_list_file)
+        run_identifier = Path(run_list_file).stem or 'runlist'
+        run_type = args.run_type if args.run_type in RUN_RANGES else None
+    elif args.run_type:
+        if args.run_type in RUN_RANGES:
+            run_type = args.run_type
+            run_identifier = run_type
+        elif Path(args.run_type).is_file():
+            run_list_file = args.run_type
+            runs = load_run_list(run_list_file)
+            run_identifier = Path(run_list_file).stem or 'runlist'
+        else:
+            print(f"ERROR: Invalid run type or run list file '{args.run_type}'. Must be one of {list(RUN_RANGES.keys())} or an existing file.")
+            sys.exit(1)
+    else:
+        run_type = 'run3oo'
+        run_identifier = run_type
+
     CURRENT_DATE = datetime.now().strftime("%m-%d-%y")
     output = Path(args.output).resolve()
     condor_memory = args.memory
@@ -451,7 +586,14 @@ def main():
 
     logger.info('#'*40)
     logger.info(f'LOGGING: {str(datetime.now())}')
-    logger.info(f'Run Type: {run_type}')
+    if runs:
+        logger.info(f'Run List File: {run_list_file}')
+        logger.info(f'Total Runs in List: {len(runs)}')
+        logger.info(f'Run Identifier: {run_identifier}')
+        if run_type:
+            logger.info(f'Run Type: {run_type}')
+    else:
+        logger.info(f'Run Type: {run_type}')
     logger.info(f'Output Directory: {output}')
     logger.info(f'Output Calib Tags: {output_calib_tags}')
     logger.info(f'Condor Memory: {condor_memory}')
@@ -473,10 +615,14 @@ def main():
     engine = create_engine(DATABASE_URL)
 
     # 1. Get the dataframe from the database
-    df = get_file_paths(engine, run_type)
+    df = get_file_paths(engine, runtype=run_type, runs=runs)
+
+    if df.empty:
+        logger.info('No matching datasets found in database. Quitting...')
+        sys.exit()
 
     # filter and process the initial dataframe
-    reduced_process_df = process_df(df, run_type, bin_filter_datasets, output, verbose)
+    reduced_process_df = process_df(df, run_identifier, bin_filter_datasets, output, verbose)
 
     # if there are no new runs to process then exit
     if reduced_process_df.empty:

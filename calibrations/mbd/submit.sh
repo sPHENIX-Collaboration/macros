@@ -105,11 +105,10 @@ echo "Queue" | condor_submit \
     -a "Error=$PWD/${logdir}/${log}.err" \
     -a "Initialdir=$PWD" \
     -a "PeriodicHold=(NumJobStarts>=1 && JobStatus == 1 && !(ON_EVICT_CHECK_RequestMemory_REQUIREMENTS))" \
-    -a "request_memory=4096MB" \
+    -a "request_memory=2048MB" \
     -a "retry_request_memory_increase=2048MB" \
     -a "retry_request_memory_max=16192MB" \
-    -a "request_disk=${request_disk}" \
-    -a "GetEnv=True"
+    -a "request_disk=${request_disk}"
 
 
 echo Condor submit logs are in $TMPLOG and output logs are in $logdir

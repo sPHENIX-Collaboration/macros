@@ -36,6 +36,8 @@ then
 fi
 echo Processing $nevents events
 
+export USER=$(whoami)
+echo USER=$(whoami)
 
 if [[ $USER == "sphnxpro" ]]
 then
@@ -62,7 +64,7 @@ then
   then
     # 2024 Run2auau
     echo "This is run2auau"
-    build=ana.558
+    build=ana.565
     dbtag=newcdbtag
     pass0dir=""
     outbase=DST_MBD_CALIBRATION_run2auau
@@ -73,7 +75,7 @@ then
   then
     # 2025 Run3auau
     echo "This is run3auau"
-    build=ana.558
+    build=ana.565
     dbtag=newcdbtag
     pass0dir=""
     outbase=DST_MBD_CALIBRATION_run3auau
@@ -193,6 +195,17 @@ then
   #  ln -sf $f .
   #done
 fi
+
+echo ./prorun_mbdcal.sh --outbase "$outbase" \
+  --outdir   "$outdir" \
+  --logbase  "$logbase" \
+  --logdir   "$logdir" \
+  --build    "$build" \
+  --pass0dir "$pass0dir" \
+  --run      "$runno" \
+  --dbtag    "$dbtag" \
+  --nevents  "$nevents" \
+  $inputs
 
 ./prorun_mbdcal.sh --outbase "$outbase" \
   --outdir   "$outdir" \

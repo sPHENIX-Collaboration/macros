@@ -84,6 +84,7 @@ void Process_Calo_Calib()
   std::cout << "status setters" << std::endl;
   CaloTowerStatus *statusEMC = new CaloTowerStatus("CEMCSTATUS");
   statusEMC->set_detector_type(CaloTowerDefs::CEMC);
+  statusEMC->set_doAbortMissingCalib(true);
   // MC Towers Status
   if (isSim)
   {
@@ -103,10 +104,12 @@ void Process_Calo_Calib()
 
   CaloTowerStatus *statusHCalIn = new CaloTowerStatus("HCALINSTATUS");
   statusHCalIn->set_detector_type(CaloTowerDefs::HCALIN);
+  statusHCalIn->set_doAbortMissingCalib(true);
   se->registerSubsystem(statusHCalIn);
 
   CaloTowerStatus *statusHCALOUT = new CaloTowerStatus("HCALOUTSTATUS");
   statusHCALOUT->set_detector_type(CaloTowerDefs::HCALOUT);
+  statusHCALOUT->set_doAbortMissingCalib(true);
   se->registerSubsystem(statusHCALOUT);
 
   ////////////////////
@@ -114,16 +117,19 @@ void Process_Calo_Calib()
   std::cout << "Calibrating EMCal" << std::endl;
   CaloTowerCalib *calibEMC = new CaloTowerCalib("CEMCCALIB");
   calibEMC->set_detector_type(CaloTowerDefs::CEMC);
+  calibEMC->set_doAbortMissingCalib(true);
   se->registerSubsystem(calibEMC);
 
   std::cout << "Calibrating OHcal" << std::endl;
   CaloTowerCalib *calibOHCal = new CaloTowerCalib("HCALOUT");
   calibOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
+  calibOHCal->set_doAbortMissingCalib(true);
   se->registerSubsystem(calibOHCal);
 
   std::cout << "Calibrating IHcal" << std::endl;
   CaloTowerCalib *calibIHCal = new CaloTowerCalib("HCALIN");
   calibIHCal->set_detector_type(CaloTowerDefs::HCALIN);
+  calibIHCal->set_doAbortMissingCalib(true);
   se->registerSubsystem(calibIHCal);
 
   ////////////////
