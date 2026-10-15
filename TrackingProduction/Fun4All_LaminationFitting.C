@@ -49,7 +49,7 @@ void Fun4All_LaminationFitting(
   int verbosity = 2;
 
 
-  auto se = Fun4AllServer::instance();
+  auto *se = Fun4AllServer::instance();
   se->Verbosity(verbosity);
 
   TRACKING::tpc_zero_supp = true;
@@ -139,8 +139,8 @@ void Fun4All_LaminationFitting(
     std::format("{}/LaminationQA_{}_{}-{:08d}.pdf",
                 outdir, type, prod, runnumber);
 
-  G4TPC::LaminationOutputName = Form("%s/Laminations_%s_%s-%08d.root",outdir.c_str(),type.c_str(),prod.c_str(),runnumber);
-  G4TPC::LaminationQAName = Form("%s/LaminationQA_%s_%s-%08d.pdf",outdir.c_str(),type.c_str(),prod.c_str(),runnumber);
+  G4TPC::LaminationOutputName = std::format("{}/Laminations_{}_{}-{:08}.root",outdir,type,prod,runnumber);
+  G4TPC::LaminationQAName = std::format("{}/LaminationQA_{}_{}-{:08}.pdf",outdir,type,prod,runnumber);
 
   TpcLaminationFitting *laminations = new TpcLaminationFitting;
   laminations->Verbosity(verbosity);
