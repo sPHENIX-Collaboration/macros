@@ -7,6 +7,7 @@
 #include <G4_TrkrVariables.C>
 
 #include <tpc/LaserClusterizer.h>
+#include <tpc/LaserPadAggregator.h>
 
 #include <tpccalib/TpcDirectLaserReconstruction.h>
 #include <tpccalib/TpcLaminationFitting.h>
@@ -15,6 +16,16 @@
 
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtpccalib.so)
+
+void TPC_LaserPadAggregating()
+{
+  Fun4AllServer *se = Fun4AllServer::instance();
+  
+  LaserPadAggregator *laserPadAggregator = new LaserPadAggregator;
+  laserPadAggregator->set_adc_threshold(G4TPC::laser_adc_threshold);
+  laserPadAggregator->set_padContainerNodeName("LASER_AGGREGATED_PADS");
+  se->registerSubsystem(laserPadAggregator);  
+}
 
 void TPC_LaserClustering()
 {
