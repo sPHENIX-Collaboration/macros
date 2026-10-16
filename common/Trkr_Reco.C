@@ -110,6 +110,11 @@ void Tracking_Reco_TrackFit_run2pp(const std::string &outfile = "run2pptrackfit.
   actsFit->set_use_clustermover(true);  // default is true for now
   actsFit->useActsEvaluator(false);
   actsFit->useOutlierFinder(false);
+  if(TRACKING::use_slim_tracks)
+    {
+      actsFit->setUseSlimTracks(true);
+      actsFit->setUpdateSvtxTrackStates(false);
+    }
   actsFit->setFieldMap(G4MAGNET::magfield_tracking);
   se->registerSubsystem(actsFit);
 

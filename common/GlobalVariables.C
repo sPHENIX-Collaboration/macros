@@ -95,6 +95,7 @@ namespace TRACKING
   // alignment parameter
   std::string alignmentParamsFile = "./localAlignmentParamsFile.txt";
 
+  bool use_slim_tracks = false;
 }  // namespace TRACKING
 
 namespace G4MAGNET
