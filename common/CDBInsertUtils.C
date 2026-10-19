@@ -13,6 +13,7 @@ int insertplrunrange(const std::string &fname, const std::string &ptype, int run
 int checkplrunrange(const std::string &fname, const std::string &ptype, int runnumber, int endrun);
 int insertplinfinity(const std::string &fname, const std::string &ptype, int runnumber);
 int checkplinfinity(const std::string &fname, const std::string &ptype, int runnumber);
+int deletepl(const std::string &fname, const std::string &ptype, int runnumber);
 
 int checkpl(const std::string &fname, const std::string &ptype, int runnumber)
 {
@@ -218,4 +219,16 @@ int checkrunrange(const std::string &fname, const std::string &ptype, int beginr
     }
   }
   return iret;
+}
+
+int deletepl(const std::string &fname, const std::string &ptype, int runnumber)
+{
+  std::string cdbres = getCalibration(ptype, runnumber);
+  if (cdbres.empty() || cdbres.find(fname) == std::string::npos)
+  {
+    std::cout << ptype << " calibration not in cdb, not deleting it" << std::endl;
+    return 0;
+  }
+  deletePayloadIOV(ptype,runnumber,runnumber+1);
+  return 0;
 }
