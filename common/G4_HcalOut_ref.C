@@ -389,7 +389,7 @@ void HCALOuter_Towers()
     
     if (Input::BEAM_CONFIGURATION == Input::OO_COLLISION)
     {
-      caloWaveformSim->set_pedestal_scale(0.73);
+      caloWaveformSim->set_pedestal_scale(0.92);
     }
 
     // caloWaveformSim->Verbosity(2);
