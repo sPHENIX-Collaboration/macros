@@ -8,20 +8,16 @@
 
 #include <fun4all/Fun4AllServer.h>
 
-#include <phool/recoConsts.h>
-
 #include <Rtypes.h> // for R__LOAD_LIBRARY
 
 R__LOAD_LIBRARY(libcalo_reco.so)
-R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libmbd.so)
-R__LOAD_LIBRARY(libphool.so)
 
 void Process_Calo_Fitting()
 {
   Fun4AllServer *se = Fun4AllServer::instance();
 
-  // process MBD (wave formt fitting only)
+  // process MBD (wave form fitting only)
   MbdReco *mbd = new MbdReco();
   mbd->DoOnlyFits();
   se->registerSubsystem(mbd);
@@ -34,7 +30,6 @@ void Process_Calo_Fitting()
   ctbEMCal->set_detector_type(CaloTowerDefs::CEMC);
   ctbEMCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbEMCal->set_builder_type(buildertype);
-  ctbEMCal->set_offlineflag(true);
   ctbEMCal->set_nsamples(12);
   ctbEMCal->set_bitFlipRecovery(true);
   //60 ADC SZS
@@ -45,7 +40,6 @@ void Process_Calo_Fitting()
   ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbIHCal->set_builder_type(buildertype);
-  ctbIHCal->set_offlineflag();
   ctbIHCal->set_nsamples(12);
   ctbIHCal->set_bitFlipRecovery(true);
   //30 ADC SZS
@@ -56,7 +50,6 @@ void Process_Calo_Fitting()
   ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
   ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbOHCal->set_builder_type(buildertype);
-  ctbOHCal->set_offlineflag();
   ctbOHCal->set_nsamples(12);
   ctbOHCal->set_bitFlipRecovery(true);
   //30 ADC SZS
@@ -68,7 +61,6 @@ void Process_Calo_Fitting()
   caEPD->set_builder_type(buildertype);
   caEPD->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   caEPD->set_nsamples(12);
-  caEPD->set_offlineflag();
   se->registerSubsystem(caEPD);
 }
 
