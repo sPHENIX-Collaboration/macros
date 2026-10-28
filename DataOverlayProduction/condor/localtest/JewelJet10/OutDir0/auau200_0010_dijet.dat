@@ -1,0 +1,24 @@
+# JEWEL 2.6.0 Au+Au 200 GeV 0-10%: dijets (PPJJ)
+# pT-hat > 15 GeV, pT-hat weighted; run with set_medium("simple")
+# recoils kept; thermal momenta written as status 3 for 4MomSub
+PROCESS PPJJ
+SQRTS 200.
+PTMIN 5.
+PTMAX -1.
+ETAMAX 2.5
+PDFSET 13100
+MASS 197
+NPROTON 79
+ISOCHANNEL XX
+WEIGHTED F
+KEEPRECOILS T
+SPLITINTFILE tables/splitint.dat
+PDFFILE tables/pdfs_ct14nlo.dat
+XSECFILE tables/xsecs_ct14nlo.dat
+MEDIUMPARAMS medium_auau200_0010.dat
+NF 3
+HADRO T
+MPI F
+SHORTHEPMC T
+WRITESCATCEN T
+WRITEDUMMIES F

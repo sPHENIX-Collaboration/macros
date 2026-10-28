@@ -1,0 +1,13 @@
+# JEWEL simple medium (Glauber + Bjorken) for Au+Au 200 GeV 0-10%
+# TI 0.375 GeV, TAUI 0.4 fm/c as for the JEWEL x_J curves in
+# sPH-CONF-JET-2025-05; SIGMANN in fm^2 (4.2 = 42 mb)
+TAUI 0.4
+TI 0.375
+TC 0.17
+NF 3
+WOODSSAXON T
+SIGMANN 4.2
+MDFACTOR 0.45
+MDSCALEFAC 0.9
+CENTRMIN 0
+CENTRMAX 10

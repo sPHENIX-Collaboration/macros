@@ -1,0 +1,15 @@
+# canonical JEWEL medium card (simple) written by PHJewel from
+# /gpfs/mnt/gpfs02/sphenix/user/bseidlitz/dataOverlayReboot/macros/DataOverlayProduction/condor/localtest/JewelJet10/OutDir0/medium_auau200_0010.dat
+# card hash 2ee5a911d34c9768
+TAUI 0.4
+TI 0.375
+TC 0.17
+CENTRMIN 0.
+CENTRMAX 10.
+SIGMANN 4.2
+NF 3
+MDFACTOR 0.45
+MDSCALEFAC 0.9
+WOODSSAXON T
+#default N0 0.17
+#default D 0.54

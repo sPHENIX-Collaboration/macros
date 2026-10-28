@@ -1,0 +1,21 @@
+# submit with: condor_submit embed_data.job
+# override defaults e.g.: condor_submit JetTrigger=Jet40 NJobs=100 embed_data.job
+
+JetTrigger = Jet10
+NEvents    = 500
+RunNumber  = 68145
+NJobs      = 10
+BaseDir    = /sphenix/tg/tg01/commissioning/CaloCalibWG/bseidlitz/embed_reboot
+
+universe   = vanilla
+executable = run_embed.sh
+arguments  = $(Process) $(JetTrigger) $(NEvents) $(BaseDir) $(RunNumber)
+
+log     = /tmp/$(Cluster)_$(Process).log
+output  = condor_out/$(JetTrigger)_$(Process).out
+error   = condor_err/$(JetTrigger)_$(Process).err
+
+getenv  = True
+request_memory = 12 GB
+
+queue $(NJobs)
