@@ -75,7 +75,6 @@ void Process_Calo_Calib()
     caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
     caZDC->set_funcfit_type(2);
   }
-  caZDC->set_nsamples(16);
   se->registerSubsystem(caZDC);
 
   //////////////////////////////
