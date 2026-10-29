@@ -33,16 +33,18 @@ case ${STEP} in
     LIST=$2
     TAG=$3
     cd "${_CONDOR_SCRATCH_DIR:?not a condor job}" || exit 1
-    # stage the segments; one that is no longer retrievable is skipped
+    # stage the segments; one that cannot be staged fails the job (condor retries it), so a run is never
+    # calibrated from part of its data
     : > segments.list
     while read -r calo zdc; do
       if getinputfiles.pl ${calo} && getinputfiles.pl ${zdc}; then
         echo "${calo} ${zdc}" >> segments.list
       else
-        echo "skipping segment ${calo} ${zdc}: not retrievable"
+        echo "segment ${calo} ${zdc} could not be staged"
+        exit 1
       fi
     done < ${LIST}
-    [[ -s segments.list ]] || { echo "no retrievable segments in ${LIST}"; exit 0; }
+    [[ -s segments.list ]] || { echo "no segments in ${LIST}"; exit 1; }
     root -b -q "${M}/Fun4All_CentralityTree.C(\"segments.list\", \"tree.root\", 0, \"${CDBTAG}\")" || exit 1
     mkdir -p ${CENT_TREEDIR}/segments/${RUN}
     cp tree.root ${CENT_TREEDIR}/segments/${RUN}/tree_${TAG}.root.part &&
@@ -52,8 +54,9 @@ case ${STEP} in
     RUN=$1
     SEGS=$(ls ${CENT_TREEDIR}/segments/${RUN}/tree_*.root 2> /dev/null)
     if [[ -n ${SEGS} ]]; then
-      hadd -f -k ${CENT_TREEDIR}/run${RUN}.root ${SEGS} || exit 1
-      rm -r ${CENT_TREEDIR}/segments/${RUN}   # the per-run tree replaces the segments
+      # no -k: a segment that cannot be read fails the merge instead of being left out
+      hadd -f ${CENT_TREEDIR}/run${RUN}.root ${SEGS} || exit 1
+      rm -r -- "${CENT_TREEDIR:?}/segments/${RUN:?}"   # the per-run tree replaces the segments
     fi
     [[ -s ${CENT_TREEDIR}/run${RUN}.root ]] || { echo "no tree for run ${RUN}"; exit 1; }
     root -b -q "${M}/fit_t0offset.C(${RUN}, \"${CENT_TREEDIR}/run${RUN}.root\", \"${CENT_WORKDIR}/t0offset\", ${TRIGGER_BIT}, ${T0_SEED_WINDOW})" || exit 1

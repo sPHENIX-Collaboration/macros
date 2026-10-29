@@ -41,6 +41,17 @@ awk -v d=${D}/dstlists -v n=${SEGMENTS_PER_JOB} '
     }
   }' ${D}/segments.txt
 
+# every reference run needs its tree: without DST segments it would get no tree job, and its calibration would fail or
+# read an old tree
+missing=""
+for ref in $(awk '{ print $2 }' ${HERE}/${RUNLIST} | sort -u); do
+  [[ -s ${D}/dstlists/${ref}.queue ]] || missing="${missing} ${ref}"
+done
+if [[ -n ${missing} ]]; then
+  echo "reference run(s) without DST segments:${missing}; no DAG written" >&2
+  exit 1
+fi
+
 # submit files
 header()
 {
