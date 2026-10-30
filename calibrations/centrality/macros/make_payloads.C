@@ -5,6 +5,9 @@
 //   root -b -q 'make_payloads.C("runlists/run24auau.list", "calib", "t0_offsets.csv", "payloads")'
 #include <centralitycalib/CentralityCalibrator.h>
 
+#include <Rtypes.h> // defines R__LOAD_LIBRARY macro for clang-tidy
+#include <TSystem.h>
+
 #include <fstream>
 #include <iostream>
 #include <string>

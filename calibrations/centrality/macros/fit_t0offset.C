@@ -6,6 +6,11 @@
 //   root -b -q 'fit_t0offset.C(54912, "run54912.root", "t0offset", 10, 11.5)'
 #include <centralitycalib/CentralityCalibrator.h>
 
+#include <Rtypes.h> // defines R__LOAD_LIBRARY macro for clang-tidy
+#include <TSystem.h>
+
+#include <string>
+
 R__LOAD_LIBRARY(libcentralitycalib.so)
 
 int fit_t0offset(int run, const std::string &treefile, const std::string &outdir, int triggerbit = 14, double seedwindow = 3.)

@@ -7,6 +7,11 @@
 //   root -b -q 'calibrate_run.C(54913, "run54913.root", "t0_offsets.csv", "calib/centrality_calib_54912.root", "calib/centrality_calib_54913.root", 10)'
 #include <centralitycalib/CentralityCalibrator.h>
 
+#include <Rtypes.h> // defines R__LOAD_LIBRARY macro for clang-tidy
+#include <TSystem.h>
+
+#include <string>
+
 R__LOAD_LIBRARY(libcentralitycalib.so)
 
 int calibrate_run(int run, const std::string &treefile, const std::string &t0table, const std::string &reffile, const std::string &outfile,

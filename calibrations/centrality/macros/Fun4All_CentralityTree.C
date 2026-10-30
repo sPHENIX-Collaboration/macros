@@ -14,6 +14,9 @@
 #include <fun4all/Fun4AllUtils.h>
 #include <phool/recoConsts.h>
 
+#include <Rtypes.h> // defines R__LOAD_LIBRARY macro for clang-tidy
+#include <TSystem.h>
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
