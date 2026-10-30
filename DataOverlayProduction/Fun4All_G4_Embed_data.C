@@ -12,6 +12,12 @@
 #include <phpythia8/PHPy8ParticleTrigger.h>
 #include <phpythia8/PHPy8JetTrigger.h>
 
+#include <phjewel/PHJewel.h>
+#include <phjewel/PHJewelJetTrigger.h>
+#include <phjewel/PHJewelPhotonTrigger.h>
+
+#include <g4main/HepMCNodeReader.h>
+
 #include <caloembedding/HepMCCollisionVertex.h>
 #include <caloembedding/caloTowerEmbed.h>
 #include <caloembedding/CopyIODataNodes.h>
@@ -54,6 +60,7 @@
 #include <TRandom3.h>
 
 #include <format>
+#include <fstream>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
@@ -65,6 +72,7 @@ R__LOAD_LIBRARY(libcalotrigger.so)
 R__LOAD_LIBRARY(libjetbase.so)
 R__LOAD_LIBRARY(libjetbackground.so)
 R__LOAD_LIBRARY(libg4jets.so)
+R__LOAD_LIBRARY(libPHJewel.so)
 // R__LOAD_LIBRARY(libg4dst.so)
 //  For HepMC Hijing
 //  try inputFile = /sphenix/sim/sim01/sphnxpro/sHijing_HepMC/sHijing_0-12fm.dat
@@ -75,6 +83,7 @@ R__LOAD_LIBRARY(libg4jets.so)
 // }
 
 void AddCommonNodes(Fun4AllOutputManager *out);
+std::string MakeJewelCard(const std::string &card, int centrality_max);
 
 int Fun4All_G4_Embed_data(
     const int nEvents = 2,
@@ -83,7 +92,8 @@ int Fun4All_G4_Embed_data(
     const std::string &outdir = "./",
     const std::string &/*outnameEnd*/ = "embed_test.root",
     const std::string &jettrigger = "Jet10",
-    const std::string &cdbtag = "MDC2")
+    const std::string &cdbtag = "MDC2",
+    const int centrality_max = 100)  // data selected in 0-centrality_max %, also the JEWEL medium range
 {
 
   std::cout << "segment: " << segment << std::endl;
@@ -186,14 +196,24 @@ int Fun4All_G4_Embed_data(
   // Enable this is emulating the nominal pp/pA/AA collision vertex distribution
   Input::BEAM_CONFIGURATION = Input::AA_COLLISION; // for 2023 sims we want the AA geometry for no pileup sims
 
-  Input::PYTHIA8 = true;
+  // JewelJet10, JewelPhotonJet10: JEWEL Au+Au 0-10% instead of PYTHIA 8
+  const bool use_jewel = (jettrigger.rfind("Jewel", 0) == 0);
+  Input::PYTHIA8 = !use_jewel;
   if (Input::PYTHIA8)
   {
     std::string pythia8_config_file = std::string(getenv("CALIBRATIONROOT")) + "/Generators/JetStructure_TG/";
     std::cout << "pythia config path: " << pythia8_config_file << std::endl;
-    if (jettrigger == "Jet10")
+    if (jettrigger == "Jet5")
+    {
+      pythia8_config_file = std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8_detroit_minBias.cfg";
+    }
+    else if (jettrigger == "Jet10" || jettrigger == "Jet12" || jettrigger == "PhotonJet12")
     {
       pythia8_config_file += "phpythia8_10GeV_JS_MDC2.cfg";
+    }
+    else if (jettrigger == "Jet20" || jettrigger == "PhotonJet20")
+    {
+      pythia8_config_file += "phpythia8_20GeV_JS_MDC2.cfg";
     }
     else if (jettrigger == "Jet30")
     {
@@ -202,10 +222,6 @@ int Fun4All_G4_Embed_data(
     else if (jettrigger == "Jet40")
     {
       pythia8_config_file += "phpythia8_40GeV_JS_MDC2.cfg";
-    }
-    else if (jettrigger == "PhotonJet20")
-    {
-      pythia8_config_file += "phpythia8_15GeV_JS_MDC2.cfg";
     }
     else
     {
@@ -240,9 +256,21 @@ int Fun4All_G4_Embed_data(
     p8_photon_jet_trigger->AddParents(partentsId);
 
 
-    if (jettrigger == "Jet10")
+    if (jettrigger == "Jet5")
+    {
+      p8_js_signal_trigger->SetMinJetPt(1);
+    }
+    else if (jettrigger == "Jet10")
     {
       p8_js_signal_trigger->SetMinJetPt(10);
+    }
+    else if (jettrigger == "Jet12")
+    {
+      p8_js_signal_trigger->SetMinJetPt(12);
+    }
+    else if (jettrigger == "Jet20")
+    {
+      p8_js_signal_trigger->SetMinJetPt(20);
     }
     else if (jettrigger == "Jet30")
     {
@@ -253,7 +281,10 @@ int Fun4All_G4_Embed_data(
       p8_js_signal_trigger->SetMinJetPt(40);
     }
     
-    if (jettrigger == "Jet10" ||
+    if (jettrigger == "Jet5" ||
+        jettrigger == "Jet10" ||
+        jettrigger == "Jet12" ||
+        jettrigger == "Jet20" ||
         jettrigger == "Jet30" ||
         jettrigger == "Jet40")
     {
@@ -265,6 +296,12 @@ int Fun4All_G4_Embed_data(
       delete p8_js_signal_trigger;
       p8_js_signal_trigger = nullptr;
       p8_photon_jet_trigger->SetPtLow(20);
+    }
+    else if (jettrigger == "PhotonJet12")
+    {
+      delete p8_js_signal_trigger;
+      p8_js_signal_trigger = nullptr;
+      p8_photon_jet_trigger->SetPtLow(12);
     }
     else
     {
@@ -284,6 +321,39 @@ int Fun4All_G4_Embed_data(
     }
 
     Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Pythia8[0]);
+  }
+
+  PHJewel *jewel = nullptr;
+  if (use_jewel)
+  {
+    // simple medium 0-centrality_max %, as the data, truth trigger as for the PYTHIA samples (|eta| < 1.5).
+    // With the recoils kept the jet trigger sees unsubtracted jets.
+    jewel = new PHJewel("PHJewel");
+    jewel->set_medium("simple");
+    if (jettrigger == "JewelJet10")
+    {
+      jewel->set_card(MakeJewelCard("auau200_0010_dijet.dat", centrality_max));
+      PHJewelJetTrigger *jw_jet_trigger = new PHJewelJetTrigger();
+      jw_jet_trigger->SetJetR(0.4);
+      jw_jet_trigger->SetEtaMax(1.5);
+      jw_jet_trigger->SetMinJetPt(10);
+      jewel->register_trigger(jw_jet_trigger);
+    }
+    else if (jettrigger == "JewelPhotonJet10")
+    {
+      jewel->set_card(MakeJewelCard("auau200_0010_photonjet.dat", centrality_max));
+      PHJewelPhotonTrigger *jw_photon_trigger = new PHJewelPhotonTrigger();
+      jw_photon_trigger->SetEtaMax(1.5);
+      jw_photon_trigger->SetMinPt(10);
+      jw_photon_trigger->SetPrompt();  // no hadron parent, as the parton parents of the PYTHIA trigger
+      jewel->register_trigger(jw_photon_trigger);
+    }
+    else
+    {
+      std::cout << "invalid jettrigger: " << jettrigger << std::endl;
+      gSystem->Exit(1);
+    }
+    Input::ApplysPHENIXBeamParameter(jewel);
   }
 
   //--------------
@@ -324,6 +394,12 @@ int Fun4All_G4_Embed_data(
   se->registerSubsystem(collvtx);
 
   InputRegister();
+  if (jewel)
+  {
+    // InputRegister() only knows the G4_Input generators
+    se->registerSubsystem(jewel);
+    se->registerSubsystem(new HepMCNodeReader());
+  }
 
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
@@ -351,6 +427,7 @@ int Fun4All_G4_Embed_data(
   //-----------------
   CopyIODataNodes *cp = new CopyIODataNodes();
   cp->set_CopyTowerInfo("TOWERINFO_CALIB_SEPD","TOWERINFO_CALIB_SEPD_data");
+  cp->CopyMbdPmtContainer(true);
   cp->Verbosity(1);
   se->registerSubsystem(cp, DataTopNode);
 
@@ -529,6 +606,7 @@ int Fun4All_G4_Embed_data(
   caloWaveformSim->set_timewidth(0.2);
   caloWaveformSim->set_peakpos(6);
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+  caloWaveformSim->set_fixpedestal(0); // data waveform already carries the pedestal
   caloWaveformSim->set_directURL_calib(cemc_datacalib);
   se->registerSubsystem(caloWaveformSim);
 
@@ -539,6 +617,7 @@ int Fun4All_G4_Embed_data(
   caloWaveformSim->set_timewidth(0.2);
   caloWaveformSim->set_peakpos(6);
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+  caloWaveformSim->set_fixpedestal(0); // data waveform already carries the pedestal
   caloWaveformSim->set_directURL_calib(ihcal_datacalib);
   se->registerSubsystem(caloWaveformSim);
 
@@ -549,6 +628,7 @@ int Fun4All_G4_Embed_data(
   caloWaveformSim->set_timewidth(0.2);
   caloWaveformSim->set_peakpos(6);
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+  caloWaveformSim->set_fixpedestal(0); // data waveform already carries the pedestal
   caloWaveformSim->set_directURL_calib(ohcal_datacalib);
   se->registerSubsystem(caloWaveformSim);
 
@@ -586,7 +666,6 @@ int Fun4All_G4_Embed_data(
 
   CaloTowerBuilder *ca2 = new CaloTowerBuilder();
   ca2->set_detector_type(CaloTowerDefs::CEMC);
-  ca2->set_nsamples(12);
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
@@ -596,7 +675,6 @@ int Fun4All_G4_Embed_data(
 
   ca2 = new CaloTowerBuilder();
   ca2->set_detector_type(CaloTowerDefs::HCALIN);
-  ca2->set_nsamples(12);
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
@@ -605,7 +683,6 @@ int Fun4All_G4_Embed_data(
 
   ca2 = new CaloTowerBuilder();
   ca2->set_detector_type(CaloTowerDefs::HCALOUT);
-  ca2->set_nsamples(12);
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
@@ -669,8 +746,13 @@ int Fun4All_G4_Embed_data(
 
   //  InputManagers();
 
+  std::string sample = jettrigger;
+  if (centrality_max < 100)
+  {
+    sample += std::format("_cent0to{}", centrality_max);
+  }
   std::string outnameEnd2 =
-    std::format("{}-{:08}-", jettrigger, runnumber) +
+    std::format("{}-{:08}-", sample, runnumber) +
     std::format("{}-{:08}-{:05}.root","data", dataRunNumber, dataSegment);
 
   std::string FullOutFile = outdir + "DST_TRUTH_G4HIT_" + outnameEnd2;
@@ -730,6 +812,7 @@ int Fun4All_G4_Embed_data(
   out->AddNode("CentralityInfo");
   out->AddNode("MbdOut");
   out->AddNode("MbdPmtContainer");
+  out->AddNode("MbdPmtContainer_data");
   out->AddNode("MinimumBiasInfo");
   out->AddNode("CentralityInfo");
   out->AddNode("TOWERINFO_CALIB_SEPD_data");
@@ -775,6 +858,80 @@ void AddCommonNodes(Fun4AllOutputManager *out)
   out->AddNode("Sync");
   out->AddNode("EventHeader");
   return;
+}
+
+// JEWEL card for the overlay, made from a card in $JEWEL_CARDDIR (default
+// $CALIBRATIONROOT/Generators/JEWEL) with the tables in $JEWEL_TABLEDIR (default
+// $CALIBRATIONROOT/JEWEL_tables): unweighted, with a pT-hat minimum below the
+// trigger threshold, as for the PYTHIA samples, and the medium in 0-centrality_max %
+// (the medium cards differ only in the centrality range).  It is written to the working
+// directory next to the medium card and a tables link, since PHJewel resolves the
+// card's paths relative to the card and refuses lines over 80 characters.
+std::string MakeJewelCard(const std::string &card, int centrality_max)
+{
+  const char *env = getenv("JEWEL_CARDDIR");
+  std::string carddir = env ? env : std::string(getenv("CALIBRATIONROOT")) + "/Generators/JEWEL";
+  env = getenv("JEWEL_TABLEDIR");
+  std::string tabledir = env ? env : std::string(getenv("CALIBRATIONROOT")) + "/JEWEL_tables";
+
+  std::ifstream in(carddir + "/" + card);
+  if (!in.is_open())
+  {
+    std::cout << "MakeJewelCard: cannot open " << carddir << "/" << card << std::endl;
+    gSystem->Exit(1);
+  }
+  std::ofstream out(card);
+  std::string line;
+  while (std::getline(in, line))
+  {
+    std::string key = line.substr(0, line.find(' '));
+    std::string value = line.substr(line.find(' ') + 1);
+    if (key == "PTMIN")
+    {
+      out << "PTMIN 5." << std::endl;
+    }
+    else if (key == "WEIGHTED")
+    {
+      out << "WEIGHTED F" << std::endl;
+    }
+    else if (key == "WEXPO")
+    {
+      continue;
+    }
+    else if (key == "SPLITINTFILE" || key == "PDFFILE" || key == "XSECFILE")
+    {
+      out << key << " tables/" << value.substr(value.rfind('/') + 1) << std::endl;
+    }
+    else if (key == "MEDIUMPARAMS")
+    {
+      std::ifstream medin(std::format("{}/{}", carddir, value));
+      std::ofstream medout(value);
+      std::string medline;
+      while (std::getline(medin, medline))
+      {
+        if (medline.rfind("CENTRMIN ", 0) == 0)
+        {
+          medout << "CENTRMIN 0" << std::endl;
+        }
+        else if (medline.rfind("CENTRMAX ", 0) == 0)
+        {
+          medout << "CENTRMAX " << centrality_max << std::endl;
+        }
+        else if (medline[0] != '#')
+        {
+          medout << medline << std::endl;
+        }
+      }
+      out << line << std::endl;
+    }
+    else
+    {
+      out << line << std::endl;
+    }
+  }
+  gSystem->Unlink("tables");
+  gSystem->Symlink(tabledir.c_str(), "tables");
+  return card;
 }
 
 #endif

@@ -38,6 +38,7 @@
 
 #include <format>
 #include <fstream>
+#include <map>
 
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloWaveformProcessing.h>
@@ -59,6 +60,8 @@ void Fun4All_PrepDataFitting(
             int nEvents_prepared_data = 4,
             int nEvents_skip = 0,
 			   const std::string& inlist = "test.list",
+            int centrality_max = 100,  // keep data events in 0-centrality_max %
+
                            const std::string &outfile = "DST_CALOFITTING",
                            const std::string &outfile_hist = "HIST_CALOFITTINGQA",
                            const std::string &dbtag = "newcdbtag")
@@ -80,8 +83,9 @@ void Fun4All_PrepDataFitting(
   se->registerSubsystem(flag);
 
 
-  // loop over all files in file list and create an input manager for each one  
-  Fun4AllInputManager *In = nullptr;
+  // loop over all files in file list and create an input manager for each stream (seb),
+  // further segments of the same stream are queued in that stream's input manager
+  std::map<std::string, Fun4AllInputManager *> streams;
   std::ifstream infile;
   infile.open(inlist);
   int iman = 0;
@@ -107,14 +111,26 @@ void Fun4All_PrepDataFitting(
         rc->set_uint64Flag("TIMESTAMP", runnumber);
         first = false;
       }
-      std::string magname = "DSTin_" + std::to_string(iman);
-      In = new Fun4AllDstInputManager(magname);
-      In->Verbosity(1);
-      se->registerInputManager(In);
-      se->fileopen(magname, line);
-      iman++;
+      // stream name is the file name without -<run>-<segment>.root
+      std::string stream = line.substr(0, line.rfind('-', line.rfind('-') - 1));
+      if (!streams.contains(stream))
+      {
+        std::string magname = "DSTin_" + std::to_string(iman);
+        Fun4AllInputManager *In = new Fun4AllDstInputManager(magname);
+        In->Verbosity(1);
+        se->registerInputManager(In);
+        streams[stream] = In;
+        iman++;
+      }
+      streams[stream]->AddFile(line);
     }
     infile.close();
+  }
+  // open the first segment from the file list now: se->skip() only works on an open file
+  // and opening it via fileopen() instead would make fileclose() drop the next segment from the list
+  for (auto &iter : streams)
+  {
+    iter.second->OpenNextFile();
   }
 
   // Get info from DB and store in DSTs
@@ -139,7 +155,6 @@ void Fun4All_PrepDataFitting(
   caZDC->set_detector_type(CaloTowerDefs::ZDC);
   caZDC->set_builder_type(buildertype);
   caZDC->set_processing_type(CaloWaveformProcessing::FAST);
-  caZDC->set_nsamples(16);
   caZDC->set_offlineflag();
   se->registerSubsystem(caZDC);
 
@@ -148,10 +163,9 @@ void Fun4All_PrepDataFitting(
   ctbEMCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbEMCal->set_builder_type(buildertype);
   ctbEMCal->set_offlineflag(true);
-  ctbEMCal->set_nsamples(12);
   ctbEMCal->set_bitFlipRecovery(true);
-  //60 ADC SZS
-  ctbEMCal->set_softwarezerosuppression(true, 60);
+  // no SZS: keep full data waveforms for embedding, ZS is applied after embedding
+  ctbEMCal->set_softwarezerosuppression(false, 0);
   se->registerSubsystem(ctbEMCal);
 
   CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
@@ -159,10 +173,9 @@ void Fun4All_PrepDataFitting(
   ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbIHCal->set_builder_type(buildertype);
   ctbIHCal->set_offlineflag();
-  ctbIHCal->set_nsamples(12);
   ctbIHCal->set_bitFlipRecovery(true);
-  //30 ADC SZS
-  ctbIHCal->set_softwarezerosuppression(true, 30);
+  // no SZS: keep full data waveforms for embedding, ZS is applied after embedding
+  ctbIHCal->set_softwarezerosuppression(false, 0);
   se->registerSubsystem(ctbIHCal);
 
   CaloTowerBuilder *ctbOHCal = new CaloTowerBuilder("HCALOUTBUILDER");
@@ -170,17 +183,15 @@ void Fun4All_PrepDataFitting(
   ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbOHCal->set_builder_type(buildertype);
   ctbOHCal->set_offlineflag();
-  ctbOHCal->set_nsamples(12);
   ctbOHCal->set_bitFlipRecovery(true);
-  //30 ADC SZS
-  ctbOHCal->set_softwarezerosuppression(true, 30);
+  // no SZS: keep full data waveforms for embedding, ZS is applied after embedding
+  ctbOHCal->set_softwarezerosuppression(false, 0);
   se->registerSubsystem(ctbOHCal);
 
   CaloTowerBuilder *caEPD = new CaloTowerBuilder("SEPDBUILDER");
   caEPD->set_detector_type(CaloTowerDefs::SEPD);
   caEPD->set_builder_type(buildertype);
-  caEPD->set_processing_type(CaloWaveformProcessing::FAST);
-  caEPD->set_nsamples(12);
+  caEPD->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   caEPD->set_offlineflag();
   se->registerSubsystem(caEPD);
 
@@ -200,7 +211,10 @@ void Fun4All_PrepDataFitting(
 
   //////////////////////////////
   // Centrality
+  // drop events failing the MB selection (includes |z_vtx| < 60 cm), registered before the trigger skimmer
+  // so that set_accept_max counts only events passing both
   MinimumBiasClassifier *mb = new MinimumBiasClassifier();
+  mb->abortEvents(true);
   se->registerSubsystem(mb);
 
   CentralityReco* cent = new CentralityReco();
@@ -210,11 +224,23 @@ void Fun4All_PrepDataFitting(
 
 
   //////////////////
-  // skim out non-MB events
+  // skim out non-MB events, loose vertex MB trigger:
+  // bit 10 "MBD N&S >= 2" before run 54974, bit 14 "MBD N&S >= 2, vtx < 150 cm" after
   TriggerDSTSkimmer *tskim = new TriggerDSTSkimmer();
   std::vector<int> triggers;
-  triggers.push_back(10);
+  if (runnumber < 54974)
+  {
+    triggers.push_back(10);
+  }
+  else
+  {
+    triggers.push_back(14);
+  }
   tskim->SetTrigger(triggers);
+  if (centrality_max < 100)
+  {
+    tskim->SetCentralityRange(0, centrality_max);
+  }
   tskim->set_accept_max(nEvents_gen);
   se->registerSubsystem(tskim);
 
