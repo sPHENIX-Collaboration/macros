@@ -22,6 +22,8 @@ void Fun4All_QVecCalib(const std::string& flist,
                        int nEvents = 0,
                        const std::string& output = "test.root",
                        const std::string& dst_tag = "new_newcdbtag_v008",
+                       double charge_threshold = 50,
+                       double noise_threshold = 0.5,
                        const std::string& cdb_output_dir = ".")
 {
   std::cout << "########################" << std::endl;
@@ -33,11 +35,12 @@ void Fun4All_QVecCalib(const std::string& flist,
   std::cout << "Pass: " << pass << std::endl;
   std::cout << "Output: " << output << std::endl;
   std::cout << "dst_tag: " << dst_tag << std::endl;
+  std::cout << "charge_threshold: " << charge_threshold << std::endl;
+  std::cout << "noise_threshold: " << noise_threshold << std::endl;
   std::cout << "CDB Output Dir: " << cdb_output_dir << std::endl;
   std::cout << "########################" << std::endl;
 
   Fun4AllServer* se = Fun4AllServer::instance();
-  se->Verbosity(10);
 
   // sEPD Tree Gen
   QVecCalib* calib = new QVecCalib();
@@ -46,6 +49,8 @@ void Fun4All_QVecCalib(const std::string& flist,
   calib->set_input_Q_calib(input_Q_calib);
   calib->set_dst_tag(dst_tag);
   calib->set_cdb_output_dir(cdb_output_dir);
+  calib->set_charge_threshold(charge_threshold);
+  calib->set_noise_threshold(noise_threshold);
   calib->Verbosity(1);
   se->registerSubsystem(calib);
 
