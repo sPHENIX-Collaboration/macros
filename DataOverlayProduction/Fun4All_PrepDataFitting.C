@@ -60,6 +60,8 @@ void Fun4All_PrepDataFitting(
             int nEvents_prepared_data = 4,
             int nEvents_skip = 0,
 			   const std::string& inlist = "test.list",
+            int centrality_max = 100,  // keep data events in 0-centrality_max %
+
                            const std::string &outfile = "DST_CALOFITTING",
                            const std::string &outfile_hist = "HIST_CALOFITTINGQA",
                            const std::string &dbtag = "newcdbtag")
@@ -111,7 +113,7 @@ void Fun4All_PrepDataFitting(
       }
       // stream name is the file name without -<run>-<segment>.root
       std::string stream = line.substr(0, line.rfind('-', line.rfind('-') - 1));
-      if (streams.find(stream) == streams.end())
+      if (!streams.contains(stream))
       {
         std::string magname = "DSTin_" + std::to_string(iman);
         Fun4AllInputManager *In = new Fun4AllDstInputManager(magname);
@@ -153,7 +155,6 @@ void Fun4All_PrepDataFitting(
   caZDC->set_detector_type(CaloTowerDefs::ZDC);
   caZDC->set_builder_type(buildertype);
   caZDC->set_processing_type(CaloWaveformProcessing::FAST);
-  caZDC->set_nsamples(16);
   caZDC->set_offlineflag();
   se->registerSubsystem(caZDC);
 
@@ -162,7 +163,6 @@ void Fun4All_PrepDataFitting(
   ctbEMCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbEMCal->set_builder_type(buildertype);
   ctbEMCal->set_offlineflag(true);
-  ctbEMCal->set_nsamples(12);
   ctbEMCal->set_bitFlipRecovery(true);
   // no SZS: keep full data waveforms for embedding, ZS is applied after embedding
   ctbEMCal->set_softwarezerosuppression(false, 0);
@@ -173,7 +173,6 @@ void Fun4All_PrepDataFitting(
   ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbIHCal->set_builder_type(buildertype);
   ctbIHCal->set_offlineflag();
-  ctbIHCal->set_nsamples(12);
   ctbIHCal->set_bitFlipRecovery(true);
   // no SZS: keep full data waveforms for embedding, ZS is applied after embedding
   ctbIHCal->set_softwarezerosuppression(false, 0);
@@ -184,7 +183,6 @@ void Fun4All_PrepDataFitting(
   ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbOHCal->set_builder_type(buildertype);
   ctbOHCal->set_offlineflag();
-  ctbOHCal->set_nsamples(12);
   ctbOHCal->set_bitFlipRecovery(true);
   // no SZS: keep full data waveforms for embedding, ZS is applied after embedding
   ctbOHCal->set_softwarezerosuppression(false, 0);
@@ -194,7 +192,6 @@ void Fun4All_PrepDataFitting(
   caEPD->set_detector_type(CaloTowerDefs::SEPD);
   caEPD->set_builder_type(buildertype);
   caEPD->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  caEPD->set_nsamples(12);
   caEPD->set_offlineflag();
   se->registerSubsystem(caEPD);
 
@@ -240,6 +237,10 @@ void Fun4All_PrepDataFitting(
     triggers.push_back(14);
   }
   tskim->SetTrigger(triggers);
+  if (centrality_max < 100)
+  {
+    tskim->SetCentralityRange(0, centrality_max);
+  }
   tskim->set_accept_max(nEvents_gen);
   se->registerSubsystem(tskim);
 

@@ -1,21 +1,44 @@
 # submit with: condor_submit embed_data.job
-# override defaults e.g.: condor_submit JetTrigger=Jet40 NJobs=100 embed_data.job
+# override defaults e.g.: condor_submit JetTrigger=Jet40 LastIdx=99 embed_data.job
+# the job index selects the data events, so a failed job must be resubmitted with its
+# index, e.g. for the indices listed one per line in redo.txt:
+#   condor_submit IdxList=redo.txt embed_data.job
 
-JetTrigger = Jet10
-NEvents    = 500
-RunNumber  = 68145
-NJobs      = 10
-BaseDir    = /sphenix/tg/tg01/commissioning/CaloCalibWG/bseidlitz/embed_reboot
+# defaults, command line values take precedence
+if ! defined JetTrigger
+  JetTrigger = Jet10
+endif
+if ! defined NEvents
+  NEvents = 500
+endif
+if ! defined RunNumber
+  RunNumber = 68145
+endif
+if ! defined CentMax
+  CentMax = 100
+endif
+if ! defined LastIdx
+  LastIdx = 9
+endif
+if ! defined IdxList
+  IdxList = seq 0 $(LastIdx) |
+endif
+if ! defined MacroDir
+  MacroDir = /sphenix/u/bseidlitz/work/dataOverlayReboot/macros/DataOverlayProduction
+endif
+if ! defined BaseDir
+  BaseDir = /sphenix/tg/tg01/commissioning/CaloCalibWG/bseidlitz/embed_reboot
+endif
 
 universe   = vanilla
 executable = run_embed.sh
-arguments  = $(Process) $(JetTrigger) $(NEvents) $(BaseDir) $(RunNumber)
+arguments  = $(Idx) $(JetTrigger) $(NEvents) $(BaseDir) $(RunNumber) $(CentMax)
 
-log     = /tmp/$(Cluster)_$(Process).log
-output  = condor_out/$(JetTrigger)_$(Process).out
-error   = condor_err/$(JetTrigger)_$(Process).err
+log     = /tmp/$(Cluster)_$(Idx).log
+output  = condor_out/$(JetTrigger)_cent0to$(CentMax)_$(Idx).out
+error   = condor_err/$(JetTrigger)_cent0to$(CentMax)_$(Idx).err
 
-getenv  = True
+environment = "MACRODIR=$(MacroDir)"
 request_memory = 12 GB
 
-queue $(NJobs)
+queue Idx from $(IdxList)

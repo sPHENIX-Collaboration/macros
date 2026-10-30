@@ -83,7 +83,7 @@ R__LOAD_LIBRARY(libPHJewel.so)
 // }
 
 void AddCommonNodes(Fun4AllOutputManager *out);
-std::string MakeJewelCard(const std::string &card);
+std::string MakeJewelCard(const std::string &card, int centrality_max);
 
 int Fun4All_G4_Embed_data(
     const int nEvents = 2,
@@ -92,7 +92,8 @@ int Fun4All_G4_Embed_data(
     const std::string &outdir = "./",
     const std::string &/*outnameEnd*/ = "embed_test.root",
     const std::string &jettrigger = "Jet10",
-    const std::string &cdbtag = "MDC2")
+    const std::string &cdbtag = "MDC2",
+    const int centrality_max = 100)  // data selected in 0-centrality_max %, also the JEWEL medium range
 {
 
   std::cout << "segment: " << segment << std::endl;
@@ -206,11 +207,11 @@ int Fun4All_G4_Embed_data(
     {
       pythia8_config_file = std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8_detroit_minBias.cfg";
     }
-    else if (jettrigger == "Jet10" || jettrigger == "Jet12")
+    else if (jettrigger == "Jet10" || jettrigger == "Jet12" || jettrigger == "PhotonJet12")
     {
       pythia8_config_file += "phpythia8_10GeV_JS_MDC2.cfg";
     }
-    else if (jettrigger == "Jet20")
+    else if (jettrigger == "Jet20" || jettrigger == "PhotonJet20")
     {
       pythia8_config_file += "phpythia8_20GeV_JS_MDC2.cfg";
     }
@@ -221,14 +222,6 @@ int Fun4All_G4_Embed_data(
     else if (jettrigger == "Jet40")
     {
       pythia8_config_file += "phpythia8_40GeV_JS_MDC2.cfg";
-    }
-    else if (jettrigger == "PhotonJet12")
-    {
-      pythia8_config_file += "phpythia8_10GeV_JS_MDC2.cfg";
-    }
-    else if (jettrigger == "PhotonJet20")
-    {
-      pythia8_config_file += "phpythia8_20GeV_JS_MDC2.cfg";
     }
     else
     {
@@ -333,13 +326,13 @@ int Fun4All_G4_Embed_data(
   PHJewel *jewel = nullptr;
   if (use_jewel)
   {
-    // simple medium 0-10%, truth trigger as for the PYTHIA samples (|eta| < 1.5).
+    // simple medium 0-centrality_max %, as the data, truth trigger as for the PYTHIA samples (|eta| < 1.5).
     // With the recoils kept the jet trigger sees unsubtracted jets.
     jewel = new PHJewel("PHJewel");
     jewel->set_medium("simple");
     if (jettrigger == "JewelJet10")
     {
-      jewel->set_card(MakeJewelCard("auau200_0010_dijet.dat"));
+      jewel->set_card(MakeJewelCard("auau200_0010_dijet.dat", centrality_max));
       PHJewelJetTrigger *jw_jet_trigger = new PHJewelJetTrigger();
       jw_jet_trigger->SetJetR(0.4);
       jw_jet_trigger->SetEtaMax(1.5);
@@ -348,7 +341,7 @@ int Fun4All_G4_Embed_data(
     }
     else if (jettrigger == "JewelPhotonJet10")
     {
-      jewel->set_card(MakeJewelCard("auau200_0010_photonjet.dat"));
+      jewel->set_card(MakeJewelCard("auau200_0010_photonjet.dat", centrality_max));
       PHJewelPhotonTrigger *jw_photon_trigger = new PHJewelPhotonTrigger();
       jw_photon_trigger->SetEtaMax(1.5);
       jw_photon_trigger->SetMinPt(10);
@@ -673,7 +666,6 @@ int Fun4All_G4_Embed_data(
 
   CaloTowerBuilder *ca2 = new CaloTowerBuilder();
   ca2->set_detector_type(CaloTowerDefs::CEMC);
-  ca2->set_nsamples(12);
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
@@ -683,7 +675,6 @@ int Fun4All_G4_Embed_data(
 
   ca2 = new CaloTowerBuilder();
   ca2->set_detector_type(CaloTowerDefs::HCALIN);
-  ca2->set_nsamples(12);
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
@@ -692,7 +683,6 @@ int Fun4All_G4_Embed_data(
 
   ca2 = new CaloTowerBuilder();
   ca2->set_detector_type(CaloTowerDefs::HCALOUT);
-  ca2->set_nsamples(12);
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
@@ -756,8 +746,13 @@ int Fun4All_G4_Embed_data(
 
   //  InputManagers();
 
+  std::string sample = jettrigger;
+  if (centrality_max < 100)
+  {
+    sample += std::format("_cent0to{}", centrality_max);
+  }
   std::string outnameEnd2 =
-    std::format("{}-{:08}-", jettrigger, runnumber) +
+    std::format("{}-{:08}-", sample, runnumber) +
     std::format("{}-{:08}-{:05}.root","data", dataRunNumber, dataSegment);
 
   std::string FullOutFile = outdir + "DST_TRUTH_G4HIT_" + outnameEnd2;
@@ -868,10 +863,11 @@ void AddCommonNodes(Fun4AllOutputManager *out)
 // JEWEL card for the overlay, made from a card in $JEWEL_CARDDIR (default
 // $CALIBRATIONROOT/Generators/JEWEL) with the tables in $JEWEL_TABLEDIR (default
 // $CALIBRATIONROOT/JEWEL_tables): unweighted, with a pT-hat minimum below the
-// trigger threshold, as for the PYTHIA samples.  It is written to the working
+// trigger threshold, as for the PYTHIA samples, and the medium in 0-centrality_max %
+// (the medium cards differ only in the centrality range).  It is written to the working
 // directory next to the medium card and a tables link, since PHJewel resolves the
 // card's paths relative to the card and refuses lines over 80 characters.
-std::string MakeJewelCard(const std::string &card)
+std::string MakeJewelCard(const std::string &card, int centrality_max)
 {
   const char *env = getenv("JEWEL_CARDDIR");
   std::string carddir = env ? env : std::string(getenv("CALIBRATIONROOT")) + "/Generators/JEWEL";
@@ -908,7 +904,24 @@ std::string MakeJewelCard(const std::string &card)
     }
     else if (key == "MEDIUMPARAMS")
     {
-      gSystem->CopyFile((carddir + "/" + value).c_str(), value.c_str(), true);
+      std::ifstream medin(std::format("{}/{}", carddir, value));
+      std::ofstream medout(value);
+      std::string medline;
+      while (std::getline(medin, medline))
+      {
+        if (medline.rfind("CENTRMIN ", 0) == 0)
+        {
+          medout << "CENTRMIN 0" << std::endl;
+        }
+        else if (medline.rfind("CENTRMAX ", 0) == 0)
+        {
+          medout << "CENTRMAX " << centrality_max << std::endl;
+        }
+        else if (medline[0] != '#')
+        {
+          medout << medline << std::endl;
+        }
+      }
       out << line << std::endl;
     }
     else
