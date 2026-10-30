@@ -67,8 +67,7 @@ void Fun4All_CentralityTree(const std::string &inputlist, const std::string &out
   CaloTowerBuilder *zdcbuilder = new CaloTowerBuilder("ZDCBUILDER");
   zdcbuilder->set_detector_type(CaloTowerDefs::ZDC);
   zdcbuilder->set_builder_type(CaloTowerDefs::kPRDFTowerv4);
-  zdcbuilder->set_processing_type(CaloWaveformProcessing::FUNCFIT);
-  zdcbuilder->set_funcfit_type(2);
+  zdcbuilder->set_processing_type(CaloWaveformProcessing::FAST);
   zdcbuilder->set_offlineflag();
   se->registerSubsystem(zdcbuilder);
 
