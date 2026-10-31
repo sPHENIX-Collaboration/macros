@@ -66,7 +66,7 @@ void Fun4All_JetSkimmer(int nEvents = 1000,
                         const std::string &dbtag = "newcdbtag")
 {
   Fun4AllServer *se = Fun4AllServer::instance();
-  se->Verbosity(10);
+  se->Verbosity(1);
 //  se->VerbosityDownscale(10000);
   recoConsts *rc = recoConsts::instance();
 
