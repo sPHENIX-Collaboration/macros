@@ -390,7 +390,7 @@ namespace PYTHIA8
 
 namespace HERWIG7
 {
-  std::map<int, std::string> run_file = {{0, std::string(getenv("CALIBRATIONROOT")) + "/Generators/Herwig7/run/mb200_sphenix_s1.run"}};
+  std::map<int, std::string> config_file = {{0, std::string(getenv("CALIBRATIONROOT")) + "/Generators/Herwig7/in/mb200_sphenix_s1.in"}};
 }
 
 namespace PILEUP
@@ -506,13 +506,13 @@ void InputInit()
       INPUTGENERATOR::Herwig7.push_back(herwig7);
       herwig7->set_embedding_id(Input::EmbedId);
 
-      if (HERWIG7::run_file[i].empty())
+      if (HERWIG7::config_file[i].empty())
       {
-        std::cout << "No Herwig7 run file for herwig7 generator no " << i << std::endl;
+        std::cout << "No Herwig7 config file for herwig7 generator no " << i << std::endl;
         gSystem->Exit(1);
       }
 
-      herwig7->set_run_file(HERWIG7::run_file[i]);
+      herwig7->set_config_file(HERWIG7::config_file[i]);
 
       // luminosity makes no sense when running multiple herwig7 generators, or running together with pythia8
       if (Input::HERWIG7_NUMBER > 1 || Input::PYTHIA8)
