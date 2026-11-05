@@ -66,8 +66,6 @@ void Fun4All_Vernier(int nEvents = 100,
   caZDC->set_builder_type(buildertype);
   caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
   caZDC->set_funcfit_type(2);
-  caZDC->set_nsamples(16);
-  caZDC->set_offlineflag();
   se->registerSubsystem(caZDC);
 
   Fun4AllInputManager *In{nullptr};

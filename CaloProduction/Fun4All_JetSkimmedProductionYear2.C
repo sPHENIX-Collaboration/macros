@@ -92,8 +92,6 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents = 1000,
   caEPD->set_detector_type(CaloTowerDefs::SEPD);
   caEPD->set_builder_type(CaloTowerDefs::kPRDFTowerv4);
   caEPD->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  caEPD->set_nsamples(12);
-  caEPD->set_offlineflag();
   se->registerSubsystem(caEPD);
 
   EpdReco *epdreco = new EpdReco();
@@ -111,8 +109,6 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents = 1000,
     caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
     caZDC->set_funcfit_type(2);
   }
-  caZDC->set_nsamples(16);
-  caZDC->set_offlineflag();
   se->registerSubsystem(caZDC);
 
 
