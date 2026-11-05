@@ -93,8 +93,8 @@ void Fun4All_Raw_Fitting(int nEvents = 100,
   {
     caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
     caZDC->set_funcfit_type(2);
-    se->registerSubsystem(caZDC);
   }
+  se->registerSubsystem(caZDC);
   Fun4AllInputManager *In = new Fun4AllPrdfInputManager("PRDFin");
   In->AddFile(infile);
   se->registerInputManager(In);
