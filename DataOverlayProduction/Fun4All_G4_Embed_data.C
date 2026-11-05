@@ -525,7 +525,6 @@ int Fun4All_G4_Embed_data(
   CaloWaveformSim *caloWaveformSim = new CaloWaveformSim();
   caloWaveformSim->set_detector_type(CaloTowerDefs::CEMC);
   caloWaveformSim->set_detector("CEMC");
-  // caloWaveformSim->set_nsamples(12); // 12 like real data is default
   caloWaveformSim->set_timewidth(0.2);
   caloWaveformSim->set_peakpos(6);
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
@@ -535,7 +534,6 @@ int Fun4All_G4_Embed_data(
   caloWaveformSim = new CaloWaveformSim();
   caloWaveformSim->set_detector_type(CaloTowerDefs::HCALIN);
   caloWaveformSim->set_detector("HCALIN");
-  // caloWaveformSim->set_nsamples(12); // 12 like real data is default
   caloWaveformSim->set_timewidth(0.2);
   caloWaveformSim->set_peakpos(6);
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
@@ -545,7 +543,6 @@ int Fun4All_G4_Embed_data(
   caloWaveformSim = new CaloWaveformSim();
   caloWaveformSim->set_detector_type(CaloTowerDefs::HCALOUT);
   caloWaveformSim->set_detector("HCALOUT");
-  // caloWaveformSim->set_nsamples(12); // 12 like real data is default
   caloWaveformSim->set_timewidth(0.2);
   caloWaveformSim->set_peakpos(6);
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
@@ -586,7 +583,6 @@ int Fun4All_G4_Embed_data(
 
   CaloTowerBuilder *ca2 = new CaloTowerBuilder();
   ca2->set_detector_type(CaloTowerDefs::CEMC);
-  ca2->set_nsamples(12);
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
@@ -596,7 +592,6 @@ int Fun4All_G4_Embed_data(
 
   ca2 = new CaloTowerBuilder();
   ca2->set_detector_type(CaloTowerDefs::HCALIN);
-  ca2->set_nsamples(12);
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
@@ -605,7 +600,6 @@ int Fun4All_G4_Embed_data(
 
   ca2 = new CaloTowerBuilder();
   ca2->set_detector_type(CaloTowerDefs::HCALOUT);
-  ca2->set_nsamples(12);
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
