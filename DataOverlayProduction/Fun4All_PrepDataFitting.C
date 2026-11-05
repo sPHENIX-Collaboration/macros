@@ -155,14 +155,12 @@ void Fun4All_PrepDataFitting(
   caZDC->set_detector_type(CaloTowerDefs::ZDC);
   caZDC->set_builder_type(buildertype);
   caZDC->set_processing_type(CaloWaveformProcessing::FAST);
-  caZDC->set_offlineflag();
   se->registerSubsystem(caZDC);
 
   CaloTowerBuilder *ctbEMCal = new CaloTowerBuilder("EMCalBUILDER");
   ctbEMCal->set_detector_type(CaloTowerDefs::CEMC);
   ctbEMCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbEMCal->set_builder_type(buildertype);
-  ctbEMCal->set_offlineflag(true);
   ctbEMCal->set_bitFlipRecovery(true);
   // no SZS: keep full data waveforms for embedding, ZS is applied after embedding
   ctbEMCal->set_softwarezerosuppression(false, 0);
@@ -172,7 +170,6 @@ void Fun4All_PrepDataFitting(
   ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbIHCal->set_builder_type(buildertype);
-  ctbIHCal->set_offlineflag();
   ctbIHCal->set_bitFlipRecovery(true);
   // no SZS: keep full data waveforms for embedding, ZS is applied after embedding
   ctbIHCal->set_softwarezerosuppression(false, 0);
@@ -182,7 +179,6 @@ void Fun4All_PrepDataFitting(
   ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
   ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbOHCal->set_builder_type(buildertype);
-  ctbOHCal->set_offlineflag();
   ctbOHCal->set_bitFlipRecovery(true);
   // no SZS: keep full data waveforms for embedding, ZS is applied after embedding
   ctbOHCal->set_softwarezerosuppression(false, 0);
@@ -191,8 +187,7 @@ void Fun4All_PrepDataFitting(
   CaloTowerBuilder *caEPD = new CaloTowerBuilder("SEPDBUILDER");
   caEPD->set_detector_type(CaloTowerDefs::SEPD);
   caEPD->set_builder_type(buildertype);
-  caEPD->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  caEPD->set_offlineflag();
+  caEPD->set_processing_type(CaloWaveformProcessing::FAST);
   se->registerSubsystem(caEPD);
 
 

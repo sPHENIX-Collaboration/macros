@@ -2,30 +2,36 @@
 #define FUN4ALL_YEAR2_C
 
 #include <Calo_Calib.C>
+#include <G4_Centrality.C>
+#include <G4_Global.C>
+#include <HIJetReco.C>
+#include <Jet_QA.C>
 #include <QA.C>
 
-#include <caloreco/CaloTowerBuilder.h>
-#include <caloreco/CaloTowerCalib.h>
-#include <caloreco/CaloTowerStatus.h>
-#include <caloreco/CaloWaveformProcessing.h>
-#include <caloreco/DeadHotMapLoader.h>
-#include <caloreco/RawClusterBuilderTemplate.h>
-#include <caloreco/RawClusterDeadHotMask.h>
-#include <caloreco/RawClusterPositionCorrection.h>
-#include <caloreco/TowerInfoDeadHotMask.h>
-
 #include <mbd/MbdReco.h>
+
+#include <caloreco/CaloTowerBuilder.h>
+
+#include <epd/EpdReco.h>
 
 #include <zdcinfo/ZdcReco.h>
 
 #include <globalvertex/GlobalVertexReco.h>
 
+#include <centrality/CentralityReco.h>
+
+#include <globalqa/GlobalQA.h>
+
+#include <calotrigger/MinimumBiasClassifier.h>
+
+#include <calovalid/CaloValid.h>
+
+#include <jetdstskimmer/JetDSTSkimmer.h>
+
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
 #include <ffamodules/HeadReco.h>
 #include <ffamodules/SyncReco.h>
-
-#include <fun4allraw/Fun4AllPrdfInputManager.h>
 
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -37,40 +43,36 @@
 
 #include <phool/recoConsts.h>
 
-#include <calotrigger/MinimumBiasClassifier.h>
-#include <calotrigger/TriggerRunInfoReco.h>
-#include <centrality/CentralityReco.h>
-
-#include <calovalid/CaloValid.h>
-#include <globalqa/GlobalQA.h>
-
 R__LOAD_LIBRARY(libfun4all.so)
-R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libcalo_reco.so)
 R__LOAD_LIBRARY(libcalotrigger.so)
 R__LOAD_LIBRARY(libcentrality.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libmbd.so)
-R__LOAD_LIBRARY(libzdcinfo.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libglobalQA.so)
+R__LOAD_LIBRARY(libJetDSTSkimmer.so)
+R__LOAD_LIBRARY(libepd.so)
+R__LOAD_LIBRARY(libzdcinfo.so)
 
 void Fun4All_Year2(int nEvents = 100,
-                   const std::string &fname = "DST_TRIGGERED_EVENT_run2pp_ana451_2024p009-00047748-00000.root",
-                   const std::string &outfile = "DST_CALO_run2pp_ana451_2024p009-00047748-00000.root",
-                   const std::string &outfile_hist = "HIST_CALOQA_run2pp_ana451_2024p009-00047748-00000.root",
+                   const std::string &/*fname*/ = "DST_TRIGGERED_EVENT_run2pp_ana451_2024p009-00047748-00000.root",
+                   const std::string &/*outfile*/ = "DST_CALO_run2pp_ana451_2024p009-00047748-00000.root",
+                   const std::string &/*outfile_hist_old*/ = "HIST_CALOQA_run2pp_ana451_2024p009-00047748-00000.root",
                    const std::string &dbtag = "newcdbtag")
 {
-  // towerinfov1=kPRDFTowerv1, v2=:kWaveformTowerv2, v3=kPRDFWaveform, v4=kPRDFTowerv4
-  CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv4;
-
+  const std::string fname_calo = "/cvmfs/sphenix.sdcc.bnl.gov/files/jetskimmer/DST_CALOFITTING_run3auau_pro001_pcdb001_v001-00068114-90000.root";
+  const std::string fname_zdc = "/cvmfs/sphenix.sdcc.bnl.gov/files/jetskimmer/DST_ZDC_RAW_run3auau_pro001_pcdb001_v001-00068114-90000.root";
+  const std::string outfile_low = "DST_JETCALO_run3auau_pro001_pcdb001_v001-00068114-90000.root";
+  const std::string outfile_high = "DST_Jet_run3auau_pro001_pcdb001_v001-00068114-90000.root";
+  const std::string outfile_hist = "HIST_JETQA_run3auau_pro001_pcdb001_v001-00068114-90000.root";
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(1);
-
+  //  se->VerbosityDownscale(10000);
   recoConsts *rc = recoConsts::instance();
 
-  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname_calo);
   int runnumber = runseg.first;
 
   // conditions DB flags and timestamp
@@ -81,102 +83,150 @@ void Fun4All_Year2(int nEvents = 100,
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
 
-  TriggerRunInfoReco *triggerruninforeco = new TriggerRunInfoReco();
-  se->registerSubsystem(triggerruninforeco);
   // MBD/BBC Reconstruction
   MbdReco *mbdreco = new MbdReco();
   se->registerSubsystem(mbdreco);
 
-  CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
-  caZDC->set_detector_type(CaloTowerDefs::ZDC);
-  caZDC->set_builder_type(buildertype);
-  caZDC->set_processing_type(CaloWaveformProcessing::FAST);
-  caZDC->set_nsamples(16);
-  caZDC->set_offlineflag();
-  se->registerSubsystem(caZDC);
-
-  // ZDC Reconstruction--Calib Info
-  ZdcReco *zdcreco = new ZdcReco();
-  se->registerSubsystem(zdcreco);
+  EpdReco *epdreco = new EpdReco();
+  se->registerSubsystem(epdreco);
 
   // Official vertex storage
   GlobalVertexReco *gvertex = new GlobalVertexReco();
   se->registerSubsystem(gvertex);
 
-  /////////////////
-  // build towers
-  CaloTowerBuilder *ctbEMCal = new CaloTowerBuilder("EMCalBUILDER");
-  ctbEMCal->set_detector_type(CaloTowerDefs::CEMC);
-  ctbEMCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  ctbEMCal->set_builder_type(buildertype);
-  ctbEMCal->set_offlineflag(true);
-  ctbEMCal->set_nsamples(12);
-  ctbEMCal->set_bitFlipRecovery(true);
-  se->registerSubsystem(ctbEMCal);
-
-  CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
-  ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
-  ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  ctbIHCal->set_builder_type(buildertype);
-  ctbIHCal->set_offlineflag();
-  ctbIHCal->set_nsamples(12);
-  ctbIHCal->set_bitFlipRecovery(true);
-  se->registerSubsystem(ctbIHCal);
-
-  CaloTowerBuilder *ctbOHCal = new CaloTowerBuilder("HCALOUTBUILDER");
-  ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
-  ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-  ctbOHCal->set_builder_type(buildertype);
-  ctbOHCal->set_offlineflag();
-  ctbOHCal->set_nsamples(12);
-  ctbOHCal->set_bitFlipRecovery(true);
-  se->registerSubsystem(ctbOHCal);
-
-  CaloTowerBuilder *caEPD = new CaloTowerBuilder("SEPDBUILDER");
-  caEPD->set_detector_type(CaloTowerDefs::SEPD);
-  caEPD->set_builder_type(buildertype);
-  caEPD->set_processing_type(CaloWaveformProcessing::FAST);
-  caEPD->set_nsamples(12);
-  caEPD->set_offlineflag();
-  se->registerSubsystem(caEPD);
-
-  /////////////////////
-  // Geometry
-  std::cout << "Adding Geometry file" << std::endl;
-  Fun4AllInputManager *intrue2 = new Fun4AllRunNodeInputManager("DST_GEO");
-  std::string geoLocation = CDBInterface::instance()->getUrl("calo_geo");
-  intrue2->AddFile(geoLocation);
-  se->registerInputManager(intrue2);
+  GlobalQA *gqa = new GlobalQA("GlobalQA");
+  se->registerSubsystem(gqa);
 
   /////////////////////////////////////////////////////
-  // Set status of towers, Calibrate towers,  Cluster
+  // Set status of CALO towers, calibrate, cluster
+  std::cout << "Processing Calo Calibration" << std::endl;
   Process_Calo_Calib();
 
-  ///////////////////////////////////
-  // Validation
+  // ZDC Reconstruction--Calib Info
+  ZdcReco *zdcreco = new ZdcReco();
+  zdcreco->set_zdc1_cut(0.0);
+  zdcreco->set_zdc2_cut(0.0);
+  se->registerSubsystem(zdcreco);
+
   CaloValid *ca = new CaloValid("CaloValid");
   ca->set_timing_cut_width(200);
   se->registerSubsystem(ca);
 
-  GlobalQA *gqa = new GlobalQA("GlobalQA");
-  se->registerSubsystem(gqa);
+  // Centrality required for HI
+  Centrality();
 
-  Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
-  In->AddFile(fname);
-  se->registerInputManager(In);
+  // Jet reco related flags
+  Enable::QA = true;
 
-  Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfile);
-  out->StripNode("CEMCPackets");
-  out->StripNode("HCALPackets");
-  out->StripNode("ZDCPackets");
-  out->StripNode("SEPDPackets");
-  out->StripNode("MBDPackets");
-  se->registerOutputManager(out);
+  // Au+Au mode
+  HIJETS::is_pp = false;
+
+  // QA options
+  JetQA::HasTracks = false;
+  JetQA::DoInclusive = true;
+  JetQA::DoTriggered = false;
+  JetQA::RestrictPtToTrig = false;
+  JetQA::RestrictEtaByR = true;
+  JetQA::DoPP = HIJETS::is_pp;
+  JetQA::UseBkgdSub = true;
+  JetQA::HasCalos = true;
+
+  if (!HIJETS::is_pp)
+  {
+    std::cout << ">>> Running Centrality()" << std::endl;
+    Centrality();
+  }
+
+  // HIJetReco macro
+  std::cout << ">>> Running HIJetReco()" << std::endl;
+  HIJetReco();
+
+  // Jet DST skimmer with map-based threshold
+  std::cout << ">>> Configuring JetDSTSkimmer" << std::endl;
+  JetDSTSkimmer *jetDSTSkimmer = new JetDSTSkimmer();
+
+  // Jet thresholds: map from node name [set min jet pT]
+  std::map<std::string, float> jetNodePts;
+
+  jetNodePts["AntiKt_Tower_r03_Sub1"] = 10.0F;
+  jetDSTSkimmer->SetJetNodeThresholds(jetNodePts);
+
+  // Cluster thresholds: map from cluster node [set min cluster pT]
+  std::map<std::string, float> clusterNodePts;
+  clusterNodePts["CLUSTERINFO_CEMC"] = 8.0F;
+  jetDSTSkimmer->SetClusterNodeThresholds(clusterNodePts);
+
+  jetDSTSkimmer->Verbosity(0);
+  se->registerSubsystem(jetDSTSkimmer);
+  std::cout << ">>> JetDSTSkimmer registered" << std::endl;
+
+  // Filter out beam-background events
+
+  // BeamBackgroundFilterAndQA *filter =
+  //   new BeamBackgroundFilterAndQA("BeamBackgroundFilterAndQA");
+  // filter->Verbosity(std::max(Enable::QA_VERBOSITY, Enable::JETQA_VERBOSITY));
+  // filter->SetConfig(
+  // 		    {
+  // 		      .debug          = false,
+  // 		      .doQA           = Enable::QA,
+  // 		      .doEvtAbort     = false,
+  // 		      .filtersToApply = {"StreakSideband"}
+  // 		    });
+  // se->registerSubsystem(filter);
+
+  // Register modules necessary for QA
+  if (Enable::QA)
+  {
+    std::cout << ">>> Enabling QA: DoRhoCalculation + Jet_QA" << std::endl;
+    DoRhoCalculation();
+    Jet_QA();
+  }
+
+  Fun4AllInputManager *InCalo = new Fun4AllDstInputManager("in");
+  InCalo->AddFile(fname_calo);
+  se->registerInputManager(InCalo);
+
+  Fun4AllInputManager *InZDC = new Fun4AllDstInputManager("inzdc");
+  InZDC->AddFile(fname_zdc);
+  se->registerInputManager(InZDC);
+
+  // --- Output managers ---
+  // DST_JETCALO: low-threshold output — keeps raw tower and ZDC data
+  Fun4AllDstOutputManager *outlower = new Fun4AllDstOutputManager("DSTOUTLOW", outfile_low);
+  outlower->AddNode("Sync");
+  outlower->AddNode("EventHeader");
+  outlower->AddNode("12001");
+  outlower->AddNode("14001");
+  outlower->AddNode("TOWERS_HCALIN");
+  outlower->AddNode("TOWERS_HCALOUT");
+  outlower->AddNode("TOWERS_CEMC");
+  outlower->AddNode("TOWERS_SEPD");
+  outlower->AddNode("MbdRawContainer");
+  outlower->AddNode("TriggerRunInfo");
+  outlower->StripCompositeNode("Packets");
+  se->registerOutputManager(outlower);
+
+  // DST_Jet: high-threshold output — strips raw tower data, keeps jets
+  Fun4AllDstOutputManager *outhigher = new Fun4AllDstOutputManager("DSTOUTHIGH", outfile_high);
+  outhigher->StripNode("TOWERINFO_CALIB_HCALIN");
+  outhigher->StripNode("TOWERS_HCALIN");
+  outhigher->StripNode("TOWERINFO_CALIB_HCALOUT");
+  outhigher->StripNode("TOWERS_HCALOUT");
+  outhigher->StripNode("TOWERINFO_CALIB_CEMC");
+  outhigher->StripNode("TOWERS_CEMC");
+  outhigher->StripNode("TOWERS_SEPD");
+  outhigher->StripNode("TOWERINFO_CALIB_ZDC");
+  outhigher->StripNode("12001");
+  outhigher->StripCompositeNode("Packets");
+  se->registerOutputManager(outhigher);
 
   se->run(nEvents);
   se->End();
 
-  QAHistManagerDef::saveQARootFile(outfile_hist);
+  if (Enable::QA)
+  {
+    QAHistManagerDef::saveQARootFile(outfile_hist);
+  }
 
   CDBInterface::instance()->Print();  // print used DB files
   se->PrintTimer();
