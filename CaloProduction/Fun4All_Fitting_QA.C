@@ -27,9 +27,9 @@ R__LOAD_LIBRARY(libmbd.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 
 void Fun4All_Fitting_QA(int nEvents = 100,
-                        const std::string &inlist = "triggered_run2auau_54909-00000.list",
-                        const std::string &infile_CALOFIT = "/sphenix/lustre01/sphnxpro/production/run2auau/physics/pro001_pcdb001_v001/DST_CALOFITTING/run_00054900_00055000/DST_CALOFITTING_run2auau_pro001_pcdb001_v001-00054909-00000.root",
-                        const std::string &outfile_hist = "HIST_CALOFITTINGQA_run2auau_pro001_pcdb001_v001-00054909-00000.root",
+                        const std::string &inlist = "/cvmfs/sphenix.sdcc.bnl.gov/files/calofitting/files.list",
+                        const std::string &infilefits = "/cvmfs/sphenix.sdcc.bnl.gov/files/calofitting/DST_CALOFITTING_run3auau_pro001_pcdb001_v001-00068114-90000.root",
+                        const std::string &outfile_hist = "HIST_CALOFITTINGQA_run3auau_pro001_pcdb001_v001-00068114-90000.root",
                         const std::string &dbtag = "newcdbtag")
 {
   gSystem->Load("libg4dst.so");
@@ -56,10 +56,8 @@ void Fun4All_Fitting_QA(int nEvents = 100,
   ///////////////////////////////////
   // Validation
   CaloFittingQA *ca = new CaloFittingQA("CaloFittingQA");
-  ca->set_offlineflag(true);  // raw waveforms from packet nodes, not PRDF
   se->registerSubsystem(ca);
 
-  // triggered DSTs: raw calo waveforms + MBD packets
   Fun4AllInputManager *In = nullptr;
   std::ifstream infile;
   infile.open(inlist);
@@ -70,10 +68,6 @@ void Fun4All_Fitting_QA(int nEvents = 100,
     bool first{true};
     while (std::getline(infile, line))
     {
-      if (line.empty())
-      {
-        continue;
-      }
       if (line[0] == '#')
       {
         std::cout << "found commented out line " << line << std::endl;
@@ -98,19 +92,11 @@ void Fun4All_Fitting_QA(int nEvents = 100,
     infile.close();
   }
 
-  if (iman == 0)
-  {
-    std::cout << "No files in triggered filelist " << inlist << std::endl;
-    gSystem->Exit(1);
-  }
-
-  // DST_CALOFITTING: fitted towers
   In = new Fun4AllDstInputManager("inCALOFITTING");
   In->Verbosity(1);
-  In->AddFile(infile_CALOFIT);
+  In->AddFile(infilefits);
   se->registerInputManager(In);
 
-  // se->Print();
   if (nEvents < 0)
   {
     return;
