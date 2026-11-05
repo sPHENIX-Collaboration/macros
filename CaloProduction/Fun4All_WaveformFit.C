@@ -70,40 +70,30 @@ void Fun4All_WaveformFit(const std::string &fname = "/sphenix/lustre01/sphnxpro/
   ctbEMCal->set_detector_type(CaloTowerDefs::CEMC);
   ctbEMCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbEMCal->set_builder_type(buildertype);
-  ctbEMCal->set_offlineflag(true);
-  ctbEMCal->set_nsamples(12);
   se->registerSubsystem(ctbEMCal);
 
   CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
   ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbIHCal->set_builder_type(buildertype);
-  ctbIHCal->set_offlineflag();
-  ctbIHCal->set_nsamples(12);
   se->registerSubsystem(ctbIHCal);
 
   CaloTowerBuilder *ctbOHCal = new CaloTowerBuilder("HCALOUTBUILDER");
   ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
   ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbOHCal->set_builder_type(buildertype);
-  ctbOHCal->set_offlineflag();
-  ctbOHCal->set_nsamples(12);
   se->registerSubsystem(ctbOHCal);
 
   CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
   caZDC->set_detector_type(CaloTowerDefs::ZDC);
   caZDC->set_builder_type(buildertype);
   caZDC->set_processing_type(CaloWaveformProcessing::FAST);
-  caZDC->set_nsamples(16);
-  caZDC->set_offlineflag();
   se->registerSubsystem(caZDC);
 
   CaloTowerBuilder *caEPD = new CaloTowerBuilder("SEPDBUILDER");
   caEPD->set_detector_type(CaloTowerDefs::SEPD);
   caEPD->set_builder_type(buildertype);
   caEPD->set_processing_type(CaloWaveformProcessing::FAST);
-  caEPD->set_nsamples(12);
-  caEPD->set_offlineflag();
   se->registerSubsystem(caEPD);
 
   Fun4AllInputManager *In = new Fun4AllDstInputManager("in");
@@ -111,10 +101,7 @@ void Fun4All_WaveformFit(const std::string &fname = "/sphenix/lustre01/sphnxpro/
   se->registerInputManager(In);
 
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", fulloutfile);
-  out->StripNode("CEMCPackets");
-  out->StripNode("HCALPackets");
-  out->StripNode("ZDCPackets");
-  out->StripNode("SEPDPackets");
+  out->StripCompositeNode("Packets");
   se->registerOutputManager(out);
 
   se->run(nEvents);

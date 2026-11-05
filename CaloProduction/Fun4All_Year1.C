@@ -109,26 +109,22 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
   ctbEMCal->set_detector_type(CaloTowerDefs::CEMC);
   ctbEMCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbEMCal->set_builder_type(buildertype);
-  ctbEMCal->set_nsamples(16);
   se->registerSubsystem(ctbEMCal);
 
   CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
   ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbIHCal->set_builder_type(buildertype);
-  ctbIHCal->set_nsamples(31);
   se->registerSubsystem(ctbIHCal);
 
   CaloTowerBuilder *ctbOHCal = new CaloTowerBuilder("HCALOUTBUILDER");
   ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
   ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbOHCal->set_builder_type(buildertype);
-  ctbOHCal->set_nsamples(31);
   se->registerSubsystem(ctbOHCal);
 
   CaloTowerBuilder *ca4 = new CaloTowerBuilder("zdc");
   ca4->set_detector_type(CaloTowerDefs::ZDC);
-  ca4->set_nsamples(31);
   ca4->set_builder_type(CaloTowerDefs::kPRDFWaveform);
   ca4->set_processing_type(CaloWaveformProcessing::FAST);
   se->registerSubsystem(ca4);
@@ -242,7 +238,6 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
     CaloTowerBuilder *ctbEMCal_SZ = new CaloTowerBuilder("EMCalBUILDER_ZS");
     ctbEMCal_SZ->set_detector_type(CaloTowerDefs::CEMC);
     ctbEMCal_SZ->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-    ctbEMCal_SZ->set_nsamples(8);
     ctbEMCal_SZ->set_outputNodePrefix("TOWERS_SZ_");
     ctbEMCal_SZ->set_softwarezerosuppression(true, 100000000);
     se->registerSubsystem(ctbEMCal_SZ);
@@ -250,7 +245,6 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
     CaloTowerBuilder *ctbIHCal_SZ = new CaloTowerBuilder("HCALINBUILDER_ZS");
     ctbIHCal_SZ->set_detector_type(CaloTowerDefs::HCALIN);
     ctbIHCal_SZ->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-    ctbIHCal_SZ->set_nsamples(8);
     ctbIHCal_SZ->set_outputNodePrefix("TOWERS_SZ_");
     ctbIHCal_SZ->set_softwarezerosuppression(true, 100000000);
     se->registerSubsystem(ctbIHCal_SZ);
@@ -258,7 +252,6 @@ void Fun4All_Year1(const std::string &fname = "/sphenix/lustre01/sphnxpro/commis
     CaloTowerBuilder *ctbOHCal_SZ = new CaloTowerBuilder("HCALOUTBUILDER_SZ");
     ctbOHCal_SZ->set_detector_type(CaloTowerDefs::HCALOUT);
     ctbOHCal_SZ->set_processing_type(CaloWaveformProcessing::TEMPLATE);
-    ctbOHCal_SZ->set_nsamples(8);
     ctbOHCal_SZ->set_outputNodePrefix("TOWERS_SZ_");
     ctbOHCal_SZ->set_softwarezerosuppression(true, 100000000);
     se->registerSubsystem(ctbOHCal_SZ);
