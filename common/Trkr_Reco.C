@@ -27,6 +27,16 @@
 #include <trackreco/SecondaryVertexFinder.h>
 #include <trackreco/TrackingIterationCounter.h>
 
+#include <tpctrackreco/TpcCrossingFinder.h>
+#include <tpctrackreco/TpcPolyClusterTrkrClusterConverter.h>
+#include <tpctrackreco/TpcPolyTrackSeedConverter.h>
+#include <tpctrackreco/Tpc_AssembledTrackReco.h>
+#include <tpctrackreco/Tpc_ModuleTrackReco.h>
+#include <tpctrackreco/Tpc_PolyClusterizer.h>
+#include <tpctrackreco/Tpc_PolyTrackReco.h>
+#include <tpctrackreco/Tpc_PolyTrackVertexer.h>
+#include <phgarfield/PHGarfield.h>
+
 #include <tpc/LaserEventRejecter.h>
 #include <tpc/TpcLoadDistortionCorrection.h>
 
@@ -43,6 +53,8 @@
 
 R__LOAD_LIBRARY(libTrackingDiagnostics.so)
 R__LOAD_LIBRARY(libtrack_reco.so)
+R__LOAD_LIBRARY(libPHGarfield.so)
+R__LOAD_LIBRARY(libtpctrackreco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 R__LOAD_LIBRARY(libtpc.so)
 R__LOAD_LIBRARY(libtrackeralign.so)
@@ -470,6 +482,116 @@ void Tracking_Reco_TrackSeed_ZeroField()
 
   cprop->set_pp_mode(true);
   se->registerSubsystem(cprop);
+}
+void Tracking_Reco_PolySeed()
+{
+  // set up verbosity
+  int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
+
+  // get fun4all server instance
+  auto *se = Fun4AllServer::instance();
+
+  Tracking_Reco_SiliconSeed_run2pp();
+
+  
+  auto *converter = new TrackSeedTrackMapConverter("SiliconSeedToSvtxTrackMap");
+  converter->setTrackSeedName("SiliconTrackSeedContainer");
+  converter->setTrackMapName("SiliconSvtxTrackMap");
+  converter->setClusterMapName("TRKR_CLUSTER");
+  se->registerSubsystem(converter);  
+  
+  auto *finder_svx = new PHSimpleVertexFinder("SiliconVertexFinder");
+  finder_svx->Verbosity(verbosity);
+  finder_svx->setDcaCut(0.1);
+  finder_svx->setTrackPtCut(0.2);
+  finder_svx->setBeamLineCut(1);
+  finder_svx->setTrackQualityCut(500);
+  finder_svx->setNmvtxRequired(3);
+  finder_svx->setOutlierPairCut(0.1);
+  finder_svx->setTrackMapName("SiliconSvtxTrackMap");
+  finder_svx->setVertexMapName("SiliconSvtxVertexMap");
+  se->registerSubsystem(finder_svx);  
+
+
+  auto *garfield = new PHGarfield();
+  garfield->SetCMVoltageDefault(387.5);
+  garfield->SetIsNonDistortedMC(true);
+  se->registerSubsystem(garfield);
+  
+  se->registerSubsystem(new Tpc_ModuleTrackReco());     // makes TPC_MODULETRACKS
+  se->registerSubsystem(new Tpc_AssembledTrackReco());  // makes TPC_ASSEMBLEDTRACKS
+	
+  auto *crossingFinder = new TpcCrossingFinder();
+  crossingFinder->Verbosity(verbosity);
+  crossingFinder->setCMVoltageDefault(387.5);
+  crossingFinder->setTriggeredMode(TRACKING::streaming_mode);
+  crossingFinder->setIsNonDistortedMC(true);
+  crossingFinder->setInputNodeName("TPC_ASSEMBLEDTRACKS");
+  crossingFinder->setOutputNodeName("TPC_CROSSING_DECISIONS");
+  crossingFinder->setVertexMapNodeName("SiliconSvtxVertexMap");  // optional, configurable
+  se->registerSubsystem(crossingFinder);  
+  
+  auto *cluster = new Tpc_PolyClusterizer();  // makes TPC_POLYCLUSTERS
+  cluster->setIsNonDistortedMC(true);
+  cluster->setCMVoltageDefault(387.5);
+  se->registerSubsystem(cluster);  
+
+  auto* polytrackreco = new Tpc_PolyTrackReco();
+  polytrackreco->Verbosity(verbosity);
+  se->registerSubsystem(polytrackreco);
+
+  auto* polytrackvertexer = new Tpc_PolyTrackVertexer();
+  polytrackvertexer->Verbosity(verbosity);
+  se->registerSubsystem(polytrackvertexer);
+  
+  auto tconvert = new TpcPolyTrackSeedConverter();
+  tconvert->Verbosity(verbosity);
+  se->registerSubsystem(tconvert);           // converts TPC_POLYTRACKS to TpcTrackSeed
+  
+  auto conver = new TpcPolyClusterTrkrClusterConverter();
+  conver->Verbosity(verbosity);
+  se->registerSubsystem(conver);  // co
+
+
+  auto *silicon_match = new PHSiliconTpcTrackMatching;
+  silicon_match->Verbosity(verbosity);
+  silicon_match->set_pp_mode(TRACKING::streaming_mode);
+  std::cout << "PHSiliconTpcTrackMatching streaming_mode set to " << TRACKING::streaming_mode << std::endl;
+  if (G4TRACKING::SC_CALIBMODE)
+    {
+      // search windows for initial matching with distortions
+      // tuned values are 0.04 and 0.008 in distorted events
+      silicon_match->set_phi_search_window(0.04);
+      silicon_match->set_eta_search_window(0.008);
+    }
+  else
+    {
+      // after distortion corrections and rerunning clustering, default tuned values are 0.02 and 0.004 in low occupancy events
+      silicon_match->set_phi_search_window(0.03);
+      silicon_match->set_eta_search_window(0.005);
+    }
+  silicon_match->set_test_windows_printout(false);  // used for tuning search windows
+  se->registerSubsystem(silicon_match);
+  
+  // Associate Micromegas clusters with the tracks
+  if (Enable::MICROMEGAS)
+    {
+      std::cout << "Tracking_Reco_TrackSeed - Using Micromegas matching " << std::endl;
+      
+      // Match TPC track stubs from CA seeder to clusters in the micromegas layers
+      auto *mm_match = new PHMicromegasTpcTrackMatching;
+      mm_match->Verbosity(verbosity);
+      mm_match->set_pp_mode(TRACKING::streaming_mode);
+      mm_match->set_rphi_search_window_lyr1(0.2);
+      mm_match->set_rphi_search_window_lyr2(13.0);
+      mm_match->set_z_search_window_lyr1(26.0);
+      mm_match->set_z_search_window_lyr2(0.2);
+      
+      mm_match->set_min_tpc_layer(38);             // layer in TPC to start projection fit
+      mm_match->set_test_windows_printout(false);  // used for tuning search windows only
+      se->registerSubsystem(mm_match);
+    }
+  
 }
 void Tracking_Reco_TrackSeed()
 {
@@ -1049,7 +1171,7 @@ void Tracking_Reco()
   }
   else
   {
-    Tracking_Reco_TrackSeed();
+    Tracking_Reco_PolySeed();
   }
 
   if (G4TRACKING::convert_seeds_to_svtxtracks)
