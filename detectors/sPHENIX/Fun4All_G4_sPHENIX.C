@@ -555,14 +555,10 @@ int Fun4All_G4_sPHENIX(
 	{
 	  TPC_LaserClustering();
 	}
-      else
-	{
-	  TPC_Clustering();
-	}
     }
   if (Enable::MICROMEGAS_CLUSTER) Micromegas_Clustering();
 
-  if (Enable::TRACKING_TRACK)
+  if (Enable::TPC_CLUSTER && Enable::TRACKING_TRACK)
   {
     Tracking_Reco();
   }
