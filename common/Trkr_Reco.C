@@ -524,7 +524,7 @@ void Tracking_Reco_PolySeed()
   auto *crossingFinder = new TpcCrossingFinder();
   crossingFinder->Verbosity(verbosity);
   crossingFinder->setCMVoltageDefault(387.5);
-  crossingFinder->setTriggeredMode(TRACKING::streaming_mode);
+  crossingFinder->setTriggeredMode(!TRACKING::streaming_mode);
   crossingFinder->setIsNonDistortedMC(true);
   crossingFinder->setInputNodeName("TPC_ASSEMBLEDTRACKS");
   crossingFinder->setOutputNodeName("TPC_CROSSING_DECISIONS");
