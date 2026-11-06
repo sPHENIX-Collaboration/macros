@@ -544,11 +544,11 @@ void Tracking_Reco_PolySeed()
   polytrackvertexer->Verbosity(verbosity);
   se->registerSubsystem(polytrackvertexer);
   
-  auto tconvert = new TpcPolyTrackSeedConverter();
+  auto *tconvert = new TpcPolyTrackSeedConverter();
   tconvert->Verbosity(verbosity);
   se->registerSubsystem(tconvert);           // converts TPC_POLYTRACKS to TpcTrackSeed
   
-  auto conver = new TpcPolyClusterTrkrClusterConverter();
+  auto *conver = new TpcPolyClusterTrkrClusterConverter();
   conver->Verbosity(verbosity);
   se->registerSubsystem(conver);  // co
 
