@@ -95,5 +95,5 @@ python3 $CODE/scripts/payload_list.py $GTJSON $RUNLIST $OUT/plots/payloads.json
 
 # events and empty plots per run, for the flags on the pages (interpreted: no shared library to build when tags run at once)
 root.exe -l -b -q "$CODE/macros/scan_empty.C(\"$WORK/runfiles.txt\", \"$OUT/plots/runs\", \"$WORK/empty_scan.txt\")" > $WORK/scan_empty.log 2>&1
-python3 $CODE/scripts/make_html.py $WEB $PERIOD "$TITLE" $WORK/runfiles.txt $WORK/cdbstatus.txt $OUT/cdb $GTAG
+CDBQA_JOBLOG_PATTERN="$JOBLOG" python3 $CODE/scripts/make_html.py $WEB $PERIOD "$TITLE" $WORK/runfiles.txt $WORK/cdbstatus.txt $OUT/cdb $GTAG
 

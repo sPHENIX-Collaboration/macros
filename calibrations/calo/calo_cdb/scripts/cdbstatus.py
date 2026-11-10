@@ -59,6 +59,9 @@ def md5(url):
 
 def used_files(fname):
     f = ROOT.TFile.Open(fname)
+    if not f or f.IsZombie():
+        print(f"cannot open {fname}: treated as a run without output")
+        return None
     out = {}
     for k in f.GetListOfKeys():
         if k.GetName().startswith("cdb_"):

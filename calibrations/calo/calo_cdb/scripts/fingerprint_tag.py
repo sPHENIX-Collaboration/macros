@@ -19,12 +19,15 @@ ROOT.gROOT.SetBatch(True)
 
 def values(o):
     # the plotted numbers of one object: bin contents, graph points (x and y), or fit parameters
+    if o.InheritsFrom("TH2Poly"):
+        return np.array([o.GetBinContent(i) for i in range(1, o.GetNumberOfBins() + 1)], dtype=float)
     if o.InheritsFrom("TProfile"):
         return np.array([o.GetBinContent(i) for i in range(1, o.GetNbinsX() + 1)])
     if o.InheritsFrom("TH1"):
         a = o.GetArray()
         a.reshape((o.GetNcells(),))
-        return np.array(a)[1:o.GetNbinsX() + 1].astype(float)
+        arr = np.array(a).astype(float)
+        return arr if o.GetDimension() > 1 else arr[1:o.GetNbinsX() + 1]
     if o.InheritsFrom("TGraph"):
         n = o.GetN()
         x, y = o.GetX(), o.GetY()

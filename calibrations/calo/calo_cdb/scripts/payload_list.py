@@ -9,8 +9,10 @@ gtjson, runlist, out = sys.argv[1:4]
 runs = sorted(int(x) for x in open(runlist).read().split())
 B36 = "0123456789abcdefghijklmnopqrstuvwxyz"
 dates, didx, types = [], {}, {}
+MAXIOV = 9223372036854775807
 for pl in json.load(open(gtjson))["payload_lists"]:
-    ivs = sorted((p["major_iov"], p["major_iov_end"], p["checksum"][:6], p["inserted"][:16].replace("T", " "))
+    ivs = sorted((p["minor_iov"], p["minor_iov_end"] if p["minor_iov_end"] is not None else MAXIOV,
+                  p["checksum"][:6], (p.get("inserted") or "-")[:16].replace("T", " "))
                  for p in pl["payload_iov"])
     # sweep over the sorted runs: the valid file is the one with the latest start <= run whose IOV end is after the run
     h, t, act, k, found = [], [], [], 0, False

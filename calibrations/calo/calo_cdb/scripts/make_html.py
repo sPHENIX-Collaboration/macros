@@ -840,7 +840,7 @@ CMPLIVE = """
   st.innerHTML = '<span class="spin"></span>comparing ' + esc(A) + ' and ' + esc(B) + ' &hellip;';
   const load = async t => {
     const r = await fetch(encodeURIComponent(t) + '/plots/fingerprint.json', { cache: 'no-store' });
-    if (!r.ok) throw new Error('no fingerprint for ' + t + ' yet: run macros/run_pass2.sh ' + PERIOD + ' ' + t);
+    if (!r.ok) throw new Error('no fingerprint for ' + t + ' yet: run scripts/run_pass2.sh ' + PERIOD + ' ' + t);
     return r.json();
   };
   const loadp = t => fetch(encodeURIComponent(t) + '/plots/payloads.json', { cache: 'no-store' })
@@ -871,7 +871,7 @@ CMPLIVE = """
   const dlist = d => (d.length ? d.slice(0, 2).join(', ') + (d.length > 2 ? ` &hellip; (${d.length} times)` : '') : '&ndash;');
   let hcdb = '<h2>CDB payloads</h2>';
   if (!pa || !pb) {
-    hcdb += `<p class="note">no payload list for ${esc(!pa ? A : B)} yet: run macros/run_pass2.sh ${PERIOD} ${esc(!pa ? A : B)}</p>`;
+    hcdb += `<p class="note">no payload list for ${esc(!pa ? A : B)} yet: run scripts/run_pass2.sh ${PERIOD} ${esc(!pa ? A : B)}</p>`;
   } else {
     hcdb += `<p class="cdbsum">${cdb.nsame + cdb.rows.length} payload types over ${cdb.cr.length} runs: ` +
             `<b class="same">${cdb.nsame}</b> use the same file (md5) in both tags for every run, <b class="ch">${cdb.rows.length}</b> differ</p>`;
@@ -1066,7 +1066,9 @@ def read_notes(period):
 
 def log_reason(period, gtag, r, empty):
     # why the run has no events (empty) or what the job saw (empty plots), from the QA job log
-    path = os.path.join(QABASE, "condor/log", f"cdbcaloqa_{period}_{gtag}_{r}.out")
+    pattern = os.environ.get("CDBQA_JOBLOG_PATTERN",
+                             os.path.join(QABASE, "condor/log", f"cdbcaloqa_{period}_{gtag}_{{run}}.out"))
+    path = pattern.format(run=r)
     if not os.path.exists(path):
         return "no QA job log"
     read = dropped = proc = skim = None
