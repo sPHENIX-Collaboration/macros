@@ -3,7 +3,7 @@
 # usage: run_pass2.sh <period: Run24pp, Run24AuAu, Run25OO, Run25pp, Run25AuAu> [global tag, default newcdbtag]
 #   e.g. run_pass2.sh Run25OO newcdbtag
 PERIOD=$1; GTAG=${2:-newcdbtag}
-QABASE=${CDBQA_BASE:?set CDBQA_BASE, the work area (lists, hists, pass2, condor logs)}
+QABASE=${CDBQA_BASE:-/sphenix/user/$USER/cdbqa}
 CODE=$(cd "$(dirname "$0")"/.. && pwd)
 # other places for a test (default: the real ones)
 WEB=${CDBQA_WEB:-/sphenix/WWW/subsystem/CDBCaloQA}

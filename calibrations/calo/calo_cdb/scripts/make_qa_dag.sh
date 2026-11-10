@@ -5,10 +5,10 @@
 # usage: make_qa_dag.sh <period> <global tag> [--runs <run list>] [--test <dir>]
 #   --runs: runs to do (default runlists/<period>.txt; Run25pp, Run25AuAu: all runs with DST_CALOFITTING, from CreateDstList.pl)
 #   --test: histograms, logs, pass 2 files and pages in <dir> (the real ones are not touched)
-# environment: CDBQA_BASE (work area), CDBQA_WEB (pages), CDBQA_RELEASE, CDBQA_INSTALL (local build, optional)
+# environment: CDBQA_BASE (work area, default /sphenix/user/$USER/cdbqa), CDBQA_WEB (pages), CDBQA_RELEASE, CDBQA_INSTALL (local build, optional)
 # progress: <dag dir>/qa.dag.dagman.out, failed runs: <dag dir>/failed_pass1.txt
 PERIOD=$1; GTAG=$2; shift 2
-QABASE=${CDBQA_BASE:?set CDBQA_BASE, the work area (lists, hists, pass2, condor logs)}
+QABASE=${CDBQA_BASE:-/sphenix/user/$USER/cdbqa}
 CODE=$(cd "$(dirname "$0")"/.. && pwd)
 RUNLIST=$CODE/runlists/$PERIOD.txt; TEST=""
 while [ $# -gt 0 ]; do
