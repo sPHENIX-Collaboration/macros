@@ -113,7 +113,6 @@ void Fun4All_CDBCaloQA(const std::string &period = "Run24pp", int runnumber = 47
   std::vector<std::string> sepdfiles;
   std::vector<std::string> mbdfiles;
   std::vector<std::string> globalfiles;
-  const char *base = gSystem->Getenv("CDBQA_BASE");
   if (mc)
   {
     const char *lists = gSystem->Getenv("CDBQA_LISTS");
@@ -130,12 +129,10 @@ void Fun4All_CDBCaloQA(const std::string &period = "Run24pp", int runnumber = 47
   }
   else
   {
-    // segments with DST_ZDC_RAW (and DST_SEPD_RAW for Au+Au); segments on a Lustre OST listed in $CDBQA_BASE/lists/bad_osts.txt are skipped
+    // segments with DST_ZDC_RAW (and DST_SEPD_RAW for Au+Au)
     const std::string prodtype = production.substr(0, production.find('_'));
     const std::string version = production.substr(production.find('_') + 1);
     const std::string dstdir = "/sphenix/lustre01/sphnxpro/production/" + prodtype + "/physics/" + version + "/DST_CALOFITTING";
-    const std::string badosts = Form("%s/lists/bad_osts.txt", base ? base : ".");
-    const bool checkost = !gSystem->AccessPathName(badosts.c_str());
     std::istringstream ls(gSystem->GetFromPipe(Form("ls %s/run_*/DST_CALOFITTING_%s-%08d-*.root 2> /dev/null | sort",
                                                     dstdir.c_str(), production.c_str(), runnumber)).Data());
     for (std::string f; ls >> f;)
@@ -147,15 +144,6 @@ void Fun4All_CDBCaloQA(const std::string &period = "Run24pp", int runnumber = 47
       if (gSystem->AccessPathName(z.c_str()) || (sepd_raw && gSystem->AccessPathName(s.c_str())))
       {
         continue;
-      }
-      if (checkost)
-      {
-        const TString ost = gSystem->GetFromPipe(Form("lfs getstripe -i %s %s 2> /dev/null | grep -xFf %s; true", f.c_str(), z.c_str(), badosts.c_str()));
-        if (ost.Length() > 0)
-        {
-          std::cout << "skip segment on OST " << ost << ": " << f << std::endl;
-          continue;
-        }
       }
       calofiles.push_back(f);
       zdcfiles.push_back(z);
