@@ -61,7 +61,7 @@ Error           = $LOGDIR/cdbcaloqa_${PERIOD}_${GTAG}_\$(run).err
 Log             = $JOBLOG
 environment     = "CDBQA_BASE=$QABASE CDBQA_LISTS=$CODE/runlists CDBQA_RELEASE=${CDBQA_RELEASE:-new} CDBQA_INSTALL=$CDBQA_INSTALL"
 request_memory  = 2GB
-periodic_remove = (JobStatus == 5)
+periodic_remove = (JobStatus == 5) || (JobStatus == 2 && time() - EnteredCurrentStatus > 14400)
 Queue
 SUB
 
