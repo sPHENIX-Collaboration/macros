@@ -28,6 +28,8 @@ Periods: `Run24pp`, `Run24AuAu`, `Run25pp`, `Run25AuAu`, `Run25OO`.
 
 Histograms go to `$CDBQA_BASE`, pages to `/sphenix/WWW/subsystem/CDBCaloQA/<period>/<tag>`.
 
+Trial run that does not touch the official pages: add `--test <dir>`, and everything goes to `<dir>`.
+
 ## 4. Check progress
 
 ```
