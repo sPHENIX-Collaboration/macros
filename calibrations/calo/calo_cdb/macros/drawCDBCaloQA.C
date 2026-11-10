@@ -10,19 +10,28 @@
 
 #include <cdbobjects/CDBTTree.h>
 
+#include <TCanvas.h>
 #include <TColor.h>
+#include <TDirectory.h>
 #include <TF1.h>
+#include <TFile.h>
 #include <TGraph.h>
+#include <TGraphErrors.h>
 #include <TH2Poly.h>
 #include <TKey.h>
 #include <TLine.h>
 #include <TNamed.h>
+#include <TPad.h>
 #include <TProfile.h>
 #include <TProfile2D.h>
+#include <TROOT.h>
+#include <TStyle.h>
+#include <TSystem.h>
 
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <fstream>
 #include <map>
 #include <set>
 #include <sstream>
