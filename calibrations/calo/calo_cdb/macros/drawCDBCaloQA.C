@@ -942,14 +942,14 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
       {
         const std::string arm = a ? "north" : "south";
         TProfile2D *p2 = dynamic_cast<TProfile2D *>(f->Get(("p2_CDBCaloQA_zdc_t0_ohcal_" + arm).c_str()));
-        TH2 *ht = get2(f, "zdc_e_t0_" + arm);
-        if (!p2 || !ht || ht->GetEntries() == 0)
+        TH2 *hzdct = get2(f, "zdc_e_t0_" + arm);
+        if (!p2 || !hzdct || hzdct->GetEntries() == 0)
         {
           continue;
         }
-        TH1D *cnt = ht->ProjectionX(Form("zt0c_%d_%d", run, a));
+        TH1D *cnt = hzdct->ProjectionX(Form("zt0c_%d_%d", run, a));
         const int pk = cnt->GetMaximumBin();
-        const int j12 = ht->GetYaxis()->FindBin(12.5);
+        const int j12 = hzdct->GetYaxis()->FindBin(12.5);
         // sum E, entries, (n err)^2 in t0 bin i
         auto tbin = [&](int i)
         {
@@ -973,10 +973,10 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
           else
           {
             double s2 = 0;
-            for (int j = j12; j <= ht->GetNbinsY(); j++)
+            for (int j = j12; j <= hzdct->GetNbinsY(); j++)
             {
-              const double n = ht->GetBinContent(i, j);
-              const double e = ht->GetYaxis()->GetBinCenter(j);
+              const double n = hzdct->GetBinContent(i, j);
+              const double e = hzdct->GetYaxis()->GetBinCenter(j);
               r[0] += n * e;
               r[1] += n;
               s2 += n * e * e;
@@ -989,9 +989,9 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
         {
           double s = 0;
           double n = 0;
-          for (int i = 1; i <= ht->GetNbinsX(); i++)
+          for (int i = 1; i <= hzdct->GetNbinsX(); i++)
           {
-            if (std::abs(ht->GetXaxis()->GetBinCenter(i) - cnt->GetBinCenter(pk) - dt) < 2.5)
+            if (std::abs(hzdct->GetXaxis()->GetBinCenter(i) - cnt->GetBinCenter(pk) - dt) < 2.5)
             {
               const auto r = tbin(i);
               s += r[0];
@@ -1194,12 +1194,12 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
         // fixed y range; towers above or below it are counted in the text line
         const double ylo = 0.5;
         const double yhi = 1.2;
-        TH2F *hz = new TH2F(Form("%s_zsx_%d", L.c_str(), run), "", neta, -0.5, neta - 0.5, 150, ylo, yhi);
+        TH2F *hzsx = new TH2F(Form("%s_zsx_%d", L.c_str(), run), "", neta, -0.5, neta - 0.5, 150, ylo, yhi);
         TProfile *pz = new TProfile(Form("%s_zsx_prof_%d", L.c_str(), run), "", neta, -0.5, neta - 0.5);
         int nhi = 0, nlo = 0;
         for (auto &[ie, v] : vals)
         {
-          hz->Fill(ie, v);
+          hzsx->Fill(ie, v);
           pz->Fill(ie, v);
           nhi += (v > yhi);
           nlo += (v < ylo);
@@ -1216,12 +1216,12 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
         TCanvas *c = newCanvas(false);
         c->SetRightMargin(0.13);
         c->SetLogz();
-        hz->GetXaxis()->SetTitle(Form("%s i#eta", LL.c_str()));
-        hz->GetYaxis()->SetTitle("ZSCrossCalib factor");
-        hz->GetZaxis()->SetTitle("towers");
-        hz->GetXaxis()->CenterTitle();
-        hz->GetYaxis()->CenterTitle();
-        hz->Draw("colz");
+        hzsx->GetXaxis()->SetTitle(Form("%s i#eta", LL.c_str()));
+        hzsx->GetYaxis()->SetTitle("ZSCrossCalib factor");
+        hzsx->GetZaxis()->SetTitle("towers");
+        hzsx->GetXaxis()->CenterTitle();
+        hzsx->GetYaxis()->CenterTitle();
+        hzsx->Draw("colz");
         pz->SetMarkerStyle(20);
         pz->SetMarkerSize(0.6);
         pz->SetMarkerColor(kRed + 1);
