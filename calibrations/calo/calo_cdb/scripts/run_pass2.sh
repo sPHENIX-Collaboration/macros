@@ -44,6 +44,12 @@ if [ $NHIST -eq 0 ]; then
 fi
 
 OUT=$WEB/$PERIOD/$GTAG
+# global tag snapshot of today; stop before any page is touched if the download fails
+mkdir -p $(dirname $GTJSON)
+curl -sf -m 300 http://sphenix-cdb.apps.sdcc.bnl.gov/api/cdb_rest/globalTag/$GTAG -o $GTJSON.tmp \
+  && python3 -c "import json,sys; json.load(open(sys.argv[1]))" $GTJSON.tmp \
+  && mv $GTJSON.tmp $GTJSON \
+  || { echo "cannot download global tag $GTAG"; rm -f $GTJSON.tmp; exit 1; }
 # every pass 2 rewrites the whole tag page: nothing left over from an earlier run list
 rm -rf "${OUT:?}"
 mkdir -p $WORK $OUT/plots
@@ -77,8 +83,7 @@ Queue chunk from $WORK/draw_chunks.list
 SUB
 condor_submit $WORK/draw_chunk.sub | tail -1
 
-# global tag snapshot of today, then CDB status per run
-curl -s -m 300 http://sphenix-cdb.apps.sdcc.bnl.gov/api/cdb_rest/globalTag/$GTAG -o $GTJSON
+# CDB status per run
 python3 $CODE/scripts/cdbstatus.py $WORK/runfiles.txt $GTJSON $OUT/cdb $WORK/cdbstatus.txt "$JOBLOG"
 
 # summary vs run and CDB map here while the per-run jobs run; then wait for them (the fingerprint needs their plots)
