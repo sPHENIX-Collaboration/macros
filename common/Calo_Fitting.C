@@ -55,6 +55,14 @@ void Process_Calo_Fitting()
   caEPD->set_builder_type(buildertype);
   caEPD->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   se->registerSubsystem(caEPD);
+
+  CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
+  caZDC->set_detector_type(CaloTowerDefs::ZDC);
+  caZDC->set_builder_type(buildertype);
+  caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
+  caZDC->set_funcfit_type(2);
+  se->registerSubsystem(caZDC);
+
 }
 
 #endif

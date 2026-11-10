@@ -101,14 +101,16 @@ void Fun4All_JetSkimmedProductionYear2(int nEvents = 1000,
   CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
   caZDC->set_detector_type(CaloTowerDefs::ZDC);
   caZDC->set_builder_type(CaloTowerDefs::kPRDFTowerv4);
-  if( (runnumber > RunnumberRange::RUN2PP_FIRST && runnumber < RunnumberRange::RUN2PP_LAST)
-     || (runnumber > RunnumberRange::RUN3PP_FIRST && runnumber < RunnumberRange::RUN3PP_LAST) ){
-    caZDC->set_processing_type(CaloWaveformProcessing::FAST);
-  }
-  else {
-    caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
-    caZDC->set_funcfit_type(2);
-  }
+  // if( (runnumber > RunnumberRange::RUN2PP_FIRST && runnumber < RunnumberRange::RUN2PP_LAST)
+  //    || (runnumber > RunnumberRange::RUN3PP_FIRST && runnumber < RunnumberRange::RUN3PP_LAST) ){
+  //   caZDC->set_processing_type(CaloWaveformProcessing::FAST);
+  // }
+  // else {
+
+  // All systems and calibrations use FU
+  caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
+  caZDC->set_funcfit_type(2);
+  //}
   se->registerSubsystem(caZDC);
 
 
