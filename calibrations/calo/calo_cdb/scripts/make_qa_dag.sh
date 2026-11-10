@@ -3,7 +3,7 @@
 # once every run is finished. DAGMan follows the jobs in their log file (no condor_q).
 #   a crashed or held job is run once more; a run that fails twice goes to failed_pass1.txt and pass 2 still runs
 # usage: make_qa_dag.sh <period> <global tag> [--runs <run list>] [--test <dir>]
-#   --runs: runs to do (default runlists/<period>.txt; Run25pp, Run25AuAu: all runs with DST_CALOFITTING, from CreateDstList.pl)
+#   --runs: runs to do (default: all runs with DST_CALOFITTING between FIRST and LAST of phool/RunnumberRange.h; MC: runlists/<period>.txt)
 #   --test: histograms, logs, pass 2 files and pages in <dir> (the real ones are not touched)
 # environment: CDBQA_BASE (work area, default /sphenix/user/$USER/cdbqa), CDBQA_WEB (pages), CDBQA_RELEASE, CDBQA_INSTALL (local build, optional)
 # progress: <dag dir>/qa.dag.dagman.out, failed runs: <dag dir>/failed_pass1.txt
@@ -32,14 +32,21 @@ rm -rf "${D:?}"
 mkdir -p $D $HISTS $LOGDIR $WEB $(dirname $GTJSON) /tmp/$USER
 if [ ! -s "$RUNLIST" ]; then
   case $PERIOD in
-    Run25pp) DATASET=run3pp ;;
-    Run25AuAu) DATASET=run3auau ;;
+    Run24pp)   DATASET=run2pp;   RANGE=RUN2PP ;;
+    Run24AuAu) DATASET=run2auau; RANGE=RUN2AUAU ;;
+    Run25AuAu) DATASET=run3auau; RANGE=RUN3AUAU ;;
+    Run25pp)   DATASET=run3pp;   RANGE=RUN3PP ;;
+    Run25OO)   DATASET=run3oo;   RANGE=RUN3OO ;;
     *) echo "no run list $RUNLIST"; exit 1 ;;
   esac
   source /opt/sphenix/core/bin/sphenix_setup.sh -n ${CDBQA_RELEASE:-new} > /dev/null 2>&1
+  HDR=$OFFLINE_MAIN/include/phool/RunnumberRange.h
+  FIRST=$(sed -n "s/.*${RANGE}_FIRST *= *\([0-9]*\).*/\1/p" $HDR)
+  LAST=$(sed -n "s/.*${RANGE}_LAST *= *\([0-9]*\).*/\1/p" $HDR)
   RUNLIST=$D/runs.txt
-  CreateDstList.pl --printruns --dataset $DATASET --tag pro001_pcdb001_v001 DST_CALOFITTING > $RUNLIST
-  [ -s $RUNLIST ] || { echo "no runs from CreateDstList.pl for $DATASET"; exit 1; }
+  CreateDstList.pl --printruns --dataset $DATASET --tag pro001_pcdb001_v001 DST_CALOFITTING \
+    | awk -v a=$FIRST -v b=$LAST '$1 >= a && $1 <= b' > $RUNLIST
+  [ -s $RUNLIST ] || { echo "no runs for $DATASET in $FIRST-$LAST"; exit 1; }
 fi
 
 # pass 1: one run per node; a held job is removed, so DAGMan sees a failure and runs it again
