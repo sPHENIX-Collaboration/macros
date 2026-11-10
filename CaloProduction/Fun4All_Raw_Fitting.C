@@ -85,15 +85,18 @@ void Fun4All_Raw_Fitting(int nEvents = 100,
   CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
   caZDC->set_detector_type(CaloTowerDefs::ZDC);
   caZDC->set_builder_type(buildertype);
-  if ((runnumber > RunnumberRange::RUN2PP_FIRST && runnumber < RunnumberRange::RUN2PP_LAST) || (runnumber > RunnumberRange::RUN3PP_FIRST && runnumber < RunnumberRange::RUN3PP_LAST))
-  {
-    caZDC->set_processing_type(CaloWaveformProcessing::FAST);
-  }
-  else
-  {
-    caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
-    caZDC->set_funcfit_type(2);
-  }
+  //if ((runnumber > RunnumberRange::RUN2PP_FIRST && runnumber < RunnumberRange::RUN2PP_LAST) || (runnumber > RunnumberRange::RUN3PP_FIRST && runnumber < RunnumberRange::RUN3PP_LAST))
+  //{
+  //caZDC->set_processing_type(CaloWaveformProcessing::FAST);
+  //}
+  //else
+  //{
+
+  // Now all systems and calibrations use FUNCFIT type 2
+  
+  caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
+  caZDC->set_funcfit_type(2);
+  //}
   se->registerSubsystem(caZDC);
   Fun4AllInputManager *In = new Fun4AllPrdfInputManager("PRDFin");
   In->AddFile(infile);

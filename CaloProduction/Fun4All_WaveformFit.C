@@ -87,7 +87,7 @@ void Fun4All_WaveformFit(const std::string &fname = "/sphenix/lustre01/sphnxpro/
   CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
   caZDC->set_detector_type(CaloTowerDefs::ZDC);
   caZDC->set_builder_type(buildertype);
-  caZDC->set_processing_type(CaloWaveformProcessing::FAST);
+  caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
   se->registerSubsystem(caZDC);
 
   CaloTowerBuilder *caEPD = new CaloTowerBuilder("SEPDBUILDER");
