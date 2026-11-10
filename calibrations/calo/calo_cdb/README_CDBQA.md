@@ -26,7 +26,7 @@ scripts/make_qa_dag.sh Run25OO newcdbtag
 
 Periods: `Run24pp`, `Run24AuAu`, `Run25pp`, `Run25AuAu`, `Run25OO`.
 
-Add `--test <dir>` to write everything, pages included, to `<dir>` instead.
+Histograms go to `$CDBQA_BASE`, pages to `/sphenix/WWW/subsystem/CDBCaloQA/<period>/<tag>`.
 
 ## 4. Check progress
 
