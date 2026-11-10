@@ -516,10 +516,20 @@ void Tracking_Reco_PolySeed()
   auto *garfield = new PHGarfield();
   garfield->SetCMVoltageDefault(387.5);
   garfield->SetIsNonDistortedMC(true);
+  garfield->Verbosity(verbosity);
   se->registerSubsystem(garfield);
+
+  auto* modtrackreco = new Tpc_ModuleTrackReco();
+  modtrackreco->Verbosity(verbosity);
+  se->registerSubsystem(modtrackreco);     // makes TPC_MODULETRACKS
   
-  se->registerSubsystem(new Tpc_ModuleTrackReco());     // makes TPC_MODULETRACKS
-  se->registerSubsystem(new Tpc_AssembledTrackReco());  // makes TPC_ASSEMBLEDTRACKS
+  auto* tpcreco = new Tpc_AssembledTrackReco();
+  tpcreco->setConnectMaxLayerOverlap(4);
+  tpcreco->Verbosity(verbosity);
+
+  auto assembled = new Tpc_AssembledTrackReco();
+  assembled->Verbosity(verbosity);
+  se->registerSubsystem(assembled);  // makes TPC_ASSEMBLEDTRACKS
 	
   auto *crossingFinder = new TpcCrossingFinder();
   crossingFinder->Verbosity(verbosity);
