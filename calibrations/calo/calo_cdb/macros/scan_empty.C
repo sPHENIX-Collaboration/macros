@@ -47,7 +47,7 @@ namespace
     }
     return -1;
   }
-}
+}  // namespace
 
 void scan_empty(const std::string &runfiles, const std::string &plotdir, const std::string &out)
 {
@@ -60,7 +60,8 @@ void scan_empty(const std::string &runfiles, const std::string &plotdir, const s
     int run;
     std::string hf;
     if (!(ls >> run >> hf)) continue;
-    double nall = -1, nmb = -1;
+    double nall = -1;
+    double nmb = -1;
     if (hf != "-")
     {
       TFile *f = TFile::Open(hf.c_str());

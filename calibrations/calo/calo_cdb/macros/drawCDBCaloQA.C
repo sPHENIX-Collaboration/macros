@@ -50,8 +50,8 @@ namespace
   const std::vector<std::string> trigs{"MB", "Photon", "Jet"};
   std::vector<std::string> g_trigname{"MB", "Photon", "Jet"};  // full trigger names, read from each run file
   const std::vector<int> trigcolor{kBlack, kBlue + 1, kRed + 1};
-  std::string g_tag;   // "Run 47289" label on every plot
-  std::string g_coll;  // collision system and energy, from the run number
+  std::string g_tag;    // "Run 47289" label on every plot
+  std::string g_coll;   // collision system and energy, from the run number
   std::string g_label;  // text line of the last label(), written with the next plot's objects for the web page
 
   std::string collisionLabel(int run)
@@ -176,7 +176,10 @@ namespace
   void refline(double v, bool vertical)
   {
     gPad->Update();
-    double x1 = gPad->GetUxmin(), x2 = gPad->GetUxmax(), y1 = gPad->GetUymin(), y2 = gPad->GetUymax();
+    double x1 = gPad->GetUxmin();
+    double x2 = gPad->GetUxmax();
+    double y1 = gPad->GetUymin();
+    double y2 = gPad->GetUymax();
     if (gPad->GetLogx())
     {
       x1 = std::pow(10, x1);
@@ -281,7 +284,8 @@ namespace
     int b0 = h->FindBin(0.0);
     for (int b = 1; b < b0; ++b)
     {
-      double c = h->GetBinContent(b), e = h->GetBinError(b);
+      double c = h->GetBinContent(b);
+      double e = h->GetBinError(b);
       m->SetBinContent(b, c);
       m->SetBinError(b, e);
       int bp = m->FindBin(-h->GetBinCenter(b));
@@ -479,7 +483,7 @@ namespace
       if (g)
       {
         ko.push_back(g);
-        kopt.push_back("l");
+        kopt.emplace_back("l");
       }
     }
     keep(file, ko, kopt, {"south", "north"}, true);
@@ -642,7 +646,7 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
       noevt.insert(run);
     }
     TH1 *ho = (f && !f->IsZombie()) ? dynamic_cast<TH1 *>(f->Get("h_CDBCaloQA_ohcal_esum")) : nullptr;
-    if (ho && !noevt.count(run))
+    if (ho && !noevt.contains(run))
     {
       if (!ohsum)
       {
@@ -688,7 +692,7 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
       std::map<int, std::vector<double>> zsieta;
       for (auto &[run, fname] : runs)
       {
-        if (noevt.count(run))
+        if (noevt.contains(run))
         {
           continue;
         }
@@ -719,7 +723,8 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
       const int nrun = zsieta.size();
       TH2F *hm = new TH2F(Form("%s_zsx_map", layers[l].c_str()), "", nrun, 0, nrun, neta, -0.5, neta - 0.5);
       const int step = std::max(1, (int) std::ceil(nrun / 20.));  // at most about 20 run labels
-      double vlo = 1e9, vhi = -1e9;
+      double vlo = 1e9;
+      double vhi = -1e9;
       int i = 0;
       for (auto &[r, m] : zsieta)
       {
@@ -770,7 +775,7 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
 
   // summary quantities vs run
   std::map<std::string, TGraph *> gr;
-  bool skipsum = false;  // run without MB events: no summary point
+  bool skipsum = false;                      // run without MB events: no summary point
   std::map<std::string, TProfile *> tscsum;  // HCal per-tower profiles summed over the runs: <layer>_tsc_e, <layer>_tsc_occ
   auto addpt = [&gr, &skipsum](const std::string &key, int run, double val)
   {
@@ -778,7 +783,7 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
     {
       return;
     }
-    if (!gr.count(key))
+    if (!gr.contains(key))
     {
       gr[key] = new TGraph();
     }
@@ -798,7 +803,7 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
       continue;
     }
     g_tag = Form("Run %d", run);
-    skipsum = noevt.count(run) > 0;
+    skipsum = noevt.contains(run);
     for (size_t l = 1; !skipsum && l < layers.size(); l++)
     {
       for (const std::string q : {"_tsc_e", "_tsc_occ"})
@@ -842,7 +847,7 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
       {
         hs.push_back(hq->ProjectionY(Form("q_pmt%d_%d", p, run), p + 1, p + 1)->Rebin(4));
         hs.back()->GetXaxis()->SetRangeUser(-0.5, 5);  // MIP peak region
-        nm.push_back(Form("PMT %d", p));
+        nm.emplace_back(Form("PMT %d", p));
       }
       overlay(hs, nm, selcol, "PMT charge, valid TDC", pre + "mbd_q_selpmt.pdf", true, mbname, false, {0., 1.});
       hs.clear();
@@ -912,8 +917,11 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
         {
           hm.push_back(zdczoom(get1(f, Form("zdc_mod_e_%s_%d", arm.c_str(), m))));
         }
-        overlay(hm, {"compartment 1", "compartment 2", "compartment 3"}, {kBlack, kBlue + 1, kRed + 1},
-                "ZDC " + arm + " compartment energy (" + zu + ")", pre + "zdc_mod_" + arm + ".pdf", true, zdcname);
+        std::string ztitle = "ZDC ";
+        ztitle.append(arm).append(" compartment energy (").append(zu).append(")");
+        std::string pdfname = pre;
+        pdfname.append("zdc_mod_").append(arm).append(".pdf");
+        overlay(hm, {"compartment 1", "compartment 2", "compartment 3"}, {kBlack, kBlue + 1, kRed + 1}, ztitle, pdfname, true, zdcname);
       }
       std::array<double, 2> p1n{};
       zdcRatio(zdczoom(hzs), zdczoom(hzn), "ZDC arm energy (" + zu + ")", pre + "zdc_e_ns.pdf", zdcname, zdcfitu, p1n);
@@ -1015,7 +1023,7 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
         {
           addpt("zdc_fp5_" + arm, run, mp / m0);
         }
-        for (int i = 1; i <= ht->GetNbinsX(); i++)
+        for (int i = 1; i <= hzdct->GetNbinsX(); i++)
         {
           const auto r = tbin(i);
           auto &z = zt0[a][i - pk];
@@ -1025,10 +1033,11 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
         }
         for (int w = 0; w < 3; w++)
         {
-          const double dt = (w == 0) ? 0 : (w == 1 ? -5.3 : 5.3);
-          const int i0 = ht->GetXaxis()->FindBin(cnt->GetBinCenter(pk) + dt - 2.49);
-          const int i1 = ht->GetXaxis()->FindBin(cnt->GetBinCenter(pk) + dt + 2.49);
-          TH1 *py = ht->ProjectionY(Form("zsp_%d_%d_%d", run, a, w), i0, i1);
+          const std::array<double, 3> wdt{0, -5.3, 5.3};
+          const double dt = wdt[w];
+          const int i0 = hzdct->GetXaxis()->FindBin(cnt->GetBinCenter(pk) + dt - 2.49);
+          const int i1 = hzdct->GetXaxis()->FindBin(cnt->GetBinCenter(pk) + dt + 2.49);
+          TH1 *py = hzdct->ProjectionY(Form("zsp_%d_%d_%d", run, a, w), i0, i1);
           if (!zspec[a][w])
           {
             zspec[a][w] = (TH1 *) py->Clone(Form("zspec_%d_%d", a, w));
@@ -1076,7 +1085,7 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
         const int ch = TowerInfoDefs::decode_epd(TowerInfoDefs::encode_epd(arm, ring, 0));
         hs.push_back(hsq->ProjectionY(Form("sepd_q_ch%d_%d", ch, run), ch + 1, ch + 1));
         hs.back()->GetXaxis()->SetRangeUser(-0.5, 5);  // MIP peak region
-        nm.push_back(Form("%s ring %d tile 0", arm ? "north" : "south", ring));
+        nm.emplace_back(Form("%s ring %d tile 0", arm ? "north" : "south", ring));
       }
       overlay(hs, nm, selcol, "sEPD tile charge (nMIP)", pre + "sepd_q_seltile.pdf", true, mbname, false, {0., 1.});
       TH1 *hqt = hsq->ProjectionY(Form("sepd_q_all_%d", run));
@@ -1085,7 +1094,9 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
       // per tile: MIP peak (most probable charge in 0.5-2.5 nMIP, at least 50 entries there), mean charge per event,
       // fraction of events with q > 0.5 nMIP
       const int nch = hsq->GetNbinsX();
-      std::vector<double> mip(nch, std::nan("")), qmean(nch, std::nan("")), hitfrac(nch, std::nan(""));
+      std::vector<double> mip(nch, std::nan(""));
+      std::vector<double> qmean(nch, std::nan(""));
+      std::vector<double> hitfrac(nch, std::nan(""));
       std::array<double, 2> mipsum{0, 0};
       std::array<int, 2> nmip{0, 0};
       for (int ch = 0; ch < nch; ch++)
@@ -1196,7 +1207,8 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
         const double yhi = 1.2;
         TH2F *hzsx = new TH2F(Form("%s_zsx_%d", L.c_str(), run), "", neta, -0.5, neta - 0.5, 150, ylo, yhi);
         TProfile *pz = new TProfile(Form("%s_zsx_prof_%d", L.c_str(), run), "", neta, -0.5, neta - 0.5);
-        int nhi = 0, nlo = 0;
+        int nhi = 0;
+        int nlo = 0;
         for (auto &[ie, v] : vals)
         {
           hzsx->Fill(ie, v);
@@ -1303,7 +1315,9 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
         gs->SetMaximum(NOISE_SIGYMAX[l]);
         gs->GetXaxis()->SetLimits(-1, h2->GetNbinsX());
         gs->Draw("AP");
-        label(LL + ", " + mbname + ", |v_{z}| < 100 cm");
+        std::string ltext = LL;
+        ltext.append(", ").append(mbname).append(", |v_{z}| < 100 cm");
+        label(ltext);
         keep(pre + L + "_noise_ieta.pdf", {gs}, {"p"}, {}, false);
         save(cs, pre + L + "_noise_ieta.pdf");
       }
@@ -1317,7 +1331,10 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
       // jet eta above 5 GeV (p+p) or 10 GeV (Au+Au, O+O)
       const double jetetapt = (period.find("pp") != std::string::npos) ? 5. : 10.;
       // only trigger categories that are set up for this period (Au+Au: MB only)
-      std::vector<TH1 *> he, heta, hj, hjeta;
+      std::vector<TH1 *> he;
+      std::vector<TH1 *> heta;
+      std::vector<TH1 *> hj;
+      std::vector<TH1 *> hjeta;
       std::vector<std::string> tnames;
       std::vector<int> tcols;
       for (size_t it = 0; it < trigs.size(); it++)
@@ -1389,7 +1406,7 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
   auto drawgr = [&gr, &outdir](const std::string &key, const std::string &ytitle, double hline = std::nan(""),
                                const std::string &extra = "")
   {
-    if (!gr.count(key))
+    if (!gr.contains(key))
     {
       return;
     }
@@ -1424,7 +1441,7 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
   drawgr("mbd_zvtx_rms", "MBD z-vertex RMS (cm)");
   drawgr("mbd_qsum", "MBD mean charge sum");
   // centrality fractions relative to the sum of all runs of the period (one run off can not move the others)
-  if (gr.count("cent_frac_0_5"))
+  if (gr.contains("cent_frac_0_5"))
   {
     const std::vector<std::string> keys{"cent_frac_0_5", "cent_frac_75_80"};
     const std::vector<std::string> names{"0-5%", "75-80%"};
@@ -1469,7 +1486,8 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
       double xhi = rg[0]->GetPointX(rg[0]->GetN() - 1);
       TH1F *fr = new TH1F("fr_centref", ";run number;fraction of MB events / all runs", 100,
                           xlo - 5 - 0.02 * (xhi - xlo), xhi + 5 + 0.02 * (xhi - xlo));
-      double ymin = 1, ymax = 1;
+      double ymin = 1;
+      double ymax = 1;
       for (auto *g : rg)
       {
         for (int i = 0; i < g->GetN(); i++)
@@ -1508,7 +1526,7 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
     }
   }
   // mean charge sum per event, south (blue) and north (red)
-  if (gr.count("mbd_qsum_south_mean"))
+  if (gr.contains("mbd_qsum_south_mean"))
   {
     TCanvas *c = newCanvas(false);
     c->SetRightMargin(0.04);
@@ -1567,7 +1585,7 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
   auto drawns = [&gr, &outdir](const std::string &key, const std::string &ytitle, double ylo = 0, double yhi = -1)
   {
     const std::vector<std::string> keys{key + "_south", key + "_north"};
-    if (!gr.count(keys[0]) || !gr.count(keys[1]))
+    if (!gr.contains(keys[0]) || !gr.contains(keys[1]))
     {
       return;
     }
@@ -1589,7 +1607,8 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
     c->SetRightMargin(0.04);
     TH1F *fr = new TH1F(("fr_" + key).c_str(), (";run number;" + ytitle).c_str(), 100, xlo - 5 - 0.02 * (xhi - xlo), xhi + 5 + 0.02 * (xhi - xlo));
     fr->SetMinimum(yhi > ylo ? ylo : 0);
-    fr->SetMaximum(yhi > ylo ? yhi : (ymax > 0 ? headroom(0, ymax, false, 0.72) : 1));
+    const double frmax = (ymax > 0) ? headroom(0, ymax, false, 0.72) : 1;
+    fr->SetMaximum(yhi > ylo ? yhi : frmax);
     fr->GetXaxis()->CenterTitle();
     fr->GetYaxis()->CenterTitle();
     fr->GetXaxis()->SetNoExponent();
@@ -1711,8 +1730,10 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
       h->GetXaxis()->SetRangeUser(0., zhi ? 750. : 300.);
       hs.push_back(h);
     }
-    overlay(hs, {"main bunch", "-5 ns", "+5 ns"}, {kBlack, kBlue + 1, kRed + 1}, "ZDC " + arm + " energy (GeV)",
-            outdir + "/summary/zdc_bunchspec_" + arm + "_vs_run.pdf", true, zhi ? "MB |z| < 10 cm, all runs" : "MB, all runs");
+    std::string pdfname = outdir;
+    pdfname.append("/summary/zdc_bunchspec_").append(arm).append("_vs_run.pdf");
+    overlay(hs, {"main bunch", "-5 ns", "+5 ns"}, {kBlack, kBlue + 1, kRed + 1}, "ZDC " + arm + " energy (GeV)", pdfname, true,
+            zhi ? "MB |z| < 10 cm, all runs" : "MB, all runs");
   }
   // O+O: peripheral MB events (OHCal < 2 GeV), all runs
   if (zperiph[0] && zperiph[1])
@@ -1743,7 +1764,8 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
   {
     const bool isE = key.find("_tsc_e") != std::string::npos;
     const size_t l = key.rfind("ihcal", 0) == 0 ? 1 : 2;
-    std::array<double, 1536> v{}, ev{};
+    std::array<double, 1536> v{};
+    std::array<double, 1536> ev{};
     std::array<bool, 1536> ok{};
     for (int i = 0; i < 1536; i++)
     {
@@ -1751,7 +1773,8 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
       v[i] = p->GetBinContent(i + 1);
       ev[i] = p->GetBinError(i + 1);
     }
-    std::array<double, 64> sum{}, sum2{};
+    std::array<double, 64> sum{};
+    std::array<double, 64> sum2{};
     std::array<int, 64> n{};
     for (int ie = 0; ie < 24; ie++)
     {
@@ -1778,7 +1801,7 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
     }
     TH1D *h = new TH1D(("tsc_" + key).c_str(),
                        (std::string(";i#phi;") + (isE ? Form("<E> in %s GeV / i#eta ring mean", l == 1 ? "0.3-1.0" : "1.0-2.5")
-                                                       : Form("fraction E > %s GeV / i#eta ring mean", l == 1 ? "0.3" : "1.0")))
+                                                      : Form("fraction E > %s GeV / i#eta ring mean", l == 1 ? "0.3" : "1.0")))
                            .c_str(),
                        64, -0.5, 63.5);
     double dev = 0.01;
@@ -1804,8 +1827,10 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
     h->Draw("e");
     refline(1., false);
     label(layerlabel[l] + ", all runs, good towers averaged over i#eta");
-    keep(outdir + "/summary/" + key + "_vs_run.pdf", {h}, {"e"}, {}, false);
-    save(c, outdir + "/summary/" + key + "_vs_run.pdf");
+    std::string pdfname = outdir;
+    pdfname.append("/summary/").append(key).append("_vs_run.pdf");
+    keep(pdfname, {h}, {"e"}, {}, false);
+    save(c, pdfname);
   }
 
   g_objfile->Close();
@@ -1822,7 +1847,8 @@ void drawCDBCaloQA(const std::string &runfiles = "runfiles.txt",
     {
       std::istringstream ls(line);
       int r;
-      std::string d, s;
+      std::string d;
+      std::string s;
       if (!(ls >> r >> d >> s))
       {
         continue;

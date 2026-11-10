@@ -98,7 +98,18 @@ void Fun4All_CDBCaloQA(const std::string &period = "Run24pp", int runnumber = 47
   }
   else if (period == "MC_pp" || period == "MC_AuAu" || period == "MC_OO")
   {
-    production = (period == "MC_pp") ? "pythia8_Detroit" : (period == "MC_AuAu" ? "sHijing_0_20fm" : "sHijing_OO_0_15fm");
+    if (period == "MC_pp")
+    {
+      production = "pythia8_Detroit";
+    }
+    else if (period == "MC_AuAu")
+    {
+      production = "sHijing_0_20fm";
+    }
+    else
+    {
+      production = "sHijing_OO_0_15fm";
+    }
     nMB = 10000;
     nMax = nMB;
   }
@@ -134,7 +145,8 @@ void Fun4All_CDBCaloQA(const std::string &period = "Run24pp", int runnumber = 47
     const std::string version = production.substr(production.find('_') + 1);
     const std::string dstdir = "/sphenix/lustre01/sphnxpro/production/" + prodtype + "/physics/" + version + "/DST_CALOFITTING";
     std::istringstream ls(gSystem->GetFromPipe(Form("ls %s/run_*/DST_CALOFITTING_%s-%08d-*.root 2> /dev/null | sort",
-                                                    dstdir.c_str(), production.c_str(), runnumber)).Data());
+                                                    dstdir.c_str(), production.c_str(), runnumber))
+                              .Data());
     for (std::string f; ls >> f;)
     {
       std::string z = f;
