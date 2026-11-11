@@ -10,15 +10,19 @@
 PERIOD=$1; GTAG=$2; shift 2
 QABASE=${CDBQA_BASE:-/sphenix/user/$USER/cdbqa}
 CODE=$(cd "$(dirname "$0")"/.. && pwd)
-RUNLIST=$CODE/runlists/$PERIOD.txt; TEST=""
+RUNLIST=$CODE/runlists/$PERIOD.txt; TEST=""; RUNSGIVEN=0
 while [ $# -gt 0 ]; do
   case $1 in
-    --runs) RUNLIST=$(readlink -f $2); shift 2 ;;
+    --runs) RUNLIST=$(readlink -f $2); RUNSGIVEN=1; shift 2 ;;
     --test) TEST=$(readlink -f $2); shift 2 ;;
     *) echo "unknown option $1"; exit 1 ;;
   esac
 done
 [ -n "$PERIOD" ] && [ -n "$GTAG" ] || { echo "usage: make_qa_dag.sh <period> <global tag> [--runs <run list>] [--test <dir>]"; exit 1; }
+if [ $RUNSGIVEN -eq 1 ] && [ ! -s "$RUNLIST" ]; then
+  echo "no run list $RUNLIST"
+  exit 1
+fi
 if [ -n "$TEST" ]; then
   HISTS=$TEST/hists/$PERIOD/$GTAG; LOGDIR=$TEST/log; WORK=$TEST/pass2/$PERIOD/$GTAG
   WEB=$TEST/web; GTJSON=$TEST/gt_$GTAG.json; D=$TEST/dag/${PERIOD}_$GTAG
@@ -55,7 +59,7 @@ Universe        = vanilla
 Executable      = $CODE/scripts/run_cdbcaloqa.sh
 transfer_executable = false
 Arguments       = $PERIOD \$(run) $GTAG $HISTS
-Initialdir      = $QABASE
+Initialdir      = ${TEST:-$QABASE}
 Output          = $LOGDIR/cdbcaloqa_${PERIOD}_${GTAG}_\$(run).out
 Error           = $LOGDIR/cdbcaloqa_${PERIOD}_${GTAG}_\$(run).err
 Log             = $JOBLOG
@@ -82,7 +86,7 @@ cat > $D/pass2.sub << SUB
 Universe       = local
 Executable     = /bin/bash
 Arguments      = $CODE/scripts/run_pass2.sh $PERIOD $GTAG
-Initialdir     = $QABASE
+Initialdir     = ${TEST:-$QABASE}
 Output         = $D/pass2.out
 Error          = $D/pass2.err
 Log            = $JOBLOG
