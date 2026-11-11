@@ -1,9 +1,9 @@
 // SDCC CDB snapshot: no event input, GL1 packet, reconstruction or collector build.
-#include "TPCRunConditionsSnapshot.h"
+#include <TSystem.h>
 #include <cdbobjects/CDBTTree.h>
 #include <ffamodules/CDBInterface.h>
 #include <phool/recoConsts.h>
-#include <TSystem.h>
+
 #include <cstdint>
 #include <fstream>
 #include <iomanip>
@@ -12,6 +12,8 @@
 #include <memory>
 #include <sstream>
 #include <stdexcept>
+
+#include "TPCRunConditionsSnapshot.h"
 R__LOAD_LIBRARY(libphool.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libcdbobjects.so)
@@ -48,14 +50,21 @@ inline std::string joined(const std::vector<std::string> &values)
   }
   return out;
 }
-} // namespace TPCSnapshot
+}  // namespace TPCSnapshot
 
 void ExportTPCRunConditions(int run, const char *group, const char *output,
                             const char *seriesOutput, const char *cdbTag, bool useFallback = false,
                             double referenceKeff = 1.55, double par0 = .185, double par1 = .815,
                             double referenceSouth = 3.36138, double referenceNorth = 3.20357)
 {
-  using namespace TPCSnapshot;
+  using TPCSnapshot::fallbackKeff;
+  using TPCSnapshot::joined;
+  using TPCSnapshot::median;
+  using TPCSnapshot::missing;
+  using TPCSnapshot::number;
+  using TPCSnapshot::quote;
+  using TPCSnapshot::r1Channels;
+  using TPCSnapshot::summarize;
   auto *rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", run);
   rc->set_uint64Flag("TIMESTAMP", run);
@@ -63,7 +72,8 @@ void ExportTPCRunConditions(int run, const char *group, const char *output,
   auto *cdb = CDBInterface::instance();
   const std::string conditionFile = cdb->getUrl("TPC_CONDITIONS");
   const std::string keffFile = cdb->getUrl("Tpc_PolyClusterizer_kEff");
-  std::unique_ptr<CDBTTree> conditions, keff;
+  std::unique_ptr<CDBTTree> conditions;
+  std::unique_ptr<CDBTTree> keff;
   if (!conditionFile.empty())
   {
     conditions = std::make_unique<CDBTTree>(conditionFile);
@@ -85,7 +95,9 @@ void ExportTPCRunConditions(int run, const char *group, const char *output,
       if (!channels.emplace(found->second, entry.first).second)
         throw std::runtime_error("Duplicate conditions BCO");
     }
-  std::vector<double> currents[2], pressure, temperature;
+  std::vector<double> currents[2];
+  std::vector<double> pressure;
+  std::vector<double> temperature;
   std::ofstream series(seriesOutput);
   if (!series)
     throw std::runtime_error("Cannot write conditions series");
@@ -110,7 +122,8 @@ void ExportTPCRunConditions(int run, const char *group, const char *output,
     }
   }
   series.close();
-  const auto p = summarize(pressure), t = summarize(temperature);
+  const auto p = summarize(pressure);
+  const auto t = summarize(temperature);
   std::ofstream out(output);
   if (!out)
     throw std::runtime_error("Cannot write conditions snapshot");
@@ -123,7 +136,8 @@ void ExportTPCRunConditions(int run, const char *group, const char *output,
   {
     const auto values = summarize(currents[side]);
     double scale = missing();
-    std::string source = "missing", kind = "missing";
+    std::string source = "missing";
+    std::string kind = "missing";
     if (keff)
     {
       const auto &entries = keff->GetSingleFloatEntryMap();
@@ -147,9 +161,11 @@ void ExportTPCRunConditions(int run, const char *group, const char *output,
       }
     }
     const bool complete = !channels.empty() && values.n == channels.size();
-    const std::string status = !complete
-                                   ? "missing_or_partial_current"
-                                   : (!std::isfinite(scale) ? "missing_keff" : "complete_snapshot");
+    std::string status = "missing_or_partial_current";
+    if (complete)
+    {
+      status = std::isfinite(scale) ? "complete_snapshot" : "missing_keff";
+    }
     out << quote(group) << ',' << run << ',' << side << ',' << number(values.mean) << ','
         << number(values.rms) << ',' << number(values.low) << ',' << number(values.high) << ','
         << number(scale) << ',' << number(scale) << ",," << quote(kind) << ',' << quote(source)

@@ -1,14 +1,9 @@
 // Interpreted by ROOT on SDCC. No custom collector library/build is needed.
-#include "TPCRunAverageConditions.h"
-#include <GlobalVariables.C>
 #include <TPolyLine3D.h>
 #include <TSystem.h>
-#include <array>
 #include <cdbobjects/CDBTTree.h>
-#include <cmath>
 #include <ffamodules/CDBInterface.h>
 #include <ffamodules/FlagHandler.h>
-#include <fstream>
 #include <fun4all/Fun4AllDummyInputManager.h>
 #include <fun4all/Fun4AllReturnCodes.h>
 #include <fun4all/Fun4AllRunNodeInputManager.h>
@@ -16,17 +11,24 @@
 #include <fun4all/SubsysReco.h>
 #include <g4detectors/PHG4TpcGeom.h>
 #include <g4detectors/PHG4TpcGeomContainer.h>
+#include <phgarfield/PHGarfield.h>
+#include <phool/getClass.h>
+#include <phool/recoConsts.h>
+
+#include <GlobalVariables.C>
+#include <array>
+#include <cmath>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <numeric>
-#include <phgarfield/PHGarfield.h>
-#include <phool/getClass.h>
-#include <phool/recoConsts.h>
 #include <stdexcept>
 #include <string>
 #include <tuple>
+
+#include "TPCRunAverageConditions.h"
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
 R__LOAD_LIBRARY(libg4detectors.so)
@@ -35,12 +37,16 @@ R__LOAD_LIBRARY(libcdbobjects.so)
 
 class TPCPHGReferenceOnly : public SubsysReco
 {
-public:
+ public:
   TPCPHGReferenceOnly(double field, double pressure, double temperature, double t0, double clock,
                       double step)
-      : SubsysReco("TPCPHGReferenceOnly"), m_referenceCMFieldVcm(field),
-        m_referencePressure(pressure), m_referenceTemperatureK(temperature), m_tpcTimeBinNs(clock),
-        m_phgT0Bins(t0), m_phgStepNs(step)
+      : SubsysReco("TPCPHGReferenceOnly"),
+        m_referenceCMFieldVcm(field),
+        m_referencePressure(pressure),
+        m_referenceTemperatureK(temperature),
+        m_tpcTimeBinNs(clock),
+        m_phgT0Bins(t0),
+        m_phgStepNs(step)
   {
   }
   int InitRun(PHCompositeNode *topNode) override
@@ -50,19 +56,22 @@ public:
     if (!initializeDriftCoordinateCalibration(topNode))
       throw std::runtime_error("PHGarfield reference integration failed; see preceding log");
     for (int side = 0; side < 2; ++side)
-      velocity[side] = 1000. *
-                       std::accumulate(m_phgDriftVelocityCmNs[side].begin(),
-                                       m_phgDriftVelocityCmNs[side].end(), 0.) /
-                       kNFees;
+      m_velocity[side] = 1000. *
+                         std::accumulate(m_phgDriftVelocityCmNs[side].begin(),
+                                         m_phgDriftVelocityCmNs[side].end(), 0.) /
+                         kNFees;
     auto *geometry = findNode::getClass<PHG4TpcGeomContainer>(topNode, "TPCGEOMCONTAINER");
-    cmHalf = geometry->GetLayerCellGeom(20)->get_CM_halfwidth();
+    m_cmHalf = geometry->GetLayerCellGeom(20)->get_CM_halfwidth();
     return Fun4AllReturnCodes::EVENT_OK;
   }
-  int process_event(PHCompositeNode *) override
+  int process_event(PHCompositeNode * /*topNode*/) override
   {
     return Fun4AllReturnCodes::EVENT_OK;
   }
-  std::array<double, 2> velocity{};
+  const std::array<double, 2> &velocity() const
+  {
+    return m_velocity;
+  }
   double pressure() const
   {
     return m_pressure;
@@ -79,9 +88,14 @@ public:
   {
     return m_zPadPlaneCm;
   }
-  double cmHalf{0.};
+  double cmHalf() const
+  {
+    return m_cmHalf;
+  }
 
-private:
+ private:
+  std::array<double, 2> m_velocity{};
+  double m_cmHalf{0.};
   static constexpr int kNFees = 312;
   std::array<std::array<double, kNFees>, 2> m_feeX{}, m_feeY{}, m_feeCount{};
   std::array<std::array<double, kNFees>, 2> m_phgDriftTimeNs{}, m_phgDriftVelocityCmNs{};
@@ -128,12 +142,21 @@ private:
         {
           for (int ch = 0; ch < 256; ++ch)
           {
-            const int mapped = feeMap[fee] + (feeR[fee] == 2 ? 6 : feeR[fee] == 3 ? 14 : 0);
+            int offset = 0;
+            if (feeR[fee] == 2)
+            {
+              offset = 6;
+            }
+            else if (feeR[fee] == 3)
+            {
+              offset = 14;
+            }
+            const int mapped = feeMap[fee] + offset;
             const int key = 256 * mapped + ch;
             const int layer = map.GetIntValue(key, "layer");
             if (layer < 7 || layer > 54)
             {
-              continue; // antenna pads are not in TRKR_HITSET
+              continue;  // antenna pads are not in TRKR_HITSET
             }
             auto *lg = geom->GetLayerCellGeom(layer);
             if (!lg)
@@ -290,7 +313,7 @@ private:
         m_phgDriftVelocityCmNs[side][fee] = m_zPadPlaneCm / time;
       }
     }
-    m_driftPHGarfield.reset(); // integration only at InitRun, never per hit
+    m_driftPHGarfield.reset();  // integration only at InitRun, never per hit
     return true;
   }
 };
@@ -328,11 +351,11 @@ void ExportTPCPHGarfieldReference(int run, const char *group, const char *csv, c
   se->registerSubsystem(qa);
   if (se->run(1) != 0)
     throw std::runtime_error("PHGarfield reference InitRun failed");
-  const auto velocity = qa->velocity;
+  const auto velocity = qa->velocity();
   for (double value : velocity)
     if (!std::isfinite(value) || value <= 0)
       throw std::runtime_error("No valid PHGarfield mean velocity");
-  const auto quoted = [](std::string text)
+  const auto quoted = [](const std::string &text)
   {
     std::string out = "\"";
     for (char c : text)
@@ -357,7 +380,7 @@ void ExportTPCPHGarfieldReference(int run, const char *group, const char *csv, c
            "corrections disabled\","
         << quoted(cdbTag) << ',' << referenceField << ',' << qa->effectiveField() << ','
         << qa->pressure() << ',' << qa->temperatureK() << ',' << timeBinNs << ',' << stepNs << ','
-        << qa->padPlane() << ',' << qa->cmHalf << ',' << quoted(geometry) << ','
+        << qa->padPlane() << ',' << qa->cmHalf() << ',' << quoted(geometry) << ','
         << referencePressure << ',' << referenceTemperatureK << '\n';
   out.close();
   if (!out)

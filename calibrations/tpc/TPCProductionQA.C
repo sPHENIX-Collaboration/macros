@@ -4,7 +4,25 @@
 
 namespace TPCBatchQA
 {
-using namespace TPCDQA;
+using TPCDQA::combine;
+using TPCDQA::Config;
+using TPCDQA::Curve;
+using TPCDQA::Curves;
+using TPCDQA::edge;
+using TPCDQA::edges;
+using TPCDQA::ends;
+using TPCDQA::folder;
+using TPCDQA::hasKey;
+using TPCDQA::Hists;
+using TPCDQA::location;
+using TPCDQA::outputIndex;
+using TPCDQA::plain;
+using TPCDQA::plot;
+using TPCDQA::point;
+using TPCDQA::sameBins;
+using TPCDQA::Sample;
+using TPCDQA::wanted;
+using TPCDQA::writeCurve;
 bool keepInput(const std::string &name, const std::string &prefix)
 {
   for (const auto &key : wanted())
@@ -21,7 +39,8 @@ void cache(const char *listing, const char *output, const char *prefix)
   if (!input)
     throw std::runtime_error("Cannot read cache input list");
   Hists sums;
-  std::set<std::string> schema, seen;
+  std::set<std::string> schema;
+  std::set<std::string> seen;
   std::string path;
   int count = 0;
   while (std::getline(input, path))
@@ -38,13 +57,13 @@ void cache(const char *listing, const char *output, const char *prefix)
     while (auto *key = dynamic_cast<TKey *>(next()))
     {
       std::string name = key->GetName();
-      if (!keepInput(name, prefix) || present.count(name))
+      if (!keepInput(name, prefix) || hasKey(present, name))
         continue;
       auto *h = dynamic_cast<TH1 *>(file->Get(name.c_str()));
       if (!h)
         continue;
       present.insert(name);
-      if (sums.count(name))
+      if (hasKey(sums, name))
       {
         if (!sameBins(sums[name].get(), h))
           throw std::runtime_error("Mixed cache binning: " + name);
@@ -53,7 +72,8 @@ void cache(const char *listing, const char *output, const char *prefix)
         if (name == "h_TpcDriftVelocityQA_h_calibration_sums")
           for (int bin : {6, 7, 8, 9, 10})
           {
-            double n = sums[name]->GetBinContent(1), m = h->GetBinContent(1);
+            double n = sums[name]->GetBinContent(1);
+            double m = h->GetBinContent(1);
             if (!(n > 0 && m > 0) ||
                 std::abs(sums[name]->GetBinContent(bin) / n - h->GetBinContent(bin) / m) > 1e-6)
               throw std::runtime_error("Mixed drift geometry/time settings in cache");
@@ -68,8 +88,9 @@ void cache(const char *listing, const char *output, const char *prefix)
       }
     }
     if (count && schema != present)
-      throw std::runtime_error("Mixed supported QA schemas within a run; split "
-                               "the inventory by reconstruction configuration");
+      throw std::runtime_error(
+          "Mixed supported QA schemas within a run; split "
+          "the inventory by reconstruction configuration");
     schema = present;
     ++count;
     if (count % 1000 == 0)
@@ -102,14 +123,15 @@ Curves readCurves(TDirectory *dir)
     auto tab = line.find('\t');
     if (tab == std::string::npos)
       continue;
-    std::string key = line.substr(0, tab), path = line.substr(tab + 1);
+    std::string key = line.substr(0, tab);
+    std::string path = line.substr(tab + 1);
     if (key.find("_vs_reference") != std::string::npos ||
         key.find("_ratio_to_reference") != std::string::npos)
       continue;
     auto *object = dir->Get(path.c_str());
     auto *mode = dynamic_cast<TNamed *>(dir->Get(("metadata/comparisons/" + key).c_str()));
     if (!mode)
-      continue; // index also contains input TH2 maps and fit-result objects
+      continue;  // index also contains input TH2 maps and fit-result objects
     Curve c;
     c.title = object ? object->GetTitle() : key;
     c.comparison = mode->GetTitle();
@@ -146,17 +168,33 @@ Curves readCurves(TDirectory *dir)
 
 void copy(TDirectory *src, TDirectory *dst, bool maps)
 {
-  std::set<std::string> seen;
-  TIter next(src->GetListOfKeys());
-  while (auto *key = dynamic_cast<TKey *>(next()))
+  // Keep a frame per directory to preserve depth-first key order without recursion.
+  struct Frame
   {
-    std::string name = key->GetName();
-    if (!seen.insert(name).second)
+    TDirectory *destination;
+    TIter next;
+    std::set<std::string> seen;
+  };
+  std::vector<Frame> stack;
+  stack.push_back({dst, TIter(src->GetListOfKeys()), {}});
+  while (!stack.empty())
+  {
+    auto &frame = stack.back();
+    auto *key = dynamic_cast<TKey *>(frame.next());
+    if (!key)
+    {
+      stack.pop_back();
       continue;
-    auto *object = src->Get(name.c_str());
+    }
+    const std::string name = key->GetName();
+    if (!frame.seen.insert(name).second)
+      continue;
+    // Read from the directory owning this key, as in the recursive traversal.
+    auto *object = key->GetMotherDir()->Get(name.c_str());
     if (auto *sub = dynamic_cast<TDirectory *>(object))
     {
-      copy(sub, folder(dst, name), maps);
+      auto *destination = folder(frame.destination, name);
+      stack.push_back({destination, TIter(sub->GetListOfKeys()), {}});
       continue;
     }
     if (!maps)
@@ -167,7 +205,7 @@ void copy(TDirectory *src, TDirectory *dst, bool maps)
       if (ends(name, "_valid_points"))
         continue;
     }
-    dst->cd();
+    frame.destination->cd();
     object->Write(name.c_str());
   }
 }
@@ -181,7 +219,8 @@ void collect(const char *manifest, const char *references, const char *output, b
 {
   gROOT->SetBatch(true);
   TH1::AddDirectory(false);
-  std::ifstream in(manifest), refs(references);
+  std::ifstream in(manifest);
+  std::ifstream refs(references);
   if (!in || !refs)
     throw std::runtime_error("Cannot read collection manifest/reference list");
   std::vector<Item> items;
@@ -219,7 +258,7 @@ void collect(const char *manifest, const char *references, const char *output, b
   for (const auto &i : items)
   {
     const std::string base = i.group + "/" + i.window;
-    if (!refCurves.count(base))
+    if (!hasKey(refCurves, base))
       throw std::runtime_error("Reference missing for " + base);
     TFile file(i.path.c_str(), "READ");
     auto *source = file.GetDirectory(i.label.c_str());
@@ -248,8 +287,8 @@ void collect(const char *manifest, const char *references, const char *output, b
           {
             std::string title = path + name + "_parameter_" + std::to_string(p);
             std::replace(title.begin(), title.end(), '/', '_');
-            trends[base + "/run_trends/rdca/" + title][i.label] = {fit->Parameter(p),
-                                                                   fit->ParError(p)};
+            trends[std::string(base).append("/run_trends/rdca/").append(title)][i.label] = {
+                fit->Parameter(p), fit->ParError(p)};
           }
         }
       }
@@ -294,7 +333,7 @@ void collect(const char *manifest, const char *references, const char *output, b
     if (plots)
     {
       Config cfg{.5, 1., 100, 3, 4, "h_TpcSeedsQA_", false, ratioFloor, false, 40.};
-      Sample sample(i.label, "");
+      Sample sample{i.label, "", ""};
       std::string pdf =
           std::string(output) + "_" + i.group + "_" + i.window + "_" + i.label + ".pdf";
       std::replace(pdf.begin() + std::string(output).size(), pdf.end(), '/', '_');
@@ -328,10 +367,11 @@ void collect(const char *manifest, const char *references, const char *output, b
                     : "Compact: 1D profiles, validity masks, fit results, metadata; "
                       "2D/3D input maps remain in per-run SDCC outputs");
   scope.Write();
-  TNamed limits("interpretation", "Observable/reference ratios are not k_eff ratios. Derive "
-                                  "response using controlled k_eff variations; preserve side, "
-                                  "charge, selection and reconstruction configuration. Drift "
-                                  "edge uncertainties are not estimated.");
+  TNamed limits("interpretation",
+                "Observable/reference ratios are not k_eff ratios. Derive "
+                "response using controlled k_eff variations; preserve side, "
+                "charge, selection and reconstruction configuration. Drift "
+                "edge uncertainties are not estimated.");
   limits.Write();
   result.Close();
 }
@@ -339,7 +379,7 @@ void collect(const char *manifest, const char *references, const char *output, b
 // Attach readable side scalars and run trends to the portable ROOT summary.
 void attachConditions(const char *table, const char *output)
 {
-  using namespace TPCDQA;
+  using TPCDQA::folder;
   std::ifstream input(table);
   if (!input)
     throw std::runtime_error("Cannot read condition scalar table");
@@ -358,7 +398,7 @@ void attachConditions(const char *table, const char *output)
     if (side < 0 || side > 1)
       throw std::runtime_error("Invalid condition scalar side");
     const std::string key = tokens[0] + "/" + tokens[1] + "/runs/" + tokens[2];
-    if (rows[key].count(side))
+    if (hasKey(rows[key], side))
       throw std::runtime_error("Duplicate condition scalar side");
     rows[key][side] = {std::stod(tokens[4]), std::stod(tokens[5]), std::stod(tokens[6])};
   }
@@ -373,7 +413,8 @@ void attachConditions(const char *table, const char *output)
   for (const auto &run : rows)
   {
     auto cut = run.first.rfind("/runs/");
-    const auto group = run.first.substr(0, cut), label = run.first.substr(cut + 6);
+    const auto group = run.first.substr(0, cut);
+    const auto label = run.first.substr(cut + 6);
     auto *dir = folder(&file, run.first + "/conditions");
     for (std::size_t metric = 0; metric < names.size(); ++metric)
     {
@@ -431,4 +472,4 @@ void attachConditions(const char *table, const char *output)
   }
   file.Close();
 }
-} // namespace TPCBatchQA
+}  // namespace TPCBatchQA

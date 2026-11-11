@@ -39,27 +39,34 @@ namespace TPCDQA
 {
 using Hist = std::unique_ptr<TH1>;
 using Hists = std::map<std::string, Hist>;
+// ROOT installations may still use C++17; Jenkins checks also support C++20.
+template <class Container, class Key>
+bool hasKey(const Container &container, const Key &key)
+{
+#if __cplusplus >= 202002L
+  return container.contains(key);
+#else
+  return container.find(key) != container.end();
+#endif
+}
 struct Sample
 {
-  std::string label, list, driftList;
+  std::string label{};
+  std::string list{};
+  std::string driftList{};
   double rawTimeShift{std::numeric_limits<double>::quiet_NaN()};
-  Sample(std::string labelIn, std::string listIn, std::string driftIn = "",
-         double shift = std::numeric_limits<double>::quiet_NaN())
-      : label(std::move(labelIn)), list(std::move(listIn)), driftList(std::move(driftIn)),
-        rawTimeShift(shift)
-  {
-  }
 };
 struct Curve
 {
-  std::string title, xTitle, yTitle, comparison{"difference"};
-  std::vector<double> x, ex, y, ey, edges;
-  Curve() = default;
-  Curve(std::string titleIn, std::string xLabel, std::string yLabel, std::string cmp = "difference")
-      : title(std::move(titleIn)), xTitle(std::move(xLabel)), yTitle(std::move(yLabel)),
-        comparison(std::move(cmp))
-  {
-  }
+  std::string title{};
+  std::string xTitle{};
+  std::string yTitle{};
+  std::string comparison{"difference"};
+  std::vector<double> x{};
+  std::vector<double> ex{};
+  std::vector<double> y{};
+  std::vector<double> ey{};
+  std::vector<double> edges{};
 };
 using Curves = std::map<std::string, Curve>;
 struct Config
@@ -113,10 +120,11 @@ std::vector<std::string> wanted()
     names.push_back("tpc_only_" + side + "_rdca_qoverpt");
     for (const std::string q : {"pos", "neg"})
     {
-      names.push_back("dcaxyorigin_phi_" + side + "_" + q);
+      names.push_back(std::string("dcaxyorigin_phi_").append(side).append("_").append(q));
       for (const std::string obs : {"rdca_phi_pt", "rdca_eta_pt", "pt_phi_eta"})
       {
-        names.push_back("tpc_only_" + side + "_" + q + "_" + obs);
+        names.push_back(
+            std::string("tpc_only_").append(side).append("_").append(q).append("_").append(obs));
       }
     }
   }
@@ -160,15 +168,18 @@ Hists load(const Sample &sample, const Config &cfg, std::ostream &availability)
       {
         continue;
       }
-      const int dim = name.find("rdca_qoverpt") != std::string::npos ||
-                              name.find("dcaxyorigin_phi") == 0 || name == "nrecotracks_pos" ||
-                              name == "nrecotracks_neg"
-                          ? 2
-                      : name.find("_pt_phi_eta") != std::string::npos ||
-                              name.find("_rdca_phi_pt") != std::string::npos ||
-                              name.find("_rdca_eta_pt") != std::string::npos
-                          ? 3
-                          : 1;
+      int dim = 1;
+      if (name.find("rdca_qoverpt") != std::string::npos || name.find("dcaxyorigin_phi") == 0 ||
+          name == "nrecotracks_pos" || name == "nrecotracks_neg")
+      {
+        dim = 2;
+      }
+      else if (name.find("_pt_phi_eta") != std::string::npos ||
+               name.find("_rdca_phi_pt") != std::string::npos ||
+               name.find("_rdca_eta_pt") != std::string::npos)
+      {
+        dim = 3;
+      }
       if (h->GetDimension() != dim)
       {
         throw std::runtime_error("Wrong histogram dimension: " + name);
@@ -200,11 +211,17 @@ Hists load(const Sample &sample, const Config &cfg, std::ostream &availability)
   }
   for (const auto &name : wanted())
   {
+    std::string state = "absent";
+    if (present[name] == files)
+    {
+      state = "complete";
+    }
+    else if (present[name])
+    {
+      state = "partial_SKIPPED";
+    }
     availability << sample.label << '\t' << name << '\t' << present[name] << '\t' << files << '\t'
-                 << (present[name] == files ? "complete"
-                     : present[name]        ? "partial_SKIPPED"
-                                            : "absent")
-                 << '\n';
+                 << state << '\n';
     if (present[name] != files)
     {
       sums.erase(name);
@@ -221,7 +238,8 @@ Fit gaussian(TH1 *h, int minEntries, bool background = false)
   {
     return f;
   }
-  double probs[] = {.16, .5, .84}, qs[3];
+  double probs[] = {.16, .5, .84};
+  double qs[3];
   h->GetQuantiles(3, qs, probs);
   const double width = h->GetXaxis()->GetBinWidth(h->GetMaximumBin());
   double sigma = std::max((qs[2] - qs[0]) / 2., width);
@@ -236,7 +254,8 @@ Fit gaussian(TH1 *h, int minEntries, bool background = false)
     std::sort(contents.begin(), contents.end());
     const double pedestal = contents[contents.size() / 4];
     const double half = pedestal + .5 * (h->GetBinContent(peak) - pedestal);
-    int left = peak, right = peak;
+    int left = peak;
+    int right = peak;
     while (left > 1 && h->GetBinContent(left) > half)
       --left;
     while (right < h->GetNbinsX() && h->GetBinContent(right) > half)
@@ -246,16 +265,19 @@ Fit gaussian(TH1 *h, int minEntries, bool background = false)
     {
       const auto crossing = [&](int a, int b)
       {
-        const double ya = h->GetBinContent(a), yb = h->GetBinContent(b);
+        const double ya = h->GetBinContent(a);
+        const double yb = h->GetBinContent(b);
         return h->GetBinCenter(a) +
                (half - ya) * (h->GetBinCenter(b) - h->GetBinCenter(a)) / (yb - ya);
       };
-      const double low = crossing(left, left + 1), high = crossing(right - 1, right);
+      const double low = crossing(left, left + 1);
+      const double high = crossing(right - 1, right);
       sigma = std::max(width, (high - low) / 2.354820045);
       mean = h->GetBinCenter(peak);
     }
   }
-  const double axisLow = h->GetXaxis()->GetXmin(), axisHigh = h->GetXaxis()->GetXmax();
+  const double axisLow = h->GetXaxis()->GetXmin();
+  const double axisHigh = h->GetXaxis()->GetXmax();
   if (!(sigma > 0) || !std::isfinite(mean))
   {
     f.status = 2;
@@ -603,9 +625,10 @@ void slices(TH2 *h, const std::string &key, const std::string &title, Curves &cu
   for (const std::string name : {"counts", "chi2_ndf", "root_status", "covariance", "low", "high",
                                  "underflow", "overflow", "ndf", "background"})
   {
-    Hist item(new TH1D((key + "_fit_" + name).c_str(),
-                       ("Slice fit " + name + ";slice coordinate;" + name).c_str(), h->GetNbinsX(),
-                       mean.edges.data()));
+    Hist item(new TH1D(
+        (std::string(key).append("_fit_").append(name)).c_str(),
+        (std::string("Slice fit ").append(name).append(";slice coordinate;").append(name)).c_str(),
+        h->GetNbinsX(), mean.edges.data()));
     item->SetDirectory(nullptr);
     diagnostics.emplace(name, std::move(item));
   }
@@ -625,7 +648,8 @@ void slices(TH2 *h, const std::string &key, const std::string &title, Curves &cu
     diagnostics.at("high")->SetBinContent(i, f.high);
     diagnostics.at("underflow")->SetBinContent(i, slice->GetBinContent(0));
     diagnostics.at("overflow")->SetBinContent(i, slice->GetBinContent(slice->GetNbinsX() + 1));
-    const double x = h->GetXaxis()->GetBinCenter(i), ex = h->GetXaxis()->GetBinWidth(i) / 2.;
+    const double x = h->GetXaxis()->GetBinCenter(i);
+    const double ex = h->GetXaxis()->GetBinWidth(i) / 2.;
     csv << sample.label << ',' << key << ',' << i << ',' << x << ',' << ex << ',' << f.n << ','
         << f.status << ',' << f.rootStatus << ',' << f.covariance << ',' << f.mean << ','
         << f.meanError << ',' << f.sigma << ',' << f.sigmaError << ',' << f.low << ',' << f.high
@@ -700,7 +724,8 @@ Curve combine(const Curve &a, const Curve &b, const std::string &op, double rati
       {
         continue;
       }
-      double y = 0, err = 0;
+      double y = 0;
+      double err = 0;
       if (op == "ratio" || op == "signed_ratio")
       {
         if ((op == "ratio" && b.y[j] <= 0) ||
@@ -737,16 +762,20 @@ void chargeCurves(TH1 *pos, TH1 *neg, const std::string &key, const std::string 
   }
   Curve ratio{title, pos->GetXaxis()->GetTitle(), "N_{+}/N_{-}", "ratio"};
   Curve asym{title, ratio.xTitle, "(N_{+}-N_{-})/(N_{+}+N_{-})"};
-  Curve plus{title, ratio.xTitle, "tracks / frame / axis unit", "ratio"}, minus = plus;
+  Curve plus{title, ratio.xTitle, "tracks / frame / axis unit", "ratio"};
+  Curve minus = plus;
   Curve plusCounts{title, ratio.xTitle, "positive tracks", "ratio"};
   Curve minusCounts{title, ratio.xTitle, "negative tracks", "ratio"};
   ratio.edges = asym.edges = plus.edges = minus.edges = edges(pos->GetXaxis());
   plusCounts.edges = minusCounts.edges = ratio.edges;
   for (int i = 1; i <= pos->GetNbinsX(); ++i)
   {
-    const double p = pos->GetBinContent(i), n = neg->GetBinContent(i), ep = pos->GetBinError(i),
-                 en = neg->GetBinError(i);
-    const double x = pos->GetBinCenter(i), ex = pos->GetBinWidth(i) / 2.;
+    const double p = pos->GetBinContent(i);
+    const double n = neg->GetBinContent(i);
+    const double ep = pos->GetBinError(i);
+    const double en = neg->GetBinError(i);
+    const double x = pos->GetBinCenter(i);
+    const double ex = pos->GetBinWidth(i) / 2.;
     if (p < 0 || n < 0)
     {
       throw std::runtime_error("Negative counts in " + key);
@@ -782,7 +811,8 @@ void chargeCurves(TH1 *pos, TH1 *neg, const std::string &key, const std::string 
 // Accept pT intervals only at existing edges; never silently include a partial bin.
 std::pair<int, int> ptRange(const TAxis *axis, double low, double high)
 {
-  int a = -1, b = -1;
+  int a = -1;
+  int b = -1;
   for (int i = 1; i <= axis->GetNbins() + 1; ++i)
   {
     if (std::abs(axis->GetBinLowEdge(i) - low) < 1e-7)
@@ -842,14 +872,12 @@ void phiQoverPt(TH3 *pos, TH3 *neg, const std::string &side, const Sample &sampl
     }
   }
   std::vector<double> qedges;
+  qedges.reserve(2 * inverse.size());
   for (double v : inverse)
   {
     qedges.push_back(-v);
   }
-  for (auto i = inverse.rbegin(); i != inverse.rend(); ++i)
-  {
-    qedges.push_back(*i);
-  }
+  qedges.insert(qedges.end(), inverse.rbegin(), inverse.rend());
   const auto dcaEdges = edges(pos->GetZaxis());
   for (int lo = 1; lo <= pos->GetNbinsX(); lo += cfg.phiGroup)
   {
@@ -864,8 +892,8 @@ void phiQoverPt(TH3 *pos, TH3 *neg, const std::string &side, const Sample &sampl
       auto *source = sign > 0 ? pos : neg;
       for (int j = 1; j <= source->GetNbinsY(); ++j)
       {
-        const double pl = source->GetYaxis()->GetBinLowEdge(j),
-                     ph = source->GetYaxis()->GetBinUpEdge(j);
+        const double pl = source->GetYaxis()->GetBinLowEdge(j);
+        const double ph = source->GetYaxis()->GetBinUpEdge(j);
         if (pl < .2 - 1e-7)
         {
           continue;
@@ -917,7 +945,8 @@ Curves analyze(Hists &hs, const Sample &sample, const Config &cfg, TDirectory *d
                                     (side == "south" ? "<=0" : ">0") + ", no new pT/cluster cut";
     for (const std::string charge : {"pos", "neg"})
     {
-      auto *h = dynamic_cast<TH2 *>(get("dcaxyorigin_phi_" + side + "_" + charge));
+      auto *h = dynamic_cast<TH2 *>(
+          get(std::string("dcaxyorigin_phi_").append(side).append("_").append(charge)));
       if (!h)
       {
         continue;
@@ -926,8 +955,8 @@ Curves analyze(Hists &hs, const Sample &sample, const Config &cfg, TDirectory *d
       copy->SetDirectory(nullptr);
       auto *h2 = static_cast<TH2 *>(copy.get());
       rebin(h2, cfg.phiGroup);
-      slices(h2, "legacy_pcaz_" + side + "_phi_" + charge, legacyTitle, curves, sample, cfg, dir,
-             csv);
+      slices(h2, std::string("legacy_pcaz_").append(side).append("_phi_").append(charge),
+             legacyTitle, curves, sample, cfg, dir, csv);
     }
     const std::string newTitle =
         sample.label + ": TPC-only hardware " + side + ", N_{TPC}>=31, all assigned crossings";
@@ -935,8 +964,13 @@ Curves analyze(Hists &hs, const Sample &sample, const Config &cfg, TDirectory *d
     {
       for (const std::string charge : {"pos", "neg"})
       {
-        auto *h =
-            dynamic_cast<TH3 *>(get("tpc_only_" + side + "_" + charge + "_rdca_" + axis + "_pt"));
+        auto *h = dynamic_cast<TH3 *>(get(std::string("tpc_only_")
+                                              .append(side)
+                                              .append("_")
+                                              .append(charge)
+                                              .append("_rdca_")
+                                              .append(axis)
+                                              .append("_pt")));
         if (!h)
         {
           continue;
@@ -947,7 +981,8 @@ Curves analyze(Hists &hs, const Sample &sample, const Config &cfg, TDirectory *d
         projected->SetDirectory(nullptr);
         h->GetYaxis()->SetRange(0, 0);
         rebin(projected.get(), axis == "phi" ? cfg.phiGroup : cfg.etaGroup);
-        slices(projected.get(), "new_" + side + "_" + axis + "_" + charge,
+        slices(projected.get(),
+               std::string("new_").append(side).append("_").append(axis).append("_").append(charge),
                newTitle + ", " + std::to_string(cfg.ptMin) + "<=pT<" + std::to_string(cfg.ptMax),
                curves, sample, cfg, dir, csv);
       }
@@ -988,10 +1023,10 @@ Curves analyze(Hists &hs, const Sample &sample, const Config &cfg, TDirectory *d
         n->SetDirectory(nullptr);
         rebin1(p.get(), axis == "phi" ? cfg.phiGroup : cfg.etaGroup);
         rebin1(n.get(), axis == "phi" ? cfg.phiGroup : cfg.etaGroup);
-        chargeCurves(p.get(), n.get(), "new_" + side + "_" + axis,
-                     newTitle +
-                         ", selected pT window, charge projections within |eta|<1.2, |phi|<pi",
-                     curves, frames);
+        chargeCurves(
+            p.get(), n.get(), std::string("new_").append(side).append("_").append(axis),
+            newTitle + ", selected pT window, charge projections within |eta|<1.2, |phi|<pi",
+            curves, frames);
       }
     }
   }
@@ -1042,7 +1077,7 @@ Curves analyze(Hists &hs, const Sample &sample, const Config &cfg, TDirectory *d
     {
       Curve c = combine(entry.second, neg->second, op);
       c.yTitle = op == "even" ? "(#mu_{+}+#mu_{-})/2 [cm]" : "(#mu_{+}-#mu_{-})/2 [cm]";
-      curves[base + "_charge_" + op] = std::move(c);
+      curves[std::string(base).append("_charge_").append(op)] = std::move(c);
     }
   }
   dir->cd();
@@ -1143,7 +1178,7 @@ void plot(const Curves &curves, const Curves &reference, const Sample &sample,
       }
       continue;
     }
-    if (!pdfs.count(category))
+    if (!hasKey(pdfs, category))
     {
       pdfs[category] = pdf.substr(0, pdf.size() - 4) + "_" + category + ".pdf";
       canvas.Print((pdfs[category] + "[").c_str());
@@ -1155,8 +1190,13 @@ void plot(const Curves &curves, const Curves &reference, const Sample &sample,
     auto ref = reference.find(entry.first);
     const bool hasRef =
         sample.label != refLabel && ref != reference.end() && !ref->second.x.empty();
-    canvas.Divide(1, hasRef ? (signedDCA ? 3 : 2) : 1);
-    for (int p = 1; p <= (hasRef ? (signedDCA ? 3 : 2) : 1); ++p)
+    int panels = 1;
+    if (hasRef)
+    {
+      panels = signedDCA ? 3 : 2;
+    }
+    canvas.Divide(1, panels);
+    for (int p = 1; p <= panels; ++p)
     {
       canvas.cd(p);
       gPad->SetLeftMargin(.16);
@@ -1177,7 +1217,9 @@ void plot(const Curves &curves, const Curves &reference, const Sample &sample,
     current->SetLineColor(kBlue + 1);
     current->SetMarkerColor(kBlue + 1);
     current->SetMarkerStyle(20);
-    std::unique_ptr<TGraphErrors> rg, dg, ratioGraph;
+    std::unique_ptr<TGraphErrors> rg;
+    std::unique_ptr<TGraphErrors> dg;
+    std::unique_ptr<TGraphErrors> ratioGraph;
     canvas.cd(1);
     gPad->SetGrid();
     current->Draw("AP");
@@ -1192,7 +1234,8 @@ void plot(const Curves &curves, const Curves &reference, const Sample &sample,
       rg->SetMarkerStyle(24);
       rg->Draw("P SAME");
       legend.AddEntry(rg.get(), refLabel.c_str(), "lp");
-      double low = std::numeric_limits<double>::infinity(), high = -low;
+      double low = std::numeric_limits<double>::infinity();
+      double high = -low;
       for (const auto *c : {&entry.second, &ref->second})
       {
         for (size_t i = 0; i < c->y.size(); ++i)
@@ -1334,7 +1377,7 @@ void plotDcaDistributions(TDirectory *dir, const std::string &pdf)
     canvas.Print((pdf + "]").c_str());
   }
 }
-} // namespace TPCDQA
+}  // namespace TPCDQA
 
 #include "TPCDriftQA.h"
 
@@ -1348,7 +1391,27 @@ int TPCDistortionQA(const char *manifest, const char *output = "tpc_distortion_q
                     double rawTimeShift = 40., bool makePlots = true,
                     const char *phgReferences = "", bool fitBackground = false)
 {
-  using namespace TPCDQA;
+  using TPCDQA::analyze;
+  using TPCDQA::analyzeDrift;
+  using TPCDQA::applyPhgReference;
+  using TPCDQA::combine;
+  using TPCDQA::Config;
+  using TPCDQA::Curves;
+  using TPCDQA::DriftInput;
+  using TPCDQA::edges;
+  using TPCDQA::ends;
+  using TPCDQA::folder;
+  using TPCDQA::graph;
+  using TPCDQA::Hists;
+  using TPCDQA::load;
+  using TPCDQA::loadDrift;
+  using TPCDQA::outputIndex;
+  using TPCDQA::plot;
+  using TPCDQA::plotDcaDistributions;
+  using TPCDQA::point;
+  using TPCDQA::Sample;
+  using TPCDQA::slices;
+  using TPCDQA::writeCurve;
   if (!(ptMin >= .2 && ptMax > ptMin) || minEntries < 20 || phiGroup < 1 || etaGroup < 1 ||
       ratioFloor < 0 || !std::isfinite(ratioFloor) || !std::isfinite(rawTimeShift))
   {
@@ -1428,8 +1491,9 @@ int TPCDistortionQA(const char *manifest, const char *output = "tpc_distortion_q
   {
     throw std::runtime_error("Cannot create results.root");
   }
-  std::ofstream available(out + "/availability.tsv"), csv(out + "/slice_fits.csv"),
-      trends(out + "/trends.csv");
+  std::ofstream available(out + "/availability.tsv");
+  std::ofstream csv(out + "/slice_fits.csv");
+  std::ofstream trends(out + "/trends.csv");
   available << "sample\thistogram\tfiles_present\tfiles_total\tstatus\n";
   csv << std::setprecision(12)
       << "sample,observable,bin,x,x_half_width,in_range_counts,status,root_status,covariance,mean,"
@@ -1487,7 +1551,8 @@ int TPCDistortionQA(const char *manifest, const char *output = "tpc_distortion_q
       folder(dir, name);
     }
     Curves curves = analyze(hs, sample, cfg, dir, csv, trends);
-    bool hasDca = false, hasFit = false;
+    bool hasDca = false;
+    bool hasFit = false;
     for (const auto &entry : hs)
     {
       if (entry.first.find("dcaxyorigin_phi") != std::string::npos ||
@@ -1503,11 +1568,15 @@ int TPCDistortionQA(const char *manifest, const char *output = "tpc_distortion_q
         hasFit = true;
       }
     }
-    std::string dcaState = hasDca ? (hasFit ? "DCA inputs found; Gaussian profiles available"
-                                            : "DCA inputs found, but no accepted Gaussian slices; "
-                                              "see diagnostics and min-entries")
-                                  : "No supported DCA input histograms found; check histogram "
-                                    "prefix and availability.tsv";
+    std::string dcaState =
+        "No supported DCA input histograms found; check histogram "
+        "prefix and availability.tsv";
+    if (hasDca)
+    {
+      dcaState = hasFit ? "DCA inputs found; Gaussian profiles available"
+                        : "DCA inputs found, but no accepted Gaussian slices; "
+                          "see diagnostics and min-entries";
+    }
     std::cout << sample.label << ": " << dcaState << std::endl;
     summary << sample.label << '\t' << dcaState << '\n';
     summary.flush();
@@ -1600,7 +1669,8 @@ int TPCDistortionQA(const char *manifest, const char *output = "tpc_distortion_q
     {
       std::vector<std::unique_ptr<TGraphErrors>> graphs;
       TLegend legend(.60, .72, .98, .93);
-      double low = std::numeric_limits<double>::infinity(), high = -low;
+      double low = std::numeric_limits<double>::infinity();
+      double high = -low;
       const std::vector<std::string> names = {"data_velocity", "phg_edge_velocity",
                                               "phg_baseline_velocity", "phg_adc_weighted_velocity"};
       for (size_t index = 0; index < names.size(); ++index)
