@@ -9,6 +9,8 @@ libtpccalibrationqa and ROOT; Python uses only the standard library.
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import csv
+from contextlib import contextmanager
+import fcntl
 import glob
 import hashlib
 import json
@@ -21,8 +23,44 @@ import stat as stat_module
 import subprocess
 import sys
 import time
+import threading
 
 SOURCE_COMMIT = "b241b6413a2de90cba3b6d415579db62bc81a153"
+
+
+_lock_state = threading.local()
+
+
+def locked_subprocess(*args, **kwargs):
+    """Keep locks held by surviving ROOT children if their Python parent dies."""
+    inherited = tuple(int(fd) for fd in os.environ.get("TPCQA_LOCK_FDS", "").split(",") if fd)
+    descriptors = inherited + tuple(getattr(_lock_state, "descriptors", ()))
+    if descriptors:
+        kwargs["pass_fds"] = descriptors
+        kwargs["env"] = dict(os.environ, TPCQA_LOCK_FDS=",".join(map(str, descriptors)))
+    return subprocess.run(*args, **kwargs)
+
+
+@contextmanager
+def run_lock(directory):
+    """Nonblocking cross-process lock; never unlink a lock inode."""
+    legacy = directory / ".running"
+    if legacy.exists():
+        raise RuntimeError(
+            f"Legacy lock {legacy}: verify the old job has stopped before removing this directory"
+        )
+    with (directory / ".lock").open("a+") as handle:
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            raise RuntimeError(f"Already running: {directory}") from error
+        descriptors = list(getattr(_lock_state, "descriptors", ()))
+        _lock_state.descriptors = descriptors + [handle.fileno()]
+        try:
+            yield
+        finally:
+            _lock_state.descriptors = descriptors
+            # Close only: children may still hold this open file description.
 
 
 def parse_runs(text):
@@ -50,6 +88,17 @@ def windows(text):
             raise ValueError("Duplicate pT window")
         result.append((tag, lo, hi))
     return result
+
+
+def file_list_paths(source):
+    source = Path(source).expanduser().resolve()
+    paths = []
+    for line in source.read_text().splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        path = Path(line.strip()).expanduser()
+        paths.append(str(path if path.is_absolute() else source.parent / path))
+    return paths
 
 
 def analyze_main(argv):
@@ -207,13 +256,7 @@ def analyze_main(argv):
             specs.append((label, sorted(glob.glob(os.path.expanduser(pattern)))))
         for spec in args.file_list:
             label, list_path = spec.split("=", 1)
-            source = Path(list_path).expanduser().resolve()
-            paths = []
-            for line in source.read_text().splitlines():
-                if not line.strip() or line.lstrip().startswith("#"):
-                    continue
-                p = Path(line.strip()).expanduser()
-                paths.append(str(p if p.is_absolute() else source.parent / p))
+            paths = file_list_paths(list_path)
             specs.append((label, paths))
         if not specs:
             raise ValueError("Provide --runs, --run-list, --dataset, or --file-list")
@@ -308,13 +351,7 @@ def analyze_main(argv):
             drift_specs.append((label, sorted(glob.glob(os.path.expanduser(pattern)))))
         for spec in args.drift_file_list:
             label, path = spec.split("=", 1)
-            listing = Path(path).expanduser().resolve()
-            paths = []
-            for line in listing.read_text().splitlines():
-                if not line.strip() or line.lstrip().startswith("#"):
-                    continue
-                p = Path(line.strip()).expanduser()
-                paths.append(str(p if p.is_absolute() else listing.parent / p))
+            paths = file_list_paths(path)
             drift_specs.append((label, paths))
         for label, paths in drift_specs:
             if label not in datasets or label in drift_datasets:
@@ -436,7 +473,7 @@ def analyze_main(argv):
             )
             print(f"Analyzing {tag}; log: {out / (tag + '.log')}", flush=True)
             with (out / f"{tag}.log").open("w") as log:
-                process = subprocess.run(
+                process = locked_subprocess(
                     [executable, "-l", "-b", "-q", str(driver)],
                     stdout=log,
                     stderr=subprocess.STDOUT,
@@ -476,7 +513,7 @@ def library_signature(executable):
         "if (!p) { gSystem->Exit(1); } "
         'std::cout << "TPCQA_LIBRARY=" << p << std::endl; gSystem->Exit(0);'
     )
-    result = subprocess.run(
+    result = locked_subprocess(
         [executable, "-l", "-b", "-q", "-e", query], capture_output=True, text=True
     )
     paths = [
@@ -535,14 +572,18 @@ def run(args):
         common += ["--runs", args.runs]
     if args.run_list:
         common += ["--run-list", str(args.run_list)]
-    if conditions_main(
+    conditions_result = conditions_main(
         common + ["--out", str(root / "conditions"), "--keff-fallback", args.keff_fallback]
-    ):
+    )
+    if conditions_result and not args.allow_partial:
         raise RuntimeError("Conditions export failed; processing was not started")
-    if phgarfield_main(
+    phgarfield_result = phgarfield_main(
         common + ["--out", str(root / "phgarfield"), "--reference-field", str(args.reference_field)]
-    ):
+    )
+    if phgarfield_result and not args.allow_partial:
         raise RuntimeError("PHGarfield export failed; processing was not started")
+    if conditions_result or phgarfield_result:
+        print("Export failures will be recorded and excluded from the partial batch", flush=True)
     args.conditions_csv = root / "conditions/conditions.csv"
     args.phg_reference_csv = root / "phgarfield/phgarfield_references.csv"
     args.require_conditions = True
@@ -617,7 +658,7 @@ def conditions_main(argv):
                     + "gSystem->Exit(0); } catch(const std::exception &e) { std::cerr << e.what() << std::endl; gSystem->Exit(1); } }\n"
                 )
                 with (work / "export.log").open("w") as log:
-                    result = subprocess.run(
+                    result = locked_subprocess(
                         [exe, "-l", "-b", "-q", str(driver)], stdout=log, stderr=subprocess.STDOUT
                     )
                 if result.returncode or not temp.exists() or not series_temp.exists():
@@ -796,7 +837,7 @@ def phgarfield_main(argv):
                     + "gSystem->Exit(0); } catch(const std::exception &e) { std::cerr << e.what() << std::endl; gSystem->Exit(1); } }\n"
                 )
                 with (work / "export.log").open("w") as log:
-                    result = subprocess.run(
+                    result = locked_subprocess(
                         [executable, "-l", "-b", "-q", str(driver)],
                         stdout=log,
                         stderr=subprocess.STDOUT,
@@ -866,13 +907,7 @@ def checked_path(path):
 
 
 def runs(text):
-    values = set()
-    for token in re.split(r"[,\s]+", text.strip()):
-        if token:
-            if not token.isdecimal():
-                raise ValueError("Run list must contain integers; # comments allowed")
-            values.add(int(token))
-    return values
+    return set(parse_runs(text))
 
 
 def selected(args):
@@ -1152,7 +1187,7 @@ def root_call(executable, work, expression, label):
         f"{compiled_preamble()}\nvoid {label}() {{ try {{ {expression}; gSystem->Exit(0); }} catch(const std::exception &e) {{ std::cerr << e.what() << std::endl; gSystem->Exit(1); }} }}\n"
     )
     with (work / f"{label}.log").open("w") as log:
-        done = subprocess.run(
+        done = locked_subprocess(
             [executable, "-l", "-b", "-q", str(driver)], stdout=log, stderr=subprocess.STDOUT
         )
     if done.returncode:
@@ -1197,7 +1232,7 @@ def process(args):
         args.min_entries < 20
         or args.phi_group < 1
         or args.eta_group < 1
-        or not __import__("math").isfinite(args.raw_time_shift)
+        or not math.isfinite(args.raw_time_shift)
     ):
         raise ValueError("Invalid fit grouping, min-entries or time shift")
     choice = selected(args)
@@ -1268,7 +1303,7 @@ def process(args):
                 if condition_row.get("conditions_status") != "complete_snapshot":
                     raise ValueError(f"{group}/{run}: incomplete conditions snapshot")
                 for field in ("gem_current_uA", "keff_base"):
-                    if not __import__("math").isfinite(float(condition_row.get(field) or "nan")):
+                    if not math.isfinite(float(condition_row.get(field) or "nan")):
                         raise ValueError(f"{group}/{run}: missing conditions {field}")
         if args.require_phg:
             if (group, run) in phg_failures:
@@ -1281,7 +1316,7 @@ def process(args):
                 )
             for prediction in predictions:
                 value = float(prediction.get("velocity_cm_us") or "nan")
-                if not __import__("math").isfinite(value) or value <= 0:
+                if not math.isfinite(value) or value <= 0:
                     raise ValueError(f"{group}/{run}: invalid PHGarfield velocity")
         fingerprint = digest(
             {"row": effective_row, "settings": settings, "conditions": cond, "phg": predictions}
@@ -1302,8 +1337,12 @@ def process(args):
         ):
             print(f"{group}/{run}: already complete", flush=True)
             return json.loads(status.read_text())
-        lock = destination / ".running"
-        lock.mkdir(exist_ok=False)
+        with run_lock(destination):
+            return analyze_run(
+                row, files, cond, predictions, fingerprint, destination, status, group, run
+            )
+
+    def analyze_run(row, files, cond, predictions, fingerprint, destination, status, group, run):
         try:
             atomic_json(
                 status,
@@ -1327,9 +1366,7 @@ def process(args):
                 cache_work.mkdir(parents=True, exist_ok=True)
                 shared_cache = cache_work / "cache.root"
                 if not shared_cache.exists():
-                    cache_lock = cache_work / ".running"
-                    cache_lock.mkdir(exist_ok=False)
-                    try:
+                    with run_lock(cache_work):
                         print(f"{group}/{run}: caching {len(files)} segments", flush=True)
                         temp = cache_work / "cache.partial.root"
                         root_call(
@@ -1342,19 +1379,21 @@ def process(args):
                         )
                         check_inputs(row, files, "checking inputs after caching")
                         temp.replace(shared_cache)
-                    finally:
-                        cache_lock.rmdir()
+                if cache.is_symlink():
+                    cache.unlink()
                 cache.symlink_to(shared_cache)
             analysis = destination / "analysis"
             # Preserve failed attempts; the existing runner deliberately refuses existing output dirs.
             if analysis.exists():
                 analysis.rename(destination / f"failed_analysis_{time.time_ns()}")
+            cache_listing = destination / "cache_inputs.txt"
+            cache_listing.write_text(str(cache) + "\n")
             command = [
                 sys.executable,
                 str(Path(__file__).resolve()),
                 "analyze",
-                "--dataset",
-                f"{run}={cache}",
+                "--file-list",
+                f"{run}={cache_listing}",
                 "--reference",
                 str(run),
                 "--out",
@@ -1398,7 +1437,7 @@ def process(args):
                     writer.writerows(table)
                 command += [option, str(path)]
             with (destination / "analysis.log").open("w") as log:
-                completed = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
+                completed = locked_subprocess(command, stdout=log, stderr=subprocess.STDOUT)
             if completed.returncode or not (analysis / "SUCCESS").is_file():
                 raise RuntimeError(f'Analysis failed; see {destination / "analysis.log"}')
             phi_pairs = {}
@@ -1457,8 +1496,6 @@ def process(args):
             failure = RuntimeError(str(error))
             failure.qa_directory = str(destination)
             raise failure from error
-        finally:
-            lock.rmdir()
 
     records, failed = [], []
     with ThreadPoolExecutor(max_workers=args.jobs) as pool:
@@ -1701,10 +1738,17 @@ def main(argv=None):
         if getattr(args, "max_files", None) is not None and args.max_files < 1:
             raise ValueError("--max-files must be positive")
         if hasattr(args, "ratio_floor") and (
-            not __import__("math").isfinite(args.ratio_floor) or args.ratio_floor < 0
+            not math.isfinite(args.ratio_floor) or args.ratio_floor < 0
         ):
             raise ValueError("--ratio-floor must be finite and nonnegative")
-        return globals()[args.action](args)
+        actions = {
+            "catalog": catalog,
+            "discover": discover,
+            "process": process,
+            "collect": collect,
+            "run": run,
+        }
+        return actions[args.action](args)
     except (ValueError, OSError, RuntimeError, KeyError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 1
