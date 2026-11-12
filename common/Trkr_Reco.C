@@ -526,10 +526,7 @@ void Tracking_Reco_PolySeed()
   auto* tpcreco = new Tpc_AssembledTrackReco();
   tpcreco->setConnectMaxLayerOverlap(4);
   tpcreco->Verbosity(verbosity);
-
-  auto assembled = new Tpc_AssembledTrackReco();
-  assembled->Verbosity(verbosity);
-  se->registerSubsystem(assembled);  // makes TPC_ASSEMBLEDTRACKS
+  se->registerSubsystem(tpcreco);  // makes TPC_ASSEMBLEDTRACKS
 	
   auto *crossingFinder = new TpcCrossingFinder();
   crossingFinder->Verbosity(verbosity);
