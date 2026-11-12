@@ -9,7 +9,7 @@ import hashlib
 import json
 import os
 import sys
-from multiprocessing import Pool
+from multiprocessing import get_context
 
 import numpy as np
 import ROOT
@@ -68,7 +68,7 @@ def main():
     d = os.path.join(webdir, period, tag, "plots")
     files = sorted(os.path.join(d, "runs", f) for f in os.listdir(os.path.join(d, "runs"))
                    if f.startswith("run") and f.endswith(".root"))
-    with Pool(4) as pool:
+    with get_context("spawn").Pool(4) as pool:
         runs = dict(pool.map(one_run, files, chunksize=20))
     out = {"period": period, "tag": tag, "runs": {str(r): runs[r] for r in sorted(runs)}, "summary": {}}
     s = os.path.join(d, "summary", "summary.root")
