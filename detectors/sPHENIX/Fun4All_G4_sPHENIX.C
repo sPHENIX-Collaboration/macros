@@ -19,6 +19,8 @@
 #include <G4_Production.C>
 #include <G4_TopoClusterReco.C>
 
+#include <g4chimney/ChimneySetup.h>
+
 #include <Trkr_RecoInit.C>
 #include <Trkr_Clustering.C>
 #include <Trkr_LaserClustering.C>
@@ -47,6 +49,7 @@
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libffamodules.so)
+R__LOAD_LIBRARY(libg4chimney.so)
 
 // For HepMC Hijing
 // try inputFile = /sphenix/sim/sim01/sphnxpro/sHijing_HepMC/sHijing_0-12fm.dat
@@ -416,6 +419,9 @@ int Fun4All_G4_sPHENIX(
 
   //! forward flux return plug door. Out of acceptance and off by default.
   //Enable::PLUGDOOR = true;
+  // Chimney endcaps replace the plug door
+  
+  Enable::PLUGDOOR = false;
   Enable::PLUGDOOR_ABSORBER = true;
 
  //Enable::GLOBAL_FASTSIM = true;
@@ -485,6 +491,12 @@ int Fun4All_G4_sPHENIX(
   // Initialize the selected subsystems
   G4Init();
 
+  // Chimney: between G4Init() and G4Setup(): enlarge the black hole so that it encloses the chimney (box 2 to z = -421.5 cm, valve box to
+  //    r = 434 cm); with the stock black hole (r 274 cm, z -364 cm) the tube crosses its -z end cap and box 2 / riser / valve box are outside it
+
+  BlackHoleGeometry::max_radius = std::max(BlackHoleGeometry::max_radius, 440.);
+  BlackHoleGeometry::min_z = std::min(BlackHoleGeometry::min_z, -430.);
+
   //---------------------
   // GEANT4 Detector description
   //---------------------
@@ -501,6 +513,9 @@ int Fun4All_G4_sPHENIX(
   // Detector Division
   //------------------
 
+  PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
+  RegisterChimney(g4, 1, 1);
+  
   if ((Enable::MBD && Enable::MBDRECO) || Enable::MBDFAKE) Mbd_Reco();
 
   if (Enable::MVTX_CELL) Mvtx_Cells();
