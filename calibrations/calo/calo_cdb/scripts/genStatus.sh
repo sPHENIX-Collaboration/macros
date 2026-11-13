@@ -8,6 +8,7 @@ source /opt/sphenix/core/bin/sphenix_setup.sh -n new
 exe=${1}
 input=${2}
 submitDir=${3}
+calofittingPrefix=${4} # optional: dsttype prefix of the calofitting QA files (e.g. HIST_DST_CALOFITTING)
 failureDir="$(dirname "$submitDir")/failures"
 
 if [[ -n "$_CONDOR_SCRATCH_DIR" && -d "$_CONDOR_SCRATCH_DIR" ]]
@@ -24,7 +25,7 @@ fi
 # print the environment - needed for debugging
 printenv
 
-$exe "$input"
+$exe "$input" output ${calofittingPrefix:+"$calofittingPrefix"}
 
 root_exit=$?
 if [ $root_exit -ne 0 ]; then
