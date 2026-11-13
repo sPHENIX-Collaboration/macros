@@ -382,6 +382,7 @@ def process_df(df, run_type, bin_filter_datasets, output, calofitting_prefix, ve
 def generate_run_list(reduced_process_df, output):
     """
     Generate lists of CaloValid histogram for each run.
+    Returns the paths of the lists written for the current selection.
     """
     dataset_dir = output / 'datasets'
     dataset_dir.mkdir(parents=True, exist_ok=True)
@@ -389,6 +390,8 @@ def generate_run_list(reduced_process_df, output):
     # 7. Group by 'runnumber' and 'dsttype_group'
     # Iterating over this grouped object is efficient.
     grouped = reduced_process_df.groupby(['runnumber', 'dsttype_group'])
+
+    written = []
 
     # 8. Loop through each unique group
     for (run, group), group_df in grouped:
@@ -399,6 +402,9 @@ def generate_run_list(reduced_process_df, output):
         filepath = dataset_dir / f'{run}_{group}_{tags}.list'
 
         group_df['full_file_path'].to_csv(filepath, index=False, header=False)
+        written.append(filepath)
+
+    return written
 
 def create_symlink(target_path, link_path):
     """
@@ -429,9 +435,10 @@ def create_symlink(target_path, link_path):
     link.symlink_to(target)
     logger.info(f"Created symlink: {link} -> {target}")
 
-def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit, calofitting_prefix):
+def generate_condor(output, list_files, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit, calofitting_prefix):
     """
     Generate condor submission directory to generate the CDB files for the runs.
+    Only the given list_files (the current selection) are queued.
     """
     shutil.rmtree(condor_log_dir, ignore_errors=True)
 
@@ -441,9 +448,8 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
     shutil.copy(bin_genStatus, output)
     shutil.copy(condor_script, output)
 
-    dataset_dir = output / 'datasets'
-    list_files = list(dataset_dir.glob('*.list'))
-
+    # Queue only the lists generated for the current selection; stale lists
+    # from earlier invocations in the same output directory are ignored.
     jobs = 0
     with open(output / 'jobs.list', 'w', encoding="utf-8") as f:
         for file_path in list_files:
@@ -644,10 +650,10 @@ def main():
         sys.exit()
 
     # generate the lists of CaloValid histograms for each identified run
-    generate_run_list(reduced_process_df, output)
+    list_files = generate_run_list(reduced_process_df, output)
 
     # generate condor jobs / submit them
-    generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit, calofitting_prefix)
+    generate_condor(output, list_files, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit, calofitting_prefix)
 
 if __name__ == "__main__":
     main()
