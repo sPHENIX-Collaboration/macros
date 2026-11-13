@@ -75,6 +75,14 @@ parser.add_argument('-v'
                     , '--verbose', action='store_true'
                     , help='Verbose.')
 
+CALOFITTING_PREFIXES = ['HIST_DST_CALOFITTING', 'HIST_CALOFITTINGQA']
+
+parser.add_argument('-p'
+                    , '--calofitting-prefix', type=str
+                    , default=CALOFITTING_PREFIXES[0]
+                    , choices=CALOFITTING_PREFIXES
+                    , help=f'dsttype prefix of the calofitting QA histogram files. Only one prefix is used per run. Default: {CALOFITTING_PREFIXES[0]}')
+
 RUN_RANGES = {
     'run2pp': (47286, 53880),
     'run2auau': (54128, 54974),
@@ -115,9 +123,10 @@ def load_run_list(filepath):
 
     return unique_runs
 
-def get_file_paths(engine, runtype=None, runs=None):
+def get_file_paths(engine, calofitting_prefix, runtype=None, runs=None):
     """
     Generate file paths from given run type or list of runs.
+    Only calofitting QA files with the given dsttype prefix are selected; the prefix is also used as their dsttype_group.
     """
     params = {}
     if runs:
@@ -130,6 +139,9 @@ def get_file_paths(engine, runtype=None, runs=None):
         run_condition = "d.runnumber >= :run_start AND d.runnumber <= :run_end"
     else:
         raise ValueError("Either runtype or runs must be specified.")
+
+    params['calo_group'] = calofitting_prefix
+    params['calo_like'] = f'{calofitting_prefix}%'
 
     query = f"""
     -- Use a Common Table Expression (CTE) to find the winning tag for each runnumber and dsttype group
@@ -145,7 +157,7 @@ def get_file_paths(engine, runtype=None, runs=None):
                 d.tag,
                 CASE
                     WHEN d.dsttype LIKE 'HIST_JETQA%' THEN 'HIST_JETQA'
-                    WHEN d.dsttype LIKE 'HIST_CALOFITTINGQA%' THEN 'HIST_CALOFITTINGQA'
+                    WHEN d.dsttype LIKE :calo_like THEN :calo_group
                 END as dsttype_group,
                 -- The tag with the latest max timestamp gets rank '1'
                 ROW_NUMBER() OVER (
@@ -153,7 +165,7 @@ def get_file_paths(engine, runtype=None, runs=None):
                         d.runnumber,
                         CASE
                             WHEN d.dsttype LIKE 'HIST_JETQA%' THEN 'HIST_JETQA'
-                            WHEN d.dsttype LIKE 'HIST_CALOFITTINGQA%' THEN 'HIST_CALOFITTINGQA'
+                            WHEN d.dsttype LIKE :calo_like THEN :calo_group
                         END
                     ORDER BY MAX(f.time) DESC
                 ) as rn
@@ -164,7 +176,7 @@ def get_file_paths(engine, runtype=None, runs=None):
             ON
                 d.filename = f.lfn
             WHERE
-                (d.dsttype LIKE 'HIST_JETQA%' OR d.dsttype LIKE 'HIST_CALOFITTINGQA%')
+                (d.dsttype LIKE 'HIST_JETQA%' OR d.dsttype LIKE :calo_like)
                 AND d.dsttype NOT LIKE 'HIST_CALOQASKIMMED%'
                 AND d.tag IS NOT NULL AND d.tag != ''
                 AND {run_condition}
@@ -192,11 +204,11 @@ def get_file_paths(engine, runtype=None, runs=None):
         AND (
             CASE
                 WHEN d.dsttype LIKE 'HIST_JETQA%' THEN 'HIST_JETQA'
-                WHEN d.dsttype LIKE 'HIST_CALOFITTINGQA%' THEN 'HIST_CALOFITTINGQA'
+                WHEN d.dsttype LIKE :calo_like THEN :calo_group
             END
         ) = wt.dsttype_group
     WHERE
-        (d.dsttype LIKE 'HIST_JETQA%' OR d.dsttype LIKE 'HIST_CALOFITTINGQA%')
+        (d.dsttype LIKE 'HIST_JETQA%' OR d.dsttype LIKE :calo_like)
         AND d.dsttype NOT LIKE 'HIST_CALOQASKIMMED%'
         AND {run_condition}
         AND d.segment < 9999;
@@ -300,7 +312,7 @@ def check_file_validity(path):
         # Path does not exist
         return False
 
-def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
+def process_df(df, run_type, bin_filter_datasets, output, calofitting_prefix, verbose=False):
     """
     Filter df and get a reduced df that contains the necessary runs with missing / outdated bad tower maps
     """
@@ -315,7 +327,7 @@ def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
     df[['runnumber', 'tag', 'dsttype_group']].drop_duplicates().sort_values(by='runnumber').to_csv(output / f'{run_type}.csv', index=False, header=True)
 
     ## DEBUG
-    command = [bin_filter_datasets, output / f"{run_type}.csv", output]
+    command = [bin_filter_datasets, output / f"{run_type}.csv", output, 0, calofitting_prefix]
     run_command_and_log(command)
 
     processed_df = pd.read_csv(output / f'{run_type}-process.csv')
@@ -370,6 +382,7 @@ def process_df(df, run_type, bin_filter_datasets, output, verbose=False):
 def generate_run_list(reduced_process_df, output):
     """
     Generate lists of CaloValid histogram for each run.
+    Returns the paths of the lists written for the current selection.
     """
     dataset_dir = output / 'datasets'
     dataset_dir.mkdir(parents=True, exist_ok=True)
@@ -377,6 +390,8 @@ def generate_run_list(reduced_process_df, output):
     # 7. Group by 'runnumber' and 'dsttype_group'
     # Iterating over this grouped object is efficient.
     grouped = reduced_process_df.groupby(['runnumber', 'dsttype_group'])
+
+    written = []
 
     # 8. Loop through each unique group
     for (run, group), group_df in grouped:
@@ -387,6 +402,9 @@ def generate_run_list(reduced_process_df, output):
         filepath = dataset_dir / f'{run}_{group}_{tags}.list'
 
         group_df['full_file_path'].to_csv(filepath, index=False, header=False)
+        written.append(filepath)
+
+    return written
 
 def create_symlink(target_path, link_path):
     """
@@ -417,9 +435,10 @@ def create_symlink(target_path, link_path):
     link.symlink_to(target)
     logger.info(f"Created symlink: {link} -> {target}")
 
-def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit):
+def generate_condor(output, list_files, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit, calofitting_prefix):
     """
     Generate condor submission directory to generate the CDB files for the runs.
+    Only the given list_files (the current selection) are queued.
     """
     shutil.rmtree(condor_log_dir, ignore_errors=True)
 
@@ -429,9 +448,8 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
     shutil.copy(bin_genStatus, output)
     shutil.copy(condor_script, output)
 
-    dataset_dir = output / 'datasets'
-    list_files = list(dataset_dir.glob('*.list'))
-
+    # Queue only the lists generated for the current selection; stale lists
+    # from earlier invocations in the same output directory are ignored.
     jobs = 0
     with open(output / 'jobs.list', 'w', encoding="utf-8") as f:
         for file_path in list_files:
@@ -446,7 +464,7 @@ def generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_
         (output / subdir).mkdir(parents=True, exist_ok=True)
 
     submit_file_content = textwrap.dedent(f"""\
-        arguments      = {output / os.path.basename(bin_genStatus)} $(input_run) {output / "output"}
+        arguments      = {output / os.path.basename(bin_genStatus)} $(input_run) {output / "output"} {calofitting_prefix}
         executable     = {os.path.basename(condor_script)}
         log            = {condor_log_file}
         output         = stdout/job-$(ClusterId)-$(Process).out
@@ -550,6 +568,7 @@ def main():
     condor_log_file = condor_log_dir / 'job-$(ClusterId)-$(Process).log'
     do_condor_submit = args.do_condor_submit
     verbose    = args.verbose
+    calofitting_prefix = args.calofitting_prefix
 
     # Append timestamp if the automated condor submission is enabled.
     # This will ensure the output directory is unique for each call of the cron job.
@@ -604,6 +623,7 @@ def main():
     logger.info(f'Log File: {log_file}')
     logger.info(f'Condor Log File: {condor_log_file}')
     logger.info(f'Verbose: {verbose}')
+    logger.info(f'Calofitting Prefix: {calofitting_prefix}')
 
     if not (os.path.exists(bin_filter_datasets) and os.path.exists(bin_genStatus) and os.path.exists(condor_script)):
         logger.info(f'One of {bin_filter_datasets} or {bin_genStatus} or {condor_script} does NOT exist!')
@@ -615,14 +635,14 @@ def main():
     engine = create_engine(DATABASE_URL)
 
     # 1. Get the dataframe from the database
-    df = get_file_paths(engine, runtype=run_type, runs=runs)
+    df = get_file_paths(engine, calofitting_prefix, runtype=run_type, runs=runs)
 
     if df.empty:
         logger.info('No matching datasets found in database. Quitting...')
         sys.exit()
 
     # filter and process the initial dataframe
-    reduced_process_df = process_df(df, run_identifier, bin_filter_datasets, output, verbose)
+    reduced_process_df = process_df(df, run_identifier, bin_filter_datasets, output, calofitting_prefix, verbose)
 
     # if there are no new runs to process then exit
     if reduced_process_df.empty:
@@ -630,10 +650,10 @@ def main():
         sys.exit()
 
     # generate the lists of CaloValid histograms for each identified run
-    generate_run_list(reduced_process_df, output)
+    list_files = generate_run_list(reduced_process_df, output)
 
     # generate condor jobs / submit them
-    generate_condor(output, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit)
+    generate_condor(output, list_files, condor_log_dir, condor_log_file, condor_memory, bin_genStatus, condor_script, do_condor_submit, calofitting_prefix)
 
 if __name__ == "__main__":
     main()
