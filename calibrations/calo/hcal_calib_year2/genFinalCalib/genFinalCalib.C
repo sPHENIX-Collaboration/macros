@@ -142,7 +142,7 @@ void genFinalCalib(const std::string &dataset = "", int isIHcal = 0, std::string
   std::vector<std::string> cosmic_tempFrom;
   for (int cos_run : cosmic_runnumbers){
     float cos_temp = hcalCosmicTemp(ds, isIHcal, cos_run);
-    cosmic_tempFrom.push_back("header");
+    cosmic_tempFrom.emplace_back("header");
     if (cos_temp <= 0){
       int cos_last = hcalCosmicLastRun(ds, isIHcal, cos_run);
       if (cos_last > cos_run) cos_temp = fetch_hcal_temp_degC_period(cos_run, cos_last, detDB); // functions from getCosmicTemps.C

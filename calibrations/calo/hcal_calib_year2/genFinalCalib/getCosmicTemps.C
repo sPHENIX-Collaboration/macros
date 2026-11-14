@@ -147,7 +147,9 @@ float fetch_hcal_temp_degC_period(int firstRun, int lastRun,
   while (std::getline(iss, line)) {
     int run = 0;
     double length = 0;
-    if (sscanf(line.c_str(), "%d,%lf", &run, &length) != 2 || length <= 0) continue;
+    char comma = 0;
+    std::istringstream row(line);
+    if (!(row >> run >> comma >> length) || comma != ',' || length <= 0) continue;
     float t = fetch_hcal_temp_degC(run, detector, max_retries, backoff_ms);
     if (std::isnan(t)) continue;
     sum += t * length;

@@ -321,7 +321,7 @@ std::string findRunByRunCalib(const std::string &dir, int runnumber)
       int last = std::stoi(match[2]);
       if (runnumber >= first && runnumber <= last)
       {
-        return dir + "/" + name;
+        return std::format("{}/{}", dir, name);
       }
     }
   }

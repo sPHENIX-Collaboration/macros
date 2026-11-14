@@ -6,6 +6,7 @@
 #include <TSystem.h>
 
 #include <cmath>
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -36,15 +37,18 @@
 //         h_meanE_run   mean energy above the threshold eLow (no upper limit) per run, eta rings ieL to ieH
 //         h_meanE_2d    mean energy above the threshold eLow (no upper limit) per tower, from all runs (GeV)
 
-static float getTempRun(int runnumber, const std::string &tempDir, const std::string &detDB, TProfile2D *pr2d_temp);
-
-// sum of the energy of the entries of a spectrum from bin b1 to b2 (bin center x entries)
-static double sumEnergy(TH1 *h, int b1, int b2)
+namespace
 {
-  double sum = 0.0;
-  for (int b = b1; b <= b2; ++b) sum += h->GetBinCenter(b) * h->GetBinContent(b);
-  return sum;
-}
+  float getTempRun(int runnumber, const std::string &tempDir, const std::string &detDB, TProfile2D *pr2d_temp);
+
+  // sum of the energy of the entries of a spectrum from bin b1 to b2 (bin center x entries)
+  double sumEnergy(TH1 *h, int b1, int b2)
+  {
+    double sum = 0.0;
+    for (int b = b1; b <= b2; ++b) sum += h->GetBinCenter(b) * h->GetBinContent(b);
+    return sum;
+  }
+}  // namespace
 
 // ------------------------------------------------------------
 
@@ -64,7 +68,8 @@ void ana_hits(const char *runlist_txt = "runList.txt", int isIHcal = 0,
   if (out_root.empty()) out_root = "output/anaOut_" + det + ".root";
   gSystem->mkdir(gSystem->GetDirName(out_root.c_str()).Data(), true);  // folder of the output file
   // eta rings summed for the hits per run
-  const int ieL = 1, ieH = 22;
+  const int ieL = 1;
+  const int ieH = 22;
 
   std::cout << "[ana_hits] " << det << ", hits with " << eLow << " < E < " << eHigh << " GeV" << std::endl;
   std::cout << "  spectra from      " << spectraDir << std::endl;
@@ -103,19 +108,19 @@ void ana_hits(const char *runlist_txt = "runList.txt", int isIHcal = 0,
   std::cout << "number of runs in provided runList is:" << N << std::endl;
 
   // 1) book histograms
-  TH1F *h_hits = new TH1F("h_hits", Form("%s hit counts;run index;entries (%.1f < E < %.1f GeV)", det.c_str(), eLow, eHigh), N, 0, N);
-  TH2F *h_hits_2d = new TH2F("h_hits_2d", Form("2D map of %s hit rate;#eta;#phi;hit rate / average of the eta ring", det.c_str()), 24, 0, 24, 64, 0, 64);
+  TH1F *h_hits = new TH1F("h_hits", std::format("{} hit counts;run index;entries ({:.1f} < E < {:.1f} GeV)", det, eLow, eHigh).c_str(), N, 0, N);
+  TH2F *h_hits_2d = new TH2F("h_hits_2d", std::format("2D map of {} hit rate;#eta;#phi;hit rate / average of the eta ring", det).c_str(), 24, 0, 24, 64, 0, 64);
 
-  TH1F *h_meanE_run = new TH1F("h_meanE_run", Form("%s mean energy above threshold per run;run index;mean E (E > %.1f GeV) [GeV]", det.c_str(), eLow), N, 0, N);
-  TH2F *h_meanE_2d = new TH2F("h_meanE_2d", Form("%s mean energy above threshold (E > %.1f GeV);#eta;#phi;mean E [GeV]", det.c_str(), eLow), 24, 0, 24, 64, 0, 64);
+  TH1F *h_meanE_run = new TH1F("h_meanE_run", std::format("{} mean energy above threshold per run;run index;mean E (E > {:.1f} GeV) [GeV]", det, eLow).c_str(), N, 0, N);
+  TH2F *h_meanE_2d = new TH2F("h_meanE_2d", std::format("{} mean energy above threshold (E > {:.1f} GeV);#eta;#phi;mean E [GeV]", det, eLow).c_str(), 24, 0, 24, 64, 0, 64);
 
   TH1F *h_events_run = new TH1F("h_events_run", "Events per run;run index;events", N, 0, N);
   TH1F *runNumberHist = new TH1F("runNumberHist", "Run numbers;run index;run number", N, 0, N);
-  TH1F *h_temp_run = new TH1F("h_temp_run", Form("Avg %s tower temp per run;run index;T [^{o}C]", detDB.c_str()), N, 0, N);
+  TH1F *h_temp_run = new TH1F("h_temp_run", std::format("Avg {} tower temp per run;run index;T [^{{o}}C]", detDB).c_str(), N, 0, N);
 
   // same tower selection as the average temperature (10 < T < 32 C)
   TProfile2D *pr2d_temp = new TProfile2D("pr2d_temp",
-                                         Form("%s tower temperature profile;eta;phi;T [^{o}C]", detDB.c_str()),
+                                         std::format("{} tower temperature profile;eta;phi;T [^{{o}}C]", detDB).c_str(),
                                          24, 0, 24, 64, 0, 64, 10.0, 32.0, "s");
 
   std::vector<int> missingOut;   // out_<RUN>.root files missing
@@ -136,10 +141,10 @@ void ana_hits(const char *runlist_txt = "runList.txt", int isIHcal = 0,
     std::cout << "Analyzing run index " << i << " with runnumber: " << run << std::endl;
 
     // open out_<RUN>.root
-    TString infile = Form("%s/out_%d.root", spectraDir.c_str(), run);
+    const std::string infile = std::format("{}/out_{}.root", spectraDir, run);
 
     std::unique_ptr<TFile> fin;
-    if (!gSystem->AccessPathName(infile)) fin.reset(TFile::Open(infile, "READ"));
+    if (!gSystem->AccessPathName(infile.c_str())) fin.reset(TFile::Open(infile.c_str(), "READ"));
     if (!fin || fin->IsZombie())
     {
       std::cout << "out_runnumber file missing or not readable for run: " << run << "\n";
@@ -156,7 +161,7 @@ void ana_hits(const char *runlist_txt = "runList.txt", int isIHcal = 0,
       double n_sum = 0.0;
       for (int ieta = ieL; ieta <= ieH; ++ieta)
       {
-        TH1 *h_eta = (TH1 *) fin->Get(Form("%s%d", etaHist.c_str(), ieta));
+        TH1 *h_eta = (TH1 *) fin->Get(std::format("{}{}", etaHist, ieta).c_str());
         if (!h_eta)
         {
           std::cout << "Missing " << etaHist << ieta << " in " << infile << std::endl;
@@ -183,7 +188,7 @@ void ana_hits(const char *runlist_txt = "runList.txt", int isIHcal = 0,
       {
         for (int ip = 0; ip < 64; ++ip)
         {
-          TH1 *hE = (TH1 *) fin->Get(Form("%s%d_phi_%d", towerHist.c_str(), ie, ip));
+          TH1 *hE = (TH1 *) fin->Get(std::format("{}{}_phi_{}", towerHist, ie, ip).c_str());
           if (!hE) continue;
           towerHits[ie][ip] += hE->Integral(hE->FindBin(eLow), hE->FindBin(eHigh));
           towerE[ie][ip] += sumEnergy(hE, hE->FindBin(eLow), hE->GetNbinsX());
@@ -274,43 +279,46 @@ void ana_hits(const char *runlist_txt = "runList.txt", int isIHcal = 0,
 
 // ------------------------------------------------------------
 
-// average tower temperature of a run from the map made by makeTemp/loopCaloTemp.C, 0 if there is none
-static float getTempRun(int runnumber, const std::string &tempDir, const std::string &detDB, TProfile2D *pr2d_temp)
+namespace
 {
-  TString tpath = Form("%s/%s_temp_%d.root", tempDir.c_str(), detDB.c_str(), runnumber);
-
-  if (gSystem->AccessPathName(tpath))
+  // average tower temperature of a run from the map made by makeTemp/loopCaloTemp.C, 0 if there is none
+  float getTempRun(int runnumber, const std::string &tempDir, const std::string &detDB, TProfile2D *pr2d_temp)
   {
-    return 0.0F;  // file missing
-  }
+    const std::string tpath = std::format("{}/{}_temp_{}.root", tempDir, detDB, runnumber);
 
-  std::unique_ptr<TFile> f(TFile::Open(tpath, "READ"));
-  if (!f || f->IsZombie())
-  {
-    return 0.0F;  // file couldn't open
-  }
-
-  TH2 *h = (TH2 *) f->Get(Form("h_%s_temp", detDB.c_str()));
-  if (!h) return 0.0F;
-
-  float sum = 0.0F;
-  int cnt = 0;
-  int nx = h->GetXaxis()->GetNbins();
-  int ny = h->GetYaxis()->GetNbins();
-  for (int ix = 1; ix <= nx; ++ix)
-  {
-    for (int iy = 1; iy <= ny; ++iy)
+    if (gSystem->AccessPathName(tpath.c_str()))
     {
-      float t = h->GetBinContent(ix, iy);
-      // same tower selection as for the cosmics runs (genFinalCalib/getCosmicTemps.C)
-      if (t > 10 && t < 32)
-      {
-        sum += t;
-        cnt++;
-      }
-      if (pr2d_temp) pr2d_temp->Fill(ix - 1, iy - 1, t);
+      return 0.0F;  // file missing
     }
+
+    std::unique_ptr<TFile> f(TFile::Open(tpath.c_str(), "READ"));
+    if (!f || f->IsZombie())
+    {
+      return 0.0F;  // file couldn't open
+    }
+
+    TH2 *h = (TH2 *) f->Get(std::format("h_{}_temp", detDB).c_str());
+    if (!h) return 0.0F;
+
+    float sum = 0.0F;
+    int cnt = 0;
+    int nx = h->GetXaxis()->GetNbins();
+    int ny = h->GetYaxis()->GetNbins();
+    for (int ix = 1; ix <= nx; ++ix)
+    {
+      for (int iy = 1; iy <= ny; ++iy)
+      {
+        float t = h->GetBinContent(ix, iy);
+        // same tower selection as for the cosmics runs (genFinalCalib/getCosmicTemps.C)
+        if (t > 10 && t < 32)
+        {
+          sum += t;
+          cnt++;
+        }
+        if (pr2d_temp) pr2d_temp->Fill(ix - 1, iy - 1, t);
+      }
+    }
+    if (cnt < 3) return 0.0F;
+    return sum / cnt;
   }
-  if (cnt < 3) return 0.0F;
-  return sum / cnt;
-}
+}  // namespace
