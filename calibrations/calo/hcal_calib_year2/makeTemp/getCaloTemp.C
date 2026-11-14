@@ -107,8 +107,19 @@ void getCaloTemp(int runnumber = 54263, const TString& detector = "HCALIN",
              "LIMIT 1;\"", tablename.Data(), runtime.Data()); 
 */ 
 
+  // look within one day of the run start first: the search over the whole table takes ~15 s per run
+  TString sql_day = std::format("\"SELECT time FROM {} "
+           "WHERE {} "
+           "AND time BETWEEN '{}'::timestamp - interval '1 day' AND '{}'::timestamp + interval '1 day' "
+           "ORDER BY ABS(EXTRACT(epoch FROM time) - EXTRACT(epoch FROM '{}'::timestamp)) "
+           "LIMIT 1;\"",
+           tablename.Data(),
+           (det >= 0 ? std::format("detector={}", det) : "TRUE"),
+           runtime.Data(), runtime.Data(), runtime.Data());
+
   TString closest_time;
-  if (!psql_run(dbhost, dbname, sql, closest_time, "-t -A", max_retries, backoff_ms)) {
+  if (!psql_run(dbhost, dbname, sql_day, closest_time, "-t -A", 1, backoff_ms) &&
+      !psql_run(dbhost, dbname, sql, closest_time, "-t -A", max_retries, backoff_ms)) {
     std::cerr << "[getCaloTemp] Run " << runnumber
               << ": failed to fetch closest heartbeat time after retries.\n";
     return;

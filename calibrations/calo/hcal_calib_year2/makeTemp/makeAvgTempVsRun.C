@@ -23,7 +23,7 @@ void makeAvgTempVsRun(
   const char* runlist_path = "Full_ppGoldenRunList_Version3.list", // one run per line
   const char* outroot = "avgTemp_HCALIN.root",
   const char* outcsv  = "avgTemp_HCALIN.csv",
-  double Tmin = 10.0, double Tmax = 30.0)
+  double Tmin = 10.0, double Tmax = 32.0)
 {
   std::ifstream rin(runlist_path);
   if (!rin.is_open()) { std::cerr << "Cannot open runlist: " << runlist_path << std::endl; return; }

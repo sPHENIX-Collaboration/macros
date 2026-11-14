@@ -13,7 +13,8 @@ cd ${Cur_dir}
 ls
 root '' > notes.log
 
-root -b "Fun4All_HCal.C(0,\"inputdata.txt\")"
+# the dataset and the calibrations are filled in by run.sh
+root -b "Fun4All_HCal.C(0,\"inputdata.txt\",\"DATASET\",\"OHCALCALIB\",\"IHCALCALIB\")"
 
 rm inputdata.txt
 echo "DONE" >> DONE.txt

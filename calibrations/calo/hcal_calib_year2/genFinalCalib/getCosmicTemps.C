@@ -8,6 +8,8 @@
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <sstream>
+#include <string>
 #include <cmath>
 
 // --- run a psql command and capture output (no prompts), with retries ---
@@ -44,7 +46,7 @@ bool psql_run(const TString& dbhost,
   return false;
 }
 
-// fetch average temp (degC) for HCALOUT/HCALIN at closest heartbeat to run start ---
+// fetch average temp (degC) of the towers with 10 < T < 32 C for HCALOUT/HCALIN at closest heartbeat to run start ---
 float fetch_hcal_temp_degC(int runnumber,
                            const TString& detector = "HCALOUT",
                            int max_retries = 3,
@@ -74,12 +76,21 @@ float fetch_hcal_temp_degC(int runnumber,
 
   TString closest_time;
   {
+    // closest heartbeat that has towers with 10 < T < 32 C (some heartbeats have no valid temperature at all).
+    // look within one day of the run start first: the search over the whole table takes ~15 s per run
     TString sql = std::format("\"SELECT time FROM hcal_heartbeat "
-                       "WHERE detector={} "
+                       "WHERE detector={} AND temp > 10 AND temp < 32 "
+                       "AND time BETWEEN '{}'::timestamp - interval '1 day' AND '{}'::timestamp + interval '1 day' "
+                       "ORDER BY ABS(EXTRACT(epoch FROM time) - EXTRACT(epoch FROM '{}'::timestamp)) "
+                       "LIMIT 1;\"",
+                       det, runtime.Data(), runtime.Data(), runtime.Data());
+    TString sql_all = std::format("\"SELECT time FROM hcal_heartbeat "
+                       "WHERE detector={} AND temp > 10 AND temp < 32 "
                        "ORDER BY ABS(EXTRACT(epoch FROM time) - EXTRACT(epoch FROM '{}'::timestamp)) "
                        "LIMIT 1;\"",
                        det, runtime.Data());
-    if (!psql_run(dbhost, dbname, sql, closest_time, "-X -q -t -A -w", max_retries, backoff_ms)) {
+    if (!psql_run(dbhost, dbname, sql, closest_time, "-X -q -t -A -w", 1, backoff_ms) &&
+        !psql_run(dbhost, dbname, sql_all, closest_time, "-X -q -t -A -w", max_retries, backoff_ms)) {
       std::cout << "Run " << runnumber << ": FAILED to fetch closest heartbeat time" << std::endl;
       return std::numeric_limits<float>::quiet_NaN();
     }
@@ -88,10 +99,12 @@ float fetch_hcal_temp_degC(int runnumber,
 
   TString avg_temp_str;
   {
+    // towers with 10 < T < 32 C, the same selection as for the beam runs (fileQA/ana_hits.C):
+    // dead towers report unphysical temperatures and must not enter the average
     TString sql = std::format("\"SELECT AVG(temp) "
                        "FROM hcal_heartbeat "
-                       "WHERE detector=%d AND time='{}' "
-                       "  AND temp > -50 AND temp < 100;\"",
+                       "WHERE detector={} AND time='{}' "
+                       "  AND temp > 10 AND temp < 32;\"",
                        det, closest_time.Data());
     if (!psql_run(dbhost, dbname, sql, avg_temp_str, "-X -q -t -A -w", max_retries, backoff_ms)) {
       return std::numeric_limits<float>::quiet_NaN();
@@ -104,6 +117,47 @@ float fetch_hcal_temp_degC(int runnumber,
   catch (...) {std::cout << "caught unknown exception from std::stof" << std::endl;}
 
   return tdeg;
+}
+
+// Temperature of a cosmics calibration made from several runs (firstRun to lastRun): the temperature at the
+// start of each cosmics run in the range (fetch_hcal_temp_degC), averaged with the length of the run as weight.
+//   root -l getCosmicTemps.C
+//   root [1] fetch_hcal_temp_degC_period(82716, 82744, "HCALIN")
+float fetch_hcal_temp_degC_period(int firstRun, int lastRun,
+                                  const TString& detector = "HCALOUT",
+                                  int max_retries = 3,
+                                  int backoff_ms  = 400)
+{
+  // cosmics runs of the range and their length in seconds
+  TString rows;
+  TString sql = std::format("\"SELECT runnumber, EXTRACT(epoch FROM ertimestamp - brtimestamp) FROM run "
+                     "WHERE runnumber BETWEEN {} AND {} AND runtype='cosmics' AND ertimestamp IS NOT NULL "
+                     "ORDER BY runnumber;\"",
+                     firstRun, lastRun);
+  if (!psql_run("sphnxdaqdbreplica", "daq", sql, rows, "-X -q -t -A -w -F,", max_retries, backoff_ms)) {
+    std::cout << "Runs " << firstRun << "-" << lastRun << ": FAILED to fetch the cosmics runs" << std::endl;
+    return std::numeric_limits<float>::quiet_NaN();
+  }
+
+  double sum = 0;
+  double sumw = 0;
+  int nruns = 0;
+  std::istringstream iss(rows.Data());
+  std::string line;
+  while (std::getline(iss, line)) {
+    int run = 0;
+    double length = 0;
+    if (sscanf(line.c_str(), "%d,%lf", &run, &length) != 2 || length <= 0) continue;
+    float t = fetch_hcal_temp_degC(run, detector, max_retries, backoff_ms);
+    if (std::isnan(t)) continue;
+    sum += t * length;
+    sumw += length;
+    nruns++;
+  }
+  if (sumw <= 0) return std::numeric_limits<float>::quiet_NaN();
+  std::cout << detector << " cosmics runs " << firstRun << "-" << lastRun << ": " << nruns << " runs, "
+            << sumw / 3600. << " hours, average temperature " << sum / sumw << " C" << std::endl;
+  return sum / sumw;
 }
 
 // (Optional) quick driver to test a single runlist directly with this file:

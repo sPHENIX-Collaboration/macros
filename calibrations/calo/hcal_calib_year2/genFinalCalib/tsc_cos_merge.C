@@ -2,10 +2,13 @@
 
 #include <TFile.h>
 #include <TH2.h>
+#include <TSystem.h>
 
+#include <fstream>
 #include <iostream>
+#include <sstream>
 
-void rescaleTSC(TH2* h_tsc, TH2* h_cos);
+void rescaleTSC(TH2* h_tsc, TH2* h_cos, int isIHcal);
 void checkTsc(TH2* h);
 void checkCos(TH2* h);
 
@@ -26,7 +29,7 @@ void tsc_cos_merge(const std::string& tsc_file, const std::string& cos_cdb_file,
 
   checkTsc(h_tsc_corr_ohcal);
   checkCos(h_ohcal);
-  rescaleTSC(h_tsc_corr_ohcal, h_ohcal);
+  rescaleTSC(h_tsc_corr_ohcal, h_ohcal, isIHcal);
   h_ohcal->Divide(h_tsc_corr_ohcal);
 
   // generate cdb ttrees for input into calotowercalib
@@ -72,6 +75,8 @@ void checkCos(TH2* h)
     for (int ip = 0; ip < 64; ip++)
     {
       double v = h->GetBinContent(ie + 1, ip + 1);
+      // dead towers have a cosmics constant of exactly 0: keep them at 0
+      if (v == 0) continue;
   if (v < 0.01 * avg || v > 10 * avg)
   {
     std::cout << "Rescaling the calib. factor in bin (" << ie << "," << ip << ") to a global average. Be cautious!" << std::endl;
@@ -81,10 +86,12 @@ void checkCos(TH2* h)
   }
 }
 
-void rescaleTSC(TH2* h_tsc, TH2* h_cos)
+void rescaleTSC(TH2* h_tsc, TH2* h_cos, int isIHcal)
 {
   //  chimeny and support regions which are invalid for TSC
   // set TSC=1 add 1 bin of padding.
+  // OHCal only: the IHCal sits inside the magnet, so the chimney and
+  // support structure do not affect it and no towers are excluded there.
   int chimEtaLow = 0;
   int chimEtaHigh = 4;
   int chimPhiLow = 12;
@@ -127,7 +134,7 @@ void rescaleTSC(TH2* h_tsc, TH2* h_cos)
     {
       bool isChim = (ie >= chimEtaLow && ie <= chimEtaHigh && ip >= chimPhiLow && ip <= chimPhiHigh);
       bool isSupport = (ie >= supportEtaLow && ie <= supportEtaHigh && ip >= supportPhiLow && ip <= supportPhiHigh);
-      if (isChim || isSupport) h_tsc->SetBinContent(ie + 1, ip + 1, 1);
+      if (isIHcal != 1 && (isChim || isSupport)) h_tsc->SetBinContent(ie + 1, ip + 1, 1);
     }
   }
 }
@@ -170,11 +177,11 @@ void genCdbCorr_HH(float corr, const std::string& cos_cdb_file, const std::strin
 void genCdbCorr(float corr, const std::string& cos_cdb_file, const std::string& output_name, int isIHcal)
 {
   std::cout << "heeeelllloooooo" << std::endl;
-  // get 2024 cosmics calibration
-  std::string fieldName_in = "ohcal_abscalib_mip";
+  // get the calibration made by tsc_cos_merge (same field names)
+  std::string fieldName_in = "HCALOUT_calib_ADC_to_ETower";
   if (isIHcal == 1)
   {
-    fieldName_in = "ihcal_cosmic_calibration";
+    fieldName_in = "HCALIN_calib_ADC_to_ETower";
   }
   TH2* h_ohcal = CaloCDBTreeToHist(cos_cdb_file, fieldName_in, 1);
 
@@ -187,10 +194,10 @@ void genCdbCorr(float corr, const std::string& cos_cdb_file, const std::string& 
   h_ohcal->Scale(corr);
 
   // generate cdb ttrees for input into calotowercalib
-  std::string fieldName = "ohcal_abscalib_mip";
+  std::string fieldName = "HCALOUT_calib_ADC_to_ETower";
   if (isIHcal == 1)
   {
-    fieldName = "ihcal_abscalib_mip";
+    fieldName = "HCALIN_calib_ADC_to_ETower";
   }
   histToCaloCDBTree(output_name, fieldName, 1, h_ohcal);
 }
