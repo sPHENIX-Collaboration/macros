@@ -88,7 +88,8 @@ void genFinalCalib(const std::string &dataset = "", int isIHcal = 0, std::string
   // cosmics + towerslope files: one per towerslope period, or one per cosmics run for datasets without periods.
   // They are made in ../genTSCalib (run_cosmicsTS.C), each towerslope merged with its own cosmics file.
   bool hasPeriods = !ds.tscPeriods.empty();
-  std::vector<int> cosmic_runnumbers = hasPeriods ? ds.tscPeriods : ((isIHcal == 1) ? ds.ih_cosmicRuns : ds.oh_cosmicRuns);
+  const std::vector<int> &cosmicRuns = (isIHcal == 1) ? ds.ih_cosmicRuns : ds.oh_cosmicRuns;
+  std::vector<int> cosmic_runnumbers = hasPeriods ? ds.tscPeriods : cosmicRuns;
   if (cosmic_runnumbers.empty())
   {
     std::cout << "MISSING: no towerslope periods and no " << det << " cosmics runs for " << ds.name << " in HcalCalibDatasetinputs.h" << std::endl;

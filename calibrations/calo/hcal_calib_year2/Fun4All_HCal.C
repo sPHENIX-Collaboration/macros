@@ -288,7 +288,8 @@ std::string findTscCalib(const HCalCalibDataset &ds, int isIHcal, int runnumber)
     std::cout << "no folder with the cosmics + towerslope files (tscDir) for " << ds.name << " in HcalCalibDatasetinputs.h" << std::endl;
     return "";
   }
-  const std::vector<int> &runs = !ds.tscPeriods.empty() ? ds.tscPeriods : ((isIHcal == 1) ? ds.ih_cosmicRuns : ds.oh_cosmicRuns);
+  const std::vector<int> &cosmicRuns = (isIHcal == 1) ? ds.ih_cosmicRuns : ds.oh_cosmicRuns;
+  const std::vector<int> &runs = ds.tscPeriods.empty() ? cosmicRuns : ds.tscPeriods;
   int tscRun = 0;
   for (int run : runs)
   {
