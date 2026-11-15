@@ -1,3 +1,5 @@
+#include "../HcalCalibDatasetinputs.h"  // run list of a dataset
+
 #include <TFile.h>
 #include <TH1F.h>
 #include <TH2F.h>
@@ -17,14 +19,36 @@
 // Reads the spectra of the runs (out_<run>.root from condor_histmaker) and the temperature maps
 // of the runs (<detector>_temp_<run>.root from makeTemp/loopCaloTemp.C).
 //
-// usage: root -l -b -q 'ana_hits.C("runList.txt", 0)'      OHCal
-//        root -l -b -q 'ana_hits.C("runList.txt", 1)'      IHCal
+// How to run (from fileQA, after condor_histmaker made the spectra and makeTemp the temperature maps):
 //
-// runlist_txt: beam run list, one run per line
+//   // cosmics only: spectra in ../condor_histmaker/out_run -> output/anaOut_ohcal_cosmics.root
+//   root -l -b -q 'ana_hits.C("run3oo", 0)'      // OHCal
+//   root -l -b -q 'ana_hits.C("run3oo", 1)'      // IHCal
+//
+//   // cosmics + towerslope: spectra in ../condor_histmaker/out_run_cosmics_tsc -> output/anaOut_ohcal_cosmics_tsc.root
+//   root -l -b -q 'ana_hits.C("run3oo", 0, "../condor_histmaker/out_run_cosmics_tsc")'
+//   root -l -b -q 'ana_hits.C("run3oo", 1, "../condor_histmaker/out_run_cosmics_tsc")'
+//
+//   // cosmics + towerslope + temperature: out_run_cosmics_tsc_temp -> output/anaOut_ohcal_cosmics_tsc_temp.root
+//   root -l -b -q 'ana_hits.C("run3oo", 0, "../condor_histmaker/out_run_cosmics_tsc_temp")'
+//
+//   // temperature maps in another folder than ../makeTemp/temp_ohcal (temp_ihcal): 4th argument, e.g.
+//   root -l -b -q 'ana_hits.C("run3oo", 0, "../condor_histmaker/out_run_cosmics_tsc", "/sphenix/user/anjsmenon/work_2026/maketemp_ohcal/temp_ohcal_run3oo")'
+//   root -l -b -q 'ana_hits.C("run3oo", 1, "../condor_histmaker/out_run_cosmics_tsc", "/sphenix/user/anjsmenon/work_2026/maketemp_ihcal/temp_ihcal_run3oo")'
+//
+//   // own run list instead of the run list of the dataset
+//   root -l -b -q 'ana_hits.C("myRunList.txt", 0, "../condor_histmaker/out_run_cosmics_tsc")'
+//
+// The out_run_<name> folders are filled by condor_histmaker/copy_outfiles.sh <name> (out_run for cosmics).
+// Then plot the hit rates with plot_hits.C (see there).
+//
+// runlist_txt: dataset name (run2pp, run2auau, run3oo, ...: its run list in ../HcalCalibDatasetinputs.h)
+//              or a beam run list, one run per line
 // isIHcal:     0 OHCal, 1 IHCal
-// spectraDir:  folder with out_<run>.root
+// spectraDir:  folder with out_<run>.root: ../condor_histmaker/out_run (cosmics) or out_run_<name>
+//              (e.g. out_run_cosmics_tsc). The calibration name is taken from the folder name.
 // tempDir:     folder with the temperature maps, "" for ../makeTemp/temp_ohcal (temp_ihcal)
-// out_root:    output file, "" for output/anaOut_ohcal.root (anaOut_ihcal.root)
+// out_root:    output file, "" for output/anaOut_<detector>_<calibration name>.root, e.g. output/anaOut_ohcal_cosmics_tsc.root
 // eLow, eHigh: energy window of a hit in GeV, negative for the default (OHCal 1 to 5, IHCal 0.2 to 1)
 //
 // output: h_hits        hits in the energy window per run, summed over the eta rings ieL to ieH
@@ -65,7 +89,23 @@ void ana_hits(const char *runlist_txt = "runList.txt", int isIHcal = 0,
   if (eLow < 0) eLow = (isIHcal == 1) ? 0.2 : 1.0;
   if (eHigh < 0) eHigh = (isIHcal == 1) ? 1.0 : 5.0;
   if (tempDir.empty()) tempDir = "../makeTemp/temp_" + det;
-  if (out_root.empty()) out_root = "output/anaOut_" + det + ".root";
+  // calibration name from the spectra folder: out_run -> cosmics, out_run_<name> -> <name>
+  std::string spectraPath = spectraDir;
+  while (spectraPath.size() > 1 && spectraPath.back() == '/')
+  {
+    spectraPath.pop_back();
+  }
+  const std::string spectraName = gSystem->BaseName(spectraPath.c_str());
+  std::string calibName = spectraName;
+  if (spectraName == "out_run")
+  {
+    calibName = "cosmics";
+  }
+  else if (spectraName.starts_with("out_run_"))
+  {
+    calibName = spectraName.substr(8);
+  }
+  if (out_root.empty()) out_root = std::format("output/anaOut_{}_{}.root", det, calibName);
   gSystem->mkdir(gSystem->GetDirName(out_root.c_str()).Data(), true);  // folder of the output file
   // eta rings summed for the hits per run
   const int ieL = 1;
@@ -76,7 +116,12 @@ void ana_hits(const char *runlist_txt = "runList.txt", int isIHcal = 0,
   std::cout << "  temperatures from " << tempDir << std::endl;
   std::cout << "  output            " << out_root << std::endl;
 
-  // 0) read run list
+  // 0) read run list (the run list of the dataset if a dataset name is given)
+  if (const HCalCalibDataset *ds = findHCalCalibDataset(runlist_txt))
+  {
+    std::cout << "  run list of " << ds->name << ": " << ds->runList << std::endl;
+    runlist_txt = ds->runList.c_str();
+  }
   std::ifstream in(runlist_txt);
   if (!in.is_open())
   {

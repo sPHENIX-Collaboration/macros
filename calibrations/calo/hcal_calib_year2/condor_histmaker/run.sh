@@ -107,7 +107,9 @@ if [[ $confirm != [yY] ]]; then
   echo "Aborting."
   exit 1
 fi
-mkdir -p dstLists  #Ensure directory exists
+# DST lists are kept per DST tag: a list of another tag (production) is not reused
+dstListDir="dstLists/${dstTag}"
+mkdir -p ${dstListDir}  #Ensure directory exists
 
 export TargetDir="$PWD"/condorout$outSuffix
 
@@ -128,7 +130,7 @@ while read dir; do
 
   rm inputdata.txt
   rm dst_cal*
-  dstName="dstLists/dst_calofitting-000${dir}.list"
+  dstName="${dstListDir}/dst_calofitting-000${dir}.list"
 
   # creates a list of all files for a particular run
   if [ -f ${dstName} ]; then 
@@ -137,7 +139,7 @@ while read dir; do
     echo "did not find ${dstName} getting from DB"
     CreateDstList.pl -dataset ${dataset} --tag ${dstTag} --run ${dir} DST_CALOFITTING
     cp dst_calo* inputdata.txt
-    cp dst_calo* dstLists/.
+    cp dst_calo* ${dstListDir}/.
   fi
 
   if [ ! -s inputdata.txt ]; then

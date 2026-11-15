@@ -160,7 +160,7 @@ This calls `get_tsFiles_flat.sh`, which:
 
 Give `Fun4All_HCal.C` / `condor_histmaker/run.sh` the Step 1 calibration files and produce spectra on beam `DST_CALOFITTING` data, to check that the hitrate is flat across towers.
 
-`fileQA/ana_hits.C` — loops over the merged `out_run/out_<run>.root` files of the run list, fills per-run hit and temperature histograms and the 2D map of the hit rate per tower → writes `output/anaOut_{o,i}hcal.root` with `runNumberHist`, `h_temp_run`, `h_hits`, `h_events_run`, `pr2d_temp`, `h_hits_2d`.
+`fileQA/ana_hits.C` — loops over the merged `out_run/out_<run>.root` files of the run list, fills per-run hit and temperature histograms and the 2D map of the hit rate per tower → writes `output/anaOut_{o,i}hcal_<calibration>.root` with `runNumberHist`, `h_temp_run`, `h_hits`, `h_events_run`, `pr2d_temp`, `h_hits_2d`.
 `h_hits_2d` is the hits of each tower from all runs of the list, divided by the average over the live towers of its eta ring (1 = flat; dead towers are 0 and are left out of the average).
 
 ---
@@ -208,24 +208,41 @@ root -l -q makeAvgTempVsRun.C
 #### 3. Beam-run temperature input for `genFinalCalib.C`
 
 `genFinalCalib.C` reads the step 1 temperature map of each beam run directly and takes `T_beam` as the average of the towers with 10 < T < 32 °C.
-The folder with the maps is its 4th argument (default `../makeTemp/temp_ohcal` or `../makeTemp/temp_ihcal`). A beam run without a map gets no calibration file (a warning is printed).
+The folder with the maps is its 3rd argument (default `../makeTemp/temp_ohcal` or `../makeTemp/temp_ihcal`). A beam run without a map gets no calibration file (a warning is printed).
 
 `fileQA/ana_hits.C` is not needed for the temperature correction. It is QA: it loops over the beam run list, reads the merged spectra (`out_run/out_<run>.root`) and
 the step 1 temperature map of each run, and stores the per-run average temperature (same tower selection) together with the hit rates.
 
 ```bash
 cd fileQA
-root -l -b -q 'ana_hits.C("runList.txt", 0)'   # OHCal
-root -l -b -q 'ana_hits.C("runList.txt", 1)'   # IHCal
+root -l -b -q 'ana_hits.C("run3oo", 0)'   # OHCal, cosmics only (out_run) -> output/anaOut_ohcal_cosmics.root
+root -l -b -q 'ana_hits.C("run3oo", 1)'   # IHCal
+root -l -b -q 'ana_hits.C("run3oo", 0, "../condor_histmaker/out_run_cosmics_tsc")'   # -> output/anaOut_ohcal_cosmics_tsc.root
 ```
 
 `ana_hits.C(<run list>, <isIHcal>, <spectra folder>, <temperature folder>, <output file>, <eLow>, <eHigh>)`; nothing has to be edited in the macro. Defaults:
 - spectra folder: `../condor_histmaker/out_run`.
 - temperature folder: `../makeTemp/temp_ohcal` or `../makeTemp/temp_ihcal` (the step 1 output).
-- output file: `output/anaOut_ohcal.root` or `output/anaOut_ihcal.root`. Give another name to keep the files of different calibrations apart (cosmics only, cosmics + towerslope, ...).
+- run list: a dataset name takes the run list of the dataset in `HcalCalibDatasetinputs.h`; a file name is read as a run list.
+- output file: `output/anaOut_<detector>_<calibration>.root`. The calibration name is taken from the spectra folder: `out_run` is `cosmics`, `out_run_<name>` is `<name>` (`copy_outfiles.sh <name>` fills it), e.g. `output/anaOut_ohcal_cosmics_tsc.root`.
 - energy window of a hit: 1 to 5 GeV (OHCal), 0.2 to 1 GeV (IHCal).
 
 Runs with a missing spectrum or temperature file are listed at the end of the printout; their `h_temp_run` entry is 0.
+
+Hit rate plots (hits per event vs run time and vs MBD rate, 1D distribution over the runs, temperature):
+
+```bash
+cd fileQA
+python3 get_mbdrate.py run3oo     # start time and MBD rate of the runs -> output/run_timestamps_with_rate_run3oo.csv
+root -l -b -q 'plot_hits.C("run3oo", 0, "output/anaOut_ohcal_cosmics_tsc_temp.root")'
+root -l -b -q 'plot_hits.C("run3oo", 0, "output/anaOut_ohcal_cosmics_tsc_temp.root", "output/anaOut_ohcal_cosmics.root")'  # + step comparison
+```
+
+- `get_mbdrate.py <dataset>` takes the run list of the dataset from `HcalCalibDatasetinputs.h` (`-r` for another list). The rate is the GL1 scaler of the trigger `MBD N&S >= 1` (`-t` for another one) divided by the run duration; the GL1 index of the trigger is looked up per run, since it differs between datasets (10 in p+p 2024 and O+O, 11 in Au+Au).
+- `plot_hits.C(<dataset>, <isIHcal>, <anaOut file>, <second anaOut file>, <rate csv>, <pile-up correction>, <filled bunches>)`. An empty dataset is taken from the first run of the anaOut file.
+- Pile-up correction, 6th argument: `"lambda"` (default) `hits / (1 + lambda)` with lambda from the probability of more than one collision per bunch crossing at the MBD rate (`corrDouble()`), for the number of filled bunches of the 7th argument (default 111, p+p 2024); `"pol3"` fits the hits per event vs MBD rate with pol3, `f(rate)`, and scales each run to zero rate, `hits * f(0) / f(rate)`; `"none"`. The pol3 fit only works on the temperature-corrected files: before the temperature correction the hit rate also changes with time, and the fit takes that up.
+- With a second anaOut file both are drawn vs run time, pile-up corrected with the fit of the first file.
+- Output: `figures/<dataset>_<tag>_*.pdf`, `output/plotHits_<dataset>_<tag>.root` and `.csv` (tag: name of the anaOut file without `anaOut_` and `.root`).
 
 Beam runs with `T_beam < 10` °C (no temperature found) are skipped by `genFinalCalib.C`.
 
@@ -328,9 +345,9 @@ Same condor / hadd / QA flow. Compare the QA output with the one from Step 1 (be
 | `makeTemp/getCaloTemp.C` | Fetches per-tower temperature from the daq DB → TProfile2D ROOT file |
 | `makeTemp/loopCaloTemp.C` | Loops `getCaloTemp` over a run list |
 | `makeTemp/makeAvgTempVsRun.C` | Average temperature vs run number plots |
-| `fileQA/plot_hits.C` | Plotting utilities for QA output |
+| `fileQA/plot_hits.C` | Hit rate vs run time and vs MBD rate with pile-up correction, 1D hit rate distribution, temperature |
 | `fileQA/BlairUtils.C` | Shared ROOT utility functions |
-| `fileQA/new_get_DbInfo.py` | DB query helper |
+| `fileQA/get_mbdrate.py` | Run start time and MBD rate of the runs of a dataset from the DAQ DB |
 
 ---
 

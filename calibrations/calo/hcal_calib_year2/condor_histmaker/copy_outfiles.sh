@@ -13,6 +13,13 @@ if [ ! -d "$hadd_dir" ]; then
   echo "no folder $hadd_dir"
   exit 1
 fi
+echo "copying the merged files of $hadd_dir to $dest_dir (calibration: $calibName)"
+[ -d "$dest_dir" ] && echo "$dest_dir exists: files with the same name are overwritten"
+read -p "Continue? [y/N]: " confirm
+if [[ $confirm != [yY] ]]; then
+  echo "Aborting."
+  exit 1
+fi
 
 # Create destination directory if it doesn't exist
 mkdir -p "$dest_dir"
