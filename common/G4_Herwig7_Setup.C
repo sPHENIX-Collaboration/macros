@@ -14,7 +14,11 @@ void Herwig7_Generator_Setup(const std::string &jettrigger, const int index = 0)
   std::cout << "start h setup" << std::endl;
   std::string herwig7_config_dir = std::string(getenv("CALIBRATIONROOT")) + "/Generators/Herwig7/in/";
   std::string herwig7_config_file;
-  if (jettrigger == "PhotonJet5")
+  if (jettrigger == "MB")
+  {
+    herwig7_config_file = "mb200_sphenix_s1.in";
+  }
+  else if (jettrigger == "PhotonJet5")
   {
     herwig7_config_file = "Herwig_Photon5_direct.in";
   }
@@ -51,6 +55,11 @@ void Herwig7_Trigger_Setup(const std::string &jettrigger, const int index = 0)
 {
   if (! Input::HERWIG7)
   {
+    return;
+  }
+  if (jettrigger == "MB")
+  {
+    std::cout << "Herwig7 Trigger Setup: Using MB - no cuts" << std::endl;
     return;
   }
   PHHerwig7ParticleTrigger *photonTrigger = new PHHerwig7ParticleTrigger(jettrigger);
