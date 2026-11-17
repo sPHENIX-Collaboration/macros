@@ -237,6 +237,7 @@ void reconstruct_pipi_mass()
   kfparticle->getDetectorInfo(get_detector_info);
   kfparticle->get_dEdx_info(get_dEdx_info);
   kfparticle->saveDST(save_tracks_to_DST);
+  if (getQA) kfparticle->saveDST();
   kfparticle->setContainerName(pipi_reconstruction_name);
   kfparticle->saveParticleContainer(true);
   kfparticle->magFieldFile("FIELDMAP_TRACKING");
@@ -314,6 +315,7 @@ void reconstruct_KK_mass()
   kfparticle->getDetectorInfo(get_detector_info);
   kfparticle->get_dEdx_info(get_dEdx_info);
   kfparticle->saveDST(save_tracks_to_DST);
+  if (getQA) kfparticle->saveDST();
   kfparticle->setContainerName(KK_reconstruction_name);
   kfparticle->saveParticleContainer(true);
   kfparticle->magFieldFile("FIELDMAP_TRACKING");
@@ -384,6 +386,7 @@ void reconstruct_ppi_mass()
   kfparticle->getDetectorInfo(get_detector_info);
   kfparticle->get_dEdx_info(get_dEdx_info);
   kfparticle->saveDST(save_tracks_to_DST);
+  if (getQA) kfparticle->saveDST();
   kfparticle->setContainerName(ppi_reconstruction_name);
   kfparticle->saveParticleContainer(true);
   kfparticle->magFieldFile("FIELDMAP_TRACKING");
@@ -428,7 +431,6 @@ void reconstruct_ppi_mass()
   kfparticle->setOutputName(ppi_output_reco_file);
 
   se->registerSubsystem(kfparticle);
-
   
   if (getQA)
   {
@@ -463,6 +465,7 @@ void reconstruct_Kpi_mass()
   kfparticle->getDetectorInfo(get_detector_info);
   kfparticle->get_dEdx_info(get_dEdx_info);
   kfparticle->saveDST(save_tracks_to_DST);
+  if (getQA) kfparticle->saveDST();
   kfparticle->setContainerName(Kpi_reconstruction_name);
   kfparticle->saveParticleContainer(true);
   kfparticle->magFieldFile("FIELDMAP_TRACKING");
@@ -543,6 +546,7 @@ void reconstruct_Kpipi_mass()
   kfparticle->getDetectorInfo(get_detector_info);
   kfparticle->get_dEdx_info(get_dEdx_info);
   kfparticle->saveDST(save_tracks_to_DST);
+  if (getQA) kfparticle->saveDST();
   kfparticle->setContainerName(Kpipi_reconstruction_name);
   kfparticle->saveParticleContainer(true);
   kfparticle->magFieldFile("FIELDMAP_TRACKING");
