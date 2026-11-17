@@ -17,7 +17,6 @@
 #include <G4_ParticleFlow.C>
 #include <G4_Production.C>
 #include <G4_TopoClusterReco.C>
-#include <KFParticle_selections.h>
 
 #include <Trkr_RecoInit.C>
 #include <Trkr_Clustering.C>
@@ -722,8 +721,6 @@ int Fun4All_G4_sPHENIX(
     std::cout << "it will run forever, so I just return without running anything" << std::endl;
     return 0;
   }
-
-  reconstruct_pipi_mass();
 
   se->skip(skip);
   se->run(nEvents);
