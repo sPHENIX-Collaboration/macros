@@ -54,6 +54,8 @@
 #include <fun4all/Fun4AllRunNodeInputManager.h>
 #include <fun4all/Fun4AllUtils.h>
 
+#include <sphenixnpc/SphenixClient.h>
+
 #include <phool/PHRandomSeed.h>
 #include <phool/recoConsts.h>
 
@@ -73,6 +75,7 @@ R__LOAD_LIBRARY(libjetbase.so)
 R__LOAD_LIBRARY(libjetbackground.so)
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libPHJewel.so)
+R__LOAD_LIBRARY(libsphenixnpc.so)
 // R__LOAD_LIBRARY(libg4dst.so)
 //  For HepMC Hijing
 //  try inputFile = /sphenix/sim/sim01/sphnxpro/sHijing_HepMC/sHijing_0-12fm.dat
@@ -84,6 +87,7 @@ R__LOAD_LIBRARY(libPHJewel.so)
 
 void AddCommonNodes(Fun4AllOutputManager *out);
 std::string MakeJewelCard(const std::string &card, int centrality_max);
+std::string DataCalibUrl(const std::string &domain, int runnumber, const std::string &tag = "newcdbtag");
 
 int Fun4All_G4_Embed_data(
     const int nEvents = 2,
@@ -579,54 +583,59 @@ int Fun4All_G4_Embed_data(
   truthjets8->set_input_node("TRUTH");
   truthjets8->Verbosity(verbosity);
   se->registerSubsystem(truthjets8);
-// looking at this - this statement is based on a misconception how the cdb works not a bug
-   std::string test = CDBInterface::instance()->getUrl("CEMC_meanTime");// calling this line somehow prevents CDB bug when switching global tag 
-   std::cout << "line to avoid CDB bug " << test << std::endl;
+  // data ADC to energy calibrations for the sim energy to ADC conversion: the embedded
+  // towers are calibrated with these, so the sim has to be converted with them too
+  std::string cemc_datacalib = DataCalibUrl("CEMC_calib_ADC_to_ETower", dataRunNumber);
+  std::string ohcal_datacalib = DataCalibUrl("HCALOUT_calib_ADC_to_ETower", dataRunNumber);
+  std::string ihcal_datacalib = DataCalibUrl("HCALIN_calib_ADC_to_ETower", dataRunNumber);
 
-  std::string save_globaltag = rc->get_StringFlag("CDB_GLOBALTAG");
-  int save_timestamp    = rc->get_uint64Flag("TIMESTAMP");
+  // and the data tower mean times, so the sim pulses sit where the data run's pulses are
+  // (the MC tag has those of a 2024 run, ~0.3 samples later in the EMCal than 2025)
+  std::string cemc_datatime = DataCalibUrl("CEMC_meanTime", dataRunNumber);
+  std::string ohcal_datatime = DataCalibUrl("HCALOUT_meanTime", dataRunNumber);
+  std::string ihcal_datatime = DataCalibUrl("HCALIN_meanTime", dataRunNumber);
 
-  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
-  rc->set_uint64Flag("TIMESTAMP", dataRunNumber);
-
-  std::string cemc_datacalib = CDBInterface::instance()->getUrl("CEMC_calib_ADC_to_ETower");
-  std::string ohcal_datacalib = CDBInterface::instance()->getUrl("HCALOUT_calib_ADC_to_ETower");
-  std::string ihcal_datacalib = CDBInterface::instance()->getUrl("HCALIN_calib_ADC_to_ETower");
-
-  std::cout << "using data calibration" << std::endl << cemc_datacalib  << std::endl << ohcal_datacalib << std::endl << ihcal_datacalib  << std::endl;
-
-  rc->set_StringFlag("CDB_GLOBALTAG", save_globaltag);
-  rc->set_uint64Flag("TIMESTAMP", save_timestamp);
+  std::cout << "using data calibration" << std::endl << cemc_datacalib  << std::endl << ohcal_datacalib << std::endl << ihcal_datacalib  << std::endl
+            << cemc_datatime << std::endl << ohcal_datatime << std::endl << ihcal_datatime << std::endl;
  
   // waveform sim
   CaloWaveformSim *caloWaveformSim = new CaloWaveformSim();
   caloWaveformSim->set_detector_type(CaloTowerDefs::CEMC);
   caloWaveformSim->set_detector("CEMC");
-  caloWaveformSim->set_timewidth(0.2);
+  caloWaveformSim->set_timewidth(0);
+  caloWaveformSim->set_shift_by_mbd_t0(true, DataTopNode);  // sim pulses follow the data event's collision time
   caloWaveformSim->set_peakpos(6);
+  caloWaveformSim->set_sampletime(17.7623);  // ns per sample, 6 x the 9.383 MHz beam clock (as MbdEvent); default is 16.67
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
   caloWaveformSim->set_fixpedestal(0); // data waveform already carries the pedestal
   caloWaveformSim->set_directURL_calib(cemc_datacalib);
+  caloWaveformSim->set_directURL_timecalib(cemc_datatime);
   se->registerSubsystem(caloWaveformSim);
 
   caloWaveformSim = new CaloWaveformSim();
   caloWaveformSim->set_detector_type(CaloTowerDefs::HCALIN);
   caloWaveformSim->set_detector("HCALIN");
-  caloWaveformSim->set_timewidth(0.2);
+  caloWaveformSim->set_timewidth(0);
+  caloWaveformSim->set_shift_by_mbd_t0(true, DataTopNode);  // sim pulses follow the data event's collision time
   caloWaveformSim->set_peakpos(6);
+  caloWaveformSim->set_sampletime(17.7623);  // ns per sample, 6 x the 9.383 MHz beam clock (as MbdEvent); default is 16.67
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
   caloWaveformSim->set_fixpedestal(0); // data waveform already carries the pedestal
   caloWaveformSim->set_directURL_calib(ihcal_datacalib);
+  caloWaveformSim->set_directURL_timecalib(ihcal_datatime);
   se->registerSubsystem(caloWaveformSim);
 
   caloWaveformSim = new CaloWaveformSim();
   caloWaveformSim->set_detector_type(CaloTowerDefs::HCALOUT);
   caloWaveformSim->set_detector("HCALOUT");
-  caloWaveformSim->set_timewidth(0.2);
+  caloWaveformSim->set_timewidth(0);
+  caloWaveformSim->set_shift_by_mbd_t0(true, DataTopNode);  // sim pulses follow the data event's collision time
   caloWaveformSim->set_peakpos(6);
+  caloWaveformSim->set_sampletime(17.7623);  // ns per sample, 6 x the 9.383 MHz beam clock (as MbdEvent); default is 16.67
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
   caloWaveformSim->set_fixpedestal(0); // data waveform already carries the pedestal
   caloWaveformSim->set_directURL_calib(ohcal_datacalib);
+  caloWaveformSim->set_directURL_timecalib(ohcal_datatime);
   se->registerSubsystem(caloWaveformSim);
 
   se->Print("NODETREE");
@@ -634,6 +643,12 @@ int Fun4All_G4_Embed_data(
   //-----------------
   // Calorimeter embedding
   //-----------------
+
+  // software ZS thresholds (ADC) of the fit of the embedded waveforms, as macros/common/Calo_Fitting.C
+  // (caloTowerEmbed builds the HW ZS towers for these, its defaults; set_softwarezerosuppression to change)
+  const float szs_cemc = 60;
+  const float szs_ihcal = 30;
+  const float szs_ohcal = 15;
 
   caloTowerEmbed *embedder_CEMC = new caloTowerEmbed("embedder_CEMC");
   embedder_CEMC->set_detector_type(CaloTowerDefs::CEMC);
@@ -666,8 +681,7 @@ int Fun4All_G4_Embed_data(
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
-  // match our current ZS threshold ~60ADC for emcal
-  ca2->set_softwarezerosuppression(true, 60);
+  ca2->set_softwarezerosuppression(true, szs_cemc);
   se->registerSubsystem(ca2);
 
   ca2 = new CaloTowerBuilder();
@@ -675,7 +689,7 @@ int Fun4All_G4_Embed_data(
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
-  ca2->set_softwarezerosuppression(true, 30);
+  ca2->set_softwarezerosuppression(true, szs_ihcal);
   se->registerSubsystem(ca2);
 
   ca2 = new CaloTowerBuilder();
@@ -683,7 +697,7 @@ int Fun4All_G4_Embed_data(
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
-  ca2->set_softwarezerosuppression(true, 30);
+  ca2->set_softwarezerosuppression(true, szs_ohcal);
   se->registerSubsystem(ca2);
 
 
@@ -720,14 +734,14 @@ int Fun4All_G4_Embed_data(
     // get seed
     unsigned int seed = PHRandomSeed();
     randGen.SetSeed(seed);
-    // a int from 0 to 3259
-    int sequence = randGen.Integer(3260);
-    // pad the name
-    std::ostringstream opedname;
-    opedname << "pedestal-54256-0" << std::setw(4) << std::setfill('0') << sequence << ".root";
+    // 2025 pedestal run 71666: 1000 files of 1000 events, pedestal-00071666-00000 to -00999
+    int sequence = randGen.Integer(1000);
+    std::string pedestalname = std::format("/sphenix/tg/tg01/commissioning/CaloCalibWG/bseidlitz/pedestal_71666_v2/pedestal-00071666-{:05}.root", sequence);
+    std::cout << "pedestal file " << pedestalname << std::endl;
 
-    std::string pedestalname = opedname.str();
-
+    // the pedestal DST carries its own run (71666): allow it next to the data run,
+    // CopyIODataNodes puts the data run number back in the RunHeader
+    se->getSyncManager()->MixRunsOk(true);
     Fun4AllInputManager *hitsin = new Fun4AllNoSyncDstInputManager("DST2");
     hitsin->AddFile(pedestalname);
     hitsin->Repeat();
@@ -757,6 +771,10 @@ int Fun4All_G4_Embed_data(
   AddCommonNodes(out);
   out->AddNode("G4TruthInfo");
   out->AddNode("G4HIT_BH_1");
+  // calorimeter hits, so Fun4All_Embed_fromHits.C can redo the embedding without Geant4
+  out->AddNode("G4HIT_CEMC");
+  out->AddNode("G4HIT_HCALIN");
+  out->AddNode("G4HIT_HCALOUT");
   out->AddNode("PHHepMCGenEventMap");
   out->Verbosity(0);
   se->registerOutputManager(out);
@@ -855,6 +873,27 @@ void AddCommonNodes(Fun4AllOutputManager *out)
   out->AddNode("Sync");
   out->AddNode("EventHeader");
   return;
+}
+
+// URL of a data calibration, falling back to <domain>_default as CDBInterface does.
+// CDBInterface can't be used for this: its CDB client keeps the global tag of its
+// first lookup (the MC tag here), so switching CDB_GLOBALTAG to the data tag gets the
+// MC tag at the data run number, i.e. the MC default calibrations.  These lookups go
+// to a separate client and are not recorded in the RUN/CdbUrl node.
+std::string DataCalibUrl(const std::string &domain, int runnumber, const std::string &tag)
+{
+  static SphenixClient datacdb(tag);
+  std::string url = datacdb.getCalibration(domain, runnumber);
+  if (url.empty())
+  {
+    url = datacdb.getCalibration(domain + "_default", runnumber);
+  }
+  if (url.empty())
+  {
+    std::cout << "DataCalibUrl: no " << domain << " in " << tag << " for run " << runnumber << std::endl;
+    gSystem->Exit(1);
+  }
+  return url;
 }
 
 // JEWEL card for the overlay, made from a card in $JEWEL_CARDDIR (default
