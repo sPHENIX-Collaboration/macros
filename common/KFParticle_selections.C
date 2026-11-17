@@ -50,7 +50,7 @@ namespace KFPARTICLE
   float L0_mass[2] = {1.08, 1.15};
   float Xi_mass[2] = {1.30, 1.35}; //Check mass ranges
   float Xi_L0_intermediate_mass[2] = {1.1057, 1.1257}; //Lambda inside Xi-
-  float phi_mass[2] = {0.98, 1.1};
+  float phi_mass[2] = {0.99, 1.04};
   float D0_mass[2] = {1.7, 2.0};
   float Dp_mass[2] = {1.7, 2.0};
   float Ds_mass[2] = {1.7, 2.2};
