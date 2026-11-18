@@ -58,6 +58,7 @@
 #include <TFile.h>
 #include <TInterpreter.h>
 #include <TRandom3.h>
+#include <TSystem.h>
 #include <TTree.h>
 
 #include <format>
@@ -130,7 +131,7 @@ bool HasRunNode(const std::string &fname, const std::string &node)
 void CallNewSetter(const std::string &cls, void *obj, const std::string &call)
 {
   TInterpreter::EErrorCode err = TInterpreter::kNoError;
-  gInterpreter->ProcessLine(Form("((%s *) %p)->%s;", cls.c_str(), obj, call.c_str()), &err);
+  gInterpreter->ProcessLine(std::format("(({} *) {})->{};", cls, obj, call).c_str(), &err);
   if (err != TInterpreter::kNoError)
   {
     std::cout << cls << "::" << call << " needs the coresoftware wf_sim build" << std::endl;
