@@ -11,6 +11,7 @@
 #include <QA.C>
 
 #include <cfloat>
+#include <fstream>
 
 #pragma GCC diagnostic push
 
@@ -225,7 +226,7 @@ namespace KFPARTICLE
     }
   }
   
-  void create_hf_directories(const std::string reconstruction_name, std::string &final_output_dir, std::string &output_reco_file)
+  void create_hf_directories(const std::string &reconstruction_name, std::string &final_output_dir, std::string &output_reco_file)
   {
     std::string output_file_name = kfp_header + reconstruction_name + trailer;
     final_output_dir = output_dir + reconstruction_name + "/";
@@ -967,18 +968,18 @@ namespace KFPARTICLE
     kfparticle->constrainIntermediateMasses(constrain_lambda_mass);
   
     std::vector<std::pair<float, float>> intermediate_mass_range;
-    intermediate_mass_range.emplace_back(std::make_pair(Xi_L0_intermediate_mass[0], Xi_L0_intermediate_mass[1]));
+    intermediate_mass_range.emplace_back(Xi_L0_intermediate_mass[0], Xi_L0_intermediate_mass[1]);
     kfparticle->setIntermediateMassRange(intermediate_mass_range);
   
     std::vector<float> intermediate_min_pt = {0.0};
     kfparticle->setIntermediateMinPT(intermediate_min_pt);
   
     std::vector<std::pair<float, float>> intermediate_PV_DCA_range;
-    intermediate_PV_DCA_range.emplace_back(std::make_pair(-1., FLT_MAX));
+    intermediate_PV_DCA_range.emplace_back(-1., FLT_MAX);
     kfparticle->setIntermediatePV_DCARange(intermediate_PV_DCA_range);
   
     std::vector<std::pair<float, float>> intermediate_PV_DCAchi2_range;
-    intermediate_PV_DCAchi2_range.emplace_back(std::make_pair(0., 400.));
+    intermediate_PV_DCAchi2_range.emplace_back(0., 400.);
     kfparticle->setIntermediatePV_DCA_StdDevRange(intermediate_PV_DCAchi2_range);
   
     kfparticle->setIntermediatePV_DCARange_XY(intermediate_PV_DCA_range);
