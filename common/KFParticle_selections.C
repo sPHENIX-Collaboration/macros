@@ -108,7 +108,7 @@ namespace KFPARTICLE
 
   bool doRescale = false;
   bool do_truth_matching = false; //Simulation only: match reconstructed candidates to the truth record
-  std::string track_map_name = ""; //Track map the reconstruction reads, empty = KFParticle default. Ignored if doRescale is set
+  std::string track_map_name; //Track map the reconstruction reads, empty = KFParticle default. Ignored if doRescale is set
   std::string momReweightTrackMap = "SvtxTrackMapMomentumScaleCorrected";
   bool save_kfpntuple = true;
   bool save_kfpntuple_to_qa = false;
@@ -119,7 +119,7 @@ namespace KFPARTICLE
   bool save_all_vtx_info = false;
   bool use_2D_matching = false;
   bool get_trigger_info = false;
-  bool get_detector_info = true;
+  bool get_detector_info = false;
   bool get_dEdx_info = true;
   bool get_calo_info = false;
   float pid_frac = 0.4;
@@ -225,7 +225,7 @@ namespace KFPARTICLE
     }
   }
   
-  void create_hf_directories(std::string reconstruction_name, std::string &final_output_dir, std::string &output_reco_file)
+  void create_hf_directories(const std::string reconstruction_name, std::string &final_output_dir, std::string &output_reco_file)
   {
     std::string output_file_name = kfp_header + reconstruction_name + trailer;
     final_output_dir = output_dir + reconstruction_name + "/";
@@ -270,8 +270,8 @@ namespace KFPARTICLE
     kfparticle->setContainerName(pipi_reconstruction_name);
     kfparticle->saveParticleContainer(true);
     kfparticle->magFieldFile("FIELDMAP_TRACKING");
-    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap.c_str());
-    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name.c_str());
+    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap);
+    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name);
     if (do_truth_matching) kfparticle->doTruthMatching(true);
     kfparticle->useOrderedProngCombinations(use_ordered_prong_combinations);
   
@@ -351,8 +351,8 @@ namespace KFPARTICLE
     kfparticle->setContainerName(KK_reconstruction_name);
     kfparticle->saveParticleContainer(true);
     kfparticle->magFieldFile("FIELDMAP_TRACKING");
-    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap.c_str());
-    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name.c_str());
+    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap);
+    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name);
     if (do_truth_matching) kfparticle->doTruthMatching(true);
     kfparticle->useOrderedProngCombinations(use_ordered_prong_combinations);
   
@@ -425,8 +425,8 @@ namespace KFPARTICLE
     kfparticle->setContainerName(ppi_reconstruction_name);
     kfparticle->saveParticleContainer(true);
     kfparticle->magFieldFile("FIELDMAP_TRACKING");
-    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap.c_str());
-    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name.c_str());
+    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap);
+    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name);
     if (do_truth_matching) kfparticle->doTruthMatching(true);
     kfparticle->useOrderedProngCombinations(use_ordered_prong_combinations);
   
@@ -506,8 +506,8 @@ namespace KFPARTICLE
     kfparticle->setContainerName(Kpi_reconstruction_name);
     kfparticle->saveParticleContainer(true);
     kfparticle->magFieldFile("FIELDMAP_TRACKING");
-    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap.c_str());
-    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name.c_str());
+    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap);
+    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name);
     if (do_truth_matching) kfparticle->doTruthMatching(true);
     kfparticle->useOrderedProngCombinations(use_ordered_prong_combinations);
   
@@ -589,8 +589,8 @@ namespace KFPARTICLE
     kfparticle->setContainerName(Kpipi_reconstruction_name);
     kfparticle->saveParticleContainer(true);
     kfparticle->magFieldFile("FIELDMAP_TRACKING");
-    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap.c_str());
-    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name.c_str());
+    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap);
+    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name);
     if (do_truth_matching) kfparticle->doTruthMatching(true);
     kfparticle->useOrderedProngCombinations(use_ordered_prong_combinations);
   
@@ -671,8 +671,8 @@ namespace KFPARTICLE
     kfparticle->setContainerName(KKpi_reconstruction_name);
     kfparticle->saveParticleContainer(true);
     kfparticle->magFieldFile("FIELDMAP_TRACKING");
-    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap.c_str());
-    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name.c_str());
+    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap);
+    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name);
     if (do_truth_matching) kfparticle->doTruthMatching(true);
     kfparticle->useOrderedProngCombinations(use_ordered_prong_combinations);
   
@@ -718,14 +718,14 @@ namespace KFPARTICLE
     {
       kfparticle->constrainIntermediateMasses(constrain_phi_mass);
       kfparticle->setIntermediateMassRange({{KKpi_phi_intermediate_mass[0], KKpi_phi_intermediate_mass[1]}});
-      kfparticle->setIntermediateMinPT({0.f});
-      kfparticle->setIntermediatePV_DCARange({{-1.f, FLT_MAX}});
-      kfparticle->setIntermediatePV_DCARange_XY({{-1.f, FLT_MAX}});
-      kfparticle->setIntermediatePV_DCA_StdDevRange({{-1e5f, 1e5f}});
-      kfparticle->setIntermediatePV_DCA_StdDevRange_XY({{-1e5f, 1e5f}});
-      kfparticle->setIntermediateMinDIRA({-1.1f});
-      kfparticle->setIntermediateMinFDchi2({-1.f});
-      kfparticle->setIntermediateMaxVertexVolume({0.1f});
+      kfparticle->setIntermediateMinPT({0.});
+      kfparticle->setIntermediatePV_DCARange({{-1., FLT_MAX}});
+      kfparticle->setIntermediatePV_DCARange_XY({{-1., FLT_MAX}});
+      kfparticle->setIntermediatePV_DCA_StdDevRange({{-1e5, 1e5}});
+      kfparticle->setIntermediatePV_DCA_StdDevRange_XY({{-1e5, 1e5}});
+      kfparticle->setIntermediateMinDIRA({-1.1});
+      kfparticle->setIntermediateMinFDchi2({-1.});
+      kfparticle->setIntermediateMaxVertexVolume({0.1});
     }
   
     kfparticle->setOutputName(KKpi_output_reco_file);
@@ -761,8 +761,8 @@ namespace KFPARTICLE
     kfparticle->setContainerName(pKpi_reconstruction_name);
     kfparticle->saveParticleContainer(true);
     kfparticle->magFieldFile("FIELDMAP_TRACKING");
-    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap.c_str());
-    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name.c_str());
+    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap);
+    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name);
     if (do_truth_matching) kfparticle->doTruthMatching(true);
     kfparticle->useOrderedProngCombinations(use_ordered_prong_combinations);
   
@@ -835,8 +835,8 @@ namespace KFPARTICLE
     kfparticle->setContainerName(ee_reconstruction_name);
     kfparticle->saveParticleContainer(true);
     kfparticle->magFieldFile("FIELDMAP_TRACKING");
-    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap.c_str());
-    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name.c_str());
+    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap);
+    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name);
     if (do_truth_matching) kfparticle->doTruthMatching(true);
     kfparticle->useOrderedProngCombinations(use_ordered_prong_combinations);
   
@@ -922,8 +922,8 @@ namespace KFPARTICLE
     kfparticle->setContainerName(Lambdapi_reconstruction_name);
     kfparticle->saveParticleContainer(true);
     kfparticle->magFieldFile("FIELDMAP_TRACKING");
-    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap.c_str());
-    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name.c_str());
+    if (doRescale) kfparticle->setTrackMapNodeName(momReweightTrackMap);
+    else if (!track_map_name.empty()) kfparticle->setTrackMapNodeName(track_map_name);
     if (do_truth_matching) kfparticle->doTruthMatching(true);
     kfparticle->useOrderedProngCombinations(use_ordered_prong_combinations);
   
@@ -967,18 +967,18 @@ namespace KFPARTICLE
     kfparticle->constrainIntermediateMasses(constrain_lambda_mass);
   
     std::vector<std::pair<float, float>> intermediate_mass_range;
-    intermediate_mass_range.push_back(std::make_pair(Xi_L0_intermediate_mass[0], Xi_L0_intermediate_mass[1]));
+    intermediate_mass_range.emplace_back(std::make_pair(Xi_L0_intermediate_mass[0], Xi_L0_intermediate_mass[1]));
     kfparticle->setIntermediateMassRange(intermediate_mass_range);
   
     std::vector<float> intermediate_min_pt = {0.0};
     kfparticle->setIntermediateMinPT(intermediate_min_pt);
   
     std::vector<std::pair<float, float>> intermediate_PV_DCA_range;
-    intermediate_PV_DCA_range.push_back(std::make_pair(-1., FLT_MAX));
+    intermediate_PV_DCA_range.emplace_back(std::make_pair(-1., FLT_MAX));
     kfparticle->setIntermediatePV_DCARange(intermediate_PV_DCA_range);
   
     std::vector<std::pair<float, float>> intermediate_PV_DCAchi2_range;
-    intermediate_PV_DCAchi2_range.push_back(std::make_pair(0., 400.));
+    intermediate_PV_DCAchi2_range.emplace_back(std::make_pair(0., 400.));
     kfparticle->setIntermediatePV_DCA_StdDevRange(intermediate_PV_DCAchi2_range);
   
     kfparticle->setIntermediatePV_DCARange_XY(intermediate_PV_DCA_range);
@@ -1003,16 +1003,16 @@ namespace KFPARTICLE
     se->registerSubsystem(kfparticle);
   }
   
-  void end_kfparticle(std::string full_file_name, std::string final_path)
+  void end_kfparticle(const std::string &full_file_name, const std::string &final_path)
   {
-    ifstream file(full_file_name.c_str());
+    std::ifstream file(full_file_name.c_str());
     if (file.good())
     {
-      string moveOutput = "mv " + full_file_name + " " + final_path;
+      std::string moveOutput = "mv " + full_file_name + " " + final_path;
       system(moveOutput.c_str());
     }
   }
   
-  };
+  }  // namespace KFPARTICLE
 
 #endif
