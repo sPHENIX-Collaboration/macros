@@ -1,6 +1,8 @@
 #ifndef MACRO_G4KFPARTICLE_C
 #define MACRO_G4KFPARTICLE_C
 
+#pragma message("G4_KFParticle.C is deprecated and will be removed. Remove the include, or use KFParticle_selections.C for KFParticle reconstruction.")
+
 #include <GlobalVariables.C>
 
 #ifndef HomogeneousField  // for the clang-tidy check happiness
