@@ -5,6 +5,30 @@
 
 #include <iostream>
 
+namespace MBDRUNS {
+  enum type {
+    RUN24AUAU = 0,
+    RUN24PP,
+    RUN25AUAU,
+    RUN25PP,
+    RUN25OO,
+    SIMAUAU200,
+    SIMPP200,
+    RUNERROR
+  };
+}
+
+namespace MBDRUNTYPE {
+  enum type {
+    AUAU200 = 0,
+    PP200,
+    OO200,
+    SIMAUAU200,
+    SIMPP200,
+    TYPEERROR
+  };
+}
+
 TString get_runstr(const char *fname)
 {
   TString name = fname;
@@ -48,13 +72,75 @@ int get_runnumber(const char *fname)
   return str.Atoi();
 }
 
-namespace MBDRUNS {
-  enum type {
-    AUAU200 = 0,
-    PP200,
-    SIMAUAU200,
-    SIMPP200
-  };
+// which run (eg, run24pp, run24auau, etc)
+int get_run(const int runno)
+{
+  if ( runno <= 30000 )
+  {
+    // may need to update with way to determine if pp or auau
+    return MBDRUNS::SIMAUAU200;
+  }
+  else if ( runno <= 53880 )
+  {
+    return MBDRUNS::RUN24PP;
+  }
+  else if ( runno <= 54962 )
+  {
+    return MBDRUNS::RUN24AUAU;
+  }
+  else if ( runno <= 78954 )
+  {
+    return MBDRUNS::RUN25AUAU;
+  }
+  else if ( runno <= 81667 )
+  {
+    return MBDRUNS::RUN25PP;
+  }
+  else if ( runno <= 82703 )
+  {
+    return MBDRUNS::RUN25OO;
+  }
+  else
+  {
+    return MBDRUNS::RUNERROR;
+  }
+
+  return -1;
+}
+
+int get_runtype(const int runno)
+{
+  if ( runno <= 30000 )
+  {
+    // may need to update with way to determine if pp or auau
+    return MBDRUNTYPE::SIMAUAU200;
+  }
+  else if ( runno <= 53880 )
+  {
+    return MBDRUNTYPE::PP200;
+  }
+  else if ( runno <= 54962 )
+  {
+    return MBDRUNTYPE::AUAU200;
+  }
+  else if ( runno <= 78954 )
+  {
+    return MBDRUNTYPE::AUAU200;
+  }
+  else if ( runno <= 81667 )
+  {
+    return MBDRUNTYPE::PP200;
+  }
+  else if ( runno <= 82703 )
+  {
+    return MBDRUNTYPE::OO200;
+  }
+  else
+  {
+    return MBDRUNTYPE::TYPEERROR;
+  }
+
+  return -1;
 }
 
 #endif  // __get_runstr__

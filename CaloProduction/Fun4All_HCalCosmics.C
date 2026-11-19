@@ -1,5 +1,9 @@
-#ifndef FUN4ALL_YEAR1_C
-#define FUN4ALL_YEAR1_C
+#ifndef FUN4ALL_HCALCOSMICS_C
+#define FUN4ALL_HCALCOSMICS_C
+
+#include <calovalid/CaloValid.h>
+
+#include <litecaloeval/HCalCosmics.h>
 
 #include <caloreco/CaloTowerBuilder.h>
 #include <caloreco/CaloTowerCalib.h>
@@ -23,9 +27,8 @@
 
 #include <phool/recoConsts.h>
 
-#include <calovalid/CaloValid.h>
-
-#include <litecaloeval/HCalCosmics.h>
+#include <Rtypes.h> // for R__LOAD_LIBRARY
+#include <TSystem.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
@@ -39,7 +42,7 @@ void Fun4All_HCalCosmics(int nEvents = 100,
                    const std::string &outfile = "DST_CALOFITTING-00000000-000000.root",
                    const std::string& outfile_hist1= "HIST_HCALOUT-00000000-000000.root",
                    const std::string& outfile_hist2= "HIST_HCALIN-00000000-000000.root",                   
-                   const std::string &dbtag = "ProdA_2024")
+                   const std::string &dbtag = "newcdbtag")
 {
   bool useDSTRAW = true;
   // v1 uncomment:
@@ -54,7 +57,7 @@ void Fun4All_HCalCosmics(int nEvents = 100,
 
   recoConsts *rc = recoConsts::instance();
 
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
   int runnumber = runseg.first;
 
   // conditions DB flags and timestamp
@@ -71,8 +74,6 @@ void Fun4All_HCalCosmics(int nEvents = 100,
   ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbIHCal->set_builder_type(buildertype);
-  ctbIHCal->set_nsamples(12);
-  if (useDSTRAW) ctbIHCal->set_offlineflag();
   ctbIHCal->set_softwarezerosuppression(true, 200);
   se->registerSubsystem(ctbIHCal);
 
@@ -80,19 +81,15 @@ void Fun4All_HCalCosmics(int nEvents = 100,
   ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
   ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbOHCal->set_builder_type(buildertype);
-  ctbOHCal->set_nsamples(12);
-  if (useDSTRAW) ctbOHCal->set_offlineflag();
   ctbOHCal->set_softwarezerosuppression(true, 200);
   se->registerSubsystem(ctbOHCal);
 
   CaloTowerStatus *statusHCalIn = new CaloTowerStatus("HCALINSTATUS");
   statusHCalIn->set_detector_type(CaloTowerDefs::HCALIN);
-  statusHCalIn->set_time_cut(10);
   se->registerSubsystem(statusHCalIn);
 
   CaloTowerStatus *statusHCALOUT = new CaloTowerStatus("HCALOUTSTATUS");
   statusHCALOUT->set_detector_type(CaloTowerDefs::HCALOUT);
-  statusHCALOUT->set_time_cut(10);
   se->registerSubsystem(statusHCALOUT);
 
   ////////////////////
@@ -149,11 +146,7 @@ void Fun4All_HCalCosmics(int nEvents = 100,
   se->registerInputManager(In);
 
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", outfile);
-  out->StripNode("CEMCPackets");
-  out->StripNode("HCALPackets");
-  out->StripNode("ZDCPackets");
-  out->StripNode("SEPDPackets");
-  out->StripNode("MBDPackets");
+  out->StripCompositeNode("Packets");
   se->registerOutputManager(out);
 
   se->run(nEvents);

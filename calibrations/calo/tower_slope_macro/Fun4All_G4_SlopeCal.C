@@ -9,12 +9,15 @@
 
 #include <litecaloeval/LiteCaloEval.h>
 
+#include <Rtypes.h>
+#include <TSystem.h>
+
 R__LOAD_LIBRARY(libfun4all.so)
 
 void Fun4All_G4_SlopeCal(
     const int nEvents = 1,
-    const string &inputClustersFileList = "dst_calo_cluster.list",
-    const string &outputFile = "test1")
+    const std::string &inputClustersFileList = "dst_calo_cluster.list",
+    const std::string &outputFile = "test1")
 {
   // this convenience library knows all our i/o objects so you don't
   // have to figure out what is in each dst type
@@ -28,9 +31,9 @@ void Fun4All_G4_SlopeCal(
   in->AddListFile(inputClustersFileList);
   se->registerInputManager(in);
 
-  string outputfile = outputFile + "_g4cemc_eval.root";
-  string outputfile2 = outputFile + "_g4hcalin_eval.root";
-  string outputfile3 = outputFile + "_g4hcalout_eval.root";
+  std::string outputfile = outputFile + "_g4cemc_eval.root";
+  std::string outputfile2 = outputFile + "_g4hcalin_eval.root";
+  std::string outputfile3 = outputFile + "_g4hcalout_eval.root";
 
   LiteCaloEval *eval = new LiteCaloEval("CEMCEVALUATOR", "CEMC", outputfile);
   //  eval->Verbosity(verbosity);

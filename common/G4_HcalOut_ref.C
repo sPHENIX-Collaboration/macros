@@ -380,20 +380,25 @@ void HCALOuter_Towers()
   // where I use waveformsim
   else
   {
-    CaloWaveformSim *caloWaveformSim = new CaloWaveformSim();
+    CaloWaveformSim *caloWaveformSim = new CaloWaveformSim("HCALOUTCaloWaveformSim");
     caloWaveformSim->set_detector_type(CaloTowerDefs::HCALOUT);
     caloWaveformSim->set_detector("HCALOUT");
-    caloWaveformSim->set_nsamples(12);
-    caloWaveformSim->set_pedestalsamples(12);
+    // caloWaveformSim->set_nsamples(12);// default is 12 like in real data - if we ever want a different number of samples
     caloWaveformSim->set_timewidth(0.2);
     caloWaveformSim->set_peakpos(6);
+    
+    if (Input::BEAM_CONFIGURATION == Input::OO_COLLISION)
+    {
+      caloWaveformSim->set_pedestal_scale(0.92);
+    }
+
     // caloWaveformSim->Verbosity(2);
     // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+    caloWaveformSim->set_calibName("HCALOUT_calib_ADC_to_ETower");
     se->registerSubsystem(caloWaveformSim);
 
-    CaloTowerBuilder *ca2 = new CaloTowerBuilder();
+    CaloTowerBuilder *ca2 = new CaloTowerBuilder("HCALOUTCaloTowerBuilder");
     ca2->set_detector_type(CaloTowerDefs::HCALOUT);
-    ca2->set_nsamples(12);
     ca2->set_dataflag(false);
     ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
     ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
@@ -402,7 +407,6 @@ void HCALOuter_Towers()
 
     CaloTowerStatus *statusHCALOUT = new CaloTowerStatus("HCALOUTSTATUS");
     statusHCALOUT->set_detector_type(CaloTowerDefs::HCALOUT);
-    statusHCALOUT->set_time_cut(2);
     se->registerSubsystem(statusHCALOUT);
 
     CaloTowerCalib *calibOHCal = new CaloTowerCalib("HCALOUTCALIB");

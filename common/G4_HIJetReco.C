@@ -68,8 +68,6 @@ void HIJetReco()
   if(G4HIJETS::do_flow == 3)
   {
       EventPlaneReco *epreco = new EventPlaneReco();
-      epreco->set_sepd_epreco(true);
-      epreco->set_isSim(true);
       se->registerSubsystem(epreco);
   }
 
@@ -95,7 +93,7 @@ void HIJetReco()
   dtb->SetFlow(G4HIJETS::do_flow);
   dtb->SetSeedType(0);
   dtb->SetSeedJetD(3);
-  dtb->set_towerinfo(true);
+  // dtb->set_towerinfo(true);
   dtb->Verbosity(verbosity); 
   se->registerSubsystem(dtb);
 
@@ -113,7 +111,7 @@ void HIJetReco()
   dtb2->SetSeedType(1);
   dtb2->SetSeedJetPt(7);
   dtb2->Verbosity(verbosity); 
-  dtb2->set_towerinfo(true);
+  // dtb2->set_towerinfo(true);
   se->registerSubsystem(dtb2);
   
 

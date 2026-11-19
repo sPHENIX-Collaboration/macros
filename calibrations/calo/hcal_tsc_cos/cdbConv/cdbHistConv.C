@@ -1,12 +1,16 @@
 #include <cdbobjects/CDBTTree.h> 
-#include "TowerInfoDefs.h"
+#include <calobase/TowerInfoDefs.h>
+
+#include <Rtypes.h> // for R__LOAD_LIBRARY macro
+#include <TH2.h>
 
 R__LOAD_LIBRARY(libcdbobjects)
 R__LOAD_LIBRARY(libcalo_io.so)
 
-void histToCaloCDBTree(string outputfile, string fieldName, int icalo, TH2F* hist){
+void histToCaloCDBTree(const std::string &outputfile, const std::string &fieldName, int icalo, TH2* hist){
 
-  int neta,nphi;
+  int neta;
+  int nphi;
 
   if (icalo != 0 && icalo != 1) return;
 
@@ -38,7 +42,7 @@ void histToCaloCDBTree(string outputfile, string fieldName, int icalo, TH2F* his
     }
   }
 
-  cout << "Writing " << outputfile.c_str() << "   with mean=" << mean/count << endl; 
+  std::cout << "Writing " << outputfile << "   with mean=" << mean/count << std::endl;
   cdbttree->Commit();
   cdbttree->WriteCDBTTree();
   //cdbttree->Print();
