@@ -5,7 +5,7 @@
 
 #include <mbd/MbdCalib.h>
 #include <mbd/MbdDefs.h>
-#include <mbd/MbdGeomV1.h>
+#include <mbd/MbdGeomV2.h>
 
 #include <TCanvas.h>
 #include <TF1.h>
@@ -27,11 +27,12 @@ const int MAXADC = 15999;
 
 int verbose = 0;
 
-TGraphErrors *g_slew[MbdDefs::MBD_N_PMT];
-TF1 *f_slewfit[MbdDefs::MBD_N_PMT];
+TGraphErrors *g_slew[MbdDefs::MBD_N_PMT];     // slew curve
+TGraphErrors *g_trms[MbdDefs::MBD_N_PMT];     // sgl ch time resol vs ADC
+//TF1 *f_slewfit[MbdDefs::MBD_N_PMT];
 
-// find the ridge of the TH2
-TGraphErrors *find_th2ridge(const TH2 *h2)
+// find the ridge of the TH2, return ridge and rms
+void find_th2ridge(const TH2 *h2, TGraphErrors*& gridge, TGraphErrors*& grms)
 {
   int nbinsx = h2->GetNbinsX();
   int nbinsy = h2->GetNbinsY();
@@ -42,12 +43,18 @@ TGraphErrors *find_th2ridge(const TH2 *h2)
 
   TString name;
   TString title;
-  name = "aaa";
-  title = "aaa";
-  // TH1D prof(name,title,nbinsx,min_xrange,max_xrange);
-  TGraphErrors *prof = new TGraphErrors();
-  prof->SetName(name);
-  prof->SetTitle(title);
+  name = "gridge";
+  title = "ridge";
+  // TH1D gridge(name,title,nbinsx,min_xrange,max_xrange);
+  gridge = new TGraphErrors();
+  gridge->SetName(name);
+  gridge->SetTitle(title);
+
+  name = "grms";
+  title = "rms of ridge";
+  grms = new TGraphErrors();
+  grms->SetName(name);
+  grms->SetTitle(title);
 
   TH1 *h_projx = h2->ProjectionX("projx");
   // std::unique_ptr<TH2D> h_projx( h2->ProjectionX("projx") );
@@ -96,11 +103,20 @@ TGraphErrors *find_th2ridge(const TH2 *h2)
 
       double mean = gaussian.GetParameter(1);
       double meanerr = gaussian.GetParError(1);
+      double rms = gaussian.GetParameter(2);
+      double rmserr = gaussian.GetParError(2);
       if (meanerr < 1.0)
       {
-        int n = prof->GetN();
-        prof->SetPoint(n, adcmean, mean);
-        prof->SetPointError(n, 0, meanerr);
+        int n = gridge->GetN();
+        gridge->SetPoint(n, adcmean, mean);
+        gridge->SetPointError(n, 0, meanerr);
+      }
+
+      if (rmserr < 0.01)
+      {
+        int n = grms->GetN();
+        grms->SetPoint(n, adcmean, rms);
+        grms->SetPointError(n, 0, rmserr);
       }
 
       gPad->Modified();
@@ -116,28 +132,30 @@ TGraphErrors *find_th2ridge(const TH2 *h2)
   }
 
   // interpolate last point out to ADC = 16000
-  int n = prof->GetN();
+  int n = gridge->GetN();
   double x1;
   double x2;
   double y1;
   double y2;
-  prof->GetPoint(n - 2, x1, y1);
-  prof->GetPoint(n - 1, x2, y2);
+  gridge->GetPoint(n - 2, x1, y1);
+  gridge->GetPoint(n - 1, x2, y2);
 
   delete h_projx;
 
-  prof->SetBit(TGraph::kIsSortedX);
-  return prof;
+  gridge->SetBit(TGraph::kIsSortedX);
+  grms->SetBit(TGraph::kIsSortedX);
+
 }
 
 //
 // pass: should be the same as cal_mbd pass number
 //
 // need to fix run number issue...
-void recal_mbd_slew(const char *tfname = "calmbdslew_pass1-54321.root", const int pass = 1, const int /*nevt*/ = 0)
+//void recal_mbd_slew(const char *tfname = "calmbdslew_pass1-54321.root", const int pass = 1, const int /*nevt*/ = 0)
+void recal_mbd_slew(const char *tfname = "calmbdslew_pass1-54321.root", const int pass = 1)
 {
   std::cout << "tfname " << tfname << std::endl;
-  MbdGeom *mbdgeom = new MbdGeomV1();
+  MbdGeom *mbdgeom = new MbdGeomV2();
 
   // Read in TFile with h_q
   TFile *oldfile = new TFile(tfname, "READ");
@@ -148,7 +166,8 @@ void recal_mbd_slew(const char *tfname = "calmbdslew_pass1-54321.root", const in
   TString title;
   for (int ipmt = 0; ipmt < MbdDefs::MBD_N_PMT; ipmt++)
   {
-    int feech = (ipmt / 8) * 16 + ipmt % 8;
+    //int feech = (ipmt / 8) * 16 + ipmt % 8;
+    int feech = mbdgeom->get_feech(ipmt,0);   // feech for time ch
     name = "h2_slew";
     name += ipmt;
     std::cout << name << "\t" << feech << std::endl;
@@ -206,13 +225,17 @@ void recal_mbd_slew(const char *tfname = "calmbdslew_pass1-54321.root", const in
 
     // h2_slew[ifeech]->RebinX(20);
     // h2_slew[ifeech]->RebinY(10);
-    name = "g_slew";
-    name += pmtch;
+    name = "g_slew"; name += pmtch;
     std::cout << name << std::endl;
-    g_slew[pmtch] = find_th2ridge(h2_slew[ifeech]);
+    find_th2ridge(h2_slew[ifeech],g_slew[pmtch],g_trms[pmtch]);
     g_slew[pmtch]->SetName(name);
     g_slew[pmtch]->SetMarkerStyle(20);
     g_slew[pmtch]->SetMarkerSize(0.25);
+
+    name = "g_trms"; name += pmtch;
+    g_trms[pmtch]->SetName(name);
+    g_trms[pmtch]->SetMarkerStyle(20);
+    g_trms[pmtch]->SetMarkerSize(0.25);
 
     ac[cvindex]->cd();
     h2_slew[ifeech]->Draw("colz");
@@ -252,8 +275,38 @@ void recal_mbd_slew(const char *tfname = "calmbdslew_pass1-54321.root", const in
     ac[cvindex]->Print(pdfname, name);
   }
   ac[cvindex]->Print(pdfname + "]");
-
   ++cvindex;
+
+  // trms curves
+  pdfname = name;
+  pdfname.ReplaceAll("slew", "trms");
+  ac[cvindex] = new TCanvas("cal_trms", "trms", 425 * 1.5, 550 * 1.5);
+  ac[cvindex]->Print(pdfname + "[");
+
+  for (int ipmtch = 0; ipmtch < MbdDefs::MBD_N_PMT; ipmtch++)
+  {
+    ac[cvindex]->cd();
+    g_trms[ipmtch]->Draw("cp");
+
+    gPad->Modified();
+    gPad->Update();
+
+    if (verbose > 10)
+    {
+      std::string junk;
+      std::cout << ipmtch << " ? ";
+      std::cin >> junk;
+    }
+
+    name = "trms";
+    name += ipmtch;
+    name += "_pass";
+    name += pass;
+    std::cout << name << std::endl;
+    ac[cvindex]->Print(pdfname, name);
+  }
+  ac[cvindex]->Print(pdfname + "]");
+  cvindex++;
 
   // Write out slew curves to temp calib file
   TString scorr_fname = dir;
@@ -285,10 +338,45 @@ void recal_mbd_slew(const char *tfname = "calmbdslew_pass1-54321.root", const in
   }
   scorr_file.close();
 
+  // Write out time rms to temp calib file
+  TString trms_fname = dir;
+  trms_fname += "/pass";
+  trms_fname += pass;
+  trms_fname += "_mbd_timerms.calib";
+  std::cout << trms_fname << std::endl;
+  std::ofstream trms_file(trms_fname);
+  for (int ifeech = 0; ifeech < MbdDefs::MBD_N_FEECH; ifeech++)
+  {
+    if (mbdgeom->get_type(ifeech) == 1)
+    {
+      continue;  // skip q-channels
+    }
+    int pmtch = mbdgeom->get_pmt(ifeech);
+
+    trms_file << ifeech << "\t" << NPOINTS << "\t" << MINADC << "\t" << MAXADC << std::endl;
+    int step = (MAXADC - MINADC) / (NPOINTS - 1);
+    // std::cout << "STEP " << step << std::endl;
+    for (int iadc = MINADC; iadc <= MAXADC; iadc += step)
+    {
+      float trms = g_trms[pmtch]->Eval(iadc);
+      trms_file << trms << " ";
+      if (iadc % 10 == 9)
+      {
+        trms_file << std::endl;
+      }
+    }
+  }
+  trms_file.close();
+
   if (pass > 0)
   {
     // write out the slew curves
     for (auto &ipmt : g_slew)
+    {
+      ipmt->Write();
+    }
+    // write out the trms curves
+    for (auto &ipmt : g_trms)
     {
       ipmt->Write();
     }

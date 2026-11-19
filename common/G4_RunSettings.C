@@ -18,10 +18,11 @@ void RunSettings(int runnumber, const std::string & /*type*/ = "")
   case 29:  // 1.5mRad xing angle, mvtx rotated
     Input::BEAM_CONFIGURATION = Input::pp_COLLISION;
     Enable::MVTX_APPLYMISALIGNMENT = true;
+    TRACKING::streaming_mode = true;
     break;
   case 23:  // AuAu 1mRad xing angle, mvtx rotated
   case 30:  // AuAu 1mRad xing angle, mvtx rotated
-    Input::BEAM_CONFIGURATION = Input::AA_COLLISION;
+    Input::BEAM_CONFIGURATION = Input::AuAu_COLLISION;
     Enable::MVTX_APPLYMISALIGNMENT = true;
     break;
   case 24:  // single particle sims
@@ -43,31 +44,61 @@ void RunSettings(int runnumber, const std::string & /*type*/ = "")
     std::cout << "use ppg02 settings" << std::endl;
     break;
   case 31:  // run 31 ppg08, AuAu 1mRad xing angle, mvtx rotated, flow flucuations enabled
-    Input::BEAM_CONFIGURATION = Input::AA_COLLISION;
+    Input::BEAM_CONFIGURATION = Input::AuAu_COLLISION;
     Enable::MVTX_APPLYMISALIGNMENT = true;
     INPUTHEPMC::FLOW_FLUCTUATIONS = true;
     INPUTHEPMC::FLOW_SCALING = 1.0;
     std::cout << "use ppg08 run31 settings" << std::endl;
     break;
   case 32:  // run 32 ppg08, AuAu 1mRad xing angle, mvtx rotated, flow fluctuations disabled, scale 2
-    Input::BEAM_CONFIGURATION = Input::AA_COLLISION;
+    Input::BEAM_CONFIGURATION = Input::AuAu_COLLISION;
     Enable::MVTX_APPLYMISALIGNMENT = true;
     INPUTHEPMC::FLOW_FLUCTUATIONS = false;
     INPUTHEPMC::FLOW_SCALING = 2.0;
     std::cout << "use ppg08 run32 settings" << std::endl;
     break;
   case 33:  // run 33 ppg08, AuAu 1mRad xing angle, mvtx rotated, flow afterburner disabled
-    Input::BEAM_CONFIGURATION = Input::AA_COLLISION;
+    Input::BEAM_CONFIGURATION = Input::AuAu_COLLISION;
     Enable::MVTX_APPLYMISALIGNMENT = true;
     INPUTHEPMC::FLOW_FLUCTUATIONS = false;
     INPUTHEPMC::FLOW = false;
     INPUTHEPMC::FLOW_SCALING = 0.0;
     std::cout << "use ppg08 run33 settings" << std::endl;
     break;
-  default:
-    std::cout << "runnnumber " << runnumber << " not implemented" << std::endl;
-    gSystem->Exit(1);
+  case 34:  // 0.5mRad xing angle, mvtx rotated
+    Input::BEAM_CONFIGURATION = Input::mRad_05;
+    Enable::MVTX_APPLYMISALIGNMENT = true;
     break;
+  case 35:  // OO: 0.75mRad xing angle, mvtx rotated, measured vertex mean and width
+    Input::BEAM_CONFIGURATION = Input::OO_COLLISION;
+    Enable::MVTX_APPLYMISALIGNMENT = true;
+    break;
+  case 36:  // run 36- ppg14, AuAu 1mRad xing angle, mvtx rotated, flow flucuations enabled, scale factor sqrt(1.3)
+    Input::BEAM_CONFIGURATION = Input::AuAu_COLLISION;
+    Enable::MVTX_APPLYMISALIGNMENT = true;
+    INPUTHEPMC::FLOW_FLUCTUATIONS = true;
+    INPUTHEPMC::FLOW_SCALING = 1.14;
+    std::cout << "use ppg14 run36 settings" << std::endl;
+    break;
+  case 37:  // 0.75mRad xing angle, mvtx rotated, OO vertex from intt for dNdEta
+    Input::BEAM_CONFIGURATION = Input::OOdNdEta;
+    Enable::MVTX_APPLYMISALIGNMENT = true;
+    break;
+  case 38:  // flat wide z-distribution for calo studies, 0 degxing angle
+    Input::BEAM_CONFIGURATION = Input::WIDE_VERTEX;
+    break;
+  default:
+    if (runnumber < 100)
+    {
+      std::cout << "runnnumber " << runnumber << " not implemented" << std::endl;
+      gSystem->Exit(1);
+    }
+    break;
+  }
+  // tests use runnumber >= 100, just that we can run them without having to change this macro
+  if (runnumber >= 100)
+  {
+    Input::BEAM_CONFIGURATION = Input::mRad_00;
   }
   return;
 }

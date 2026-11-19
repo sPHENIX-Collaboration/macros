@@ -15,7 +15,9 @@
 
 #include <phool/recoConsts.h>
 
-// cppcheck-suppress unknownMacro
+#include <Rtypes.h> // for R__LOAD_LIBRARY
+#include <TSystem.h>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libXingShiftCal.so)
@@ -27,7 +29,7 @@ R__LOAD_LIBRARY(libXingShiftCal.so)
   se->Verbosity(0);
 
   recoConsts *rc = recoConsts::instance();
-  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
+  std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(fname);
   int runnumber = runseg.first;
   if (runnumber != 0)
   {
@@ -47,9 +49,6 @@ R__LOAD_LIBRARY(libXingShiftCal.so)
   delete se;
   std::cout << "All done!" << std::endl;
   gSystem->Exit(0);
-
-
-
 
 }
 

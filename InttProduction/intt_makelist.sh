@@ -21,7 +21,7 @@ runnumber=$(printf "%08d" $2)
 
 for i in {0..7}
 do
-/bin/ls -1 /sphenix/lustre01/sphnxpro/commissioning/INTT/${type}/${type}_intt${i}-${runnumber}-* > intt${i}.list
+/bin/ls -1 /sphenix/lustre01/sphnxpro/physics/INTT/${type}/${type}_intt${i}-${runnumber}-* > intt${i}.list
 if [ ! -s intt${i}.list ]
 then
   echo intt${i}.list empty, removing it

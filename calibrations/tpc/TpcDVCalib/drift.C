@@ -289,7 +289,7 @@ double driftGET(const int runnumber)
   rc->set_IntFlag("RUNNUMBER", runnumber);
   //
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", 6);
   //
   // G4TPC::tpc_drift_velocity_reco = (8.0 / 1000) * 107.0 / 105.0;

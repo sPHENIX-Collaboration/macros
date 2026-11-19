@@ -13,6 +13,8 @@ int insertplrunrange(const std::string &fname, const std::string &ptype, int run
 int checkplrunrange(const std::string &fname, const std::string &ptype, int runnumber, int endrun);
 int insertplinfinity(const std::string &fname, const std::string &ptype, int runnumber);
 int checkplinfinity(const std::string &fname, const std::string &ptype, int runnumber);
+int checkrunrange(const std::string &fname, const std::string &ptype, int beginrun, int endrun);
+int deletepl(const std::string &fname, const std::string &ptype, int runnumber);
 
 int checkpl(const std::string &fname, const std::string &ptype, int runnumber)
 {
@@ -60,7 +62,10 @@ int checkplrunrange(const std::string &fname, const std::string &ptype, int runn
     switch (iret)
     {
     case 0:
-      //      std::cout << fname << " checks out" << std::endl;
+      while(checkrunrange(fname,ptype,runnumber,endrun) < 0)
+      {
+        insertplrunrange(fname, ptype, runnumber, endrun);
+      }
       break;
     case 1:
       std::cout << fname << " will be overwritten with new md5sum" << std::endl;
@@ -182,7 +187,55 @@ int md5check(const std::string &cdbfname, const std::string &fname)
       //      std::cout << "all good" << std::endl;
       return 0;
     }
+    std::cout << "expected " << iter->second << " cdb returned " << lfn << std::endl;
     return 1;
   }
   return -1;
+}
+
+int checkrunrange(const std::string &fname, const std::string &ptype, int beginrun, int endrun)
+{
+  int iret = 0;
+  for (int irun = beginrun; irun <= endrun; irun++)
+  {
+    if (irun % 1000 == 0)
+    {
+      std::cout << "checking " << irun << std::endl;
+    }
+    std::string cdbres = getCalibration(ptype,irun);
+    if (cdbres.empty())
+    {
+      std::cout << "no " << ptype << " calibration for run " << irun << std::endl;
+      iret = -1;
+      continue;
+    }
+    if (cdbres.find(fname) == std::string::npos)
+    {
+      std::cout << "calibration mismatch for " << ptype << " calibration, expected " << fname
+		<< ", read back " << cdbres << std::endl;
+      iret = -2;
+      break;
+    }
+    int md5ret = md5check(cdbres,fname);
+    if (md5ret != 0)
+    {
+      std::cout << "run " << irun << " md5sum check failed with ret " << md5ret << " for " << fname << std::endl;
+      std::cout << "cdb filename " << cdbres << ", expected " << fname << std::endl;
+      iret = -3;
+      break;
+    }
+  }
+  return iret;
+}
+
+int deletepl(const std::string &fname, const std::string &ptype, int runnumber)
+{
+  std::string cdbres = getCalibration(ptype, runnumber);
+  if (cdbres.empty() || cdbres.find(fname) == std::string::npos)
+  {
+    std::cout << ptype << " calibration not in cdb, not deleting it" << std::endl;
+    return 0;
+  }
+  deletePayloadIOV(ptype,runnumber,runnumber+1);
+  return 0;
 }

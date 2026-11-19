@@ -339,33 +339,44 @@ void CEMC_Towers()
   }
   else
   {
-    CaloWaveformSim *caloWaveformSim = new CaloWaveformSim();
+    CaloWaveformSim *caloWaveformSim = new CaloWaveformSim("CEMCCaloWaveformSim");
     caloWaveformSim->set_detector_type(CaloTowerDefs::CEMC);
     caloWaveformSim->set_detector("CEMC");
-    caloWaveformSim->set_nsamples(12);
-    caloWaveformSim->set_pedestalsamples(12);
+    //  caloWaveformSim->set_nsamples(12); // default is 12 like in real data - if we ever want a different number of samples
     caloWaveformSim->set_timewidth(0.2);
     caloWaveformSim->set_peakpos(6);
     caloWaveformSim->get_light_collection_model().load_data_file(
         std::string(getenv("CALIBRATIONROOT")) +
             std::string("/CEMC/LightCollection/Prototype3Module.xml"),
         "data_grid_light_guide_efficiency", "data_grid_fiber_trans");
-    // pedestal scale down for different beam configurations according to Blair
+    
     if (Input::BEAM_CONFIGURATION == Input::pp_ZEROANGLE)
     {
       caloWaveformSim->set_pedestal_scale(0.75);
     }
-    if (Input::BEAM_CONFIGURATION == Input::pp_COLLISION)
+    else if (Input::BEAM_CONFIGURATION == Input::pp_COLLISION)
     {
       caloWaveformSim->set_pedestal_scale(0.77);
     }
+    else if (Input::BEAM_CONFIGURATION == Input::OO_COLLISION)
+    {
+      caloWaveformSim->set_pedestal_scale(0.45);
+    }
+
     // caloWaveformSim->Verbosity(2);
     // caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
+
+    // calibration overrides:
+    // caloWaveformSim->set_calibName("CEMC_calib_ADC_to_ETower");
+    // caloWaveformSim->set_fieldname("CEMC_calib_ADC_to_ETower");
+    // caloWaveformSim->set_directURL_calib("CEMC_MC_calib_default.root");
+    // caloWaveformSim->set_MC_calibName("CEMC_MC_RECALIB");
+    // caloWaveformSim->set_MC_fieldname("CEMC_calib_ADC_to_ETower");
+    // caloWaveformSim->set_directURL_MCcalib("CEMC_MC_calib_default_v3.root");
     se->registerSubsystem(caloWaveformSim);
 
-    CaloTowerBuilder *ca2 = new CaloTowerBuilder();
+    CaloTowerBuilder *ca2 = new CaloTowerBuilder("CEMCCaloTowerBuilder");
     ca2->set_detector_type(CaloTowerDefs::CEMC);
-    ca2->set_nsamples(12);
     ca2->set_dataflag(false);
     ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
     ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
@@ -375,7 +386,6 @@ void CEMC_Towers()
 
     CaloTowerStatus *statusEMC = new CaloTowerStatus("CEMCSTATUS");
     statusEMC->set_detector_type(CaloTowerDefs::CEMC);
-    statusEMC->set_time_cut(1);
     se->registerSubsystem(statusEMC);
 
     CaloTowerCalib *calibEMC = new CaloTowerCalib("CEMCCALIB");

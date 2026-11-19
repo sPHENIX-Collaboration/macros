@@ -16,7 +16,7 @@
 #include <Trkr_Reco.C>
 #include <Trkr_RecoInit.C>
 #include <Trkr_TpcReadoutInit.C>
-
+#include <G4Setup_sPHENIX.C>
 
 #include <tpccalib/PHTpcResiduals.h>
 
@@ -57,7 +57,8 @@ void Fun4All_TrackSeeding(
     const std::string &dir = "/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana517_2024p024_v001/DST_TRKR_CLUSTER/run_00053800_00053900/dst/",
     const std::string &outfilename = "clusters_seeds",
     const bool convertSeeds = false,
-    const bool doKFParticle = false)
+    const bool doKFParticle = false,
+    const int nskip = 0)
 {
   //std::string inputseedRawHitFile = dir + seedfilename;
   std::string inputclusterRawHitFile = dir + clusterfilename;
@@ -70,12 +71,28 @@ void Fun4All_TrackSeeding(
 
   auto *rc = recoConsts::instance();
   rc->set_IntFlag("RUNNUMBER", runnumber);
+  rc->set_IntFlag("RUNSEGMENT", segment);
 
   Enable::CDB = true;
   rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
-  std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
+
+  bool rebuild_tracking_geometry = false;
+  if(rebuild_tracking_geometry)
+    {
+      // To make simulation geometry before running reconstruction
+      
+      Enable::MVTX = true;
+      Enable::INTT = true;
+      Enable::TPC = true;
+      Enable::MICROMEGAS = true;
+      
+      G4TPC::tpc_survey_position = true; // to use TPC survey position, set to true
+      G4Init();
+      G4Setup();
+    }
+  
   TpcReadoutInit(runnumber);
  // these lines show how to override the drift velocity and time offset values set in TpcReadoutInit
   // G4TPC::tpc_drift_velocity_reco = 0.0073844; // cm/ns
@@ -105,34 +122,32 @@ void Fun4All_TrackSeeding(
    * TPC clusters not participating to the ACTS track fit
    */
   G4TRACKING::SC_CALIBMODE = false;
-  TRACKING::pp_mode = true;
-  
+  TRACKING::streaming_mode = true;
+
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
-  
+
   std::string theOutfile = outfilename + "_" + std::to_string(runnumber) + "-" + std::to_string(segment) + ".root";
   auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
 
-
-  Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
-  ingeo->AddFile(geofile);
-  se->registerInputManager(ingeo);
-
+  if(!rebuild_tracking_geometry)
+    {
+      std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
+      Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
+      ingeo->AddFile(geofile);
+      se->registerInputManager(ingeo);
+    }
+  
   G4TPC::REJECT_LASER_EVENTS=true;
   G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS = true;
 
   // to turn on the default static corrections, enable the two lines below
   G4TPC::ENABLE_STATIC_CORRECTIONS = true;
-  G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
 
   //to turn on the average corrections, enable the three lines below
   //note: these are designed to be used only if static corrections are also applied
   G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-   // to use a custom file instead of the database file:
-  G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
-   
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();
 
@@ -146,10 +161,10 @@ void Fun4All_TrackSeeding(
   /*
    * Begin Track Seeding
    */
-  
+
   Tracking_Reco_TrackSeed_run2pp();
   Tracking_Reco_TrackMatching_run2pp();
-  
+
   /*
    * Either converts seeds to tracks with a straight line/helix fit
    * or run the full Acts track kalman filter fit
@@ -190,7 +205,7 @@ void Fun4All_TrackSeeding(
   kfparticle->getDetectorInfo(true);
 
   kfparticle->constrainToPrimaryVertex(true);
-  kfparticle->setMotherIPchi2(FLT_MAX);
+  kfparticle->setMotherPV_DCA_StdDev(FLT_MAX);
   kfparticle->setFlightDistancechi2(-1.);
   kfparticle->setMinDIRA(-1.1);
   kfparticle->setDecayLengthRange(0., FLT_MAX);
@@ -202,8 +217,8 @@ void Fun4All_TrackSeeding(
   kfparticle->setMinTPChits(20);
   kfparticle->setMinimumTrackPT(-1.);
   kfparticle->setMaximumTrackPTchi2(FLT_MAX);
-  kfparticle->setMinimumTrackIPchi2(-1.);
-  kfparticle->setMinimumTrackIP(-1.);
+  kfparticle->setMinimumTrackPV_DCA_StdDev(-1.);
+  kfparticle->setMinimumTrackPV_DCA(-1.);
   //kfparticle->setMaximumTrackchi2nDOF(20.);
   kfparticle->setMaximumTrackchi2nDOF(300.);
 
@@ -250,7 +265,8 @@ void Fun4All_TrackSeeding(
     se->registerSubsystem(new TpcSeedsQA);
     se->registerSubsystem(new TpcSiliconQA);
   }
-  se->run(nEvents);
+ se->skip(nskip);
+ se->run(nEvents);
   se->End();
   se->PrintTimer();
   CDBInterface::instance()->Print();

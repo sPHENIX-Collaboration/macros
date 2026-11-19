@@ -28,11 +28,13 @@ TGraphErrors *find_th2ridge(const TH2* h2)
   TH1 *h_projx = h2->ProjectionX("projx");
 
   TF1 gaussian("gaussian","gaus",min_yrange,max_yrange);
+  gaussian.SetNpx(1000);
   gaussian.SetLineColor(4);
 
   TH1 *h_projy{nullptr};
-  double adcmean = 0.;  // x-value
-//  double adcnum = 0.;
+  double prev_xmean = -1e-12;  // prev x-value
+  double xmean = 0.;  // x-value
+  double xsum = 0.;
 
   for (int ibin=1; ibin<=nbinsx; ibin++)
   {
@@ -40,26 +42,25 @@ TGraphErrors *find_th2ridge(const TH2* h2)
     if ( h_projy==nullptr )
     {
       h_projy = h2->ProjectionY(name,ibin,ibin);
-      adcmean = h_projx->GetBinCenter(ibin);
-//      adcnum = 1.0;
+      xmean = h_projy->Integral()*h_projx->GetBinCenter(ibin);
+      xsum = h_projy->Integral();
     }
-    /*
     else  // keep summing until we get enough statistics in bin
     {
       TH1 *h_projyadd =  h2->ProjectionY(name,ibin,ibin);
       h_projy->Add( h_projyadd );
+
+      xmean += h_projyadd->Integral()*h_projx->GetBinCenter(ibin);
+      xsum += h_projyadd->Integral();
+
       delete h_projyadd;
-
-      adcmean += h_projx->GetBinCenter(ibin);
-      adcnum += 1.0;
     }
-    */
 
-    std::cout << "adcmean " << adcmean << std::endl;
+    //if ( xsum>0. ) std::cout << "xmean " << xmean/xsum << std::endl;
 
     if ( h_projy->Integral()>100 || ibin==nbinsx )
     {
-      //adcmean = adcmean/adcnum;
+      xmean = xmean/xsum;
 
       h_projy->Draw();
 
@@ -70,28 +71,41 @@ TGraphErrors *find_th2ridge(const TH2* h2)
       gaussian.SetParameter(0,ymax);
       gaussian.SetRange(xmax-0.6,xmax+0.6);
 
-      std::cout << "xmax " << xmax << "\t" << ymax << "\t" << h_projy->GetRMS() << std::endl;
-      auto fitresult = h_projy->Fit("gaussian","RWWS");
+      //std::cout << "xmax " << xmax << "\t" << ymax << "\t" << h_projy->GetRMS() << std::endl;
+      auto fitresult = h_projy->Fit("gaussian","QRWWS");
 
       int n = prof->GetN();
 
       if ( fitresult->IsValid() )
       {
-        double mean = gaussian.GetParameter(1);
-        double meanerr = gaussian.GetParError(1);
+        double ymean = gaussian.GetParameter(1);
+        double ymeanerr = gaussian.GetParError(1);
 
-        prof->SetPoint(n,adcmean,mean);
-        prof->SetPointError(n,0,meanerr);
-        //std::cout << "mean and meanerr " << mean << "\t" << meanerr << std::endl;
+        prof->SetPoint(n,xmean,ymean);
+        prof->SetPointError(n,0,ymeanerr);
+        //std::cout << "ymean and ymeanerr " << ymean << "\t" << ymeanerr << std::endl;
       }
       else
       {
-        prof->SetPoint(n,adcmean,h_projy->GetMean());
-        prof->SetPointError(n,0,h_projy->GetRMS());
+        double ymean = h_projy->GetMean();
+        double ymeanerr = h_projy->GetRMS();
+
+        prof->SetPoint(n,xmean,ymean);
+        prof->SetPointError(n,0,ymeanerr);
+
+        std::cout << "fit failed, using means " << xmean << "\t" << ymean << std::endl;
       }
 
+      if ( xmean < prev_xmean )
+      {
+        std::cout << "ERROR, xmean < prev_xmean, " <<  xmean << "\t" << prev_xmean << std::endl;
+      }
+      prev_xmean = xmean;
+
+      /*
       gPad->Modified();
       gPad->Update();
+      */
 
       /*
       string junk;
@@ -105,6 +119,31 @@ TGraphErrors *find_th2ridge(const TH2* h2)
   }
 
   delete h_projx;
+
+  /*
+  // Add points until 1500, to extend fit in low stats region
+  int n = prof->GetN();
+  double x1,y1;
+  double x0,y0;
+  prof->GetPoint(n-1,x1,y1);
+  prof->GetPoint(n-2,x0,y0);
+  double dx = x1-x0;
+  double dy = y1-y0;
+  //double m = dy/dx;
+  //double b = y1-m*x1;
+  TF1 *poly1 = new TF1("poly1","pol1",0,15000);
+  prof->Fit(poly1,"R");
+  double m = poly1->GetParameter(1);
+  double b = poly1->GetParameter(0);
+  while (xmean<15000)
+  {
+    int n = prof->GetN();
+    xmean += 100;
+    double y = m*xmean+b;
+    prof->SetPoint(n,xmean,y);
+    prof->SetPointError(n,0,0.0001);
+  }
+  */
 
   prof->SetBit(TGraph::kIsSortedX);
   return prof;

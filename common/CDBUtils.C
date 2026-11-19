@@ -48,6 +48,16 @@ void listPayloadIOVs(uint64_t iov)
   return;
 }
 
+void listPayloadIOVs(uint64_t iov, const std::string &pltype)
+{
+  if (!uti)
+  {
+    uti = new CDBUtils();
+  }
+  uti->listPayloadIOVs(iov,pltype);
+  return;
+}
+
 void createGlobalTag(const std::string &tagname)
 {
   if (!uti)

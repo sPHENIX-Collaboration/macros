@@ -1,6 +1,8 @@
 #ifndef MACRO_G4KFPARTICLE_C
 #define MACRO_G4KFPARTICLE_C
 
+#pragma message("G4_KFParticle.C is deprecated and will be removed. Remove the include, or use KFParticle_selections.C for KFParticle reconstruction.")
+
 #include <GlobalVariables.C>
 
 #ifndef HomogeneousField  // for the clang-tidy check happiness
@@ -58,7 +60,7 @@ namespace KFParticleBaseCut
 {
   float minTrackPT = 0.5;  // GeV
   float maxTrackchi2nDoF = 2;
-  float minTrackIPchi2 = 15;  // IP = DCA of track with vertex
+  float minTrackPV_DCA_StdDev = 15;  // DCA significance of track with vertex
   float maxVertexchi2nDoF = 2;
   float maxTrackTrackDCA = 0.05;  // cm
   float minMotherPT = 0;          // GeV
@@ -80,7 +82,7 @@ void KFParticle_Upsilon_Reco()
   if (Enable::KFPARTICLE_DETECTOR_INFO) kfparticle->getDetectorInfo();
 
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
-  kfparticle->setMinimumTrackIPchi2(0);  // Upsilon decays are prompt, tracks are more likely to point to vertex
+  kfparticle->setMinimumTrackPV_DCA_StdDev(0);  // Upsilon decays are prompt, tracks are more likely to point to vertex
   kfparticle->setMaximumTrackchi2nDOF(KFParticleBaseCut::maxTrackchi2nDoF);
 
   kfparticle->setMaximumVertexchi2nDOF(KFParticleBaseCut::maxVertexchi2nDoF);
@@ -116,7 +118,7 @@ void KFParticle_D0_Reco()
   if (Enable::KFPARTICLE_DETECTOR_INFO) kfparticle->getDetectorInfo();
 
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
-  kfparticle->setMinimumTrackIPchi2(KFParticleBaseCut::minTrackIPchi2);
+  kfparticle->setMinimumTrackPV_DCA_StdDev(KFParticleBaseCut::minTrackPV_DCA_StdDev);
   kfparticle->setMaximumTrackchi2nDOF(KFParticleBaseCut::maxTrackchi2nDoF);
 
   kfparticle->setMaximumVertexchi2nDOF(KFParticleBaseCut::maxVertexchi2nDoF);
@@ -153,7 +155,7 @@ void KFParticle_Lambdac_Reco()
   if (Enable::KFPARTICLE_DETECTOR_INFO) kfparticle->getDetectorInfo();
 
   kfparticle->setMinimumTrackPT(KFParticleBaseCut::minTrackPT);
-  kfparticle->setMinimumTrackIPchi2(KFParticleBaseCut::minTrackIPchi2);
+  kfparticle->setMinimumTrackPV_DCA_StdDev(KFParticleBaseCut::minTrackPV_DCA_StdDev);
   kfparticle->setMaximumTrackchi2nDOF(KFParticleBaseCut::maxTrackchi2nDoF);
 
   kfparticle->setMaximumVertexchi2nDOF(KFParticleBaseCut::maxVertexchi2nDoF);
