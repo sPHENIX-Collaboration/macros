@@ -91,7 +91,7 @@ namespace TRACKING
   int reco_t0 = 0;
   bool tpc_zero_supp = false;
   bool tpc_baseline_corr = true;
-
+  bool polyseed = true;
   // alignment parameter
   std::string alignmentParamsFile = "./localAlignmentParamsFile.txt";
 
