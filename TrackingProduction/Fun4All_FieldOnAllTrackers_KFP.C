@@ -152,7 +152,7 @@ void Fun4All_FieldOnAllTrackers_KFP(
 
   Micromegas_Clustering();
 
-  Tracking_Reco_TrackSeed();
+  Tracking_Reco_CASeed();
 
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
