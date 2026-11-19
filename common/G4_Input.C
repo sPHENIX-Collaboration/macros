@@ -6,6 +6,7 @@
 #include <G4_TrkrVariables.C>
 
 #include <phpythia8/PHPythia8.h>
+#include <phherwig7/PHHerwig7.h>
 
 #include <g4main/CosmicSpray.h>
 #include <g4main/HepMCNodeReader.h>
@@ -41,6 +42,7 @@
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libPHPythia8.so)
+R__LOAD_LIBRARY(libPHHerwig7.so)
 R__LOAD_LIBRARY(libFermimotionAfterburner.so)
 R__LOAD_LIBRARY(libHIJINGFlipAfterburner.so)
 R__LOAD_LIBRARY(libReactionPlaneAfterburner.so)
@@ -55,6 +57,11 @@ namespace Input
   int PYTHIA8_NUMBER = 1;
   int PYTHIA8_VERBOSITY = 0;
   std::set<int> PYTHIA8_EmbedIds;
+
+  bool HERWIG7 = false;
+  int HERWIG7_NUMBER = 1;
+  int HERWIG7_VERBOSITY = 0;
+  std::set<int> HERWIG7_EmbedIds;
 
   // Single/multiple particle generators
   bool DZERO = false;
@@ -105,10 +112,17 @@ namespace Input
       std::cout << "ApplysPHENIXBeamParameter(): Fatal Error - null input pointer HepMCGen" << std::endl;
       exit(1);
     }
+    // default is gaussian vertex (and timing) distributions
+    HepMCGen->set_vertex_distribution_function(
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus,
+        PHHepMCGenHelper::Gaus);
+
     double localbcross = Input::beam_crossing / 2. * 1e-3;
     switch (beam_config)
     {
-    case AA_COLLISION:
+    case AuAu_COLLISION:
     case mRad_10:
       // heavy ion mode
       Input::beam_crossing = 1.;  // +1 mRad for late 2024 with triggered readout for mvtx
@@ -121,6 +135,7 @@ namespace Input
           13.5,           // measured 2024 with 1mRad beam Xing
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
+      HepMCGen->set_vertex_distribution_mean(-0.058, 0.133, 0, 0);  // rough position of actual beam spot. This can vary by a few hundred microns
       break;
     case pA_COLLISION:
 
@@ -142,10 +157,11 @@ namespace Input
       // 1.5mRad is split among both beams, means set to 0.75 mRad
       HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
       HepMCGen->set_vertex_distribution_width(
-          120e-4,         // approximation from past PHENIX data
-          120e-4,         // approximation from past PHENIX data
-          16,             // measured in 2024 for 1.5mrad Xing angle
-          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+          120e-4,                                                  // approximation from past PHENIX data
+          120e-4,                                                  // approximation from past PHENIX data
+          16,                                                      // measured in 2024 for 1.5mrad Xing angle
+          20 / 29.9792);                                           // 20cm collision length / speed of light in cm/ns
+      HepMCGen->set_vertex_distribution_mean(-0.07, 0.141, 0, 0);  // rough position of actual beam spot. This can vary by a few hundred microns
 
       break;
     case pp_ZEROANGLE:
@@ -176,28 +192,75 @@ namespace Input
 
     case mRad_05:
       Input::beam_crossing = 0.5;
-      //0.5 mRad is split among both beams, means set to 0.25 mRad
+      // 0.5 mRad is split among both beams, means set to 0.25 mRad
       localbcross = Input::beam_crossing / 2. * 1e-3;
 
       HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
       HepMCGen->set_vertex_distribution_width(
           120e-4,         // approximation from past PHENIX data
           120e-4,         // approximation from past PHENIX data
-          24.5,             // estimate from Colorado
+          24.5,           // estimate from Colorado
           20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
 
+      break;
+    case mRad_075:
+      Input::beam_crossing = 0.75;
+      // 0.75 mRad is split among both beams, means set to 0.375 mRad
+      localbcross = Input::beam_crossing / 2. * 1e-3;
+
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
+      HepMCGen->set_vertex_distribution_width(
+          120e-4,         // approximation from past PHENIX data
+          120e-4,         // approximation from past PHENIX data
+          20,             // from online monitoring mbd
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+    case OOdNdEta:  // special for Cheng-Wei's intt based dNdEta analysis
+      Input::beam_crossing = 0.75;
+      // 0.75 mRad is split among both beams, means set to 0.375 mRad
+      localbcross = Input::beam_crossing / 2. * 1e-3;
+
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
+      HepMCGen->set_vertex_distribution_mean(-0.0538, 0.137, 6.49, 0.);
+      HepMCGen->set_vertex_distribution_width(
+          100e-4,         // approximation from past PHENIX data
+          100e-4,         // approximation from past PHENIX data
+          11.44,          // from intt
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+    case OO_COLLISION:
+      Input::beam_crossing = 0.75;
+      // 0.75 mRad is split among both beams, means set to 0.375 mRad
+      localbcross = Input::beam_crossing / 2. * 1e-3;
+
+      HepMCGen->set_beam_direction_theta_phi(localbcross, 0, M_PI - localbcross, 0);
+      HepMCGen->set_vertex_distribution_mean(-0.0365, 0.137, 0.0, 0.);
+      HepMCGen->set_vertex_distribution_width(
+          92.4e-4,        // measured from silicon vertices in OO data
+          74.1e-4,        // measured from silicon vertices in OO data
+          12.1,           // measured from MBD vertex distribution in OO data, with trigger bit 14 (MBD S&N > 1 && |vtx| < 150 cm, least biased)
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+
+      break;
+    case WIDE_VERTEX:
+      HepMCGen->set_vertex_distribution_width(
+          120e-4,         // approximation from past PHENIX data
+          120e-4,         // approximation from past PHENIX data
+          200,            // +-200 cm
+          20 / 29.9792);  // 20cm collision length / speed of light in cm/ns
+      HepMCGen->set_vertex_distribution_function(
+          PHHepMCGenHelper::Gaus,
+          PHHepMCGenHelper::Gaus,
+          PHHepMCGenHelper::Uniform,  // uniform in z
+          PHHepMCGenHelper::Gaus);
       break;
     default:
       std::cout << "ApplysPHENIXBeamParameter: invalid beam_config = " << beam_config << std::endl;
 
       exit(1);
     }
-
-    HepMCGen->set_vertex_distribution_function(
-        PHHepMCGenHelper::Gaus,
-        PHHepMCGenHelper::Gaus,
-        PHHepMCGenHelper::Gaus,
-        PHHepMCGenHelper::Gaus);
   }
 
   //! apply sPHENIX nominal beam parameter according to the beam collision setting of Input::IS_PP_COLLISION
@@ -207,12 +270,16 @@ namespace Input
     ApplysPHENIXBeamParameter(HepMCGen, Input::BEAM_CONFIGURATION);
   }
 
-  void ApplysPHENIXBeamParameter(std::vector<PHPythia8 *> &HepMCGenVec)
+  template <class T> // make it template so it works for both phpythia8 and phherwig7
+  void ApplysPHENIXBeamParameter(std::vector<T *> &HepMCGenVec)
   {
-    PHHepMCGenHelper *gen = dynamic_cast<PHHepMCGenHelper *> (HepMCGenVec[0]);
-    if (gen)
+    for (auto *iter : HepMCGenVec)
     {
-      ApplysPHENIXBeamParameter(gen, Input::BEAM_CONFIGURATION);
+      PHHepMCGenHelper *gen = dynamic_cast<PHHepMCGenHelper *>(iter);
+      if (gen)
+      {
+        ApplysPHENIXBeamParameter(gen, Input::BEAM_CONFIGURATION);
+      }
     }
   }
 
@@ -317,9 +384,13 @@ namespace PYTHIA6
 namespace PYTHIA8
 {
   std::map<int, std::string> config_file =
-  {
-    {0, std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg"}
-  };
+      {
+          {0, std::string(getenv("CALIBRATIONROOT")) + "/Generators/phpythia8.cfg"}};
+}
+
+namespace HERWIG7
+{
+  std::map<int, std::string> config_file = {{0, std::string(getenv("CALIBRATIONROOT")) + "/Generators/Herwig7/in/mb200_sphenix_s1.in"}};
 }
 
 namespace PILEUP
@@ -339,6 +410,7 @@ namespace INPUTGENERATOR
   std::vector<PHG4ParticleGun *> Gun;
   PHPythia8 *Pythia6 = nullptr;
   std::vector<PHPythia8 *> Pythia8;
+  std::vector<PHHerwig7 *> Herwig7;
   //  ReadEICFiles *EICFileReader = nullptr;
   CosmicSpray *Cosmic = nullptr;
 }  // namespace INPUTGENERATOR
@@ -365,7 +437,7 @@ void InputInit()
     std::cout << "Reading Hits and Embedding into background at the same time is not supported" << std::endl;
     gSystem->Exit(1);
   }
-  if (Input::READHITS && (Input::PYTHIA6 || Input::PYTHIA8 || Input::SIMPLE || Input::GUN || Input::UPSILON || Input::HEPMC))
+  if (Input::READHITS && (Input::PYTHIA6 || Input::PYTHIA8 || Input::HERWIG7 || Input::SIMPLE || Input::GUN || Input::UPSILON || Input::HEPMC))
   {
     std::cout << "Reading Hits and running G4 simultanously is not supported" << std::endl;
     gSystem->Exit(1);
@@ -406,21 +478,53 @@ void InputInit()
       // see coresoftware/generators/PHPythia8 for example config
       if (PYTHIA8::config_file[i].empty())
       {
-	std::cout << "No Pythia8 config file for pythia8 generator no " << i << std::endl;
-	gSystem->Exit(1);
+        std::cout << "No Pythia8 config file for pythia8 generator no " << i << std::endl;
+        gSystem->Exit(1);
       }
       pythia8->set_config_file(PYTHIA8::config_file[i]);
       // luminosity makes no sense when running multiple pythia8 generators
       if (Input::PYTHIA8_NUMBER > 1)
       {
-	pythia8->save_integrated_luminosity(false);
+        pythia8->save_integrated_luminosity(false);
       }
 
       Input::PYTHIA8_EmbedIds.insert(Input::EmbedId);
       Input::EmbedId++;
       if (Input::EMBED)
       {
-	pythia8->set_reuse_vertex(Input::VertexEmbedId);
+        pythia8->set_reuse_vertex(Input::VertexEmbedId);
+      }
+    }
+  }
+  // Herwig7
+  if (Input::HERWIG7)
+  {
+    for (int i = 0; i < Input::HERWIG7_NUMBER; i++)
+    {
+      std::string name = "HERWIG7_" + std::to_string(i);
+      PHHerwig7 *herwig7 = new PHHerwig7(name);
+      INPUTGENERATOR::Herwig7.push_back(herwig7);
+      herwig7->set_embedding_id(Input::EmbedId);
+
+      if (HERWIG7::config_file[i].empty())
+      {
+        std::cout << "No Herwig7 config file for herwig7 generator no " << i << std::endl;
+        gSystem->Exit(1);
+      }
+
+      herwig7->set_config_file(HERWIG7::config_file[i]);
+
+      // luminosity makes no sense when running multiple herwig7 generators, or running together with pythia8
+      if (Input::HERWIG7_NUMBER > 1 || Input::PYTHIA8)
+      {
+        herwig7->save_integrated_luminosity(false);
+      }
+
+      Input::HERWIG7_EmbedIds.insert(Input::EmbedId);
+      Input::EmbedId++;
+      if (Input::EMBED)
+      {
+        herwig7->set_reuse_vertex(Input::VertexEmbedId);
       }
     }
   }
@@ -521,6 +625,15 @@ void InputRegister()
   {
     int verbosity = std::max(Input::PYTHIA8_VERBOSITY, Input::VERBOSITY);
     for (auto &generator : INPUTGENERATOR::Pythia8)
+    {
+      generator->Verbosity(verbosity);
+      se->registerSubsystem(generator);
+    }
+  }
+  if (Input::HERWIG7)
+  {
+    int verbosity = std::max(Input::HERWIG7_VERBOSITY, Input::VERBOSITY);
+    for (auto &generator : INPUTGENERATOR::Herwig7)
     {
       generator->Verbosity(verbosity);
       se->registerSubsystem(generator);
@@ -744,9 +857,9 @@ void InputManagers()
     INPUTMANAGER::HepMCPileupInputManager->set_collision_rate(Input::PILEUPRATE);
     double time_window = G4TPC::maxDriftLength / PILEUP::TpcDriftVelocity;
     double extended_readout_time = 0.0;
-    if (TRACKING::pp_mode)
+    if (TRACKING::streaming_mode)
     {
-      extended_readout_time = TRACKING::pp_extended_readout_time;
+      extended_readout_time = TRACKING::extended_readout_time;
     }
     INPUTMANAGER::HepMCPileupInputManager->set_time_window(-time_window, time_window + extended_readout_time);
     std::cout << "Pileup window is from " << -time_window << " to " << time_window + extended_readout_time << std::endl;

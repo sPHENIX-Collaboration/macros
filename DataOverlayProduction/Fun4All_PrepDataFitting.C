@@ -10,6 +10,8 @@
 
 #include <mbd/MbdReco.h>
 
+#include <epd/EpdReco.h>
+
 #include <globalvertex/GlobalVertexReco.h>
 
 #include <ffamodules/CDBInterface.h>
@@ -27,23 +29,44 @@
 
 #include <phool/recoConsts.h>
 
+#include <zdcinfo/ZdcReco.h>
+
+#include <Calo_Calib.C>
+
 #include <Rtypes.h> // for R__LOAD_LIBRARY
 #include <TSystem.h>
 
 #include <format>
 #include <fstream>
+#include <map>
+
+#include <caloreco/CaloTowerBuilder.h>
+#include <caloreco/CaloWaveformProcessing.h>
+
+#include <centrality/CentralityReco.h>
+#include <calotrigger/MinimumBiasClassifier.h>
+#include <generaldstslimmer/TriggerDSTSkimmer.h>
 
 R__LOAD_LIBRARY(libfun4allraw.so)
 R__LOAD_LIBRARY(libcalovalid.so)
 R__LOAD_LIBRARY(libcalotrigger.so)
+R__LOAD_LIBRARY(libepd.so)
+R__LOAD_LIBRARY(libzdcinfo.so)
+R__LOAD_LIBRARY(libTriggerDSTSkimmer.so)
 
 // this pass containis the reco process that's stable wrt time stamps(raw tower building)
-void Fun4All_PrepDataFitting(int nEvents = 1e4,
+void Fun4All_PrepDataFitting(
+            int nEvents_gen = 2,
+            int nEvents_prepared_data = 4,
+            int nEvents_skip = 0,
 			   const std::string& inlist = "test.list",
+            int centrality_max = 100,  // keep data events in 0-centrality_max %
+
                            const std::string &outfile = "DST_CALOFITTING",
                            const std::string &outfile_hist = "HIST_CALOFITTINGQA",
-                           const std::string &dbtag = "ProdA_2024")
+                           const std::string &dbtag = "newcdbtag")
 {
+
   gSystem->Load("libg4dst.so");
 
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -59,27 +82,10 @@ void Fun4All_PrepDataFitting(int nEvents = 1e4,
   FlagHandler *flag = new FlagHandler();
   se->registerSubsystem(flag);
 
-  // Get info from DB and store in DSTs
-  TriggerRunInfoReco *triggerinfo = new TriggerRunInfoReco();
-  se->registerSubsystem(triggerinfo);
 
-  // MBD/BBC Reconstruction
-  MbdReco *mbdreco = new MbdReco();
-  se->registerSubsystem(mbdreco);
-
-  // Official vertex storage
-  GlobalVertexReco *gvertex = new GlobalVertexReco();
-  se->registerSubsystem(gvertex);
-
-  Process_Calo_Fitting();
-
-  ///////////////////////////////////
-  // Validation
-  CaloFittingQA *ca = new CaloFittingQA("CaloFittingQA");
-  se->registerSubsystem(ca);
-
-// loop over all files in file list and create an input manager for each one  
-  Fun4AllInputManager *In = nullptr;
+  // loop over all files in file list and create an input manager for each stream (seb),
+  // further segments of the same stream are queued in that stream's input manager
+  std::map<std::string, Fun4AllInputManager *> streams;
   std::ifstream infile;
   infile.open(inlist);
   int iman = 0;
@@ -93,40 +99,169 @@ void Fun4All_PrepDataFitting(int nEvents = 1e4,
     {
       if (line[0] == '#')
       {
-	std::cout << "found commented out line " << line << std::endl;
-	continue;
+        std::cout << "found commented out line " << line << std::endl;
+        continue;
       }
       // extract run number from first not commented out file in list
       if (first)
       {
-	std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(line);
-	runnumber = runseg.first;
-	segment = runseg.second;
-	rc->set_uint64Flag("TIMESTAMP", runnumber);
-	first = false;
+        std::pair<int, int> runseg = Fun4AllUtils::GetRunSegment(line);
+        runnumber = runseg.first;
+        segment = runseg.second;
+        rc->set_uint64Flag("TIMESTAMP", runnumber);
+        first = false;
       }
-      std::string magname = "DSTin_" + std::to_string(iman);
-      In = new Fun4AllDstInputManager(magname);
-      In->Verbosity(1);
-      In->AddFile(line);
-      se->registerInputManager(In);
-      iman++;
+      // stream name is the file name without -<run>-<segment>.root
+      std::string stream = line.substr(0, line.rfind('-', line.rfind('-') - 1));
+      if (!streams.contains(stream))
+      {
+        std::string magname = "DSTin_" + std::to_string(iman);
+        Fun4AllInputManager *In = new Fun4AllDstInputManager(magname);
+        In->Verbosity(1);
+        se->registerInputManager(In);
+        streams[stream] = In;
+        iman++;
+      }
+      streams[stream]->AddFile(line);
     }
     infile.close();
   }
+  // open the first segment from the file list now: se->skip() only works on an open file
+  // and opening it via fileopen() instead would make fileclose() drop the next segment from the list
+  for (auto &iter : streams)
+  {
+    iter.second->OpenNextFile();
+  }
+
+  // Get info from DB and store in DSTs
+  TriggerRunInfoReco *triggerinfo = new TriggerRunInfoReco();
+  se->registerSubsystem(triggerinfo);
+
+  // MBD/BBC Reconstruction
+  MbdReco *mbdreco = new MbdReco();
+  se->registerSubsystem(mbdreco);
+
+  // Official vertex storage
+  GlobalVertexReco *gvertex = new GlobalVertexReco();
+  se->registerSubsystem(gvertex);
+
+  //Process_Calo_Fitting();
+
+  //////////////////////////////////
+  // make towerinfov3 nodes 
+  CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFWaveform;
+
+  CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
+  caZDC->set_detector_type(CaloTowerDefs::ZDC);
+  caZDC->set_builder_type(buildertype);
+  caZDC->set_processing_type(CaloWaveformProcessing::FAST);
+  se->registerSubsystem(caZDC);
+
+  CaloTowerBuilder *ctbEMCal = new CaloTowerBuilder("EMCalBUILDER");
+  ctbEMCal->set_detector_type(CaloTowerDefs::CEMC);
+  ctbEMCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+  ctbEMCal->set_builder_type(buildertype);
+  ctbEMCal->set_bitFlipRecovery(true);
+  // no SZS: keep full data waveforms for embedding, ZS is applied after embedding
+  ctbEMCal->set_softwarezerosuppression(false, 0);
+  se->registerSubsystem(ctbEMCal);
+
+  CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
+  ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
+  ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+  ctbIHCal->set_builder_type(buildertype);
+  ctbIHCal->set_bitFlipRecovery(true);
+  // no SZS: keep full data waveforms for embedding, ZS is applied after embedding
+  ctbIHCal->set_softwarezerosuppression(false, 0);
+  se->registerSubsystem(ctbIHCal);
+
+  CaloTowerBuilder *ctbOHCal = new CaloTowerBuilder("HCALOUTBUILDER");
+  ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
+  ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+  ctbOHCal->set_builder_type(buildertype);
+  ctbOHCal->set_bitFlipRecovery(true);
+  // no SZS: keep full data waveforms for embedding, ZS is applied after embedding
+  ctbOHCal->set_softwarezerosuppression(false, 0);
+  se->registerSubsystem(ctbOHCal);
+
+  CaloTowerBuilder *caEPD = new CaloTowerBuilder("SEPDBUILDER");
+  caEPD->set_detector_type(CaloTowerDefs::SEPD);
+  caEPD->set_builder_type(buildertype);
+  caEPD->set_processing_type(CaloWaveformProcessing::FAST);
+  se->registerSubsystem(caEPD);
+
+
+
+  ///////////////////////////
+  // other detectors
+  // sEPD Reconstruction--Calib Info
+  EpdReco *epdreco = new EpdReco();
+  se->registerSubsystem(epdreco);
+
+  // ZDC Reconstruction--Calib Info
+  ZdcReco *zdcreco = new ZdcReco();
+  zdcreco->set_zdc1_cut(0.0);
+  zdcreco->set_zdc2_cut(0.0);
+  se->registerSubsystem(zdcreco);
+
+  //////////////////////////////
+  // Centrality
+  // drop events failing the MB selection (includes |z_vtx| < 60 cm), registered before the trigger skimmer
+  // so that set_accept_max counts only events passing both
+  MinimumBiasClassifier *mb = new MinimumBiasClassifier();
+  mb->abortEvents(true);
+  se->registerSubsystem(mb);
+
+  CentralityReco* cent = new CentralityReco();
+  se->registerSubsystem( cent );
+
+  //Process_Calo_Calib(); 
+
+
+  //////////////////
+  // skim out non-MB events, loose vertex MB trigger:
+  // bit 10 "MBD N&S >= 2" before run 54974, bit 14 "MBD N&S >= 2, vtx < 150 cm" after
+  TriggerDSTSkimmer *tskim = new TriggerDSTSkimmer();
+  std::vector<int> triggers;
+  if (runnumber < 54974)
+  {
+    triggers.push_back(10);
+  }
+  else
+  {
+    triggers.push_back(14);
+  }
+  tskim->SetTrigger(triggers);
+  if (centrality_max < 100)
+  {
+    tskim->SetCentralityRange(0, centrality_max);
+  }
+  tskim->set_accept_max(nEvents_gen);
+  se->registerSubsystem(tskim);
+
+  ///////////////////////////////////
+  // Validation
+  CaloFittingQA *ca = new CaloFittingQA("CaloFittingQA");
+  se->registerSubsystem(ca);
+
   
 // this strips all nodes under the Packets PHCompositeNode
 // (means removes all offline packets)
   std::string dstoutfile = std::format("{}-{:08}-{:05}.root",outfile, runnumber,segment);
+
+  std::ofstream outList("prepData.txt");
+  outList << dstoutfile;
+  outList.close();
+  
   Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT", dstoutfile);
   out->StripCompositeNode("Packets");
   se->registerOutputManager(out);
-  // se->Print();
-  if (nEvents < 0)
-  {
-    return;
-  }
-  se->run(nEvents);
+  se->Print();
+
+
+  se->skip(nEvents_skip);
+  se->run(nEvents_prepared_data);
+  
   se->End();
   dstoutfile = std::format("{}-{:08}-{:05}.root",outfile_hist, runnumber,segment);
   QAHistManagerDef::saveQARootFile(dstoutfile);

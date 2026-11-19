@@ -14,7 +14,6 @@
 #include <G4_HIJetReco.C>
 #include <G4_Input.C>
 #include <G4_Jets.C>
-#include <G4_KFParticle.C>
 #include <G4_ParticleFlow.C>
 #include <G4_Production.C>
 #include <G4_TopoClusterReco.C>
@@ -384,6 +383,12 @@ int Fun4All_G4_sPHENIX(
   // TRACKING::pp_mode = true;
   // TRACKING::pp_extended_readout_time = 20000;
 
+  // Place to set TPC tilt angles for envelope and endcaps, if desired
+  G4TPC::rot_x = 0.0;
+  G4TPC::rot_y = 0.0;
+  G4TPC::rot_z = 0.0;
+  std::cout << "Fun4All macro: Setting TPC tilt angles to rot_x = " << G4TPC::rot_x << " roty = " << G4TPC::rot_y << " rot_z = " << G4TPC::rot_z << std::endl;
+  
   // set flags to simulate and correct TPC distortions, specify distortion and correction files
   //G4TPC::ENABLE_STATIC_DISTORTIONS = true;
   //G4TPC::static_distortion_filename = std::string("/sphenix/user/rcorliss/distortion_maps/2023.02/Summary_hist_mdc2_UseFieldMaps_AA_event_0_bX180961051_0.distortion_map.hist.root");
@@ -440,12 +445,14 @@ int Fun4All_G4_sPHENIX(
 
  //Enable::GLOBAL_FASTSIM = true;
 
-  Enable::KFPARTICLE = true;
+  Enable::KFPARTICLE = false;
   //Enable::KFPARTICLE_VERBOSITY = 1;
   Enable::KFPARTICLE_TRUTH_MATCH = true;
   //Enable::KFPARTICLE_SAVE_NTUPLE = true;
 
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && true;
+
+  Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && false;
 
   Enable::JETS = (Enable::GLOBAL_RECO || Enable::GLOBAL_FASTSIM) && true;
   Enable::JETS_EVAL = Enable::JETS && true;
@@ -512,6 +519,10 @@ int Fun4All_G4_sPHENIX(
   {
     G4Setup();
   }
+  else
+  {
+    LoadTrackingCDBGeometry();
+  }
 
   //------------------
   // Detector Division
@@ -573,12 +584,15 @@ int Fun4All_G4_sPHENIX(
 	}
       else
 	{
-	  TPC_Clustering();
+	  if(!TRACKING::polyseed)
+	    {
+	      TPC_Clustering();
+	    }
 	}
     }
   if (Enable::MICROMEGAS_CLUSTER) Micromegas_Clustering();
 
-  if (Enable::TRACKING_TRACK)
+  if (Enable::TPC_CLUSTER && Enable::TRACKING_TRACK)
   {
     Tracking_Reco();
   }

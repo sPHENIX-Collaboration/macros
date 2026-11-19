@@ -147,7 +147,7 @@ void Fun4All_raw_hit_KFP(
   int i = 0;
   int runnumber = std::numeric_limits<int>::quiet_NaN();
   int segment = std::numeric_limits<int>::quiet_NaN();
-  
+
 
   while (std::getline(ifs, filepath))
   {
@@ -161,7 +161,7 @@ void Fun4All_raw_hit_KFP(
       rc->set_IntFlag("RUNNUMBER", runnumber);
       rc->set_uint64Flag("TIMESTAMP", runnumber);
     }
-  
+
     std::string inputname = "InputManager" + std::to_string(i);
     auto *hitsin = new Fun4AllDstInputManager(inputname);
     hitsin->fileopen(filepath);
@@ -174,6 +174,7 @@ void Fun4All_raw_hit_KFP(
 
   Enable::QA = false;
   Enable::CDB = true;
+  //rc->set_StringFlag("CDB_GLOBALTAG", "2025p012");
   rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
 
@@ -212,7 +213,7 @@ void Fun4All_raw_hit_KFP(
             << " vdrift: " << G4TPC::tpc_drift_velocity_reco
             << std::endl;
 
-  TRACKING::pp_mode = true;
+  TRACKING::streaming_mode = true;
 
   // distortion calibration mode
   /*
@@ -244,13 +245,10 @@ void Fun4All_raw_hit_KFP(
 
   // to turn on the default static corrections, enable the two lines below
   G4TPC::ENABLE_STATIC_CORRECTIONS = true;
-  G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
 
   // to turn on the average corrections derived from simulation, enable the three lines below
   // note: these are designed to be used only if static corrections are also applied
   // G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  // G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-  // G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
 
   G4MAGNET::magfield_rescale = 1;
 
@@ -301,7 +299,7 @@ void Fun4All_raw_hit_KFP(
   /*
    * Begin Track Seeding
    */
-  
+
   Tracking_Reco_TrackSeed_run2pp();
   Tracking_Reco_TrackMatching_run2pp();
   /*
@@ -310,77 +308,15 @@ void Fun4All_raw_hit_KFP(
    */
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
-    auto *converter = new TrackSeedTrackMapConverter;
-    // Default set to full SvtxTrackSeeds. Can be set to
-    // SiliconTrackSeedContainer or TpcTrackSeedContainer
-    converter->setTrackSeedName("SvtxTrackSeedContainer");
-    converter->setFieldMap(G4MAGNET::magfield_tracking);
-    converter->Verbosity(0);
-    se->registerSubsystem(converter);
+    G4TRACKING::convertSeedsContainerName = "SvtxTrackSeedContainer";
+    convert_seeds();
   }
   else
   {
-    auto *deltazcorr = new PHTpcDeltaZCorrection;
-    deltazcorr->Verbosity(0);
-    se->registerSubsystem(deltazcorr);
-
-    // perform final track fit with ACTS
-    auto *actsFit = new PHActsTrkFitter;
-    actsFit->Verbosity(0);
-    actsFit->commissioning(G4TRACKING::use_alignment);
-    // in calibration mode, fit only Silicons and Micromegas hits
-    actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
-    actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-    actsFit->set_pp_mode(TRACKING::pp_mode);
-    actsFit->set_use_clustermover(true);  // default is true for now
-    actsFit->useActsEvaluator(false);
-    actsFit->useOutlierFinder(false);
-    actsFit->setFieldMap(G4MAGNET::magfield_tracking);
-    se->registerSubsystem(actsFit);
-
-    auto *cleaner = new PHTrackCleaner();
-    cleaner->Verbosity(0);
-    cleaner->set_pp_mode(TRACKING::pp_mode);
-    se->registerSubsystem(cleaner);
-
-    if (G4TRACKING::SC_CALIBMODE)
-    {
-      /*
-       * in calibration mode, calculate residuals between TPC and fitted tracks,
-       * store in dedicated structure for distortion correction
-       */
-      auto *residuals = new PHTpcResiduals;
-      const TString tpc_residoutfile = theOutfile + "_PhTpcResiduals.root";
-      residuals->setOutputfile(tpc_residoutfile.Data());
-      residuals->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-
-      // matches Tony's analysis
-      residuals->setMinPt(0.2);
-
-      // reconstructed distortion grid size (phi, r, z)
-      residuals->setGridDimensions(36, 48, 80);
-      se->registerSubsystem(residuals);
-    }
+    Tracking_Reco_TrackFit_run2pp();
   }
 
-  auto *finder = new PHSimpleVertexFinder;
-  finder->Verbosity(0);
-  finder->setDcaCut(0.5);
-  finder->setTrackPtCut(0.3);
-  finder->setBeamLineCut(1);
-  finder->setTrackQualityCut(1000);
-  finder->setNmvtxRequired(3);
-  finder->setOutlierPairCut(0.1);
-  se->registerSubsystem(finder);
-
-  if (!G4TRACKING::convert_seeds_to_svtxtracks)
-  {
-    // Propagate track positions to the vertex position
-    auto *vtxProp = new PHActsVertexPropagator;
-    vtxProp->Verbosity(0);
-    vtxProp->fieldMap(G4MAGNET::magfield_tracking);
-    se->registerSubsystem(vtxProp);
-  }
+  Tracking_Reco_Vertex_run2pp();
 
   TString residoutfile = theOutfile + "_resid.root";
   std::string residstring(residoutfile.Data());
@@ -402,7 +338,7 @@ void Fun4All_raw_hit_KFP(
   resid->convertSeeds(G4TRACKING::convert_seeds_to_svtxtracks);
 
   //   resid->Verbosity(0);
-  // se->registerSubsystem(resid);
+  se->registerSubsystem(resid);
 
   // auto ntuplizer = new TrkrNtuplizer("TrkrNtuplizer");
   // se->registerSubsystem(ntuplizer);
@@ -519,7 +455,7 @@ void Fun4All_raw_hit_KFP(
 
     // PV to SV cuts
     kfparticle->constrainToPrimaryVertex(HeavyFlavorReco::constrain_to_primary_vertex);
-    kfparticle->setMotherIPchi2(100);
+    kfparticle->setMotherPV_DCA_StdDev(100);
     kfparticle->setFlightDistancechi2(-1.);
     kfparticle->setMinDIRA(0.88);                    // was .95
     kfparticle->setDecayLengthRange(-0.1, FLT_MAX);  // was 0.1 min
@@ -534,8 +470,8 @@ void Fun4All_raw_hit_KFP(
 
     // Track parameters
     kfparticle->setMinimumTrackPT(0.0);
-    kfparticle->setMinimumTrackIPchi2(-1.);
-    kfparticle->setMinimumTrackIP(-1.);
+    kfparticle->setMinimumTrackPV_DCA_StdDev(-1.);
+    kfparticle->setMinimumTrackPV_DCA(-1.);
     kfparticle->setMaximumTrackchi2nDOF(100.);
     kfparticle->setMinINTThits(0);
     kfparticle->setMinMVTXhits(0);
@@ -575,15 +511,15 @@ void Fun4All_raw_hit_KFP(
 
     // PV to SV cuts
     kfparticle->constrainToPrimaryVertex(HeavyFlavorReco::constrain_to_primary_vertex);
-    kfparticle->setMotherIPchi2(100);
+    kfparticle->setMotherPV_DCA_StdDev(100);
     kfparticle->setFlightDistancechi2(-1.);
     kfparticle->setMinDIRA(0.88);
     kfparticle->setDecayLengthRange(0.2, FLT_MAX);
 
     // Track parameters
     kfparticle->setMinimumTrackPT(0.1);
-    kfparticle->setMinimumTrackIPchi2(-1.);
-    kfparticle->setMinimumTrackIP(-1.);
+    kfparticle->setMinimumTrackPV_DCA_StdDev(-1.);
+    kfparticle->setMinimumTrackPV_DCA(-1.);
     kfparticle->setMaximumTrackchi2nDOF(100.);
     kfparticle->setMinTPChits(25);
 

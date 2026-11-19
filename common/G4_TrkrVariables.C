@@ -16,7 +16,7 @@ namespace Enable
   bool MVTX_SUPPORT = false;
   bool MVTX_APPLYMISALIGNMENT = true;
   bool MVTX_STREAMING = true;
-  
+
   int MVTX_VERBOSITY = 0;
 
   bool INTT = false;
@@ -112,12 +112,11 @@ namespace G4TPC
 
   // apply static distortions in simulations
   bool ENABLE_STATIC_DISTORTIONS = false;
-
-  std::string static_distortion_filename = "TPC_STATIC_DISTORTION";
+  std::string static_distortion_filename;
 
   // apply time-ordered distortion fluctuations in simulation
   bool ENABLE_TIME_ORDERED_DISTORTIONS = false;
-  std::string time_ordered_distortion_filename = "TPC_TIMEORDERED_DISTORTION";
+  std::string time_ordered_distortion_filename;
 
   // allow distortions to remove electrons that
   bool ENABLE_REACHES_READOUT = true;
@@ -128,15 +127,19 @@ namespace G4TPC
 
   // static distortion corrections
   bool ENABLE_STATIC_CORRECTIONS = false;
-  std::string static_correction_filename = std::string(getenv("CALIBRATIONROOT")) + "/distortion_maps/static_only_inverted_10-new.root";
+  std::string static_correction_filename;
   bool USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
 
   // average distortion corrections
   bool ENABLE_AVERAGE_CORRECTIONS = false;
   std::string average_correction_filename;
-  bool USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
+  bool USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = true;
+
+  std::string CMStripePattern = "/sphenix/u/bkimelman/CMStripePattern_ideal.root";
   bool average_correction_interpolate = true;
-  
+  bool SaveAllLaminationHists = false;
+  bool BFieldOff = false;
+
   // enable central membrane g4hits generation
   bool ENABLE_CENTRAL_MEMBRANE_HITS = false;
 
@@ -209,16 +212,25 @@ namespace G4TPC
 
   double maxDriftLength = 102.325;  // new value, CM face to top of GEM stack
   double CM_halfwidth = 0.28;  // cm
+
+  bool tpc_survey_position = true;
+  double rot_x = 0.0;  // tpc default tilt angles (for tpc envelope and endcap)
+  double rot_y = 0.0;
+  double rot_z = 0.0;
+  double place_x = 0.0;  // tpc default center position (for tpc envelope and endcap)
+  double place_y = 0.0;
+  double place_z = 0.0;
+
   double sampa_tzero_bias = -65.0; // ns, set for simulations/reco matching with new sampa response
   bool apply_tpc_tzero_correction = false;  // true to apply small correction to TPC time zero in alignment transforms
-  
+
 }  // namespace G4TPC
 
 namespace G4TRACKING
 {
   // Space Charge calibration flag
-  bool SC_CALIBMODE = false;  // this is anded with G4TPC::ENABLE_DISTORTIONS in TrackingInit()
-  bool SC_USE_MICROMEGAS = true;
+  bool SC_CALIBMODE = false;
+  bool SC_USE_MICROMEGAS = false;
   double SC_COLLISIONRATE = 50e3;                                      // leave at 50 KHz for now, scaling of distortion map not implemented yet
   std::string SC_ROOTOUTPUT_FILENAME = "TpcSpaceChargeMatrices.root";  // space charge calibration output file
 
@@ -240,7 +252,7 @@ namespace G4TRACKING
   // use of the various evaluation tools already available
   bool convert_seeds_to_svtxtracks = false;
   std::string convertSeedsContainerName = "SvtxTrackSeedContainer";
-  
+
   // Flag to run commissioning seeding workflow with tuned parameters for
   // misaligned + distorted tracks
   bool use_alignment = false;

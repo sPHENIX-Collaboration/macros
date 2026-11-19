@@ -3,9 +3,9 @@
 
 #include <GlobalVariables.C>
 
-#include "G4Setup_sPHENIX.C"
 #include <G4_Input.C>
 #include <G4_Production.C>
+#include <G4Setup_sPHENIX.C>
 
 #include <globalvertex/GlobalVertexReco.h>
 
@@ -455,8 +455,6 @@ int Fun4All_G4_Embed_data(
   CaloWaveformSim *caloWaveformSim = new CaloWaveformSim();
   caloWaveformSim->set_detector_type(CaloTowerDefs::CEMC);
   caloWaveformSim->set_detector("CEMC");
-  caloWaveformSim->set_nsamples(12);
-  caloWaveformSim->set_pedestalsamples(12);
   caloWaveformSim->set_timewidth(0.2);
   caloWaveformSim->set_peakpos(6);
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
@@ -465,8 +463,6 @@ int Fun4All_G4_Embed_data(
   caloWaveformSim = new CaloWaveformSim();
   caloWaveformSim->set_detector_type(CaloTowerDefs::HCALIN);
   caloWaveformSim->set_detector("HCALIN");
-  caloWaveformSim->set_nsamples(12);
-  caloWaveformSim->set_pedestalsamples(12);
   caloWaveformSim->set_timewidth(0.2);
   caloWaveformSim->set_peakpos(6);
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
@@ -475,8 +471,6 @@ int Fun4All_G4_Embed_data(
   caloWaveformSim = new CaloWaveformSim();
   caloWaveformSim->set_detector_type(CaloTowerDefs::HCALOUT);
   caloWaveformSim->set_detector("HCALOUT");
-  caloWaveformSim->set_nsamples(12);
-  caloWaveformSim->set_pedestalsamples(12);
   caloWaveformSim->set_timewidth(0.2);
   caloWaveformSim->set_peakpos(6);
   caloWaveformSim->set_noise_type(CaloWaveformSim::NOISE_NONE);
@@ -516,7 +510,6 @@ int Fun4All_G4_Embed_data(
 
   CaloTowerBuilder *ca2 = new CaloTowerBuilder();
   ca2->set_detector_type(CaloTowerDefs::CEMC);
-  ca2->set_nsamples(12);
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
@@ -526,7 +519,6 @@ int Fun4All_G4_Embed_data(
 
   ca2 = new CaloTowerBuilder();
   ca2->set_detector_type(CaloTowerDefs::HCALIN);
-  ca2->set_nsamples(12);
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
@@ -535,7 +527,6 @@ int Fun4All_G4_Embed_data(
 
   ca2 = new CaloTowerBuilder();
   ca2->set_detector_type(CaloTowerDefs::HCALOUT);
-  ca2->set_nsamples(12);
   ca2->set_dataflag(false);
   ca2->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ca2->set_builder_type(CaloTowerDefs::kWaveformTowerSimv1);
@@ -566,7 +557,8 @@ int Fun4All_G4_Embed_data(
     randGen.SetSeed(seed);
     // a int from 0 to 3259
     int sequence = randGen.Integer(3260);
-    std::string pedestalname = std::format("pedestal-54256-{:05}.root",sequence);
+    int pedestalrun = 54256;
+    std::string pedestalname = std::format("pedestal-{:08}-{:05}.root",pedestalrun,sequence);
 
     Fun4AllInputManager *hitsin = new Fun4AllNoSyncDstInputManager("DST2");
     hitsin->AddFile(pedestalname);

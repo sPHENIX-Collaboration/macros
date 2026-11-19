@@ -20,17 +20,22 @@
 R__LOAD_LIBRARY(libtrack_reco.so)
 R__LOAD_LIBRARY(libtpccalib.so)
 
+void LoadTrackingCDBGeometry()
+{
+
+  auto *se = Fun4AllServer::instance();
+  std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
+  
+  Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
+  ingeo->AddFile(geofile);
+  se->registerInputManager(ingeo);
+  
+}
 void TrackingInit()
 {
    // server
   auto *se = Fun4AllServer::instance();
-  
-  std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
-
-  Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
-  ingeo->AddFile(geofile);
-  se->registerInputManager(ingeo);
-
+ 
   auto *rc = recoConsts::instance();
   if(rc->get_StringFlag("CDB_GLOBALTAG").find("MDC") != std::string::npos)
     {
@@ -41,11 +46,32 @@ void TrackingInit()
       std::cout << "Setting reconstruction for data with CDB tag " << rc->get_StringFlag("CDB_GLOBALTAG") << std::endl;
       CDB::is_data_reco = true;
     }
-  
+
+  // check that we are not building the geometry from scratch, i.e. that
+  // G4Setup() was not run
+  if(CDB::is_data_reco)
+    {
+      if(!Enable::MVTX || !Enable::INTT || !Enable::TPC || !Enable::MICROMEGAS)
+	{
+	  LoadTrackingCDBGeometry();
+	}
+    }
+ 
   TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
 
   ACTSGEOM::ActsGeomInit();
-  G4TPC::module_edge_correction_filename = CDBInterface::instance()->getUrl("TPC_Module_Edge");
+
+  // initialize module edge correction
+  if( G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS && G4TPC::module_edge_correction_filename.empty() )
+  { G4TPC::module_edge_correction_filename = CDBInterface::instance()->getUrl("TPC_Module_Edge"); }
+
+  // initialize static distortion correction
+  if( G4TPC::ENABLE_STATIC_CORRECTIONS && G4TPC::static_correction_filename.empty() )
+  { G4TPC::static_correction_filename = CDBInterface::instance()->getUrl("TPC_STATIC_CORRECTION_MODEL"); }
+
+  // initialize time average distortion correction
+  if( G4TPC::ENABLE_AVERAGE_CORRECTIONS && G4TPC::average_correction_filename.empty() )
+  { G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION"); }
 
   // space charge correction
   if (G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS || G4TPC::ENABLE_STATIC_CORRECTIONS || G4TPC::ENABLE_AVERAGE_CORRECTIONS)

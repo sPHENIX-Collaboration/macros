@@ -66,7 +66,7 @@ void Fun4All_TrackCaloAnalysis(
 
   Enable::MVTX_APPLYMISALIGNMENT = true;
   ACTSGEOM::mvtx_applymisalignment = Enable::MVTX_APPLYMISALIGNMENT;
-  TRACKING::pp_mode = true;
+  TRACKING::streaming_mode = true;
 
   auto *se = Fun4AllServer::instance();
   se->Verbosity(1);
@@ -76,7 +76,7 @@ void Fun4All_TrackCaloAnalysis(
   rc->set_IntFlag("RUNSEGMENT", segment);
 
   Enable::CDB = true;
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   rc->set_uint64Flag("TIMESTAMP", runnumber);
   std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
 
@@ -95,14 +95,10 @@ void Fun4All_TrackCaloAnalysis(
 
   // to turn on the default static corrections, enable the two lines below
   G4TPC::ENABLE_STATIC_CORRECTIONS = true;
-  G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS = false;
 
   //to turn on the average corrections, enable the three lines below
   //note: these are designed to be used only if static corrections are also applied
   G4TPC::ENABLE_AVERAGE_CORRECTIONS = true;
-  G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS = false;
-   // to use a custom file instead of the database file:
-  G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION");
 
   G4MAGNET::magfield_rescale = 1;
   TrackingInit();

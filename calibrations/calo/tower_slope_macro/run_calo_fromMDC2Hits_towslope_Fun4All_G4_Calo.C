@@ -4,7 +4,7 @@
 #include <GlobalVariables.C>
 
 #include <DisplayOn.C>
-#include "G4Setup_sPHENIX.C"
+#include <G4Setup_sPHENIX.C>
 #include <G4_Mbd.C>
 #include <G4_CaloTrigger.C>
 #include <G4_DSTReader.C>

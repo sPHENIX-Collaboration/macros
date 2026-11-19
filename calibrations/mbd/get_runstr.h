@@ -11,8 +11,10 @@ namespace MBDRUNS {
     RUN24PP,
     RUN25AUAU,
     RUN25PP,
+    RUN25OO,
     SIMAUAU200,
-    SIMPP200
+    SIMPP200,
+    RUNERROR
   };
 }
 
@@ -20,8 +22,10 @@ namespace MBDRUNTYPE {
   enum type {
     AUAU200 = 0,
     PP200,
+    OO200,
     SIMAUAU200,
-    SIMPP200
+    SIMPP200,
+    TYPEERROR
   };
 }
 
@@ -88,9 +92,17 @@ int get_run(const int runno)
   {
     return MBDRUNS::RUN25AUAU;
   }
-  else if ( runno <= 99999 )
+  else if ( runno <= 81667 )
   {
     return MBDRUNS::RUN25PP;
+  }
+  else if ( runno <= 82703 )
+  {
+    return MBDRUNS::RUN25OO;
+  }
+  else
+  {
+    return MBDRUNS::RUNERROR;
   }
 
   return -1;
@@ -115,9 +127,17 @@ int get_runtype(const int runno)
   {
     return MBDRUNTYPE::AUAU200;
   }
-  else if ( runno <= 99999 )
+  else if ( runno <= 81667 )
   {
     return MBDRUNTYPE::PP200;
+  }
+  else if ( runno <= 82703 )
+  {
+    return MBDRUNTYPE::OO200;
+  }
+  else
+  {
+    return MBDRUNTYPE::TYPEERROR;
   }
 
   return -1;

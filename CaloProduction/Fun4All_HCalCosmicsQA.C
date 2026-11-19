@@ -44,9 +44,8 @@ void Fun4All_HCalCosmicsQA(int nEvents = 100,
                              const std::string& inlist = "files.list",
                              const std::string &outfile_hist1 = "HIST_COSMIC_HCALOUT_run2auau_ana487_2024p018_v001",
                              const std::string &outfile_hist2 = "HIST_COSMIC_HCALIN_run2auau_ana487_2024p018_v001",
-                             const std::string &dbtag = "ProdA_2024")
+                             const std::string &dbtag = "newcdbtag")
 {
-  bool useDSTRAW = true;
   // v1 uncomment:
   // CaloTowerDefs::BuilderType buildertype = CaloTowerDefs:::kPRDFTowerv1;
   // v2 uncomment:
@@ -72,8 +71,6 @@ void Fun4All_HCalCosmicsQA(int nEvents = 100,
   ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
   ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbIHCal->set_builder_type(buildertype);
-  ctbIHCal->set_nsamples(12);
-  if (useDSTRAW) ctbIHCal->set_offlineflag();
   ctbIHCal->set_softwarezerosuppression(true, 200);
   se->registerSubsystem(ctbIHCal);
 
@@ -81,19 +78,15 @@ void Fun4All_HCalCosmicsQA(int nEvents = 100,
   ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
   ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
   ctbOHCal->set_builder_type(buildertype);
-  ctbOHCal->set_nsamples(12);
-  if (useDSTRAW) ctbOHCal->set_offlineflag();
   ctbOHCal->set_softwarezerosuppression(true, 200);
   se->registerSubsystem(ctbOHCal);
 
   CaloTowerStatus *statusHCalIn = new CaloTowerStatus("HCALINSTATUS");
   statusHCalIn->set_detector_type(CaloTowerDefs::HCALIN);
-  statusHCalIn->set_time_cut(10);
   se->registerSubsystem(statusHCalIn);
 
   CaloTowerStatus *statusHCALOUT = new CaloTowerStatus("HCALOUTSTATUS");
   statusHCALOUT->set_detector_type(CaloTowerDefs::HCALOUT);
-  statusHCALOUT->set_time_cut(10);
   se->registerSubsystem(statusHCALOUT);
 
   ////////////////////

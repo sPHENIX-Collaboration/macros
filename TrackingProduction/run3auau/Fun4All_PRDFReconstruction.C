@@ -485,7 +485,7 @@ void Fun4All_PRDFReconstruction(
   // Match the TPC track stubs from the CA seeder to silicon track stubs from PHSiliconTruthTrackSeeding
   auto *silicon_match = new PHSiliconTpcTrackMatching;
   silicon_match->Verbosity(0);
-  silicon_match->set_pp_mode(TRACKING::pp_mode);
+  silicon_match->set_pp_mode(TRACKING::streaming_mode);
   if (G4TPC::ENABLE_AVERAGE_CORRECTIONS)
   {
     // for general tracking
@@ -561,7 +561,7 @@ void Fun4All_PRDFReconstruction(
     // in calibration mode, fit only Silicons and Micromegas hits
     actsFit->fitSiliconMMs(G4TRACKING::SC_CALIBMODE);
     actsFit->setUseMicromegas(G4TRACKING::SC_USE_MICROMEGAS);
-    actsFit->set_pp_mode(TRACKING::pp_mode);
+    actsFit->set_pp_mode(TRACKING::streaming_mode);
     actsFit->set_use_clustermover(true);  // default is true for now
     actsFit->useActsEvaluator(false);
     actsFit->useOutlierFinder(false);
@@ -570,7 +570,7 @@ void Fun4All_PRDFReconstruction(
 
     auto *cleaner = new PHTrackCleaner();
     cleaner->Verbosity(0);
-    cleaner->set_pp_mode(TRACKING::pp_mode);
+    cleaner->set_pp_mode(TRACKING::streaming_mode);
     // se->registerSubsystem(cleaner);
   }
 

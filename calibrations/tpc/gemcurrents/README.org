@@ -1,0 +1,178 @@
+#+TITLE: GEM Current CDB Generator
+#+AUTHOR: Charles Hughes
+#+STARTUP: overview
+
+Last Modified: 16:26:19 08/05/26
+
+* Overview
+
+This repository contains utilities for extracting GEM current information from
+the DAQ database and converting it into a CDB-compatible ROOT object for use
+within the sPHENIX software framework.
+
+The repository currently contains two programs:
+
+** daqdbreader_tpc_GEM_charge_status_2.py
+
+Python utility that queries the DAQ database for a specified run and produces a
+CSV file containing the measured current draw for every TPC GEM module.
+
+The output file has the form
+
+#+begin_example
+./tpc_GEM_current_status/run_<RunNumber>_GEM_BCO.csv
+#+end_example
+
+Each row contains
+
+- BCO timestamp
+- GEM module name
+- Current draw (μA)
+
+The current measurements are sampled every 60 seconds throughout the run.
+
+** FillGemCurrents.C
+
+ROOT macro that reads the CSV produced by
+~daqdbreader_tpc_GEM_charge_status_2.py~ and converts it into a
+CDB-compatible ROOT object.
+
+The output is
+
+#+begin_example
+cdbttree.root
+#+end_example
+
+which contains a TTree named
+
+#+begin_example
+Multiple
+#+end_example
+
+ready for use by the sPHENIX Conditions Database framework.
+
+* Workflow
+
+The complete workflow consists of two steps.
+
+** Step 1: Query the DAQ database
+
+Run
+
+#+begin_src bash
+python3 daqdbreader_tpc_GEM_charge_status_2.py <RunNumber>
+#+end_src
+
+For example
+
+#+begin_src text
+$ python3 daqdbreader_tpc_GEM_charge_status_2.py 82516
+
+Begin: 1770149596
+End:   1770153193
+
+Wrote:
+tpc_GEM_current_status/run_82516_GEM_BCO.csv
+#+end_src
+
+This produces
+
+#+begin_example
+tpc_GEM_current_status/run_82516_GEM_BCO.csv
+#+end_example
+
+which contains
+
+- GEM current draws (μA)
+- corresponding BCO timestamps
+- measurements sampled every 60 seconds over the duration of the run
+
+** Step 2: Create the CDB object
+
+Execute
+
+#+begin_src bash
+root -l FillGemCurrents.C
+#+end_src
+
+Example output
+
+#+begin_src text
+root [0]
+Processing FillGemCurrents.C...
+
+Number of float entries: 60
+
+ID: 0
+name N01R1G4 value: 45.072
+name N01R2G4 value: 33.124
+name N01R3G4 value: 12.686
+...
+
+...
+
+ID: 57
+name bco value: 915832872830666
+
+ID: 58
+name bco value: 915833435820666
+
+ID: 59
+name bco value: 915833998810666
+#+end_src
+
+The macro writes
+
+#+begin_example
+cdbttree.root
+#+end_example
+
+* Inspecting the Output
+
+The resulting ROOT file can be inspected with
+
+#+begin_src bash
+root --web=off -l cdbttree.root
+#+end_src
+
+Example session
+
+#+begin_src text
+root [0]
+Attaching file cdbttree.root as _file0...
+
+(TFile *) 0x3a0d4e0
+
+root [1] .ls
+
+TFile**        cdbttree.root
+ TFile*        cdbttree.root
+  KEY: TTree Multiple;1 Multiple
+#+end_src
+
+The tree contains the GEM current values together with their corresponding BCO
+timestamps in a format compatible with the sPHENIX Conditions Database.
+
+* Validation
+
+The generated CDB object can be plotted to produce GEM current versus BCO
+distributions for every detector module.
+
+The resulting traces reproduce the expected behaviour observed online in
+Grafana, including the gradual decrease in GEM current over the course of a
+physics run.
+
+#+CAPTION: Grafana
+[[file:Grafana_GEM_Current.png]]
+
+#+CAPTION: ROOT output
+[[file:ROOT_TTree_GEM_Current_Output.png]]
+
+Agreement between the CDB output and the Grafana monitoring confirms that the
+
+- DAQ database query,
+- BCO conversion, and
+- CDB object generation
+
+are functioning correctly.
+

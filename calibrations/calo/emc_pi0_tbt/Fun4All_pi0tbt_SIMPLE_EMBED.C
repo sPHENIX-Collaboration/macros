@@ -11,7 +11,6 @@
 #include <G4_HIJetReco.C>
 #include <G4_Input.C>
 #include <G4_Jets.C>
-#include <G4_KFParticle.C>
 #include <G4_Mbd.C>
 #include <G4_ParticleFlow.C>
 #include <G4_Production.C>
@@ -245,11 +244,6 @@ int Fun4All_pi0tbt_SIMPLE_EMBED(
   // Enable::GLOBAL_RECO = true;
   // Enable::GLOBAL_FASTSIM = true;
 
-  // Enable::KFPARTICLE = true;
-  // Enable::KFPARTICLE_VERBOSITY = 1;
-  // Enable::KFPARTICLE_TRUTH_MATCH = true;
-  // Enable::KFPARTICLE_SAVE_NTUPLE = true;
-
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && false;
 
   Enable::JETS = false;
@@ -408,12 +402,6 @@ Global_FastSim();
   if (Enable::DSTREADER) G4DSTreader(outputroot + "_DSTReader.root");
 
   if (Enable::USER) UserAnalysisInit();
-
-  //======================
-  // Run KFParticle on evt
-  //======================
-  if (Enable::KFPARTICLE && Input::UPSILON) KFParticle_Upsilon_Reco();
-  if (Enable::KFPARTICLE && Input::DZERO) KFParticle_D0_Reco();
 
   //----------------------
   // Standard QAs

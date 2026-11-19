@@ -68,7 +68,7 @@ void Fun4All_Cosmics(
   se->VerbosityDownscale(1000);
   auto *rc = recoConsts::instance();
 
-  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
+  rc->set_StringFlag("CDB_GLOBALTAG", "newcdbtag");
   std::ifstream ifs(filelist);
   std::string filepath;
   int runnumber = std::numeric_limits<int>::quiet_NaN();

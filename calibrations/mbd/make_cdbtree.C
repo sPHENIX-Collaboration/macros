@@ -25,6 +25,14 @@ void make_cdbtree(const char *calibfname)
     std::cout << cdbfname << std::endl;
     cal->Write_CDB_SampMax( cdbfname.Data() );
   }
+  else if ( calfname.Contains("ped") )
+  {
+    cal->Download_Ped( calibfname );
+    TString cdbfname = calibfname;
+    cdbfname.ReplaceAll("mbd_ped.calib","mbd_ped.root");
+    std::cout << cdbfname << std::endl;
+    cal->Write_CDB_Ped( cdbfname.Data() );
+  }
   else if ( calfname.Contains("status") )
   {
     cal->Download_Status( calibfname );
