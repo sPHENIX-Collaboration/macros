@@ -549,6 +549,13 @@ int Fun4All_G4_sPHENIX(
 	{
 	  TPC_LaserClustering();
 	}
+      else
+	{
+	  if(!TRACKING::polyseed)
+	    {
+	      TPC_Clustering();
+	    }
+	}
     }
   if (Enable::MICROMEGAS_CLUSTER) Micromegas_Clustering();
 

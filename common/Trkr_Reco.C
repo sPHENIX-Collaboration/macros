@@ -600,7 +600,7 @@ void Tracking_Reco_PolySeed()
     }
   
 }
-void Tracking_Reco_TrackSeed()
+void Tracking_Reco_CASeed()
 {
   // set up verbosity
   int verbosity = std::max(Enable::VERBOSITY, Enable::TRACKING_VERBOSITY);
@@ -1176,10 +1176,14 @@ void Tracking_Reco()
   {
     Tracking_Reco_CommissioningTrackSeed();
   }
-  else
+  else if(TRACKING::polyseed)
   {
     Tracking_Reco_PolySeed();
   }
+  else
+    {
+      Tracking_Reco_CASeed();
+    }
 
   if (G4TRACKING::convert_seeds_to_svtxtracks)
   {
