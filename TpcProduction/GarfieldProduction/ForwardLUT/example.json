@@ -1,0 +1,22 @@
+{
+  "release": "ana.578",
+  "install_prefix": "",
+  "generator_options": {
+    "--gas-file": "/cvmfs/sphenix.sdcc.bnl.gov/calibrations/sphnxpro/cdb/PHGARFIELD_GAS/2f/77/2f776187989ee6fbd33e7f85e6cd5099_Ar75_CF20_iso5_v2.gas",
+    "--magnetic-field-map": "/cvmfs/sphenix.sdcc.bnl.gov/calibrations/sphnxpro/cdb/FIELDMAP_GAP/65/a9/65a930ed6de9c0e049cd0f3ef226e6b4_sphenix3dbigmapxyz_gap_rebuild_v2.root",
+    "--electric-field-map-3d-side0": "/cvmfs/sphenix.sdcc.bnl.gov/calibrations/sphnxpro/cdb/Tpc_PolySeeding_EField3D_Side0/ba/76/ba7618a6247314a270a9ee4b95530f39_phgarfield_ibf_3d_map_gainOn_alpha_1p8_flatphi_side0.root",
+    "--electric-field-map-3d-side1": "/cvmfs/sphenix.sdcc.bnl.gov/calibrations/sphnxpro/cdb/Tpc_PolySeeding_EField3D_Side1/6b/fd/6bfd3df3e1ef1dc50931e28171240431_phgarfield_ibf_3d_map_gainOn_alpha_1p8_flatphi_side1.root",
+    "--frame-field-map-3d-side0": "/cvmfs/sphenix.sdcc.bnl.gov/calibrations/sphnxpro/cdb/Tpc_PolySeeding_ModuleFrames3D_Side0/05/0c/050c53906b9f27aa2cb69733a3b863df_phgarfield_tpc_moduleframes_3d_side0.root",
+    "--frame-field-map-3d-side1": "/cvmfs/sphenix.sdcc.bnl.gov/calibrations/sphnxpro/cdb/Tpc_PolySeeding_ModuleFrames3D_Side1/8d/c2/8dc290303f3c6caabf4a48fea0c52925_phgarfield_tpc_moduleframes_3d_side1.root",
+    "--nominal-e-vcm": 375,
+    "--scale-side0": 0.579394,
+    "--scale-side1": 0.610215,
+    "--frame-charge-scale": -180,
+    "--magnetic-field-scale": 1,
+    "--step-ns": 1.5625,
+    "--interpolation-tolerance-um": 10,
+    "--phi-nodes": 36,
+    "--radial-nodes": 24,
+    "--longitudinal-nodes": 28
+  }
+}
