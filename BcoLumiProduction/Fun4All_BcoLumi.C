@@ -48,7 +48,7 @@ void Fun4All_BcoLumi(const int nEvents = 0,
   se->registerSubsystem(sync);
 
   BcoLumiReco *lumi = new BcoLumiReco();
-  //lumi->Verbosity(10);
+  //lumi->Verbosity(11);
   se->registerSubsystem(lumi);
 
   Fun4AllInputManager *in = new Fun4AllPrdfInputManager("PRDFin");
