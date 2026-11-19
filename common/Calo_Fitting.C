@@ -1,0 +1,68 @@
+#ifndef MACRO_CALO_FITTING_C
+#define MACRO_CALO_FITTING_C
+
+#include <caloreco/CaloTowerBuilder.h>
+#include <caloreco/CaloWaveformProcessing.h>
+
+#include <mbd/MbdReco.h>
+
+#include <fun4all/Fun4AllServer.h>
+
+#include <Rtypes.h> // for R__LOAD_LIBRARY
+
+R__LOAD_LIBRARY(libcalo_reco.so)
+R__LOAD_LIBRARY(libmbd.so)
+
+void Process_Calo_Fitting()
+{
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  // process MBD (wave form fitting only)
+  MbdReco *mbd = new MbdReco();
+  mbd->DoOnlyFits();
+  se->registerSubsystem(mbd);
+
+  CaloTowerDefs::BuilderType buildertype = CaloTowerDefs::kPRDFTowerv4;
+
+  /////////////////
+
+  CaloTowerBuilder *ctbEMCal = new CaloTowerBuilder("EMCalBUILDER");
+  ctbEMCal->set_detector_type(CaloTowerDefs::CEMC);
+  ctbEMCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+  ctbEMCal->set_builder_type(buildertype);
+  ctbEMCal->set_bitFlipRecovery(true);
+  ctbEMCal->set_softwarezerosuppression(true, 60);
+  se->registerSubsystem(ctbEMCal);
+
+  CaloTowerBuilder *ctbIHCal = new CaloTowerBuilder("HCALINBUILDER");
+  ctbIHCal->set_detector_type(CaloTowerDefs::HCALIN);
+  ctbIHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+  ctbIHCal->set_builder_type(buildertype);
+  ctbIHCal->set_bitFlipRecovery(true);
+  ctbIHCal->set_softwarezerosuppression(true, 30);
+  se->registerSubsystem(ctbIHCal);
+
+  CaloTowerBuilder *ctbOHCal = new CaloTowerBuilder("HCALOUTBUILDER");
+  ctbOHCal->set_detector_type(CaloTowerDefs::HCALOUT);
+  ctbOHCal->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+  ctbOHCal->set_builder_type(buildertype);
+  ctbOHCal->set_bitFlipRecovery(true);
+  ctbOHCal->set_softwarezerosuppression(true, 15);
+  se->registerSubsystem(ctbOHCal);
+
+  CaloTowerBuilder *caEPD = new CaloTowerBuilder("SEPDBUILDER");
+  caEPD->set_detector_type(CaloTowerDefs::SEPD);
+  caEPD->set_builder_type(buildertype);
+  caEPD->set_processing_type(CaloWaveformProcessing::TEMPLATE);
+  se->registerSubsystem(caEPD);
+
+  CaloTowerBuilder *caZDC = new CaloTowerBuilder("ZDCBUILDER");
+  caZDC->set_detector_type(CaloTowerDefs::ZDC);
+  caZDC->set_builder_type(buildertype);
+  caZDC->set_processing_type(CaloWaveformProcessing::FUNCFIT);
+  caZDC->set_funcfit_type(2);
+  se->registerSubsystem(caZDC);
+
+}
+
+#endif

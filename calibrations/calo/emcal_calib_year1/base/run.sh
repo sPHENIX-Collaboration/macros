@@ -115,7 +115,7 @@ done
 +JobFlavour                   = "workday"
 transfer_input_files          = ${WorkDir}/CondorRunJob$li.sh, ${WorkDir}/inputdata.txt,${WorkDir}/Fun4All_EMCal.C
 Executable                    = CondorRunJob$li.sh
-request_memory                = 10GB
+request_memory                = 2GB
 Universe                      = vanilla
 Notification                  = Never
 GetEnv                        = True

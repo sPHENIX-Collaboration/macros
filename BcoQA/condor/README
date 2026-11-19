@@ -1,0 +1,13 @@
+Welcome to the crude condor submission for bco checks of the tpc and gl1
+Usage:
+By default the output goes to /sphenix/user/<username>/bcoqa. If you want this somewhere else, you need to modify the outpathroot in create_condorlist.pl
+
+get the file lists for a given run (which has to be in lustre in sdcc):
+sh make_list.sh physics <run>
+This produces tpc and gl1daq file lists for this run. 
+To generate the condor.list which get submitted to condor run
+perl create_condorlist.pl
+To submit the show to condor run
+condor_submit condor.job
+
+CAVEAT: The list files are copied to the condor jobs when they start running. If you run make_list.sh again with a different run number jobs will copy the wrong file lists. Either just wait until your jobs have started (and run for a few minutes) or copy all this here into a subdir and run from there 

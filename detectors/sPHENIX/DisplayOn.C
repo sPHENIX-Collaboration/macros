@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MACRO_DISPLAYON_C
+#define MACRO_DISPLAYON_C
 
 #include <g4main/PHG4Reco.h>
 
@@ -33,32 +34,33 @@ PHG4Reco *QTGui()
 // start up the visualization, the next event will
 // be displayed. Do not execute this macro
 // before PHG4Reco was registered with Fun4All
-PHG4Reco *DisplayOn(const char *mac = "vis.mac")
+PHG4Reco *DisplayOn(const std::string &mac = "vis.mac")
 {
-  char cmd[100];
   Fun4AllServer *se = Fun4AllServer::instance();
   PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
   g4->InitRun(se->topNode());
   g4->ApplyDisplayAction();
-  sprintf(cmd, "/control/execute %s", mac);
+  std::string cmd =  "/control/execute " + mac;
   g4->ApplyCommand(cmd);
   return g4;
 }
 // print out the commands I always forget
 void displaycmd()
 {
-  cout << "draw axis: " << endl;
-  cout << " g4->ApplyCommand(\"/vis/scene/add/axes 0 0 0 50 cm\")" << endl;
-  cout << "zoom" << endl;
-  cout << " g4->ApplyCommand(\"/vis/viewer/zoom 1\")" << endl;
-  cout << "viewpoint:" << endl;
-  cout << " g4->ApplyCommand(\"/vis/viewer/set/viewpointThetaPhi 0 0\")" << endl;
-  cout << "panTo:" << endl;
-  cout << " g4->ApplyCommand(\"/vis/viewer/panTo 0 0 cm\")" << endl;
-  cout << "print to eps:" << endl;
-  cout << " g4->ApplyCommand(\"/vis/ogl/printEPS\")" << endl;
-  cout << "set background color:" << endl;
-  cout << " g4->ApplyCommand(\"/vis/viewer/set/background white\")" << endl;
-  cout << "Overlap check:" << endl;
-  cout << " g4->ApplyCommand(\"/geometry/test/run\")" << endl;
+  std::cout << "draw axis: " << std::endl;
+  std::cout << " g4->ApplyCommand(\"/vis/scene/add/axes 0 0 0 50 cm\")" << std::endl;
+  std::cout << "zoom" << std::endl;
+  std::cout << " g4->ApplyCommand(\"/vis/viewer/zoom 1\")" << std::endl;
+  std::cout << "viewpoint:" << std::endl;
+  std::cout << " g4->ApplyCommand(\"/vis/viewer/set/viewpointThetaPhi 0 0\")" << std::endl;
+  std::cout << "panTo:" << std::endl;
+  std::cout << " g4->ApplyCommand(\"/vis/viewer/panTo 0 0 cm\")" << std::endl;
+  std::cout << "print to eps:" << std::endl;
+  std::cout << " g4->ApplyCommand(\"/vis/ogl/printEPS\")" << std::endl;
+  std::cout << "set background color:" << std::endl;
+  std::cout << " g4->ApplyCommand(\"/vis/viewer/set/background white\")" << std::endl;
+  std::cout << "Overlap check:" << std::endl;
+  std::cout << " g4->ApplyCommand(\"/geometry/test/run\")" << std::endl;
 }
+
+#endif

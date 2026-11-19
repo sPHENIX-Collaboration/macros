@@ -35,14 +35,20 @@ void CEmcAlbedo(PHG4Reco *g4Reco)
   cyl->set_double_param("radius", G4CEMCALBEDO::inner_radius);
   cyl->set_string_param("material", "G4_TEFLON");
   cyl->set_double_param("thickness", G4CEMCALBEDO::teflon_cylinder_thickness);
-  if (AbsorberActive) cyl->SetActive();
+  if (AbsorberActive)
+  {
+    cyl->SetActive();
+  }
   g4Reco->registerSubsystem(cyl);
   cyl = new PHG4CylinderSubsystem("CEMC_ALBEDO", 1);
   cyl->SuperDetector("CEMC_MOCKUP");
   cyl->set_double_param("radius", G4CEMCALBEDO::inner_radius + G4CEMCALBEDO::teflon_cylinder_thickness);
   cyl->set_string_param("material", "Spacal_W_Epoxy");
   cyl->set_double_param("thickness", G4CEMCALBEDO::albedo_thickness);
-  if (AbsorberActive) cyl->SetActive();
+  if (AbsorberActive)
+  {
+    cyl->SetActive();
+  }
   g4Reco->registerSubsystem(cyl);
 }
 #endif

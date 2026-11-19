@@ -1,0 +1,30 @@
+This code is used to run over the first stage of calorimeter ouputs (uncalibrated DST's post waveform processing) and measure the hit-frequency of each tower and interface board in the emcal. The distributions of these hit frequencies is then used to flag noisy and cold towers for QA during the calibration process. Below is a description of the files contained in this directory:
+
+Top directory:
+
+Fun4All_EMCalBadTowerID.C
+	- The steering macro for the analysis module
+
+channels.root
+	- Contains information on the fiber type of the EMCal blocks
+
+scripts/:
+
+setupDirs.csh
+	-Creates the directory structure for the output and intermediate files
+
+generateFileLists.csh
+	-Generates a file list based on a given production and ana build
+
+makeSingleFileList.csh
+	-Generates a list with one file per run for use during the second stage of the tower flagging so the 
+	 code can parse a run number
+
+runHotTowerMacroMultiStage.csh
+	-Passes over the DST's in two stages. The first determines the hit frequency in each tower/IB, and the         second calculates the modes of central tendency for these frequencies (mu, sigma) and, based on 
+ 	 value set in the steering macro, flags bad towers by assigning them a non-zero value in the output
+         CDBTTree
+
+runEverything.csh
+        -Surprisingly, this script runs everything
+

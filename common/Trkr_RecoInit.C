@@ -1,36 +1,102 @@
 #ifndef MACRO_TRKRRECOINIT_C
 #define MACRO_TRKRRECOINIT_C
 
-R__LOAD_LIBRARY(libtrack_reco.so)
-R__LOAD_LIBRARY(libtpccalib.so)
-
 #include <GlobalVariables.C>
 
 #include <G4_ActsGeom.C>
 #include <G4_TrkrVariables.C>
-#include <fun4all/Fun4AllServer.h>
-#include <tpc/TpcLoadDistortionCorrection.h>
 
+#include <phool/recoConsts.h>
+#include <fun4all/Fun4AllRunNodeInputManager.h>
+#include <tpc/TpcLoadDistortionCorrection.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wundefined-internal"
+#include <tpc/TpcClusterZCrossingCorrection.h>
+#pragma GCC diagnostic pop
+#include <ffamodules/CDBInterface.h>
+
+#include <fun4all/Fun4AllServer.h>
+
+R__LOAD_LIBRARY(libtrack_reco.so)
+R__LOAD_LIBRARY(libtpccalib.so)
+
+void LoadTrackingCDBGeometry()
+{
+
+  auto *se = Fun4AllServer::instance();
+  std::string geofile = CDBInterface::instance()->getUrl("Tracking_Geometry");
+  
+  Fun4AllRunNodeInputManager *ingeo = new Fun4AllRunNodeInputManager("GeoIn");
+  ingeo->AddFile(geofile);
+  se->registerInputManager(ingeo);
+  
+}
 void TrackingInit()
 {
-  G4MAGNET::magfield = string(getenv("CALIBRATIONROOT")) + string("/Field/Map/sphenix3dtrackingmapxyz_gap_rebuild.root");
-  G4MAGNET::magfield_rescale = 1.;
+   // server
+  auto *se = Fun4AllServer::instance();
+ 
+  auto *rc = recoConsts::instance();
+  if(rc->get_StringFlag("CDB_GLOBALTAG").find("MDC") != std::string::npos)
+    {
+      CDB::is_data_reco = false;
+    }
+  else
+    {
+      std::cout << "Setting reconstruction for data with CDB tag " << rc->get_StringFlag("CDB_GLOBALTAG") << std::endl;
+      CDB::is_data_reco = true;
+    }
+
+  // check that we are not building the geometry from scratch, i.e. that
+  // G4Setup() was not run
+  if(CDB::is_data_reco)
+    {
+      if(!Enable::MVTX || !Enable::INTT || !Enable::TPC || !Enable::MICROMEGAS)
+	{
+	  LoadTrackingCDBGeometry();
+	}
+    }
+ 
+  TpcClusterZCrossingCorrection::_vdrift = G4TPC::tpc_drift_velocity_reco;
 
   ACTSGEOM::ActsGeomInit();
-  // space charge correction
-  /* corrections are applied in the track finding, and via TpcClusterMover before the final track fit
-   */
 
-  if( G4TPC::ENABLE_CORRECTIONS )
+  // initialize module edge correction
+  if( G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS && G4TPC::module_edge_correction_filename.empty() )
+  { G4TPC::module_edge_correction_filename = CDBInterface::instance()->getUrl("TPC_Module_Edge"); }
+
+  // initialize static distortion correction
+  if( G4TPC::ENABLE_STATIC_CORRECTIONS && G4TPC::static_correction_filename.empty() )
+  { G4TPC::static_correction_filename = CDBInterface::instance()->getUrl("TPC_STATIC_CORRECTION_MODEL"); }
+
+  // initialize time average distortion correction
+  if( G4TPC::ENABLE_AVERAGE_CORRECTIONS && G4TPC::average_correction_filename.empty() )
+  { G4TPC::average_correction_filename = CDBInterface::instance()->getUrl("TPC_LAMINATION_FIT_CORRECTION"); }
+
+  // space charge correction
+  if (G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS || G4TPC::ENABLE_STATIC_CORRECTIONS || G4TPC::ENABLE_AVERAGE_CORRECTIONS)
   {
-    auto se = Fun4AllServer::instance();
-    auto tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
-    tpcLoadDistortionCorrection->set_read_phi_as_radians( G4TPC::DISTORTIONS_USE_PHI_AS_RADIANS );
-    tpcLoadDistortionCorrection->set_distortion_filename( G4TPC::correction_filename );
+    auto *tpcLoadDistortionCorrection = new TpcLoadDistortionCorrection;
+
+    tpcLoadDistortionCorrection->set_read_phi_as_radians(TpcLoadDistortionCorrection::DistortionType_Static, G4TPC::USE_PHI_AS_RAD_STATIC_CORRECTIONS);
+    tpcLoadDistortionCorrection->set_read_phi_as_radians(TpcLoadDistortionCorrection::DistortionType_Average, G4TPC::USE_PHI_AS_RAD_AVERAGE_CORRECTIONS);
+
+    tpcLoadDistortionCorrection->set_interpolate_2D_to_zero(TpcLoadDistortionCorrection::DistortionType_ModuleEdge, false);
+
+    if (G4TPC::ENABLE_MODULE_EDGE_CORRECTIONS)
+    {
+      tpcLoadDistortionCorrection->set_correction_filename(TpcLoadDistortionCorrection::DistortionType_ModuleEdge, G4TPC::module_edge_correction_filename);
+    }
+    if (G4TPC::ENABLE_STATIC_CORRECTIONS)
+    {
+      tpcLoadDistortionCorrection->set_correction_filename(TpcLoadDistortionCorrection::DistortionType_Static, G4TPC::static_correction_filename);
+    }
+    if (G4TPC::ENABLE_AVERAGE_CORRECTIONS)
+    {
+      tpcLoadDistortionCorrection->set_correction_filename(TpcLoadDistortionCorrection::DistortionType_Average, G4TPC::average_correction_filename);
+      tpcLoadDistortionCorrection->set_interpolate_2D_to_zero(TpcLoadDistortionCorrection::DistortionType_Average, G4TPC::average_correction_interpolate);
+    }
     se->registerSubsystem(tpcLoadDistortionCorrection);
   }
-
 }
-
-
 #endif

@@ -23,7 +23,7 @@ namespace Enable
 
 void ParticleFlow()
 {
-  int verbosity = max(Enable::VERBOSITY, Enable::PARTICLEFLOW_VERBOSITY);
+  int verbosity = std::max(Enable::VERBOSITY, Enable::PARTICLEFLOW_VERBOSITY);
   //---------------
   // Fun4All server
   //---------------
