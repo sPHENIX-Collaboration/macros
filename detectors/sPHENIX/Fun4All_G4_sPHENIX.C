@@ -28,6 +28,7 @@
 #include <Trkr_Diagnostics.C>
 #include <G4_User.C>
 #include <QA.C>
+#include <KFParticle_selections.C>
 
 #include <phpythia8/PHPy8JetTrigger.h>
 
@@ -274,16 +275,6 @@ int Fun4All_G4_sPHENIX(
   // register all input generators with Fun4All
   InputRegister();
   // pythia8
-  if (Input::PYTHIA8)
-  {
-    DecayFinder *D0Finder = new DecayFinder("DecayFinder_D0");
-    D0Finder->setDecayDescriptor("[D0 -> K^- pi^+]cc");
-    D0Finder->saveDST(false);
-    D0Finder->allowPi0(true);
-    D0Finder->allowPhotons(true);
-    D0Finder->triggerOnDecay(true);
-    se->registerSubsystem(D0Finder);
-  }
 
   if (! Input::READHITS)
   {
@@ -445,10 +436,6 @@ int Fun4All_G4_sPHENIX(
 
  //Enable::GLOBAL_FASTSIM = true;
 
-  Enable::KFPARTICLE = false;
-  //Enable::KFPARTICLE_VERBOSITY = 1;
-  Enable::KFPARTICLE_TRUTH_MATCH = true;
-  //Enable::KFPARTICLE_SAVE_NTUPLE = true;
 
   Enable::CALOTRIGGER = Enable::CEMC_TOWER && Enable::HCALIN_TOWER && Enable::HCALOUT_TOWER && true;
 
@@ -686,12 +673,6 @@ int Fun4All_G4_sPHENIX(
   if(G4TRACKING::filter_conversion_electrons) Filter_Conversion_Electrons(outputroot + "_secvert_ntuple.root");
 
 
-  //======================
-  // Run KFParticle on evt
-  //======================
-  // if (Enable::KFPARTICLE && Input::UPSILON) KFParticle_Upsilon_Reco();
-  if (Enable::KFPARTICLE && Input::DZERO) KFParticle_D0_Reco();
-
   //----------------------
   // Standard QAs
   //----------------------
@@ -709,7 +690,6 @@ int Fun4All_G4_sPHENIX(
   if (Enable::TRACKING_QA) Tracking_QA();
 
   if (Enable::TRACKING_QA && Enable::CEMC_QA && Enable::HCALIN_QA && Enable::HCALOUT_QA) QA_G4CaloTracking();
-  if (Enable::KFPARTICLE)  KFParticle_QA();
 
   if (Enable::TRACK_MATCHING) Track_Matching(outputroot + "_g4trackmatching.root");
 
