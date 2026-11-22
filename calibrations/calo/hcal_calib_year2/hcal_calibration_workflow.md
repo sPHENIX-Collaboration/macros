@@ -160,7 +160,7 @@ This calls `get_tsFiles_flat.sh`, which:
 
 Give `Fun4All_HCal.C` / `condor_histmaker/run.sh` the Step 1 calibration files and produce spectra on beam `DST_CALOFITTING` data, to check that the hitrate is flat across towers.
 
-`fileQA/ana_hits.C` — loops over the merged `out_run/out_<run>.root` files of the run list, fills per-run hit and temperature histograms and the 2D map of the hit rate per tower → writes `output/anaOut_{o,i}hcal_<calibration>.root` with `runNumberHist`, `h_temp_run`, `h_hits`, `h_events_run`, `pr2d_temp`, `h_hits_2d`.
+`fileQA/ana_hits.C` — loops over the merged `out_run/out_<run>.root` files of the run list, fills per-run hit and temperature histograms and the 2D map of the hit rate per tower → writes `output/anaOut_{o,i}hcal_<calibration>.root` with `runNumberHist`, `h_temp_run`, `h_hits`, `h_events_run`, `pr2d_temp`, `h_hits_2d` and the hits per event of each tower vs run number (`hpe_tower_vs_runnumber/`, input of `findHalfHeight.C`).
 `h_hits_2d` is the hits of each tower from all runs of the list, divided by the average over the live towers of its eta ring (1 = flat; dead towers are 0 and are left out of the average).
 
 ---
@@ -312,16 +312,32 @@ root -l -b -q 'genFinalCalib.C("run3oo", 1, "/path/to/temp_ihcal_run3oo")'
 
 **Goal**: apply per-tower correction factors to individual towers over the run ranges where they need them, on top of the temperature-corrected calibration.
 
-**Sample macros**: `genFinalCalib.C` + `genCdbCorr_HH()` in `tsc_cos_merge.C`
+A half height tower has a poor signal cable connection: only half of the signal reaches the readout, the gain is 0.5 of normal, usually from some run on until it is repaired. The cosmics calibration absorbs the state the tower had during the cosmics run, so only the beam runs in which the tower was in the other state need a correction: factor 2 on the calibration if the tower was at half height in the beam runs but not in the cosmics, 0.5 the other way round. It shows up as a step by 2 or 0.5 in the hits per event of the tower vs run number (not in the sums over towers of `plot_hits.C`).
 
-1. Make a CSV file of the towers to correct (`halfHieghtList.csv`, name set in `genFinalCalib.C`), one tower per line:
+**Sample macros**: `fileQA/ana_hits.C` → `fileQA/findHalfHeight.C` → `genFinalCalib.C` + `genCdbCorr_HH()` in `tsc_cos_merge.C`
+
+1. `ana_hits.C` on the Step 2 spectra (`out_run_cosmics_tsc_temp`) writes, besides the sums, the hits per event of each tower vs run number (`hpe_tower_vs_runnumber/g_hpe_eta<ie>_phi<ip>` in `output/anaOut_<det>_cosmics_tsc_temp.root`; same energy window as the sums, OHCal 1–5 GeV, IHCal 0.2–1 GeV) and, per eta ring, the hit ratio expected for a tower with gain 0.5 and 2 (`h_hitRatio_gainHalf`, `h_hitRatio_gainDouble`). A tower with gain g records g × E, so its hits in the window are the hits of a normal tower in the window divided by g; the ratio is the ring spectrum integrated over the moved window over the normal one. With 1–5 GeV a half height OHCal tower has 0.17 of the hits of a normal one and a double height one 3.5 (IHCal, 0.2–1 GeV: 0.11 and 4.5); with the pp24 window 0.25–5 GeV it is 0.43 and 1.67, so the thresholds have to follow the window.
+2. `findHalfHeight.C` reads them and, per tower and run, divides the hits per event by the median of the live towers of its eta ring in the same run (the ring reference; it cancels the temperature drift and the rate of the run). The normal level of the tower is the median of this ratio over the runs within 0.4–2 × the ring (1 for most towers; chimney, support and badly towerslope-corrected towers have another level in all runs). Half and double height states lie outside this band, so the level does not depend on how many runs the tower spent in the bad state, unlike the tower's own median over the runs (run3pp OHCal (6,42) was at half height in 57 % of the runs). A run is flagged `Half` or `Double` if the ratio / normal level is within 0.6–2 × the expected ratio of its eta ring (OHCal 1–5 GeV: 0.10–0.34 and 2.1–7.0), and only if it is more than 2 sigma away from the normal level (a tower with few hits scatters outside the windows by statistics alone). Flagged runs that follow each other with the same reason are grouped into blocks (a single run of another state inside a block is bridged) and the blocks of at least `minRuns` runs (default 2) are written to the CSV file of `genFinalCalib.C`. A run below 0.7 or above 1.5 × the normal level that is neither is a `Step`, a gain change that is not a factor 2: step blocks are listed in the summary with the implied gain factor and drawn, never written to the CSV.
+   ```bash
+   root -l -b -q 'findHalfHeight.C("run3oo", 0)'   # OHCal -> output/halfHeightList_ohcal_run3oo.csv
+   root -l -b -q 'findHalfHeight.C("run3oo", 1)'   # IHCal
+   root -l -b -q 'findHalfHeight.C("run3oo", 0, "output/anaOut_ohcal_cosmics_tsc.root", "", 2)'   # other anaOut file, blocks of >= 2 runs
    ```
-   ieta,iphi,calib_factor,run_lo,run_hi
-   ```
-   To spot the half height towers, make "hit rate plots per tower" using the condor job outputs and spot any runnumber ranges where the scale is shifted by 2 or 0.5.
-2. Run `genFinalCalib.C`. For each beam run it:
+   - CSV format, one block per line, no header: `ieta,iphi,calib_factor,run_lo,run_hi` with factor 2 for `Half` and 0.5 for `Double`. `run_lo` and `run_hi` are the runs of the run list before and after the block (0 and last run + 1 at the ends) because `genFinalCalib.C` applies an entry for `run_lo < run < run_hi`.
+   - `output/halfHeight_<det>_<dataset>_summary.txt` lists every block, also the ones shorter than `minRuns` (single-run outliers are usually a feature of the run, not of the cable; whether to correct them is a decision for the conveners, then rerun with `minRuns` = 1).
+   - `output/halfHeight_<det>_<dataset>.root` has, for every tower, the hits per event with the ring median per run (`g_hpe_...`) and the ratio to the ring with the normal level (`g_ratio_...`), the runs colored (green normal, blue `Half`, red `Double`, orange `Step`); `output/figures_halfHeight_<det>_<dataset>/` the png of each tower with a block in the CSV or a step block: hits per event on top, below the ratio with the normal level and the `Half` and `Double` windows, from which the decision is read. Check them before using the CSV. Old png of towers that are no longer flagged are not removed.
+   - The summary also counts per run how many towers are flagged. A run with many flagged towers (run3oo: 82532, 82579, 82665, 82698 with about 100 each) has an odd rate in the whole detector, not a cable; blocks made of such runs only are suspect.
+   - Towers with no run within 0.4–2 × the ring take the median of all their runs as normal level and are listed (run3pp IHCal: the noisy towers (10,18) and (10,19) at 15–17 × the ring).
+   - The band 0.6–2 (`kBandLo`, `kBandHi`), the normal level band (`kNormalLo`, `kNormalHi`), the significance (`kMinSigma`), the step limits (`kStepLo`, `kStepHi`) and the fixed windows used for an anaOut file without the expected ratios (`kHalfLo`..`kDoubleHi`, the pp24 values for 0.25–5 GeV) are constants at the top of the macro.
+   - run3oo result: no half height tower in either detector. IHCal (16,4) is a gain step of about 1.4 from run 82646 to the end (hits 2.4 × median), not a factor 2, so `findHalfHeight.C` does not write it to the CSV; it was corrected by hand with a CSV line of the measured factor (`16,4,0.714,82638,82704`), which `genCdbCorr_HH()` applies like any other line.
+   - run3pp result (cosmics only spectra, 2026-11-21): OHCal (6,42) at half height for 79269–79738 and 80265–80998, OHCal (16,17) at double height for 79338–79731, IHCal (21,49) at half height for 80311–80489, 80563–81089 and 81473–81664; all at the expected ratio of the ring (0.16 and 3.7 OHCal, 0.10 IHCal).
+3. Run `genFinalCalib.C` with the CSV file as `<half height list>`. For each beam run it:
    - Selects the CSV entries whose run range contains the run (`getTowersForRun`, `run_lo < run < run_hi`).
    - Calls `genCdbCorr_HH()`: multiplies those towers' calibration by `calib_factor`, then scales the whole map by the Step 2 temperature correction.
+4. Closure: rerun the condor jobs and `ana_hits.C` with the corrected files (Final QA below), then `findHalfHeight.C` with the new anaOut file as 4th argument draws the towers of the CSV before and after the correction side by side, and run on the new file alone it should flag nothing:
+   ```bash
+   root -l -b -q 'findHalfHeight.C("run3oo", 0, "", "output/anaOut_ohcal_cosmics_tsc_temp_hh.root")'
+   ```
 
 To produce files without the half height correction, use `genCdbCorr()` instead of `genCdbCorr_HH()` in `genFinalCalib.C`.
 
