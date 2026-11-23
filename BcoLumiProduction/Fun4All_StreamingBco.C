@@ -18,13 +18,13 @@
 #include <TSystem.h>
 #include <fstream>
 
-#include "../common/Trkr_BcoCounting.C"
+#include <Trkr_BcoCounting.C>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libbcolumicount.so)
 R__LOAD_LIBRARY(libffamodules.so)
 
-void Fun4All_StreamingBco(const int nEvents = 100,
+void Fun4All_StreamingBco(const int nEvents = 0,
 		      const std::string &bcodst = "DST_BCOINFO-00079516.root")
 {
   std::string histfile = "bco_histos-";

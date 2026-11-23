@@ -19,7 +19,7 @@
 #include <TSystem.h>
 #include <fstream>
 
-#include "../common/Trkr_BcoCounting.C"
+#include <Trkr_BcoCounting.C>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libbcolumicount.so)

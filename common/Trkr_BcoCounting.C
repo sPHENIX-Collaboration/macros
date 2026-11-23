@@ -24,6 +24,6 @@ void StreamingLumi()
   // Requires StreamingBcoReco module output on the node tree
   // Determines the luminosity in the streaming data (both per bunch ID and integrated)
   StreamingLumiReco *streaming_lumi = new StreamingLumiReco();
-  streaming_lumi->Verbosity(10);
+  //streaming_lumi->Verbosity(10);
   se->registerSubsystem(streaming_lumi);
 }
