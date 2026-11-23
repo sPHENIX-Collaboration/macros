@@ -60,32 +60,34 @@ void Herwig7_Trigger_Setup(const std::string &jettrigger, const int index = 0)
   if (jettrigger == "MB")
   {
     std::cout << "Herwig7 Trigger Setup: Using MB - no cuts" << std::endl;
-    return;
-  }
-  PHHerwig7ParticleTrigger *photonTrigger = new PHHerwig7ParticleTrigger(jettrigger);
-  photonTrigger->SetStableParticleOnly(true);
-  photonTrigger->SetPromptOnly(true);
-  photonTrigger->AddParticles(22);
-  photonTrigger->SetEtaHighLow(1.5, -1.5);
-  if (jettrigger.find("PhotonJet5") != std::string::npos)
-  {
-    photonTrigger->SetPtLow(5);
-  }
-  else if (jettrigger.find("PhotonJet10") != std::string::npos)
-  {
-    photonTrigger->SetPtLow(10);
-  }
-  else if (jettrigger.find("PhotonJet20") != std::string::npos)
-  {
-    photonTrigger->SetPtLow(20);
   }
   else
   {
-    std::cout << "Invalid jet trigger " << jettrigger << std::endl;
-    gSystem->Exit(1);
+    PHHerwig7ParticleTrigger *photonTrigger = new PHHerwig7ParticleTrigger(jettrigger);
+    photonTrigger->SetStableParticleOnly(true);
+    photonTrigger->SetPromptOnly(true);
+    photonTrigger->AddParticles(22);
+    photonTrigger->SetEtaHighLow(1.5, -1.5);
+    if (jettrigger.find("PhotonJet5") != std::string::npos)
+    {
+      photonTrigger->SetPtLow(5);
+    }
+    else if (jettrigger.find("PhotonJet10") != std::string::npos)
+    {
+      photonTrigger->SetPtLow(10);
+    }
+    else if (jettrigger.find("PhotonJet20") != std::string::npos)
+    {
+      photonTrigger->SetPtLow(20);
+    }
+    else
+    {
+      std::cout << "Invalid jet trigger " << jettrigger << std::endl;
+      gSystem->Exit(1);
+    }
+    photonTrigger->PrintConfig();
+    INPUTGENERATOR::Herwig7[index]->register_trigger(photonTrigger);
   }
-  photonTrigger->PrintConfig();
-  INPUTGENERATOR::Herwig7[index]->register_trigger(photonTrigger);
   //! Nominal collision geometry is selected by Input::BEAM_CONFIGURATION
   Input::ApplysPHENIXBeamParameter(INPUTGENERATOR::Herwig7);
 }
