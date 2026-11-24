@@ -18,22 +18,19 @@
 #include <TSystem.h>
 #include <fstream>
 
+#include <Trkr_BcoCounting.C>
+
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libbcolumicount.so)
 R__LOAD_LIBRARY(libffamodules.so)
 
 void Fun4All_StreamingBco(const int nEvents = 0,
-		      const std::string &bcodst = "DST_BCOINFO-00081100.root")
+		      const std::string &bcodst = "DST_BCOINFO-00079516.root")
 {
-
-  std::string outfile = "DST_STREAMING_BCOINFO-";
   std::string histfile = "bco_histos-";
 
   // There is probably a better way to do this... revisit!
   std::string run_segments = bcodst.substr(bcodst.size() - 13, 8);
-  outfile += run_segments;
-  outfile += ".root";
-
   histfile += run_segments;
   histfile += ".root";
 
@@ -41,18 +38,12 @@ void Fun4All_StreamingBco(const int nEvents = 0,
   Fun4AllServer *se = Fun4AllServer::instance();
   //se->Verbosity(1);
 
-  StreamingBcoReco *streaming_bco = new StreamingBcoReco();
-  //streaming_bco->Verbosity(2);
-
-  se->registerSubsystem(streaming_bco);
-  //in->Verbosity(10);
-
   Fun4AllInputManager *in_dst = new Fun4AllDstInputManager("DSTin");
   in_dst->AddFile(bcodst);
   se->registerInputManager(in_dst);
 
-  Fun4AllOutputManager *out = new Fun4AllDstOutputManager("out",outfile);
-  se->registerOutputManager(out);
+  // This is coming from ../common/Trkr_BcoCounting.C 
+  StreamingBco();
 
   se->run(nEvents);
 
